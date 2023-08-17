@@ -17,10 +17,12 @@ public class IOUtils {
 
     public static final int ALSE = BIG_ENDIAN ? 0x616c7365 : 0x65736c61;
     public static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
+    public static final long DOT_X0 = BIG_ENDIAN ? 0x2e00L : 0x2eL;
 
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
 
-    public static final int[] DIGITS_K = new int[1000];
+    public static final int[] DIGITS_K_32 = new int[1000];
+    public static final long[] DIGITS_K_64 = new long[1000];
 
     private static final byte[] MIN_INT_BYTES = "-2147483648".getBytes();
     private static final char[] MIN_INT_CHARS = "-2147483648".toCharArray();
@@ -92,7 +94,12 @@ public class IOUtils {
             int c1 = (i / 100) + '0';
             int c2 = ((i / 10) % 10) + '0';
             int c3 = i % 10 + '0';
-            DIGITS_K[i] = c0 + (c1 << 8) + (c2 << 16) + (c3 << 24);
+            DIGITS_K_32[i] = c0 + (c1 << 8) + (c2 << 16) + (c3 << 24);
+            long v = (c1 << 16) + (((long) c2) << 32) + (((long) c3) << 48);
+            if (BIG_ENDIAN) {
+                v <<= 8;
+            }
+            DIGITS_K_64[i] = c0 + v;
         }
     }
 
@@ -315,7 +322,7 @@ public class IOUtils {
                     UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[(int) rem]);
                     return off + 3;
                 } else if (scale == 3) {
-                    int v = DIGITS_K[(int) rem];
+                    int v = DIGITS_K_32[(int) rem];
                     buf[off + 1] = (byte) (v >> 8);
                     buf[off + 2] = (byte) (v >> 16);
                     buf[off + 3] = (byte) (v >> 24);
@@ -361,10 +368,10 @@ public class IOUtils {
                     UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[(int) rem]);
                     return off + 3;
                 } else if (scale == 3) {
-                    int v = DIGITS_K[(int) rem];
-                    buf[off + 1] = (char) (byte) (v >> 8);
-                    buf[off + 2] = (char) (byte) (v >> 16);
-                    buf[off + 3] = (char) (byte) (v >> 24);
+                    long v = DIGITS_K_64[(int) rem];
+                    buf[off + 1] = (char) (v >> 16);
+                    buf[off + 2] = (char) (v >> 32);
+                    buf[off + 3] = (char) (v >> 48);
                     return off + 4;
                 }
                 return IOUtils.writeInt64(buf, off + 1, rem);
@@ -844,7 +851,7 @@ public class IOUtils {
         final int div2 = div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putInt(bytes, off, DIGITS_K[div2] & 0xffffff00 | '.');
+        putInt(bytes, off, DIGITS_K_32[div2] & 0xffffff00 | '.');
         off += 4;
 
         int v;
@@ -854,9 +861,9 @@ public class IOUtils {
                 return off;
             }
 
-            v = DIGITS_K[rem2];
+            v = DIGITS_K_32[rem2];
         } else {
-            v = DIGITS_K[div - div2 * 1000];
+            v = DIGITS_K_32[div - div2 * 1000];
         }
 
         bytes[off] = (byte) (v >> 8);
@@ -867,7 +874,7 @@ public class IOUtils {
             return off + 1;
         }
 
-        putInt(bytes, off, DIGITS_K[rem1] & 0xffffff00 | (v >> 24));
+        putInt(bytes, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
         return off + 4;
     }
 
@@ -876,39 +883,31 @@ public class IOUtils {
         final int div2 = div / 1000;
         final int rem1 = nano - div * 1000;
 
-        {
-            chars[off] = '.';
-            int v = DIGITS_K[div2];
-            chars[off + 1] = (char) (byte) (v >> 8);
-            chars[off + 2] = (char) (byte) (v >> 16);
-            chars[off + 3] = (char) (byte) (v >> 24);
-            off += 4;
-        }
+        putLong(chars, off, DIGITS_K_64[div2] & 0xffffffffffff0000L | DOT_X0);
+        off += 4;
 
-        int v;
+        long v;
         if (rem1 == 0) {
             final int rem2 = div - div2 * 1000;
             if (rem2 == 0) {
                 return off;
             }
 
-            v = DIGITS_K[rem2];
+            v = DIGITS_K_64[rem2];
         } else {
-            v = DIGITS_K[div - div2 * 1000];
+            v = DIGITS_K_64[div - div2 * 1000];
         }
 
-        chars[off] = (char) (byte) (v >> 8);
-        chars[off + 1] = (char) (byte) (v >> 16);
-        chars[off + 2] = (char) (byte) (v >> 24);
+        chars[off] = (char) (v >> 16);
+        chars[off + 1] = (char) (v >> 32);
+        off += 2;
         if (rem1 == 0) {
-            return off + 3;
+            chars[off] = (char) (v >> 48);
+            return off + 1;
         }
 
-        v = DIGITS_K[rem1];
-        chars[off + 3] = (char) (byte) (v >> 8);
-        chars[off + 4] = (char) (byte) (v >> 16);
-        chars[off + 5] = (char) (byte) (v >> 24);
-        return off + 6;
+        putLong(chars, off, DIGITS_K_64[rem1] & 0xffffffffffff0000L | (v >> 48));
+        return off + 4;
     }
 
     public static void writeLocalTime(char[] chars, int off, int hour, int minute, int second) {
@@ -941,7 +940,7 @@ public class IOUtils {
         }
 
         if (i < 1000) {
-            int v = DIGITS_K[(int) i];
+            int v = DIGITS_K_32[(int) i];
             int start = v & 0xff;
             if (start == 0) {
                 buf[pos] = (byte) (v >> 8);
@@ -956,9 +955,9 @@ public class IOUtils {
 
         final long q1 = i / 1000;
         final int r1 = (int) (i - q1 * 1000);
-        final int v1 = DIGITS_K[r1];
+        final int v1 = DIGITS_K_32[r1];
         if (i < 1000000) {
-            final int v2 = DIGITS_K[(int) q1];
+            final int v2 = DIGITS_K_32[(int) q1];
 
             int start = v2 & 0xff;
             if (start == 0) {
@@ -975,9 +974,9 @@ public class IOUtils {
         final long q2 = q1 / 1000;
         final int r2 = (int) (q1 - q2 * 1000);
         final long q3 = q2 / 1000;
-        final int v2 = DIGITS_K[r2];
+        final int v2 = DIGITS_K_32[r2];
         if (q3 == 0) {
-            final int v3 = DIGITS_K[(int) q2];
+            final int v3 = DIGITS_K_32[(int) q2];
             int start = v3 & 0xff;
             if (start == 0) {
                 buf[pos] = (byte) (v3 >> 8);
@@ -994,9 +993,9 @@ public class IOUtils {
         }
         final int r3 = (int) (q2 - q3 * 1000);
         final int q4 = (int) (q3 / 1000);
-        final int v3 = DIGITS_K[r3];
+        final int v3 = DIGITS_K_32[r3];
         if (q4 == 0) {
-            final int v4 = DIGITS_K[(int) q3];
+            final int v4 = DIGITS_K_32[(int) q3];
             final int start = v4 & 0xff;
             if (start == 0) {
                 buf[pos] = (byte) (v4 >> 8);
@@ -1014,9 +1013,9 @@ public class IOUtils {
         final int r4 = (int) (q3 - q4 * 1000);
         final int q5 = q4 / 1000;
 
-        final int v4 = DIGITS_K[r4];
+        final int v4 = DIGITS_K_32[r4];
         if (q5 == 0) {
-            final int v5 = DIGITS_K[q4];
+            final int v5 = DIGITS_K_32[q4];
             int start = v5 & 0xff;
             if (start == 0) {
                 buf[pos] = (byte) (v5 >> 8);
@@ -1033,9 +1032,9 @@ public class IOUtils {
         }
         final int r5 = q4 - q5 * 1000;
         final int q6 = q5 / 1000;
-        final int v5 = DIGITS_K[r5];
+        final int v5 = DIGITS_K_32[r5];
         if (q6 == 0) {
-            int v = DIGITS_K[q5];
+            int v = DIGITS_K_32[q5];
             final int start = v & 0xff;
             if (start == 0) {
                 buf[pos] = (byte) (v >> 8);
@@ -1046,7 +1045,7 @@ public class IOUtils {
             }
             buf[pos++] = (byte) (v >> 24);
         } else {
-            putInt(buf, pos, DIGITS_K[q5 - q6 * 1000] & 0xffffff00 | (q6 + '0'));
+            putInt(buf, pos, DIGITS_K_32[q5 - q6 * 1000] & 0xffffff00 | (q6 + '0'));
             pos += 4;
         }
 
@@ -1075,120 +1074,94 @@ public class IOUtils {
         }
 
         if (i < 1000) {
-            int v = DIGITS_K[(int) i];
+            long v = DIGITS_K_64[(int) i];
             int start = (byte) v;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v >> 8);
-                buf[pos + 1] = (char) (byte) (v >> 16);
+                putInt(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v >> 16);
+                buf[pos++] = (char) (v >> 32);
             }
-            buf[pos++] = (char) (byte) (v >> 24);
+            buf[pos++] = (char) (v >> 48);
             return pos;
         }
 
         final long q1 = i / 1000;
         final int r1 = (int) (i - q1 * 1000);
-        final int v1 = DIGITS_K[r1];
+        final long v1 = DIGITS_K_64[r1];
         if (i < 1000000) {
-            final int v2 = DIGITS_K[(int) q1];
+            final long v2 = DIGITS_K_64[(int) q1];
             int start = (byte) v2;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v2 >> 8);
-                buf[pos + 1] = (char) (byte) (v2 >> 16);
+                putInt(buf, pos, (int) (v2 >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v2 >> 16);
+                buf[pos++] = (char) (v2 >> 32);
             }
-            buf[pos] = (char) (byte) (v2 >> 24);
-            buf[pos + 1] = (char) (byte) (v1 >> 8);
-            buf[pos + 2] = (char) (byte) (v1 >> 16);
-            buf[pos + 3] = (char) (byte) (v1 >> 24);
+            putLong(buf, pos, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 4;
         }
 
         final long q2 = q1 / 1000;
         final int r2 = (int) (q1 - q2 * 1000);
         final long q3 = q2 / 1000;
-        final int v2 = DIGITS_K[r2];
+        final long v2 = DIGITS_K_64[r2];
         if (q3 == 0) {
-            final int v3 = DIGITS_K[(int) q2];
+            final long v3 = DIGITS_K_64[(int) q2];
             int start = (byte) v3;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v3 >> 8);
-                buf[pos + 1] = (char) (byte) (v3 >> 16);
+                putInt(buf, pos, (int) (v3 >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v3 >> 16);
+                buf[pos++] = (char) (v3 >> 32);
             }
-            buf[pos] = (char) (byte) (v3 >> 24);
-            buf[pos + 1] = (char) (byte) (v2 >> 8);
-            buf[pos + 2] = (char) (byte) (v2 >> 16);
-            buf[pos + 3] = (char) (byte) (v2 >> 24);
-            buf[pos + 4] = (char) (byte) (v1 >> 8);
-            buf[pos + 5] = (char) (byte) (v1 >> 16);
-            buf[pos + 6] = (char) (byte) (v1 >> 24);
+            buf[pos] = (char) (v3 >> 48);
+            putInt(buf, pos + 1, (int) (v2 >> 16));
+            putLong(buf, pos + 3, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 7;
         }
         final int r3 = (int) (q2 - q3 * 1000);
         final int q4 = (int) (q3 / 1000);
-        final int v3 = DIGITS_K[r3];
+        final long v3 = DIGITS_K_64[r3];
         if (q4 == 0) {
-            final long v4 = DIGITS_K[(int) q3];
+            final long v4 = DIGITS_K_64[(int) q3];
             final int start = (byte) v4;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v4 >> 8);
-                buf[pos + 1] = (char) (byte) (v4 >> 16);
+                putInt(buf, pos, (int) (v4 >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v4 >> 16);
+                buf[pos++] = (char) (v4 >> 32);
             }
-            buf[pos] = (char) (byte) (v4 >> 24);
-            buf[pos + 1] = (char) (byte) (v3 >> 8);
-            buf[pos + 2] = (char) (byte) (v3 >> 16);
-            buf[pos + 3] = (char) (byte) (v3 >> 24);
-            buf[pos + 4] = (char) (byte) (v2 >> 8);
-            buf[pos + 5] = (char) (byte) (v2 >> 16);
-            buf[pos + 6] = (char) (byte) (v2 >> 24);
-            buf[pos + 7] = (char) (byte) (v1 >> 8);
-            buf[pos + 8] = (char) (byte) (v1 >> 16);
-            buf[pos + 9] = (char) (byte) (v1 >> 24);
+            buf[pos] = (char) (v4 >> 48);
+            buf[pos + 1] = (char) (v3 >> 16);
+            putLong(buf, pos + 2, ((v2 & 0x0000ffffffff0000L) << 16) | (v3 >> 32));
+            putLong(buf, pos + 6, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 10;
         }
         final int r4 = (int) (q3 - q4 * 1000);
         final int q5 = q4 / 1000;
-        final int v4 = DIGITS_K[r4];
+        final long v4 = DIGITS_K_64[r4];
         if (q5 == 0) {
-            final int v5 = DIGITS_K[q4];
+            final long v5 = DIGITS_K_64[q4];
             int start = (byte) v5;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v5 >> 8);
-                buf[pos + 1] = (char) (byte) (v5 >> 16);
+                putInt(buf, pos, (int) (v5 >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v5 >> 16);
+                buf[pos++] = (char) (v5 >> 32);
             }
-            buf[pos] = (char) (byte) (v5 >> 24);
-            buf[pos + 1] = (char) (byte) (v4 >> 8);
-            buf[pos + 2] = (char) (byte) (v4 >> 16);
-            buf[pos + 3] = (char) (byte) (v4 >> 24);
-            buf[pos + 4] = (char) (byte) (v3 >> 8);
-            buf[pos + 5] = (char) (byte) (v3 >> 16);
-            buf[pos + 6] = (char) (byte) (v3 >> 24);
-            buf[pos + 7] = (char) (byte) (v2 >> 8);
-            buf[pos + 8] = (char) (byte) (v2 >> 16);
-            buf[pos + 9] = (char) (byte) (v2 >> 24);
-            buf[pos + 10] = (char) (byte) (v1 >> 8);
-            buf[pos + 11] = (char) (byte) (v1 >> 16);
-            buf[pos + 12] = (char) (byte) (v1 >> 24);
+            buf[pos] = (char) (v5 >> 48);
+            putInt(buf, pos + 1, (int) (v4 >> 16));
+            putLong(buf, pos + 3, v3 & 0xffffffffffff0000L | (v4 >> 48));
+            putInt(buf, pos + 7, (int) (v2 >> 16));
+            putLong(buf, pos + 9, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 13;
         }
         final int r5 = q4 - q5 * 1000;
         final int q6 = q5 / 1000;
-        final int v5 = DIGITS_K[r5];
+        final long v5 = DIGITS_K_64[r5];
         if (q6 == 0) {
-            int v = DIGITS_K[q5];
+            int v = DIGITS_K_32[q5];
             final int start = (byte) v;
             if (start == 0) {
                 buf[pos] = (char) (byte) (v >> 8);
@@ -1197,31 +1170,19 @@ public class IOUtils {
             } else if (start == 1) {
                 buf[pos++] = (char) (byte) (v >> 16);
             }
-            buf[pos++] = (char) (byte) (v >> 24);
+            buf[pos++] = (char) (v >> 24);
         } else {
+            putLong(buf, pos, DIGITS_K_64[q5 - q6 * 1000]);
             buf[pos] = (char) (q6 + '0');
-            int v = DIGITS_K[q5 - q6 * 1000];
-            buf[pos + 1] = (char) (byte) (v >> 8);
-            buf[pos + 2] = (char) (byte) (v >> 16);
-            buf[pos + 3] = (char) (byte) (v >> 24);
             pos += 4;
         }
 
-        buf[pos] = (char) (byte) (v5 >> 8);
-        buf[pos + 1] = (char) (byte) (v5 >> 16);
-        buf[pos + 2] = (char) (byte) (v5 >> 24);
-        buf[pos + 3] = (char) (byte) (v4 >> 8);
-        buf[pos + 4] = (char) (byte) (v4 >> 16);
-        buf[pos + 5] = (char) (byte) (v4 >> 24);
-        buf[pos + 6] = (char) (byte) (v3 >> 8);
-        buf[pos + 7] = (char) (byte) (v3 >> 16);
-        buf[pos + 8] = (char) (byte) (v3 >> 24);
-        buf[pos + 9] = (char) (byte) (v2 >> 8);
-        buf[pos + 10] = (char) (byte) (v2 >> 16);
-        buf[pos + 11] = (char) (byte) (v2 >> 24);
-        buf[pos + 12] = (char) (byte) (v1 >> 8);
-        buf[pos + 13] = (char) (byte) (v1 >> 16);
-        buf[pos + 14] = (char) (byte) (v1 >> 24);
+        putInt(buf, pos, (int) (v5 >> 16));
+        putLong(buf, pos + 2, v4 & 0xffffffffffff0000L | (v5 >> 48));
+
+        buf[pos + 6] = (char) (v3 >> 16);
+        putLong(buf, pos + 7, ((v2 & 0x0000ffffffff0000L) << 16) | (v3 >> 32));
+        putLong(buf, pos + 11, v1 & 0xffffffffffff0000L | (v2 >> 48));
         return pos + 15;
     }
 
@@ -1239,7 +1200,7 @@ public class IOUtils {
         }
 
         if (i < 1000) {
-            int v = DIGITS_K[i];
+            int v = DIGITS_K_32[i];
             final int start = (byte) v;
             if (start == 0) {
                 putShort(buf, pos, (short) (v >> 8));
@@ -1253,9 +1214,9 @@ public class IOUtils {
 
         final int q1 = i / 1000;
         final int r1 = i - q1 * 1000;
-        final int v1 = DIGITS_K[r1];
+        final int v1 = DIGITS_K_32[r1];
         if (i < 1000000) {
-            final int v2 = DIGITS_K[q1];
+            final int v2 = DIGITS_K_32[q1];
             int start = (byte) v2;
             if (start == 0) {
                 putShort(buf, pos, (short) (v2 >> 8));
@@ -1269,9 +1230,9 @@ public class IOUtils {
         final int q2 = q1 / 1000;
         final int r2 = q1 - q2 * 1000;
         final int q3 = q2 / 1000;
-        final int v2 = DIGITS_K[r2];
+        final int v2 = DIGITS_K_32[r2];
         if (q3 == 0) {
-            int v = DIGITS_K[q2];
+            int v = DIGITS_K_32[q2];
             final int start = (byte) v;
             if (start == 0) {
                 putShort(buf, pos, (short) (v >> 8));
@@ -1281,7 +1242,7 @@ public class IOUtils {
             }
             buf[pos++] = (byte) (v >> 24);
         } else {
-            putInt(buf, pos, DIGITS_K[q2 - q3 * 1000] & 0xffffff00 | (q3 + '0'));
+            putInt(buf, pos, DIGITS_K_32[q2 - q3 * 1000] & 0xffffff00 | (q3 + '0'));
             pos += 4;
         }
 
@@ -1303,66 +1264,54 @@ public class IOUtils {
             i = value;
         }
         if (i < 1000) {
-            int v = DIGITS_K[i];
+            long v = DIGITS_K_64[i];
             final int start = (byte) v;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v >> 8);
-                buf[pos + 1] = (char) (byte) (v >> 16);
+                putInt(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v >> 16);
+                buf[pos++] = (char) (v >> 32);
             }
-            buf[pos] = (char) (byte) (v >> 24);
+            buf[pos] = (char) (v >> 48);
             return pos + 1;
         }
         final int q1 = i / 1000;
         final int r1 = i - q1 * 1000;
-        final int v1 = DIGITS_K[r1];
+        final long v1 = DIGITS_K_64[r1];
         if (i < 1000000) {
-            final int v2 = DIGITS_K[q1];
+            final long v2 = DIGITS_K_64[q1];
             int start = (byte) v2;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v2 >> 8);
-                buf[pos + 1] = (char) (byte) (v2 >> 16);
+                putInt(buf, pos, (int) (v2 >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v2 >> 16);
+                buf[pos++] = (char) (v2 >> 32);
             }
-            buf[pos] = (char) (byte) (v2 >> 24);
-            buf[pos + 1] = (char) (byte) (v1 >> 8);
-            buf[pos + 2] = (char) (byte) (v1 >> 16);
-            buf[pos + 3] = (char) (byte) (v1 >> 24);
+            putLong(buf, pos, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 4;
         }
         final int q2 = q1 / 1000;
+        final int r2 = q1 - q2 * 1000;
         final int q3 = q2 / 1000;
-        final int v2 = DIGITS_K[q1 - q2 * 1000];
+        final long v2 = DIGITS_K_64[r2];
         if (q3 == 0) {
-            int v = DIGITS_K[q2];
+            long v = DIGITS_K_64[q2];
             final int start = (byte) v;
             if (start == 0) {
-                buf[pos] = (char) (byte) (v >> 8);
-                buf[pos + 1] = (char) (byte) (v >> 16);
+                putInt(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
-                buf[pos++] = (char) (byte) (v >> 16);
+                buf[pos++] = (char) (v >> 32);
             }
-            buf[pos++] = (char) (byte) (v >> 24);
+            buf[pos++] = (char) (v >> 48);
         } else {
+            putLong(buf, pos, DIGITS_K_64[q2 - q3 * 1000]);
             buf[pos] = (char) (q3 + '0');
-            int v = DIGITS_K[q2 - q3 * 1000];
-            buf[pos + 1] = (char) (byte) (v >> 8);
-            buf[pos + 2] = (char) (byte) (v >> 16);
-            buf[pos + 3] = (char) (byte) (v >> 24);
             pos += 4;
         }
 
-        buf[pos] = (char) (byte) (v2 >> 8);
-        buf[pos + 1] = (char) (byte) (v2 >> 16);
-        buf[pos + 2] = (char) (byte) (v2 >> 24);
-        buf[pos + 3] = (char) (byte) (v1 >> 8);
-        buf[pos + 4] = (char) (byte) (v1 >> 16);
-        buf[pos + 5] = (char) (byte) (v1 >> 24);
+        putInt(buf, pos, (int) (v2 >> 16));
+        putLong(buf, pos + 2, v1 & 0xffffffffffff0000L | (v2 >> 48));
         return pos + 6;
     }
 
@@ -1379,6 +1328,22 @@ public class IOUtils {
                 buf,
                 ARRAY_BYTE_BASE_OFFSET + pos,
                 BIG_ENDIAN ? Integer.reverseBytes(v) : v
+        );
+    }
+
+    public static void putInt(char[] buf, int pos, int v) {
+        UNSAFE.putInt(
+                buf,
+                ARRAY_CHAR_BASE_OFFSET + (pos << 1),
+                BIG_ENDIAN ? Integer.reverseBytes(v) : v
+        );
+    }
+
+    public static void putLong(char[] buf, int pos, long v) {
+        UNSAFE.putLong(
+                buf,
+                ARRAY_CHAR_BASE_OFFSET + (pos << 1),
+                BIG_ENDIAN ? Long.reverseBytes(v) : v
         );
     }
 }
