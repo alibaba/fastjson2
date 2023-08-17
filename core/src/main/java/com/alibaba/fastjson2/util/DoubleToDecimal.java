@@ -729,7 +729,7 @@ public final class DoubleToDecimal {
 
         int index = off;
         if (json) {
-            UNSAFE.putLong(chars, ARRAY_BYTE_BASE_OFFSET + (index << 1), NULL_64);
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (index << 1), NULL_64);
             index += 4;
         } else if (t != 0) {
             chars[index] = 'N';
