@@ -2155,7 +2155,11 @@ class JSONWriterUTF16
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                IOUtils.putLong(chars, off, (DIGITS_K_64[millis] & 0xffffffffffff0000L) | DOT_X0);
+                chars[off] = '.';
+                int v = DIGITS_K[millis];
+                chars[off + 1] = (char) (byte) (v >> 8);
+                chars[off + 2] = (char) (byte) (v >> 16);
+                chars[off + 3] = (char) (byte) (v >> 24);
                 off += 4;
             } else {
                 chars[off++] = '.';
