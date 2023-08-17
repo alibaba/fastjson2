@@ -2673,20 +2673,17 @@ class JSONWriterUTF8
         bytes[off++] = '{';
 
         boolean first = true;
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
+        for (Map.Entry entry : map.entrySet()) {
             Object value = entry.getValue();
+            if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
+                continue;
+            }
 
             if (!first) {
                 if (off == bytes.length) {
                     ensureCapacity(off + 1);
                 }
-                if (value != null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
-                    bytes[off++] = ',';
-                }
-            }
-
-            if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
-                continue;
+                bytes[off++] = ',';
             }
 
             first = false;
