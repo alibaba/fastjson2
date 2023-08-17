@@ -10778,9 +10778,8 @@ public class DateUtils {
         }
 
         char[] chars = new char[19];
-        byte[] bytes = new byte[19];
-        IOUtils.writeLocalDate(bytes, 0, year, month, dayOfMonth);
-        bytes[10] = ' ';
+        IOUtils.writeLocalDate(chars, 0, year, month, dayOfMonth);
+        chars[10] = ' ';
         IOUtils.writeLocalTime(chars, 11, hour, minute, second);
         if (STRING_CREATOR_JDK8 != null) {
             return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
