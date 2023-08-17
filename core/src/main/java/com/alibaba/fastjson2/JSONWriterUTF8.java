@@ -1940,7 +1940,7 @@ class JSONWriterUTF8
             }
             Number item = values.get(i);
             if (item == null) {
-                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_32);
+                UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off, NULL_32);
                 off += 4;
                 continue;
             }
@@ -2024,7 +2024,7 @@ class JSONWriterUTF8
             }
             Long item = values.get(i);
             if (item == null) {
-                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_32);
+                UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off, NULL_32);
                 off += 4;
                 continue;
             }

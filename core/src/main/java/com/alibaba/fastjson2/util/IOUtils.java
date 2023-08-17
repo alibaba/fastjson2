@@ -365,7 +365,7 @@ public class IOUtils {
                     buf[off + 1] = (char) (rem + '0');
                     return off + 2;
                 } else if (scale == 2) {
-                    UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[(int) rem]);
+                    UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[(int) rem]);
                     return off + 3;
                 } else if (scale == 3) {
                     long v = DIGITS_K_64[(int) rem];
@@ -1334,7 +1334,7 @@ public class IOUtils {
     public static void putInt(char[] buf, int pos, int v) {
         UNSAFE.putInt(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + (pos << 1),
+                ARRAY_CHAR_BASE_OFFSET + (pos << 1),
                 BIG_ENDIAN ? Integer.reverseBytes(v) : v
         );
     }
@@ -1342,7 +1342,7 @@ public class IOUtils {
     public static void putLong(char[] buf, int pos, long v) {
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + (pos << 1),
+                ARRAY_CHAR_BASE_OFFSET + (pos << 1),
                 BIG_ENDIAN ? Long.reverseBytes(v) : v
         );
     }
