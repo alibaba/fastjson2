@@ -73,8 +73,8 @@ public class JDKUtils {
             Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
-            offset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
-            charOffset = Unsafe.ARRAY_CHAR_BASE_OFFSET;
+            offset = unsafe.arrayBaseOffset(byte[].class);
+            charOffset = unsafe.arrayBaseOffset(char[].class);
         } catch (Throwable ignored) {
             // ignored
         }
