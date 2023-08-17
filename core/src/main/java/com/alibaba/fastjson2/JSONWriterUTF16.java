@@ -542,7 +542,7 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = quote;
         for (int i = 0; i < strlen; i += 2) {
-            char ch = UNSAFE.getChar(str, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + i);
+            char ch = UNSAFE.getChar(str, (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i);
             switch (ch) {
                 case '"':
                 case '\'':
@@ -2757,7 +2757,7 @@ class JSONWriterUTF16
             if (!value) {
                 chars[off++] = 'f';
             }
-            UNSAFE.putLong(chars, ARRAY_BYTE_BASE_OFFSET + (off << 1), value ? TRUE_64 : ALSE_64);
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), value ? TRUE_64 : ALSE_64);
             off += 4;
         }
         this.off = off;
