@@ -736,4 +736,72 @@ public class TypeUtilsTest {
         assertTrue(TypeUtils.isInteger(new BigDecimal("-92233720368547758081")));
         assertFalse(TypeUtils.isInteger(new BigDecimal("-9223372036854775808.1")));
     }
+
+    @Test
+    public void isInt64_true() {
+        BigInteger[] integers = new BigInteger[] {
+                BigInteger.ZERO,
+                BigInteger.valueOf(Long.MIN_VALUE),
+                BigInteger.valueOf(Long.MIN_VALUE + 1),
+                BigInteger.valueOf(Long.MIN_VALUE + Integer.MAX_VALUE),
+                BigInteger.valueOf(Long.MAX_VALUE),
+                BigInteger.valueOf(Long.MAX_VALUE - 1),
+                BigInteger.valueOf(Long.MAX_VALUE - Integer.MAX_VALUE)
+        };
+        for (BigInteger integer : integers) {
+            assertTrue(TypeUtils.isInt64(integer));
+        }
+    }
+
+    @Test
+    public void isInt64_false() {
+        BigInteger[] integers = new BigInteger[] {
+                BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE),
+                BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.TEN),
+                BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.valueOf(100)),
+                BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.valueOf(1000)),
+                BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.valueOf(Integer.MAX_VALUE)),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.TEN),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.valueOf(100)),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.valueOf(1000)),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.valueOf(Integer.MAX_VALUE)),
+        };
+        for (BigInteger integer : integers) {
+            assertFalse(TypeUtils.isInt64(integer));
+        }
+    }
+
+    @Test
+    public void isInt32_true() {
+        BigInteger[] integers = new BigInteger[] {
+                BigInteger.ZERO,
+                BigInteger.valueOf(Integer.MIN_VALUE),
+                BigInteger.valueOf(Integer.MIN_VALUE + 1),
+                BigInteger.valueOf(Integer.MIN_VALUE + Short.MAX_VALUE),
+                BigInteger.valueOf(Integer.MAX_VALUE),
+                BigInteger.valueOf(Integer.MAX_VALUE - 1),
+                BigInteger.valueOf(Integer.MAX_VALUE - Short.MAX_VALUE)
+        };
+        for (BigInteger integer : integers) {
+            assertTrue(TypeUtils.isInt32(integer));
+        }
+    }
+
+    @Test
+    public void isInt32_false() {
+        BigInteger[] integers = new BigInteger[] {
+                BigInteger.valueOf(Integer.MIN_VALUE - 1L),
+                BigInteger.valueOf(Integer.MIN_VALUE - 10L),
+                BigInteger.valueOf(Integer.MIN_VALUE - 100L),
+                BigInteger.valueOf(Integer.MIN_VALUE - 1000L),
+                BigInteger.valueOf(Integer.MAX_VALUE + 1L),
+                BigInteger.valueOf(Integer.MAX_VALUE + 10L),
+                BigInteger.valueOf(Integer.MAX_VALUE + 100L),
+                BigInteger.valueOf(Integer.MAX_VALUE + 1000L),
+        };
+        for (BigInteger integer : integers) {
+            assertFalse(TypeUtils.isInt32(integer));
+        }
+    }
 }
