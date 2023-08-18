@@ -1879,14 +1879,25 @@ public class TypeUtils {
     }
 
     public static boolean isInt32(BigInteger value) {
+        if (FIELD_BIGINTEGER_MAG_OFFSET != -1) {
+            int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
+            return mag.length == 0
+                    || (mag.length == 1 && (mag[0] >= 0 || (mag[0] == Integer.MIN_VALUE && value.signum() == -1)));
+        }
+
         return value.compareTo(BIGINT_INT32_MIN) >= 0 && value.compareTo(BIGINT_INT32_MAX) <= 0;
     }
 
     public static boolean isInt64(BigInteger value) {
         if (FIELD_BIGINTEGER_MAG_OFFSET != -1) {
             int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
-            if (mag.length == 1 || (mag.length == 2 && mag[0] >= 0)) {
+            if (mag.length <= 1) {
                 return true;
+            }
+
+            if (mag.length == 2) {
+                int mag0 = mag[0];
+                return mag[0] >= 0 || (mag0 == Integer.MIN_VALUE && mag[1] == 0 && value.signum() == -1);
             }
         }
         return value.compareTo(BIGINT_INT64_MIN) >= 0 && value.compareTo(BIGINT_INT64_MAX) <= 0;
