@@ -5378,6 +5378,9 @@ class JSONReaderUTF16
         }
 
         String str = readString();
+        if (str.isEmpty()) {
+            return null;
+        }
         return UUID.fromString(str);
     }
 

@@ -7993,6 +7993,9 @@ class JSONReaderUTF8
         }
 
         String str = readString();
+        if (str.isEmpty()) {
+            return null;
+        }
         return UUID.fromString(str);
     }
 
