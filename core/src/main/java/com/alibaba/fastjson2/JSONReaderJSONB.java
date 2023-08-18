@@ -127,11 +127,10 @@ final class JSONReaderJSONB
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             charset = StandardCharsets.UTF_16BE;
-        } else if (strtype == BC_SYMBOL) {
-            int symbol = strlen;
-            int index = symbol * 2;
-//            return symbols[index];
-            throw new JSONException("TODO : " + JSONB.typeName(strtype));
+//      } else if (strtype == BC_SYMBOL) {
+//          int symbol = strlen;
+//          int index = symbol * 2;
+//          return symbols[index];
         } else {
             throw new JSONException("TODO : " + JSONB.typeName(strtype));
         }
@@ -420,13 +419,14 @@ final class JSONReaderJSONB
         throw new JSONException("object not support input " + error(type));
     }
 
+    @Override
     public void read(final Map map, long features) {
         if (bytes[offset] != BC_OBJECT) {
             throw new JSONException("object not support input " + error(type));
         }
         offset++;
 
-        for (int i = 0; ; ++i) {
+        while (true) {
             byte type = bytes[offset];
             if (type == BC_OBJECT_END) {
                 offset++;
@@ -1287,10 +1287,7 @@ final class JSONReaderJSONB
             objectClass = autoTypeBeforeHandler.apply(getString(), expectClass, features);
         }
         if (objectClass != null) {
-            ObjectReader objectReader = context.getObjectReader(objectClass);
-            if (objectReader != null) {
-                return objectReader;
-            }
+            return context.getObjectReader(objectClass);
         }
         return null;
     }
@@ -1535,8 +1532,7 @@ final class JSONReaderJSONB
 
         message.append(", offset ")
                 .append(offset);
-        JSONException error = new JSONException(message.toString());
-        return error;
+        return new JSONException(message.toString());
     }
 
     @Override
@@ -2369,7 +2365,7 @@ final class JSONReaderJSONB
                 return;
             }
             case BC_OBJECT: {
-                for (int i = 0; ; ++i) {
+                while (true) {
                     if (bytes[offset] == BC_OBJECT_END) {
                         offset++;
                         break;
@@ -4708,14 +4704,16 @@ final class JSONReaderJSONB
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public OffsetTime readOffsetTime() {
         ZonedDateTime zdt = readZonedDateTime();
         return zdt == null ? null : zdt.toOffsetDateTime().toOffsetTime();
     }
 
+    @Override
     public OffsetDateTime readOffsetDateTime() {
         ZonedDateTime zdt = readZonedDateTime();
-        return zdt == null ? zdt.toOffsetDateTime() : zdt.toOffsetDateTime();
+        return zdt == null ? null : zdt.toOffsetDateTime();
     }
 
     @Override
