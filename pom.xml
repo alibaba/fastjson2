@@ -161,7 +161,7 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-core</artifactId>
-                <version>0.43.4-public</version>
+                <version>0.45.1-public</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>32.1.1-jre</version>
+                <version>32.1.2-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -286,7 +286,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
-                <version>3.5.8</version>
+                <version>3.5.9</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
