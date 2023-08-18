@@ -73,11 +73,11 @@ public class FastJsonHttpMessageConverterUnitTest {
         assertTrue(messageConverter.canWrite(VO.class, VO.class, MediaType.APPLICATION_JSON));
 
         messageConverter.setSupportedMediaTypes(Arrays
-            .asList(new MediaType[]{MediaType.APPLICATION_JSON}));
+                .asList(new MediaType[] {MediaType.APPLICATION_JSON}));
         assertEquals(1, messageConverter.getSupportedMediaTypes().size());
 
         Method method = FastJsonHttpMessageConverter.class.getDeclaredMethod(
-            "supports", Class.class);
+                "supports", Class.class);
         method.setAccessible(true);
         method.invoke(messageConverter, int.class);
 
