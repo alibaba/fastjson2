@@ -1857,7 +1857,7 @@ public class JSONObject
      * @param value the value of the element
      */
     public static JSONObject of(String key, Object value) {
-        JSONObject object = new JSONObject(1);
+        JSONObject object = new JSONObject(1, 1F);
         object.put(key, value);
         return object;
     }
@@ -1876,7 +1876,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2) {
-        JSONObject object = new JSONObject(2);
+        JSONObject object = new JSONObject(2, 1F);
         object.put(k1, v1);
         object.put(k2, v2);
         return object;
@@ -1931,7 +1931,7 @@ public class JSONObject
             Object v3,
             String k4,
             Object v4) {
-        JSONObject object = new JSONObject(4);
+        JSONObject object = new JSONObject(4, 1F);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
@@ -1971,7 +1971,7 @@ public class JSONObject
             Object v5
 
     ) {
-        JSONObject object = new JSONObject(5);
+        JSONObject object = new JSONObject(5, 1F);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
