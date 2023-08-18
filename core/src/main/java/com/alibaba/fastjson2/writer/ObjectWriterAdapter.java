@@ -302,7 +302,8 @@ public class ObjectWriterAdapter<T>
             writeTypeInfo(jsonWriter);
         }
 
-        for (int i = 0; i < fieldWriters.size(); i++) {
+        final int size = fieldWriters.size();
+        for (int i = 0; i < size; i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             fieldWriter.write(jsonWriter, object);
         }
@@ -311,8 +312,9 @@ public class ObjectWriterAdapter<T>
     }
 
     public Map<String, Object> toMap(Object object) {
-        JSONObject map = new JSONObject(fieldWriters.size());
-        for (int i = 0; i < fieldWriters.size(); i++) {
+        final int size = fieldWriters.size();
+        JSONObject map = new JSONObject(size, 1F);
+        for (int i = 0; i < size; i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             map.put(
                     fieldWriter.fieldName,
