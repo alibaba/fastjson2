@@ -4708,14 +4708,16 @@ final class JSONReaderJSONB
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public OffsetTime readOffsetTime() {
         ZonedDateTime zdt = readZonedDateTime();
         return zdt == null ? null : zdt.toOffsetDateTime().toOffsetTime();
     }
 
+    @Override
     public OffsetDateTime readOffsetDateTime() {
         ZonedDateTime zdt = readZonedDateTime();
-        return zdt == null ? zdt.toOffsetDateTime() : zdt.toOffsetDateTime();
+        return zdt == null ? null : zdt.toOffsetDateTime();
     }
 
     @Override
