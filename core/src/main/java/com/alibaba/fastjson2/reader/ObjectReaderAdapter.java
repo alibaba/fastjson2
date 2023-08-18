@@ -175,7 +175,7 @@ public class ObjectReaderAdapter<T>
 
         this.seeAlso = seeAlso;
         if (seeAlso != null) {
-            this.seeAlsoMapping = new HashMap<>(seeAlso.length);
+            this.seeAlsoMapping = new HashMap<>(seeAlso.length, 1F);
             this.seeAlsoNames = new String[seeAlso.length];
             for (int i = 0; i < seeAlso.length; i++) {
                 Class seeAlsoClass = seeAlso[i];

@@ -1101,7 +1101,6 @@ public class JSONObject
      * @return JSON {@link String}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
             writer.setRootObject(this);
@@ -1116,7 +1115,6 @@ public class JSONObject
      * @param features features to be enabled in serialization
      * @return JSON {@link String}
      */
-    @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
             writer.setRootObject(this);
@@ -1152,7 +1150,6 @@ public class JSONObject
      * @param features features to be enabled in serialization
      * @return JSONB bytes
      */
-    @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
             writer.setRootObject(this);
@@ -1857,7 +1854,7 @@ public class JSONObject
      * @param value the value of the element
      */
     public static JSONObject of(String key, Object value) {
-        JSONObject object = new JSONObject(1);
+        JSONObject object = new JSONObject(1, 1F);
         object.put(key, value);
         return object;
     }
@@ -1876,7 +1873,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2) {
-        JSONObject object = new JSONObject(2);
+        JSONObject object = new JSONObject(2, 1F);
         object.put(k1, v1);
         object.put(k2, v2);
         return object;
@@ -1931,7 +1928,7 @@ public class JSONObject
             Object v3,
             String k4,
             Object v4) {
-        JSONObject object = new JSONObject(4);
+        JSONObject object = new JSONObject(4, 1F);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
@@ -2004,9 +2001,8 @@ public class JSONObject
     /**
      * See {@link JSON#parseObject} for details
      */
-    @SuppressWarnings("unchecked")
     public static <T> T parseObject(String text, TypeReference<T> typeReference, JSONReader.Feature... features) {
-        return (T) JSON.parseObject(text, typeReference, features);
+        return JSON.parseObject(text, typeReference, features);
     }
 
     /**

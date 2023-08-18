@@ -62,11 +62,12 @@ final class ConstructorFunction<T>
 
         this.alternateConstructors = alternateConstructors;
         if (alternateConstructors != null) {
-            alternateConstructorMap = new HashMap<>(alternateConstructors.size());
-            alternateConstructorNames = new HashMap<>(alternateConstructors.size());
-            alternateConstructorArgTypes = new HashMap<>(alternateConstructors.size());
-            alternateConstructorNameHashCodes = new HashMap<>(alternateConstructors.size());
-            for (int i = 0; i < alternateConstructors.size(); i++) {
+            final int size = alternateConstructors.size();
+            alternateConstructorMap = new HashMap<>(size, 1F);
+            alternateConstructorNames = new HashMap<>(size, 1F);
+            alternateConstructorArgTypes = new HashMap<>(size, 1F);
+            alternateConstructorNameHashCodes = new HashMap<>(size, 1F);
+            for (int i = 0; i < size; i++) {
                 Constructor alternateConstructor = alternateConstructors.get(i);
                 alternateConstructor.setAccessible(true);
 

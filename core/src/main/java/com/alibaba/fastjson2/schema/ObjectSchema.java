@@ -158,8 +158,8 @@ public final class ObjectSchema
 
         JSONObject dependentRequired = input.getJSONObject("dependentRequired");
         if (dependentRequired != null && !dependentRequired.isEmpty()) {
-            this.dependentRequired = new LinkedHashMap<>(dependentRequired.size());
-            this.dependentRequiredHashCodes = new LinkedHashMap<>(dependentRequired.size());
+            this.dependentRequired = new LinkedHashMap<>(dependentRequired.size(), 1F);
+            this.dependentRequiredHashCodes = new LinkedHashMap<>(dependentRequired.size(), 1F);
             Set<String> keys = dependentRequired.keySet();
             for (String key : keys) {
                 String[] dependentRequiredProperties = dependentRequired.getObject(key, String[].class);
@@ -177,8 +177,8 @@ public final class ObjectSchema
 
         JSONObject dependentSchemas = input.getJSONObject("dependentSchemas");
         if (dependentSchemas != null && !dependentSchemas.isEmpty()) {
-            this.dependentSchemas = new LinkedHashMap<>(dependentSchemas.size());
-            this.dependentSchemasHashMapping = new LinkedHashMap<>(dependentSchemas.size());
+            this.dependentSchemas = new LinkedHashMap<>(dependentSchemas.size(), 1F);
+            this.dependentSchemasHashMapping = new LinkedHashMap<>(dependentSchemas.size(), 1F);
             Set<String> keys = dependentSchemas.keySet();
             for (String key : keys) {
                 JSONSchema dependentSchema = dependentSchemas.getObject(key, JSONSchema::of);

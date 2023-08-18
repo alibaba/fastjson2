@@ -3811,9 +3811,10 @@ public interface JSON {
         if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
             List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
 
+            final int size = fieldWriters.size();
             if (objectReader instanceof ObjectReaderNoneDefaultConstructor) {
-                Map<String, Object> map = new HashMap(fieldWriters.size());
-                for (int i = 0; i < fieldWriters.size(); i++) {
+                Map<String, Object> map = new HashMap<>(size, 1F);
+                for (int i = 0; i < size; i++) {
                     FieldWriter fieldWriter = fieldWriters.get(i);
                     Object fieldValue = fieldWriter.getFieldValue(object);
                     map.put(fieldWriter.fieldName, fieldValue);
@@ -3823,7 +3824,7 @@ public interface JSON {
             }
 
             T instance = (T) objectReader.createInstance(featuresValue);
-            for (int i = 0; i < fieldWriters.size(); i++) {
+            for (int i = 0; i < size; i++) {
                 FieldWriter fieldWriter = fieldWriters.get(i);
                 FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.fieldName);
                 if (fieldReader == null) {
@@ -3888,7 +3889,7 @@ public interface JSON {
             List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
 
             if (objectReader instanceof ObjectReaderNoneDefaultConstructor) {
-                Map<String, Object> map = new HashMap(fieldWriters.size());
+                Map<String, Object> map = new HashMap<>(fieldWriters.size(), 1F);
                 for (int i = 0; i < fieldWriters.size(); i++) {
                     FieldWriter fieldWriter = fieldWriters.get(i);
                     Object fieldValue = fieldWriter.getFieldValue(object);
