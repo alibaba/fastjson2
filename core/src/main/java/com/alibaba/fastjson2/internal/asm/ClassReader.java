@@ -186,7 +186,6 @@ public class ClassReader {
             int codeLength = readInt(v + 4);
             v += 8;
 
-            int codeStart = v;
             v = v + codeLength;
 
             j = readUnsignedShort(v);
@@ -210,17 +209,13 @@ public class ClassReader {
                 v += 6 + readInt(v + 2);
             }
 
-            v = codeStart;
             // visits the local variable tables
             if (varTable != 0) {
                 if (varTypeTable != 0) {
                     k = readUnsignedShort(varTypeTable) * 3;
                     w = varTypeTable + 2;
-                    int[] typeTable = new int[k];
                     while (k > 0) {
-                        typeTable[--k] = w + 6; // signature
-                        typeTable[--k] = readUnsignedShort(w + 8); // index
-                        typeTable[--k] = readUnsignedShort(w); // start
+                        k -= 3; // signature + index + start
                         w += 10;
                     }
                 }
