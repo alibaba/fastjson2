@@ -82,7 +82,7 @@ class ObjectReaderImplInt8Array
             if ("gzip,base64".equals(format) || "gzip".equals(format)) {
                 byte[] bytes = Base64.getDecoder().decode(strVal);
 
-                GZIPInputStream gzipIn = null;
+                GZIPInputStream gzipIn;
                 try {
                     gzipIn = new GZIPInputStream(new ByteArrayInputStream(bytes));
 

@@ -244,7 +244,7 @@ public abstract class BeanUtils {
 
         Field[] fields = declaredFieldCache.get(objectClass);
         if (fields == null) {
-            Field[] declaredFields = null;
+            Field[] declaredFields;
             try {
                 declaredFields = objectClass.getDeclaredFields();
                 declaredFieldCache.put(objectClass, declaredFields);

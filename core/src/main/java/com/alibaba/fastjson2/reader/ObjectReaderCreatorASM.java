@@ -3834,7 +3834,7 @@ public class ObjectReaderCreatorASM
         ) {
             this.objectClass = objectClass;
             this.cw = cw;
-            this.publicClass = objectClass == null ? true : Modifier.isPublic(objectClass.getModifiers());
+            this.publicClass = objectClass == null || Modifier.isPublic(objectClass.getModifiers());
             this.externalClass = externalClass;
             this.fieldReaders = fieldReaders;
 

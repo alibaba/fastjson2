@@ -4019,7 +4019,7 @@ class JSONReaderUTF16
             _for:
             {
                 int i = 0;
-                char c0 = 0, c1 = 0, c2 = 0, c3 = 0;
+                char c0 = 0, c1 = 0, c2 = 0, c3;
 
                 // vector optimize
                 boolean quoted = false;
@@ -4976,7 +4976,7 @@ class JSONReaderUTF16
     public final void readNull() {
         final char[] chars = this.chars;
         int offset = this.offset;
-        char ch = this.ch;
+        char ch;
 
         if (chars[offset] == 'u'
                 && chars[offset + 1] == 'l'

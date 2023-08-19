@@ -62,8 +62,7 @@ public class ObjectWriterCreator {
         for (int i = 0; i < names.length; i++) {
             String fieldName = names[i];
             Type fieldType = types[i];
-            int fieldIndex = i;
-            Function<T, Object> function = new FieldSupplierFunction<T>(supplier, fieldIndex);
+            Function<T, Object> function = new FieldSupplierFunction<>(supplier, i);
             fieldWriters[i] = createFieldWriter(fieldName, fieldType, TypeUtils.getClass(fieldType), function);
         }
         return createObjectWriter(fieldWriters);
@@ -587,7 +586,7 @@ public class ObjectWriterCreator {
             } else {
                 fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
 
-                Field field = null;
+                Field field;
                 if ((provider.userDefineMask & NAME_COMPATIBLE_WITH_FILED) != 0
                         && (field = BeanUtils.getField(objectClass, method)) != null) {
                     fieldName = field.getName();
