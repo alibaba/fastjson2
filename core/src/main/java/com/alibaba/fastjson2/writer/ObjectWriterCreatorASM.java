@@ -29,33 +29,11 @@ import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
 public class ObjectWriterCreatorASM
         extends ObjectWriterCreator {
-    static final boolean DISABLE_STRING_UNSAFE_GET;
-
     // GraalVM not support
     // Android not support
     public static final ObjectWriterCreatorASM INSTANCE = new ObjectWriterCreatorASM(
             DynamicClassLoader.getInstance()
     );
-
-    static {
-        {
-            String key = "fastjson2.disableStringUnsafeGet";
-            String property = System.getProperty(key);
-            if (property == null || property.isEmpty()) {
-                String str = JSONFactory.getProperty(key);
-                if (str != null && !str.isEmpty()) {
-                    property = str;
-                }
-            }
-            boolean value = !(!ANDROID && !GRAAL);
-            if ("".equals(property) || "true".equals(property)) {
-                value = true;
-            } else if ("false".equals(property)) {
-                value = false;
-            }
-            DISABLE_STRING_UNSAFE_GET = false;
-        }
-    }
 
     protected static final AtomicLong seed = new AtomicLong();
     protected final DynamicClassLoader classLoader;
@@ -2711,8 +2689,7 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(notNull_);
         }
 
-        if ((!DISABLE_STRING_UNSAFE_GET)
-                && JVM_VERSION == 8
+        if (JVM_VERSION == 8
                 && !OPENJ9
                 && !FIELD_STRING_VALUE_ERROR
                 && !symbol
@@ -2730,8 +2707,7 @@ public class ObjectWriterCreatorASM
                     "([C)V",
                     false
             );
-        } else if ((!DISABLE_STRING_UNSAFE_GET)
-                && JVM_VERSION > 8
+        } else if (JVM_VERSION > 8
                 && !OPENJ9
                 && FIELD_STRING_CODER_OFFSET != -1
                 && FIELD_STRING_VALUE_OFFSET != -1
