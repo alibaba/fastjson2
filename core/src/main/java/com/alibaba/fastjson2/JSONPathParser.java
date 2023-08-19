@@ -339,13 +339,11 @@ class JSONPathParser {
             long hashCode = jsonReader.readFieldNameHashCodeUnquote();
             String name = jsonReader.getFieldName();
             if (isNum) {
-                if (name.length() > 9) {
-                    isNum = false;
-                } else {
-                    for (int i = 0; i < name.length(); ++i) {
+                final int length = name.length();
+                if (length <= 9) {
+                    for (int i = 0; i < length; ++i) {
                         char ch = name.charAt(i);
                         if (ch < '0' || ch > '9') {
-                            isNum = false;
                             break;
                         }
                     }
