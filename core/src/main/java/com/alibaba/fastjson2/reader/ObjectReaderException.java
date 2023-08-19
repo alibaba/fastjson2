@@ -154,7 +154,7 @@ final class ObjectReaderException<T>
                 long typeHash = jsonReader.readTypeHashCode();
                 JSONReader.Context context = jsonReader.getContext();
                 ObjectReader reader = autoType(context, typeHash);
-                String typeName = null;
+                String typeName;
                 if (reader == null) {
                     typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(typeName, objectClass, features);

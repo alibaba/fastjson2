@@ -308,7 +308,7 @@ public abstract class FieldWriter<T>
                 return;
             }
         } else if (fieldClass == char.class) {
-            if (((Character) fieldValue).charValue() == '\0') {
+            if ((Character) fieldValue == '\0') {
                 return;
             }
         }

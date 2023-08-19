@@ -2029,7 +2029,7 @@ class JSONWriterUTF8
                 continue;
             }
 
-            long v = item.longValue();
+            long v = item;
             boolean writeAsString = nonStringAsString
                     || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
             if (writeAsString) {

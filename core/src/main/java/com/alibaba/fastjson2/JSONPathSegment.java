@@ -438,9 +438,8 @@ abstract class JSONPathSegment {
 
             if (object instanceof JSONPath.Sequence) {
                 List list = ((JSONPath.Sequence) object).values;
-                for (int i = 0; i < list.size(); i++) {
-                    Object item = list.get(i);
-                    context.value = item;
+                for (int i = 0, size = list.size(); i < size; i++) {
+                    context.value = list.get(i);
                     JSONPath.Context itemContext = new JSONPath.Context(context.path, context, context.current, context.next, context.readerFeatures);
                     eval(itemContext);
                     Object value = itemContext.value;
@@ -1267,10 +1266,10 @@ abstract class JSONPathSegment {
                                 .getObjectWriter(value.getClass());
                         if (objectWriter instanceof ObjectWriterAdapter) {
                             ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
-                            Object temp = Optional.ofNullable(writerAdapter.getFieldWriters()).orElseGet(() -> new ArrayList())
-                                    .stream()
-                                    .filter(Objects::nonNull).map(v -> ((FieldWriter) v).getFieldValue(value))
-                                    .collect(Collectors.toList());
+                            final List<FieldWriter> fieldWriters = writerAdapter.getFieldWriters();
+                            Object temp = fieldWriters == null || fieldWriters.isEmpty()
+                                    ? new ArrayList<>() // JDK 8+ 只要不 add()，不会初始化内部数组
+                                    : fieldWriters.stream().filter(Objects::nonNull).map(v -> v.getFieldValue(value)).collect(Collectors.toList());
                             accept(temp);
                         }
                     }

@@ -154,7 +154,7 @@ final class JSONPathSingleName
             }
             fieldReader.accept(rootObject, value);
         } else if (objectReader instanceof ObjectReaderBean) {
-            ((ObjectReaderBean) objectReader).acceptExtra(rootObject, name, value);
+            objectReader.acceptExtra(rootObject, name, value);
         }
     }
 

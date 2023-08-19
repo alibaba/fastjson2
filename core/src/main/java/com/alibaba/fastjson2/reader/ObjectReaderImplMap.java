@@ -246,13 +246,11 @@ public final class ObjectReaderImplMap
         String instanceTypeName = instanceType.getName();
         switch (instanceTypeName) {
             case "com.ali.com.google.common.collect.EmptyImmutableBiMap":
-                return ((Supplier) () -> {
-                    try {
-                        return UNSAFE.allocateInstance(instanceType);
-                    } catch (InstantiationException e) {
-                        throw new JSONException("create map error : " + instanceType);
-                    }
-                }).get();
+                try {
+                    return UNSAFE.allocateInstance(instanceType);
+                } catch (InstantiationException e) {
+                    throw new JSONException("create map error : " + instanceType);
+                }
             case "java.util.ImmutableCollections$Map1":
                 return new HashMap<>();
             case "java.util.ImmutableCollections$MapN":

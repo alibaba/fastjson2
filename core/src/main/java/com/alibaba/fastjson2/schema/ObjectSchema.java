@@ -243,7 +243,7 @@ public final class ObjectSchema
 
         if (!additionalProperties) {
             for_:
-            for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
+            for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
                 Object key = entry.getKey();
 
                 if (properties.containsKey(key)) {

@@ -469,7 +469,6 @@ public final class FDBigInteger {
                 subtrahend.data = sData = r;
             }
             subtrahend.offset = minuend.offset;
-            subLen -= offsetDiff;
             offsetDiff = 0;
         } else {
             int rLen = minLen + offsetDiff;
