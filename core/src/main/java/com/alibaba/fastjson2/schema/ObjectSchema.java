@@ -659,4 +659,8 @@ public final class ObjectSchema
             this.properties.values().forEach(v::test);
         }
     }
+
+    public JSONSchema getDefs(String def) {
+        return this.defs.get(def);
+    }
 }
