@@ -10,9 +10,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_ARRAY_1x;
@@ -378,16 +376,14 @@ final class ObjectWriterImplList
     }
 
     private List getList(Object object) {
-        List list;
-        if (object instanceof Iterable) {
-            list = new ArrayList();
-            Iterator iterator = ((Iterable) object).iterator();
-            while (iterator.hasNext()) {
-                list.add(iterator.next());
+        if (!(object instanceof List) && object instanceof Iterable) {
+            final Iterable items = (Iterable) object;
+            List list = items instanceof Collection ? new ArrayList(((Collection<?>) items).size()) : new ArrayList();
+            for (Object o : items) {
+                list.add(o);
             }
-        } else {
-            list = (List) object;
+            return list;
         }
-        return list;
+        return (List) object;
     }
 }
