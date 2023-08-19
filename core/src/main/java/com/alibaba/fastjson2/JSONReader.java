@@ -1673,6 +1673,7 @@ public abstract class JSONReader
                     }
 
                     ldt = readLocalDateTime19();
+                    break;
                 }
                 case 20: {
                     ldt = readLocalDateTime20();
@@ -2252,7 +2253,7 @@ public abstract class JSONReader
                 object = new JSONObject();
             }
         } else {
-            object = (Map) context.objectSupplier.get();
+            object = context.objectSupplier.get();
         }
 
         for (int i = 0; ; ++i) {
@@ -3713,7 +3714,7 @@ public abstract class JSONReader
             // destructiveMulAdd
             long ylong = 1000000000 & 0XFFFFFFFFL;
 
-            long product = 0;
+            long product;
             long carry = 0;
             for (int i = 3; i >= 0; i--) {
                 switch (i) {
@@ -3851,7 +3852,7 @@ public abstract class JSONReader
             long ylong = 1000000000 & 0XFFFFFFFFL;
             long zlong = groupVal & 0XFFFFFFFFL;
 
-            long product = 0;
+            long product;
             long carry = 0;
             for (int i = 3; i >= 0; i--) {
                 switch (i) {
