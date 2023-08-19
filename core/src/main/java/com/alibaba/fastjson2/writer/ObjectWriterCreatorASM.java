@@ -43,7 +43,7 @@ public class ObjectWriterCreatorASM
             String property = System.getProperty(key);
             if (property == null || property.isEmpty()) {
                 String str = JSONFactory.getProperty(key);
-                if (str != null && !property.isEmpty()) {
+                if (str != null && !str.isEmpty()) {
                     property = str;
                 }
             }
