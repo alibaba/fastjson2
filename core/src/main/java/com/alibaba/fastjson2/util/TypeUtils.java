@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.FIELD_BIGINTEGER_MAG_OFFSET;
 import static java.lang.invoke.MethodType.methodType;
 
 public class TypeUtils {
@@ -1599,7 +1598,6 @@ public class TypeUtils {
         NAME_MAPPINGS.put(UUID[][].class, "[[UUID");
 
         NAME_MAPPINGS.put(Object.class, "Object");
-        NAME_MAPPINGS.put(Object[].class, "[O");
 
         NAME_MAPPINGS.put(HashMap.class, "M");
         TYPE_MAPPINGS.put("HashMap", HashMap.class);
@@ -1720,7 +1718,7 @@ public class TypeUtils {
         TYPE_MAPPINGS.put("StackTraceElement", StackTraceElement.class);
         TYPE_MAPPINGS.put("[StackTraceElement", StackTraceElement[].class);
 
-        String[] items = new String[]{
+        String[] items = {
                 "java.util.Collections$UnmodifiableMap",
                 "java.util.Collections$UnmodifiableCollection",
         };
@@ -3111,48 +3109,36 @@ public class TypeUtils {
     }
 
     public static int compare(Object a, Object b) {
-        if (a.getClass() == b.getClass()) {
+        final Class typeA = a.getClass(), typeB = b.getClass();
+
+        if (typeA == typeB) {
             return ((Comparable) a).compareTo(b);
         }
 
-        Class typeA = a.getClass();
-        Class typeB = b.getClass();
-
         if (typeA == BigDecimal.class) {
-            if (typeB == Integer.class) {
-                b = new BigDecimal((Integer) b);
-            } else if (typeB == Long.class) {
-                b = new BigDecimal((Long) b);
-            } else if (typeB == Float.class) {
-                b = BigDecimal.valueOf((Float) b);
-            } else if (typeB == Double.class) {
-                b = BigDecimal.valueOf((Double) b);
+            if (typeB == Integer.class || typeB == Long.class) {
+                b = BigDecimal.valueOf(((Number) b).longValue());
+            } else if (typeB == Float.class || typeB == Double.class) {
+                b = BigDecimal.valueOf(((Number) b).doubleValue());
             } else if (typeB == BigInteger.class) {
                 b = new BigDecimal((BigInteger) b);
             }
         } else if (typeA == BigInteger.class) {
-            if (typeB == Integer.class) {
-                b = BigInteger.valueOf((Integer) b);
-            } else if (typeB == Long.class) {
-                b = BigInteger.valueOf((Long) b);
-            } else if (typeB == Float.class) {
-                b = BigDecimal.valueOf((Float) b);
-                a = new BigDecimal((BigInteger) a);
-            } else if (typeB == Double.class) {
-                b = BigDecimal.valueOf((Double) b);
+            if (typeB == Integer.class || typeB == Long.class) {
+                b = BigInteger.valueOf(((Number) b).longValue());
+            } else if (typeB == Float.class || typeB == Double.class) {
+                b = BigDecimal.valueOf(((Number) b).doubleValue());
                 a = new BigDecimal((BigInteger) a);
             } else if (typeB == BigDecimal.class) {
                 a = new BigDecimal((BigInteger) a);
             }
         } else if (typeA == Long.class) {
             if (typeB == Integer.class) {
-                b = new Long((Integer) b);
+                return Long.compare((Long) a, ((Integer) b));
             } else if (typeB == BigDecimal.class) {
-                a = new BigDecimal((Long) a);
-            } else if (typeB == Float.class) {
-                a = new Float((Long) a);
-            } else if (typeB == Double.class) {
-                a = new Double((Long) a);
+                a = BigDecimal.valueOf((Long) a);
+            } else if (typeB == Float.class || typeB == Double.class) {
+                return Double.compare((Long) a, ((Number) b).doubleValue());
             } else if (typeB == BigInteger.class) {
                 a = BigInteger.valueOf((Long) a);
             } else if (typeB == String.class) {
@@ -3161,26 +3147,20 @@ public class TypeUtils {
             }
         } else if (typeA == Integer.class) {
             if (typeB == Long.class) {
-                a = new Long((Integer) a);
+                return Long.compare((Integer) a, ((Long) b));
             } else if (typeB == BigDecimal.class) {
-                a = new BigDecimal((Integer) a);
+                a = BigDecimal.valueOf((Integer) a);
             } else if (typeB == BigInteger.class) {
                 a = BigInteger.valueOf((Integer) a);
-            } else if (typeB == Float.class) {
-                a = new Float((Integer) a);
-            } else if (typeB == Double.class) {
-                a = new Double((Integer) a);
+            } else if (typeB == Float.class || typeB == Double.class) {
+                return Double.compare((Integer) a, ((Number) b).doubleValue());
             } else if (typeB == String.class) {
                 a = BigDecimal.valueOf((Integer) a);
                 b = new BigDecimal((String) b);
             }
         } else if (typeA == Double.class) {
-            if (typeB == Integer.class) {
-                b = new Double((Integer) b);
-            } else if (typeB == Long.class) {
-                b = new Double((Long) b);
-            } else if (typeB == Float.class) {
-                b = new Double((Float) b);
+            if (typeB == Integer.class || typeB == Long.class || typeB == Float.class) {
+                return Double.compare((Double) a, ((Number) b).doubleValue());
             } else if (typeB == BigDecimal.class) {
                 a = BigDecimal.valueOf((Double) a);
             } else if (typeB == String.class) {
@@ -3191,12 +3171,8 @@ public class TypeUtils {
                 b = new BigDecimal((BigInteger) b);
             }
         } else if (typeA == Float.class) {
-            if (typeB == Integer.class) {
-                b = new Float((Integer) b);
-            } else if (typeB == Long.class) {
-                b = new Float((Long) b);
-            } else if (typeB == Double.class) {
-                a = new Double((Float) a);
+            if (typeB == Integer.class || typeB == Long.class || typeB == Double.class) {
+                return Double.compare((Float) a, ((Number) b).doubleValue());
             } else if (typeB == BigDecimal.class) {
                 a = BigDecimal.valueOf((Float) a);
             } else if (typeB == String.class) {
@@ -3208,33 +3184,16 @@ public class TypeUtils {
             }
         } else if (typeA == String.class) {
             String strA = (String) a;
-            if (typeB == Integer.class) {
-                NumberFormatException error = null;
+            if (typeB == Integer.class || typeB == Long.class) {
                 try {
-                    a = Integer.parseInt(strA);
+                    long aVal = Long.parseLong(strA);
+                    return Long.compare(aVal, ((Number) b).longValue());
                 } catch (NumberFormatException ex) {
-                    error = ex;
-                }
-                if (error != null) {
-                    try {
-                        a = Long.parseLong(strA);
-                        b = Long.valueOf((Integer) b);
-                        error = null;
-                    } catch (NumberFormatException ex) {
-                        error = ex;
-                    }
-                }
-                if (error != null) {
                     a = new BigDecimal(strA);
-                    b = BigDecimal.valueOf((Integer) b);
+                    b = BigDecimal.valueOf(((Number) b).longValue());
                 }
-            } else if (typeB == Long.class) {
-                a = new BigDecimal(strA);
-                b = BigDecimal.valueOf((Long) b);
-            } else if (typeB == Float.class) {
-                a = Float.parseFloat(strA);
-            } else if (typeB == Double.class) {
-                a = Double.parseDouble(strA);
+            } else if (typeB == Float.class || typeB == Double.class) {
+                return Double.compare(Double.parseDouble(strA), ((Number) b).doubleValue());
             } else if (typeB == BigInteger.class) {
                 a = new BigInteger(strA);
             } else if (typeB == BigDecimal.class) {
@@ -3824,7 +3783,6 @@ public class TypeUtils {
 
         int end = off + len;
         boolean dot = ch == '.';
-        boolean space = false;
         boolean num = false;
         if (!dot && (ch >= '0' && ch <= '9')) {
             num = true;
@@ -3834,7 +3792,7 @@ public class TypeUtils {
                 } else {
                     return true;
                 }
-            } while (!space && ch >= '0' && ch <= '9');
+            } while (ch >= '0' && ch <= '9');
         }
 
         boolean small = false;
@@ -3853,7 +3811,7 @@ public class TypeUtils {
                     } else {
                         return true;
                     }
-                } while (!space && ch >= '0' && ch <= '9');
+                } while (ch >= '0' && ch <= '9');
             }
         }
 
