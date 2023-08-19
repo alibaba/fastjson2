@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONObject;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 
 public final class ArraySchema
@@ -144,303 +145,130 @@ public final class ArraySchema
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
-        Set uniqueItemsSet = null;
-
         if (value instanceof Object[]) {
-            Object[] array = (Object[]) value;
-            final int size = array.length;
-
-            if (minLength >= 0 && size < minLength) {
-                return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
-            }
-
-            if (maxLength >= 0 && size > maxLength) {
-                return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
-            }
-
-            int containsCount = 0;
-            for (int index = 0; index < array.length; index++) {
-                Object item = array[index];
-
-                boolean prefixMatch = false;
-                if (index < prefixItems.length) {
-                    ValidateResult result = prefixItems[index].validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                    prefixMatch = true;
-                }
-
-                if (!prefixMatch && itemSchema != null) {
-                    ValidateResult result = itemSchema.validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                }
-
-                if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
-                    ValidateResult result = this.contains.validate(item);
-                    if (result == SUCCESS) {
-                        containsCount++;
-                    }
-                }
-
-                if (uniqueItems) {
-                    if (uniqueItemsSet == null) {
-                        uniqueItemsSet = new HashSet(size);
-                    }
-
-                    if (item instanceof BigDecimal) {
-                        item = ((BigDecimal) item).stripTrailingZeros();
-                    }
-
-                    if (!uniqueItemsSet.add(item)) {
-                        return UNIQUE_ITEMS_NOT_MATCH;
-                    }
-                }
-            }
-
-            if (this.contains != null && containsCount == 0) {
-                return CONTAINS_NOT_MATCH;
-            }
-
-            if (minContains >= 0 && containsCount < minContains) {
-                return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
-            }
-
-            if (maxContains >= 0 && containsCount > maxContains) {
-                return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
-            }
-
-            if (!additionalItems) {
-                if (size > prefixItems.length) {
-                    return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
-                }
-            }
-
-            if (allOf != null) {
-                ValidateResult result = allOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            if (anyOf != null) {
-                ValidateResult result = anyOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            if (oneOf != null) {
-                ValidateResult result = oneOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            return SUCCESS;
+            final Object[] items = (Object[]) value;
+            return validateItems(value, items.length, i -> items[i]);
         }
 
         if (value.getClass().isArray()) {
             final int size = Array.getLength(value);
-
-            if (minLength >= 0 && size < minLength) {
-                return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
-            }
-
-            if (maxLength >= 0 && size > maxLength) {
-                return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
-            }
-
-            int containsCount = 0;
-            for (int index = 0; index < size; index++) {
-                Object item = Array.get(value, index);
-
-                boolean prefixMatch = false;
-                if (index < prefixItems.length) {
-                    ValidateResult result = prefixItems[index].validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                    prefixMatch = true;
-                }
-
-                if (!prefixMatch && itemSchema != null) {
-                    ValidateResult result = itemSchema.validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                }
-
-                if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
-                    ValidateResult result = this.contains.validate(item);
-                    if (result == SUCCESS) {
-                        containsCount++;
-                    }
-                }
-
-                if (uniqueItems) {
-                    if (uniqueItemsSet == null) {
-                        uniqueItemsSet = new HashSet(size);
-                    }
-
-                    if (item instanceof BigDecimal) {
-                        item = ((BigDecimal) item).stripTrailingZeros();
-                    }
-
-                    if (!uniqueItemsSet.add(item)) {
-                        return UNIQUE_ITEMS_NOT_MATCH;
-                    }
-                }
-            }
-            if (this.contains != null && containsCount == 0) {
-                return CONTAINS_NOT_MATCH;
-            }
-
-            if (minContains >= 0 && containsCount < minContains) {
-                return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
-            }
-
-            if (maxContains >= 0 && containsCount > maxContains) {
-                return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
-            }
-
-            if (!additionalItems) {
-                if (size > prefixItems.length) {
-                    return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
-                }
-            }
-
-            if (allOf != null) {
-                ValidateResult result = allOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            if (anyOf != null) {
-                ValidateResult result = anyOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            if (oneOf != null) {
-                ValidateResult result = oneOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            return SUCCESS;
+            return validateItems(value, size, i -> Array.get(value, i));
         }
 
         if (value instanceof Collection) {
-            int size = ((Collection<?>) value).size();
-            if (minLength >= 0 && size < minLength) {
-                return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
-            }
-
-            if (maxLength >= 0 && size > maxLength) {
-                return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
-            }
-
-            if (!additionalItems) {
-                if (size > prefixItems.length) {
-                    return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
-                }
-            }
-
-            int index = 0;
-            int containsCount = 0;
-            for (Iterator it = ((Iterable) value).iterator(); it.hasNext(); index++) {
-                Object item = it.next();
-
-                boolean prefixMatch = false;
-                if (index < prefixItems.length) {
-                    ValidateResult result = prefixItems[index].validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                    prefixMatch = true;
-                } else if (itemSchema == null && additionalItem != null) {
-                    ValidateResult result = additionalItem.validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                }
-
-                if (!prefixMatch && itemSchema != null) {
-                    ValidateResult result = itemSchema.validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                }
-
-                if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
-                    ValidateResult result = this.contains.validate(item);
-                    if (result == SUCCESS) {
-                        containsCount++;
-                    }
-                }
-
-                if (uniqueItems) {
-                    if (uniqueItemsSet == null) {
-                        uniqueItemsSet = new HashSet();
-                    }
-
-                    if (item instanceof BigDecimal) {
-                        item = ((BigDecimal) item).stripTrailingZeros();
-                    }
-
-                    if (!uniqueItemsSet.add(item)) {
-                        return UNIQUE_ITEMS_NOT_MATCH;
-                    }
-                }
-            }
-
-            if (this.contains != null) {
-                if (minContains >= 0 && containsCount < minContains) {
-                    return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
-                } else {
-                    if (containsCount == 0 && minContains != 0) {
-                        return CONTAINS_NOT_MATCH;
-                    }
-                }
-
-                if (maxContains >= 0 && containsCount > maxContains) {
-                    return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
-                }
-            }
-
-            if (allOf != null) {
-                ValidateResult result = allOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            if (anyOf != null) {
-                ValidateResult result = anyOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            if (oneOf != null) {
-                ValidateResult result = oneOf.validate(value);
-                if (!result.isSuccess()) {
-                    return result;
-                }
-            }
-
-            return SUCCESS;
+            final Collection<?> items = (Collection<?>) value;
+            final Iterator<?> iterator = items.iterator();
+            return validateItems(value, items.size(), i -> iterator.next());
         }
 
         return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
     }
 
+    private ValidateResult validateItems(final Object value, final int size, IntFunction<Object> itemGetter) {
+        if (minLength >= 0 && size < minLength) {
+            return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
+        }
+
+        if (maxLength >= 0 && size > maxLength) {
+            return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
+        }
+
+        if (!additionalItems && size > prefixItems.length) {
+            return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
+        }
+
+        final boolean isCollection = value instanceof Collection;
+        Set<Object> uniqueItemsSet = null;
+        int containsCount = 0;
+        for (int index = 0; index < size; index++) {
+            Object item = itemGetter.apply(index);
+
+            boolean prefixMatch = false;
+            if (index < prefixItems.length) {
+                ValidateResult result = prefixItems[index].validate(item);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+                prefixMatch = true;
+            } else if (isCollection && itemSchema == null && additionalItem != null) { // 只有 Collection 才会执行这部分校验
+                ValidateResult result = additionalItem.validate(item);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (!prefixMatch && itemSchema != null) {
+                ValidateResult result = itemSchema.validate(item);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
+                ValidateResult result = this.contains.validate(item);
+                if (result == SUCCESS) {
+                    containsCount++;
+                }
+            }
+
+            if (uniqueItems) {
+                if (uniqueItemsSet == null) {
+                    uniqueItemsSet = new HashSet<>(size, 1F);
+                }
+
+                if (item instanceof BigDecimal) {
+                    item = ((BigDecimal) item).stripTrailingZeros();
+                }
+
+                if (!uniqueItemsSet.add(item)) {
+                    return UNIQUE_ITEMS_NOT_MATCH;
+                }
+            }
+        }
+
+        if (!isCollection || this.contains != null) {
+            if (minContains >= 0 && containsCount < minContains) {
+                return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
+            }
+
+            if (isCollection) { // Collection 和 数组 的部分校验规则不一样
+                if (containsCount == 0 && minContains != 0) {
+                    return CONTAINS_NOT_MATCH;
+                }
+            } else if (this.contains != null && containsCount == 0) {
+                return CONTAINS_NOT_MATCH;
+            }
+
+            if (maxContains >= 0 && containsCount > maxContains) {
+                return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
+            }
+        }
+
+        if (allOf != null) {
+            ValidateResult result = allOf.validate(value);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+
+        if (anyOf != null) {
+            ValidateResult result = anyOf.validate(value);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+
+        if (oneOf != null) {
+            ValidateResult result = oneOf.validate(value);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+
+        return SUCCESS;
+    }
+
+    @Override
     public JSONObject toJSONObject() {
         JSONObject object = new JSONObject();
         object.put("type", "array");
@@ -499,6 +327,7 @@ public final class ArraySchema
         return object;
     }
 
+    @Override
     public void accept(Predicate<JSONSchema> v) {
         if (v.test(this)) {
             if (itemSchema != null) {
