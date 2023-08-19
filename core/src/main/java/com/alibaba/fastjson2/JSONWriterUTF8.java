@@ -18,6 +18,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
+import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
 
 class JSONWriterUTF8
         extends JSONWriter {
@@ -2493,8 +2494,7 @@ class JSONWriterUTF8
 
         String str = value.toString(10);
 
-        if (((context.features | features) & Feature.BrowserCompatible.mask) != 0
-                && (value.compareTo(LOW_BIGINT) < 0 || value.compareTo(HIGH_BIGINT) > 0)) {
+        if (((context.features | features) & Feature.BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value)) {
             writeString(str);
             return;
         }
@@ -2602,9 +2602,7 @@ class JSONWriterUTF8
         int precision = value.precision();
         boolean nonStringAsString = (features & WriteNonStringValueAsString.mask) != 0;
         boolean writeAsString = nonStringAsString
-                || ((features & BrowserCompatible.mask) != 0
-                && precision >= 16
-                && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0));
+                || ((features & BrowserCompatible.mask) != 0 && precision >= 16 && !TypeUtils.isJavaScriptSupport(value));
 
         int off = this.off;
         int minCapacity = off + precision + 7;

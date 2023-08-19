@@ -66,6 +66,12 @@ public class TypeUtils {
     public static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     public static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
+    static final BigDecimal DECIMAL_JAVASCRIPT_LOW = BigDecimal.valueOf(-9007199254740991L);
+    static final BigDecimal DECIMAL_JAVASCRIPT_HIGH = BigDecimal.valueOf(9007199254740991L);
+
+    static final BigInteger BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(-9007199254740991L);
+    static final BigInteger BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(9007199254740991L);
+
     /**
      * All the positive powers of 10 that can be
      * represented exactly in double/float.
@@ -4270,5 +4276,15 @@ public class TypeUtils {
         int mask = (1 << eq) - 1;
         int j = i >> eq | (Integer.signum(i & mask)) | sb;
         return signNum * Math.scalb((float) j, Q_MIN_F - 2);
+    }
+
+    public static boolean isJavaScriptSupport(BigDecimal i) {
+        return i.compareTo(DECIMAL_JAVASCRIPT_LOW) >= 0
+                && i.compareTo(DECIMAL_JAVASCRIPT_HIGH) <= 0;
+    }
+
+    public static boolean isJavaScriptSupport(BigInteger i) {
+        return i.compareTo(BIGINT_JAVASCRIPT_LOW) >= 0
+                && i.compareTo(BIGINT_JAVASCRIPT_HIGH) <= 0;
     }
 }

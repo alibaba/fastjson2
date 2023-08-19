@@ -10,6 +10,8 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 
+import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_HIGH;
+import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_LOW;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TypeUtilsTest {
@@ -802,6 +804,36 @@ public class TypeUtilsTest {
         };
         for (BigInteger integer : integers) {
             assertFalse(TypeUtils.isInt32(integer));
+        }
+    }
+
+    @Test
+    public void isJavaScriptSupport() {
+        BigInteger[] integers = new BigInteger[] {
+                BIGINT_JAVASCRIPT_LOW,
+                BIGINT_JAVASCRIPT_LOW.add(BigInteger.ONE),
+                BIGINT_JAVASCRIPT_HIGH,
+                BIGINT_JAVASCRIPT_HIGH.subtract(BigInteger.ONE)
+        };
+
+        for (BigInteger integer : integers) {
+            assertTrue(TypeUtils.isJavaScriptSupport(integer));
+        }
+
+        for (BigInteger integer : integers) {
+            assertTrue(TypeUtils.isJavaScriptSupport(new BigDecimal(integer)));
+        }
+    }
+
+    @Test
+    public void isJavaScriptSupport_false() {
+        BigInteger[] integers = new BigInteger[] {
+                BIGINT_JAVASCRIPT_LOW.subtract(BigInteger.ONE),
+                BIGINT_JAVASCRIPT_HIGH.add(BigInteger.ONE)
+        };
+
+        for (BigInteger integer : integers) {
+            assertFalse(TypeUtils.isJavaScriptSupport(integer));
         }
     }
 }
