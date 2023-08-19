@@ -268,8 +268,7 @@ public abstract class JSONSchema {
                     && Map.class.isAssignableFrom((Class) rawType)
             ) {
                 JSONObject object = JSONObject.of("type", "object");
-                ObjectSchema schema = new ObjectSchema(object, root);
-                return schema;
+                return new ObjectSchema(object, root);
             }
         }
 

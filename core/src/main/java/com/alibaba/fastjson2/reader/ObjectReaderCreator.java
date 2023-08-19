@@ -475,7 +475,7 @@ public class ObjectReaderCreator {
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
-        Class declaringClass = null;
+        Class declaringClass;
         Parameter[] parameters;
         String[] paramNames;
         if (beanInfo.creatorConstructor != null) {

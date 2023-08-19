@@ -489,7 +489,7 @@ public class ObjectReaderProvider
             }
         }
 
-        Long hashCodeObj = new Long(hashCode);
+        Long hashCodeObj = hashCode;
         ObjectReader objectReader = null;
         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         if (tcl != null && tcl != FASTJSON2_CLASS_LOADER) {

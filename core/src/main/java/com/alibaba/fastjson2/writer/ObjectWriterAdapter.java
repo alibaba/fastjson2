@@ -601,7 +601,7 @@ public class ObjectWriterAdapter<T>
     public JSONObject toJSONObject(T object) {
         JSONObject jsonObject = new JSONObject();
 
-        for (int i = 0; i < fieldWriters.size(); i++) {
+        for (int i = 0, size = fieldWriters.size(); i < size; i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             Object fieldValue = fieldWriter.getFieldValue(object);
             String format = fieldWriter.format;
@@ -613,8 +613,6 @@ public class ObjectWriterAdapter<T>
                     fieldValue = DateUtils.format((LocalDate) fieldValue, format);
                 } else if (fieldClass == LocalDateTime.class) {
                     fieldValue = DateUtils.format((LocalDateTime) fieldValue, format);
-                } else if (fieldClass == LocalDate.class) {
-                    fieldValue = DateUtils.format((LocalDate) fieldValue, format);
                 }
             }
 
@@ -630,7 +628,7 @@ public class ObjectWriterAdapter<T>
                     fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldClass);
                 }
                 List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
-                for (int j = 0; j < unwrappedFieldWriters.size(); j++) {
+                for (int j = 0, unwrappedSize = unwrappedFieldWriters.size(); j < unwrappedSize; j++) {
                     FieldWriter unwrappedFieldWriter = unwrappedFieldWriters.get(j);
                     Object unwrappedFieldValue = unwrappedFieldWriter.getFieldValue(fieldValue);
                     jsonObject.put(unwrappedFieldWriter.fieldName, unwrappedFieldValue);

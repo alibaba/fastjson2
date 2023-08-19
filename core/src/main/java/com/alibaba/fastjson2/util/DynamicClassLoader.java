@@ -185,7 +185,7 @@ public class DynamicClassLoader
             return clazz;
         }
 
-        ClassNotFoundException error = null;
+        ClassNotFoundException error;
         try {
             return super.loadClass(name, resolve);
         } catch (ClassNotFoundException e) {

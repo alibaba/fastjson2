@@ -1097,7 +1097,7 @@ final class JSONWriterJSONB
                 continue;
             }
 
-            long val = item.longValue();
+            long val = item;
             if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
                 bytes[off++] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
                 continue;
@@ -1383,7 +1383,7 @@ final class JSONWriterJSONB
             }
             size = 1;
         } else {
-            int val = i.intValue();
+            int val = i;
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 bytes[off] = (byte) val;
                 size = 1;
