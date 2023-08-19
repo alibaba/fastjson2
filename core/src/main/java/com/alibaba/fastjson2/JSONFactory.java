@@ -11,8 +11,6 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.ZoneId;
@@ -88,11 +86,6 @@ public final class JSONFactory {
             this.value1 = value1;
         }
     }
-
-    static final BigDecimal LOW = BigDecimal.valueOf(-9007199254740991L);
-    static final BigDecimal HIGH = BigDecimal.valueOf(9007199254740991L);
-    static final BigInteger LOW_BIGINT = BigInteger.valueOf(-9007199254740991L);
-    static final BigInteger HIGH_BIGINT = BigInteger.valueOf(9007199254740991L);
 
     static final char[] CA = new char[]{
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
