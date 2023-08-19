@@ -892,7 +892,6 @@ public class JSONArray
      * @return JSON {@link String}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
             writer.setRootObject(this);
@@ -950,7 +949,6 @@ public class JSONArray
      * @param features features to be enabled in serialization
      * @return JSONB bytes
      */
-    @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
             writer.setRootObject(this);
