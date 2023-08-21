@@ -1134,7 +1134,7 @@ abstract class JSONPathSegment {
             List values = new JSONArray();
 
             Consumer action;
-            if (nameHashCode == HASH_STAR || nameHashCode == HASH_EMPTY) {
+            if (shouldRecursive()) {
                 action = new MapRecursive(context, values, 0);
             } else {
                 action = new MapLoop(context, values);
@@ -1171,6 +1171,10 @@ abstract class JSONPathSegment {
 
             LoopCallback action = new LoopCallback(context, callback);
             action.accept(object);
+        }
+
+        protected boolean shouldRecursive() {
+            return nameHashCode == HASH_STAR || nameHashCode == HASH_EMPTY;
         }
 
         class MapLoop
@@ -1234,7 +1238,7 @@ abstract class JSONPathSegment {
             }
         }
 
-        static final class MapRecursive
+        class MapRecursive
                 implements Consumer {
             static final int maxLevel = 2048;
             final JSONPath.Context context;
@@ -1249,16 +1253,28 @@ abstract class JSONPathSegment {
 
             @Override
             public void accept(Object value) {
+                recursive(value, values, level);
+            }
+
+            private void recursive(Object value, List values, int level) {
                 if (level >= maxLevel) {
                     throw new JSONException("level too large");
                 } else {
                     if (value instanceof Map) {
                         Collection collection = ((Map) value).values();
-                        values.addAll(collection);
+                        if (nameHashCode == HASH_STAR) {
+                            values.addAll(collection);
+                        } else if (nameHashCode == HASH_EMPTY) {
+                            values.add(value);
+                        }
                         collection.forEach(this);
                     } else if (value instanceof Collection) {
                         Collection collection = (Collection) value;
-                        values.addAll(collection);
+                        if (nameHashCode == HASH_STAR) {
+                            values.addAll(collection);
+                        } else if (nameHashCode == HASH_EMPTY) {
+                            values.add(value);
+                        }
                         collection.forEach(this);
                     } else if (value != null) {
                         ObjectWriter<?> objectWriter = context.path
@@ -1270,7 +1286,7 @@ abstract class JSONPathSegment {
                             Object temp = fieldWriters == null || fieldWriters.isEmpty()
                                     ? new ArrayList<>() // JDK 8+ 只要不 add()，不会初始化内部数组
                                     : fieldWriters.stream().filter(Objects::nonNull).map(v -> v.getFieldValue(value)).collect(Collectors.toList());
-                            accept(temp);
+                            recursive(temp, values, level + 1);
                         }
                     }
                 }

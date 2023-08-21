@@ -18,6 +18,8 @@ class JSONPathSingle
             extractSupport = false;
         } else if (segment instanceof JSONPathSegmentIndex && ((JSONPathSegmentIndex) segment).index < 0) {
             extractSupport = false;
+        } else if (segment instanceof JSONPathSegment.CycleNameSegment && ((JSONPathSegment.CycleNameSegment) segment).shouldRecursive()) {
+            extractSupport = false;
         }
         this.extractSupport = extractSupport;
     }

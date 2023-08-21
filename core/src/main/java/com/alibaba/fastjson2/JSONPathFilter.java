@@ -489,6 +489,8 @@ abstract class JSONPathFilter
 
         final Function function;
 
+        boolean includeArray = true;
+
         public NameFilter(String fieldName, long fieldNameNameHash) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
@@ -578,7 +580,7 @@ abstract class JSONPathFilter
                 JSONPath.Sequence sequence = (JSONPath.Sequence) object;
                 JSONArray array = new JSONArray();
                 for (Object value : sequence.values) {
-                    if (value instanceof Collection) {
+                    if (includeArray && value instanceof Collection) {
                         for (Object valueItem : ((Collection<?>) value)) {
                             if (apply(context, valueItem)) {
                                 array.add(valueItem);
@@ -700,6 +702,10 @@ abstract class JSONPathFilter
             }
 
             return false;
+        }
+
+        protected void excludeArray() {
+            this.includeArray = false;
         }
     }
 
