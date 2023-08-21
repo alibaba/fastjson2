@@ -32,6 +32,11 @@ class JSONPathTwoSegment
             extractSupport = false;
         }
         this.extractSupport = extractSupport;
+
+        if (first instanceof JSONPathSegment.CycleNameSegment && ((JSONPathSegment.CycleNameSegment) first).shouldRecursive()
+                && second instanceof JSONPathFilter.NameFilter) {
+            ((JSONPathFilter.NameFilter) second).excludeArray();
+        }
     }
 
     @Override
