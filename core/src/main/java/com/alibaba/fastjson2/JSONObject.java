@@ -47,7 +47,9 @@ public class JSONObject
     public JSONObject() {
         super();
     }
-
+    public JSONObject(boolean ordered){
+        super();
+    }
     /**
      * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
      * @throws IllegalArgumentException If the initial capacity is negative
@@ -56,6 +58,10 @@ public class JSONObject
         super(initialCapacity);
     }
 
+    public JSONObject(int initialCapacity, boolean ordered){
+         super(initialCapacity);
+    }
+            
     /**
      * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
      * @param loadFactor the load factor
