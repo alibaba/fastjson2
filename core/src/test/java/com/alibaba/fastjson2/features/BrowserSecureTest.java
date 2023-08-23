@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSONWriter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

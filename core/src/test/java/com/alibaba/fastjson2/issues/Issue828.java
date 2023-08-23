@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Rongzhen Yan
