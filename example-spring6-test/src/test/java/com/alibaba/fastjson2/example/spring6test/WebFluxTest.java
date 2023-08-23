@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.example.spring6test.api.TestApi;
 import com.alibaba.fastjson2.example.spring6test.codec.Fastjson2Codec;
 import com.alibaba.fastjson2.example.spring6test.entity.WebFluxMockBean;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;

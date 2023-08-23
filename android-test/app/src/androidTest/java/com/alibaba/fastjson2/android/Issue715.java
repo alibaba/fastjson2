@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class Issue715 {
     @Test
