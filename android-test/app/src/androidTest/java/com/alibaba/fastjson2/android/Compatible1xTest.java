@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.alibaba.fastjson.JSON;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class Compatible1xTest {
     @Test

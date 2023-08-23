@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -376,14 +373,18 @@ final class ObjectWriterImplList
     }
 
     private List getList(Object object) {
-        if (!(object instanceof List) && object instanceof Iterable) {
+        if (object instanceof List) {
+            return (List) object;
+        } else if (object instanceof Iterable) {
             final Iterable items = (Iterable) object;
             List list = items instanceof Collection ? new ArrayList(((Collection<?>) items).size()) : new ArrayList();
-            for (Object o : items) {
-                list.add(o);
+            Iterator iterator = items.iterator();
+            while (iterator.hasNext()) {
+                list.add(iterator.next());
             }
             return list;
+        } else {
+            throw new JSONException("Can not cast '" + object.getClass() + "' to List");
         }
-        return (List) object;
     }
 }
