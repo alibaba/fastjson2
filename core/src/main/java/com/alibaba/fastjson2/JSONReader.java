@@ -2339,7 +2339,18 @@ public abstract class JSONReader
                 default:
                     throw new JSONException(info("illegal input " + ch));
             }
-            object.put(name, val);
+            Object origin = object.put(name, val);
+            if (origin != null) {
+                if ((context.getFeatures() & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(val);
+                        object.put(name, origin);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, val);
+                        object.put(name, array);
+                    }
+                }
+            }
         }
 
         if (comma = (ch == ',')) {
