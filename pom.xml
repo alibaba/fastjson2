@@ -39,7 +39,7 @@
         <springframework6.version>6.0.10</springframework6.version>
         <springboot2.version>2.7.13</springboot2.version>
         <springboot3.version>3.1.1</springboot3.version>
-        <arrow.version>12.0.1</arrow.version>
+        <arrow.version>13.0.0</arrow.version>
 
         <!-- Requires kotlin minor version less than the latest version -->
         <kotlin.version>1.6.21</kotlin.version>
