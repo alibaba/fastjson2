@@ -10,10 +10,8 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class FieldReaderInt64ValueField<T>
         extends FieldReaderObjectField<T> {
-    final long fieldOffset;
     FieldReaderInt64ValueField(String fieldName, Class fieldType, int ordinal, long features, String format, Long defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
-        fieldOffset = UNSAFE.objectFieldOffset(field);
     }
 
     @Override

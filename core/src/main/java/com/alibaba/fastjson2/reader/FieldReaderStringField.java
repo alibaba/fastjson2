@@ -10,12 +10,10 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 class FieldReaderStringField<T>
         extends FieldReaderObjectField<T> {
     final boolean trim;
-    final long fieldOffset;
 
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
-        fieldOffset = UNSAFE.objectFieldOffset(field);
     }
 
     @Override

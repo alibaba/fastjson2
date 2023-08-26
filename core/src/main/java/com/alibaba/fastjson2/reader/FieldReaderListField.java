@@ -11,8 +11,6 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class FieldReaderListField<T>
         extends FieldReaderList<T, Object> {
-    final long fieldOffset;
-
     FieldReaderListField(
             String fieldName,
             Type fieldType,
@@ -42,7 +40,6 @@ final class FieldReaderListField<T>
                 field,
                 null
         );
-        fieldOffset = UNSAFE.objectFieldOffset(field);
     }
 
     @Override
