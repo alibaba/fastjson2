@@ -236,7 +236,7 @@ public class ObjectReaderCreatorASM
             }
         }
 
-        if (fieldBased && objectClass.isInterface()) {
+        if (fieldBased && (objectClass.isInterface() || BeanUtils.isRecord(objectClass))) {
             fieldBased = false;
         }
 
