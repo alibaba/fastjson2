@@ -58,7 +58,7 @@ public class CodeGenUtils {
         readDirectMap.put("com.alibaba.fastjson2.JSONArray", "readJSONArray");
     }
 
-    public static Class getSupperClass(int fieldReaders) {
+    public static Class getSuperClass(int fieldReaders) {
         Class objectReaderSuper;
         switch (fieldReaders) {
             case 1:
