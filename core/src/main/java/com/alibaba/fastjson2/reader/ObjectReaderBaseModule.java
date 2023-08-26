@@ -1669,6 +1669,10 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplOffsetTime.INSTANCE;
         }
 
+        if (type == ZoneOffset.class) {
+            return new ObjectReaderImplFromString<>(ZoneOffset.class, ZoneOffset::of);
+        }
+
         if (type == Instant.class) {
             return ObjectReaderImplInstant.INSTANCE;
         }
