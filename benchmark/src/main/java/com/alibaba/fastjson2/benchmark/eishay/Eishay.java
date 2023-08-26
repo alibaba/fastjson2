@@ -12,6 +12,8 @@ public class Eishay {
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(Eishay.class.getName())
+                .include(EishayFuryCompatibleParse.class.getName())
+                .include(EishayFuryCompatibleWrite.class.getName())
                 .exclude(EishayParseStringNoneCache.class.getName())
                 .exclude(EishayWriteStringNoneCache.class.getName())
                 .exclude(EishayWriteStringTree1x.class.getName())
