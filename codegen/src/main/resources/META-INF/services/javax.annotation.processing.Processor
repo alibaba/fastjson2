@@ -1,1 +1,3 @@
+com.alibaba.fastjson2.internal.processor.JSONBaseAnnotationProcessor
 com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor
+com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor2

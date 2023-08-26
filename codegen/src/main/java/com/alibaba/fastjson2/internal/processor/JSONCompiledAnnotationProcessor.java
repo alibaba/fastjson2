@@ -116,7 +116,7 @@ public class JSONCompiledAnnotationProcessor
 
         List<AttributeInfo> fields = si.getReaderAttributes();
 
-        Class supperClass = CodeGenUtils.getSupperClass(fields.size());
+        Class supperClass = CodeGenUtils.getSuperClass(fields.size());
         ClassWriter cw = new ClassWriter(packageName, generateClassName, supperClass, new Class[0]);
 
         final boolean generatedFields = fields.size() < 128;
@@ -650,7 +650,7 @@ public class JSONCompiledAnnotationProcessor
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        nextIfMatch = invoke(jsonReader, "nextIfName4Match28", ldc(name1), ldc(name2), ldc(name3));
+                        nextIfMatch = invoke(jsonReader, "nextIfName4Match28", ldc(name1), ldc(name2), ldc(name3), ldc(fieldName[27]));
                         break;
                     }
                     case 29: {
