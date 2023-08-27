@@ -37,7 +37,7 @@ public final class Image_FASTJOSNReader
         while (!jsonReader.nextIfObjectEnd()) {
             switch (jsonReader.getRawInt()) {
                 // '"' | ('w' << 8) | ('i' << 16) | ('d' << 24) == 1684633378
-                // 'd' | ('h' << 8) | ('"' << 16) | (':' << 24) == 975333492
+                // 't' | ('h' << 8) | ('"' << 16) | (':' << 24) == 975333492
                 case 1684633378: // "wid
                     if (jsonReader.nextIfName4Match5(975333492)) { // th":
                         object.setWidth(
