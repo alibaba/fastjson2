@@ -98,7 +98,6 @@ class JSONReaderUTF8 implements JSONReader {
         return true;
     }
 
-    @Override
     public final boolean nextIfName4Match4(byte c4) {
         offset += 6;
         if (bytes[offset - 3] != c4 || bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
