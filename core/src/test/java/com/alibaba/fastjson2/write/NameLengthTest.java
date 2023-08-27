@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.write;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -219,7 +220,14 @@ public class NameLengthTest {
         String str = jsonObject.toJSONString();
         {
             Bean9 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean9.class);
-            assertEquals(str, JSON.toJSONString(bean1));
+            assertEquals(str, new String(JSON.toJSONBytes(bean1)));
+        }
+        {
+            Bean9 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean9.class);
+            assertEquals(
+                    jsonObject.toJSONString(JSONWriter.Feature.PrettyFormat),
+                    new String(JSON.toJSONBytes(bean1, JSONWriter.Feature.PrettyFormat))
+            );
         }
         {
             Bean9 bean1 = JSON.parseObject(str.toCharArray(), Bean9.class);
@@ -261,7 +269,14 @@ public class NameLengthTest {
         String str = jsonObject.toJSONString();
         {
             Bean10 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean10.class);
-            assertEquals(str, JSON.toJSONString(bean1));
+            assertEquals(str, new String(JSON.toJSONBytes(bean1)));
+        }
+        {
+            Bean10 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean10.class);
+            assertEquals(
+                    jsonObject.toJSONString(JSONWriter.Feature.PrettyFormat),
+                    new String(JSON.toJSONBytes(bean1, JSONWriter.Feature.PrettyFormat))
+            );
         }
         {
             Bean10 bean1 = JSON.parseObject(str.toCharArray(), Bean10.class);
@@ -295,7 +310,14 @@ public class NameLengthTest {
         String str = jsonObject.toJSONString();
         {
             Bean11 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean11.class);
-            assertEquals(str, JSON.toJSONString(bean1));
+            assertEquals(str, new String(JSON.toJSONBytes(bean1)));
+        }
+        {
+            Bean11 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean11.class);
+            assertEquals(
+                    jsonObject.toJSONString(JSONWriter.Feature.PrettyFormat),
+                    new String(JSON.toJSONBytes(bean1, JSONWriter.Feature.PrettyFormat))
+            );
         }
         {
             Bean11 bean1 = JSON.parseObject(str.toCharArray(), Bean11.class);

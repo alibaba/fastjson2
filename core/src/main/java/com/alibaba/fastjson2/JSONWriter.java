@@ -767,6 +767,10 @@ public abstract class JSONWriter
 
     public abstract void writeNameRaw(byte[] bytes);
 
+    public void writeName2Raw(long name) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
     public void writeName3Raw(long name) {
         throw new JSONException("UnsupportedOperation");
     }
@@ -792,6 +796,30 @@ public abstract class JSONWriter
     }
 
     public void writeName9Raw(long name0, int name1) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName10Raw(long name0, long name1) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName11Raw(long name0, long name2) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName12Raw(long name0, long name2) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName13Raw(long name0, long name2) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName14Raw(long name0, long name2) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName15Raw(long name0, long name2) {
         throw new JSONException("UnsupportedOperation");
     }
 

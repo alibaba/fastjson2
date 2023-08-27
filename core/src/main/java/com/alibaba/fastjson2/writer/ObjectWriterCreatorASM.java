@@ -2853,14 +2853,21 @@ public class ObjectWriterCreatorASM
         if (!mwc.jsonb) {
             byte[] fieldNameUTF8 = fieldWriter.fieldName.getBytes(StandardCharsets.UTF_8);
             int length = fieldNameUTF8.length;
-            if (length >= 3 && length <= 9) {
+            if (length >= 2 && length <= 15) {
                 writeDirect = true;
 
-                int name1 = 0;
+                Number name1 = 0;
                 String methodName;
                 String methodDesc = "(J)V";
                 byte[] bytes = new byte[8];
                 switch (length) {
+                    case 2:
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 2);
+                        bytes[3] = '"';
+                        bytes[4] = ':';
+                        methodName = "writeName2Raw";
+                        break;
                     case 3:
                         bytes[0] = '"';
                         System.arraycopy(fieldNameUTF8, 0, bytes, 1, 3);
@@ -2898,7 +2905,7 @@ public class ObjectWriterCreatorASM
                         methodName = "writeName8Raw";
                         break;
                     }
-                    case 9:
+                    case 9: {
                         bytes[0] = '"';
                         System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
                         methodDesc = "(JI)V";
@@ -2910,6 +2917,94 @@ public class ObjectWriterCreatorASM
                         name1 = UNSAFE.getInt(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
                         methodName = "writeName9Raw";
                         break;
+                    }
+                    case 10: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        methodDesc = "(JJ)V";
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = '"';
+                        name1Bytes[4] = ':';
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        methodName = "writeName10Raw";
+                        break;
+                    }
+                    case 11: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        methodDesc = "(JJ)V";
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = '"';
+                        name1Bytes[5] = ':';
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        methodName = "writeName11Raw";
+                        break;
+                    }
+                    case 12: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        methodDesc = "(JJ)V";
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = fieldNameUTF8[11];
+                        name1Bytes[5] = '"';
+                        name1Bytes[6] = ':';
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        methodName = "writeName12Raw";
+                        break;
+                    }
+                    case 13: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        methodDesc = "(JJ)V";
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = fieldNameUTF8[11];
+                        name1Bytes[5] = fieldNameUTF8[12];
+                        name1Bytes[6] = '"';
+                        name1Bytes[7] = ':';
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        methodName = "writeName13Raw";
+                        break;
+                    }
+                    case 14: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        methodDesc = "(JJ)V";
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = fieldNameUTF8[11];
+                        name1Bytes[5] = fieldNameUTF8[12];
+                        name1Bytes[6] = fieldNameUTF8[13];
+                        name1Bytes[7] = '"';
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        methodName = "writeName14Raw";
+                        break;
+                    }
+                    case 15: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        methodDesc = "(JJ)V";
+                        name1 = UNSAFE.getLong(fieldNameUTF8, ARRAY_BYTE_BASE_OFFSET + 7);
+                        methodName = "writeName15Raw";
+                        break;
+                    }
                     default:
                         throw new IllegalStateException("length : " + length);
                 }
@@ -2921,7 +3016,9 @@ public class ObjectWriterCreatorASM
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
                 mw.visitLdcInsn(nameIn64);
                 if (methodDesc.equals("(JI)V")) {
-                    mw.visitLdcInsn(name1);
+                    mw.visitLdcInsn(name1.intValue());
+                } else if (methodDesc.equals("(JJ)V")) {
+                    mw.visitLdcInsn(name1.longValue());
                 }
                 mw.visitMethodInsn(
                         Opcodes.INVOKEVIRTUAL,
