@@ -1994,6 +1994,8 @@ public abstract class JSONReader
             map = object;
         }
 
+        long contextFeatures = features | context.getFeatures();
+
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipLineComment();
@@ -2010,9 +2012,12 @@ public abstract class JSONReader
             String name = readFieldName();
             Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
 
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin = map.put(name, value);
             if (origin != null) {
-                long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
@@ -2195,6 +2200,8 @@ public abstract class JSONReader
         ObjectReader keyReader = context.getObjectReader(keyType);
         ObjectReader valueReader = context.getObjectReader(valueType);
 
+        long contextFeatures = features | context.getFeatures();
+
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipLineComment();
@@ -2218,9 +2225,13 @@ public abstract class JSONReader
             }
 
             Object value = valueReader.readObject(this, null, null, 0L);
+
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
-                long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
@@ -2344,9 +2355,14 @@ public abstract class JSONReader
                 default:
                     throw new JSONException(info("illegal input " + ch));
             }
+
+            if (val == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin = object.put(name, val);
             if (origin != null) {
-                if ((context.getFeatures() & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                if ((context.features & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(val);
                         object.put(name, origin);

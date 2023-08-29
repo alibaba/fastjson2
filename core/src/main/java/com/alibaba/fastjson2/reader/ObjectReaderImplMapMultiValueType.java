@@ -142,6 +142,10 @@ public class ObjectReaderImplMapMultiValueType
                 value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
             }
 
+            if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, value);
