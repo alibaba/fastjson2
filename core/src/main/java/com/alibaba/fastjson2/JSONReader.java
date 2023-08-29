@@ -1641,6 +1641,8 @@ public abstract class JSONReader
             }
         }
 
+        long contextFeatures = features | context.features;
+
         for_:
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -1753,9 +1755,12 @@ public abstract class JSONReader
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
             }
 
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
-                long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
@@ -3765,7 +3770,12 @@ public abstract class JSONReader
         /**
          * @since 2.0.24
          */
-        NonZeroNumberCastToBooleanAsTrue(1 << 24);
+        NonZeroNumberCastToBooleanAsTrue(1 << 24),
+
+        /**
+         * @since 2.0.40
+         */
+        IgnoreNullPropertyValue(1 << 25);
 
         public final long mask;
 
