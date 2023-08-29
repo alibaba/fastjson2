@@ -6354,7 +6354,7 @@ class JSONReaderUTF16
 
     @Override
     public final void close() {
-        if (cacheIndex != -1) {
+        if (cacheIndex != -1 && chars.length < CACHE_THRESHOLD) {
             final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
             CHARS_UPDATER.lazySet(cacheItem, chars);
         }
