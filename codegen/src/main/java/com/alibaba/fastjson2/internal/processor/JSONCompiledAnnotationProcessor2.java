@@ -53,12 +53,13 @@ public class JSONCompiledAnnotationProcessor2
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        this.messager = processingEnv.getMessager();
-        this.javacTrees = JavacTrees.instance(processingEnv);
-        Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
+        ProcessingEnvironment unwrappedProcessingEnv = unwrapProcessingEnv(processingEnv);
+        super.init(unwrappedProcessingEnv);
+        this.messager = unwrappedProcessingEnv.getMessager();
+        this.javacTrees = JavacTrees.instance(unwrappedProcessingEnv);
+        Context context = ((JavacProcessingEnvironment) unwrappedProcessingEnv).getContext();
         this.names = Names.instance(context);
-        initialize(TreeMaker.instance(context), names, processingEnv.getElementUtils());
+        initialize(TreeMaker.instance(context), names, unwrappedProcessingEnv.getElementUtils());
     }
 
     @Override
@@ -89,11 +90,8 @@ public class JSONCompiledAnnotationProcessor2
                         // initialization
                         String innerClassFQN = findConverterName(structInfo);
                         int dotIdx = innerClassFQN.lastIndexOf('.');
-                        if (dotIdx == -1) {
-                            messager.printMessage(Diagnostic.Kind.ERROR, String.format("not qualified inner class name for %s", beanFQN));
-                        }
                         String innerClassName = innerClassFQN.substring(dotIdx + 1);
-                        JCTree.JCExpression beanType = qualIdent(beanFQN);
+                        JCTree.JCExpression beanType = dotIdx == -1 ? ident(beanFQN) : qualIdent(beanFQN);
                         JCTree.JCNewClass beanNew = newClass(null, null, beanType, null, null);
                         JCTree.JCIdent objectType = ident("Object");
 
@@ -113,7 +111,7 @@ public class JSONCompiledAnnotationProcessor2
                         innerClass.defs = innerClass.defs.append(genCreateInstance(objectType, beanNew));
 
                         // generate readObject
-                        innerClass.defs = innerClass.defs.append(genReadObject(objectType, beanFQN, beanNew, attributeInfos, structInfo, false));
+                        innerClass.defs = innerClass.defs.append(genReadObject(objectType, beanType, beanNew, attributeInfos, structInfo, false));
 
                         // link with inner class
                         beanClassDecl.defs = beanClassDecl.defs.append(innerClass);
@@ -212,7 +210,7 @@ public class JSONCompiledAnnotationProcessor2
         return defMethod(Flags.PUBLIC, "createInstance", objectType, null, List.of(featuresVar), null, block(defReturn(beanNew)), null);
     }
 
-    private JCTree.JCMethodDecl genReadObject(JCTree.JCIdent objectType, String classNamePath, JCTree.JCNewClass beanNew, java.util.List<AttributeInfo> attributeInfos, StructInfo structInfo, boolean isJsonb) {
+    private JCTree.JCMethodDecl genReadObject(JCTree.JCIdent objectType, JCTree.JCExpression beanType, JCTree.JCNewClass beanNew, java.util.List<AttributeInfo> attributeInfos, StructInfo structInfo, boolean isJsonb) {
         int fieldNameLengthMin = 0, fieldNameLengthMax = 0;
         for (int i = 0; i < attributeInfos.size(); ++i) {
             String fieldName = attributeInfos.get(i).name;
@@ -245,7 +243,7 @@ public class JSONCompiledAnnotationProcessor2
         JCTree.JCVariableDecl features2Var = defVar(Flags.PARAMETER, "features2", type(TypeTag.LONG), binary(JCTree.Tag.BITOR, ident("features"), field(ident(names._this), "features")));
         readObjectBody.append(features2Var);
 
-        JCTree.JCVariableDecl objectVar = defVar(Flags.PARAMETER, "object", qualIdent(classNamePath), beanNew);
+        JCTree.JCVariableDecl objectVar = defVar(Flags.PARAMETER, "object", beanType, beanNew);
         JCTree.JCIdent objectIdent = ident(objectVar.name);
         readObjectBody.append(objectVar);
 
@@ -995,9 +993,11 @@ public class JSONCompiledAnnotationProcessor2
             JavaFileObject converterFile = processingEnv.getFiler().createSourceFile(fullQualifiedName, structInfo.element);
             try (Writer writer = converterFile.openWriter()) {
                 int idx = fullQualifiedName.lastIndexOf(".");
-                String pkgPath = fullQualifiedName.substring(0, idx);
-                writer.write("package " + pkgPath + ";");
-                writer.write(System.lineSeparator());
+                if (idx != -1) {
+                    String pkgPath = fullQualifiedName.substring(0, idx);
+                    writer.write("package " + pkgPath + ";");
+                    writer.write(System.lineSeparator());
+                }
                 String str = innerClass.toString().replaceFirst("private static class ", "public class ");
                 writer.write(str);
             } catch (IOException e) {

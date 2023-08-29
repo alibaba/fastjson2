@@ -2,18 +2,19 @@ package com.alibaba.fastjson2.internal.processor;
 
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
+import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
-import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.ListBuffer;
-import com.sun.tools.javac.util.Name;
-import com.sun.tools.javac.util.Names;
+import com.sun.tools.javac.util.*;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 final class JavacTreeUtils {
     private static TreeMaker treeMaker;
@@ -28,6 +29,54 @@ final class JavacTreeUtils {
         treeMaker = _treeMaker;
         names = _names;
         elements = _elements;
+    }
+
+    static ProcessingEnvironment unwrapProcessingEnv(ProcessingEnvironment processingEnv) {
+        if (processingEnv instanceof JavacProcessingEnvironment) {
+            return processingEnv;
+        }
+        // IntelliJ >2020.3 wraps the processing environment in a dynamic proxy.
+        ProcessingEnvironment unwrappedIntelliJ = unwrapIntelliJ(processingEnv);
+        if (unwrappedIntelliJ != null) {
+            return unwrapProcessingEnv(unwrappedIntelliJ);
+        }
+        // Gradle incremental build wraps the processing environment.
+        for (Class<?> envClass = processingEnv.getClass(); envClass != null; envClass = envClass.getSuperclass()) {
+            ProcessingEnvironment unwrappedGradle = unwrapGradle(envClass, processingEnv);
+            if (unwrappedGradle != null) {
+                return unwrapProcessingEnv(unwrappedGradle);
+            }
+        }
+        throw new IllegalArgumentException("failed to retrieve JavacProcessingEnvironment");
+    }
+
+    private static ProcessingEnvironment unwrapIntelliJ(ProcessingEnvironment processingEnv) {
+        try {
+            InvocationHandler handler = Proxy.getInvocationHandler(processingEnv);
+            Field field = handler.getClass().getDeclaredField("val$delegateTo");
+            field.setAccessible(true);
+            Object object = field.get(handler);
+            if (object instanceof ProcessingEnvironment) {
+                return (ProcessingEnvironment) object;
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            // just ignore
+        }
+        return null;
+    }
+
+    private static ProcessingEnvironment unwrapGradle(Class<?> delegateClass, ProcessingEnvironment processingEnv) {
+        try {
+            Field field = delegateClass.getDeclaredField("delegate");
+            field.setAccessible(true);
+            Object object = field.get(processingEnv);
+            if (object instanceof ProcessingEnvironment) {
+                return (ProcessingEnvironment) object;
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            // just ignore
+        }
+        return null;
     }
 
     static JCTree.JCLiteral defNull() {

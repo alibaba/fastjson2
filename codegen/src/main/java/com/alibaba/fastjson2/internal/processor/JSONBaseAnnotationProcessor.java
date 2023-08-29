@@ -7,6 +7,7 @@ import javax.lang.model.element.TypeElement;
 import java.lang.reflect.Method;
 import java.util.Set;
 
+import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.unwrapProcessingEnv;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
@@ -23,7 +24,7 @@ public class JSONBaseAnnotationProcessor
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         addOpensSinceJava9();
-        super.init(processingEnv);
+        super.init(unwrapProcessingEnv(processingEnv));
     }
 
     @Override

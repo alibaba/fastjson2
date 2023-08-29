@@ -1,0 +1,3 @@
+com.alibaba.fastjson2.internal.processor.JSONBaseAnnotationProcessor,DYNAMIC
+com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor,DYNAMIC
+com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor2,DYNAMIC
