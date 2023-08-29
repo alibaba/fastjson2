@@ -87,7 +87,7 @@ public class ASMUtils {
     static {
         paramMapping.put(
                 new MethodInfo(
-                        "com.alibaba.fastjson2.util.ParameterizedTypeImpl",
+                        ParameterizedTypeImpl.class.getName(),
                         "<init>",
                         new String[]{"[Ljava.lang.reflect.Type;", "java.lang.reflect.Type", "java.lang.reflect.Type"}
                 ),
@@ -378,7 +378,7 @@ public class ASMUtils {
         return paramNames;
     }
 
-    static class MethodInfo {
+    static final class MethodInfo {
         final String className;
         final String methodName;
         final String[] paramTypeNames;
