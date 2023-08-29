@@ -27,6 +27,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.internal.codegen.Opcodes.*;
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.fieldObjectReader;
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.fieldReader;
+import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.unwrapProcessingEnv;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
@@ -42,7 +43,7 @@ public class JSONCompiledAnnotationProcessor
         extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
+        super.init(unwrapProcessingEnv(processingEnv));
     }
 
     @Override
