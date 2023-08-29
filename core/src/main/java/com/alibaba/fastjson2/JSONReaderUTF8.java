@@ -6720,7 +6720,7 @@ class JSONReaderUTF8
 
     @Override
     public final void close() {
-        if (cacheItem != null) {
+        if (cacheItem != null && bytes.length < CACHE_THRESHOLD) {
             BYTES_UPDATER.lazySet(cacheItem, bytes);
         }
 
