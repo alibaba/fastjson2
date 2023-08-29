@@ -301,6 +301,8 @@ public final class ObjectReaderImplMap
         jsonReader.nextIfMatch(BC_OBJECT);
 
         Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
+        long contextFeatures = features | jsonReader.features(features);
+
         Map map = null;
         if (mapType == null && objectSupplier != null) {
             map = objectSupplier.get();
@@ -404,6 +406,11 @@ public final class ObjectReaderImplMap
                 } else {
                     value = jsonReader.readAny();
                 }
+
+                if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                    continue;
+                }
+
                 map.put(fieldName, value);
             }
         }

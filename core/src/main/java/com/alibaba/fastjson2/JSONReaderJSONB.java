@@ -405,6 +405,11 @@ final class JSONReaderJSONB
                 } else {
                     value = readAny();
                 }
+
+                if (value == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                    continue;
+                }
+
                 map.put(name, value);
             }
 
@@ -425,6 +430,8 @@ final class JSONReaderJSONB
             throw new JSONException("object not support input " + error(type));
         }
         offset++;
+
+        long contextFeatures = features | context.getFeatures();
 
         while (true) {
             byte type = bytes[offset];
@@ -469,6 +476,11 @@ final class JSONReaderJSONB
             } else {
                 value = readAny();
             }
+
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             map.put(name, value);
         }
     }
@@ -832,6 +844,11 @@ final class JSONReaderJSONB
                     } else {
                         value = readAny();
                     }
+
+                    if (value == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                        continue;
+                    }
+
                     map.put(name, value);
                 }
 
