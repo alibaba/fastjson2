@@ -2098,7 +2098,8 @@ class JSONReaderUTF8
 
                 if (nameValue0 != -1) {
                     if (nameValue1 != -1) {
-                        int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
+                        long nameValue01 = nameValue0 ^ nameValue1;
+                        int indexMask = ((int) (nameValue01 ^ (nameValue01 >>> 32))) & (NAME_CACHE2.length - 1);
                         NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                         if (entry == null) {
                             String name = new String(bytes, nameBegin, length, IOUtils.ISO_8859_1);
@@ -2108,7 +2109,7 @@ class JSONReaderUTF8
                             return entry.name;
                         }
                     } else {
-                        int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
+                        int indexMask = ((int) (nameValue0 ^ (nameValue0 >>> 32))) & (NAME_CACHE.length - 1);
                         NameCacheEntry entry = NAME_CACHE[indexMask];
                         if (entry == null) {
                             String name = new String(bytes, nameBegin, length, IOUtils.ISO_8859_1);
