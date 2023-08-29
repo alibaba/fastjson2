@@ -255,6 +255,11 @@ class ObjectReaderImplMapTyped
                     value = valueObjectReader.readJSONBObject(jsonReader, valueType, name, features);
                 }
             }
+
+            if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             object.put(name, value);
         }
 
@@ -368,7 +373,13 @@ class ObjectReaderImplMapTyped
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
+
             Object value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+
+            if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, value);

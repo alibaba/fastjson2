@@ -225,6 +225,8 @@ public final class ObjectReaderImplMap
         boolean emptyObject = false;
         jsonReader.nextIfMatch(BC_OBJECT);
 
+        long features2 = jsonReader.features(features);
+
         Supplier<Map> objectSupplier = jsonReader.context.getObjectSupplier();
         Map map = null;
         if (mapType == null && objectSupplier != null) {
@@ -329,6 +331,11 @@ public final class ObjectReaderImplMap
                 } else {
                     value = jsonReader.readAny();
                 }
+
+                if (value == null && (features2 & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                    continue;
+                }
+
                 map.put(fieldName, value);
             }
         }

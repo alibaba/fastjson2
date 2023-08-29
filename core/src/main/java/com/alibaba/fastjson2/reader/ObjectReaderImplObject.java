@@ -67,6 +67,7 @@ public final class ObjectReaderImplObject
         }
 
         JSONReader.Context context = jsonReader.context;
+        long contextFeatures = features | context.getFeatures();
 
         String typeName = null;
         if (jsonReader.isObject()) {
@@ -226,9 +227,12 @@ public final class ObjectReaderImplObject
                         throw new JSONException(jsonReader.info());
                 }
 
+                if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                    continue;
+                }
+
                 Object origin = object.put(name, value);
                 if (origin != null) {
-                    long contextFeatures = features | context.getFeatures();
                     if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                         if (origin instanceof Collection) {
                             ((Collection) origin).add(value);

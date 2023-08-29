@@ -60,6 +60,10 @@ final class ObjectReaderImplMapString
                 continue;
             }
 
+            if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {

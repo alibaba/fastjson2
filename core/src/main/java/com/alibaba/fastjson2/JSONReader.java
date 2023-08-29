@@ -1672,11 +1672,11 @@ public abstract class JSONReader
             if (name == null) {
                 if (isNumber()) {
                     name = readNumber();
-                    if ((context.features & Feature.NonStringKeyAsString.mask) != 0) {
+                    if ((contextFeatures & Feature.NonStringKeyAsString.mask) != 0) {
                         name = name.toString();
                     }
                 } else {
-                    if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                    if ((contextFeatures & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                         name = readFieldNameUnquote();
                     } else {
                         throw new JSONException(info("not allow unquoted fieldName"));
@@ -1785,6 +1785,8 @@ public abstract class JSONReader
         ObjectReader keyReader = context.getObjectReader(keyType);
         ObjectReader valueReader = context.getObjectReader(valueType);
 
+        long contextFeatures = features | context.getFeatures();
+
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipLineComment();
@@ -1808,9 +1810,13 @@ public abstract class JSONReader
             }
 
             Object value = valueReader.readObject(this, null, null, 0L);
+
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
-                long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
@@ -1935,6 +1941,11 @@ public abstract class JSONReader
                 default:
                     throw new JSONException(info("illegal input " + ch));
             }
+
+            if (val == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             object.put(name, val);
         }
 
@@ -3993,6 +4004,7 @@ public abstract class JSONReader
     public void read(Map map, ObjectReader itemReader, long features) {
         nextIfObjectStart();
 
+        long contextFeatures = features | context.getFeatures();
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipLineComment();
@@ -4009,9 +4021,12 @@ public abstract class JSONReader
             String name = readFieldName();
             Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
 
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             Object origin = map.put(name, value);
             if (origin != null) {
-                long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);

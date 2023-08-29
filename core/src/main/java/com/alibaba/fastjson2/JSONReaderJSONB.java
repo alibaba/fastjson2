@@ -382,6 +382,11 @@ final class JSONReaderJSONB
                 } else {
                     value = readAny();
                 }
+
+                if (value == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                    continue;
+                }
+
                 map.put(name, value);
             }
 
@@ -445,6 +450,11 @@ final class JSONReaderJSONB
             } else {
                 value = readAny();
             }
+
+            if (value == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
             map.put(name, value);
         }
     }
@@ -773,6 +783,11 @@ final class JSONReaderJSONB
                     } else {
                         value = readAny();
                     }
+
+                    if (value == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                        continue;
+                    }
+
                     map.put(name, value);
                 }
 
