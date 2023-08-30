@@ -7,6 +7,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.zip.ZipInputStream;
@@ -25,7 +26,8 @@ public class LargeFile2MTest {
         ) {
             zipIn.getNextEntry();
             str = IOUtils.toString(zipIn, "UTF-8");
-        } catch (Throwable ex) {
+            zipIn.closeEntry();
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
@@ -45,60 +47,34 @@ public class LargeFile2MTest {
         bh.consume(mapper.readValue(str, HashMap.class));
     }
 
-    //    @Test
-    public void fastjson1_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson1_perf();
-        }
-    }
-
-    //    @Test
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
-        }
-    }
-
-    public void jackson_perf_test() throws Exception {
-        for (int i = 0; i < 10; i++) {
-            jackson_perf();
-        }
-    }
-
-    public static void fastjson2_perf() {
+    public void perfTest(Runnable task) {
         long start = System.currentTimeMillis();
         for (int i = 0; i < COUNT; ++i) {
-            JSON.parseObject(str);
+            task.run();
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("fastjson2 millis : " + millis);
+        System.out.println("millis : " + millis);
         // zulu17.32.13 : 1299 1136
         // zulu11.52.13 : 1187 1145
         // zulu8.58.0.13 : 1154
     }
 
-    public static void jackson_perf() throws Exception {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < COUNT; ++i) {
-            mapper.readValue(str, HashMap.class);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("jackson millis : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 :
-        // zulu8.58.0.13 :
+    public void fastjson1_perf_test() {
+        perfTest(() -> com.alibaba.fastjson.JSON.parseObject(str));
     }
 
-    public static void fastjson1_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < COUNT; ++i) {
-            com.alibaba.fastjson.JSON.parseObject(str);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("fastjson1 millis : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 :
-        // zulu8.58.0.13 :
+    public void fastjson2_perf_test() {
+        perfTest(() -> JSON.parseObject(str));
+    }
+
+    public void jackson_perf_test() throws Exception {
+        perfTest(() -> {
+            try {
+                mapper.readValue(str, HashMap.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public static void main(String[] args) throws Exception {
