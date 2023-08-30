@@ -209,6 +209,34 @@ public class FieldWriterObject<T>
     }
 
     @Override
+    public void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
+        if (e == null) {
+            return;
+        }
+
+        writeFieldName(jsonWriter);
+
+        Class<?> valueClass = e.getClass();
+        ObjectWriter valueWriter;
+        if (initValueClass == null) {
+            initValueClass = valueClass;
+            valueWriter = jsonWriter.getObjectWriter(valueClass);
+            initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+        } else {
+            if (initValueClass == valueClass) {
+                valueWriter = initObjectWriter;
+            } else {
+                valueWriter = jsonWriter.getObjectWriter(valueClass);
+            }
+        }
+        if (valueWriter == null) {
+            throw new JSONException("get value writer error, valueType : " + valueClass);
+        }
+
+        valueWriter.writeJSONB(jsonWriter, e, fieldName, fieldType, this.features);
+    }
+
+    @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         long features = this.features | jsonWriter.getFeatures();
 
