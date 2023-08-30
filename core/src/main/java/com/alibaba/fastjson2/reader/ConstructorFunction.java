@@ -7,10 +7,7 @@ import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -201,12 +198,16 @@ final class ConstructorFunction<T>
             }
         } else {
             for (int i = 0; i < size; i++) {
-                Class<?> paramType = parameters[i].getType();
+                Parameter parameter = parameters[i];
+                Class<?> paramClass = parameter.getType();
+                Type paramType = parameter.getParameterizedType();
                 Object arg = values.get(hashCodes[i]);
                 if (arg == null) {
-                    arg = TypeUtils.getDefaultValue(paramType);
+                    arg = TypeUtils.getDefaultValue(paramClass);
                 } else {
-                    if (!paramType.isInstance(arg)) {
+                    if (!paramClass.isInstance(arg)) {
+                        arg = TypeUtils.cast(arg, paramClass);
+                    } else if (paramType instanceof ParameterizedType) {
                         arg = TypeUtils.cast(arg, paramType);
                     }
                 }
