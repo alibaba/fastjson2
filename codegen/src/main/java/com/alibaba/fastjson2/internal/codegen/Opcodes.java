@@ -402,23 +402,28 @@ public class Opcodes {
                 size.toString(mw, buf, indent);
             }
             buf.append(']');
-            if (values != null && values.length > 0) {
-                buf.append('{');
+            if (values != null) {
+                int length = values.length;
+                if (length > 0) {
+                    buf.append('{');
 
-                buf.append('\n');
-                mw.ident(buf, indent + 2);
+                    buf.append('\n');
+                    mw.ident(buf, indent + 2);
 
-                for (int i = 0; i < values.length; i++) {
-                    if (i != 0) {
-                        buf.append(",\n");
-                        mw.ident(buf, indent + 2);
+                    for (int i = 0; i < length; i++) {
+                        if (i != 0) {
+                            buf.append(",\n");
+                            mw.ident(buf, indent + 2);
+                        }
+                        values[i].toString(mw, buf, indent + 2);
                     }
-                    values[i].toString(mw, buf, indent + 2);
-                }
 
-                buf.append('\n');
-                mw.ident(buf, indent);
-                buf.append('}');
+                    buf.append('\n');
+                    mw.ident(buf, indent);
+                    buf.append('}');
+                } else if (length == 0) {
+                    buf.append("{}");
+                }
             }
         }
     }
