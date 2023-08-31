@@ -677,8 +677,8 @@ final class JSONWriterJSONB
                     break;
                 }
                 int strlen = str.length();
-                if (off + strlen + 3 > bytes.length) {
-                    ensureCapacity(off + strlen + 3);
+                if (off + strlen + 6 > bytes.length) {
+                    ensureCapacity(off + strlen + 6);
                 }
                 if (strlen <= STR_ASCII_FIX_LEN) {
                     bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
