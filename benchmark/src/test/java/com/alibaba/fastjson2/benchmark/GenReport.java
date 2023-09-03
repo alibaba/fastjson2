@@ -7,8 +7,8 @@ import java.util.*;
 public class GenReport {
     public void gen() throws Exception {
         File dir = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/");
-        File file = new File(dir, "benchmark_2.0.39_raw.md");
-        File outFile = new File(dir, "benchmark_2.0.39.md");
+        File file = new File(dir, "benchmark_2.0.40_raw.md");
+        File outFile = new File(dir, "benchmark_2.0.40.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -38,7 +38,15 @@ public class GenReport {
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         int h1 = 0;
         for (BenchmarkResult benchmarkResult : benchResults.values()) {
-            if (benchmarkResult.libraryResults.size() == 4) {
+            if (benchmarkResult.libraryResults.size() == 2) {
+                LibResult fury = benchmarkResult.libraryResults.get("fury");
+                LibResult jsonb = benchmarkResult.libraryResults.get("jsonb");
+                if (fury != null && jsonb != null) {
+                    benchmarkResult.libraryResults.clear();
+                    benchmarkResult.libraryResults.put("jsonb", jsonb);
+                    benchmarkResult.libraryResults.put("fury", fury);
+                }
+            } else if (benchmarkResult.libraryResults.size() == 4) {
                 LibResult fastjson2 = benchmarkResult.libraryResults.get("fastjson2");
                 LibResult fastjson1 = benchmarkResult.libraryResults.get("fastjson1");
                 LibResult jackson = benchmarkResult.libraryResults.get("jackson");
