@@ -1387,11 +1387,13 @@ public class ObjectReaderCreator {
             Class[] interfaces = objectClass.getInterfaces();
             for (int i = 0; i < interfaces.length; i++) {
                 Method interfaceMethod = BeanUtils.getMethod(interfaces[i], method);
-                Type[] genericParameterTypes = interfaceMethod.getGenericParameterTypes();
-                if (genericParameterTypes.length == 1
-                        && genericParameterTypes[0] instanceof ParameterizedType
-                ) {
-                    fieldType = genericParameterTypes[0];
+                if (interfaceMethod != null) {
+                    Type[] genericParameterTypes = interfaceMethod.getGenericParameterTypes();
+                    if (genericParameterTypes.length == 1
+                            && genericParameterTypes[0] instanceof ParameterizedType
+                    ) {
+                        fieldType = genericParameterTypes[0];
+                    }
                 }
             }
         }
