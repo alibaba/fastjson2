@@ -1301,11 +1301,13 @@ public class TypeUtils {
     }
 
     public static <T> T cast(Object obj, Type type) {
-        if (type instanceof Class) {
-            return (T) cast(obj, (Class) type, JSONFactory.defaultObjectReaderProvider);
-        }
+        return cast(obj, type, JSONFactory.defaultObjectReaderProvider);
+    }
 
-        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+    public static <T> T cast(Object obj, Type type, ObjectReaderProvider provider) {
+        if (type instanceof Class) {
+            return (T) cast(obj, (Class) type, provider);
+        }
 
         if (obj instanceof Collection) {
             ObjectReader objectReader = provider.getObjectReader(type);

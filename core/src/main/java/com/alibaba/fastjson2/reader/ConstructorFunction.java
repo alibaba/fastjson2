@@ -195,13 +195,19 @@ final class ConstructorFunction<T>
             }
         } else {
             for (int i = 0; i < size; i++) {
-                Class<?> paramType = parameterTypes[i];
+                Class<?> paramClass = parameterTypes[i];
                 Object arg = values.get(hashCodes[i]);
                 if (arg == null) {
-                    arg = TypeUtils.getDefaultValue(paramType);
+                    arg = TypeUtils.getDefaultValue(paramClass);
                 } else {
-                    if (!paramType.isInstance(arg)) {
-                        arg = TypeUtils.cast(arg, paramType, JSONFactory.defaultObjectReaderProvider);
+                    if (!paramClass.isInstance(arg)) {
+                        arg = TypeUtils.cast(arg, paramClass, JSONFactory.defaultObjectReaderProvider);
+                    } else if (Collection.class.isAssignableFrom(paramClass) || Map.class.isAssignableFrom(paramClass)) {
+                        Type[] genericParameterTypes = constructor.getGenericParameterTypes();
+                        if (genericParameterTypes.length == parameterTypes.length) {
+                            Type paramType = genericParameterTypes[i];
+                            arg = TypeUtils.cast(arg, paramType);
+                        }
                     }
                 }
                 args[i] = arg;

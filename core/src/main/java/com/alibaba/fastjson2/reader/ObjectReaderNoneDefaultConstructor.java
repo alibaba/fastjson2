@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -346,7 +347,10 @@ public class ObjectReaderNoneDefaultConstructor<T>
             if (fieldValue != null) {
                 Class<?> valueClass = fieldValue.getClass();
                 Class fieldClass = fieldReader.fieldClass;
-                if (valueClass != fieldClass) {
+                Type fieldType = fieldReader.fieldType;
+                if (!(fieldType instanceof Class)) {
+                    fieldValue = TypeUtils.cast(fieldValue, fieldType, provider);
+                } else if (valueClass != fieldClass) {
                     Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                     if (typeConvert != null) {
                         fieldValue = typeConvert.apply(fieldValue);
@@ -443,9 +447,12 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
             Class<?> valueClass = fieldValue.getClass();
             Class fieldClass = fieldReader.fieldClass;
+            Type fieldType = fieldReader.fieldType;
             if (valueClass != fieldClass) {
                 Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                if (typeConvert != null) {
+                if (!(fieldType instanceof Class)) {
+                    fieldValue = TypeUtils.cast(fieldValue, fieldType, provider);
+                } else if (typeConvert != null) {
                     fieldValue = typeConvert.apply(fieldValue);
                 } else if (fieldValue instanceof Map) {
                     ObjectReader objectReader = fieldReader.getObjectReader(JSONFactory.createReadContext(provider));

@@ -140,6 +140,10 @@ public final class ObjectReaderImplListInt64
                 break;
             }
 
+            if (jsonReader.current() == ',') {
+                throw new JSONException(jsonReader.info("illegal input error"));
+            }
+
             list.add(
                     jsonReader.readInt64());
         }

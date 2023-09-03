@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.40.android4-SNAPSHOT</version>
+    <version>2.0.40.android4</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -915,7 +915,7 @@
                                     <shouldMatchTo>false</shouldMatchTo>
                                 </validationProperty>
                             </validationProperties>
-                            <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                            <generateGitPropertiesFile>false</generateGitPropertiesFile>
                             <generateGitPropertiesFilename>
                                 ${project.build.outputDirectory}/META-INF/scm/${project.groupId}/${project.artifactId}/git.properties
                             </generateGitPropertiesFilename>
