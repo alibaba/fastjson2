@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -266,5 +267,25 @@ public class DecimalUtilsTest {
                     DecimalUtils.toString(BigInteger.valueOf(unscaledVal), scale)
             );
         }
+    }
+
+    @Test
+    public void testDiv() {
+        BigDecimal v1 = new BigDecimal("11061");
+        BigDecimal v2 = new BigDecimal("2754593222460641763294400");
+
+        BigDecimal res1 = v1.divide(v2, MathContext.DECIMAL64);
+        String res1Str = res1.toString();
+        assertEquals(res1Str, "4.015474920147867E-21");
+    }
+
+    @Test
+    public void testDiv1() {
+        BigDecimal v1 = new BigDecimal("11061");
+        BigDecimal v2 = new BigDecimal("0.10554589082317914511");
+
+        BigDecimal res1 = v1.divide(v2, MathContext.DECIMAL64);
+        String res1Str = res1.toString();
+        assertEquals(res1Str, "104798.0164242535");
     }
 }
