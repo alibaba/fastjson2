@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -13,6 +11,8 @@ import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import io.fury.Fury;
+import io.fury.Language;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -26,35 +26,38 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseBinaryArrayMapping {
-    static MediaContent mc;
-    static byte[] fastjson2UTF8Bytes;
+    static final Fury fury = Fury.builder().withLanguage(Language.JAVA)
+            .withRefTracking(false)
+            .requireClassRegistration(false)
+            .withNumberCompressed(true)
+            .build();
+
+    static MediaContent mediaContent;
     static byte[] fastjson2JSONBBytes;
     static byte[] kryoBytes;
 
     static byte[] protobufBytes;
+    static byte[] furyBytes;
 
-    private static final ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
-        protected Kryo initialValue() {
-            Kryo kryo = new Kryo();
-            kryo.register(MediaContent.class);
-            kryo.register(ArrayList.class);
-            kryo.register(Image.class);
-            kryo.register(Image.Size.class);
-            kryo.register(Media.class);
-            kryo.register(Media.Player.class);
-            return kryo;
-        }
-    };
+    private static final ThreadLocal<Kryo> kryos = ThreadLocal.withInitial(() -> {
+        Kryo kryo = new Kryo();
+        kryo.register(MediaContent.class);
+        kryo.register(ArrayList.class);
+        kryo.register(Image.class);
+        kryo.register(Image.Size.class);
+        kryo.register(Media.class);
+        kryo.register(Media.Player.class);
+        return kryo;
+    });
 
     static {
         try {
             InputStream is = EishayParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
-            mc = JSONReader.of(str)
+            mediaContent = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            fastjson2UTF8Bytes = JSON.toJSONBytes(mc, JSONWriter.Feature.BeanToArray);
-            fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray);
+            fastjson2JSONBBytes = JSONB.toBytes(mediaContent, JSONWriter.Feature.BeanToArray);
 
             Kryo kryo = new Kryo();
             kryo.register(MediaContent.class);
@@ -65,28 +68,28 @@ public class EishayParseBinaryArrayMapping {
             kryo.register(Media.Player.class);
 
             Output output = new Output(1024, -1);
-            kryo.writeObject(output, mc);
+            kryo.writeObject(output, mediaContent);
             kryoBytes = output.toBytes();
 
-            protobufBytes = MediaContentTransform.forward(mc).toByteArray();
+            protobufBytes = MediaContentTransform.forward(mediaContent).toByteArray();
+            furyBytes = MediaContentTransform.forward(mediaContent).toByteArray();
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
     }
 
-//    @Benchmark
-    public void fastjson1UTF8Bytes(Blackhole bh) {
-        bh.consume(com.alibaba.fastjson.JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class, Feature.SupportArrayToBean));
-    }
-
     @Benchmark
-    public void fastjson2UTF8Bytes(Blackhole bh) {
-        bh.consume(JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class, JSONReader.Feature.SupportArrayToBean));
+    public void fury(Blackhole bh) {
+        bh.consume(
+                fury.deserializeJavaObject(furyBytes, MediaContent.class)
+        );
     }
 
     @Benchmark
     public void jsonb(Blackhole bh) {
-        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class, JSONReader.Feature.SupportArrayToBean));
+        bh.consume(
+                JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class, JSONReader.Feature.SupportArrayToBean)
+        );
     }
 
     @Benchmark
