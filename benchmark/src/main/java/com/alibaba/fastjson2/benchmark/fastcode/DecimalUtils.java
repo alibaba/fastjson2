@@ -48,7 +48,7 @@ public class DecimalUtils {
                 long div = unscaledVal / power;
                 long rem = unscaledVal - div * power;
                 int divSize = size - scale;
-                buf = new byte[size + 1 + (negative ? 1 : 0)];
+                buf = new byte[size + (negative ? 2 : 1)];
                 if (negative) {
                     buf[0] = '-';
                     off = 1;

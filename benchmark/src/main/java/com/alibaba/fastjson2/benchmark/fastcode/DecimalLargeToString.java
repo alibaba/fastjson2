@@ -9,17 +9,21 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.function.BiFunction;
 
 import static java.lang.invoke.MethodType.methodType;
 
-public class DecimalToString {
-    static final long unscaledVal = 123456;
+public class DecimalLargeToString {
+    static final BigInteger unscaledVal;
     static int scale = 2;
-    static BigDecimal decimal = BigDecimal.valueOf(unscaledVal, scale);
+    static BigDecimal decimal;
     static BiFunction<BigDecimal, Boolean, String> LAYOUT_CHARS;
 
     static {
+        decimal = new BigDecimal("2715737727.55");
+        unscaledVal = decimal.unscaledValue();
+
         try {
             MethodHandles.Lookup lookup = JDKUtils.trustedLookup(BigDecimal.class);
 
@@ -53,7 +57,9 @@ public class DecimalToString {
 
     @Benchmark
     public void toPlainStringDec(Blackhole bh) {
-        bh.consume(decimal.toPlainString());
+        bh.consume(
+                decimal.toPlainString()
+        );
     }
 
     public void toStringCharWithInt8(Blackhole bh) {

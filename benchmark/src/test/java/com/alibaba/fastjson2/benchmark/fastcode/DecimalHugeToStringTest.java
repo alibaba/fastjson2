@@ -1,14 +1,14 @@
 package com.alibaba.fastjson2.benchmark.fastcode;
 
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigDecimal;
+import java.util.Random;
 
-public class DecimalToStringTest {
+public class DecimalHugeToStringTest {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
-    static final DecimalToString benchmark = new DecimalToString();
-    static final int COUNT = 100_000_000;
+    static final DecimalHugToString benchmark = new DecimalHugToString();
+    static final int COUNT = 10_000_000;
 
     public static void toPlainString() throws Throwable {
         for (int j = 0; j < 5; j++) {
@@ -20,16 +20,11 @@ public class DecimalToStringTest {
             System.out.println("DecimalToString-toPlainStringDec millis : " + millis);
             // zulu8.58.0.13 :
             // zulu11.52.13 :
-            // zulu17.38.21 : 832 785
+            // zulu17.38.21 :
         }
     }
 
     public static void toPlainStringDec() throws Throwable {
-        JDKUtils.UNSAFE.putObject(
-                new BigDecimal("1"),
-                JDKUtils.UNSAFE.objectFieldOffset(BigDecimal.class.getDeclaredField("stringCache")),
-                null
-        );
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < COUNT; ++i) {
@@ -39,7 +34,7 @@ public class DecimalToStringTest {
             System.out.println("DecimalToString-toPlainStringDec millis : " + millis);
             // zulu8.58.0.13 :
             // zulu11.52.13 :
-            // zulu17.38.21 : 1765
+            // zulu17.38.21 : 2122 1931 1645 1553
         }
     }
 
@@ -53,7 +48,8 @@ public class DecimalToStringTest {
             System.out.println("DecimalToString-layoutChars millis : " + millis);
             // zulu8.58.0.13 :
             // zulu11.52.13 :
-            // zulu17.38.21 :
+            // jdk22-ea : 1352
+            // jdk22-base : 2658
         }
     }
 
@@ -67,8 +63,8 @@ public class DecimalToStringTest {
             System.out.println("DecimalToString-toStringCharWithInt8 millis : " + millis);
             // zulu8.58.0.13 :
             // zulu11.52.13 :
-            // zulu17.38.21 : 8718
-            // openjdk20 : 5514
+            // zulu17.38.21 :
+            // openjdk20 :
         }
     }
 
@@ -82,15 +78,22 @@ public class DecimalToStringTest {
             System.out.println("DecimalToString-toStringCharWithInt8UTF16 millis : " + millis);
             // zulu8.58.0.13 :
             // zulu11.52.13 :
-            // jdk21.0.0 : 5722
-            // openjdk22 : 4684
+            // jdk21.0.0 :
+            // openjdk22 :
         }
     }
 
     public static void main(String[] args) throws Throwable {
+        Random r = new Random();
+//        int value = Math.abs(r.nextInt());
+//        BigDecimal h = new BigDecimal("" + ((long) value + (long) Integer.MAX_VALUE)
+//                + ((long) value + (long) Integer.MAX_VALUE) + ".55");
+//        BigDecimal l = new BigDecimal("" + ((long) value + (long) Integer.MAX_VALUE) + ".55");
+
 //        toPlainString();
-        toPlainStringDec();
-//        layoutChars();
+//        toPlainStringDec();
+        BigDecimal d = new BigDecimal(r.nextDouble());
+        layoutChars();
 //        toStringCharWithInt8();
 //        toStringCharWithInt8UTF16();
     }
