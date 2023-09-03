@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.40-SNAPSHOT</version>
+    <version>2.0.40</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -61,8 +61,10 @@
         <module>adapter</module>
         -->
         <module>benchmark</module>
+        <!--
         <module>codegen</module>
         <module>codegen-test</module>
+        -->
         <module>core</module>
         <!--
             <module>example-graalvm-native</module>
