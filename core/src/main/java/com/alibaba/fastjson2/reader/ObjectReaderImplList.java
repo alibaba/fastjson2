@@ -593,6 +593,10 @@ public final class ObjectReaderImplList
                 break;
             }
 
+            if (jsonReader.current() == ',') {
+                throw new JSONException(jsonReader.info("illegal input error"));
+            }
+
             Object item;
             if (itemType == String.class) {
                 item = jsonReader.readString();
@@ -613,8 +617,6 @@ public final class ObjectReaderImplList
             }
 
             list.add(item);
-
-            jsonReader.nextIfComma();
         }
 
         jsonReader.nextIfComma();
