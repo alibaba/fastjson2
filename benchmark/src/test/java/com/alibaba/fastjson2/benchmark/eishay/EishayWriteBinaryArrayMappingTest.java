@@ -32,9 +32,25 @@ public class EishayWriteBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryArrayMapping-jsonb millis : " + millis);
-            // zulu8.62.0.19 : 1265
-            // zulu11.52.13 : 749
-            // zulu17.32.13 : 804 766
+            // zulu8.62.0.19 : 796
+            // zulu11.52.13 :  782
+            // zulu17.32.13 : 790
+        }
+    }
+
+    public static void fury() throws Exception {
+        System.out.println("fury size " + benchmark.furySize()); // 388
+
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < LOOP; ++i) {
+                benchmark.fury(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayWriteBinaryArrayMapping-fury millis : " + millis);
+            // zulu8.62.0.19 : 1551
+            // zulu11.52.13 : 1126
+            // zulu17.32.13 : 1058
         }
     }
 
@@ -56,6 +72,7 @@ public class EishayWriteBinaryArrayMappingTest {
 
     public static void main(String[] args) throws Exception {
         jsonb();
+//        fury();
 //        kryo();
 //        protobuf();
     }
