@@ -1639,11 +1639,13 @@ public abstract class BeanUtils {
         return null;
     }
 
-    public static Type getParamType(TypeReference type,
-                                    Class<?> raw,
-                                    Class declaringClass,
-                                    Parameter field,
-                                    Type fieldType) {
+    public static Type getParamType(
+            TypeReference type,
+            Class<?> raw,
+            Class declaringClass,
+            Parameter field,
+            Type fieldType
+    ) {
         while (raw != Object.class) {
             if (declaringClass == raw) {
                 return resolve(type.getType(), declaringClass, fieldType);

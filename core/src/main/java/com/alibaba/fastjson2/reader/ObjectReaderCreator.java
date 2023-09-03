@@ -1346,6 +1346,8 @@ public class ObjectReaderCreator {
 
         int parameterCount = method.getParameterCount();
         if (parameterCount == 0) {
+            Type fieldType = method.getGenericReturnType();
+            Class<?> fieldClass = method.getReturnType();
             FieldReader fieldReader = createFieldReaderMethod(
                     objectClass,
                     objectType,
@@ -1356,8 +1358,8 @@ public class ObjectReaderCreator {
                     fieldInfo.locale,
                     fieldInfo.defaultValue,
                     fieldInfo.schema,
-                    method.getGenericReturnType(),
-                    method.getReturnType(),
+                    fieldType,
+                    fieldClass,
                     method,
                     fieldInfo.getInitReader()
             );
@@ -1381,6 +1383,18 @@ public class ObjectReaderCreator {
 
         Type fieldType = method.getGenericParameterTypes()[0];
         Class fieldClass = method.getParameterTypes()[0];
+        if (fieldType instanceof Class && Collection.class.isAssignableFrom((Class<?>) fieldType)) {
+            Class[] interfaces = objectClass.getInterfaces();
+            for (int i = 0; i < interfaces.length; i++) {
+                Method interfaceMethod = BeanUtils.getMethod(interfaces[i], method);
+                Type[] genericParameterTypes = interfaceMethod.getGenericParameterTypes();
+                if (genericParameterTypes.length == 1
+                        && genericParameterTypes[0] instanceof ParameterizedType
+                ) {
+                    fieldType = genericParameterTypes[0];
+                }
+            }
+        }
 
         // skip function
         if (isFunction(fieldClass)) {
@@ -2146,6 +2160,13 @@ public class ObjectReaderCreator {
             );
         }
 
+        Type fieldTypeResolved = null;
+        Class fieldClassResolved = null;
+        if (!(fieldType instanceof Class) || !(objectType instanceof Class)) {
+            fieldTypeResolved = BeanUtils.getFieldType(TypeReference.get(objectType), objectClass, method, fieldType);
+            fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
+        }
+
         if (method.getParameterCount() == 0) {
             if (fieldClass == AtomicInteger.class) {
                 return new FieldReaderAtomicIntegerMethodReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
@@ -2180,7 +2201,7 @@ public class ObjectReaderCreator {
                 }
                 return new FieldReaderCollectionMethodReadOnly(
                         fieldName,
-                        fieldType,
+                        fieldTypeResolved != null ? fieldTypeResolved : fieldType,
                         fieldClass,
                         ordinal,
                         features,
@@ -2214,13 +2235,6 @@ public class ObjectReaderCreator {
             if (!objectClass.isInterface()) {
                 return null;
             }
-        }
-
-        Type fieldTypeResolved = null;
-        Class fieldClassResolved = null;
-        if (!(fieldType instanceof Class)) {
-            fieldTypeResolved = BeanUtils.getFieldType(TypeReference.get(objectType), objectClass, method, fieldType);
-            fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
         }
 
         if (fieldClass == List.class
