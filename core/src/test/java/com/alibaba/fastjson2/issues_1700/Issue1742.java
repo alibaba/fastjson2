@@ -20,10 +20,30 @@ public class Issue1742 {
                 add(1L);
             }};
     }
+
     @Test
     public void test() {
         TestFastJson testFastJson = new TestFastJson();
         String jsonString = JSON.toJSONString(testFastJson, JSONWriter.Feature.BrowserCompatible);
         assertEquals("{\"a\":\"1443605444282772302\",\"b\":[\"1443605444282772302\",\"1443605444282772303\",1]}", jsonString);
+    }
+
+    @Test
+    public void testUTF8() {
+        TestFastJson testFastJson = new TestFastJson();
+        String jsonString = new String(JSON.toJSONBytes(testFastJson, JSONWriter.Feature.BrowserCompatible));
+        assertEquals("{\"a\":\"1443605444282772302\",\"b\":[\"1443605444282772302\",\"1443605444282772303\",1]}", jsonString);
+    }
+
+    @Test
+    public void test1() {
+        String jsonString = JSON.toJSONString(1443605444282772302L, JSONWriter.Feature.BrowserCompatible);
+        assertEquals("\"1443605444282772302\"", jsonString);
+    }
+
+    @Test
+    public void test12() {
+        String jsonString = new String(JSON.toJSONBytes(1443605444282772302L, JSONWriter.Feature.BrowserCompatible));
+        assertEquals("\"1443605444282772302\"", jsonString);
     }
 }
