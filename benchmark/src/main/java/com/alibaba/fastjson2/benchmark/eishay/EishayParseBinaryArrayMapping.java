@@ -78,7 +78,7 @@ public class EishayParseBinaryArrayMapping {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void fury(Blackhole bh) {
         bh.consume(
                 fury.deserializeJavaObject(furyBytes, MediaContent.class)

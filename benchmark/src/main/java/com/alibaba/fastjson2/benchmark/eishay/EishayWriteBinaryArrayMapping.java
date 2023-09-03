@@ -68,7 +68,7 @@ public class EishayWriteBinaryArrayMapping {
         return fury.serialize(mediaContent).length;
     }
 
-    @Benchmark
+//    @Benchmark
     public void fury(Blackhole bh) {
         bh.consume(
                 fury.serialize(mediaContent)
