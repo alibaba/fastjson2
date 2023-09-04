@@ -669,6 +669,7 @@ final class JSONWriterJSONB
                 String str = list.get(i);
                 if (str == null) {
                     writeNull();
+                    continue;
                 }
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder != LATIN) {
