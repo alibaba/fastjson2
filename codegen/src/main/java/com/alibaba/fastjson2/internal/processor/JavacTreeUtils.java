@@ -1,20 +1,21 @@
 package com.alibaba.fastjson2.internal.processor;
 
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
-import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.ListBuffer;
+import com.sun.tools.javac.util.Name;
+import com.sun.tools.javac.util.Names;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 
 final class JavacTreeUtils {
     private static TreeMaker treeMaker;
@@ -295,11 +296,18 @@ final class JavacTreeUtils {
     }
 
     static JCTree.JCBreak defBreak(JCTree.JCLabeledStatement labeledStatement) {
-        return defBreak(labeledStatement.label);
-    }
-
-    static JCTree.JCBreak defBreak(Name name) {
-        return treeMaker.Break(name);
+        Class<? extends TreeMaker> clazz = treeMaker.getClass();
+        try {
+            Method method = clazz.getDeclaredMethod("Break", Name.class);
+            return (JCTree.JCBreak) method.invoke(treeMaker, labeledStatement.label);
+        } catch (Exception e) {
+            try {
+                Method method = clazz.getDeclaredMethod("Break", JCTree.JCExpression.class);
+                return (JCTree.JCBreak) method.invoke(treeMaker, new Object[]{null});
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     static JCTree.JCContinue defContinue(JCTree.JCLabeledStatement labeledStatement) {
@@ -333,7 +341,14 @@ final class JavacTreeUtils {
                 Class<?> caseKind = Class.forName("com.sun.source.tree.CaseTree$CaseKind");
                 Field statement = Class.forName("com.sun.tools.javac.tree.JCTree$JCCase").getDeclaredField("STATEMENT");
                 Method method = clazz.getDeclaredMethod("Case", caseKind, List.class, List.class, JCTree.class);
-                return (JCTree.JCCase) method.invoke(treeMaker, statement.get(null), List.of(matchExpr), List.of(block(matchStmts)), null);
+                if (JDKUtils.JVM_VERSION >= 19 && (matchExpr instanceof JCTree.JCLiteral || matchExpr instanceof JCTree.JCTypeCast)) {
+                    Class<?> constantCaseLabel = Class.forName("com.sun.tools.javac.tree.JCTree$JCConstantCaseLabel");
+                    Constructor<?> constructor = constantCaseLabel.getDeclaredConstructor(JCTree.JCExpression.class);
+                    constructor.setAccessible(true);
+                    return (JCTree.JCCase) method.invoke(treeMaker, statement.get(null), List.of(constructor.newInstance(matchExpr)), List.of(block(matchStmts)), null);
+                } else {
+                    return (JCTree.JCCase) method.invoke(treeMaker, statement.get(null), List.of(matchExpr), List.of(block(matchStmts)), null);
+                }
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
