@@ -359,6 +359,7 @@ public class IOUtils {
                 long power = POWER_TEN[scale - 1];
                 long div = unscaledVal / power;
                 long rem = unscaledVal - div * power;
+                int remSize = stringSize(rem);
                 off = IOUtils.writeInt64(buf, off, div);
                 buf[off] = '.';
                 if (scale == 1) {
@@ -373,6 +374,12 @@ public class IOUtils {
                     buf[off + 2] = (char) (v >> 32);
                     buf[off + 3] = (char) (v >> 48);
                     return off + 4;
+                }else {
+                    int temp = remSize;
+                    while (temp < scale) {
+                        buf[++off] = '0';
+                        temp++;
+                    }
                 }
                 return IOUtils.writeInt64(buf, off + 1, rem);
             }
