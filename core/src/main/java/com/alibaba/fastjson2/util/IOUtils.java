@@ -317,22 +317,16 @@ public class IOUtils {
                 off = IOUtils.writeInt64(buf, off, div);
                 buf[off] = '.';
 
-                for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
-                    buf[++off] = '0';
-                }
-
                 if (scale == 1) {
                     buf[off + 1] = (byte) (rem + '0');
                     return off + 2;
                 } else if (scale == 2) {
                     UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[(int) rem]);
                     return off + 3;
-                } else if (scale == 3) {
-                    int v = DIGITS_K_32[(int) rem];
-                    buf[off + 1] = (byte) (v >> 8);
-                    buf[off + 2] = (byte) (v >> 16);
-                    buf[off + 3] = (byte) (v >> 24);
-                    return off + 4;
+                }
+
+                for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
+                    buf[++off] = '0';
                 }
                 return IOUtils.writeInt64(buf, off + 1, rem);
             }
@@ -369,22 +363,16 @@ public class IOUtils {
                 off = IOUtils.writeInt64(buf, off, div);
                 buf[off] = '.';
 
-                for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
-                    buf[++off] = '0';
-                }
-
                 if (scale == 1) {
                     buf[off + 1] = (char) (rem + '0');
                     return off + 2;
                 } else if (scale == 2) {
                     UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[(int) rem]);
                     return off + 3;
-                } else if (scale == 3) {
-                    long v = DIGITS_K_64[(int) rem];
-                    buf[off + 1] = (char) (v >> 16);
-                    buf[off + 2] = (char) (v >> 32);
-                    buf[off + 3] = (char) (v >> 48);
-                    return off + 4;
+                }
+
+                for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
+                    buf[++off] = '0';
                 }
                 return IOUtils.writeInt64(buf, off + 1, rem);
             }
