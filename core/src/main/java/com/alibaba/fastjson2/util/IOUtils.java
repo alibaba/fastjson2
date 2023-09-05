@@ -296,7 +296,8 @@ public class IOUtils {
         }
 
         if (scale != 0) {
-            int insertionPoint = IOUtils.stringSize(unscaledVal) - scale;
+            int unscaleValSize = IOUtils.stringSize(unscaledVal);
+            int insertionPoint = unscaleValSize - scale;
             if (insertionPoint == 0) {
                 buf[off] = '0';
                 buf[off + 1] = '.';
@@ -315,6 +316,11 @@ public class IOUtils {
                 long rem = unscaledVal - div * power;
                 off = IOUtils.writeInt64(buf, off, div);
                 buf[off] = '.';
+
+                for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
+                    buf[++off] = '0';
+                }
+
                 if (scale == 1) {
                     buf[off + 1] = (byte) (rem + '0');
                     return off + 2;
@@ -342,7 +348,8 @@ public class IOUtils {
         }
 
         if (scale != 0) {
-            int insertionPoint = stringSize(unscaledVal) - scale;
+            int unscaleValSize = stringSize(unscaledVal);
+            int insertionPoint = unscaleValSize - scale;
             if (insertionPoint == 0) {
                 buf[off] = '0';
                 buf[off + 1] = '.';
@@ -361,6 +368,11 @@ public class IOUtils {
                 long rem = unscaledVal - div * power;
                 off = IOUtils.writeInt64(buf, off, div);
                 buf[off] = '.';
+
+                for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
+                    buf[++off] = '0';
+                }
+
                 if (scale == 1) {
                     buf[off + 1] = (char) (rem + '0');
                     return off + 2;
