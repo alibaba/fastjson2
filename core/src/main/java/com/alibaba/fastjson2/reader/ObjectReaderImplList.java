@@ -236,7 +236,7 @@ public final class ObjectReaderImplList
         int size = collection.size();
 
         if (size == 0 && (listClass == List.class)) {
-            Collection list = Collections.emptyList();
+            Collection list = new ArrayList();
             if (builder != null) {
                 return builder.apply(list);
             }
