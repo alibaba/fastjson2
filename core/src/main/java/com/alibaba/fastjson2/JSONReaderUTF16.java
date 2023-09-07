@@ -3703,6 +3703,7 @@ class JSONReaderUTF16
                     }
                 }
             } else if (ch == '{' && quote == 0) {
+                valid = true;
                 Map<String, Object> obj = readObject();
                 if (!obj.isEmpty()) {
                     throw new JSONException(info());
@@ -3710,6 +3711,7 @@ class JSONReaderUTF16
                 value = true;
                 wasNull = true;
             } else if (ch == '[' && quote == 0) {
+                valid = true;
                 List array = readArray();
                 if (!array.isEmpty()) {
                     throw new JSONException(info());
