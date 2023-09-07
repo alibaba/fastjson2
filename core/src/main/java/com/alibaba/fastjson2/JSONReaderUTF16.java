@@ -2659,6 +2659,7 @@ class JSONReaderUTF16
 
     @Override
     public final int readInt32Value() {
+        boolean valid = false;
         boolean negative = false;
         int firstOffset = offset;
         final char firstChar = ch;
@@ -2681,6 +2682,7 @@ class JSONReaderUTF16
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             int intValue10 = intValue * 10 + (ch - '0');
             if (intValue10 < intValue) {
                 overflow = true;
@@ -2732,6 +2734,9 @@ class JSONReaderUTF16
 
         if (quote != 0) {
             wasNull = firstOffset + 1 == offset;
+            if (wasNull) {
+                valid = true;
+            }
             ch = offset == end ? EOI : chars[offset++];
         }
 
@@ -2782,11 +2787,16 @@ class JSONReaderUTF16
             }
         }
 
-        return negative ? -intValue : intValue;
+        if (valid) {
+            return negative ? -intValue : intValue;
+        } else {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     @Override
     public final Integer readInt32() {
+        boolean valid = false;
         boolean negative = false;
         int firstOffset = offset;
         char firstChar = ch;
@@ -2825,6 +2835,7 @@ class JSONReaderUTF16
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             int intValue10 = intValue * 10 + (ch - '0');
             if (intValue10 < intValue) {
                 overflow = true;
@@ -2923,11 +2934,16 @@ class JSONReaderUTF16
             }
         }
 
-        return negative ? -intValue : intValue;
+        if (valid) {
+            return negative ? -intValue : intValue;
+        } else {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     @Override
     public final long readInt64Value() {
+        boolean valid = false;
         boolean negative = false;
         final int firstOffset = offset;
         final char firstChar = ch;
@@ -2950,6 +2966,7 @@ class JSONReaderUTF16
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             long intValue10 = longValue * 10 + (ch - '0');
             if (intValue10 < longValue) {
                 overflow = true;
@@ -2998,6 +3015,9 @@ class JSONReaderUTF16
 
         if (quote != 0) {
             wasNull = firstOffset + 1 == offset;
+            if (wasNull) {
+                valid = true;
+            }
             ch = offset == end ? EOI : chars[offset++];
         }
 
@@ -3048,11 +3068,16 @@ class JSONReaderUTF16
             }
         }
 
-        return negative ? -longValue : longValue;
+        if (valid) {
+            return negative ? -longValue : longValue;
+        } else {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     @Override
     public final Long readInt64() {
+        boolean valid = false;
         boolean negative = false;
         int firstOffset = offset;
         char firstChar = ch;
@@ -3092,6 +3117,7 @@ class JSONReaderUTF16
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             long intValue10 = longValue * 10 + (ch - '0');
             if (intValue10 < longValue) {
                 overflow = true;
@@ -3188,11 +3214,16 @@ class JSONReaderUTF16
             }
         }
 
-        return negative ? -longValue : longValue;
+        if (valid) {
+            return negative ? -longValue : longValue;
+        } else {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     @Override
     public final double readDoubleValue() {
+        boolean valid = false;
         this.wasNull = false;
 
         boolean value = false;
@@ -3231,6 +3262,7 @@ class JSONReaderUTF16
         boolean overflow = false;
         long longValue = 0;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             if (!overflow) {
                 long intValue10 = longValue * 10 + (ch - '0');
                 if (intValue10 < longValue) {
@@ -3253,6 +3285,7 @@ class JSONReaderUTF16
             valueType = JSON_TYPE_DEC;
             ch = chars[offset++];
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 this.scale++;
                 if (!overflow) {
                     long intValue10 = longValue * 10 + (ch - '0');
@@ -3285,6 +3318,7 @@ class JSONReaderUTF16
             }
 
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
                 if (expValue > MAX_EXP) {
@@ -3313,6 +3347,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'l'
                         && chars[offset++] == 'l'
                 ) {
+                    valid = true;
                     if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
                         throw new JSONException(info("long value not support input null"));
                     }
@@ -3331,6 +3366,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'u'
                         && chars[offset++] == 'e'
                 ) {
+                    valid = true;
                     value = true;
                     doubleValue = 1;
                     if (offset == end) {
@@ -3341,6 +3377,7 @@ class JSONReaderUTF16
                 }
             } else if (ch == 'f') {
                 if (offset + 4 <= end && UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + (offset << 1)) == ALSE_64) {
+                    valid = true;
                     offset += 4;
                     doubleValue = 0;
                     value = true;
@@ -3486,11 +3523,16 @@ class JSONReaderUTF16
             }
         }
 
-        return doubleValue;
+        if (valid) {
+            return doubleValue;
+        } else {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     @Override
     public final float readFloatValue() {
+        boolean valid = false;
         this.wasNull = false;
 
         boolean value = false;
@@ -3529,6 +3571,7 @@ class JSONReaderUTF16
         long longValue = 0;
 
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             if (!overflow) {
                 long intValue10 = longValue * 10 + (ch - '0');
                 if (intValue10 < longValue) {
@@ -3551,6 +3594,7 @@ class JSONReaderUTF16
             valueType = JSON_TYPE_DEC;
             ch = chars[offset++];
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 this.scale++;
                 if (!overflow) {
                     long intValue10 = longValue * 10 + (ch - '0');
@@ -3583,6 +3627,7 @@ class JSONReaderUTF16
             }
 
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
                 if (expValue > MAX_EXP) {
@@ -3611,6 +3656,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'l'
                         && chars[offset++] == 'l'
                 ) {
+                    valid = true;
                     if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
                         throw new JSONException(info("long value not support input null"));
                     }
@@ -3628,6 +3674,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'u'
                         && chars[offset++] == 'e'
                 ) {
+                    valid = true;
                     value = true;
                     floatValue = 1;
                     if (offset == end) {
@@ -3643,6 +3690,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 's'
                         && chars[offset++] == 'e'
                 ) {
+                    valid = true;
                     floatValue = 0;
                     value = true;
                     if (offset == end) {
@@ -3780,7 +3828,11 @@ class JSONReaderUTF16
             }
         }
 
-        return floatValue;
+        if (valid) {
+            return floatValue;
+        } else {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     private void skipString() {
@@ -4552,6 +4604,7 @@ class JSONReaderUTF16
 
     @Override
     public final void readNumber0() {
+        boolean valid = false;
         this.wasNull = false;
         this.mag0 = 0;
         this.mag1 = 0;
@@ -4603,6 +4656,7 @@ class JSONReaderUTF16
         boolean intOverflow = false;
         valueType = JSON_TYPE_INT;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             if (!intOverflow) {
                 int digit = ch - '0';
                 mag3 *= 10;
@@ -4627,6 +4681,7 @@ class JSONReaderUTF16
             valueType = JSON_TYPE_DEC;
             ch = chars[offset++];
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 if (!intOverflow) {
                     int digit = ch - '0';
                     mag3 *= 10;
@@ -4677,6 +4732,7 @@ class JSONReaderUTF16
             }
 
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
                 if (expValue > MAX_EXP) {
@@ -4704,6 +4760,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'l'
                         && chars[offset++] == 'l'
                 ) {
+                    valid = true;
                     wasNull = true;
                     valueType = JSON_TYPE_NULL;
                     if (offset == end) {
@@ -4718,6 +4775,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'u'
                         && chars[offset++] == 'e'
                 ) {
+                    valid = true;
                     boolValue = true;
                     valueType = JSON_TYPE_BOOL;
                     if (offset == end) {
@@ -4733,6 +4791,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 's'
                         && chars[offset++] == 'e'
                 ) {
+                    valid = true;
                     boolValue = false;
                     valueType = JSON_TYPE_BOOL;
                     if (offset == end) {
@@ -4818,6 +4877,10 @@ class JSONReaderUTF16
                     }
                 }
             }
+        }
+
+        if (!valid) {
+            throw new JSONException(info("illegal input error"));
         }
     }
 
@@ -5025,6 +5088,7 @@ class JSONReaderUTF16
     }
 
     public final BigDecimal readBigDecimal() {
+        boolean valid = false;
         final char[] chars = this.chars;
         boolean value = false;
 
@@ -5060,6 +5124,7 @@ class JSONReaderUTF16
         boolean overflow = false;
         long longValue = 0;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             if (!overflow) {
                 long r = longValue * 10;
                 if ((longValue | 10) >>> 31 == 0L || (r / 10 == longValue)) {
@@ -5082,6 +5147,7 @@ class JSONReaderUTF16
             valueType = JSON_TYPE_DEC;
             ch = chars[offset++];
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 this.scale++;
                 if (!overflow) {
                     long r = longValue * 10;
@@ -5114,6 +5180,7 @@ class JSONReaderUTF16
             }
 
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
                 if (expValue > MAX_EXP) {
@@ -5142,6 +5209,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'l'
                         && chars[offset++] == 'l'
                 ) {
+                    valid = true;
                     if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
                         throw new JSONException(info("long value not support input null"));
                     }
@@ -5160,6 +5228,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 'u'
                         && chars[offset++] == 'e'
                 ) {
+                    valid = true;
                     value = true;
                     decimal = BigDecimal.ONE;
                     if (offset == end) {
@@ -5175,6 +5244,7 @@ class JSONReaderUTF16
                         && chars[offset++] == 's'
                         && chars[offset++] == 'e'
                 ) {
+                    valid = true;
                     decimal = BigDecimal.ZERO;
                     value = true;
                     if (offset == end) {
@@ -5185,12 +5255,14 @@ class JSONReaderUTF16
                     }
                 }
             } else if (ch == '{' && quote == 0) {
+                valid = true;
                 JSONObject jsonObject = new JSONObject();
                 readObject(jsonObject, 0);
                 decimal = decimal(jsonObject);
                 value = true;
                 wasNull = true;
             } else if (ch == '[' && quote == 0) {
+                valid = true;
                 List array = readArray();
                 if (!array.isEmpty()) {
                     throw new JSONException(info());
@@ -5282,7 +5354,11 @@ class JSONReaderUTF16
             }
         }
 
-        return decimal;
+        if (valid) {
+            return decimal;
+        } else {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     @Override
