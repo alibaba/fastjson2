@@ -167,8 +167,8 @@ JSONType是配置在类/接口上的注解，可以配置改类的所有字段�
 |---------------------|-----------------------------------------------------------|
 | ignores             | 序列化时忽略某些字段                                                |
 | alphabetic          | 配置序列化时保持原生类字段顺序                                           |
-| serializeFeatures   | 配置序列化时`JSONWriter`的`Featrues`                             |
-| deserializeFeatures | 配置反序列化时`JSONReader`的`Featrues`                            |
+| serializeFeatures   | 配置序列化时`JSONWriter`的`Features`                             |
+| deserializeFeatures | 配置反序列化时`JSONReader`的`Features`                            |
 | orders              | 配置序列化时的字段顺序                                               |
 | naming              | 配置字段名的`NamingStrategy`,详细内容请参考`PropertyNamingStrategy`枚举类 |
 | serializer          | 自定义序列化行为                                                  |
@@ -227,7 +227,7 @@ public class JSONTypeAlphabetic {
 
 ### 2.3 配置序列化时的`JSONReader`/`JSONWriter`的`Features`
 
-您可以通过`@JSONType(serialzeFeatures= ...)`或`@JSONType(deserializeFeatures = ...)`注解配置序列化和反序列时`JSONWriter`/`JSONReader`的`Features`。
+您可以通过`@JSONType(serializeFeatures= ...)`或`@JSONType(deserializeFeatures = ...)`注解配置序列化和反序列时`JSONWriter`/`JSONReader`的`Features`。
 
 更多`Features`配置请参考 [features_cn.md](features_cn.md) 。
 

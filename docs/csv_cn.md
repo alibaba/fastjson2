@@ -1,4 +1,4 @@
-CSV (comma-seperated values)是一种使用逗号作为分隔符的被广泛使用的数据交换文件格式。
+CSV (comma-separated values)是一种使用逗号作为分隔符的被广泛使用的数据交换文件格式。
 
 fastjson提供了一个高性能CSV读写支持。
 
