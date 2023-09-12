@@ -398,10 +398,10 @@ final class CSVReaderUTF16<T>
             valueSize++;
         }
 
-        if (valueSize > 0) {
+        Object value;
+        if (valueSize > 0 || quote) {
             Type type = types != null && columnIndex < types.length ? types[columnIndex] : null;
 
-            Object value;
             if (quote) {
                 if (escapeCount == 0) {
                     if (type == null || type == String.class || type == Object.class || strings) {

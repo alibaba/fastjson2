@@ -406,7 +406,7 @@ final class CSVReaderUTF8<T>
             valueSize++;
         }
 
-        if (valueSize > 0) {
+        if (valueSize > 0 || quote) {
             Type type = types != null && columnIndex < types.length ? types[columnIndex] : null;
 
             Object value;
