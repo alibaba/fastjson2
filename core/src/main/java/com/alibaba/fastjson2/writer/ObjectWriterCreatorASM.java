@@ -7,6 +7,9 @@ import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.*;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.lang.reflect.Type;
@@ -242,6 +245,11 @@ public class ObjectWriterCreatorASM
 
                     String fieldName = getFieldName(objectClass, provider, beanInfo, record, fieldInfo, method);
 
+                    // 如果不存在 fieldName 属性则跳过
+                    if(fieldNotExist(fieldName, objectClass)){
+                        return;
+                    }
+
                     if (beanInfo.orders != null) {
                         boolean match = false;
                         for (int i = 0; i < beanInfo.orders.length; i++) {
@@ -417,6 +425,26 @@ public class ObjectWriterCreatorASM
         setDefaultValue(fieldWriters, objectClass);
 
         return jitWriter(objectClass, provider, beanInfo, fieldWriters, writerFeatures);
+    }
+
+    private boolean fieldNotExist(String fieldName, Class objectClass) {
+        boolean result = true;
+
+        try {
+            java.beans.BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
+            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+
+            for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+                String name = propertyDescriptor.getName();
+                if (fieldName.equals(name)) {
+                    result = false;
+                    break;
+                }
+            }
+        } catch (IntrospectionException ignored) {
+
+        }
+        return result;
     }
 
     private ObjectWriterAdapter jitWriter(
