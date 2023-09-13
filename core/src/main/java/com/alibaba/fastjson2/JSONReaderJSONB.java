@@ -4425,6 +4425,11 @@ final class JSONReaderJSONB
             return LocalDate.of(year, month, dayOfMonth);
         }
 
+        if (type == BC_NULL) {
+            offset++;
+            return null;
+        }
+
         return readLocalDate0(type);
     }
 
@@ -4666,6 +4671,11 @@ final class JSONReaderJSONB
             return LocalTime.of(hour, minute, second, nano);
         }
 
+        if (type == BC_NULL) {
+            offset++;
+            return null;
+        }
+
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
             int len = getStringLength();
             switch (len) {
@@ -4737,7 +4747,40 @@ final class JSONReaderJSONB
     @Override
     public ZonedDateTime readZonedDateTime() {
         int type = bytes[offset++];
+        if (type == BC_TIMESTAMP_WITH_TIMEZONE) {
+            int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+            int month = bytes[offset++];
+            int dayOfMonth = bytes[offset++];
+            int hour = bytes[offset++];
+            int minute = bytes[offset++];
+            int second = bytes[offset++];
+            int nano = readInt32Value();
+            LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+
+            ZoneId zoneId;
+            long zoneIdHash = readValueHashCode();
+            final long SHANGHAI_ZONE_ID_HASH = -4800907791268808639L; // Fnv.hashCode64("Asia/Shanghai");
+            if (zoneIdHash == SHANGHAI_ZONE_ID_HASH) {
+                zoneId = SHANGHAI_ZONE_ID;
+            } else {
+                String zoneIdStr = getString();
+                ZoneId contextZoneId = context.getZoneId();
+                if (contextZoneId.getId().equals(zoneIdStr)) {
+                    zoneId = contextZoneId;
+                } else {
+                    zoneId = DateUtils.getZoneId(zoneIdStr, SHANGHAI_ZONE_ID);
+                }
+            }
+            return ZonedDateTime.ofLocal(ldt, zoneId, null);
+        }
+
+        return readZonedDateTime0(type);
+    }
+
+    private ZonedDateTime readZonedDateTime0(int type) {
         switch (type) {
+            case BC_NULL:
+                return null;
             case BC_TIMESTAMP: {
                 long second = readInt64Value();
                 int nano = readInt32Value();
@@ -4781,31 +4824,6 @@ final class JSONReaderJSONB
                 Instant instant = Instant.ofEpochMilli(BIG_ENDIAN ? millis : Long.reverseBytes(millis));
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
-            case BC_TIMESTAMP_WITH_TIMEZONE:
-                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
-                int month = bytes[offset++];
-                int dayOfMonth = bytes[offset++];
-                int hour = bytes[offset++];
-                int minute = bytes[offset++];
-                int second = bytes[offset++];
-                int nano = readInt32Value();
-                LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
-
-                ZoneId zoneId;
-                long zoneIdHash = readValueHashCode();
-                final long SHANGHAI_ZONE_ID_HASH = -4800907791268808639L; // Fnv.hashCode64("Asia/Shanghai");
-                if (zoneIdHash == SHANGHAI_ZONE_ID_HASH) {
-                    zoneId = SHANGHAI_ZONE_ID;
-                } else {
-                    String zoneIdStr = getString();
-                    ZoneId contextZoneId = context.getZoneId();
-                    if (contextZoneId.getId().equals(zoneIdStr)) {
-                        zoneId = contextZoneId;
-                    } else {
-                        zoneId = DateUtils.getZoneId(zoneIdStr, SHANGHAI_ZONE_ID);
-                    }
-                }
-                return ZonedDateTime.ofLocal(ldt, zoneId, null);
             default:
                 if (type >= BC_STR_ASCII_FIX_0 && type <= BC_STR_ASCII_FIX_MAX) {
                     offset--;
