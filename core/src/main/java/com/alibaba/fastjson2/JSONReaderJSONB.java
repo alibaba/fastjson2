@@ -1076,7 +1076,7 @@ final class JSONReaderJSONB
                 offset += 3;
                 value = int3;
             } else if (valueType == BC_INT32) {
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
                 offset += 5;
                 value = BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
             } else if (valueType == BC_REFERENCE) {
