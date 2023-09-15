@@ -38,7 +38,7 @@ public class Issue1819 {
         ObjectInput objectInput = serialization.deserialize(url, inputStream);
         map = objectInput.readObject(Map.class);
         List<Integer> workBys = (List) map.get("work_by");
-        for (int i=0; i<workBys.size(); i++) {
+        for (int i = 0; i < workBys.size(); i++) {
             assertEquals(workBysOrigin.get(i), workBys.get(i));
         }
     }
