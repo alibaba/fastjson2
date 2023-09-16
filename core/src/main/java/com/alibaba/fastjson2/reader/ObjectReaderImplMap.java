@@ -427,6 +427,10 @@ public final class ObjectReaderImplMap
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
+
         JSONReader.Context context = jsonReader.getContext();
         Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
         Map object;
