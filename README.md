@@ -405,3 +405,9 @@ JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
 JSONReader parser = JSONReader.ofJSONB(bytes); // 注意这里使用ofJSONB方法
 Object result = path.extract(parser);
 ```
+
+## Star History
+
+
+[![Star History Chart](https://api.star-history.com/svg?repos=alibaba/fastjson2&type=Date)](https://star-history.com/#alibaba/fastjson2)
+
