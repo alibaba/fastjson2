@@ -8,16 +8,17 @@ import java.util.Map;
 
 public class ReadResult {
     public static void main(String[] args) throws Exception {
-        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.40_raw.md");
+        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.41_raw.md");
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
 
         Map<String, String> files = new LinkedHashMap<>();
-        files.put("aliyun_ecs.c8i.large", "/Users/wenshao/Downloads/result_2.0.40_g8i.out");
+        files.put("aliyun_ecs.c8i.large", "/Users/wenshao/Downloads/result_2.0.41_g8i.out");
 //        files.put("aliyun_ecs.g7.large", "/Users/wenshao/Downloads/result_2.0.33_g7.out");
-        files.put("aliyun_ecs.c8y.large", "/Users/wenshao/Downloads/result_2.0.40_g8y.out");
-//        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.33_aws_c6g.out");
-//        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_2.0.33_aws_c7g.out");
-//        files.put("orangepi5p", "/Users/wenshao/Downloads/result_2.0.38_orangepi5.out");
+        files.put("aliyun_ecs.c8y.large", "/Users/wenshao/Downloads/result_2.0.41_g8y.out");
+//        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.41_aws_c6g.out");
+//        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_2.0.41_aws_c7g.out");
+        files.put("orangepi5p", "/Users/wenshao/Downloads/result_2.0.41_orangepi5.out");
+//        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_2.0.41_applem1pro.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
