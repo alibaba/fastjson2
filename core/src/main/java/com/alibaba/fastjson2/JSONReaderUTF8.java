@@ -6241,17 +6241,21 @@ class JSONReaderUTF8
 
         final int start = offset;
 
-        final int limit, multmin;
+        final int multmin;
         if (ch == '-') {
-            limit = Integer.MIN_VALUE;
+            if (offset == end) {
+                throw new JSONException(info("illegal input"));
+            }
             multmin = -214748364; // limit / 10;
             negative = true;
             ch = (char) bytes[offset++];
         } else {
             if (ch == '+') {
+                if (offset == end) {
+                    throw new JSONException(info("illegal input"));
+                }
                 ch = (char) bytes[offset++];
             }
-            limit = -2147483647; // -Integer.MAX_VALUE;
             multmin = -214748364; // limit / 10;
         }
 
