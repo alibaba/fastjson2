@@ -1,6 +1,7 @@
-package com.alibaba.fastjson2.support.csv;
+package com.alibaba.fastjson2.support.arrow;
 
 import com.alibaba.fastjson2.stream.StreamReader;
+import com.alibaba.fastjson2.support.csv.CSVReader;
 
 import java.io.File;
 import java.io.IOException;

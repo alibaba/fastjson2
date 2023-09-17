@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
+import com.alibaba.fastjson2.support.arrow.ArrowByteArrayConsumer;
+import com.alibaba.fastjson2.support.arrow.ArrowUtils;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import org.apache.arrow.memory.BufferAllocator;

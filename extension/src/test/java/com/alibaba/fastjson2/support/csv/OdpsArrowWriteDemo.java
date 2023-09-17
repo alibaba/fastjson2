@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.support.arrow.ArrowByteArrayConsumer;
+import com.alibaba.fastjson2.support.arrow.CSVUtils;
 import com.aliyun.odps.Instance;
 import com.aliyun.odps.Odps;
 import com.aliyun.odps.data.ArrowRecordWriter;

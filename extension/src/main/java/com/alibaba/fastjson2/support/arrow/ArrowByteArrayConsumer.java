@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support.csv;
+package com.alibaba.fastjson2.support.arrow;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;

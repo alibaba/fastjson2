@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.support.csv;
 
+import com.alibaba.fastjson2.support.arrow.CSVUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
