@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.support.arrow.CSVUtils;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.aliyun.odps.Column;
