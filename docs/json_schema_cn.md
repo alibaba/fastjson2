@@ -20,14 +20,14 @@ JSONSchemaBenchmark.networknt  thrpt    5   2.337 ± 0.007  ops/ms
 @Test
 public void test() {
     // 定义必须包含longitude和latitude两个属性，其中longitude的取值范围是[-180 ~ 180]，latitude的取值范围是[-90, 90]
-    JSONSchema schema = JSONSchema.of("{\n" +
-            "  \"type\": \"object\",\n" +
-            "  \"properties\": {\n" +
-            "    \"longitude\": { \"type\": \"number\", \"minimum\":-180, \"maximum\":180},\n" +
-            "    \"latitude\": { \"type\": \"number\", \"minimum\":-90, \"maximum\":90},\n" +
-            "  },\n" +
-            "  \"required\": [\"longitude\", \"latitude\"]\n" +
-            "}");
+    JSONSchema schema = JSONSchema.of(JSON.parseObject("{" +
+        "  \"type\": \"object\"," +
+        "  \"properties\": {" +
+        "    \"longitude\": { \"type\": \"number\", \"minimum\":-180, \"maximum\":180}," +
+        "    \"latitude\": { \"type\": \"number\", \"minimum\":-90, \"maximum\":90}," +
+        "  }," +
+        "  \"required\": [\"longitude\", \"latitude\"]" +
+        "}"));
 
     // 校验JSONObject对象，校验通过
     assertTrue(
