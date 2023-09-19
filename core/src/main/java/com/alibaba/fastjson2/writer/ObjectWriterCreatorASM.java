@@ -2257,19 +2257,19 @@ public class ObjectWriterCreatorASM
 
         mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
 
-        mwc.genIsEnabled(
-                WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
-                writeNullValue_,
-                endIfNull_
-        );
-
         mw.visitLabel(writeNullValue_);
 
-        gwFieldName(mwc, fieldWriter, i);
-
-        // TODO : if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsEmpty.mask)) == 0) {
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNumberNull", "()V", false);
+        long features = fieldWriter.features | mwc.var2(CONTEXT_FEATURES);
+        if ((features & WriteNullNumberAsZero.mask) != 0) {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitLdcInsn(0);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
+        } else if ((features & (WriteNulls.mask | NullAsDefaultValue.mask)) != 0) {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNull", "()V", false);
+        }
 
         mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
 
