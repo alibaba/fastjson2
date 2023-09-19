@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.Test;
 
 import javax.validation.Valid;
+
 import java.time.OffsetDateTime;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class Issue1861 {
 
     public class MyData1 {
         @JsonProperty("myData2")
-        private @Valid Map<String, MyData2> myData2 = null;
+        private @Valid Map<String, MyData2> myData2;
 
         public Map<String, MyData2> getMyData2() {
             return myData2;
