@@ -1446,8 +1446,7 @@ public abstract class JSONReader
             return ZonedDateTime.parse(str);
         }
 
-        if (isNull()) {
-            readNull();
+        if (nextIfNull()) {
             return null;
         }
         throw new JSONException("TODO : " + ch);
@@ -2391,8 +2390,7 @@ public abstract class JSONReader
     public abstract void skipLineComment();
 
     public Boolean readBool() {
-        if (isNull()) {
-            readNull();
+        if (nextIfNull()) {
             return null;
         }
 
