@@ -94,7 +94,7 @@ public final class IntegerSchema
 
             if (maximum != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             }
 
@@ -177,7 +177,7 @@ public final class IntegerSchema
 
         if (maximum != Long.MIN_VALUE) {
             if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, longValue);
+                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, longValue);
             }
         }
 
@@ -211,7 +211,7 @@ public final class IntegerSchema
 
         if (maximum != Long.MIN_VALUE) {
             if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
             }
         }
 
@@ -244,7 +244,7 @@ public final class IntegerSchema
 
         if (maximum != Long.MIN_VALUE) {
             if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
             }
         }
 

@@ -118,7 +118,7 @@ public final class NumberSchema
                 if (exclusiveMaximum
                         ? maximum.compareTo(decimalValue) <= 0
                         : maximum.compareTo(decimalValue) < 0) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             }
 
@@ -192,7 +192,7 @@ public final class NumberSchema
         if (maximum != null) {
             if (maximumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             } else {
                 if (decimalValue == null) {
@@ -202,7 +202,7 @@ public final class NumberSchema
                 if (exclusiveMaximum
                         ? maximum.compareTo(decimalValue) <= 0
                         : maximum.compareTo(decimalValue) < 0) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             }
         }
@@ -244,12 +244,12 @@ public final class NumberSchema
         if (maximum != null) {
             if (maximumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             } else {
                 double maximumDoubleValue = maximum.doubleValue();
                 if (exclusiveMaximum ? value >= maximumDoubleValue : value > maximumDoubleValue) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             }
         }
