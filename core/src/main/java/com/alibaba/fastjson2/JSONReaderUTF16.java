@@ -5789,7 +5789,8 @@ class JSONReaderUTF16
                     ) {
                         year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
                     } else {
-                        return readZonedDateTime().toOffsetDateTime();
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
                     }
 
                     if (m0 >= '0' && m0 <= '9'
@@ -5797,7 +5798,8 @@ class JSONReaderUTF16
                     ) {
                         month = (m0 - '0') * 10 + (m1 - '0');
                     } else {
-                        return readZonedDateTime().toOffsetDateTime();
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
                     }
 
                     int dom;
@@ -5806,7 +5808,8 @@ class JSONReaderUTF16
                     ) {
                         dom = (d0 - '0') * 10 + (d1 - '0');
                     } else {
-                        return readZonedDateTime().toOffsetDateTime();
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
                     }
 
                     int hour;
@@ -5815,7 +5818,8 @@ class JSONReaderUTF16
                     ) {
                         hour = (h0 - '0') * 10 + (h1 - '0');
                     } else {
-                        return readZonedDateTime().toOffsetDateTime();
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
                     }
 
                     int minute;
@@ -5824,7 +5828,8 @@ class JSONReaderUTF16
                     ) {
                         minute = (i0 - '0') * 10 + (i1 - '0');
                     } else {
-                        return readZonedDateTime().toOffsetDateTime();
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
                     }
 
                     int second;
@@ -5833,7 +5838,8 @@ class JSONReaderUTF16
                     ) {
                         second = (s0 - '0') * 10 + (s1 - '0');
                     } else {
-                        return readZonedDateTime().toOffsetDateTime();
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
                     }
 
                     LocalDate localDate;
@@ -5871,7 +5877,8 @@ class JSONReaderUTF16
                 }
             }
         }
-        return readZonedDateTime().toOffsetDateTime();
+        ZonedDateTime zdt = readZonedDateTime();
+        return zdt == null ? null : zdt.toOffsetDateTime();
     }
 
     @Override
