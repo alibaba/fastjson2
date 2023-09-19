@@ -110,7 +110,7 @@ public final class NumberSchema
                 if (exclusiveMinimum
                         ? minimum.compareTo(decimalValue) >= 0
                         : minimum.compareTo(decimalValue) > 0) {
-                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
 
@@ -118,7 +118,7 @@ public final class NumberSchema
                 if (exclusiveMaximum
                         ? maximum.compareTo(decimalValue) <= 0
                         : maximum.compareTo(decimalValue) < 0) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             }
 
@@ -177,14 +177,14 @@ public final class NumberSchema
         if (minimum != null) {
             if (minimumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {
-                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             } else {
                 decimalValue = BigDecimal.valueOf(value);
                 if (exclusiveMinimum
                         ? minimum.compareTo(decimalValue) >= 0
                         : minimum.compareTo(decimalValue) > 0) {
-                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
         }
@@ -192,7 +192,7 @@ public final class NumberSchema
         if (maximum != null) {
             if (maximumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             } else {
                 if (decimalValue == null) {
@@ -202,7 +202,7 @@ public final class NumberSchema
                 if (exclusiveMaximum
                         ? maximum.compareTo(decimalValue) <= 0
                         : maximum.compareTo(decimalValue) < 0) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             }
         }
@@ -231,12 +231,12 @@ public final class NumberSchema
         if (minimum != null) {
             if (minimumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {
-                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             } else {
                 double minimumDoubleValue = minimum.doubleValue();
                 if (exclusiveMinimum ? value <= minimumDoubleValue : value < minimumDoubleValue) {
-                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
         }
@@ -244,12 +244,12 @@ public final class NumberSchema
         if (maximum != null) {
             if (maximumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             } else {
                 double maximumDoubleValue = maximum.doubleValue();
                 if (exclusiveMaximum ? value >= maximumDoubleValue : value > maximumDoubleValue) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect <= %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
                 }
             }
         }
