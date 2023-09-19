@@ -13,12 +13,14 @@ public class Issue1866 {
         User hello = new User();
         hello.setAge1(null);  // WriteNullNumberAsZero, 期望为0
         hello.setAge2(null);  // WriteNulls, 期望为null
-        hello.setAge3(null);  // 期望不序列化
+        hello.setAge3(null);  // NullAsDefaultValue, 期望为0
+        hello.setAge4(null);  // 期望不被序列化
 
-        // age4, age5不为null应不受影响
-        hello.setAge4(10);
+        // age5, age6不为null应不受影响
         hello.setAge5(10);
-        assertEquals(JSON.toJSONString(hello), "{\"age1\":0,\"age2\":null,\"age4\":10,\"age5\":10}");
+        hello.setAge6(10);
+        System.out.println(JSON.toJSONString(hello));
+        assertEquals("{\"age1\":0,\"age2\":null,\"age3\":0,\"age5\":10,\"age6\":10}", JSON.toJSONString(hello));
     }
 
     public static class User {
@@ -28,12 +30,14 @@ public class Issue1866 {
         @JSONField(serializeFeatures = JSONWriter.Feature.WriteNulls)
         private Integer age2;
 
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
         private Integer age3;
 
-        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
         private Integer age4;
 
         private Integer age5;
+
+        private Integer age6;
 
         public Integer getAge1() {
             return age1;
@@ -73,6 +77,14 @@ public class Issue1866 {
 
         public void setAge5(Integer age5) {
             this.age5 = age5;
+        }
+
+        public Integer getAge6() {
+            return age6;
+        }
+
+        public void setAge6(Integer age6) {
+            this.age6 = age6;
         }
     }
 }

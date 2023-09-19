@@ -2257,18 +2257,33 @@ public class ObjectWriterCreatorASM
 
         mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
 
-        mw.visitLabel(writeNullValue_);
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
+            mwc.genIsEnabled(
+                    WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                    writeNullValue_,
+                    endIfNull_
+            );
 
-        long features = fieldWriter.features | mwc.var2(CONTEXT_FEATURES);
-        if ((features & WriteNullNumberAsZero.mask) != 0) {
+            mw.visitLabel(writeNullValue_);
+
             gwFieldName(mwc, fieldWriter, i);
+
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(0);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
-        } else if ((features & (WriteNulls.mask | NullAsDefaultValue.mask)) != 0) {
-            gwFieldName(mwc, fieldWriter, i);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNull", "()V", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNumberNull", "()V", false);
+        } else {
+            long features = fieldWriter.features;
+            if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0) {
+                gwFieldName(mwc, fieldWriter, i);
+
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+                mw.visitLdcInsn(0);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
+            } else {  // (features & WriteNulls.mask) != 0
+                gwFieldName(mwc, fieldWriter, i);
+
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNull", "()V", false);
+            }
         }
 
         mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
