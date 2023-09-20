@@ -471,29 +471,31 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         : valueMap
         );
 
-        for (int i = 0; i < setterFieldReaders.length; i++) {
-            FieldReader fieldReader = setterFieldReaders[i];
-            Object fieldValue = map.get(fieldReader.fieldName);
-            if (fieldValue == null) {
-                continue;
-            }
-
-            Class<?> valueClass = fieldValue.getClass();
-            Class fieldClass = fieldReader.fieldClass;
-            Type fieldType = fieldReader.fieldType;
-            if (!(fieldType instanceof Class)) {
-                fieldValue = TypeUtils.cast(fieldValue, fieldType, provider);
-            } else if (valueClass != fieldClass) {
-                Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                if (typeConvert != null) {
-                    fieldValue = typeConvert.apply(fieldValue);
-                } else if (fieldValue instanceof Map) {
-                    ObjectReader objectReader = fieldReader.getObjectReader(JSONFactory.createReadContext(provider));
-                    fieldValue = objectReader.createInstance((Map) fieldValue, features | fieldReader.features);
+        if (setterFieldReaders != null) {
+            for (int i = 0; i < setterFieldReaders.length; i++) {
+                FieldReader fieldReader = setterFieldReaders[i];
+                Object fieldValue = map.get(fieldReader.fieldName);
+                if (fieldValue == null) {
+                    continue;
                 }
-            }
 
-            fieldReader.accept(object, fieldValue);
+                Class<?> valueClass = fieldValue.getClass();
+                Class fieldClass = fieldReader.fieldClass;
+                Type fieldType = fieldReader.fieldType;
+                if (!(fieldType instanceof Class)) {
+                    fieldValue = TypeUtils.cast(fieldValue, fieldType, provider);
+                } else if (valueClass != fieldClass) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                    if (typeConvert != null) {
+                        fieldValue = typeConvert.apply(fieldValue);
+                    } else if (fieldValue instanceof Map) {
+                        ObjectReader objectReader = fieldReader.getObjectReader(JSONFactory.createReadContext(provider));
+                        fieldValue = objectReader.createInstance((Map) fieldValue, features | fieldReader.features);
+                    }
+                }
+
+                fieldReader.accept(object, fieldValue);
+            }
         }
 
         return object;
