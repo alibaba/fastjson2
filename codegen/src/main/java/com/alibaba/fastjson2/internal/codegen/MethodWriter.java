@@ -27,7 +27,7 @@ public class MethodWriter
             buf.append("\tpublic ");
         }
 
-        if (name.equals("<init>")) {
+        if ("<init>".equals(name)) {
             buf.append(classWriter.name);
         } else {
             buf.append(getTypeName(returnType)).append(' ').append(name);

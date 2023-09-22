@@ -18,14 +18,14 @@ public static class Bean {
 @Test
 public void test_valuefilterCompose() {
     ValueFilter filter0 = (source, name, value) -> {
-        if (name.equals("id")) {
+        if ("id".equals(name)) {
             return ((Integer) value).intValue() + 1;
         }
         return value;
     };
 
     ValueFilter filter1 = (source, name, value) -> {
-        if (name.equals("id")) {
+        if ("id".equals(name)) {
             return ((Integer) value).intValue() + 10;
         }
         return value;

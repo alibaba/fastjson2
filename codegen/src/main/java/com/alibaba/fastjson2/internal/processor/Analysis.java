@@ -159,7 +159,7 @@ public class Analysis {
                                 break;
                         }
                     } else if (parameterCount == 1) {
-                        ignored = methodName.equals("equals");
+                        ignored = "equals".equals(methodName);
                     }
                     if (ignored) {
                         continue;

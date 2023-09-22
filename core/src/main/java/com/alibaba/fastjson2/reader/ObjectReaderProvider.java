@@ -806,7 +806,7 @@ public class ObjectReaderProvider
 
         String className = objectClass.getName();
         if (!fieldBased) {
-            if (className.equals("com.google.common.collect.ArrayListMultimap")) {
+            if ("com.google.common.collect.ArrayListMultimap".equals(className)) {
                 objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
             }
         }
@@ -816,7 +816,7 @@ public class ObjectReaderProvider
             Annotation[] annotations = objectClass.getAnnotations();
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                jsonCompiled = annotationType.getName().equals("com.alibaba.fastjson2.annotation.JSONCompiled");
+                jsonCompiled = "com.alibaba.fastjson2.annotation.JSONCompiled".equals(annotationType.getName());
             }
             if (jsonCompiled) {
                 String codeGenClassName = objectClass.getName() + "_FASTJOSNReader";

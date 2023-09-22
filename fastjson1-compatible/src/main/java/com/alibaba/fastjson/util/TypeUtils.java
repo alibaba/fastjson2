@@ -764,11 +764,11 @@ public class TypeUtils {
                 continue;
             }
 
-            if (methodName.equals("getMetaClass")
-                    && returnType.getName().equals("groovy.lang.MetaClass")) {
+            if ("getMetaClass".equals(methodName)
+                    && "groovy.lang.MetaClass".equals(returnType.getName())) {
                 continue;
             }
-            if (methodName.equals("getSuppressed")
+            if ("getSuppressed".equals(methodName)
                     && method.getDeclaringClass() == Throwable.class) {
                 continue;
             }
@@ -864,10 +864,10 @@ public class TypeUtils {
                 if (methodName.length() < 4) {
                     continue;
                 }
-                if (methodName.equals("getClass")) {
+                if ("getClass".equals(methodName)) {
                     continue;
                 }
-                if (methodName.equals("getDeclaringClass") && clazz.isEnum()) {
+                if ("getDeclaringClass".equals(methodName) && clazz.isEnum()) {
                     continue;
                 }
                 char c3 = methodName.charAt(3);
@@ -1179,7 +1179,7 @@ public class TypeUtils {
                 continue;
             }
 
-            if (parameterTypes.length > 0 && parameterTypes[parameterTypes.length - 1].getName().equals("kotlin.jvm.internal.DefaultConstructorMarker")) {
+            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1])) {
                 continue;
             }
             if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
