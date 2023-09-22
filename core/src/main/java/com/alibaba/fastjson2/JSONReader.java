@@ -1342,7 +1342,7 @@ public abstract class JSONReader
             return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
-        if (str.equals("0000-00-00 00:00:00")) {
+        if ("0000-00-00 00:00:00".equals(str)) {
             wasNull = true;
             return null;
         }

@@ -87,7 +87,7 @@ public class JDKUtils {
         try {
             String jmvName = System.getProperty("java.vm.name");
             openj9 = jmvName.contains("OpenJ9");
-            android = jmvName.equals("Dalvik");
+            android = "Dalvik".equals(jmvName);
             graal = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
             if (openj9 || android || graal) {
                 FIELD_STRING_VALUE_ERROR = true;

@@ -297,10 +297,10 @@ public class ObjectWriterProvider
         if (fieldBased) {
             if (superclass != null
                     && superclass != Object.class
-                    && superclass.getName().equals("com.google.protobuf.GeneratedMessageV3")) {
+                    && "com.google.protobuf.GeneratedMessageV3".equals(superclass.getName())) {
                 fieldBased = false;
             }
-            if (objectClass.getName().equals("springfox.documentation.spring.web.json.Json")) {
+            if ("springfox.documentation.spring.web.json.Json".equals(objectClass.getName())) {
                 fieldBased = false;
             }
         }

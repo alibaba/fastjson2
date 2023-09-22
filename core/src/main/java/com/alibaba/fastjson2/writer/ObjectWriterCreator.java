@@ -692,7 +692,7 @@ public class ObjectWriterCreator {
         Method method = null;
 
         if (declaringClass == Throwable.class) {
-            if (field.getName().equals("stackTrace")) {
+            if ("stackTrace".equals(field.getName())) {
                 method = BeanUtils.getMethod(Throwable.class, "getStackTrace");
             }
         }

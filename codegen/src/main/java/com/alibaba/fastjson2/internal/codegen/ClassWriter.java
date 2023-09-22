@@ -30,7 +30,7 @@ public class ClassWriter {
 
     static String getTypeName(Class type) {
         Package pkg = type.getPackage();
-        if (pkg != null && pkg.getName().equals("java.lang") && !type.isArray()) {
+        if (pkg != null && "java.lang".equals(pkg.getName()) && !type.isArray()) {
             return type.getSimpleName();
         }
 

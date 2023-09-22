@@ -206,7 +206,7 @@ public class ObjectReaderBaseModule
             Class mixInSource = provider.mixInCache.get(objectClass);
             if (mixInSource == null) {
                 String typeName = objectClass.getName();
-                if (typeName.equals("org.apache.commons.lang3.tuple.Triple")) {
+                if ("org.apache.commons.lang3.tuple.Triple".equals(typeName)) {
                     provider.mixIn(objectClass, mixInSource = ApacheLang3Support.TripleMixIn.class);
                 }
             }
@@ -326,7 +326,7 @@ public class ObjectReaderBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("value")) {
+                    if ("value".equals(name)) {
                         Object[] value = (Object[]) result;
                         if (value.length != 0) {
                             beanInfo.seeAlso = new Class[value.length];
@@ -349,7 +349,7 @@ public class ObjectReaderBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("using")) {
+                    if ("using".equals(name)) {
                         Class using = processUsing((Class) result);
                         if (using != null) {
                             beanInfo.deserializer = using;
@@ -367,7 +367,7 @@ public class ObjectReaderBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("property")) {
+                    if ("property".equals(name)) {
                         String value = (String) result;
                         if (!value.isEmpty()) {
                             beanInfo.typeKey = value;
@@ -520,7 +520,7 @@ public class ObjectReaderBaseModule
                                     Class<? extends Annotation> builderAnnotationClass = builderAnnotation.annotationType();
                                     String builderAnnotationName = builderAnnotationClass.getName();
 
-                                    if (builderAnnotationName.equals("com.alibaba.fastjson.annotation.JSONPOJOBuilder")) {
+                                    if ("com.alibaba.fastjson.annotation.JSONPOJOBuilder".equals(builderAnnotationName)) {
                                         getBeanInfo1xJSONPOJOBuilder(beanInfo, builderClass, builderAnnotation, builderAnnotationClass);
                                     } else {
                                         JSONBuilder jsonBuilder = findAnnotation(builderClass, JSONBuilder.class);
@@ -572,7 +572,7 @@ public class ObjectReaderBaseModule
             Class mixInSource = provider.mixInCache.get(objectClass);
             if (mixInSource == null) {
                 String typeName = objectClass.getName();
-                if (typeName.equals("org.apache.commons.lang3.tuple.Triple")) {
+                if ("org.apache.commons.lang3.tuple.Triple".equals(typeName)) {
                     provider.mixIn(objectClass, mixInSource = ApacheLang3Support.TripleMixIn.class);
                 }
             }
@@ -592,7 +592,7 @@ public class ObjectReaderBaseModule
                     String name = m.getName();
                     try {
                         Object result = m.invoke(annotation);
-                        if (name.equals("typeName")) {
+                        if ("typeName".equals(name)) {
                             String typeName = (String) result;
                             if (!typeName.isEmpty()) {
                                 beanInfo.typeName = typeName;
@@ -1003,7 +1003,7 @@ public class ObjectReaderBaseModule
                         }
                         case "access": {
                             String access = ((Enum) result).name();
-                            fieldInfo.ignore = access.equals("READ_ONLY");
+                            fieldInfo.ignore = "READ_ONLY".equals(access);
                             break;
                         }
                         case "required":
@@ -1027,7 +1027,7 @@ public class ObjectReaderBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("value")) {
+                    if ("value".equals(name)) {
                         String[] values = (String[]) result;
                         if (values.length != 0) {
                             fieldInfo.alternateNames = values;
@@ -1289,7 +1289,7 @@ public class ObjectReaderBaseModule
                     creatorMethod = true;
                     BeanUtils.annotationMethods(annotationType, m1 -> {
                         try {
-                            if (m1.getName().equals("parameterNames")) {
+                            if ("parameterNames".equals(m1.getName())) {
                                 String[] createParameterNames = (String[]) m1.invoke(annotation);
                                 if (createParameterNames.length != 0) {
                                     beanInfo.createParameterNames = createParameterNames;
@@ -1331,7 +1331,7 @@ public class ObjectReaderBaseModule
 
         String methodName = method.getName();
         if (objectClass.isEnum()) {
-            if (methodName.equals("values")) {
+            if ("values".equals(methodName)) {
                 return;
             }
         }
@@ -1352,7 +1352,7 @@ public class ObjectReaderBaseModule
                     creatorMethod = true;
                     BeanUtils.annotationMethods(annotationType, m1 -> {
                         try {
-                            if (m1.getName().equals("parameterNames")) {
+                            if ("parameterNames".equals(m1.getName())) {
                                 String[] createParameterNames = (String[]) m1.invoke(annotation);
                                 if (createParameterNames.length != 0) {
                                     beanInfo.createParameterNames = createParameterNames;
@@ -1368,7 +1368,7 @@ public class ObjectReaderBaseModule
                         creatorMethod = true;
                         BeanUtils.annotationMethods(annotationType, m1 -> {
                             try {
-                                if (m1.getName().equals("parameterNames")) {
+                                if ("parameterNames".equals(m1.getName())) {
                                     String[] createParameterNames = (String[]) m1.invoke(annotation);
                                     if (createParameterNames.length != 0) {
                                         beanInfo.createParameterNames = createParameterNames;
@@ -1605,7 +1605,7 @@ public class ObjectReaderBaseModule
             if (mixin == null) {
                 mixin = TypeUtils.loadClass(internalMixin);
                 if (mixin == null) {
-                    if (internalMixin.equals("org.springframework.security.jackson2.SimpleGrantedAuthorityMixin")) {
+                    if ("org.springframework.security.jackson2.SimpleGrantedAuthorityMixin".equals(internalMixin)) {
                         mixin = TypeUtils.loadClass("com.alibaba.fastjson2.internal.mixin.spring.SimpleGrantedAuthorityMixin");
                     }
                 }
