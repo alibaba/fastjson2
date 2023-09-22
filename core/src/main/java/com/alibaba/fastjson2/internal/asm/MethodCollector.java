@@ -25,7 +25,7 @@ public class MethodCollector {
 
     protected void visitLocalVariable(String name, int index) {
         if (index >= ignoreCount && index < ignoreCount + paramCount) {
-            if (!name.equals("arg" + currentParameter)) {
+            if (!("arg" + currentParameter).equals(name)) {
                 debugInfoPresent = true;
             }
             result.append(',');

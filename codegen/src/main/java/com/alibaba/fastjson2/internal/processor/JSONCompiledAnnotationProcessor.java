@@ -944,7 +944,7 @@ public class JSONCompiledAnnotationProcessor
             }
 
             OpName for_i;
-            if (fieldName.equals("i")) {
+            if ("i".equals(fieldName)) {
                 for_i = var("j");
             } else {
                 for_i = var("i");

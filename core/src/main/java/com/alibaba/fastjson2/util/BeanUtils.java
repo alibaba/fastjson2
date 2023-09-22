@@ -236,7 +236,7 @@ public abstract class BeanUtils {
         if (superClass != null
                 && superClass != Object.class
         ) {
-            protobufMessageV3 = superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
+            protobufMessageV3 = "com.google.protobuf.GeneratedMessageV3".equals(superClass.getName());
             if (!protobufMessageV3) {
                 declaredFields(superClass, fieldConsumer);
             }
@@ -288,7 +288,7 @@ public abstract class BeanUtils {
                 String fieldName = field.getName();
                 Class<?> fieldClass = field.getType();
                 if ("cardsmap_".equals(fieldName)
-                        && fieldClass.getName().equals("com.google.protobuf.MapField")) {
+                        && "com.google.protobuf.MapField".equals(fieldClass.getName())) {
                     return;
                 }
             }
@@ -724,7 +724,7 @@ public abstract class BeanUtils {
             }
 
             String methodName = method.getName();
-            if (methodName.equals("values")) {
+            if ("values".equals(methodName)) {
                 continue;
             }
 
@@ -844,7 +844,7 @@ public abstract class BeanUtils {
             methodCache.putIfAbsent(objectClass, methods);
         }
 
-        boolean protobufMessageV3 = superClass != null && superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
+        boolean protobufMessageV3 = superClass != null && "com.google.protobuf.GeneratedMessageV3".equals(superClass.getName());
 
         for (Method method : methods) {
             int paramType = method.getParameterCount();
@@ -893,7 +893,7 @@ public abstract class BeanUtils {
 
             if (protobufMessageV3) {
                 if ((methodName.endsWith("Type") || methodName.endsWith("Bytes"))
-                        && returnClass.getName().equals("com.google.protobuf.ByteString")) {
+                        && "com.google.protobuf.ByteString".equals(returnClass.getName())) {
                     continue;
                 }
             }
@@ -1203,9 +1203,9 @@ public abstract class BeanUtils {
 
         Field field = fields[0] != null ? fields[0] : fields[1];
         if (Throwable.class.isAssignableFrom(objectClass)) {
-            if (returnType == String.class && (field == null && methodName.equals("getMessage") || field == null && methodName.equals("getLocalizedMessage"))) {
+            if (returnType == String.class && (field == null && "getMessage".equals(methodName) || field == null && "getLocalizedMessage".equals(methodName))) {
                 field = getDeclaredField(objectClass, "detailMessage");
-            } else if (returnType == Throwable[].class && methodName.equals("getSuppressed")) {
+            } else if (returnType == Throwable[].class && "getSuppressed".equals(methodName)) {
                 field = getDeclaredField(objectClass, "suppressedExceptions");
             }
         }
@@ -2334,7 +2334,7 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                if (name.equals("value")) {
+                if ("value".equals(name)) {
                     fieldInfo.ignore = (boolean) (Boolean) result;
                 }
             } catch (Throwable ignored) {
@@ -2623,7 +2623,7 @@ public abstract class BeanUtils {
                     }
                     case "shape": {
                         String shape = ((Enum) result).name();
-                        if (shape.equals("STRING")) {
+                        if ("STRING".equals(shape)) {
                             fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
                         }
                         break;
@@ -2643,7 +2643,7 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                if (name.equals("pattern")) {
+                if ("pattern".equals(name)) {
                     String pattern = (String) result;
                     if (pattern.length() != 0) {
                         beanInfo.format = pattern;
@@ -2661,7 +2661,7 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                if (name.equals("value")) {
+                if ("value".equals(name)) {
                     String include = ((Enum) result).name();
                     switch (include) {
                         case "ALWAYS":
@@ -2686,7 +2686,7 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                if (name.equals("value")) {
+                if ("value".equals(name)) {
                     String value = (String) result;
                     if (!value.isEmpty()) {
                         beanInfo.typeName = value;
@@ -2780,7 +2780,7 @@ public abstract class BeanUtils {
             if (Modifier.isStatic(modifiers)
                     || Modifier.isTransient(modifiers)
                     || field.getDeclaringClass().isAssignableFrom(superclass)
-                    || field.getName().equals("this$0")
+                    || "this$0".equals(field.getName())
             ) {
                 return;
             }

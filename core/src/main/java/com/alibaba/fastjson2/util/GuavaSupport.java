@@ -207,7 +207,7 @@ public class GuavaSupport {
 
     public static Function createConvertFunction(Class objectClass) {
         String instanceTypeName = objectClass.getName();
-        if (instanceTypeName.equals("com.google.common.collect.ArrayListMultimap")) {
+        if ("com.google.common.collect.ArrayListMultimap".equals(instanceTypeName)) {
             if (CLASS_ARRAYLIST_MULTI_MAP == null) {
                 CLASS_ARRAYLIST_MULTI_MAP = objectClass;
             }

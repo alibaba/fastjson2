@@ -175,7 +175,7 @@ public class ObjectWriterBaseModule
                         }
 
                         String annotationTypeName = annotationType.getName();
-                        if (annotationTypeName.equals("com.alibaba.fastjson.annotation.JSONType")) {
+                        if ("com.alibaba.fastjson.annotation.JSONType".equals(annotationTypeName)) {
                             jsonType1x = annotation;
                         }
                     }
@@ -402,7 +402,7 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("value")) {
+                    if ("value".equals(name)) {
                         Annotation[] value = (Annotation[]) result;
                         if (value.length != 0) {
                             beanInfo.seeAlso = new Class[value.length];
@@ -471,7 +471,7 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("property")) {
+                    if ("property".equals(name)) {
                         String value = (String) result;
                         if (!value.isEmpty()) {
                             beanInfo.typeKey = value;
@@ -490,7 +490,7 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("value")) {
+                    if ("value".equals(name)) {
                         String[] value = (String[]) result;
                         if (value.length != 0) {
                             beanInfo.orders = value;
@@ -551,7 +551,7 @@ public class ObjectWriterBaseModule
                             break;
                         case "access": {
                             String access = ((Enum) result).name();
-                            fieldInfo.ignore = access.equals("WRITE_ONLY");
+                            fieldInfo.ignore = "WRITE_ONLY".equals(access);
                             break;
                         }
                         default:
@@ -569,7 +569,7 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if (name.equals("value")) {
+                    if ("value".equals(name)) {
                         String[] value = (String[]) result;
                         if (value.length != 0) {
                             beanInfo.ignores = value;
@@ -714,7 +714,7 @@ public class ObjectWriterBaseModule
             Class mixInSource = provider.mixInCache.get(objectClass);
             String methodName = method.getName();
 
-            if (methodName.equals("getTargetSql")) {
+            if ("getTargetSql".equals(methodName)) {
                 if (objectClass != null
                         && objectClass.getName().startsWith("com.baomidou.mybatisplus.")
                 ) {

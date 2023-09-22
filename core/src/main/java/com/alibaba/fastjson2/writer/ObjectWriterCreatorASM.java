@@ -3015,9 +3015,9 @@ public class ObjectWriterCreatorASM
 
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
                 mw.visitLdcInsn(nameIn64);
-                if (methodDesc.equals("(JI)V")) {
+                if ("(JI)V".equals(methodDesc)) {
                     mw.visitLdcInsn(name1.intValue());
-                } else if (methodDesc.equals("(JJ)V")) {
+                } else if ("(JJ)V".equals(methodDesc)) {
                     mw.visitLdcInsn(name1.longValue());
                 }
                 mw.visitMethodInsn(
