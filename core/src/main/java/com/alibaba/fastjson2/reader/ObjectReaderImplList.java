@@ -370,7 +370,12 @@ public final class ObjectReaderImplList
         Function builder = this.builder;
         Class listType = this.instanceType;
         if (objectReader != null) {
-            listType = objectReader.getObjectClass();
+            if (objectReader instanceof ObjectReaderImplList) {
+                listType = ((ObjectReaderImplList) objectReader).instanceType;
+                builder = ((ObjectReaderImplList) objectReader).builder;
+            } else {
+                listType = objectReader.getObjectClass();
+            }
 
             if (listType == CLASS_UNMODIFIABLE_COLLECTION) {
                 listType = ArrayList.class;
@@ -441,7 +446,7 @@ public final class ObjectReaderImplList
             list = entryCnt > 0 ? new ArrayList(entryCnt) : new ArrayList();
         } else if (listType == JSONArray.class) {
             list = entryCnt > 0 ? new JSONArray(entryCnt) : new JSONArray();
-        } else if (listType == Set.class || listType == HashSet.class) {
+        } else if (listType == HashSet.class) {
             list = new HashSet();
         } else if (listType == LinkedHashSet.class) {
             list = new LinkedHashSet();
