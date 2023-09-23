@@ -122,6 +122,12 @@ public interface ObjectWriter<T> {
         return jsonWriter.hasFilter(JSONWriter.Feature.IgnoreNonFieldGetter.mask);
     }
 
+    default String write(Object object, JSONWriter.Feature... features) {
+        JSONWriter jsonWriter = JSONWriter.of(features);
+        write(jsonWriter, object, null, null, 0);
+        return jsonWriter.toString();
+    }
+
     default void write(JSONWriter jsonWriter, Object object) {
         write(jsonWriter, object, null, null, 0);
     }
