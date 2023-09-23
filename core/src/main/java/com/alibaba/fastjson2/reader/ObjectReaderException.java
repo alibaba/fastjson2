@@ -342,6 +342,15 @@ final class ObjectReaderException<T>
     }
 
     @Override
+    public T createInstance(Map map, long features) {
+        if (map == null) {
+            return null;
+        }
+
+        return readObject(JSONReader.of(JSON.toJSONString(map)), features);
+    }
+
+    @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
             JSONReader.Context context = jsonReader.getContext();

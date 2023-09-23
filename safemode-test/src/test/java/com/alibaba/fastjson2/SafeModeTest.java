@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SafeModeTest {
     @Test
@@ -27,9 +28,6 @@ public class SafeModeTest {
         Throwable e1 = JSON.parseObject(jsonString, Throwable.class);
         assertEquals(Throwable.class, e1.getClass());
         JSONObject object = JSON.parseObject(jsonString);
-        assertThrows(
-                Exception.class,
-                () -> object.toJavaObject(Throwable.class)
-        );
+        assertEquals(Throwable.class, object.toJavaObject(Throwable.class).getClass());
     }
 }

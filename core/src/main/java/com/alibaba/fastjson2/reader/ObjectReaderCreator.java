@@ -684,25 +684,27 @@ public class ObjectReaderCreator {
 
         boolean[] flags = null;
         int maskCount = 0;
-        for (int i = 0; i < setterFieldReaders.length; i++) {
-            FieldReader setterFieldReader = setterFieldReaders[i];
-            if (fieldReaders.containsKey(setterFieldReader.fieldName)) {
-                if (flags == null) {
-                    flags = new boolean[setterFieldReaders.length];
-                }
-                flags[i] = true;
-                maskCount++;
-            }
-        }
-        if (maskCount > 0) {
-            FieldReader[] array = new FieldReader[setterFieldReaders.length - maskCount];
-            int index = 0;
+        if (setterFieldReaders != null) {
             for (int i = 0; i < setterFieldReaders.length; i++) {
-                if (!flags[i]) {
-                    array[index++] = setterFieldReaders[i];
+                FieldReader setterFieldReader = setterFieldReaders[i];
+                if (fieldReaders.containsKey(setterFieldReader.fieldName)) {
+                    if (flags == null) {
+                        flags = new boolean[setterFieldReaders.length];
+                    }
+                    flags[i] = true;
+                    maskCount++;
                 }
             }
-            setterFieldReaders = array;
+            if (maskCount > 0) {
+                FieldReader[] array = new FieldReader[setterFieldReaders.length - maskCount];
+                int index = 0;
+                for (int i = 0; i < setterFieldReaders.length; i++) {
+                    if (!flags[i]) {
+                        array[index++] = setterFieldReaders[i];
+                    }
+                }
+                setterFieldReaders = array;
+            }
         }
 
         return (ObjectReader<T>) new ObjectReaderNoneDefaultConstructor(
