@@ -441,7 +441,7 @@ public final class ObjectReaderImplList
             list = entryCnt > 0 ? new ArrayList(entryCnt) : new ArrayList();
         } else if (listType == JSONArray.class) {
             list = entryCnt > 0 ? new JSONArray(entryCnt) : new JSONArray();
-        } else if (listType == HashSet.class) {
+        } else if (listType == Set.class || listType == HashSet.class) {
             list = new HashSet();
         } else if (listType == LinkedHashSet.class) {
             list = new LinkedHashSet();
