@@ -4049,8 +4049,6 @@ class JSONReaderUTF8
                 }
                 return null;
             }
-        } else if (ch == ',' || ch == '\r' || ch == '\n') {
-            return null;
         }
 
         if (ch == '-') {
@@ -4334,8 +4332,6 @@ class JSONReaderUTF8
                 nextIfComma();
                 return null;
             }
-        } else if (ch == ',' || ch == '\r' || ch == '\n') {
-            return null;
         }
 
         if (ch == '-') {
@@ -6288,10 +6284,6 @@ class JSONReaderUTF8
                 wasNull = true;
                 return;
             }
-        } else if (ch == ',' || ch == '\r' || ch == '\n') {
-            wasNull = true;
-            valueType = JSON_TYPE_NULL;
-            return;
         }
 
         final int start = offset;
