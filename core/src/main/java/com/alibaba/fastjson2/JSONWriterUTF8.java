@@ -2778,7 +2778,7 @@ class JSONWriterUTF8
         features |= context.features;
 
         int precision = value.precision();
-        boolean writeAsString = isWriteAsString(value, features) && precision >= 16;
+        boolean writeAsString = isWriteAsString(value, features);
 
         int off = this.off;
         int minCapacity = off + precision + 7;

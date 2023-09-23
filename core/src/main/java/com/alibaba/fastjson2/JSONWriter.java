@@ -845,7 +845,7 @@ public abstract class JSONWriter
     }
 
     protected boolean isWriteAsString(BigDecimal value, long features) {
-        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
+        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value) && value.precision() >= 16;
         boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask)) != 0;
         return browserCompatible || nonStringAsString;
     }
