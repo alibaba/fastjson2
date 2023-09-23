@@ -11,11 +11,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.zone.ZoneRules;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import static com.alibaba.fastjson2.util.DateUtils.DateTimeFormatPattern.*;
-import static com.alibaba.fastjson2.util.IOUtils.PACKED_DIGITS;
-import static com.alibaba.fastjson2.util.IOUtils.PACKED_DIGITS_UTF16;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.time.ZoneOffset.UTC;
 
@@ -6909,14 +6909,14 @@ public class DateUtils {
         } else if (len == 34) {
             DateTimeFormatter formatter = DATE_TIME_FORMATTER_34;
             if (formatter == null) {
-                formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy");
+                formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy", Locale.ENGLISH);
             }
             return ZonedDateTime.parse(new String(str, off, len), formatter);
         } else if (len == 31 && str[off + 3] == ',') {
             DateTimeFormatter formatter;
             formatter = DATE_TIME_FORMATTER_RFC_2822;
             if (formatter == null) {
-                formatter = DATE_TIME_FORMATTER_RFC_2822 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z");
+                formatter = DATE_TIME_FORMATTER_RFC_2822 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             }
             return ZonedDateTime.parse(new String(str, off, len), formatter);
         } else {
@@ -7942,14 +7942,14 @@ public class DateUtils {
         } else if (len == 34) {
             DateTimeFormatter formatter = DATE_TIME_FORMATTER_34;
             if (formatter == null) {
-                formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy");
+                formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy", Locale.ENGLISH);
             }
             return ZonedDateTime.parse(new String(str, off, len), formatter);
         } else if (len == 31 && str[off + 3] == ',') {
             DateTimeFormatter formatter;
             formatter = DATE_TIME_FORMATTER_RFC_2822;
             if (formatter == null) {
-                formatter = DATE_TIME_FORMATTER_RFC_2822 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z");
+                formatter = DATE_TIME_FORMATTER_RFC_2822 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             }
             return ZonedDateTime.parse(new String(str, off, len), formatter);
         } else {
@@ -8028,7 +8028,7 @@ public class DateUtils {
         if (str.endsWith(" CST")) {
             DateTimeFormatter formatter = DATE_TIME_FORMATTER_COOKIE_LOCAL;
             if (formatter == null) {
-                formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss");
+                formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
                 DATE_TIME_FORMATTER_COOKIE_LOCAL = formatter;
             }
             String strLocalDateTime = str.substring(0, str.length() - 4);
@@ -8038,7 +8038,7 @@ public class DateUtils {
 
         DateTimeFormatter formatter = DATE_TIME_FORMATTER_COOKIE;
         if (formatter == null) {
-            formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss zzz");
+            formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss zzz", Locale.ENGLISH);
             DATE_TIME_FORMATTER_COOKIE = formatter;
         }
         return ZonedDateTime.parse(str, formatter);
