@@ -1,12 +1,12 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteLongAsString;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 abstract class FieldWriterInt64<T>
         extends FieldWriter<T> {
@@ -31,9 +31,7 @@ abstract class FieldWriterInt64<T>
         boolean writeAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
         writeFieldName(jsonWriter);
         if (!writeAsString) {
-            writeAsString = browserCompatible
-                    && !jsonWriter.jsonb
-                    && (value > 9007199254740991L || value < -9007199254740991L);
+            writeAsString = browserCompatible && !TypeUtils.isJavaScriptSupport(value) && !jsonWriter.jsonb;
         }
         if (writeAsString) {
             jsonWriter.writeString(Long.toString(value));

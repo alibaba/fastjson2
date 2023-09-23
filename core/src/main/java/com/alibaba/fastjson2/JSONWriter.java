@@ -23,6 +23,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
 
 public abstract class JSONWriter
         implements Closeable {
@@ -829,6 +830,24 @@ public abstract class JSONWriter
 
     public void writeNameRaw(byte[] name, long nameHash) {
         throw new JSONException("UnsupportedOperation");
+    }
+
+    protected boolean isWriteAsString(long value, long features) {
+        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
+        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        return browserCompatible || nonStringAsString;
+    }
+
+    protected boolean isWriteAsString(BigInteger value, long features) {
+        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
+        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask)) != 0;
+        return browserCompatible || nonStringAsString;
+    }
+
+    protected boolean isWriteAsString(BigDecimal value, long features) {
+        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
+        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask)) != 0;
+        return browserCompatible || nonStringAsString;
     }
 
     public abstract void writeNameRaw(char[] chars);
