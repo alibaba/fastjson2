@@ -1,7 +1,10 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
+import com.alibaba.fastjson2.reader.ObjectReaderImplInstant;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterPrimitiveImpl;
 
@@ -66,11 +69,14 @@ public class TypeUtils {
     public static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     public static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
-    static final BigDecimal DECIMAL_JAVASCRIPT_LOW = BigDecimal.valueOf(-9007199254740991L);
-    static final BigDecimal DECIMAL_JAVASCRIPT_HIGH = BigDecimal.valueOf(9007199254740991L);
+    static final long LONG_JAVASCRIPT_LOW = -9007199254740991L;
+    static final long LONG_JAVASCRIPT_HIGH = 9007199254740991L;
 
-    static final BigInteger BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(-9007199254740991L);
-    static final BigInteger BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(9007199254740991L);
+    static final BigDecimal DECIMAL_JAVASCRIPT_LOW = BigDecimal.valueOf(LONG_JAVASCRIPT_LOW);
+    static final BigDecimal DECIMAL_JAVASCRIPT_HIGH = BigDecimal.valueOf(LONG_JAVASCRIPT_HIGH);
+
+    static final BigInteger BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(LONG_JAVASCRIPT_LOW);
+    static final BigInteger BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(LONG_JAVASCRIPT_HIGH);
 
     /**
      * All the positive powers of 10 that can be
@@ -3275,11 +3281,11 @@ public class TypeUtils {
             case "java.lang.Object":
                 return Object.class;
             case "java.util.Collections$EmptyMap":
-                return Collections.EMPTY_MAP.getClass();
+                return Collections.emptyMap().getClass();
             case "java.util.Collections$EmptyList":
-                return Collections.EMPTY_LIST.getClass();
+                return Collections.emptyList().getClass();
             case "java.util.Collections$EmptySet":
-                return Collections.EMPTY_SET.getClass();
+                return Collections.emptySet().getClass();
             case "java.util.Optional":
                 return Optional.class;
             case "java.util.OptionalInt":
@@ -4280,13 +4286,15 @@ public class TypeUtils {
         return signNum * Math.scalb((float) j, Q_MIN_F - 2);
     }
 
+    public static boolean isJavaScriptSupport(long i) {
+        return i >= LONG_JAVASCRIPT_LOW && i <= LONG_JAVASCRIPT_HIGH;
+    }
+
     public static boolean isJavaScriptSupport(BigDecimal i) {
-        return i.compareTo(DECIMAL_JAVASCRIPT_LOW) >= 0
-                && i.compareTo(DECIMAL_JAVASCRIPT_HIGH) <= 0;
+        return i.compareTo(DECIMAL_JAVASCRIPT_LOW) >= 0 && i.compareTo(DECIMAL_JAVASCRIPT_HIGH) <= 0;
     }
 
     public static boolean isJavaScriptSupport(BigInteger i) {
-        return i.compareTo(BIGINT_JAVASCRIPT_LOW) >= 0
-                && i.compareTo(BIGINT_JAVASCRIPT_HIGH) <= 0;
+        return i.compareTo(BIGINT_JAVASCRIPT_LOW) >= 0 && i.compareTo(BIGINT_JAVASCRIPT_HIGH) <= 0;
     }
 }
