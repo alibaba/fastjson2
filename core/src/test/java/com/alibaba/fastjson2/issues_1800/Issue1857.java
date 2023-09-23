@@ -13,7 +13,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class Issue1857 {
-
     @Test
     public void test() {
         Map<String, String> map = new HashMap<>();
@@ -39,12 +38,10 @@ public class Issue1857 {
         assertEquals(result, map.keySet());
     }
 
-    private static class Handler extends ContextAutoTypeBeforeHandler {
-
+    private static class Handler
+            extends ContextAutoTypeBeforeHandler {
         public Handler() {
             super(true, new String[0]);
         }
-
     }
-
 }
