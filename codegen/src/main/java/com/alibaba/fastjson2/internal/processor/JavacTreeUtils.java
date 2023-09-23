@@ -349,8 +349,22 @@ final class JavacTreeUtils {
                 } else {
                     return (JCTree.JCCase) method.invoke(treeMaker, statement.get(null), List.of(matchExpr), List.of(block(matchStmts)), null);
                 }
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+            } catch (Exception e2) {
+                try {
+                    Class<?> caseKind = Class.forName("com.sun.source.tree.CaseTree$CaseKind");
+                    Field statement = Class.forName("com.sun.tools.javac.tree.JCTree$JCCase").getDeclaredField("STATEMENT");
+                    Method method = clazz.getDeclaredMethod("Case", caseKind, List.class, JCTree.JCExpression.class, List.class, JCTree.class);
+                    if (matchExpr instanceof JCTree.JCLiteral || matchExpr instanceof JCTree.JCTypeCast) {
+                        Class<?> constantCaseLabel = Class.forName("com.sun.tools.javac.tree.JCTree$JCConstantCaseLabel");
+                        Constructor<?> constructor = constantCaseLabel.getDeclaredConstructor(JCTree.JCExpression.class);
+                        constructor.setAccessible(true);
+                        return (JCTree.JCCase) method.invoke(treeMaker, statement.get(null), List.of(constructor.newInstance(matchExpr)), null, List.of(block(matchStmts)), null);
+                    } else {
+                        return (JCTree.JCCase) method.invoke(treeMaker, statement.get(null), List.of(matchExpr), null, List.of(block(matchStmts)), null);
+                    }
+                } catch (Exception e3) {
+                    throw new RuntimeException(e3);
+                }
             }
         }
     }
