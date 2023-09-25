@@ -4806,10 +4806,12 @@ class JSONReaderUTF16
                     }
                 }
             } else if (ch == '{' && quote == 0) {
+                valid = true;
                 this.complex = readObject();
                 valueType = JSON_TYPE_OBJECT;
                 return;
             } else if (ch == '[' && quote == 0) {
+                valid = true;
                 this.complex = readArray();
                 valueType = JSON_TYPE_ARRAY;
                 return;

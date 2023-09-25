@@ -4938,6 +4938,7 @@ class JSONReaderUTF8
                     }
                 }
             } else if (ch == '{' && quote == 0) {
+                valid = true;
                 Map<String, Object> obj = readObject();
                 if (!obj.isEmpty()) {
                     throw new JSONException(info());
@@ -4945,6 +4946,7 @@ class JSONReaderUTF8
                 value = true;
                 wasNull = true;
             } else if (ch == '[' && quote == 0) {
+                valid = true;
                 List array = readArray();
                 if (!array.isEmpty()) {
                     throw new JSONException(info());
@@ -6452,10 +6454,12 @@ class JSONReaderUTF8
                     }
                 }
             } else if (ch == '{' && quote == 0) {
+                valid = true;
                 this.complex = readObject();
                 valueType = JSON_TYPE_OBJECT;
                 return;
             } else if (ch == '[' && quote == 0) {
+                valid = true;
                 this.complex = readArray();
                 valueType = JSON_TYPE_ARRAY;
                 return;
@@ -6535,6 +6539,7 @@ class JSONReaderUTF8
 
     @Override
     public final void readNumber(ValueConsumer consumer, boolean quoted) {
+        boolean valid = false;
         this.wasNull = false;
         this.boolValue = false;
         this.mag0 = 0;
@@ -6560,6 +6565,7 @@ class JSONReaderUTF8
         boolean intOverflow = false;
         valueType = JSON_TYPE_INT;
         while (ch >= '0' && ch <= '9') {
+            valid = true;
             if (!intOverflow) {
                 int mag3_10 = mag3 * 10 + (ch - '0');
                 if (mag3_10 < mag3) {
@@ -6575,6 +6581,7 @@ class JSONReaderUTF8
             valueType = JSON_TYPE_DEC;
             ch = (char) bytes[offset++];
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 if (!intOverflow) {
                     int mag3_10 = mag3 * 10 + (ch - '0');
                     if (mag3_10 < mag3) {
@@ -6607,6 +6614,7 @@ class JSONReaderUTF8
             }
 
             while (ch >= '0' && ch <= '9') {
+                valid = true;
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
                 if (expValue > MAX_EXP) {
@@ -6631,6 +6639,7 @@ class JSONReaderUTF8
                         && bytes[offset++] == 'l'
                         && bytes[offset++] == 'l'
                 ) {
+                    valid = true;
                     wasNull = true;
                     valueType = JSON_TYPE_NULL;
                     ch = (char) bytes[offset++];
@@ -6640,22 +6649,26 @@ class JSONReaderUTF8
                         && bytes[offset++] == 'u'
                         && bytes[offset++] == 'e'
                 ) {
+                    valid = true;
                     boolValue = true;
                     valueType = JSON_TYPE_BOOL;
                     ch = (char) bytes[offset++];
                 }
             } else if (ch == 'f') {
                 if (offset + 4 <= end && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == ALSE) {
+                    valid = true;
                     offset += 4;
                     boolValue = false;
                     valueType = JSON_TYPE_BOOL;
                     ch = (char) bytes[offset++];
                 }
             } else if (ch == '{' && quote == 0) {
+                valid = true;
                 this.complex = readObject();
                 valueType = JSON_TYPE_OBJECT;
                 return;
             } else if (ch == '[' && quote == 0) {
+                valid = true;
                 this.complex = readArray();
                 valueType = JSON_TYPE_ARRAY;
                 return;
@@ -6724,6 +6737,9 @@ class JSONReaderUTF8
 
         Number number = getNumber();
         consumer.accept(number);
+        if (!valid) {
+            throw new JSONException(info("illegal input error"));
+        }
     }
 
     @Override
