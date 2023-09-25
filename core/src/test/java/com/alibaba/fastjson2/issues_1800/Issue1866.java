@@ -15,7 +15,6 @@ public class Issue1866 {
         hello.setAge2(null);  // WriteNulls, 期望为null
         hello.setAge3(null);  // NullAsDefaultValue, 期望为0
         hello.setAge4(null);  // 期望不被序列化
-
         // age5, age6不为null应不受影响
         hello.setAge5(10);
         hello.setAge6(10);
