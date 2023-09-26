@@ -119,7 +119,7 @@
         <dependency>
             <groupId>org.msgpack</groupId>
             <artifactId>jackson-dataformat-msgpack</artifactId>
-            <version>0.9.5</version>
+            <version>0.9.6</version>
         </dependency>
         <dependency>
             <groupId>org.msgpack</groupId>
