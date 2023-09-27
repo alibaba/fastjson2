@@ -24,7 +24,7 @@ public class Issue1567 {
         User user = first.get();
         assertEquals("1001", user.getId());
         // name 或者nickname会为null， 之前用的版本2.0.25是没问题的
-        assertNull(user.getName());
+        assertEquals("Jack", user.getName());
         assertEquals("Jack", user.getNickname());
     }
 
