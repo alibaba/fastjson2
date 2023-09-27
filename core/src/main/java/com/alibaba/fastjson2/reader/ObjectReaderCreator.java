@@ -501,7 +501,7 @@ public class ObjectReaderCreator {
         });
 
         Supplier instanceSupplier = createSupplier(builderClass);
-        return createObjectReader(builderClass, 0, instanceSupplier, builderFunction,  toFieldReaderArray(fieldReaders));
+        return createObjectReader(builderClass, 0, instanceSupplier, builderFunction, toFieldReaderArray(fieldReaders));
     }
 
     protected <T> ObjectReader<T> createObjectReaderWithCreator(
