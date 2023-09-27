@@ -1,19 +1,41 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.*;
+import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.JdbcSupport;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.Serializable;
-import java.lang.reflect.*;
-import java.time.*;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
@@ -388,7 +410,7 @@ public abstract class FieldReader<T>
             Class<?> valueClass = fieldValue.getClass();
             if (!supportAcceptType(valueClass)) {
                 if (valueClass == String.class) {
-                    if (fieldClass == java.util.Date.class) {
+                    if (fieldClass == Date.class) {
                         autoCast = false;
                     }
                 } else if (valueClass == Integer.class
@@ -533,5 +555,49 @@ public abstract class FieldReader<T>
 
     public BiConsumer getFunction() {
         return null;
+    }
+
+    public boolean sameTo(FieldReader other) {
+        if (this.field != null) {
+            String thisName = this.field.getName();
+            if (other.field != null) {
+                String otherName = other.field.getName();
+                if (thisName != null && thisName.equals(otherName)) {
+                    return true;
+                }
+            }
+            if (other.method != null) {
+                String otherName = getActualFieldName(other);
+                if (thisName != null && thisName.equals(otherName)) {
+                    return true;
+                }
+            }
+        }
+
+        if (this.method != null) {
+            String thisName = getActualFieldName(this);
+            if (other.method != null) {
+                String otherName = getActualFieldName(other);
+                if (thisName != null && thisName.equals(otherName)) {
+                    return true;
+                }
+            }
+            if (other.field != null) {
+                if (thisName != null && thisName.equals(other.field.getName())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean belongTo(Class clazz) {
+        return (this.field != null && this.field.getDeclaringClass() == clazz) || (this.method != null && this.method.getDeclaringClass() == clazz);
+    }
+
+    private String getActualFieldName(FieldReader fieldReader) {
+        String name = fieldReader.method.getName();
+        return fieldReader.isReadOnly() ? BeanUtils.getterName(name, PropertyNamingStrategy.CamelCase.name()) : BeanUtils.setterName(name, PropertyNamingStrategy.CamelCase.name());
     }
 }
