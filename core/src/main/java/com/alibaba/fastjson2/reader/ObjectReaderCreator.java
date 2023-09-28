@@ -480,22 +480,23 @@ public class ObjectReaderCreator {
                         continue;
                     }
 
-                    fieldReaders
-                            .putIfAbsent(alternateName,
-                                    listOf(createFieldReaderMethod(
-                                            builderClass,
-                                            objectType,
-                                            alternateName,
-                                            fieldInfo.ordinal,
-                                            fieldInfo.features,
-                                            fieldInfo.format,
-                                            fieldInfo.locale,
-                                            fieldInfo.defaultValue,
-                                            fieldInfo.schema,
-                                            fieldType,
-                                            fieldClass,
-                                            method,
-                                            null)));
+                    putIfAbsent(fieldReaders,
+                            alternateName,
+                            createFieldReaderMethod(
+                                    builderClass,
+                                    objectType,
+                                    alternateName,
+                                    fieldInfo.ordinal,
+                                    fieldInfo.features,
+                                    fieldInfo.format,
+                                    fieldInfo.locale,
+                                    fieldInfo.defaultValue,
+                                    fieldInfo.schema,
+                                    fieldType,
+                                    fieldClass,
+                                    method,
+                                    null),
+                            objectClass);
                 }
             }
         });
@@ -611,8 +612,9 @@ public class ObjectReaderCreator {
                         continue;
                     }
 
-                    fieldReaders.putIfAbsent(alternateName,
-                            listOf(createFieldReaderParam(
+                    putIfAbsent(fieldReaders,
+                            alternateName,
+                            createFieldReaderParam(
                                     objectClass,
                                     objectType,
                                     alternateName,
@@ -625,7 +627,8 @@ public class ObjectReaderCreator {
                                     declaringClass,
                                     parameter,
                                     null
-                            )));
+                            ),
+                            objectClass);
                 }
             }
         }
@@ -1283,22 +1286,24 @@ public class ObjectReaderCreator {
                     continue;
                 }
 
-                FieldReader<Object> fieldReader1 = createFieldReader(
-                        objectClass,
-                        objectType,
+                putIfAbsent(fieldReaders,
                         alternateName,
-                        fieldInfo.ordinal,
-                        fieldInfo.features,
-                        null,
-                        fieldInfo.locale,
-                        fieldInfo.defaultValue,
-                        schema,
-                        fieldType,
-                        fieldClass,
-                        field,
-                        null
-                );
-                fieldReaders.putIfAbsent(alternateName, listOf(fieldReader1));
+                        createFieldReader(
+                                objectClass,
+                                objectType,
+                                alternateName,
+                                fieldInfo.ordinal,
+                                fieldInfo.features,
+                                null,
+                                fieldInfo.locale,
+                                fieldInfo.defaultValue,
+                                schema,
+                                fieldType,
+                                fieldClass,
+                                field,
+                                null
+                        ),
+                        objectClass);
             }
         }
     }
@@ -1481,23 +1486,24 @@ public class ObjectReaderCreator {
                     continue;
                 }
 
-                fieldReaders
-                        .putIfAbsent(alternateName,
-                                listOf(createFieldReaderMethod(
-                                        objectClass,
-                                        objectType,
-                                        alternateName,
-                                        fieldInfo.ordinal,
-                                        fieldInfo.features,
-                                        fieldInfo.format,
-                                        fieldInfo.locale,
-                                        fieldInfo.defaultValue,
-                                        fieldInfo.schema,
-                                        fieldType,
-                                        fieldClass,
-                                        method,
-                                        initReader
-                                )));
+                putIfAbsent(fieldReaders,
+                        alternateName,
+                        createFieldReaderMethod(
+                                objectClass,
+                                objectType,
+                                alternateName,
+                                fieldInfo.ordinal,
+                                fieldInfo.features,
+                                fieldInfo.format,
+                                fieldInfo.locale,
+                                fieldInfo.defaultValue,
+                                fieldInfo.schema,
+                                fieldType,
+                                fieldClass,
+                                method,
+                                initReader
+                        ),
+                        objectClass);
             }
         }
     }
