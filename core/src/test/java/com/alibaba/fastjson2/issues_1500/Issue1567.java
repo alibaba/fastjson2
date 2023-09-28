@@ -26,6 +26,8 @@ public class Issue1567 {
         // name 或者nickname会为null， 之前用的版本2.0.25是没问题的
         assertEquals("Jack", user.getName());
         assertEquals("Jack", user.getNickname());
+        assertEquals("Jack", user.getName2());
+        assertEquals("Jack", user.getNickname2());
     }
 
     @Data
@@ -38,5 +40,9 @@ public class Issue1567 {
         private String name;
         @JSONField(name = "name")
         private String nickname;
+        @JSONField(alternateNames = "name")
+        private String name2;
+        @JSONField(alternateNames = "name")
+        private String nickname2;
     }
 }
