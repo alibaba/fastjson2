@@ -1,6 +1,6 @@
 # FASTJSON v2 JSONSchema的支持
 
-在fastjson 2.0.4版本之后，提供了JSONSchema的支持，具体JSON Schema的规范，参考 https://json-schema.org/
+fastjson 在2.0.4版本之后，提供了JSONSchema的支持，具体JSON Schema的规范，参考 https://json-schema.org/
 
 ## 1. FASTJSON2 JSONSchema的性能
 一贯如此，FASTJSON2 JSONSchema性能非常出色，远超竞品。如下的测试表名，fastjson2性能是networknt的9倍，everit的6倍。
