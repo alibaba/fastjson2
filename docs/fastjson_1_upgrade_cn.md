@@ -7,7 +7,7 @@
 * 支持 JSON Schema https://github.com/alibaba/fastjson2/wiki/json_schema_cn
 * 统一文本和二进制API，在RPC、Redis场景也可以使用FASTJSON v2
 * 更安全，完全删除autoType白名单，提升安全性 https://github.com/alibaba/fastjson2/wiki/fastjson2_autotype_cn
-* 新版本会长期维护，目标为下一个时间提供高性能JSON库，提需求能更快得到响应，提BUG也更快修复
+* 新版本会长期维护，目标为下一个十年提供高性能JSON库，提需求能更快得到响应，提BUG也更快修复
 
 ## 2. 如何升级
 
