@@ -15,7 +15,7 @@ public class JSONPath {
 }
 ```
 
-这样构造的JSONPath，在eval或者extract方法执行时，会返回和types类型匹配的对象数组。
+这样构造的JSONPath，在执行eval或者extract方法时，会返回和types类型匹配的对象数组。
 
 ```java
 JSONObject object = JSONObject.of("id", 1001, "name", "DataWorks", "date", "2017-07-14");
