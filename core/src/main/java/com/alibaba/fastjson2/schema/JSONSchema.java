@@ -44,6 +44,9 @@ public abstract class JSONSchema {
         this.description = description;
     }
 
+    void addResolveTask(UnresolvedReference.ResolveTask task){
+    }
+
     public static JSONSchema of(JSONObject input, Class objectClass) {
         if (input == null || input.isEmpty()) {
             return null;
@@ -448,7 +451,7 @@ public abstract class JSONSchema {
                             refName = URLDecoder.decode(refName);
                             JSONSchema refSchema = defs.get(refName);
                             if (refSchema == null) {
-                                refSchema = Any.NOT_ANY;
+                                refSchema = new UnresolvedReference(refName);
                             }
                             return refSchema;
                         }
@@ -866,7 +869,8 @@ public abstract class JSONSchema {
         OneOf,
         AllOf,
         AnyOf,
-        Any;
+        Any,
+        UnresolvedReference;
 
         public static Type of(String typeStr) {
             if (typeStr == null) {
