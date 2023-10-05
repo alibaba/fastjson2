@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.schema.ObjectSchema;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue1766 {
     @Test
@@ -37,5 +38,12 @@ public class Issue1766 {
         JSONSchema person = schema.getDefs("person");
         ArraySchema personList = (ArraySchema) schema.getDefs("personList");
         assertSame(person, personList.getItemSchema());
+
+        assertTrue(
+                schema.validate(
+                        JSON.parseObject("\n" +
+                                "{\"family\":{\"name\":\"1\",\"children\":[{\"name\":\"2\"}]}}")
+                ).isSuccess()
+        );
     }
 }

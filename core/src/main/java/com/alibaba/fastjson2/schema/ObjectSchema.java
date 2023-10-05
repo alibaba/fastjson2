@@ -42,6 +42,8 @@ public final class ObjectSchema
     final AnyOf anyOf;
     final OneOf oneOf;
 
+    transient List<UnresolvedReference.ResolveTask> resolveTasks;
+
     public ObjectSchema(JSONObject input) {
         this(input, null);
     }
@@ -72,6 +74,11 @@ public final class ObjectSchema
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
                 this.defs.put(entryKey, schema);
             }
+            if (resolveTasks != null) {
+                for (UnresolvedReference.ResolveTask resolveTask : resolveTasks) {
+                    resolveTask.resolve(this);
+                }
+            }
         }
 
         JSONObject properties = input.getJSONObject("properties");
@@ -88,6 +95,13 @@ public final class ObjectSchema
                     schema = JSONSchema.of((JSONObject) entryValue, root == null ? this : root);
                 }
                 this.properties.put(entryKey, schema);
+                if (schema instanceof UnresolvedReference) {
+                    String refName = ((UnresolvedReference) schema).refName;
+                    UnresolvedReference.PropertyResolveTask task
+                            = new UnresolvedReference.PropertyResolveTask(this.properties, entryKey, refName);
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(task);
+                }
             }
         }
 
@@ -197,6 +211,14 @@ public final class ObjectSchema
         allOf = allOf(input, null);
         anyOf = anyOf(input, null);
         oneOf = oneOf(input, null);
+    }
+
+    @Override
+    void addResolveTask(UnresolvedReference.ResolveTask task) {
+        if (resolveTasks == null) {
+            resolveTasks = new ArrayList<>();
+        }
+        resolveTasks.add(task);
     }
 
     @Override
