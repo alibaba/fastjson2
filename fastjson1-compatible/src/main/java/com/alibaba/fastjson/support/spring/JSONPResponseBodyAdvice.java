@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
  * in order to be serialized into jsonp format.
  * </p>
  * <p>
- * <p>
  * url: /path/to/your/api?<b>callback=functionName</b>
  * </p>
  *
