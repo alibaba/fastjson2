@@ -37,7 +37,7 @@
         <jersey.version>2.40</jersey.version>
         <springframework5.version>5.3.30</springframework5.version>
         <springframework6.version>6.0.12</springframework6.version>
-        <springsecurity5.version>5.8.7</springsecurity5.version>
+        <springsecurity5.version>6.1.4</springsecurity5.version>
         <springsecurity6.version>6.1.4</springsecurity6.version>
         <springboot2.version>2.7.16</springboot2.version>
         <springboot3.version>3.1.4</springboot3.version>
