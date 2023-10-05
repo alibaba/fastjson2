@@ -1121,7 +1121,12 @@ abstract class JSONPathSegment {
 
         @Override
         public boolean remove(JSONPath.Context context) {
-            set(context, null);
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            LoopRemove action = new LoopRemove(context);
+            action.accept(object);
             return context.eval = true;
         }
 
@@ -1288,6 +1293,53 @@ abstract class JSONPathSegment {
                                     : fieldWriters.stream().filter(Objects::nonNull).map(v -> v.getFieldValue(value)).collect(Collectors.toList());
                             recursive(temp, values, level + 1);
                         }
+                    }
+                }
+            }
+        }
+
+        class LoopRemove {
+            final JSONPath.Context context;
+
+            public LoopRemove(JSONPath.Context context) {
+                this.context = context;
+            }
+
+            public void accept(Object object) {
+                if (object instanceof Map) {
+                    for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext();) {
+                        Map.Entry entry = it.next();
+                        if (name.equals(entry.getKey())) {
+                            it.remove();
+                            context.eval = true;
+                        } else {
+                            Object entryValue = entry.getValue();
+                            if (entryValue != null) {
+                                accept(entryValue);
+                            }
+                        }
+                    }
+                } else if (object instanceof Collection) {
+                    for (Object item : ((List<?>) object)) {
+                        accept(item);
+                    }
+                } else {
+                    Class<?> entryValueClass = object.getClass();
+                    ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(entryValueClass);
+                    if (objectReader instanceof ObjectReaderBean) {
+                        FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
+                        if (fieldReader != null) {
+                            fieldReader.accept(object, null);
+                            context.eval = true;
+                            return;
+                        }
+                    }
+
+                    ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(entryValueClass);
+                    List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+                    for (FieldWriter fieldWriter : fieldWriters) {
+                        Object fieldValue = fieldWriter.getFieldValue(object);
+                        accept(fieldValue);
                     }
                 }
             }
