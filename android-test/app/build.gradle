@@ -39,11 +39,11 @@ android {
 
 dependencies {
     implementation 'com.alibaba:fastjson:1.1.73.android'
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.34.1.android4'
-    implementation ('com.alibaba.fastjson2:fastjson2-codegen:2.0.34') {
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.41-SNAPSHOT'
+    implementation ('com.alibaba.fastjson2:fastjson2-codegen:2.0.40') {
         exclude group: 'com.alibaba.fastjson2', module: 'fastjson2'
     }
-    implementation ('com.alibaba.fastjson2:fastjson2-kotlin:2.0.34') {
+    implementation ('com.alibaba.fastjson2:fastjson2-kotlin:2.0.40') {
         exclude group: 'com.alibaba.fastjson2', module: 'fastjson2'
     }
 

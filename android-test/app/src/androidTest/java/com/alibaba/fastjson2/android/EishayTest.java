@@ -5,7 +5,7 @@ import android.util.Log;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.android.eishay.MediaContent;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class EishayTest {
     static final String str = "{\"images\": [{\n" +
