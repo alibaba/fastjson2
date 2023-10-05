@@ -40,6 +40,7 @@ public class JDKUtils {
     public static final boolean ANDROID;
     public static final boolean GRAAL;
     public static final boolean OPENJ9;
+    public static final int ANDROID_SDK_INT;
 
     // Android not support
     public static final Class CLASS_TRANSIENT;
@@ -82,7 +83,7 @@ public class JDKUtils {
         ARRAY_BYTE_BASE_OFFSET = offset;
         ARRAY_CHAR_BASE_OFFSET = charOffset;
 
-        int jvmVersion = -1;
+        int jvmVersion = -1, android_sdk_int = -1;
         boolean openj9 = false, android = false, graal = false;
         try {
             String jmvName = System.getProperty("java.vm.name");
@@ -101,6 +102,12 @@ public class JDKUtils {
             if (javaSpecVer.indexOf('.') == -1) {
                 jvmVersion = Integer.parseInt(javaSpecVer);
             }
+
+            if (android) {
+                android_sdk_int = Class.forName("android.os.Build$VERSION")
+                        .getField("SDK_INT")
+                        .getInt(null);
+            }
         } catch (Throwable e) {
             initErrorLast = e;
         }
@@ -108,6 +115,7 @@ public class JDKUtils {
         OPENJ9 = openj9;
         ANDROID = android;
         GRAAL = graal;
+        ANDROID_SDK_INT = android_sdk_int;
 
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
@@ -136,12 +144,14 @@ public class JDKUtils {
         if (JVM_VERSION == 8) {
             Field field = null;
             long fieldOffset = -1;
-            try {
-                field = String.class.getDeclaredField("value");
-                field.setAccessible(true);
-                fieldOffset = UNSAFE.objectFieldOffset(field);
-            } catch (Exception ignored) {
-                FIELD_STRING_VALUE_ERROR = true;
+            if (!ANDROID) {
+                try {
+                    field = String.class.getDeclaredField("value");
+                    field.setAccessible(true);
+                    fieldOffset = UNSAFE.objectFieldOffset(field);
+                } catch (Exception ignored) {
+                    FIELD_STRING_VALUE_ERROR = true;
+                }
             }
 
             FIELD_STRING_VALUE = field;
@@ -153,22 +163,26 @@ public class JDKUtils {
         } else {
             Field fieldValue = null;
             long fieldValueOffset = -1;
-            try {
-                fieldValue = String.class.getDeclaredField("value");
-                fieldValueOffset = UNSAFE.objectFieldOffset(fieldValue);
-            } catch (Exception ignored) {
-                FIELD_STRING_VALUE_ERROR = true;
+            if (!ANDROID) {
+                try {
+                    fieldValue = String.class.getDeclaredField("value");
+                    fieldValueOffset = UNSAFE.objectFieldOffset(fieldValue);
+                } catch (Exception ignored) {
+                    FIELD_STRING_VALUE_ERROR = true;
+                }
             }
             FIELD_STRING_VALUE_OFFSET = fieldValueOffset;
             FIELD_STRING_VALUE = fieldValue;
 
             Field fieldCode = null;
             long fieldCodeOffset = -1;
-            try {
-                fieldCode = String.class.getDeclaredField("coder");
-                fieldCodeOffset = UNSAFE.objectFieldOffset(fieldCode);
-            } catch (Exception ignored) {
-                FIELD_STRING_CODER_ERROR = true;
+            if (!ANDROID) {
+                try {
+                    fieldCode = String.class.getDeclaredField("coder");
+                    fieldCodeOffset = UNSAFE.objectFieldOffset(fieldCode);
+                } catch (Exception ignored) {
+                    FIELD_STRING_CODER_ERROR = true;
+                }
             }
             FIELD_STRING_CODER_OFFSET = fieldCodeOffset;
             FIELD_STRING_CODER = fieldCode;
@@ -204,7 +218,7 @@ public class JDKUtils {
         Function<String, byte[]> stringValue = null;
 
         MethodHandles.Lookup trustedLookup = null;
-        {
+        if (!ANDROID) {
             try {
                 Class lookupClass = MethodHandles.Lookup.class;
                 Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
@@ -216,8 +230,8 @@ public class JDKUtils {
             if (trustedLookup == null) {
                 trustedLookup = MethodHandles.lookup();
             }
-            IMPL_LOOKUP = trustedLookup;
         }
+        IMPL_LOOKUP = trustedLookup;
 
         int vector_bit_length = -1;
         boolean vector_support = false;

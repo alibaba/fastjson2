@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.android;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 

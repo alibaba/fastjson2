@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
 
+import static com.alibaba.fastjson2.util.JDKUtils.ANDROID_SDK_INT;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 /**
@@ -61,7 +62,7 @@ public abstract class BeanUtils {
     };
 
     public static String[] getRecordFieldNames(Class<?> recordType) {
-        if (JVM_VERSION < 14) {
+        if (JVM_VERSION < 14 && ANDROID_SDK_INT < 33) {
             return new String[0];
         }
 

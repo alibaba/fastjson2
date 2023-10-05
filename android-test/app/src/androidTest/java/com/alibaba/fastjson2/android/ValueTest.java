@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ValueTest {
     @Test
