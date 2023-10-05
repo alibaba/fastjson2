@@ -332,7 +332,7 @@ final class CSVReaderUTF8<T>
                 Object value;
                 if (quote) {
                     if (escapeCount == 0) {
-                        if (type == null || type == String.class || type == Object.class) {
+                        if (type == null || type == String.class || type == Object.class || strings) {
                             value = new String(buf, valueStart + 1, valueSize, charset);
                         } else {
                             try {
@@ -412,7 +412,7 @@ final class CSVReaderUTF8<T>
             Object value;
             if (quote) {
                 if (escapeCount == 0) {
-                    if (type == null || type == String.class || type == Object.class) {
+                    if (type == null || type == String.class || type == Object.class || strings) {
                         value = new String(buf, valueStart + 1, valueSize, charset);
                     } else {
                         try {
@@ -432,7 +432,7 @@ final class CSVReaderUTF8<T>
                         }
                     }
 
-                    if (type == null || type == String.class || type == Object.class) {
+                    if (type == null || type == String.class || type == Object.class || strings) {
                         value = new String(bytes, 0, bytes.length, charset);
                     } else {
                         try {

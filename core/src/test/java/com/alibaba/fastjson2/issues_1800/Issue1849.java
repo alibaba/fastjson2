@@ -19,6 +19,10 @@ public class Issue1849 {
             "\"Indosat\",\"JAN6B41111111111\",\"1111111111\",\"1\",\"成功\",\"\",\"\",\"3\",\"3\",\"6\",\"1365000\",\"11\",\"15015000\"\n" +
             "\"Indosat\",\"JAZ6A72222222222\",\"2222222222\",\"1\",\"失败\",\"3\",\"IOT_SHell_Login: err: connect rt:-215\",\"\",\"\",\"\",\"\",\"\",\"\"\n";
 
+    static final String str2 = "\"姓名\",\"年龄\",\"薪酬\"\n" +
+            "\"怪兽\",\"23\",\"12345\"\n" +
+            "\"大美丽\",\"34\",\"54321\"";
+
     @Test
     public void test() {
         StringReader stringReader = new StringReader(str);
@@ -135,5 +139,39 @@ public class Issue1849 {
             }
             assertEquals(13, values.length);
         }
+    }
+
+    @Test
+    public void test2() {
+        byte[] bytes = str2.getBytes(StandardCharsets.UTF_8);
+        CSVReader<?> reader = CSVReader.of(
+                new ByteArrayInputStream(bytes),
+                StandardCharsets.UTF_8,
+                String.class,
+                int.class,
+                Integer.class
+        );
+        List<String> header = reader.readHeader();
+        assertEquals(3, header.size());
+        Object[] line0 = reader.readLineValues();
+        assertEquals(23, line0[1]);
+        assertEquals(12345, line0[2]);
+    }
+
+    @Test
+    public void test2UTF16() {
+        byte[] bytes = str2.getBytes(StandardCharsets.UTF_16);
+        CSVReader<?> reader = CSVReader.of(
+                new ByteArrayInputStream(bytes),
+                StandardCharsets.UTF_16,
+                String.class,
+                int.class,
+                Integer.class
+        );
+        List<String> header = reader.readHeader();
+        assertEquals(3, header.size());
+        Object[] line0 = reader.readLineValues();
+        assertEquals(23, line0[1]);
+        assertEquals(12345, line0[2]);
     }
 }
