@@ -440,7 +440,16 @@ public final class ObjectReaderImplMap
             object = (Map) createInstance(context.getFeatures() | features);
         }
 
-        jsonReader.read(object, features);
+        if (jsonReader.isString() && !jsonReader.isTypeRedirect()) {
+            String str = jsonReader.readString();
+            if (!str.isEmpty()) {
+                try (JSONReader strReader = JSONReader.of(str, jsonReader.getContext())) {
+                    strReader.read(object, features);
+                }
+            }
+        } else {
+            jsonReader.read(object, features);
+        }
 
         jsonReader.nextIfComma();
 
