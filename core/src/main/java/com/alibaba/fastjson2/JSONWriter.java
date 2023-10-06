@@ -854,10 +854,6 @@ public abstract class JSONWriter
 
     public abstract void writeNameRaw(char[] bytes, int offset, int len);
 
-    public boolean xxxbac() {
-        return utf8 && (context.features & 5726) == 0;
-    }
-
     public void writeName(String name) {
         if (startObject) {
             startObject = false;
