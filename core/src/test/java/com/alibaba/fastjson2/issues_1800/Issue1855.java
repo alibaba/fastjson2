@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_1800;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +21,17 @@ public class Issue1855 {
         assertNull(JSONB.parseObject(bytes, Bean4.class).date);
         assertNull(JSONB.parseObject(bytes, Bean5.class).date);
         assertNull(JSONB.parseObject(bytes, Bean6.class).date);
+    }
+
+    @Test
+    public void test1() {
+        byte[] bytes = JSONB.toBytes(null);
+        assertNull(JSONReader.ofJSONB(bytes).readLocalDateTime());
+        assertNull(JSONReader.ofJSONB(bytes).readLocalDate());
+        assertNull(JSONReader.ofJSONB(bytes).readLocalTime());
+        assertNull(JSONReader.ofJSONB(bytes).readOffsetTime());
+        assertNull(JSONReader.ofJSONB(bytes).readOffsetDateTime());
+        assertNull(JSONReader.ofJSONB(bytes).readZonedDateTime());
     }
 
     public static class Bean {

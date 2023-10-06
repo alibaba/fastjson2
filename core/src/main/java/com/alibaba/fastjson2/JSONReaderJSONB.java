@@ -4502,6 +4502,11 @@ final class JSONReaderJSONB
             return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
         }
 
+        if (type == BC_NULL) {
+            offset++;
+            return null;
+        }
+
         return readLocalDateTime0(type);
     }
 
