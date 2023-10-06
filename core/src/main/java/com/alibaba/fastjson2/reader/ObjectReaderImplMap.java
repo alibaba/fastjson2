@@ -352,6 +352,10 @@ public final class ObjectReaderImplMap
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
+
         JSONReader.Context context = jsonReader.context;
         Supplier<Map> objectSupplier = jsonReader.context.getObjectSupplier();
         Map object;
@@ -361,7 +365,16 @@ public final class ObjectReaderImplMap
             object = (Map) createInstance(context.getFeatures() | features);
         }
 
-        jsonReader.read(object, features);
+        if (jsonReader.isString() && !jsonReader.isTypeRedirect()) {
+            String str = jsonReader.readString();
+            if (!str.isEmpty()) {
+                try (JSONReader strReader = JSONReader.of(str, jsonReader.getContext())) {
+                    strReader.read(object, features);
+                }
+            }
+        } else {
+            jsonReader.read(object, features);
+        }
 
         jsonReader.nextIfComma();
 

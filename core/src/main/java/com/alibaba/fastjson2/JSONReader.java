@@ -1961,8 +1961,7 @@ public abstract class JSONReader
     public abstract void skipLineComment();
 
     public final Boolean readBool() {
-        if (isNull()) {
-            readNull();
+        if (nextIfNull()) {
             return null;
         }
 

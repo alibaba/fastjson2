@@ -808,6 +808,7 @@ public abstract class JSONWriter
     public final void writeFloat(float[] value, DecimalFormat format) {
         if (format == null || jsonb) {
             writeFloat(value);
+            return;
         }
 
         if (value == null) {

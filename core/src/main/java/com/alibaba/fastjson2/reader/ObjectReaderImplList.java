@@ -210,7 +210,7 @@ public final class ObjectReaderImplList
         int size = collection.size();
 
         if (size == 0 && (listClass == List.class)) {
-            Collection list = Collections.emptyList();
+            Collection list = new ArrayList();
             if (builder != null) {
                 return builder.apply(list);
             }
@@ -348,7 +348,12 @@ public final class ObjectReaderImplList
         Function builder = this.builder;
         Class listType = this.instanceType;
         if (objectReader != null) {
-            listType = objectReader.getObjectClass();
+            if (objectReader instanceof ObjectReaderImplList) {
+                listType = ((ObjectReaderImplList) objectReader).instanceType;
+                builder = ((ObjectReaderImplList) objectReader).builder;
+            } else {
+                listType = objectReader.getObjectClass();
+            }
 
             if (listType == CLASS_UNMODIFIABLE_COLLECTION) {
                 listType = ArrayList.class;
