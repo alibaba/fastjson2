@@ -21,7 +21,7 @@ public class EishayFuryWrite {
     static MediaContent object;
 
     static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-            .withLanguage(io.fury.Language.JAVA)
+            .withLanguage(io.fury.config.Language.JAVA)
             .withRefTracking(true)
             .buildThreadSafeFury();
 

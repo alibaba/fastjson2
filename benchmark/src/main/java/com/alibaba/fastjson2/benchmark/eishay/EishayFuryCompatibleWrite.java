@@ -34,10 +34,10 @@ public class EishayFuryCompatibleWrite {
     );
 
     static ThreadSafeFury furyCompatible = Fury.builder()
-            .withLanguage(io.fury.Language.JAVA)
+            .withLanguage(io.fury.config.Language.JAVA)
             .withRefTracking(true)
             .requireClassRegistration(false)
-            .withCompatibleMode(io.fury.serializer.CompatibleMode.COMPATIBLE)
+            .withCompatibleMode(io.fury.config.CompatibleMode.COMPATIBLE)
             .buildThreadSafeFury();
 
     static {
