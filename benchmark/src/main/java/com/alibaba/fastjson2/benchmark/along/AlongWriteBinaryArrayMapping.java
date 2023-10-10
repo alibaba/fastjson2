@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
 import io.fury.Fury;
-import io.fury.Language;
+import io.fury.config.Language;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;

@@ -37,7 +37,7 @@ public class EishayFuryParseNoneCache {
     static int index;
 
     static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-            .withLanguage(io.fury.Language.JAVA)
+            .withLanguage(io.fury.config.Language.JAVA)
             .withRefTracking(true)
             .withClassLoader(classLoader)
             .buildThreadSafeFury();

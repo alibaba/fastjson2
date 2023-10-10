@@ -33,10 +33,10 @@ public class EishayFuryCompatibleParse {
     static byte[] furyCompatibleBytes;
 
     static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
-            .withLanguage(io.fury.Language.JAVA)
+            .withLanguage(io.fury.config.Language.JAVA)
             .withRefTracking(true)
             .requireClassRegistration(false)
-            .withCompatibleMode(io.fury.serializer.CompatibleMode.COMPATIBLE)
+            .withCompatibleMode(io.fury.config.CompatibleMode.COMPATIBLE)
             .buildThreadSafeFury();
 
     static {
