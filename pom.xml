@@ -32,7 +32,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
-        <jackson.version>2.15.2</jackson.version>
+        <jackson.version>2.15.3</jackson.version>
         <jetty.version>11.0.15</jetty.version>
         <jersey.version>2.40</jersey.version>
         <springframework5.version>5.3.30</springframework5.version>
