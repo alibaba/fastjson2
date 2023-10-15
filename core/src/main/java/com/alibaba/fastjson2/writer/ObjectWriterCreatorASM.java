@@ -578,7 +578,7 @@ public class ObjectWriterCreatorASM
         Label json_ = new Label(), jsonb_ = new Label(), notSuper_ = new Label();
 
         MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 8, false);
-        mwc.genVariantsMethodBefore();
+        mwc.genVariantsMethodBefore(false);
 
         mwc.genIsEnabled(JSONWriter.Feature.IgnoreErrorGetter.mask, notSuper_);
 
@@ -749,7 +749,7 @@ public class ObjectWriterCreatorASM
         final int FIELD_FEATURES = 5;
 
         MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 7, true);
-        mwc.genVariantsMethodBefore();
+        mwc.genVariantsMethodBefore(true);
 
         Label return_ = new Label();
         if (objectType == null || !java.io.Serializable.class.isAssignableFrom(objectType)) {
@@ -841,7 +841,7 @@ public class ObjectWriterCreatorASM
 
         MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 7, true);
 
-        mwc.genVariantsMethodBefore();
+        mwc.genVariantsMethodBefore(true);
 
         for (int i = 0; i < size; i++) {
             gwValueJSONB(
@@ -3795,14 +3795,14 @@ public class ObjectWriterCreatorASM
             return var;
         }
 
-        void genVariantsMethodBefore() {
+        void genVariantsMethodBefore(boolean jsonb) {
             Label notDefault_ = new Label(), end_ = new Label();
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "getFeatures", "()J", false);
             mw.visitVarInsn(Opcodes.LSTORE, var2(CONTEXT_FEATURES));
 
-            {
+            if (!jsonb) {
                 Label l1 = new Label(), l2 = new Label();
 
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
