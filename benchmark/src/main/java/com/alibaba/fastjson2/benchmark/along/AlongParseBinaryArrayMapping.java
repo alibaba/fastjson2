@@ -19,6 +19,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
+import static com.alibaba.fastjson2.JSONReader.Feature.FieldBased;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 
 public class AlongParseBinaryArrayMapping {
@@ -45,7 +46,7 @@ public class AlongParseBinaryArrayMapping {
             fury.register(HarmDTO.class);
 
             fastjson2JSONBBytes = JSONB.toBytes(object, JSONWriter.Feature.BeanToArray);
-            furyBytes = fury.serialize(object);
+            furyBytes = fury.serializeJavaObject(object);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -53,7 +54,7 @@ public class AlongParseBinaryArrayMapping {
 
     @Benchmark
     public void jsonb(Blackhole bh) {
-        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, SupportArrayToBean));
+        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, FieldBased, SupportArrayToBean));
     }
 
     @Benchmark

@@ -36,12 +36,12 @@ public class AlongParseBinaryArrayMappingTest {
             System.out.println("AlongParseBinaryArrayMapping-fury millis : " + millis);
             // zulu8.68.0.21 : 2050
             // zulu11.52.13 :
-            // zulu17.32.13 : 1587
+            // zulu17.32.13 : 1587 1154
         }
     }
 
     public static void main(String[] args) throws Exception {
-//        jsonb();
-        fury();
+        jsonb();
+//        fury();
     }
 }
