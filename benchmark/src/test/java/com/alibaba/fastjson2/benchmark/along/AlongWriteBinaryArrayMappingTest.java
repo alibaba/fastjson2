@@ -19,7 +19,7 @@ public class AlongWriteBinaryArrayMappingTest {
             System.out.println("AlongWriteBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
             // zulu8.68.0.21 :
             // zulu11.52.13 : 1477 1480 1470 1389 1361
-            // zulu17.32.13 : 3126 2888 2736 2564 1674
+            // zulu17.32.13 : 3126 2888 2736 2564 1674 1404
         }
     }
 
@@ -62,8 +62,9 @@ public class AlongWriteBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("AlongWriteBinaryArrayMapping-fury millis : " + millis);
+            // size 379
             // zulu8.68.0.21 :
-            // zulu11.52.13 : 2086
+            // zulu11.52.13 : 2086 967
             // zulu17.32.13 :
         }
     }

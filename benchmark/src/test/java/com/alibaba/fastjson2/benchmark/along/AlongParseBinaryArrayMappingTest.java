@@ -19,7 +19,7 @@ public class AlongParseBinaryArrayMappingTest {
             System.out.println("AlongParseBinaryArrayMapping-jsonb millis : " + millis);
             // zulu8.68.0.21 : 2928 2887 2826 2806 2754 2693 1876
             // zulu11.52.13 : 2484 2170 1916 1911 1892 1879 1876 1845 1756
-            // zulu17.32.13 : 2601 2457 1691
+            // zulu17.32.13 : 2601 2457 1691 1593
         }
     }
 
@@ -30,13 +30,13 @@ public class AlongParseBinaryArrayMappingTest {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
-                benchmark.jsonb(BH);
+                benchmark.fury(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("AlongParseBinaryArrayMapping-fury millis : " + millis);
             // zulu8.68.0.21 : 2050
             // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu17.32.13 : 1587
         }
     }
 
