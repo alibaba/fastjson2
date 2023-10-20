@@ -3537,7 +3537,7 @@ public class ObjectReaderCreatorASM
 
         String LIST_TYPE = fieldClass.isInterface() ? "java/util/ArrayList" : TYPE_FIELD_CLASS;
 
-        Label loadList_ = new Label(), listNotNull_ = new Label();
+        Label loadList_ = new Label(), listNotNull_ = new Label(), listInitEnd_ = new Label();
 
         boolean initCapacity = JVM_VERSION == 8 && "java/util/ArrayList".equals(LIST_TYPE);
 
@@ -3564,16 +3564,6 @@ public class ObjectReaderCreatorASM
 
             mw.visitLabel(checkAutoTypeNull_);
 
-            if (itemClass == Long.class) {
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt64List", "()Ljava/util/List;", false);
-                mw.visitVarInsn(Opcodes.ASTORE, LIST);
-
-                mw.visitLabel(loadList_);
-                mw.visitVarInsn(Opcodes.ALOAD, LIST);
-                return varIndex;
-            }
-
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
             mw.visitInsn(Opcodes.DUP);
@@ -3587,6 +3577,18 @@ public class ObjectReaderCreatorASM
 
             mw.visitLabel(listNotNull_);
 
+            if (fieldReader.method == null && fieldReader.field != null) {
+                long fieldOffset = UNSAFE.objectFieldOffset(fieldReader.field);
+                mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
+                mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+                mw.visitLdcInsn(fieldOffset);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "sun/misc/Unsafe", "getObject", "(Ljava/lang/Object;J)Ljava/lang/Object;", false);
+                mw.visitInsn(Opcodes.DUP);
+                mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
+                mw.visitVarInsn(Opcodes.ASTORE, LIST);
+                mw.visitJumpInsn(IFNONNULL, listInitEnd_);
+            }
+
             mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
             mw.visitInsn(Opcodes.DUP);
             if (initCapacity) {
@@ -3596,6 +3598,7 @@ public class ObjectReaderCreatorASM
                 mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
             }
             mw.visitVarInsn(Opcodes.ASTORE, LIST);
+            mw.visitLabel(listInitEnd_);
         } else {
             Label match_ = new Label(), skipValue_ = new Label(), loadNull_ = new Label();
 
