@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.benchmark.along;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.benchmark.along.vo.HarmDTO;
+import com.alibaba.fastjson2.benchmark.along.vo.SkillCategory;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
 import io.fury.Fury;
 import io.fury.config.Language;
@@ -17,7 +19,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import static com.alibaba.fastjson2.JSONReader.Feature.FieldBased;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 
 public class AlongParseBinaryArrayMapping {
@@ -39,6 +40,10 @@ public class AlongParseBinaryArrayMapping {
                     .withNumberCompressed(true)
                     .build();
 
+            fury.register(SkillCategory.class);
+            fury.register(SkillFire_S2C_Msg.class);
+            fury.register(HarmDTO.class);
+
             fastjson2JSONBBytes = JSONB.toBytes(object, JSONWriter.Feature.BeanToArray);
             furyBytes = fury.serialize(object);
         } catch (Throwable ex) {
@@ -48,7 +53,7 @@ public class AlongParseBinaryArrayMapping {
 
     @Benchmark
     public void jsonb(Blackhole bh) {
-        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, SupportArrayToBean, FieldBased));
+        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, SupportArrayToBean));
     }
 
     @Benchmark

@@ -289,9 +289,26 @@ public class ObjectReaderAdapter<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        int entryCnt = jsonReader.startArray();
         T object = createInstance(0);
 
+        int entryCnt = jsonReader.startArray();
+        if (entryCnt == fieldReaders.length) {
+            for (int i = 0; i < fieldReaders.length; i++) {
+                FieldReader fieldReader = fieldReaders[i];
+                fieldReader.readFieldValue(jsonReader, object);
+            }
+        } else {
+            readArrayMappingJSONBObject0(jsonReader, object, entryCnt);
+        }
+
+        if (buildFunction != null) {
+            return (T) buildFunction.apply(object);
+        }
+
+        return object;
+    }
+
+    protected void readArrayMappingJSONBObject0(JSONReader jsonReader, Object object, int entryCnt) {
         for (int i = 0; i < fieldReaders.length; i++) {
             if (i >= entryCnt) {
                 continue;
@@ -303,12 +320,6 @@ public class ObjectReaderAdapter<T>
         for (int i = fieldReaders.length; i < entryCnt; i++) {
             jsonReader.skipValue();
         }
-
-        if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
-        }
-
-        return object;
     }
 
     protected Object createInstance0(long features) {
