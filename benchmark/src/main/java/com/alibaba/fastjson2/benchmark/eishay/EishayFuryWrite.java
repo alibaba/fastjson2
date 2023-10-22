@@ -22,6 +22,7 @@ public class EishayFuryWrite {
 
     static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
             .withLanguage(io.fury.config.Language.JAVA)
+            .requireClassRegistration(false)
             .withRefTracking(true)
             .buildThreadSafeFury();
 
