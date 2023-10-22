@@ -605,7 +605,7 @@ public class ObjectReaderAdapter<T>
         T object = createInstance(0L);
 
         if (extraFieldReader == null
-                && ((features | this.features) & JSONReader.Feature.SupportSmartMatch.mask) == 0
+                && ((features | this.features) & (JSONReader.Feature.SupportSmartMatch.mask | JSONReader.Feature.ErrorOnUnknownProperties.mask)) == 0
         ) {
             for (int i = 0; i < fieldReaders.length; i++) {
                 FieldReader fieldReader = fieldReaders[i];
@@ -645,7 +645,7 @@ public class ObjectReaderAdapter<T>
 
                 FieldReader fieldReader = getFieldReader(entryKey);
                 if (fieldReader == null) {
-                    acceptExtra(object, entryKey, entry.getValue());
+                    acceptExtra(object, entryKey, entry.getValue(), features);
                     continue;
                 }
 

@@ -4501,7 +4501,12 @@ public abstract class JSONReader
         /**
          * @since 2.0.40
          */
-        IgnoreNullPropertyValue(1 << 25);
+        IgnoreNullPropertyValue(1 << 25),
+
+        /**
+         * @since 2.0.42
+         */
+        ErrorOnUnknownProperties(1 << 26);
 
         public final long mask;
 

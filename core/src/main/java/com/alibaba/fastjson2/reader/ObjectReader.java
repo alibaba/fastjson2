@@ -37,6 +37,10 @@ public interface ObjectReader<T> {
     }
 
     default void acceptExtra(Object object, String fieldName, Object fieldValue) {
+        acceptExtra(object, fieldName, fieldValue, this.getFeatures());
+    }
+
+    default void acceptExtra(Object object, String fieldName, Object fieldValue, long features) {
     }
 
     default T createInstance(Map map, JSONReader.Feature... features) {
@@ -81,7 +85,7 @@ public interface ObjectReader<T> {
 
             FieldReader fieldReader = getFieldReader(entryKey);
             if (fieldReader == null) {
-                acceptExtra(object, entryKey, entry.getValue());
+                acceptExtra(object, entryKey, entry.getValue(), features);
                 continue;
             }
 
