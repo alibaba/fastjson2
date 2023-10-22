@@ -3614,23 +3614,6 @@ final class JSONReaderJSONB
         return int64Value;
     }
 
-    public List<Long> readInt64List() {
-        if (nextIfNull()) {
-            return null;
-        }
-
-        int entryCnt = startArray();
-        if (entryCnt == -1) {
-            return null;
-        }
-
-        ArrayList<Long> list = new ArrayList<>(entryCnt);
-        for (int i = 0; i < entryCnt; i++) {
-            list.add(readInt64());
-        }
-        return list;
-    }
-
     protected String readFixedAsciiString(int strlen) {
         String str;
         if (strlen == 1) {
