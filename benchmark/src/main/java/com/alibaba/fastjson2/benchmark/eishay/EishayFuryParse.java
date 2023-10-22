@@ -30,6 +30,7 @@ public class EishayFuryParse {
 
     static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
             .withLanguage(io.fury.config.Language.JAVA)
+            .requireClassRegistration(false)
             .withRefTracking(true)
             .buildThreadSafeFury();
 
@@ -45,7 +46,7 @@ public class EishayFuryParse {
                     EishayFuryWrite.features
             );
 
-            furyBytes = fury.serialize(mc);
+            furyBytes = fury.serializeJavaObject(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
