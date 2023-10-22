@@ -1023,34 +1023,6 @@ public abstract class JSONReader
 
     public abstract Long readInt64();
 
-    public List<Long> readInt64List() {
-        if (nextIfNull()) {
-            return null;
-        }
-        if (nextIfArrayStart()) {
-            ArrayList<Long> list = new ArrayList<>();
-            while (!nextIfArrayEnd()) {
-                if (isEnd()) {
-                    throw new JSONException(info("input end"));
-                }
-
-                list.add(readInt64());
-            }
-            nextIfComma();
-            return list;
-        }
-
-        if (isString()) {
-            String str = readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-
-            throw new JSONException(info("not support input " + str));
-        }
-        throw new JSONException(info("TODO"));
-    }
-
     public abstract float readFloatValue();
 
     public Float readFloat() {
