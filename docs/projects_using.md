@@ -72,4 +72,8 @@
 * https://github.com/969025903/ChopperBot
 * https://github.com/XiaoMi/mone
 * https://github.com/gz-yami/mall4cloud
+* https://github.com/cas-bigdatalab/piflow
+* https://github.com/DataLinkDC/dinky
+* https://github.com/wh1t3p1g/ysomap
+* https://github.com/dromara/liteflow
 
