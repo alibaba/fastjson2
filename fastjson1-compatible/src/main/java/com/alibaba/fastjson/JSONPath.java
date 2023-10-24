@@ -54,6 +54,7 @@ public class JSONPath {
 
     public static boolean set(Object rootObject, String path, Object value) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
+        jsonPath.setReaderContext(JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE));
         jsonPath.set(rootObject, value);
         return true;
     }
