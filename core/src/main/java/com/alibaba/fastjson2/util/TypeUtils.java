@@ -1467,6 +1467,19 @@ public class TypeUtils {
             return (T) typeConvert.apply(obj);
         }
 
+        if (targetClass.isEnum()) {
+            ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
+            if (objectReader instanceof ObjectReaderImplEnum) {
+                if (obj instanceof Integer) {
+                    int intValue = (Integer) obj;
+                    return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
+                } else {
+                    JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
+                    return (T) objectReader.readObject(jsonReader, null, null, 0);
+                }
+            }
+        }
+
         if (obj instanceof String) {
             String json = (String) obj;
             if (json.isEmpty() || "null".equals(json)) {
@@ -1486,16 +1499,6 @@ public class TypeUtils {
                     .getDefaultObjectReaderProvider()
                     .getObjectReader(targetClass);
             return (T) objectReader.readObject(jsonReader, null, null, 0);
-        }
-
-        if (targetClass.isEnum()) {
-            if (obj instanceof Integer) {
-                int intValue = (Integer) obj;
-                ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
-                if (objectReader instanceof ObjectReaderImplEnum) {
-                    return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
-                }
-            }
         }
 
         if (obj instanceof Collection) {
