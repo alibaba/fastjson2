@@ -75,7 +75,8 @@ public class FieldWriterObject<T>
             return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
             boolean typeMatch = initValueClass == valueClass
-                    || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass));
+                    || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass))
+                    || (initValueClass == List.class && initValueClass.isAssignableFrom(valueClass));
             if (!typeMatch && initValueClass.isPrimitive()) {
                 typeMatch = typeMatch(initValueClass, valueClass);
             }
