@@ -72,7 +72,7 @@ public abstract class JSONReader
 
     protected byte valueType;
     protected short exponent;
-    protected byte scale;
+    protected short scale;
 
     protected int mag0;
     protected int mag1;
