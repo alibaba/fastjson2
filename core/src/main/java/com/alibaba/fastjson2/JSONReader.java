@@ -3006,6 +3006,9 @@ public abstract class JSONReader
             }
             case JSON_TYPE_BIG_DEC: {
                 if (scale > 0) {
+                    if (scale > defaultDecimalMaxScale) {
+                        throw new JSONException("scale overflow : " + scale);
+                    }
                     return toBigDecimal(stringValue);
                 } else {
                     return new BigInteger(stringValue);
