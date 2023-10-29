@@ -680,7 +680,7 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ISTORE, COMMA); // comma = false
 
         Label writeFields_ = new Label();
-        isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, writeFields_);
+        isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, FIELD_FEATURES, writeFields_);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -709,6 +709,7 @@ public class ObjectWriterCreatorASM
             MethodWriter mw,
             int OBJECT,
             int FIELD_TYPE,
+            int FEILD_FEATURE,
             Label notWriteType
     ) {
         if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
@@ -723,7 +724,8 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteTypeInfo", "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z", false);
+            mw.visitVarInsn(Opcodes.LLOAD, FEILD_FEATURE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteTypeInfo", "(Ljava/lang/Object;Ljava/lang/reflect/Type;J)Z", false);
             mw.visitJumpInsn(Opcodes.IFEQ, notWriteType);
         }
     }
@@ -773,7 +775,7 @@ public class ObjectWriterCreatorASM
         }
 
         Label notWriteType = new Label();
-        isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, notWriteType);
+        isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, FIELD_FEATURES, notWriteType);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -820,7 +822,7 @@ public class ObjectWriterCreatorASM
 
         {
             Label notWriteType = new Label();
-            isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, notWriteType);
+            isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, FIELD_FEATURES, notWriteType);
 
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
