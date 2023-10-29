@@ -57,6 +57,8 @@ public final class JSONFactory {
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
     static final JSONReaderUTF16Creator INCUBATOR_VECTOR_READER_CREATOR_UTF16;
 
+    static int defaultDecimalMaxScale = 2048;
+
     interface JSONReaderUTF8Creator {
         JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
     }
