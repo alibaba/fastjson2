@@ -206,13 +206,6 @@ final class JSONReaderUTF8Vector
                             (char) (bytes[this.offset] & 0xff),
                             (char) (bytes[this.offset + 1] & 0xff)
                     );
-                } else if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[strlen];
-                    for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[this.offset + i];
-                    }
-
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else if (STRING_CREATOR_JDK11 != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
