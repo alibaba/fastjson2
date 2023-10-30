@@ -477,6 +477,9 @@ final class JSONPathSegmentIndex
         for (int i = 0; jsonReader.ch != EOI; ++i) {
             if (jsonReader.ch == ']') {
                 jsonReader.next();
+                if (i == 0) {
+                    context.eval = true;
+                }
                 break;
             }
 
