@@ -5,7 +5,6 @@ import jdk.incubator.vector.ShortVector;
 import jdk.incubator.vector.Vector;
 
 import static com.alibaba.fastjson2.JSONWriterUTF16Vector.*;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 
 final class JSONReaderUTF16Vector
         extends JSONReaderUTF16 {
@@ -110,11 +109,7 @@ final class JSONReaderUTF16Vector
                     offset++;
                 }
 
-                if (STRING_CREATOR_JDK8 != null) {
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                } else {
-                    str = new String(chars);
-                }
+                str = new String(chars);
             } else {
                 char c0, c1;
                 int strlen = offset - this.offset;
