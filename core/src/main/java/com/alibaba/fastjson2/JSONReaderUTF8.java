@@ -70,8 +70,8 @@ class JSONReaderUTF8
         this.end = length;
         next();
 
-        while (ch == '/' && this.offset < this.bytes.length && this.bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -95,8 +95,8 @@ class JSONReaderUTF8
         this.end = length;
         next();
 
-        while (ch == '/' && this.offset < this.bytes.length && this.bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -186,8 +186,8 @@ class JSONReaderUTF8
 
         this.offset = offset;
         this.ch = (char) ch;
-        while (this.ch == '/' && offset < bytes.length && bytes[offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
 
         return true;
@@ -260,8 +260,8 @@ class JSONReaderUTF8
 
         this.offset = offset;
         this.ch = (char) ch;
-        while (this.ch == '/' && offset < bytes.length && bytes[offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
 
         return true;
@@ -325,8 +325,8 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -406,8 +406,8 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -535,8 +535,8 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -616,8 +616,8 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -645,8 +645,8 @@ class JSONReaderUTF8
             this.offset = offset + 1;
             this.ch = (char) ch;
 
-            while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-                skipLineComment();
+            if (this.ch == '/') {
+                skipComment();
             }
             return;
         }
@@ -685,8 +685,8 @@ class JSONReaderUTF8
 
         this.offset = offset;
         this.ch = (char) ch;
-        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -5941,37 +5941,70 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final void skipLineComment() {
-        while (true) {
-            if (ch == '\n') {
-                offset++;
+    public final void skipComment() {
+        int offset = this.offset;
+        if (offset + 1 >= this.end) {
+            throw new JSONException(info());
+        }
 
-                if (offset >= end) {
+        byte ch = bytes[offset++];
+
+        boolean multi;
+        if (ch == '*') {
+            multi = true;
+        } else if (ch == '/') {
+            multi = false;
+        } else {
+            return;
+        }
+
+        ch = bytes[offset++];
+
+        while (true) {
+            boolean endOfComment = false;
+            if (multi) {
+                if (ch == '*'
+                        && offset <= end && bytes[offset] == '/') {
+                    offset++;
+                    endOfComment = true;
+                }
+            } else {
+                endOfComment = ch == '\n';
+            }
+
+            if (endOfComment) {
+                if (offset >= this.end) {
                     ch = EOI;
-                    return;
+                    break;
                 }
 
-                ch = (char) bytes[offset];
+                ch = bytes[offset];
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     offset++;
-                    if (offset >= end) {
+                    if (offset >= this.end) {
                         ch = EOI;
-                        return;
+                        break;
                     }
-                    ch = (char) bytes[offset];
+                    ch = bytes[offset];
                 }
 
                 offset++;
                 break;
             }
 
-            offset++;
-            if (offset >= end) {
+            if (offset >= this.end) {
                 ch = EOI;
-                return;
+                break;
             }
-            ch = (char) bytes[offset];
+            ch = bytes[offset++];
+        }
+
+        this.ch = (char) ch;
+        this.offset = offset;
+
+        if (ch == '/') {
+            skipComment();
         }
     }
 
@@ -8515,8 +8548,8 @@ class JSONReaderUTF8
 
         this.offset = offset;
         this.ch = (char) ch;
-        while (this.ch == '/' && offset < bytes.length && bytes[offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
 
         return hex;

@@ -82,13 +82,8 @@ class JSONReaderUTF16
             next();
         }
 
-        while (ch == '/') {
-            next();
-            if (ch == '/') {
-                skipLineComment();
-            } else {
-                throw new JSONException("input not support " + ch + ", offset " + offset);
-            }
+        if (ch == '/') {
+            skipComment();
         }
     }
 
@@ -167,8 +162,8 @@ class JSONReaderUTF16
         }
         this.offset = offset + 1;
         this.ch = ch;
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
 
         return bytes;
@@ -356,13 +351,8 @@ class JSONReaderUTF16
             next();
         }
 
-        while (ch == '/') {
-            next();
-            if (ch == '/') {
-                skipLineComment();
-            } else {
-                throw new JSONException("input not support " + ch + ", offset " + offset);
-            }
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -407,8 +397,8 @@ class JSONReaderUTF16
             next();
         }
 
-        while (ch == '/' && this.offset < this.chars.length && this.chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -445,8 +435,8 @@ class JSONReaderUTF16
             next();
         }
 
-        while (ch == '/' && this.offset < this.chars.length && this.chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -522,13 +512,8 @@ class JSONReaderUTF16
             next();
         }
 
-        while (this.ch == '/') {
-            next();
-            if (this.ch == '/') {
-                skipLineComment();
-            } else {
-                throw new JSONException("input not support " + ch + ", offset " + offset);
-            }
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -568,8 +553,8 @@ class JSONReaderUTF16
         }
         this.offset = offset + 1;
         this.ch = ch;
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -604,8 +589,8 @@ class JSONReaderUTF16
         }
         this.offset = offset + 1;
         this.ch = ch;
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -638,8 +623,8 @@ class JSONReaderUTF16
         this.ch = ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -689,8 +674,8 @@ class JSONReaderUTF16
         this.ch = ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -1009,8 +994,8 @@ class JSONReaderUTF16
         this.ch = ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -1059,8 +1044,8 @@ class JSONReaderUTF16
         this.ch = ch;
         this.offset = offset;
 
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
         return true;
     }
@@ -1086,8 +1071,8 @@ class JSONReaderUTF16
         }
         this.offset = offset + 1;
         this.ch = ch;
-        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -4572,23 +4557,50 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final void skipLineComment() {
-        while (true) {
-            if (ch == '\n') {
-                offset++;
+    public final void skipComment() {
+        int offset = this.offset;
+        if (offset + 1 >= this.end) {
+            throw new JSONException(info());
+        }
 
-                if (offset >= end) {
+        char ch = chars[offset++];
+
+        boolean multi;
+        if (ch == '*') {
+            multi = true;
+        } else if (ch == '/') {
+            multi = false;
+        } else {
+            return;
+        }
+
+        ch = chars[offset++];
+
+        while (true) {
+            boolean endOfComment = false;
+            if (multi) {
+                if (ch == '*'
+                        && offset <= end && chars[offset] == '/') {
+                    offset++;
+                    endOfComment = true;
+                }
+            } else {
+                endOfComment = ch == '\n';
+            }
+
+            if (endOfComment) {
+                if (offset >= this.end) {
                     ch = EOI;
-                    return;
+                    break;
                 }
 
                 ch = chars[offset];
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     offset++;
-                    if (offset >= end) {
+                    if (offset >= this.end) {
                         ch = EOI;
-                        return;
+                        break;
                     }
                     ch = chars[offset];
                 }
@@ -4597,12 +4609,18 @@ class JSONReaderUTF16
                 break;
             }
 
-            offset++;
-            if (offset >= end) {
+            if (offset >= this.end) {
                 ch = EOI;
-                return;
+                break;
             }
-            ch = chars[offset];
+            ch = chars[offset++];
+        }
+
+        this.ch = ch;
+        this.offset = offset;
+
+        if (ch == '/') {
+            skipComment();
         }
     }
 

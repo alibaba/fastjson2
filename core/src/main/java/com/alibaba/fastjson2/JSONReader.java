@@ -2002,7 +2002,7 @@ public abstract class JSONReader
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
-                skipLineComment();
+                skipComment();
             }
 
             if (nextIfObjectEnd()) {
@@ -2050,7 +2050,7 @@ public abstract class JSONReader
                         return;
                     }
                 }
-                throw new JSONException("illegal input， offset " + offset + ", char " + ch);
+                throw new JSONException(info());
             }
         }
 
@@ -2065,7 +2065,7 @@ public abstract class JSONReader
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
-                skipLineComment();
+                skipComment();
             }
 
             if (nextIfObjectEnd()) {
@@ -2148,7 +2148,7 @@ public abstract class JSONReader
                 case '/':
                     next();
                     if (ch == '/') {
-                        skipLineComment();
+                        skipComment();
                     } else {
                         throw new JSONException("FASTJSON" + JSON.VERSION + "input not support " + ch + ", offset " + offset);
                     }
@@ -2208,7 +2208,7 @@ public abstract class JSONReader
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
-                skipLineComment();
+                skipComment();
             }
 
             if (nextIfObjectEnd()) {
@@ -2337,10 +2337,7 @@ public abstract class JSONReader
                     val = null;
                     break;
                 case '/':
-                    next();
-                    if (ch == '/') {
-                        skipLineComment();
-                    }
+                    skipComment();
                     continue;
                 case 'I':
                     if (nextIfInfinity()) {
@@ -2387,7 +2384,7 @@ public abstract class JSONReader
         return object;
     }
 
-    public abstract void skipLineComment();
+    public abstract void skipComment();
 
     public Boolean readBool() {
         if (nextIfNull()) {
@@ -2613,7 +2610,7 @@ public abstract class JSONReader
                     break;
                 }
                 case '/':
-                    skipLineComment();
+                    skipComment();
                     continue;
                 default:
                     throw new JSONException("TODO : " + ch);

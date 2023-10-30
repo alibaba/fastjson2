@@ -42,8 +42,8 @@ class JSONReaderASCII
         this.offset = offset + 1;
         this.ch = (char) (ch & 0xFF);
 
-        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+        if (this.ch == '/') {
+            skipComment();
         }
     }
 
@@ -75,7 +75,7 @@ class JSONReaderASCII
         this.offset = offset;
 
         while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+            skipComment();
         }
         return true;
     }
@@ -125,7 +125,7 @@ class JSONReaderASCII
         this.offset = offset;
 
         while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+            skipComment();
         }
         return true;
     }
@@ -161,7 +161,7 @@ class JSONReaderASCII
         this.ch = (char) (ch & 0xFF);
 
         while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+            skipComment();
         }
 
         return true;
@@ -206,7 +206,7 @@ class JSONReaderASCII
         this.ch = (char) (ch & 0xFF);
 
         while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+            skipComment();
         }
 
         return true;
@@ -241,7 +241,7 @@ class JSONReaderASCII
         this.offset = offset;
 
         while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+            skipComment();
         }
         return true;
     }
@@ -292,7 +292,7 @@ class JSONReaderASCII
         this.offset = offset;
 
         while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-            skipLineComment();
+            skipComment();
         }
         return true;
     }
