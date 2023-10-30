@@ -116,7 +116,7 @@ public class JSONReaderJSONBTest {
         assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
         assertThrows(JSONException.class, () -> jsonReader.readLocalDateTime18());
         assertThrows(JSONException.class, () -> jsonReader.readZonedDateTimeX(10));
-        assertThrows(JSONException.class, () -> jsonReader.skipLineComment());
+        assertThrows(JSONException.class, () -> jsonReader.skipComment());
         assertThrows(JSONException.class, () -> jsonReader.readPattern());
         assertThrows(JSONException.class, () -> jsonReader.nextIfMatchIdent('0', '1', '2'));
         assertThrows(JSONException.class, () -> jsonReader.nextIfMatchIdent('0', '1', '2', '3'));

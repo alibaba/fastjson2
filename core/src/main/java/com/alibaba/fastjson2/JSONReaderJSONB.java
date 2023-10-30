@@ -4660,7 +4660,7 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public void skipLineComment() {
+    public void skipComment() {
         throw new JSONException("UnsupportedOperation");
     }
 
