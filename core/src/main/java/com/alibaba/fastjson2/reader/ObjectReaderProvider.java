@@ -733,6 +733,14 @@ public class ObjectReaderProvider
                 ? cacheFieldBased.get(objectType)
                 : cache.get(objectType);
 
+        if (objectReader == null && objectType instanceof WildcardType) {
+            Type[] upperBounds = ((WildcardType) objectType).getUpperBounds();
+            if (upperBounds.length == 1) {
+                Type upperBoundType = upperBounds[0];
+                objectReader = fieldBased ? cacheFieldBased.get(upperBoundType) : cache.get(upperBoundType);
+            }
+        }
+
         return objectReader != null
                 ? objectReader
                 : getObjectReaderInternal(objectType, fieldBased);
