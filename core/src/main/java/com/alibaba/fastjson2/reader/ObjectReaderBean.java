@@ -80,8 +80,13 @@ public abstract class ObjectReaderBean<T>
         if ((featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
             Type itemType = fieldType == null ? this.objectClass : fieldType;
             List list = jsonReader.readArray(itemType);
-            if (list.size() == 1) {
-                return (T) list.get(0);
+            if (list != null) {
+                if (list.size() == 0) {
+                    return null;
+                }
+                if (list.size() == 1) {
+                    return (T) list.get(0);
+                }
             }
         }
         throw new JSONException(info);
