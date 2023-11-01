@@ -41,7 +41,7 @@
         <springsecurity6.version>6.1.4</springsecurity6.version>
         <springboot2.version>2.7.16</springboot2.version>
         <springboot3.version>3.1.4</springboot3.version>
-        <arrow.version>13.0.0</arrow.version>
+        <arrow.version>14.0.0</arrow.version>
 
         <!-- Requires kotlin minor version less than the latest version -->
         <kotlin.version>1.6.21</kotlin.version>
