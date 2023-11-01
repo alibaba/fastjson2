@@ -1168,6 +1168,20 @@ final class JSONReaderJSONB
         throw new JSONException("reference not support input " + error(type));
     }
 
+    public boolean readReference(List list, int i) {
+        if (bytes[offset] != BC_REFERENCE) {
+            return false;
+        }
+        offset++;
+        String path = readString();
+        if ("..".equals(path)) {
+            list.add(list);
+        } else {
+            addResolveTask(list, i, JSONPath.of(path));
+        }
+        return true;
+    }
+
     Object readAnyObject() {
         if (bytes[offset] != BC_TYPED_ANY) {
             return readAny();

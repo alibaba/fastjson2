@@ -97,20 +97,13 @@ public class FieldReaderList<T, V>
                     break;
                 }
 
-                Object item;
-                if (jsonReader.isReference()) {
-                    String path = jsonReader.readReference();
-                    if ("..".equals(path)) {
-                        item = list;
-                    } else {
-                        addResolveTask(jsonReader, (List) list, i, path);
-                        continue;
-                    }
-                } else {
-                    item = itemObjectReader.readObject(jsonReader, null, null, 0);
+                if (jsonReader.readReference((List) list, i)) {
+                    continue;
                 }
 
-                list.add(item);
+                list.add(
+                        itemObjectReader.readObject(jsonReader, null, null, 0)
+                );
 
                 jsonReader.nextIfComma();
             }

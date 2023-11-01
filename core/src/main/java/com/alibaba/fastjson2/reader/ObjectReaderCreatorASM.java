@@ -52,7 +52,7 @@ public class ObjectReaderCreatorASM
     static final String METHOD_DESC_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_PROCESS_EXTRA = "(" + DESC_JSON_READER + "Ljava/lang/Object;)V";
 
-    static final String METHOD_DESC_JSON_READER_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + "Ljava/lang/Class;J)" + DESC_OBJECT_READER;
+    static final String METHOD_DESC_JSON_READER_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + "J)" + DESC_OBJECT_READER;
     static final String METHOD_DESC_READ_ARRAY_MAPPING_JSONB_OBJECT0 = "(" + DESC_JSON_READER + "Ljava/lang/Object;I)V";
 
     static final int THIS = 0;
@@ -1388,20 +1388,12 @@ public class ObjectReaderCreatorASM
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitVarInsn(Opcodes.ALOAD, THIS);
-        mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "objectClass", "Ljava/lang/Class;");
         mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "checkAutoType", METHOD_DESC_JSON_READER_CHECK_ARRAY_AUTO_TYPE, false);
 
         mw.visitInsn(Opcodes.DUP);
         mw.visitVarInsn(Opcodes.ASTORE, AUTO_TYPE_OBJECT_READER);
         mw.visitJumpInsn(Opcodes.IFNULL, checkArrayAutoTypeNull_);
-
-        mw.visitVarInsn(Opcodes.ALOAD, AUTO_TYPE_OBJECT_READER);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "getObjectClass", "()Ljava/lang/Class;", true);
-        mw.visitVarInsn(Opcodes.ALOAD, THIS);
-        mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "objectClass", "Ljava/lang/Class;");
-        mw.visitJumpInsn(Opcodes.IF_ACMPEQ, checkArrayAutoTypeNull_);
 
         mw.visitVarInsn(Opcodes.ALOAD, AUTO_TYPE_OBJECT_READER);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -3720,57 +3712,20 @@ public class ObjectReaderCreatorASM
             mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
 
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
-//                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "getItemObjectReader", METHOD_DESC_GET_ITEM_OBJECT_READER, false);
-//
-//                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL,  TYPE_FIELD_READE, "getItemType", "()Ljava/lang/reflect/Type;", false);
-//                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL,  TYPE_JSON_READER, "getObjectReader", METHOD_DESC_GET_OBJECT_READER, false);
+
             mw.visitFieldInsn(PUTFIELD, classNameType, ITEM_OBJECT_READER, DESC_OBJECT_READER);
 
             mw.visitLabel(notNull_);
 
-            Label endReference_ = new Label(), addResolveTask_ = new Label();
-
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isReference", "()Z", false);
-            mw.visitJumpInsn(Opcodes.IFEQ, endReference_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readReference", "()Ljava/lang/String;", false);
-            mw.visitInsn(Opcodes.DUP);
-            mw.visitVarInsn(Opcodes.ASTORE, REFERENCE);
-            mw.visitLdcInsn("..");
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
-            mw.visitJumpInsn(Opcodes.IFEQ, addResolveTask_);
-
-            if (fieldClass.isAssignableFrom(objectClass)) {
-                mw.visitVarInsn(Opcodes.ALOAD, LIST);
-                mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
-                mw.visitInsn(Opcodes.POP);
-                mw.visitJumpInsn(Opcodes.GOTO, for_inc_j_);
-            }
-
-            mw.visitLabel(addResolveTask_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, LIST);
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
-            mw.visitInsn(Opcodes.POP);
-
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
             mw.visitVarInsn(Opcodes.ILOAD, J);
-            mw.visitVarInsn(Opcodes.ALOAD, REFERENCE);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "addResolveTask", METHOD_DESC_ADD_RESOLVE_TASK_2, false);
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_j_);
-
-            mw.visitLabel(endReference_);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readReference", "(Ljava/util/List;I)Z", false);
+            mw.visitJumpInsn(IFNE, for_inc_j_);
 
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
 

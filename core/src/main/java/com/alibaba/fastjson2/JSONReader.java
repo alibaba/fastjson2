@@ -599,6 +599,19 @@ public abstract class JSONReader
 
     public abstract String readReference();
 
+    public boolean readReference(List list, int i) {
+        if (!isReference()) {
+            return false;
+        }
+        String path = readReference();
+        if ("..".equals(path)) {
+            list.add(list);
+        } else {
+            addResolveTask(list, i, JSONPath.of(path));
+        }
+        return true;
+    }
+
     public final void addResolveTask(FieldReader fieldReader, Object object, JSONPath path) {
         if (resolveTasks == null) {
             resolveTasks = new ArrayList<>();
