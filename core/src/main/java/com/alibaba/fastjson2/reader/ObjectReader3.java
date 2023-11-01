@@ -107,30 +107,20 @@ public class ObjectReader3<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
-        if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
+        ObjectReader autoTypeReader = checkAutoType(jsonReader, features);
+        if (autoTypeReader != null) {
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         T object = creator.get();
 
         int entryCnt = jsonReader.startArray();
-        if (entryCnt > 0) {
+        if (entryCnt == fieldReaders.length) {
             fieldReader0.readFieldValue(jsonReader, object);
-            if (entryCnt > 1) {
-                fieldReader1.readFieldValue(jsonReader, object);
-                if (entryCnt > 2) {
-                    fieldReader2.readFieldValue(jsonReader, object);
-
-                    for (int i = 3; i < entryCnt; ++i) {
-                        jsonReader.skipValue();
-                    }
-                }
-            }
-        }
-
-        for (int i = 3; i < entryCnt; ++i) {
-            jsonReader.skipValue();
+            fieldReader1.readFieldValue(jsonReader, object);
+            fieldReader2.readFieldValue(jsonReader, object);
+        } else {
+            readArrayMappingJSONBObject0(jsonReader, object, entryCnt);
         }
 
         if (buildFunction != null) {

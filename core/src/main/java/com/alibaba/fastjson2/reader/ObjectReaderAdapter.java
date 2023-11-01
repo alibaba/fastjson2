@@ -284,8 +284,8 @@ public class ObjectReaderAdapter<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
-        if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
+        ObjectReader autoTypeReader = checkAutoType(jsonReader, features);
+        if (autoTypeReader != null) {
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 

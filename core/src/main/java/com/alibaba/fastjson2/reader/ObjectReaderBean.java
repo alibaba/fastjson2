@@ -152,58 +152,80 @@ public abstract class ObjectReaderBean<T>
         extraFieldReader.acceptExtra(object, fieldName, fieldValue);
     }
 
+    @Deprecated
     public final ObjectReader checkAutoType(JSONReader jsonReader, Class expectClass, long features) {
-        if (jsonReader.nextIfMatchTypedAny()) {
-            long typeHash = jsonReader.readTypeHashCode();
-            JSONReader.Context context = jsonReader.getContext();
-            long features3 = jsonReader.features(features | this.features);
-            JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
-            if (autoTypeFilter != null) {
-                Class<?> filterClass = autoTypeFilter.apply(typeHash, expectClass, features);
-                if (filterClass == null) {
-                    String typeName = jsonReader.getString();
-                    filterClass = autoTypeFilter.apply(typeName, expectClass, features);
+        return checkAutoType(jsonReader, features);
+    }
 
-                    if (!expectClass.isAssignableFrom(filterClass)) {
-                        if ((jsonReader.features(features) & IgnoreAutoTypeNotMatch.mask) == 0) {
-                            throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
-                        }
+    public final ObjectReader checkAutoType(JSONReader jsonReader, long features) {
+        if (!jsonReader.nextIfMatchTypedAny()) {
+            return null;
+        }
 
-                        filterClass = expectClass;
+        return checkAutoType0(jsonReader, features);
+    }
+
+    protected final ObjectReader checkAutoType0(JSONReader jsonReader, long features) {
+        Class expectClass = this.objectClass;
+        long typeHash = jsonReader.readTypeHashCode();
+        JSONReader.Context context = jsonReader.getContext();
+        long features3 = jsonReader.features(features | this.features);
+        JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
+
+        ObjectReader autoTypeObjectReader;
+        if (autoTypeFilter != null) {
+            Class<?> filterClass = autoTypeFilter.apply(typeHash, expectClass, features);
+            if (filterClass == null) {
+                String typeName = jsonReader.getString();
+                filterClass = autoTypeFilter.apply(typeName, expectClass, features);
+
+                if (!expectClass.isAssignableFrom(filterClass)) {
+                    if ((jsonReader.features(features) & IgnoreAutoTypeNotMatch.mask) == 0) {
+                        throw notMatchError();
                     }
-                }
 
-                return context.getObjectReader(filterClass);
+                    filterClass = expectClass;
+                }
             }
 
-            ObjectReader autoTypeObjectReader = jsonReader.getObjectReaderAutoType(typeHash, expectClass, features);
+            autoTypeObjectReader = context.getObjectReader(filterClass);
+        } else {
+            autoTypeObjectReader = jsonReader.getObjectReaderAutoType(typeHash, expectClass, features);
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException(jsonReader.info("auotype not support"));
+                throw auotypeError(jsonReader);
             }
 
             Class autoTypeObjectReaderClass = autoTypeObjectReader.getObjectClass();
             if (expectClass != null
                     && autoTypeObjectReaderClass != null
                     && !expectClass.isAssignableFrom(autoTypeObjectReaderClass)) {
-                if ((features3 & IgnoreAutoTypeNotMatch.mask) != 0) {
-                    return context.getObjectReader(expectClass);
+                if ((features3 & IgnoreAutoTypeNotMatch.mask) == 0) {
+                    throw notMatchError();
                 }
 
-                throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+                autoTypeObjectReader = context.getObjectReader(expectClass);
+            } else {
+                if (typeHash == this.typeNameHash || (features3 & SupportAutoType.mask) == 0) {
+                    autoTypeObjectReader = null;
+                }
             }
-
-            if (typeHash == this.typeNameHash) {
-                return this;
-            }
-
-            if ((features3 & SupportAutoType.mask) == 0) {
-                return null;
-            }
-
-            return autoTypeObjectReader;
         }
-        return null;
+
+        if (autoTypeObjectReader == this
+                || (autoTypeObjectReader != null && autoTypeObjectReader.getObjectClass() == this.objectClass)) {
+            autoTypeObjectReader = null;
+        }
+
+        return autoTypeObjectReader;
+    }
+
+    private JSONException notMatchError() {
+        return new JSONException("type not match. " + typeName + " -> " + this.objectClass.getName());
+    }
+
+    private JSONException auotypeError(JSONReader jsonReader) {
+        return new JSONException(jsonReader.info("auotype not support"));
     }
 
     protected void initDefaultValue(T object) {
