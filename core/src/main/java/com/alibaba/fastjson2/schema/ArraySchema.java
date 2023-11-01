@@ -9,7 +9,10 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
-
+/**
+ * ArraySchema 类继承了 JSONSchema 类，表示 JSON Schema 中的数组类型 schema。
+ * 该类用于验证 JSON 数据是否符合数组类型 schema 的定义。
+ */
 public final class ArraySchema
         extends JSONSchema {
     final Map<String, JSONSchema> definitions;
@@ -32,13 +35,18 @@ public final class ArraySchema
     final AnyOf anyOf;
     final OneOf oneOf;
 
+    /**
+     * 构造函数，从 JSON 对象构建 ArraySchema 对象。
+     * @param input 用于构建 ArraySchema 对象的 JSON 对象
+     * @param root 根 JSONSchema 对象
+     */
     public ArraySchema(JSONObject input, JSONSchema root) {
         super(input);
-
+        // 初始化数组类型相关属性
         this.typed = "array".equals(input.get("type"));
         this.definitions = new LinkedHashMap<>();
         this.defs = new LinkedHashMap<>();
-
+        // 从 JSON 对象中解析 "definitions" 部分的 schema 并存储到 definitions 中
         JSONObject definitions = input.getJSONObject("definitions");
         if (definitions != null) {
             for (Map.Entry<String, Object> entry : definitions.entrySet()) {
@@ -48,7 +56,7 @@ public final class ArraySchema
                 this.definitions.put(entryKey, schema);
             }
         }
-
+        // 从 JSON 对象中解析 "$defs" 部分的 schema 并存储到 defs 中
         JSONObject defs = input.getJSONObject("$defs");
         if (defs != null) {
             for (Map.Entry<String, Object> entry : defs.entrySet()) {
@@ -61,12 +69,13 @@ public final class ArraySchema
 
         this.minLength = input.getIntValue("minItems", -1);
         this.maxLength = input.getIntValue("maxItems", -1);
-
+        // 解析 "items" 和 "additionalItems" 字段
         Object items = input.get("items");
         Object additionalItems = input.get("additionalItems");
         JSONArray prefixItems = input.getJSONArray("prefixItems");
-
+        // 是否支持额外的元素
         boolean additionalItemsSupport;
+        // 处理 "items" 字段
         if (items == null) {
             additionalItemsSupport = true;
             this.itemSchema = null;
@@ -85,7 +94,7 @@ public final class ArraySchema
             additionalItemsSupport = true;
             this.itemSchema = JSONSchema.of((JSONObject) items, root != null ? root : this);
         }
-
+        // 处理 "additionalItems" 字段
         if (additionalItems instanceof JSONObject) {
             additionalItem = JSONSchema.of((JSONObject) additionalItems, root == null ? this : root);
             additionalItemsSupport = true;
@@ -97,6 +106,8 @@ public final class ArraySchema
         }
 //        ((itemSchema != null && !(itemSchema instanceof Any))
 //                || this.prefixItems.length > 0)
+
+        // 如果 itemSchema 不为 null 且不是 Any 类型，或者 prefixItems 不为空，支持额外的元素
         if (itemSchema != null && !(itemSchema instanceof Any)) {
             additionalItemsSupport = true;
         } else if (prefixItems == null && !(items instanceof Boolean)) {
@@ -104,6 +115,7 @@ public final class ArraySchema
         }
         this.additionalItems = additionalItemsSupport;
 
+        // 解析 "prefixItems" 字段
         if (prefixItems == null) {
             this.prefixItems = new JSONSchema[0];
         } else {
@@ -134,11 +146,21 @@ public final class ArraySchema
         oneOf = oneOf(input, null);
     }
 
+
+    /**
+     * 获取 ArraySchema 对象的类型，返回 Type.Array。
+     * @return ArraySchema 对象的类型
+     */
     @Override
     public Type getType() {
         return Type.Array;
     }
 
+    /**
+     * 验证输入数据是否符合 ArraySchema 定义的规则。
+     * @param value 待验证的输入数据
+     * @return 验证结果，SUCCESS 表示验证成功，否则返回具体的失败信息
+     */
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
@@ -164,6 +186,7 @@ public final class ArraySchema
         return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
     }
 
+    // 用于验证输入数据的元素是否满足数组类型 schema 的规则
     private ValidateResult validateItems(final Object value, final int size, IntFunction<Object> itemGetter) {
         if (minLength >= 0 && size < minLength) {
             return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
@@ -180,6 +203,8 @@ public final class ArraySchema
         final boolean isCollection = value instanceof Collection;
         Set<Object> uniqueItemsSet = null;
         int containsCount = 0;
+
+        // 遍历数组元素进行验证
         for (int index = 0; index < size; index++) {
             Object item = itemGetter.apply(index);
 

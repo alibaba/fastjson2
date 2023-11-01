@@ -19,6 +19,15 @@ import java.util.Map;
 import static org.objectweb.asm.Opcodes.*;
 
 public class EishayClassGen {
+
+    /**
+     * 该方法用于生成并加载类
+     * @param classLoader 类加载器
+     * @param packageName
+     * 类加载器定义了指定包名的包。
+     * 调用 genCode 方法生成类的字节码。
+     * 加载生成的类，并返回指定类名（MediaContent）的 Class 对象。
+     * */
     public Class genMedia(DynamicClassLoader classLoader, String packageName) throws Exception {
         classLoader.definePackage(packageName.replace('/', '.'));
 
@@ -35,6 +44,11 @@ public class EishayClassGen {
         return classes.get(mediaContentClassName);
     }
 
+
+    /**
+     * 该方法用于生成类的字节码，并将生成的字节码存储在 classBytes 中。
+     * 生成多个类（Player、Media、Image$Size、Image、MediaContent）的字节码。
+     * */
     public void genCode(String packageName, Map<String, byte[]> classBytes) {
         String playerType = packageName + "/Media$Player";
         String playerClassName = playerType.replace('/', '.');

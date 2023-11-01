@@ -23,6 +23,11 @@ public class AlongWriteBinaryArrayMapping {
     static SkillFire_S2C_Msg object;
     static Fury fury;
 
+    /**
+     * 从资源文件 "data/along.json" 中加载 JSON 字符串。
+     * 使用 Fury 的 JSONReader 解析 JSON 字符串并将其转换为 SkillFire_S2C_Msg 对象。
+     * 配置 Fury 实例。
+     * */
     static {
         try {
             InputStream is = AlongWriteBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
@@ -41,6 +46,9 @@ public class AlongWriteBinaryArrayMapping {
         }
     }
 
+    /**
+     * 通过 Fastjson2 将 object 序列化为字节数组，并返回字节数组的长度。
+     * */
     public int jsonbSize() {
         return JSONB.toBytes(object, JSONWriter.Feature.BeanToArray).length;
     }
@@ -69,6 +77,9 @@ public class AlongWriteBinaryArrayMapping {
         bh.consume(JSON.toJSONString(object, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
+    /**
+     * 使用 JMH 的 Runner 运行性能测试。
+     * */
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(AlongWriteBinaryArrayMapping.class.getName())

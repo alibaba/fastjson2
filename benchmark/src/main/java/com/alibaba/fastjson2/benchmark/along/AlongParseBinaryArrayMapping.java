@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 import static com.alibaba.fastjson2.JSONReader.Feature.FieldBased;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 
+
+
 public class AlongParseBinaryArrayMapping {
     static Fury fury;
 
@@ -29,6 +31,12 @@ public class AlongParseBinaryArrayMapping {
     static byte[] fastjson2JSONBBytes;
     static byte[] furyBytes;
 
+    /**
+     * 从资源文件 "data/along.json" 中加载 JSON 字符串，并使用 Fury 的 JSONReader 将其解析为 SkillFire_S2C_Msg 对象。
+     * 配置 Fury 实例，包括选择编程语言（JAVA）、禁用引用跟踪、禁用类注册、启用数字压缩等。
+     * 使用 Fury 的 register 方法注册 SkillCategory、SkillFire_S2C_Msg 和 HarmDTO 类型。
+     * 使用 Fastjson2 将 object 序列化为字节数组，使用 Fury 将其序列化为字节数组。
+     * */
     static {
         try {
             InputStream is = AlongParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
@@ -52,16 +60,27 @@ public class AlongParseBinaryArrayMapping {
         }
     }
 
+    /**
+     * 执行 Fastjson2 的反序列化操作，并使用 Blackhole 来消耗结果，以防止 JIT 编译器优化掉这些操作。
+     * */
     @Benchmark
     public void jsonb(Blackhole bh) {
         bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, FieldBased, SupportArrayToBean));
     }
 
+    /**
+     * 执行 Fury 的反序列化操作，同样使用 Blackhole 消耗结果。
+     * */
     @Benchmark
     public void fury(Blackhole bh) {
         bh.consume(fury.deserializeJavaObject(furyBytes, SkillFire_S2C_Msg.class));
     }
 
+
+    /**
+     * 创建 JMH（Java Microbenchmarking Harness）测试的配置选项，包括测试类的全名、性能测试模式、时间单位、预热迭代次数、并行度、线程数等。
+     * 使用 JMH 的 Runner 运行性能测试。
+     * */
     public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
                 .include(AlongParseBinaryArrayMapping.class.getName())
