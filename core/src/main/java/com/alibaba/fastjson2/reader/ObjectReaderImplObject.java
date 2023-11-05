@@ -252,7 +252,7 @@ public final class ObjectReaderImplObject
 
         char ch = jsonReader.current();
         if (ch == '/') {
-            jsonReader.skipLineComment();
+            jsonReader.skipComment();
             ch = jsonReader.current();
         }
 

@@ -93,7 +93,7 @@ final class FieldWriterObjectArrayField<T>
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
-        long features = jsonWriter.getFeatures();
+        long features = jsonWriter.getFeatures() | this.features;
         boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
         boolean previousItemRefDetect = refDetect;
 
@@ -190,7 +190,7 @@ final class FieldWriterObjectArrayField<T>
                 previousObjectWriter = itemObjectWriter;
             }
 
-            itemObjectWriter.write(jsonWriter, item);
+            itemObjectWriter.write(jsonWriter, item, i, fieldType, features);
         }
         jsonWriter.endArray();
     }

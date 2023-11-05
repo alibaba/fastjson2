@@ -65,7 +65,7 @@ public abstract class JSONReader
 
     protected byte valueType;
     protected short exponent;
-    protected byte scale;
+    protected short scale;
 
     protected int mag0;
     protected int mag1;
@@ -1646,7 +1646,7 @@ public abstract class JSONReader
         for_:
         for (int i = 0; ; ++i) {
             if (ch == '/') {
-                skipLineComment();
+                skipComment();
             }
 
             if (nextIfObjectEnd()) {
@@ -1727,12 +1727,7 @@ public abstract class JSONReader
                     value = readNullOrNewDate();
                     break;
                 case '/':
-                    next();
-                    if (ch == '/') {
-                        skipLineComment();
-                    } else {
-                        throw new JSONException("FASTJSON" + JSON.VERSION + "input not support " + ch + ", offset " + offset);
-                    }
+                    skipComment();
                     continue for_;
                 case 'S':
                     if (nextIfSet()) {
@@ -1789,7 +1784,7 @@ public abstract class JSONReader
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
-                skipLineComment();
+                skipComment();
             }
 
             if (nextIfMatch('}')) {
@@ -1919,10 +1914,7 @@ public abstract class JSONReader
                     val = null;
                     break;
                 case '/':
-                    next();
-                    if (ch == '/') {
-                        skipLineComment();
-                    }
+                    skipComment();
                     continue for_;
                 case 'I':
                     if (nextIfInfinity()) {
@@ -1958,7 +1950,7 @@ public abstract class JSONReader
         return object;
     }
 
-    public abstract void skipLineComment();
+    public abstract void skipComment();
 
     public final Boolean readBool() {
         if (nextIfNull()) {
@@ -2187,8 +2179,7 @@ public abstract class JSONReader
                     break;
                 }
                 case '/':
-                    skipLineComment();
-                    continue _for;
+                    skipComment();
                 default:
                     throw new JSONException("TODO : " + ch);
             }
@@ -4011,7 +4002,7 @@ public abstract class JSONReader
         long contextFeatures = features | context.getFeatures();
         for (int i = 0; ; ++i) {
             if (ch == '/') {
-                skipLineComment();
+                skipComment();
             }
 
             if (nextIfObjectEnd()) {

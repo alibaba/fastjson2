@@ -78,6 +78,15 @@ public abstract class ObjectReaderBean<T>
             if (list.size() == 1) {
                 return (T) list.get(0);
             }
+
+            if (list != null) {
+                if (list.size() == 0) {
+                    return null;
+                }
+                if (list.size() == 1) {
+                    return (T) list.get(0);
+                }
+            }
         }
         throw new JSONException(info);
     }
