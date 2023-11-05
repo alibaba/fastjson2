@@ -231,7 +231,7 @@ public class ObjectReader5<T>
                 fieldReader4.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    processExtra(jsonReader, object);
+                    processExtra(jsonReader, object, features);
                     continue;
                 }
 
@@ -247,7 +247,7 @@ public class ObjectReader5<T>
                 } else if (nameHashCodeLCase == hashCode4LCase) {
                     fieldReader4.readFieldValue(jsonReader, object);
                 } else {
-                    processExtra(jsonReader, object);
+                    processExtra(jsonReader, object, features);
                 }
             }
         }
@@ -356,7 +356,7 @@ public class ObjectReader5<T>
                 fieldReader4.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    processExtra(jsonReader, object);
+                    processExtra(jsonReader, object, features);
                     continue;
                 }
 
@@ -372,7 +372,7 @@ public class ObjectReader5<T>
                 } else if (nameHashCodeLCase == hashCode4LCase) {
                     fieldReader4.readFieldValue(jsonReader, object);
                 } else {
-                    processExtra(jsonReader, object);
+                    processExtra(jsonReader, object, features);
                 }
             }
         }

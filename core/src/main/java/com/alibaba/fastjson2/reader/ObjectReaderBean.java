@@ -82,7 +82,7 @@ public abstract class ObjectReaderBean<T>
         throw new JSONException(info);
     }
 
-    protected void processExtra(JSONReader jsonReader, Object object) {
+    protected void processExtra(JSONReader jsonReader, Object object, long features) {
         if (extraFieldReader != null && object != null) {
             extraFieldReader.processExtra(jsonReader, object);
             return;
@@ -110,11 +110,19 @@ public abstract class ObjectReaderBean<T>
             return;
         }
 
+        if ((jsonReader.features(features) & JSONReader.Feature.ErrorOnUnknownProperties.mask) != 0) {
+            throw new JSONException("Unknown Property " + jsonReader.getFieldName());
+        }
+
         jsonReader.skipValue();
     }
 
-    public void acceptExtra(Object object, String fieldName, Object fieldValue) {
+    public void acceptExtra(Object object, String fieldName, Object fieldValue, long features) {
         if (extraFieldReader == null || object == null) {
+            if ((features & JSONReader.Feature.ErrorOnUnknownProperties.mask) != 0) {
+                throw new JSONException("Unknown Property " + fieldName);
+            }
+
             return;
         }
         extraFieldReader.acceptExtra(object, fieldName, fieldValue);
@@ -201,7 +209,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (fieldReader == null) {
-                processExtra(jsonReader, object);
+                processExtra(jsonReader, object, features);
                 continue;
             }
 
@@ -328,7 +336,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (fieldReader == null) {
-                processExtra(jsonReader, object);
+                processExtra(jsonReader, object, features);
                 continue;
             }
 

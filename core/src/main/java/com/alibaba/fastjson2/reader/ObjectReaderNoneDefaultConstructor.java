@@ -132,7 +132,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 FieldReader fieldReader = getFieldReader(hashCode);
                 if (fieldReader == null) {
-                    processExtra(jsonReader, null);
+                    processExtra(jsonReader, null, features);
                     continue;
                 }
 
@@ -278,7 +278,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
 
             if (fieldReader == null) {
-                processExtra(jsonReader, null);
+                processExtra(jsonReader, null, features);
                 continue;
             }
 

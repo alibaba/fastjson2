@@ -171,7 +171,7 @@ public class ObjectReader1<T>
                         && jsonReader.getNameHashCodeLCase() == this.hashCode0LCase) {
                     fieldReader0.readFieldValue(jsonReader, object);
                 } else {
-                    processExtra(jsonReader, object);
+                    processExtra(jsonReader, object, features);
                 }
             }
         }
@@ -270,7 +270,7 @@ public class ObjectReader1<T>
                         && jsonReader.getNameHashCodeLCase() == this.hashCode0LCase) {
                     fieldReader0.readFieldValue(jsonReader, object);
                 } else {
-                    processExtra(jsonReader, object);
+                    processExtra(jsonReader, object, features);
                 }
             }
         }

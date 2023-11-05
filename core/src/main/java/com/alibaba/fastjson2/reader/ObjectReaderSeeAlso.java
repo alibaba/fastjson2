@@ -236,7 +236,7 @@ final class ObjectReaderSeeAlso<T>
             }
 
             if (fieldReader == null) {
-                processExtra(jsonReader, object);
+                processExtra(jsonReader, object, features);
                 continue;
             }
 

@@ -11,6 +11,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static com.alibaba.fastjson2.JSONReader.Feature.ErrorOnUnknownProperties;
+import static com.alibaba.fastjson2.JSONReader.Feature.SupportSmartMatch;
+
 public class ObjectReaderAdapter<T>
         extends ObjectReaderBean<T> {
     protected final String typeKey;
@@ -469,7 +472,7 @@ public class ObjectReaderAdapter<T>
                 fieldReader = getFieldReaderLCase(nameHashCodeLCase);
             }
             if (fieldReader == null) {
-                processExtra(jsonReader, object);
+                processExtra(jsonReader, object, features);
                 continue;
             }
 
@@ -549,7 +552,7 @@ public class ObjectReaderAdapter<T>
         T object = createInstance(0L);
 
         if (extraFieldReader == null
-                && ((features | this.features) & JSONReader.Feature.SupportSmartMatch.mask) == 0
+                && ((features | this.features) & (SupportSmartMatch.mask | ErrorOnUnknownProperties.mask)) == 0
         ) {
             for (int i = 0; i < fieldReaders.length; i++) {
                 FieldReader fieldReader = fieldReaders[i];
@@ -588,7 +591,7 @@ public class ObjectReaderAdapter<T>
 
                 FieldReader fieldReader = getFieldReader(entryKey);
                 if (fieldReader == null) {
-                    acceptExtra(object, entryKey, entry.getValue());
+                    acceptExtra(object, entryKey, entry.getValue(), features);
                     continue;
                 }
 

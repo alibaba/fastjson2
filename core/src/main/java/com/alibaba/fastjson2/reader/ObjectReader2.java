@@ -180,7 +180,7 @@ public class ObjectReader2<T>
                     }
                 }
 
-                processExtra(jsonReader, object);
+                processExtra(jsonReader, object, features);
             }
         }
 
@@ -286,7 +286,7 @@ public class ObjectReader2<T>
                     }
                 }
 
-                processExtra(jsonReader, object);
+                processExtra(jsonReader, object, features);
             }
         }
 
