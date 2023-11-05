@@ -13,13 +13,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1620 {
     @Test
     public void test() {
-        LocalDate localDate = LocalDate.of(2023, 7, 2);
+        LocalDate localDate = LocalDate.of(2023, 7, 3);
         String str = "{\"value\":\"2023-07-02T16:00:00.000Z\"}";
         assertEquals(localDate, JSON.parseObject(str, Bean.class).value);
         assertEquals(localDate, JSON.parseObject(str.getBytes(), Bean.class).value);
         assertEquals(localDate, JSON.parseObject(str.toCharArray(), Bean.class).value);
 
-        assertEquals(localDate, JSONB.parseObject(JSONObject.parse(str).toJSONBBytes(), Bean.class).value);
+        assertEquals(
+                localDate,
+                JSONB.parseObject(
+                        JSONObject.parse(str)
+                                .toJSONBBytes(), Bean.class).value
+        );
 
         LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.of(16, 0, 0));
         ZonedDateTime zdt = ZonedDateTime.of(ldt, DateUtils.OFFSET_8_ZONE_ID);

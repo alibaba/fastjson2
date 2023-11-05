@@ -4470,7 +4470,7 @@ final class JSONReaderJSONB
                 default:
                     if (bytes[offset + len] == 'Z') {
                         ZonedDateTime zdt = readZonedDateTime();
-                        return zdt.toLocalDate();
+                        return zdt.toInstant().atZone(context.getZoneId()).toLocalDate();
                     }
                     break;
             }

@@ -6179,7 +6179,7 @@ class JSONReaderUTF16
         LocalDateTime ldt;
         if (chars[offset + len - 1] == 'Z') {
             ZonedDateTime zdt = DateUtils.parseZonedDateTime(chars, offset, len);
-            ldt = zdt.toLocalDateTime();
+            ldt = zdt.toInstant().atZone(context.getZoneId()).toLocalDateTime();
         } else {
             ldt = DateUtils.parseLocalDateTimeX(chars, offset, len);
         }
