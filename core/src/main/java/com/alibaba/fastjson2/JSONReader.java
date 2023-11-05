@@ -2626,7 +2626,7 @@ public abstract class JSONReader
                     skipComment();
                     continue;
                 default:
-                    throw new JSONException("TODO : " + ch);
+                    throw new JSONException(info());
             }
 
             if (i == 0) {
