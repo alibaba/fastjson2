@@ -100,37 +100,31 @@ public class ObjectWriterBaseModule
                         jsonType1x = annotation;
                         break;
                     case "com.fasterxml.jackson.annotation.JsonIgnoreProperties":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonIgnoreProperties":
                         if (useJacksonAnnotation) {
                             processJacksonJsonIgnoreProperties(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonPropertyOrder":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonPropertyOrder":
                         if (useJacksonAnnotation) {
                             processJacksonJsonPropertyOrder(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonFormat":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
                             processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonInclude":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
                         if (useJacksonAnnotation) {
                             processJacksonJsonInclude(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeInfo":
                         if (useJacksonAnnotation) {
                             processJacksonJsonTypeInfo(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.databind.annotation.JsonSerialize":
-                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSerialize(beanInfo, annotation);
                             if (beanInfo.serializer != null && Enum.class.isAssignableFrom(objectClass)) {
@@ -139,13 +133,11 @@ public class ObjectWriterBaseModule
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeName":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeName":
                         if (useJacksonAnnotation) {
                             processJacksonJsonTypeName(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonSubTypes":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSubTypes(beanInfo, annotation);
                         }
@@ -450,10 +442,8 @@ public class ObjectWriterBaseModule
 
         private Class processUsing(Class result) {
             String usingName = result.getName();
-            String noneClassName0 = "com.alibaba.fastjson2.adapter.jackson.databind.JsonSerializer$None";
             String noneClassName1 = "com.fasterxml.jackson.databind.JsonSerializer$None";
-            if (!noneClassName0.equals(usingName)
-                    && !noneClassName1.equals(usingName)
+            if (!noneClassName1.equals(usingName)
                     && ObjectWriter.class.isAssignableFrom(result)
             ) {
                 return result;
