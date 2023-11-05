@@ -82,7 +82,9 @@ public class ObjectWriterBaseModule
             for (int i = 0; i < annotations.length; i++) {
                 Annotation annotation = annotations[i];
                 Class annotationType = annotation.annotationType();
-                jsonType = findAnnotation(annotation, JSONType.class);
+                if (jsonType == null) {
+                    jsonType = findAnnotation(annotation, JSONType.class);
+                }
                 if (jsonType == annotation) {
                     continue;
                 }
