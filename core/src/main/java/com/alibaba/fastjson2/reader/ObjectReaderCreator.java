@@ -2265,10 +2265,11 @@ public class ObjectReaderCreator {
             }
         }
 
-        if (fieldClass == List.class
+        boolean list = fieldClass == List.class
                 || fieldClass == ArrayList.class
                 || fieldClass == LinkedList.class
-        ) {
+                || "cn.hutool.json.JSONArray".equals(fieldClass.getName());
+        if (list) {
             if (fieldTypeResolved instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) fieldTypeResolved;
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();

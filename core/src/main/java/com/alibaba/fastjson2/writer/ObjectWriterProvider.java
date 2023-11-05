@@ -294,14 +294,20 @@ public class ObjectWriterProvider
             return getObjectWriter(superclass, superclass, fieldBased);
         }
 
+        final String className = objectClass.getName();
         if (fieldBased) {
             if (superclass != null
                     && superclass != Object.class
                     && "com.google.protobuf.GeneratedMessageV3".equals(superclass.getName())) {
                 fieldBased = false;
             }
-            if ("springfox.documentation.spring.web.json.Json".equals(objectClass.getName())) {
-                fieldBased = false;
+            switch (className) {
+                case "springfox.documentation.spring.web.json.Json":
+                case "cn.hutool.json.JSONArray":
+                    fieldBased = false;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -352,30 +358,27 @@ public class ObjectWriterProvider
             }
         }
 
-        if (objectClass != null) {
-            String className = objectClass.getName();
-            switch (className) {
-                case "com.google.common.collect.HashMultimap":
-                case "com.google.common.collect.LinkedListMultimap":
-                case "com.google.common.collect.LinkedHashMultimap":
-                case "com.google.common.collect.ArrayListMultimap":
-                case "com.google.common.collect.TreeMultimap":
-                    objectWriter = GuavaSupport.createAsMapWriter(objectClass);
-                    break;
-                case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
-                    objectWriter = ObjectWriterImplList.INSTANCE;
-                    break;
-                case "com.alibaba.fastjson.JSONObject":
-                    objectWriter = ObjectWriterImplMap.of(objectClass);
-                    break;
-                case "android.net.Uri$OpaqueUri":
-                case "android.net.Uri$HierarchicalUri":
-                case "android.net.Uri$StringUri":
-                    objectWriter = ObjectWriterImplToString.INSTANCE;
-                    break;
-                default:
-                    break;
-            }
+        switch (className) {
+            case "com.google.common.collect.HashMultimap":
+            case "com.google.common.collect.LinkedListMultimap":
+            case "com.google.common.collect.LinkedHashMultimap":
+            case "com.google.common.collect.ArrayListMultimap":
+            case "com.google.common.collect.TreeMultimap":
+                objectWriter = GuavaSupport.createAsMapWriter(objectClass);
+                break;
+            case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
+                objectWriter = ObjectWriterImplList.INSTANCE;
+                break;
+            case "com.alibaba.fastjson.JSONObject":
+                objectWriter = ObjectWriterImplMap.of(objectClass);
+                break;
+            case "android.net.Uri$OpaqueUri":
+            case "android.net.Uri$HierarchicalUri":
+            case "android.net.Uri$StringUri":
+                objectWriter = ObjectWriterImplToString.INSTANCE;
+                break;
+            default:
+                break;
         }
 
         if (objectWriter == null
