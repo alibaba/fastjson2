@@ -111,7 +111,7 @@ public class SimpleDateFormatX
                 int dom = 31;
                 switch (month) {
                     case 2:
-                        boolean isLeapYear = ((year & 3) == 0) && ((year % 100) != 0 || (year % 400) == 0);
+                        boolean isLeapYear = (year & 15) == 0 ? (year & 3) == 0 : (year & 3) == 0 && year % 100 != 0;
                         dom = isLeapYear ? 29 : 28;
                         break;
                     case 4:
