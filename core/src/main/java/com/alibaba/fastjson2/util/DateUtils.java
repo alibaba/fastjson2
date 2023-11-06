@@ -11600,7 +11600,7 @@ public class DateUtils {
                 int dom = 31;
                 switch (mm) {
                     case 2:
-                        boolean isLeapYear = ((yyyy & 3) == 0) && ((yyyy % 100) != 0 || (yyyy % 400) == 0);
+                        boolean isLeapYear = (yyyy & 15) == 0 ? (yyyy & 3) == 0 : (yyyy & 3) == 0 && yyyy % 100 != 0;
                         dom = isLeapYear ? 29 : 28;
                         break;
                     case 4:
@@ -11689,7 +11689,7 @@ public class DateUtils {
                 int dom = 31;
                 switch (mm) {
                     case 2:
-                        boolean isLeapYear = ((yyyy & 3) == 0) && ((yyyy % 100) != 0 || (yyyy % 400) == 0);
+                        boolean isLeapYear = (yyyy & 15) == 0 ? (yyyy & 3) == 0 : (yyyy & 3) == 0 && yyyy % 100 != 0;
                         dom = isLeapYear ? 29 : 28;
                         break;
                     case 4:
