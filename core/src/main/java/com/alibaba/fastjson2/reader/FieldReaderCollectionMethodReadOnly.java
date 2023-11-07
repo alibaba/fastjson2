@@ -50,7 +50,10 @@ class FieldReaderCollectionMethodReadOnly<T>
             throw new JSONException("set " + fieldName + " error", e);
         }
 
-        if (collection == Collections.EMPTY_LIST || collection == Collections.EMPTY_SET || collection == null) {
+        if (collection == Collections.EMPTY_LIST
+                || collection == Collections.EMPTY_SET
+                || collection == null
+                || collection.equals(value)) {
             if (schema != null) {
                 schema.assertValidate(collection);
             }
