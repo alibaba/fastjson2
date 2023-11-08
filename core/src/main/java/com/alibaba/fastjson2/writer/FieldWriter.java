@@ -867,6 +867,14 @@ public abstract class FieldWriter<T>
                 }
             }
 
+            if (OffsetDateTime.class.isAssignableFrom(valueClass)) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplOffsetDateTime.INSTANCE;
+                } else {
+                    return ObjectWriterImplOffsetDateTime.of(format, locale);
+                }
+            }
+
             if (LocalDateTime.class.isAssignableFrom(valueClass)) {
                 ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(LocalDateTime.class);
                 if (objectWriter != null && objectWriter != ObjectWriterImplLocalDateTime.INSTANCE) {
