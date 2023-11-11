@@ -4378,6 +4378,15 @@ class JSONReaderUTF16
                     }
                 }
 
+                if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                    if (offset < end) {
+                        ch = chars[offset++];
+                    } else {
+                        ch = EOI;
+                        return;
+                    }
+                }
+
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset < end) {
                         ch = chars[offset++];
