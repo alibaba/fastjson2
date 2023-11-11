@@ -76,4 +76,5 @@
 * https://github.com/DataLinkDC/dinky
 * https://github.com/wh1t3p1g/ysomap
 * https://github.com/dromara/liteflow
+* https://github.com/jar-analyzer/jar-analyzer
 
