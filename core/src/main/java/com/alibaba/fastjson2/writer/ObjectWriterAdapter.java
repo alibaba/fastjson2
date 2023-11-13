@@ -599,6 +599,10 @@ public class ObjectWriterAdapter<T>
     }
 
     public JSONObject toJSONObject(T object) {
+        return toJSONObject(object, 0);
+    }
+
+    public JSONObject toJSONObject(T object, long features) {
         JSONObject jsonObject = new JSONObject();
 
         for (int i = 0, size = fieldWriters.size(); i < size; i++) {
@@ -648,6 +652,10 @@ public class ObjectWriterAdapter<T>
                     }
                     fieldValue = array;
                 }
+            }
+
+            if (fieldValue == null && ((this.features | features) & WriteNulls.mask) == 0) {
+                continue;
             }
 
             jsonObject.put(fieldWriter.fieldName, fieldValue);
