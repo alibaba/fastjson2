@@ -293,8 +293,14 @@ class ObjectReaderImplMapTyped
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();
             if (mapType == Map.class && objectSupplier != null) {
-                object = objectSupplier.get();
-                innerMap = TypeUtils.getInnerMap(object);
+                if (keyType != String.class
+                        && objectSupplier.getClass().getName().equals("com.alibaba.fastjson.JSONObject$Creator")
+                ) {
+                    object = new HashMap();
+                } else {
+                    object = objectSupplier.get();
+                    innerMap = TypeUtils.getInnerMap(object);
+                }
             } else {
                 object = new HashMap<>();
             }

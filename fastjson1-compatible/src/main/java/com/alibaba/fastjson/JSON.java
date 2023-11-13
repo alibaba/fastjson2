@@ -74,7 +74,7 @@ public abstract class JSON
     }
 
     static final Supplier<List> arraySupplier = JSONArray::new;
-    static final Supplier<Map> defaultSupplier = JSONObject::new;
+    static final Supplier<Map> defaultSupplier = JSONObject.Creator.INSTANCE;
     static final Supplier<Map> orderedSupplier = () -> new JSONObject(true);
 
     static {
