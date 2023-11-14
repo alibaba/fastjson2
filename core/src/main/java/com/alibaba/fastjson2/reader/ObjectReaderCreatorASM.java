@@ -2998,12 +2998,16 @@ public class ObjectReaderCreatorASM
                             Field this0 = fieldClass.getDeclaredField("this$0");
                             long fieldOffset = UNSAFE.objectFieldOffset(this0);
 
+                            Label notNull_ = new Label();
+                            mw.visitInsn(Opcodes.DUP);
+                            mw.visitJumpInsn(IFNULL, notNull_);
                             mw.visitInsn(Opcodes.DUP);
                             mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
                             mw.visitInsn(Opcodes.SWAP);
                             mw.visitLdcInsn(fieldOffset);
                             mw.visitVarInsn(ALOAD, OBJECT);
                             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "sun/misc/Unsafe", "putObject", "(Ljava/lang/Object;JLjava/lang/Object;)V", false);
+                            mw.visitLabel(notNull_);
                         } catch (NoSuchFieldException e) {
                             // ignored
                         }
