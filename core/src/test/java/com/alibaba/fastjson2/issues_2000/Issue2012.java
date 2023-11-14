@@ -18,4 +18,3 @@ public class Issue2012 {
         assertEquals("{\"beginTime\":\"2022-11-13\",\"cardNo\":\"123\",\"cardType\":\"身份证\",\"endTime\":\"2023-11-13\",\"name\":\"xxx\"}", JSON.toJSONString(blooddonationqueryVO));
     }
 }
-
