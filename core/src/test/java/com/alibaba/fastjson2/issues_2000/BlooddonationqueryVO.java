@@ -35,5 +35,3 @@ public class BlooddonationqueryVO {
         private String donateTime;
     }
 }
-
-
