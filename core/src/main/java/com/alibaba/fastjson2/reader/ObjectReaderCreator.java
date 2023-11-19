@@ -1226,6 +1226,7 @@ public class ObjectReaderCreator {
             Class objectClass,
             Type objectType,
             String namingStrategy,
+            String[] orders,
             FieldInfo fieldInfo,
             Field field,
             Map<String, List<FieldReader>> fieldReaders,
@@ -1249,6 +1250,22 @@ public class ObjectReaderCreator {
             }
         } else {
             fieldName = fieldInfo.fieldName;
+        }
+
+        if (orders != null && orders.length > 0) {
+            boolean match = false;
+            for (int i = 0; i < orders.length; i++) {
+                if (fieldName.equals(orders[i])) {
+                    fieldInfo.ordinal = i;
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) {
+                if (fieldInfo.ordinal == 0) {
+                    fieldInfo.ordinal = orders.length;
+                }
+            }
         }
 
         Type fieldType = field.getGenericType();
@@ -1525,7 +1542,7 @@ public class ObjectReaderCreator {
             }
         }
 
-        boolean recoard = BeanUtils.isRecord(objectClass);
+        boolean record = BeanUtils.isRecord(objectClass);
         final String namingStrategy = beanInfo.namingStrategy;
 
         Map<String, List<FieldReader>> fieldReaders = new LinkedHashMap<>();
@@ -1542,17 +1559,17 @@ public class ObjectReaderCreator {
                 fieldInfo.features |= beanFeatures;
                 fieldInfo.format = beanFormat;
 
-                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
+                createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, field, fieldReaders, provider);
             });
         } else {
-            if (!recoard) {
+            if (!record) {
                 BeanUtils.declaredFields(objectClass, field -> {
                     fieldInfo.init();
                     fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
                     fieldInfo.features |= beanFeatures;
                     fieldInfo.format = beanFormat;
 
-                    createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
+                    createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, field, fieldReaders, provider);
                     if (fieldInfo.required) {
                         String fieldName = fieldInfo.fieldName;
                         if (fieldName == null || fieldName.isEmpty()) {
