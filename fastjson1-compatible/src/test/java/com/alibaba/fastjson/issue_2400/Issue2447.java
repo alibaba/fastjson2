@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class Issue2447 {
 
         Object obj = JSON.toJSON(vo);
         String text = JSON.toJSONString(obj, SerializerFeature.SortField);
-        assertEquals("{\"latitude\":37,\"id\":123,\"longitude\":127}", text);
+        JSONAssert.assertEquals("{\"latitude\":37,\"id\":123,\"longitude\":127}", text, true);
     }
 
     @Test

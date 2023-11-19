@@ -3,8 +3,7 @@ package com.alibaba.fastjson.issue_1100;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Created by wenshao on 05/05/2017.
@@ -19,6 +18,6 @@ public class Issue1177_1 {
         String value = "y2";
         JSONPath.set(jsonObject, jsonpath, value);
         String result = jsonObject.toString();
-        assertEquals("{\"a\":{\"x\":\"y2\"},\"b\":{\"x\":\"y2\"}}", result);
+        JSONAssert.assertEquals("{\"a\":{\"x\":\"y2\"},\"b\":{\"x\":\"y2\"}}", result, true);
     }
 }

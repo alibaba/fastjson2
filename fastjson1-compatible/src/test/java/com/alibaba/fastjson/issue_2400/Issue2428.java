@@ -8,8 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 @NoArgsConstructor
 @Data
@@ -31,6 +30,6 @@ public class Issue2428 {
         demoBean.setMyName("test name");
         demoBean.setNestedBean(new NestedBean("test id"));
         String text = JSON.toJSONString(JSON.toJSON(demoBean), SerializerFeature.SortField);
-        assertEquals("{\"my_name\":\"test name\",\"nested_bean\":{\"my_id\":\"test id\"}}", text);
+        JSONAssert.assertEquals("{\"my_name\":\"test name\",\"nested_bean\":{\"my_id\":\"test id\"}}", text, true);
     }
 }
