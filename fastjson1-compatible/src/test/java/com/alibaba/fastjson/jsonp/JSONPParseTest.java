@@ -3,6 +3,7 @@ package com.alibaba.fastjson.jsonp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +24,7 @@ public class JSONPParseTest {
         assertEquals(1, param.get("id"));
         assertEquals("idonans", param.get("name"));
 
-        String json = JSON.toJSONString(jsonpObject);
-        assertEquals("callback({\"name\":\"idonans\",\"id\":1})", json);
+        String json = JSON.toJSONString(jsonpObject, SerializerFeature.MapSortField);
+        assertEquals("callback({\"id\":1,\"name\":\"idonans\"})", json);
     }
 }
