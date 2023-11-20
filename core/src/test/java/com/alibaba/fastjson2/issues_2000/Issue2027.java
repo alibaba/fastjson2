@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.issues_2000;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +44,8 @@ public class Issue2027 {
         private TestEnum test;
     }
 
-    public static class DescEnumWriter implements ObjectWriter<DescEnum> {
+    public static class DescEnumWriter
+            implements ObjectWriter<DescEnum> {
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             DescEnum descEnum = (DescEnum) object;
