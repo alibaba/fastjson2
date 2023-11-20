@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
@@ -1215,27 +1216,27 @@ public class ObjectWriterCreator {
     protected ObjectWriter getInitWriter(ObjectWriterProvider provider, Class fieldClass) {
         if (fieldClass == Date.class) {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
-                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass);
                 if (objectWriter != ObjectWriterImplDate.INSTANCE) {
                     return objectWriter;
                 }
             }
         } else if (fieldClass == long.class || fieldClass == Long.class) {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) != 0) {
-                ObjectWriter objectWriter = provider.cache.get(Long.class);
+                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, Long.class);
                 if (objectWriter != ObjectWriterImplInt64.INSTANCE) {
                     return objectWriter;
                 }
             }
         } else if (fieldClass == BigDecimal.class) {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) != 0) {
-                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass);
                 if (objectWriter != ObjectWriterImplBigDecimal.INSTANCE) {
                     return objectWriter;
                 }
             }
         } else if (Enum.class.isAssignableFrom(fieldClass)) {
-            ObjectWriter objectWriter = provider.cache.get(fieldClass);
+            ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass);
             if (!(objectWriter instanceof ObjectWriterImplEnum)) {
                 return objectWriter;
             }
@@ -1324,5 +1325,20 @@ public class ObjectWriterCreator {
 
         Function function = (Function) lambda;
         return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+    }
+
+    private ObjectWriter getMostSpecificObjectWriter(ConcurrentMap<Type, ObjectWriter> cache, Class fieldClass) {
+        if (fieldClass == null) {
+            return null;
+        }
+        ObjectWriter objectWriter = cache.get(fieldClass);
+        if (objectWriter != null) {
+            return objectWriter;
+        }
+        Class[] interfaces = fieldClass.getInterfaces();
+        for (int i = 0; i < interfaces.length; i++) {
+            return getMostSpecificObjectWriter(cache, interfaces[i]);
+        }
+        return getMostSpecificObjectWriter(cache, fieldClass.getSuperclass());
     }
 }
