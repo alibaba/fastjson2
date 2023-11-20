@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.support.geo.FeatureCollection;
 import com.alibaba.fastjson.support.geo.Geometry;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -62,9 +63,9 @@ public class FeatureCollectionTest {
         Geometry geometry = JSON.parseObject(str, Geometry.class);
         assertEquals(FeatureCollection.class, geometry.getClass());
 
-        assertEquals("{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"prop0\":\"value0\"},\"geometry\":{\"type\":\"Point\",\"coordinates\":[102.0,0.5]}},{\"type\":\"Feature\",\"properties\":{\"prop1\":\"0.0\",\"prop0\":\"value0\"},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]}},{\"type\":\"Feature\",\"properties\":{\"prop1\":\"{\\\"this\\\":\\\"that\\\"}\",\"prop0\":\"value0\"},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]}}]}", JSON.toJSONString(geometry));
+        JSONAssert.assertEquals("{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"prop0\":\"value0\"},\"geometry\":{\"type\":\"Point\",\"coordinates\":[102.0,0.5]}},{\"type\":\"Feature\",\"properties\":{\"prop1\":\"0.0\",\"prop0\":\"value0\"},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]}},{\"type\":\"Feature\",\"properties\":{\"prop1\":\"{\\\"this\\\":\\\"that\\\"}\",\"prop0\":\"value0\"},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]}}]}", JSON.toJSONString(geometry), true);
 
         String str2 = JSON.toJSONString(geometry);
-        assertEquals(str2, JSON.toJSONString(JSON.parseObject(str2, Geometry.class)));
+        JSONAssert.assertEquals(str2, JSON.toJSONString(JSON.parseObject(str2, Geometry.class)), true);
     }
 }
