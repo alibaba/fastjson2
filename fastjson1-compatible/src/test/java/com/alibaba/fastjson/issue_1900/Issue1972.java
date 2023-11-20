@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,6 +24,6 @@ public class Issue1972 {
         jsonObject.put("a", a);
         JSONPath.arrayAdd(jsonObject, "$.a.b[?(@.c = '2018-04')].d", obj);
 
-        assertEquals("{\"a\":{\"b\":{\"c\":\"2018-04\",\"d\":[123]}}}", jsonObject.toString());
+        JSONAssert.assertEquals("{\"a\":{\"b\":{\"c\":\"2018-04\",\"d\":[123]}}}", jsonObject.toString(),true);
     }
 }

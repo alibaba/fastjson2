@@ -3,11 +3,11 @@ package com.alibaba.fastjson.issue_1300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -26,7 +26,7 @@ public class Issue1363 {
         String jsonStr = JSON.toJSONString(b);
         System.out.println(jsonStr);
         DataSimpleVO obj = JSON.parseObject(jsonStr, DataSimpleVO.class);
-        assertEquals(jsonStr, JSON.toJSONString(obj));
+        JSONAssert.assertEquals(jsonStr, JSON.toJSONString(obj), true);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class Issue1363 {
         DataSimpleVO obj = JSON.parseObject(jsonStr, DataSimpleVO.class);
         System.out.println(obj.toString());
         assertNotNull(obj.value1);
-        assertEquals(jsonStr, JSON.toJSONString(obj));
+        JSONAssert.assertEquals(jsonStr, JSON.toJSONString(obj), true);
     }
 
     public static class DataSimpleVO {
