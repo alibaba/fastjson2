@@ -181,6 +181,10 @@ public abstract class JSON
         JSONReader reader = JSONReader.of(str, context);
 
         try {
+            if (reader.nextIfNullOrEmptyString()) {
+                return null;
+            }
+
             Map<String, Object> map = new HashMap<>();
             reader.read(map, 0);
             JSONObject jsonObject = new JSONObject(map);
@@ -1977,6 +1981,10 @@ public abstract class JSON
         JSONReader reader = JSONReader.of(str, context);
 
         try {
+            if (reader.nextIfNullOrEmptyString()) {
+                return null;
+            }
+
             List list = new ArrayList();
             reader.read(list);
             JSONArray jsonArray = new JSONArray(list);
