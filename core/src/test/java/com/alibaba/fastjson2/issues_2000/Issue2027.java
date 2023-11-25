@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.issues_2000;
 
-import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue2027 {
     @Test
