@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.issues_2000;
 
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -33,6 +34,7 @@ public class Issue2027 {
         private final String desc;
     }
 
+    @JSONType(enableSerialize = true)
     public interface DescEnum {
         String getDesc();
     }

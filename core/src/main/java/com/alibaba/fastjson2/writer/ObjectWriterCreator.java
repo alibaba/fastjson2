@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
@@ -12,6 +13,7 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -1216,27 +1218,27 @@ public class ObjectWriterCreator {
     protected ObjectWriter getInitWriter(ObjectWriterProvider provider, Class fieldClass) {
         if (fieldClass == Date.class) {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
-                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass);
+                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass, true);
                 if (objectWriter != ObjectWriterImplDate.INSTANCE) {
                     return objectWriter;
                 }
             }
         } else if (fieldClass == long.class || fieldClass == Long.class) {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) != 0) {
-                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, Long.class);
+                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, Long.class, true);
                 if (objectWriter != ObjectWriterImplInt64.INSTANCE) {
                     return objectWriter;
                 }
             }
         } else if (fieldClass == BigDecimal.class) {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) != 0) {
-                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass);
+                ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass, true);
                 if (objectWriter != ObjectWriterImplBigDecimal.INSTANCE) {
                     return objectWriter;
                 }
             }
         } else if (Enum.class.isAssignableFrom(fieldClass)) {
-            ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass);
+            ObjectWriter objectWriter = getMostSpecificObjectWriter(provider.cache, fieldClass, true);
             if (!(objectWriter instanceof ObjectWriterImplEnum)) {
                 return objectWriter;
             }
@@ -1327,18 +1329,25 @@ public class ObjectWriterCreator {
         return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
     }
 
-    private ObjectWriter getMostSpecificObjectWriter(ConcurrentMap<Type, ObjectWriter> cache, Class fieldClass) {
+    private ObjectWriter getMostSpecificObjectWriter(ConcurrentMap<Type, ObjectWriter> cache, Class fieldClass, boolean self) {
         if (fieldClass == null) {
             return null;
         }
         ObjectWriter objectWriter = cache.get(fieldClass);
         if (objectWriter != null) {
-            return objectWriter;
+            if (self) {
+                return objectWriter;
+            } else {
+                Annotation annotation = fieldClass.getAnnotation(JSONType.class);
+                if (annotation instanceof JSONType && ((JSONType) annotation).enableSerialize()) {
+                    return objectWriter;
+                }
+            }
         }
         Class[] interfaces = fieldClass.getInterfaces();
         for (int i = 0; i < interfaces.length; i++) {
-            return getMostSpecificObjectWriter(cache, interfaces[i]);
+            return getMostSpecificObjectWriter(cache, interfaces[i], false);
         }
-        return getMostSpecificObjectWriter(cache, fieldClass.getSuperclass());
+        return getMostSpecificObjectWriter(cache, fieldClass.getSuperclass(), false);
     }
 }

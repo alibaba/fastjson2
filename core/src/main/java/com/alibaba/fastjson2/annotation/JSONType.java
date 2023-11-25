@@ -77,4 +77,9 @@ public @interface JSONType {
      * @since 2.0.25
      */
     Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler() default JSONReader.AutoTypeBeforeHandler.class;
+
+    /**
+     * @since 2.0.43
+     */
+    boolean enableSerialize() default false;
 }
