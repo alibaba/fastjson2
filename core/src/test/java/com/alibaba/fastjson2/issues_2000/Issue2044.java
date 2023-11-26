@@ -58,6 +58,5 @@ public class Issue2044 {
             implements Serializable {
         private static final long serialVersionUID = 8295348195732708179L;
         private String name;
-
     }
 }

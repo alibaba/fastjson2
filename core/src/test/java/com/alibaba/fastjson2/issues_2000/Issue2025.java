@@ -18,15 +18,10 @@ public class Issue2025 {
         qw.groupBy("group");
         qw.having("SUM({0}) AS nums", "group");
 
-
-        String json = JSON.toJSONString(qw
-                , JSONWriter.Feature.FieldBased // 基于 field，而非 getter 方法
-                , JSONWriter.Feature.ReferenceDetection);
+        String json = JSON.toJSONString(qw, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection);
         //qw.set("full_name", "test111");
         System.out.println(json);
         //new TypeReference<QueryWrapper>() {}.getType()
-        QueryWrapper query = JSON.parseObject(json,
-                QueryWrapper.class
-                , JSONReader.Feature.FieldBased);
+        QueryWrapper query = JSON.parseObject(json, QueryWrapper.class, JSONReader.Feature.FieldBased);
     }
 }

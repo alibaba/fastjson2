@@ -9,18 +9,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue2050 {
     static class TestClass {
-
         private Integer field1 = 1;
         private Integer field2;
         private Integer field3 = 3;
 
         public void setField1(Integer field1) {
-            if (field1 == null) throw new NullPointerException();
+            if (field1 == null) {
+                throw new NullPointerException();
+            }
             this.field1 = field1;
         }
 
         public void setField2(Integer field2) {
-            if (field2 == null) throw new NullPointerException();
+            if (field2 == null) {
+                throw new NullPointerException();
+            }
             this.field2 = field2;
         }
 
@@ -43,7 +46,6 @@ public class Issue2050 {
 
     @Test
     void test() {
-
         // Assertion 1
         // Deserialize json string which not contains null field
         // Passed.
@@ -119,6 +121,5 @@ public class Issue2050 {
 
         // Assertion 9. Passed.
         assertTrue(null == testOverrideDefaultValue2.getField3());
-
     }
 }
