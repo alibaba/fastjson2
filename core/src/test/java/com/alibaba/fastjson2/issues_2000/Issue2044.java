@@ -34,11 +34,17 @@ public class Issue2044 {
 
     @Test
     public void test1() {
-        User0 user1 = new User0();
-        user1.name = "abc";
-        byte[] bytes = JSONB.toBytes(user1, writerFeatures);
-        User1 user0 = JSONB.parseObject(bytes, User1.class, JSONReader.Feature.FieldBased);
-        assertEquals(user0.name, user1.name);
+        long[] ids = new long[] {1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890, 12345678901L};
+
+        for (int i = 0; i < ids.length; i++) {
+            long id = ids[i];
+            User0 user1 = new User0();
+            user1.userId = id;
+            user1.name = "abc";
+            byte[] bytes = JSONB.toBytes(user1, writerFeatures);
+            User1 user0 = JSONB.parseObject(bytes, User1.class, JSONReader.Feature.FieldBased);
+            assertEquals(user0.name, user1.name);
+        }
     }
 
     public class User0
