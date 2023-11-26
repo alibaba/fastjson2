@@ -376,6 +376,11 @@ public abstract class BeanUtils {
         return constructors;
     }
 
+    public static boolean hasPublicDefaultConstructor(Class objectClass) {
+        Constructor constructor = getDefaultConstructor(objectClass, false);
+        return constructor != null && Modifier.isPublic(constructor.getModifiers());
+    }
+
     public static Constructor getDefaultConstructor(Class objectClass, boolean includeNoneStaticMember) {
         if ((objectClass == StackTraceElement.class && JVM_VERSION >= 9) || (isRecord(objectClass))) {
             return null;
