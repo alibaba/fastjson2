@@ -1,13 +1,12 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
 
@@ -42,6 +41,7 @@ public final class ObjectReaderImplList
     Object listSingleton;
     ObjectReader itemObjectReader;
     volatile boolean instanceError;
+    volatile Constructor constructor;
 
     public static ObjectReader of(Type type, Class listClass, long features) {
         if (listClass == type && "".equals(listClass.getSimpleName())) {
@@ -334,10 +334,18 @@ public final class ObjectReaderImplList
 
         if (instanceType != null) {
             JSONException error = null;
+            if (constructor == null && !BeanUtils.hasPublicDefaultConstructor(instanceType)) {
+                constructor = BeanUtils.getDefaultConstructor(instanceType, false);
+                constructor.setAccessible(true);
+            }
             if (!instanceError) {
                 try {
-                    return instanceType.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
+                    if (constructor != null) {
+                        return constructor.newInstance();
+                    } else {
+                        return instanceType.newInstance();
+                    }
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | RuntimeException e) {
                     instanceError = true;
                     error = new JSONException("create list error, type " + instanceType);
                 }

@@ -2897,6 +2897,10 @@ public class ObjectReaderCreatorASM
                 }
             }
 
+            if (list && !BeanUtils.hasPublicDefaultConstructor(fieldClass)) {
+                list = false;
+            }
+
             if (list) {
                 varIndex = genReadFieldValueList(
                         fieldReader,
