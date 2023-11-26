@@ -2897,7 +2897,7 @@ public class ObjectReaderCreatorASM
                 }
             }
 
-            if (list && !BeanUtils.hasPublicDefaultConstructor(fieldClass)) {
+            if (list && !fieldClass.isInterface() && !BeanUtils.hasPublicDefaultConstructor(fieldClass)) {
                 list = false;
             }
 
