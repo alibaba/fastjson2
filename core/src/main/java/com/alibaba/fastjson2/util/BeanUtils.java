@@ -221,7 +221,7 @@ public abstract class BeanUtils {
             return;
         }
 
-        if (ignore(objectClass)) {
+        if (ignore(objectClass) || objectClass.getName().contains("$$Lambda$")) {
             return;
         }
 
