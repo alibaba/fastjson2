@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.jackson_support;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,7 +27,7 @@ public class JsonIncludeTest {
         Bean1 bean = new Bean1();
         bean.id = 101;
         String str = new ObjectMapper().writeValueAsString(bean);
-        assertEquals("{\"id\":101,\"name\":null}", str);
+        JSONAssert.assertEquals("{\"id\":101,\"name\":null}", str, true);
     }
 
     @JsonInclude

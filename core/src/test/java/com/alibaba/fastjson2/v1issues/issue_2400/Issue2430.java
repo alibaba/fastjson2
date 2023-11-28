@@ -2,13 +2,13 @@ package com.alibaba.fastjson2.v1issues.issue_2400;
 
 import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ArrayListMultimap;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 public class Issue2430 {
     @Test
-    public void testForIssue() {
+    public void testForIssue() throws JSONException {
         ArrayListMultimap<String, String> multimap = ArrayListMultimap.create();
         multimap.put("a", "1");
         multimap.put("a", "2");
@@ -19,15 +19,15 @@ public class Issue2430 {
         vo.setMap(multimap);
         vo.setName("zhangsan");
 
-        assertEquals("{\"map\":{\"a\":[\"1\",\"2\",\"3\"],\"b\":[\"1\"]},\"name\":\"zhangsan\"}",
-                JSON.toJSONString(vo));
+        JSONAssert.assertEquals("{\"map\":{\"a\":[\"1\",\"2\",\"3\"],\"b\":[\"1\"]},\"name\":\"zhangsan\"}",
+                JSON.toJSONString(vo), true);
     }
 
     @Test
-    public void testForIssue2() {
+    public void testForIssue2() throws JSONException {
         String jsonString = "{\"map\":{\"a\":[\"1\",\"2\",\"3\"],\"b\":[\"1\"]},\"name\":\"zhangsan\"}";
         VO vo = JSON.parseObject(jsonString, VO.class);
-        assertEquals("{\"map\":{\"a\":[\"1\",\"2\",\"3\"],\"b\":[\"1\"]},\"name\":\"zhangsan\"}", JSON.toJSONString(vo));
+        JSONAssert.assertEquals("{\"map\":{\"a\":[\"1\",\"2\",\"3\"],\"b\":[\"1\"]},\"name\":\"zhangsan\"}", JSON.toJSONString(vo), true);
     }
 
     public static class VO {

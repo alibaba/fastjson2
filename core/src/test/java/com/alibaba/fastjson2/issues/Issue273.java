@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue273 {
     @Test
     public void test() {
-        Map<Integer, Long> map0 = new HashMap<>();
+        Map<Integer, Long> map0 = new LinkedHashMap<>();
         map0.put(1, 111L);
         map0.put(2, 222L);
         String json = JSON.toJSONString(map0);
