@@ -3,7 +3,9 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TypeReference;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,13 +30,13 @@ public class Issue507 {
     }
 
     @Test
-    public void test1() {
+    public void test1() throws JSONException {
         Map<Long, String> map = new HashMap<>();
         map.put(1L, "张三");
         map.put(2L, "张四");
 
         String str = JSON.toJSONString(map, JSONWriter.Feature.WriteClassName);
-        assertEquals("{\"@type\":\"java.util.HashMap\",1L:\"张三\",2L:\"张四\"}", str);
+        JSONAssert.assertEquals("{\"@type\":\"java.util.HashMap\",1L:\"张三\",2L:\"张四\"}", str, true);
 
         Map map2 = (Map) JSON.parseObject(str, Object.class);
         assertEquals("张三", map2.get(1L));

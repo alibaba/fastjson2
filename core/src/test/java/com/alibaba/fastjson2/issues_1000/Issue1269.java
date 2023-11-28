@@ -4,7 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 
@@ -12,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1269 {
     @Test
-    public void test() {
+    public void test() throws JSONException {
         HashMap<Integer, Integer> map = new HashMap<>();
         map.put(1, 1);
         map.put(2, 2);
@@ -20,7 +22,7 @@ public class Issue1269 {
         JavaObj o = new JavaObj(map);
         byte[] bt = JSON.toJSONBytes(o, JSONWriter.Feature.WriteNonStringKeyAsString); // 兼容其他语言
         JSONObject jsonObj = JSON.parseObject(bt);
-        assertEquals("{\"map\":{\"1\":1,\"2\":2}}", jsonObj.toString());
+        JSONAssert.assertEquals("{\"map\":{\"1\":1,\"2\":2}}", jsonObj.toString(), true);
 
         o = jsonObj.to(JavaObj.class, JSONReader.Feature.FieldBased);
         assertEquals(1, o.getMap().get(1)); // 这里泛型不匹配, String的key没有自动转为int 仍是String类型。
