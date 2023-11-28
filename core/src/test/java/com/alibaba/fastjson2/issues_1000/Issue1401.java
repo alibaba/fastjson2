@@ -2,7 +2,9 @@ package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,9 +30,9 @@ public class Issue1401 {
     }
 
     @Test
-    public void test() {
+    public void test() throws JSONException {
         Bean bean = new Bean();
-        assertEquals("{\"map\":{\"0\":\"Test\",\"null\":-1,\"-9223372036854775808\":\"-9223372036854775808\",\"9223372036854775807\":\"9223372036854775807\",\"2020\":2021,\"2022\":2023}}", JSON.toJSONString(bean, JSONWriter.Feature.BrowserCompatible));
-        assertEquals("{\"map\":{\"0\":\"Test\",\"null\":-1,\"-9223372036854775808\":-9223372036854775808,\"9223372036854775807\":9223372036854775807,\"2020\":2021,\"2022\":2023}}", JSON.toJSONString(bean, JSONWriter.Feature.WriteNonStringKeyAsString));
+        JSONAssert.assertEquals("{\"map\":{\"0\":\"Test\",\"null\":-1,\"-9223372036854775808\":\"-9223372036854775808\",\"9223372036854775807\":\"9223372036854775807\",\"2020\":2021,\"2022\":2023}}", JSON.toJSONString(bean, JSONWriter.Feature.BrowserCompatible), true);
+        JSONAssert.assertEquals("{\"map\":{\"0\":\"Test\",\"null\":-1,\"-9223372036854775808\":-9223372036854775808,\"9223372036854775807\":9223372036854775807,\"2020\":2021,\"2022\":2023}}", JSON.toJSONString(bean, JSONWriter.Feature.WriteNonStringKeyAsString), true);
     }
 }

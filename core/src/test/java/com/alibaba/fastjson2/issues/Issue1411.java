@@ -3,7 +3,9 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -69,11 +71,11 @@ public class Issue1411 {
     }
 
     @Test
-    public void test5() {
+    public void test5() throws JSONException {
         String text = "{\"@type\":\"java.util.concurrent.ConcurrentHashMap\",\"id\":2,\"name\":\"fastjson\"}";
         Object result = JSON.parse(text, JSONReader.Feature.SupportAutoType);
         assertInstanceOf(ConcurrentHashMap.class, result);
-        assertEquals("{\"name\":\"fastjson\",\"id\":2}", JSON.toJSONString(result));
+        JSONAssert.assertEquals("{\"name\":\"fastjson\",\"id\":2}", JSON.toJSONString(result), true);
 
         JSONObject jsonObject = (JSONObject) JSON.parse(text);
         assertEquals("java.util.concurrent.ConcurrentHashMap", jsonObject.get("@type"));

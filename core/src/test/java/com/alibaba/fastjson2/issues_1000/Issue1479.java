@@ -4,17 +4,17 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import lombok.Data;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class Issue1479 {
     @Test
-    public void test() {
+    public void test() throws JSONException {
         JSON.register(Gender.class, new ObjectWriter<Object>() {
             @Override
             public void write(JSONWriter writer, Object value, Object fieldName, Type type, long feature) {
@@ -29,7 +29,7 @@ public class Issue1479 {
         Student student = new Student();
         student.setName("张三");
         student.setGender(Gender.MALE);
-        assertEquals("{\"gender\":{\"remark\":\"male\",\"value\":\"M\"},\"name\":\"张三\"}", JSON.toJSONString(student));
+        JSONAssert.assertEquals("{\"gender\":{\"remark\":\"male\",\"value\":\"M\"},\"name\":\"张三\"}", JSON.toJSONString(student), true);
     }
 
     public enum Gender {
