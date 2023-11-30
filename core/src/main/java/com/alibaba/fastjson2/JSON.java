@@ -3276,6 +3276,26 @@ public interface JSON {
     }
 
     /**
+     * Verify that the json string is legal json text
+     *
+     * @param text the specified string will be validated
+     * @param features the specified features is applied to parsing
+     * @return {@code true} or {@code false}
+     */
+    static boolean isValid(String text, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(text, JSONFactory.createReadContext(features))) {
+            jsonReader.skipValue();
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException error) {
+            return false;
+        }
+    }
+
+    /**
      * Verify that the json char array is legal json text
      *
      * @param chars the specified array will be validated
@@ -3380,6 +3400,21 @@ public interface JSON {
     }
 
     /**
+     * Verify that the json byte array is legal json text
+     *
+     * @param bytes the specified array will be validated
+     * @param charset the specified charset of the bytes
+     * @return {@code true} or {@code false}
+     */
+    static boolean isValid(byte[] bytes, Charset charset) {
+        if (bytes == null || bytes.length == 0) {
+            return false;
+        }
+
+        return isValid(bytes, 0, bytes.length, charset);
+    }
+
+    /**
      * Verify that the json byte array is a legal JsonArray
      *
      * @param bytes the specified array will be validated
@@ -3407,7 +3442,7 @@ public interface JSON {
      * @param bytes the specified array will be validated
      * @param offset the starting index of array
      * @param length the specified length of array
-     * @param charset the specified charset of the stream
+     * @param charset the specified charset of the bytes
      * @return {@code true} or {@code false}
      */
     static boolean isValid(byte[] bytes, int offset, int length, Charset charset) {
