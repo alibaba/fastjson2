@@ -5448,9 +5448,10 @@ class JSONReaderUTF8
 
     @Override
     public final boolean skipName() {
-        if (ch != '"') {
+        if (ch != '"' && ch != '\'') {
             throw new JSONException("not support unquoted name");
         }
+        char quote = ch;
 
         int offset = this.offset;
         for (; ; ) {
@@ -5460,7 +5461,7 @@ class JSONReaderUTF8
                 continue;
             }
 
-            if (c == '"') {
+            if (c == quote) {
                 offset++;
                 c = bytes[offset];
 
@@ -5523,6 +5524,7 @@ class JSONReaderUTF8
                 }
                 break;
             }
+            case '\'':
             case '"': {
                 skipString();
                 break;
