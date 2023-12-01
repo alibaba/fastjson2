@@ -121,7 +121,7 @@ public class JSONSerializer {
 
     public final void writeAs(Object object, Class type) {
         ObjectWriter objectWriter = raw.getObjectWriter(type);
-        objectWriter.write(raw, 0);
+        objectWriter.write(raw, object);
     }
 
     @Override
