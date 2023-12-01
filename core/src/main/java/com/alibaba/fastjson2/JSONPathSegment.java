@@ -11,6 +11,8 @@ import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -1745,6 +1747,21 @@ abstract class JSONPathSegment {
             if (aIsInt && bIsInt) {
                 return a.longValue() + b.longValue();
             }
+
+            boolean aIsDouble = a instanceof Float || a instanceof Double;
+            boolean bIsDouble = b instanceof Float || b instanceof Double;
+            if (aIsDouble || bIsDouble) {
+                return a.doubleValue() + b.doubleValue();
+            }
+
+            if (a instanceof BigDecimal || b instanceof BigDecimal) {
+                return TypeUtils.toBigDecimal(a).add(TypeUtils.toBigDecimal(b));
+            }
+
+            if (a instanceof BigInteger || b instanceof BigInteger) {
+                return TypeUtils.toBigInteger(a).add(TypeUtils.toBigInteger(b));
+            }
+
             throw new JSONException("not support operation");
         }
 
