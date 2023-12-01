@@ -31,8 +31,16 @@ final class ObjectWriterImplDouble
             return;
         }
 
-        if (format != null) {
-            String str = format.format(object);
+        DecimalFormat decimalFormat = this.format;
+        if (decimalFormat == null) {
+            String format = jsonWriter.getContext().getDateFormat();
+            if (format != null && format.indexOf("#") != -1) {
+                decimalFormat = new DecimalFormat(format);
+            }
+        }
+
+        if (decimalFormat != null) {
+            String str = decimalFormat.format(object);
             jsonWriter.writeRaw(str);
             return;
         }
