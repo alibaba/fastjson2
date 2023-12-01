@@ -16,6 +16,13 @@ public class JSONWriterWriteAs {
         assertEquals("{\"id\":123}", jsonWriter.toString());
     }
 
+    @Test
+    public void testNull() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        jsonWriter.writeAs(null, A.class);
+        assertEquals("null", jsonWriter.toString());
+    }
+
     public static class A {
         public int id;
     }
