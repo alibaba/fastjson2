@@ -581,7 +581,9 @@ public abstract class JSONPath {
                     JSONPathMulti multi = (JSONPathMulti) path;
                     if (multi.segments.size() == 3) {
                         JSONPathSegment three = multi.segments.get(2);
-                        if (!(three instanceof JSONPathSegmentName)) {
+                        if (multi.segments.get(0) instanceof JSONPathSegment.AllSegment
+                                || multi.segments.get(1) instanceof JSONPathSegment.AllSegment
+                                || !(three instanceof JSONPathSegmentName)) {
                             allThreeName = false;
                         }
                     } else {
