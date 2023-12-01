@@ -77,4 +77,8 @@
 * https://github.com/wh1t3p1g/ysomap
 * https://github.com/dromara/liteflow
 * https://github.com/jar-analyzer/jar-analyzer
-
+* https://github.com/wmsJackWang/jackdking-root
+* https://github.com/spring-projects/spring-ai
+* https://github.com/XiaoMi/ozhera
+* https://github.com/rstyro/admin-plus
+  https://github.com/zfoo-project/zfoo
