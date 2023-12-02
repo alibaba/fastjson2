@@ -562,13 +562,13 @@ public abstract class FieldReader<T>
             String thisName = this.field.getName();
             if (other.field != null) {
                 String otherName = other.field.getName();
-                if (thisName != null && thisName.equals(otherName)) {
+                if (thisName.equals(otherName)) {
                     return true;
                 }
             }
             if (other.method != null) {
                 String otherName = getActualFieldName(other);
-                if (thisName != null && thisName.equals(otherName)) {
+                if (thisName.equals(otherName)) {
                     return true;
                 }
             }
@@ -583,9 +583,7 @@ public abstract class FieldReader<T>
                 }
             }
             if (other.field != null) {
-                if (thisName != null && thisName.equals(other.field.getName())) {
-                    return true;
-                }
+                return thisName != null && thisName.equals(other.field.getName());
             }
         }
 
