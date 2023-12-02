@@ -6136,7 +6136,7 @@ class JSONReaderUTF8
                         }
                         chars[i] = (char) c;
                         offset++;
-                    } else if (c == '"') {
+                    } else if (c == quote) {
                         break;
                     } else {
                         if (c >= 0) {
