@@ -169,7 +169,7 @@ public class FieldReaderObject<T>
 
         accept(object, value);
 
-        if (noneStaticMemberClass) {
+        if (noneStaticMemberClass && value != null) {
             BeanUtils.setNoneStaticMemberClassParent(value, object);
         }
     }
