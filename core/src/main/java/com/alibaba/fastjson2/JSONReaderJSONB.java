@@ -2232,6 +2232,7 @@ final class JSONReaderJSONB
             case BC_TIMESTAMP_SECONDS:
             case BC_TIMESTAMP_MINUTES:
             case BC_FLOAT:
+            case BC_INT64_INT:
                 offset += 4;
                 return;
             case BC_FLOAT_INT:
@@ -2322,6 +2323,11 @@ final class JSONReaderJSONB
 
                 if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
                     offset++;
+                    return;
+                }
+
+                if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
+                    offset += 2;
                     return;
                 }
 

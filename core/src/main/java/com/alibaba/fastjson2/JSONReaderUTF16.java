@@ -4274,6 +4274,7 @@ class JSONReaderUTF16
                 }
                 break;
             }
+            case '\'':
             case '"': {
                 skipString();
                 break;

@@ -1411,7 +1411,7 @@ class JSONReaderUTF8
                     continue;
                 }
 
-                if (c == '"') {
+                if (c == quote) {
                     this.nameLength = i;
                     this.nameEnd = offset;
                     offset++;
@@ -3649,9 +3649,11 @@ class JSONReaderUTF8
 
     @Override
     public final boolean skipName() {
-        if (ch != '"') {
+        if (ch != '"' && ch != '\'') {
             throw new JSONException("not support unquoted name");
         }
+
+        char quote = this.ch;
 
         int offset = this.offset;
         for (; ; ) {
@@ -3661,7 +3663,7 @@ class JSONReaderUTF8
                 continue;
             }
 
-            if (c == '"') {
+            if (c == quote) {
                 offset++;
                 c = bytes[offset];
 
@@ -3724,6 +3726,7 @@ class JSONReaderUTF8
                 }
                 break;
             }
+            case '\'':
             case '"': {
                 skipString();
                 break;
@@ -4109,10 +4112,10 @@ class JSONReaderUTF8
                     && b1 != '\\'
                     && b2 != '\\'
                     && b3 != '\\'
-                    && b0 != '"'
-                    && b1 != '"'
-                    && b2 != '"'
-                    && b3 != '"'
+                    && b0 != quote
+                    && b1 != quote
+                    && b2 != quote
+                    && b3 != quote
             ) {
                 offset += 4;
                 continue;
@@ -4125,7 +4128,7 @@ class JSONReaderUTF8
             if (ch == '\\') {
                 ch = bytes[offset++];
 
-                if (ch == '\\' || ch == '"') {
+                if (ch == '\\' || ch == quote) {
                     ch = bytes[offset++];
                     continue;
                 }
@@ -4366,7 +4369,7 @@ class JSONReaderUTF8
                         }
                         chars[i] = (char) c;
                         offset++;
-                    } else if (c == '"') {
+                    } else if (c == quote) {
                         break;
                     } else {
                         if (c >= 0) {

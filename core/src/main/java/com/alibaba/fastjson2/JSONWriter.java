@@ -1192,6 +1192,19 @@ public abstract class JSONWriter
 
     public abstract void writeReference(String path);
 
+    /**
+     * @since 2.0.43
+     */
+    public final void writeAs(Object value, Class type) {
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        ObjectWriter objectWriter = context.getObjectWriter(type);
+        objectWriter.write(this, value, null, null, 0);
+    }
+
     @Override
     public abstract void close();
 

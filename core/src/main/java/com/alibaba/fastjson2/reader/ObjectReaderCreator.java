@@ -1140,6 +1140,23 @@ public class ObjectReaderCreator {
                 fieldName = fieldInfo.fieldName;
             }
 
+            String[] orders = beanInfo.orders;
+            if (orders != null && orders.length > 0) {
+                boolean match = false;
+                for (int i = 0; i < orders.length; i++) {
+                    if (fieldName.equals(orders[i])) {
+                        fieldInfo.ordinal = i;
+                        match = true;
+                        break;
+                    }
+                }
+                if (!match) {
+                    if (fieldInfo.ordinal == 0) {
+                        fieldInfo.ordinal = orders.length;
+                    }
+                }
+            }
+
             Type fieldType = field.getGenericType();
             Class<?> fieldClass = field.getType();
 

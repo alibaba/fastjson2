@@ -244,7 +244,7 @@ public class ObjectWriterCreator {
             beanFeatures &= ~JSONWriter.Feature.WriteClassName.mask;
         }
 
-        long writerFieldFeatures = features | beanFeatures;
+        long writerFieldFeatures = (features | beanFeatures) & ~JSONWriter.Feature.BeanToArray.mask;
         boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
 
         if (fieldBased && objectClass.isInterface()) {

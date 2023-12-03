@@ -2338,6 +2338,10 @@ public abstract class BeanUtils {
     }
 
     public static void setNoneStaticMemberClassParent(Object object, Object parent) {
+        if (object == null) {
+            return;
+        }
+
         Class objectClass = object.getClass();
         Field[] fields = declaredFieldCache.get(objectClass);
         if (fields == null) {

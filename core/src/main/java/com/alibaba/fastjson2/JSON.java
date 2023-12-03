@@ -3479,6 +3479,21 @@ public interface JSON {
     }
 
     /**
+     * Verify that the json byte array is legal json text
+     *
+     * @param bytes the specified array will be validated
+     * @param charset the specified charset of the bytes
+     * @return {@code true} or {@code false}
+     */
+    static boolean isValid(byte[] bytes, Charset charset) {
+        if (bytes == null || bytes.length == 0) {
+            return false;
+        }
+
+        return isValid(bytes, 0, bytes.length, charset);
+    }
+
+    /**
      * Verify that the json byte array is a legal JsonArray
      *
      * @param bytes the specified array will be validated

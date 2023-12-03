@@ -246,6 +246,14 @@ public final class ObjectReaderImplEnum
                         break;
                     }
                 }
+
+                if (fieldValue == null && valueField != null) {
+                    try {
+                        fieldValue = Enum.valueOf(enumClass, str);
+                    } catch (IllegalArgumentException ignored) {
+                        // ignored
+                    }
+                }
             } else if (intValues != null && jsonReader.isString()) {
                 int intValue = jsonReader.readInt32Value();
                 for (int i = 0; i < intValues.length; i++) {
