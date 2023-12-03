@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONException;
 import sun.misc.Unsafe;
 
 import java.lang.invoke.*;
@@ -76,12 +77,17 @@ public class JDKUtils {
             unsafe = (Unsafe) theUnsafeField.get(null);
             offset = unsafe.arrayBaseOffset(byte[].class);
             charOffset = unsafe.arrayBaseOffset(char[].class);
-        } catch (Throwable ignored) {
-            // ignored
+        } catch (Throwable e) {
+            initErrorLast = e;
         }
+
         UNSAFE = unsafe;
         ARRAY_BYTE_BASE_OFFSET = offset;
         ARRAY_CHAR_BASE_OFFSET = charOffset;
+
+        if (offset == -1) {
+            throw new JSONException("init JDKUtils error", initErrorLast);
+        }
 
         int jvmVersion = -1, android_sdk_int = -1;
         boolean openj9 = false, android = false, graal = false;
