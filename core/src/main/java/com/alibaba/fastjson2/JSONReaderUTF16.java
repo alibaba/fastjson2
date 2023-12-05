@@ -1240,6 +1240,7 @@ class JSONReaderUTF16
                         case '=':
                         case '@':
                         case ':':
+                        case ',':
                             break;
                         default:
                             ch = char1(ch);
@@ -1973,6 +1974,7 @@ class JSONReaderUTF16
                     case '=':
                     case '@':
                     case ':':
+                    case ',':
                         break;
                     default:
                         c = char1(c);

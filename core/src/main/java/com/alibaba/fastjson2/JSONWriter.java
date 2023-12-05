@@ -2071,6 +2071,7 @@ public abstract class JSONWriter
                                 case '\\':
                                 case '"':
                                 case '\'':
+                                case ',':
                                     if (off + 1 >= buf.length) {
                                         int newCapacity = buf.length + (buf.length >> 1);
                                         buf = Arrays.copyOf(buf, newCapacity);
@@ -2184,6 +2185,7 @@ public abstract class JSONWriter
                                 case '\\':
                                 case '"':
                                 case '\'':
+                                case ',':
                                     if (off + 1 >= buf.length) {
                                         int newCapacity = buf.length + (buf.length >> 1);
                                         buf = Arrays.copyOf(buf, newCapacity);
