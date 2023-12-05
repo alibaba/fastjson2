@@ -564,6 +564,7 @@ public abstract class JSONReader
             case '(':
             case ')':
             case '_':
+            case ',':
                 return (char) c;
             default:
                 throw new JSONException(info("unclosed.str '\\" + (char) c));

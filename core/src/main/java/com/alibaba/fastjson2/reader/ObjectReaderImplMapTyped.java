@@ -382,7 +382,18 @@ class ObjectReaderImplMapTyped
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
 
-            Object value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+            Object value;
+            if (jsonReader.isReference()) {
+                String reference = jsonReader.readReference();
+                if ("..".equals(reference)) {
+                    value = object;
+                } else {
+                    jsonReader.addResolveTask(object, name, JSONPath.of(reference));
+                    continue;
+                }
+            } else {
+                value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+            }
 
             if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;

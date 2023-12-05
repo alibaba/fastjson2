@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,13 +20,18 @@ public class TestSpecial_2 {
         model.subInvokes.put("com.ibatis.sqlmap.client.SqlMapExecutor@queryForObject(String,Object)", value);
 
         String json = JSON.toJSONString(model, JSONWriter.Feature.ReferenceDetection);
-        System.out.println(json);
 
         Model m2 = JSON.parseObject(json, Model.class);
         assertEquals(1, m2.values.size());
         assertEquals(1, m2.subInvokes.size());
 
-//        assertSame(m2.values.values().iterator().next(), m2.subInvokes.values().iterator().next());
+        Model m3 = JSON.parseObject(json.getBytes(StandardCharsets.UTF_8), Model.class);
+        assertEquals(1, m3.values.size());
+        assertEquals(1, m3.subInvokes.size());
+
+        Model m4 = JSON.parseObject(json.toCharArray(), Model.class);
+        assertEquals(1, m4.values.size());
+        assertEquals(1, m4.subInvokes.size());
     }
 
     public static class Model {
