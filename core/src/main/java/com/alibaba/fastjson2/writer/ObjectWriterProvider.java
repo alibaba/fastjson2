@@ -18,6 +18,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -255,6 +257,46 @@ public class ObjectWriterProvider
             }
             annotationProcessor.getBeanInfo(beanInfo, objectClass);
         }
+    }
+
+    public ObjectWriter getObjectWriter(Type objectType, String format, Locale locale) {
+        if (objectType == Double.class) {
+            return new ObjectWriterImplDouble(new DecimalFormat(format));
+        }
+
+        if (objectType == Float.class) {
+            return new ObjectWriterImplFloat(new DecimalFormat(format));
+        }
+
+        if (objectType == BigDecimal.class) {
+            return new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
+        }
+
+        if (objectType == LocalDate.class) {
+            return ObjectWriterImplLocalDate.of(format, null);
+        }
+
+        if (objectType == LocalDateTime.class) {
+            return new ObjectWriterImplLocalDateTime(format, null);
+        }
+
+        if (objectType == LocalTime.class) {
+            return new ObjectWriterImplLocalTime(format, null);
+        }
+
+        if (objectType == Date.class) {
+            return new ObjectWriterImplDate(format, null);
+        }
+
+        if (objectType == OffsetDateTime.class) {
+            return ObjectWriterImplOffsetDateTime.of(format, null);
+        }
+
+        if (objectType == ZonedDateTime.class) {
+            return new ObjectWriterImplZonedDateTime(format, null);
+        }
+
+        return getObjectWriter(objectType);
     }
 
     public ObjectWriter getObjectWriter(Class objectClass) {
