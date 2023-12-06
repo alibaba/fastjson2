@@ -6,8 +6,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -78,17 +76,9 @@ abstract class FieldWriterList<T>
             }
 
             if (format != null) {
-                if (itemType == Double.class) {
-                    return itemObjectWriter = new ObjectWriterImplDouble(new DecimalFormat(format));
-                }
-
-                if (itemType == Float.class) {
-                    return itemObjectWriter = new ObjectWriterImplFloat(new DecimalFormat(format));
-                }
-
-                if (itemType == BigDecimal.class) {
-                    return itemObjectWriter = new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
-                }
+                return jsonWriter.getContext()
+                        .getProvider()
+                        .getObjectWriter(itemType, format, null);
             }
 
             return itemObjectWriter = jsonWriter
