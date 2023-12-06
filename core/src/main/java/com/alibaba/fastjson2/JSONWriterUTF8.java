@@ -2781,7 +2781,7 @@ class JSONWriterUTF8
         boolean writeAsString = isWriteAsString(value, features);
 
         int off = this.off;
-        int minCapacity = off + precision + 7;
+        int minCapacity = off + precision + value.scale() + 7;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
