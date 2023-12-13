@@ -1286,6 +1286,7 @@ public class ObjectReaderBaseModule
 
             switch (annotationType.getName()) {
                 case "com.alibaba.fastjson.annotation.JSONCreator":
+                case "com.alibaba.fastjson2.annotation.JSONCreator":
                     creatorMethod = true;
                     BeanUtils.annotationMethods(annotationType, m1 -> {
                         try {
