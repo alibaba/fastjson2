@@ -14,4 +14,12 @@ public class JSONPath_4 {
         Object o = JSONPath.eval(x, "$.10\\.0\\.1\\.1");
         Assertions.assertEquals("haha", o);
     }
+
+    @Test
+    public void testChinese() {
+        String a = "{\"key\":\"value\",\"你好\":\"haha\"}";
+        Object x = JSON.parse(a);
+        Object o = JSONPath.eval(x, "你好");
+        Assertions.assertEquals("haha", o);
+    }
 }

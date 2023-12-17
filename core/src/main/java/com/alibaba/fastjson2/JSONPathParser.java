@@ -71,7 +71,7 @@ class JSONPathParser {
 
             char ch = jsonReader.ch;
             JSONPathSegment segment;
-            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' || ch == '@') {
+            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' || ch == '@' || Character.isIdeographic(ch)) {
                 segment = parseProperty();
             } else {
                 throw new JSONException("syntax error " + path);
@@ -93,7 +93,7 @@ class JSONPathParser {
                 segment = parseProperty();
             } else if (jsonReader.ch == '[') {
                 segment = parseArrayAccess();
-            } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_') {
+            } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' || Character.isIdeographic(ch)) {
                 segment = parseProperty();
             } else if (ch == '?') {
                 if (dollar && segmentIndex == 0) {
