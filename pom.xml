@@ -41,8 +41,8 @@
         <springsecurity6.version>6.1.5</springsecurity6.version>
         <springboot2.version>2.7.18</springboot2.version>
         <springboot3.version>3.2.0</springboot3.version>
-        <springdata2021.version>2021.2.18</springdata2021.version>
-        <springdata2023.version>2023.1.0</springdata2023.version>
+        <springdata2021.version>2023.1.1</springdata2021.version>
+        <springdata2023.version>2023.1.1</springdata2023.version>
         <arrow.version>14.0.1</arrow.version>
 
         <!-- Requires kotlin minor version less than the latest version -->
