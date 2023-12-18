@@ -5449,6 +5449,10 @@ class JSONReaderUTF8
     @Override
     public final boolean skipName() {
         if (ch != '"' && ch != '\'') {
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                readFieldNameHashCodeUnquote();
+                return true;
+            }
             throw new JSONException("not support unquoted name");
         }
         char quote = ch;
