@@ -356,7 +356,7 @@ public class ASMUtils {
                     }
                 }
                 return paramNames;
-            } catch (IOException ignored) {
+            } catch (IOException | ArrayIndexOutOfBoundsException ignored) {
                 // ignored
             } finally {
                 IOUtils.close(is);

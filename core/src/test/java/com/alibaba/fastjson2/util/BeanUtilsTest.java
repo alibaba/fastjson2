@@ -299,7 +299,9 @@ public class BeanUtilsTest {
                 "org.apache.xalan.xsltc.trax.TemplatesImpl",
                 "org.apache.xalan.xsltc.runtime.AbstractTranslet",
                 "org.apache.xalan.xsltc.trax.TransformerFactoryImpl",
-                "org.apache.commons.collections.functors.ChainedTransformer"
+                "org.apache.commons.collections.functors.ChainedTransformer",
+                "org.mockito.internal.creation.bytebuddy.MockMethodInterceptor",
+                "sun.nio.ch.FileChannelImpl"
         };
 
         long[] hashCodes = new long[names.length];
@@ -308,7 +310,7 @@ public class BeanUtilsTest {
         }
         Arrays.sort(hashCodes);
         for (int i = 0; i < hashCodes.length; i++) {
-            // System.out.println(hashCodes[i] + "L,");
+             System.out.println(hashCodes[i] + "L,");
         }
     }
 
