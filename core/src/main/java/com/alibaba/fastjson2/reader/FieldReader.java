@@ -47,21 +47,17 @@ public abstract class FieldReader<T>
     public final String format;
     public final Method method;
     public final Field field;
-    protected final long fieldOffset;
     public final Object defaultValue;
     public final Locale locale;
     public final JSONSchema schema;
-
+    protected final long fieldOffset;
     final boolean fieldClassSerializable;
     final long fieldNameHash;
     final long fieldNameHashLCase;
-
-    volatile ObjectReader reader;
-
-    volatile JSONPath referenceCache;
     final boolean noneStaticMemberClass;
     final boolean readOnly;
-
+    volatile ObjectReader reader;
+    volatile JSONPath referenceCache;
     Type itemType;
     Class itemClass;
     volatile ObjectReader itemReader;
@@ -125,6 +121,58 @@ public abstract class FieldReader<T>
         }
 
         this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
+    }
+
+    static ObjectReader createFormattedObjectReader(Type fieldType, Class fieldClass, String format, Locale locale) {
+        if (format != null && !format.isEmpty()) {
+            String typeName = fieldType.getTypeName();
+            switch (typeName) {
+                case "java.sql.Time":
+                    return JdbcSupport.createTimeReader((Class) fieldType, format, locale);
+                case "java.sql.Timestamp":
+                    return JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
+                case "java.sql.Date":
+                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
+                case "byte[]":
+                case "[B":
+                    return new ObjectReaderImplInt8Array(format);
+                default:
+                    if (Calendar.class.isAssignableFrom(fieldClass)) {
+                        return ObjectReaderImplCalendar.of(format, locale);
+                    }
+
+                    if (fieldClass == ZonedDateTime.class) {
+                        return ObjectReaderImplZonedDateTime.of(format, locale);
+                    }
+
+                    if (fieldClass == LocalDateTime.class) {
+                        return new ObjectReaderImplLocalDateTime(format, locale);
+                    }
+
+                    if (fieldClass == LocalDate.class) {
+                        return ObjectReaderImplLocalDate.of(format, locale);
+                    }
+
+                    if (fieldClass == LocalTime.class) {
+                        return new ObjectReaderImplLocalTime(format, locale);
+                    }
+
+                    if (fieldClass == Instant.class) {
+                        return ObjectReaderImplInstant.of(format, locale);
+                    }
+
+                    if (fieldClass == Optional.class) {
+                        return ObjectReaderImplOptional.of(fieldType, format, locale);
+                    }
+
+                    if (fieldClass == Date.class) {
+                        return ObjectReaderImplDate.of(format, locale);
+                    }
+
+                    break;
+            }
+        }
+        return null;
     }
 
     public void acceptDefaultValue(T object) {
@@ -453,10 +501,7 @@ public abstract class FieldReader<T>
             } else {
                 if (autoCast) {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);
-                    JSONReader.Context readContext = JSONFactory.createReadContext();
-                    if ((features & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
-                        readContext.config(JSONReader.Feature.SupportSmartMatch);
-                    }
+                    JSONReader.Context readContext = JSONFactory.createReadContext(features);
                     try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString, readContext)) {
                         ObjectReader fieldObjectReader = getObjectReader(jsonReader);
                         typedFieldValue = fieldObjectReader.readObject(jsonReader, null, fieldName, features);
@@ -499,58 +544,6 @@ public abstract class FieldReader<T>
 
     public ObjectReader getItemObjectReader(JSONReader jsonReader) {
         return getItemObjectReader(jsonReader.getContext());
-    }
-
-    static ObjectReader createFormattedObjectReader(Type fieldType, Class fieldClass, String format, Locale locale) {
-        if (format != null && !format.isEmpty()) {
-            String typeName = fieldType.getTypeName();
-            switch (typeName) {
-                case "java.sql.Time":
-                    return JdbcSupport.createTimeReader((Class) fieldType, format, locale);
-                case "java.sql.Timestamp":
-                    return JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
-                case "java.sql.Date":
-                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
-                case "byte[]":
-                case "[B":
-                    return new ObjectReaderImplInt8Array(format);
-                default:
-                    if (Calendar.class.isAssignableFrom(fieldClass)) {
-                        return ObjectReaderImplCalendar.of(format, locale);
-                    }
-
-                    if (fieldClass == ZonedDateTime.class) {
-                        return ObjectReaderImplZonedDateTime.of(format, locale);
-                    }
-
-                    if (fieldClass == LocalDateTime.class) {
-                        return new ObjectReaderImplLocalDateTime(format, locale);
-                    }
-
-                    if (fieldClass == LocalDate.class) {
-                        return ObjectReaderImplLocalDate.of(format, locale);
-                    }
-
-                    if (fieldClass == LocalTime.class) {
-                        return new ObjectReaderImplLocalTime(format, locale);
-                    }
-
-                    if (fieldClass == Instant.class) {
-                        return ObjectReaderImplInstant.of(format, locale);
-                    }
-
-                    if (fieldClass == Optional.class) {
-                        return ObjectReaderImplOptional.of(fieldType, format, locale);
-                    }
-
-                    if (fieldClass == Date.class) {
-                        return ObjectReaderImplDate.of(format, locale);
-                    }
-
-                    break;
-            }
-        }
-        return null;
     }
 
     public BiConsumer getFunction() {
