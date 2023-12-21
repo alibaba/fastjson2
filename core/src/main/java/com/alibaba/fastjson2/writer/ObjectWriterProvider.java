@@ -351,6 +351,14 @@ public class ObjectWriterProvider
                 default:
                     break;
             }
+        } else {
+            switch (className) {
+                case "org.springframework.core.ResolvableType":
+                    fieldBased = true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         ObjectWriter objectWriter = fieldBased
