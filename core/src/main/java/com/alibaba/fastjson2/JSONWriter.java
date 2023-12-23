@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterImplMap;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.*;
@@ -494,6 +495,11 @@ public abstract class JSONWriter
     public final ObjectWriter getObjectWriter(Class objectClass) {
         boolean fieldBased = (context.features & FieldBased.mask) != 0;
         return context.provider.getObjectWriter(objectClass, objectClass, fieldBased);
+    }
+
+    public final ObjectWriter getObjectWriter(Class objectClass, String format) {
+        boolean fieldBased = (context.features & FieldBased.mask) != 0;
+        return context.provider.getObjectWriter(objectClass, objectClass, format, fieldBased);
     }
 
     public final ObjectWriter getObjectWriter(Type objectType, Class objectClass) {

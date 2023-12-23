@@ -318,6 +318,16 @@ public class ObjectWriterProvider
                 : cache.get(objectType);
     }
 
+    public ObjectWriter getObjectWriter(Type objectType, Class objectClass, String format, boolean fieldBased) {
+        ObjectWriter objectWriter = getObjectWriter(objectType, objectClass, fieldBased);
+        if (format != null) {
+            if (objectType == LocalDateTime.class && objectWriter == ObjectWriterImplLocalDateTime.INSTANCE) {
+                return ObjectWriterImplLocalDateTime.of(format, null);
+            }
+        }
+        return objectWriter;
+    }
+
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
         ObjectWriter objectWriter = fieldBased
                 ? cacheFieldBased.get(objectType)

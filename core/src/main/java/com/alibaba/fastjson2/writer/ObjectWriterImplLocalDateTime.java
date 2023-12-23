@@ -13,6 +13,10 @@ final class ObjectWriterImplLocalDateTime
         implements ObjectWriter {
     static final ObjectWriterImplLocalDateTime INSTANCE = new ObjectWriterImplLocalDateTime(null, null);
 
+    static ObjectWriterImplLocalDateTime of(String format, Locale locale) {
+        return new ObjectWriterImplLocalDateTime(format, locale);
+    }
+
     public ObjectWriterImplLocalDateTime(String format, Locale locale) {
         super(format, locale);
     }
