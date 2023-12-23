@@ -847,7 +847,7 @@ public abstract class FieldWriter<T>
     ) {
         if (Map.class.isAssignableFrom(valueClass)) {
             if (fieldClass.isAssignableFrom(valueClass)) {
-                return ObjectWriterImplMap.of(fieldType, valueClass);
+                return ObjectWriterImplMap.of(fieldType, format, valueClass);
             } else {
                 return ObjectWriterImplMap.of(valueClass);
             }

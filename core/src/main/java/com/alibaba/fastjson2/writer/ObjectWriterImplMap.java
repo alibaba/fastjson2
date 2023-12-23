@@ -38,6 +38,7 @@ public final class ObjectWriterImplMap
 
     final Type keyType;
     final Type valueType;
+    final String format;
     final boolean valueTypeRefDetect;
     volatile ObjectWriter keyWriter;
     volatile ObjectWriter valueWriter;
@@ -58,8 +59,13 @@ public final class ObjectWriterImplMap
     }
 
     public ObjectWriterImplMap(Type keyType, Type valueType, Class objectClass, Type objectType, long features) {
+        this(keyType, valueType, null, objectClass, objectType, features);
+    }
+
+    public ObjectWriterImplMap(Type keyType, Type valueType, String format, Class objectClass, Type objectType, long features) {
         this.keyType = keyType;
         this.valueType = valueType;
+        this.format = format;
         this.objectClass = objectClass;
         this.objectType = objectType;
         this.features = features;
@@ -109,6 +115,10 @@ public final class ObjectWriterImplMap
     }
 
     public static ObjectWriterImplMap of(Type type, Class defineClass) {
+        return of(type, null, defineClass);
+    }
+
+    public static ObjectWriterImplMap of(Type type, String format, Class defineClass) {
         Type keyType = null, valueType = null;
 
         if (type instanceof ParameterizedType) {
@@ -121,7 +131,7 @@ public final class ObjectWriterImplMap
             }
         }
 
-        return new ObjectWriterImplMap(keyType, valueType, defineClass, type, 0);
+        return new ObjectWriterImplMap(keyType, valueType, format, defineClass, type, 0);
     }
 
     @Override
@@ -508,7 +518,9 @@ public final class ObjectWriterImplMap
                 if (this.valueWriter != null) {
                     valueWriter = this.valueWriter;
                 } else {
-                    valueWriter = this.valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    valueWriter = this.valueWriter = format != null
+                            ? jsonWriter.getObjectWriter(valueClass, format)
+                            : jsonWriter.getObjectWriter(valueClass);
                 }
                 isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
             } else {
