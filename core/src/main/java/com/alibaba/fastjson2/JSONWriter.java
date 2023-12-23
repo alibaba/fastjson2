@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterImplMap;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.*;
