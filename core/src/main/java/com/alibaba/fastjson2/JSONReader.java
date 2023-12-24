@@ -2347,8 +2347,7 @@ public abstract class JSONReader
                     val = readBoolValue();
                     break;
                 case 'n':
-                    readNull();
-                    val = null;
+                    val = readNullOrNewDate();
                     break;
                 case '/':
                     skipComment();
