@@ -418,10 +418,7 @@ public abstract class FieldReader<T>
             } else {
                 if (autoCast) {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);
-                    JSONReader.Context readContext = JSONFactory.createReadContext();
-                    if ((features & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
-                        readContext.config(JSONReader.Feature.SupportSmartMatch);
-                    }
+                    JSONReader.Context readContext = JSONFactory.createReadContext(features);
                     try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString, readContext)) {
                         ObjectReader fieldObjectReader = getObjectReader(jsonReader);
                         typedFieldValue = fieldObjectReader.readObject(jsonReader, null, fieldName, features);

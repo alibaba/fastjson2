@@ -919,6 +919,10 @@ public abstract class BeanUtils {
     }
 
     public static void getters(Class objectClass, Class mixinSource, Consumer<Method> methodConsumer) {
+        getters(objectClass, mixinSource, false, methodConsumer);
+    }
+
+    public static void getters(Class objectClass, Class mixinSource, boolean kotlin, Consumer<Method> methodConsumer) {
         if (objectClass == null) {
             return;
         }
@@ -1018,7 +1022,7 @@ public abstract class BeanUtils {
                 if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                     nameMatch = false;
                 }
-            } else if (returnClass == boolean.class || returnClass == Boolean.class) {
+            } else if (returnClass == boolean.class || returnClass == Boolean.class || kotlin) {
                 nameMatch = methodNameLength > 2 && methodName.startsWith("is", 0);
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
@@ -1151,7 +1155,15 @@ public abstract class BeanUtils {
     }
 
     public static String getterName(Method method, String namingStrategy) {
-        String fieldName = getterName(method.getName(), namingStrategy);
+        String methodName = method.getName();
+        if (methodName.startsWith("is")) {
+            Class<?> returnType = method.getReturnType();
+            if (returnType != Boolean.class && returnType != boolean.class) {
+                return methodName;
+            }
+        }
+
+        String fieldName = getterName(methodName, namingStrategy);
 
         if (fieldName.length() > 2
                 && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'

@@ -746,7 +746,10 @@ public final class ObjectReaderModule {
                 }
             }
 
-            if (annotationType.getName().equals("com.alibaba.fastjson.annotation.JSONCreator")) {
+            String annotationTypeName = annotationType.getName();
+            if (annotationTypeName.equals("com.alibaba.fastjson.annotation.JSONCreator")
+                    || annotationTypeName.equals("com.alibaba.fastjson2.annotation.JSONCreator")
+            ) {
                 creatorMethod = true;
                 annotationMethods(annotationType, m1 -> {
                     try {

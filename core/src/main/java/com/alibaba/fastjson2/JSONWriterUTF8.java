@@ -2210,7 +2210,7 @@ class JSONWriterUTF8
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0));
 
         int off = this.off;
-        int minCapacity = off + precision + 7;
+        int minCapacity = off + precision + value.scale() + 7;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
