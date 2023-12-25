@@ -491,7 +491,8 @@ public abstract class JSON
 
     @SuppressWarnings("unchecked")
     public static <T> T parseObject(String str, TypeReference<T> typeReference, Feature... features) {
-        return (T) parseObject(str, typeReference.getType(), features);
+        Type type = typeReference != null ? typeReference.getType() : Object.class;
+        return (T) parseObject(str, type, features);
     }
 
     public static <T> T parseObject(String input, Type clazz, int featureValues, Feature... features) {
