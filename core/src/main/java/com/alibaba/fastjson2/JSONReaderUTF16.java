@@ -4745,10 +4745,12 @@ class JSONReaderUTF16
 
         if (intOverflow) {
             int numStart = negative ? start : start - 1;
-
             int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
             if (numDigits > 38) {
                 valueType = JSON_TYPE_BIG_DEC;
+                if (negative) {
+                    numStart--;
+                }
                 stringValue = new String(chars, numStart, offset - 1 - numStart);
             } else {
                 bigInt(chars, numStart, offset - 1);
