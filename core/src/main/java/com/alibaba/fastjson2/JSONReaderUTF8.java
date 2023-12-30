@@ -8632,7 +8632,7 @@ class JSONReaderUTF8
             ch = bytes[offset];
         }
 
-        if (ch != quote) {
+        if (ch != quote || (offset + 1 < end && bytes[offset + 1] == '#')) {
             return false;
         }
 
