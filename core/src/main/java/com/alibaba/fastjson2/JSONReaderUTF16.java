@@ -227,7 +227,7 @@ class JSONReaderUTF16
             ch = chars[offset];
         }
 
-        if (ch != quote) {
+        if (ch != quote || (offset + 1 < end && chars[offset + 1] == '#')) {
             return false;
         }
 
