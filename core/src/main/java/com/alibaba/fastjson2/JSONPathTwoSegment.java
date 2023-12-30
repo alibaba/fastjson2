@@ -89,6 +89,11 @@ class JSONPathTwoSegment
             return null;
         }
 
+        if (first instanceof JSONPathSegment.CycleNameSegment && ((JSONPathSegment.CycleNameSegment) first).shouldRecursive()
+                && second instanceof JSONPathFilter.NameFilter) {
+            ((JSONPathFilter.NameFilter) second).excludeArray();
+        }
+
         Context context1 = new Context(this, context0, second, null, 0);
         second.eval(context1);
         Object contextValue = context1.value;
