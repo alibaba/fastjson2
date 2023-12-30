@@ -20,7 +20,9 @@ final class JSONPathMulti
 
         boolean extractSupport = true;
         boolean ref = true;
-        for (JSONPathSegment segment : segments) {
+        int size = segments.size();
+        for (int i = 0; i < size - 1; i++) {
+            JSONPathSegment segment = segments.get(i);
             if (segment instanceof JSONPathSegmentIndex) {
                 if (((JSONPathSegmentIndex) segment).index < 0) {
                     extractSupport = false;
@@ -31,6 +33,13 @@ final class JSONPathMulti
                 continue;
             }
             ref = false;
+            if (i > 0) {
+                JSONPathSegment prev = segments.get(i - 1);
+                if (prev instanceof JSONPathSegment.CycleNameSegment && ((JSONPathSegment.CycleNameSegment) prev).shouldRecursive()
+                        && segment instanceof JSONPathFilter.NameFilter) {
+                    ((JSONPathFilter.NameFilter) segment).excludeArray();
+                }
+            }
             break;
         }
         this.extractSupport = extractSupport;
@@ -172,6 +181,13 @@ final class JSONPathMulti
                 context.root = root;
             }
 
+            if (i > 0) {
+                JSONPathSegment prev = segments.get(i - 1);
+                if (prev instanceof JSONPathSegment.CycleNameSegment && ((JSONPathSegment.CycleNameSegment) prev).shouldRecursive()
+                        && segment instanceof JSONPathFilter.NameFilter) {
+                    ((JSONPathFilter.NameFilter) segment).excludeArray();
+                }
+            }
             segment.eval(context);
         }
 
