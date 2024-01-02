@@ -7,7 +7,6 @@ import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class Issue2145 {
-
     @Test
     public void test() {
         String testJson = "{\"key2\": [null, null, null, null, null, null]}";
