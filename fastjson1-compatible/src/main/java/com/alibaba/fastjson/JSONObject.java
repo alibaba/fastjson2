@@ -253,14 +253,10 @@ public class JSONObject
 
     public <T> T getObject(String key, TypeReference typeReference) {
         Object obj = map.get(key);
-        if (obj == null) {
-            return null;
-        }
-        if (typeReference == null) {
+        Type type;
+        if (obj == null || typeReference == null || (type = typeReference.getType()) == null) {
             return (T) obj;
         }
-
-        Type type = typeReference.getType();
 
         if (type instanceof Class) {
             Class clazz = (Class) type;
