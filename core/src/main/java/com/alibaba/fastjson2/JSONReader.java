@@ -451,7 +451,7 @@ public abstract class JSONReader
                         if (index == list.size()) {
                             list.add(fieldValue);
                         } else {
-                            list.set(index, fieldValue);
+                            list.add(index, fieldValue);
                         }
                         continue;
                     }
