@@ -3492,7 +3492,7 @@ public interface JSON {
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
         if (objectWriter instanceof ObjectWriterAdapter && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)) {
             ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
-            return objectWriterAdapter.toJSONObject(object,writeContext.features);
+            return objectWriterAdapter.toJSONObject(object, writeContext.features);
         }
 
         String str;
