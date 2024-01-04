@@ -374,7 +374,7 @@ public class ObjectWriterCreator {
 
                 Class mixIn = provider.getMixIn(objectClass);
 
-                BeanUtils.getters(objectClass, mixIn, method -> {
+                BeanUtils.getters(objectClass, mixIn, beanInfo.kotlin, method -> {
                     fieldInfo.init();
                     fieldInfo.features = writerFieldFeatures;
                     fieldInfo.format = beanInfo.format;

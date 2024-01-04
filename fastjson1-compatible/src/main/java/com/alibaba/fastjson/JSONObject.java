@@ -253,6 +253,9 @@ public class JSONObject
 
     public <T> T getObject(String key, TypeReference typeReference) {
         Object obj = map.get(key);
+        if (obj == null) {
+            return null;
+        }
         if (typeReference == null) {
             return (T) obj;
         }

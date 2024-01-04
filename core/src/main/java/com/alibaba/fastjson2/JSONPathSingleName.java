@@ -273,11 +273,7 @@ final class JSONPathSingleName
                         continue;
                     }
 
-                    if (jsonReader.isNumber()) {
-                        return jsonReader.readNumber();
-                    }
-
-                    throw new JSONException("TODO");
+                    return jsonReader.readAny();
                 }
             }
 

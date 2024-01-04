@@ -1323,7 +1323,9 @@ abstract class JSONPathSegment {
                     }
                 } else if (object instanceof Collection) {
                     for (Object item : ((List<?>) object)) {
-                        accept(item);
+                        if (item != null) {
+                            accept(item);
+                        }
                     }
                 } else {
                     Class<?> entryValueClass = object.getClass();
@@ -1371,7 +1373,9 @@ abstract class JSONPathSegment {
                     }
                 } else if (object instanceof Collection) {
                     for (Object item : ((List<?>) object)) {
-                        accept(item);
+                        if (item != null) {
+                            accept(item);
+                        }
                     }
                 } else {
                     Class<?> entryValueClass = object.getClass();
@@ -1420,7 +1424,9 @@ abstract class JSONPathSegment {
                     }
                 } else if (object instanceof Collection) {
                     for (Object item : ((List<?>) object)) {
-                        accept(item);
+                        if (item != null) {
+                            accept(item);
+                        }
                     }
                 } else {
                     Class<?> entryValueClass = object.getClass();

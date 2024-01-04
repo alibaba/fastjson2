@@ -496,6 +496,11 @@ public abstract class JSONWriter
         return context.provider.getObjectWriter(objectClass, objectClass, fieldBased);
     }
 
+    public final ObjectWriter getObjectWriter(Class objectClass, String format) {
+        boolean fieldBased = (context.features & FieldBased.mask) != 0;
+        return context.provider.getObjectWriter(objectClass, objectClass, format, fieldBased);
+    }
+
     public final ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         boolean fieldBased = (context.features & FieldBased.mask) != 0;
         return context.provider.getObjectWriter(objectType, objectClass, fieldBased);

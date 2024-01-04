@@ -451,7 +451,11 @@ public abstract class JSONReader
                         if (index == list.size()) {
                             list.add(fieldValue);
                         } else {
-                            list.set(index, fieldValue);
+                            if (index < list.size() && list.get(index) == null) {
+                                list.set(index, fieldValue);
+                            } else {
+                                list.add(index, fieldValue);
+                            }
                         }
                         continue;
                     }
@@ -2347,8 +2351,7 @@ public abstract class JSONReader
                     val = readBoolValue();
                     break;
                 case 'n':
-                    readNull();
-                    val = null;
+                    val = readNullOrNewDate();
                     break;
                 case '/':
                     skipComment();
@@ -2591,6 +2594,8 @@ public abstract class JSONReader
                 case '{':
                     if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
                         val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
+                    } else if (isReference()) {
+                        val = JSONPath.of(readReference());
                     } else {
                         val = readObject();
                     }
@@ -2641,11 +2646,11 @@ public abstract class JSONReader
                     list = new JSONArray();
                 }
 
-                list.add(first);
-                list.add(second);
-                list.add(val);
+                add(list, 0, first);
+                add(list, 1, second);
+                add(list, i, val);
             } else {
-                list.add(val);
+                add(list, i, val);
             }
         }
 
@@ -2661,10 +2666,10 @@ public abstract class JSONReader
             }
 
             if (i == 1) {
-                list.add(first);
+                add(list, 0, first);
             } else if (i == 2) {
-                list.add(first);
-                list.add(second);
+                add(list, 0, first);
+                add(list, 1, second);
             }
         }
 
@@ -2675,6 +2680,15 @@ public abstract class JSONReader
         level--;
 
         return list;
+    }
+
+    private void add(List<Object> list, int i, Object val) {
+        if (val instanceof JSONPath) {
+            addResolveTask(list, i, (JSONPath) val);
+            list.add(null);
+        } else {
+            list.add(val);
+        }
     }
 
     public final BigInteger getBigInteger() {
