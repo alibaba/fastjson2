@@ -2112,6 +2112,9 @@ public abstract class JSONReader
                     if ((context.features & Feature.NonStringKeyAsString.mask) != 0) {
                         name = name.toString();
                     }
+                    if (comma) {
+                        throw new JSONException(info("syntax error, illegal key-value"));
+                    }
                 } else {
                     if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                         name = readFieldNameUnquote();
