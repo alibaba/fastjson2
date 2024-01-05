@@ -588,7 +588,8 @@ public abstract class FieldReader<T>
     }
 
     public boolean belongTo(Class clazz) {
-        return (this.field != null && this.field.getDeclaringClass() == clazz) || (this.method != null && this.method.getDeclaringClass() == clazz);
+        return (this.field != null && this.field.getDeclaringClass() == clazz)
+                || (this.method != null && this.method.getDeclaringClass().isAssignableFrom(clazz));
     }
 
     private String getActualFieldName(FieldReader fieldReader) {
