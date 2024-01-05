@@ -8,19 +8,23 @@ import org.junit.jupiter.api.Test;
 import java.io.Serializable;
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class Issue2153 {
     @Test
     public void test() {
         String str = "{\"addTime\":1703124696338,\"updateTime\":1703124696338,\"id\":7}";
         User user = JSON.parseObject(str, User.class);
-        System.out.println(user.toString());
+        assertEquals("{\"id\":7}", JSON.toJSONString(user));
     }
 
-    public interface ID extends Serializable {
+    public interface ID
+            extends Serializable {
         Serializable getId();
     }
 
-    public interface Bean<K extends Serializable> extends ID {
+    public interface Bean<K extends Serializable>
+            extends ID {
         @Override
         K getId();
 
@@ -29,20 +33,23 @@ public class Issue2153 {
 
     @Getter
     @Setter
-    public static abstract class BaseEntity implements Bean<Long> {
+    public abstract static class BaseEntity
+            implements Bean<Long> {
         Long id;
     }
 
     @Getter
     @Setter
-    public static abstract class TimeBaseEntity extends BaseEntity {
+    public abstract static class TimeBaseEntity
+            extends BaseEntity {
         Date addTime;
         Date updateTime;
     }
 
     @Getter
     @Setter
-    public static class User extends BaseEntity {
+    public static class User
+            extends BaseEntity {
         String addr;
         Long a, b, c, d, e, f, g;
     }
