@@ -984,7 +984,10 @@ public abstract class BeanUtils {
                 }
             }
 
-            if (!nameMatch && fluentSetter(objectClass, methodName, returnClass) != null) {
+            if (!nameMatch
+                    && objectClass != returnClass
+                    && (!methodName.startsWith("build"))
+                    && fluentSetter(objectClass, methodName, returnClass) != null) {
                 nameMatch = true;
             }
 
