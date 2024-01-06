@@ -43,6 +43,9 @@ public final class ObjectReaderImplEnum
         } else if (valueField instanceof Method) {
             valueFieldType = ((Method) valueField).getReturnType();
         }
+        if (valueField instanceof AccessibleObject) {
+            ((AccessibleObject) valueField).setAccessible(true);
+        }
         this.valueFieldType = valueFieldType;
 
         if (valueFieldType != null) {
