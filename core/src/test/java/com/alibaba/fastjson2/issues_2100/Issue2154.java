@@ -1,12 +1,10 @@
 package com.alibaba.fastjson2.issues_2100;
 
-
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 /**
  * @author 张治保
@@ -52,8 +50,5 @@ public class Issue2154 {
         public int getCode() {
             return code;
         }
-
     }
 }
-
-
