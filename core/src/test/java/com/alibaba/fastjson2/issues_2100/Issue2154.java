@@ -7,23 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-enum Type {
-    X(101),
-    M(102),
-    S(103);
-
-    private final int code;
-
-    Type(int code) {
-        this.code = code;
-    }
-
-    @JSONField(value = true)
-    public int getCode() {
-        return code;
-    }
-
-}
 
 /**
  * @author 张治保
@@ -49,8 +32,28 @@ public class Issue2154 {
 
         intEnumDeserialize1();
     }
+
+    class Bean1 {
+        public Type type;
+    }
+
+    enum Type {
+        X(101),
+        M(102),
+        S(103);
+
+        private final int code;
+
+        Type(int code) {
+            this.code = code;
+        }
+
+        @JSONField(value = true)
+        public int getCode() {
+            return code;
+        }
+
+    }
 }
 
-class Bean1 {
-    public Type type;
-}
+
