@@ -36,6 +36,9 @@ public final class ObjectReaderImplEnum
     ) {
         this.enumClass = enumClass;
         this.createMethod = createMethod;
+        if (valueField instanceof AccessibleObject) {
+            ((AccessibleObject) valueField).setAccessible(true);
+        }
         this.valueField = valueField;
         Type valueFieldType = null;
         if (valueField instanceof Field) {

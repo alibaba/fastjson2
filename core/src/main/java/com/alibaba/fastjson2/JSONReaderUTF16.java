@@ -228,7 +228,7 @@ class JSONReaderUTF16
             ch = chars[offset];
         }
 
-        if (ch != quote) {
+        if (ch != quote || (offset + 1 < end && chars[offset + 1] == '#')) {
             return false;
         }
 
@@ -4708,6 +4708,9 @@ class JSONReaderUTF16
 
             int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
             if (numDigits > 38) {
+                if (negative) {
+                    numStart--;
+                }
                 valueType = JSON_TYPE_BIG_DEC;
                 stringValue = new String(chars, numStart, offset - 1 - numStart);
             } else {

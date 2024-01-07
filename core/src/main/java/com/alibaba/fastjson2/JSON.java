@@ -3571,12 +3571,12 @@ public interface JSON {
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
         if (objectWriter instanceof ObjectWriterAdapter && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)) {
             ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
-            return objectWriterAdapter.toJSONObject(object);
+            return objectWriterAdapter.toJSONObject(object, writeContext.features);
         }
 
         String str;
         try (JSONWriter writer = JSONWriter.of(writeContext)) {
-            objectWriter.write(writer, object, null, null, 0);
+            objectWriter.write(writer, object, null, null, writeContext.features);
             str = writer.toString();
         } catch (NullPointerException | NumberFormatException ex) {
             throw new JSONException("toJSONString error", ex);
