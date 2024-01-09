@@ -565,8 +565,21 @@ class JSONReaderUTF16
         int offset = this.offset;
         char ch = this.ch;
         if (ch != ',') {
-            this.ch = ch;
-            this.offset = offset;
+            if (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                ch = chars[offset];
+                while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                    offset++;
+                    if (offset >= end) {
+                        this.offset = offset;
+                        this.ch = EOI;
+                        return true;
+                    }
+                    ch = chars[offset];
+                }
+                this.offset = offset + 1;
+                this.ch = ch;
+                return nextIfComma();
+            }
             return false;
         }
         comma = true;
