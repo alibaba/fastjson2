@@ -136,6 +136,20 @@ class JSONReaderASCII
         int offset = this.offset;
         int ch = this.ch;
         if (ch != ',') {
+            if (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                ch = bytes[offset];
+                while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                    offset++;
+                    if (offset >= end) {
+                        this.offset = offset;
+                        this.ch = EOI;
+                        return true;
+                    }
+                    ch = bytes[offset];
+                }
+                this.offset = offset + 1;
+                this.ch = (char) (ch & 0xFF);
+            }
             return false;
         }
         comma = true;

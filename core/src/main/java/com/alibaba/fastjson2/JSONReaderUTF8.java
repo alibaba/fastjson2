@@ -199,8 +199,56 @@ class JSONReaderUTF8
         int offset = this.offset;
         int ch = this.ch;
         if (ch != ',') {
-            this.offset = offset;
-            this.ch = (char) ch;
+            if (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                ch = bytes[offset];
+                while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                    offset++;
+                    if (offset >= end) {
+                        this.offset = offset;
+                        this.ch = EOI;
+                        return true;
+                    }
+                    ch = bytes[offset];
+                }
+                if (ch >= 0) {
+                    offset++;
+                } else {
+                    ch &= 0xFF;
+                    switch (ch >> 4) {
+                        case 12:
+                        case 13: {
+                            /* 110x xxxx   10xx xxxx*/
+                            offset += 2;
+                            int char2 = bytes[offset - 1];
+                            if ((char2 & 0xC0) != 0x80) {
+                                throw new JSONException(
+                                        "malformed input around byte " + offset);
+                            }
+                            ch = ((ch & 0x1F) << 6) | (char2 & 0x3F);
+                            break;
+                        }
+                        case 14: {
+                            /* 1110 xxxx  10xx xxxx  10xx xxxx */
+                            offset += 3;
+                            int char2 = bytes[offset - 2];
+                            int char3 = bytes[offset - 1];
+                            if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
+                                throw new JSONException("malformed input around byte " + (offset - 1));
+                            }
+                            ch = (((ch & 0x0F) << 12) |
+                                    ((char2 & 0x3F) << 6) |
+                                    (char3 & 0x3F));
+                            break;
+                        }
+                        default:
+                            /* 10xx xxxx,  1111 xxxx */
+                            throw new JSONException("malformed input around byte " + offset);
+                    }
+                }
+                this.offset = offset;
+                this.ch = (char) ch;
+                return nextIfComma();
+            }
             return false;
         }
         comma = true;
