@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 final class ObjectWriterArray
         extends ObjectWriterPrimitiveImpl {
@@ -14,19 +15,26 @@ final class ObjectWriterArray
     final byte[] typeNameBytes;
     final long typeNameHash;
     final Type itemType;
-    volatile ObjectWriter itemObjectWriter;
+
+    final char[] prefixChars;
+    final byte[] prefixBytes;
 
     public ObjectWriterArray(Type itemType) {
         this.itemType = itemType;
-
+        String prefix = "{\"@type\":\"";
         if (itemType == Object.class) {
             typeNameBytes = JSONB.toBytes("[O");
             typeNameHash = Fnv.hashCode64("[0");
+            prefix += "[O";
         } else {
             String typeName = '[' + TypeUtils.getTypeName((Class) itemType);
             typeNameBytes = JSONB.toBytes(typeName);
             typeNameHash = Fnv.hashCode64(typeName);
+            prefix += typeName;
         }
+        prefix += "\",\"@value\":[";
+        prefixChars = prefix.toCharArray();
+        prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);
     }
 
     @Override
@@ -41,13 +49,23 @@ final class ObjectWriterArray
             return;
         }
 
+        boolean isWriteTypeInfo = jsonWriter.isWriteTypeInfo(object, fieldType);
+        if (isWriteTypeInfo) {
+            if (jsonWriter.utf16) {
+                jsonWriter.writeRaw(prefixChars);
+            } else {
+                jsonWriter.writeRaw(prefixBytes);
+            }
+        } else {
+            jsonWriter.startArray();
+        }
+
         boolean refDetect = jsonWriter.isRefDetect();
 
         Object[] list = (Object[]) object;
 
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
-        jsonWriter.startArray();
         for (int i = 0; i < list.length; i++) {
             if (i != 0) {
                 jsonWriter.writeComma();
@@ -89,6 +107,9 @@ final class ObjectWriterArray
             }
         }
         jsonWriter.endArray();
+        if (isWriteTypeInfo) {
+            jsonWriter.endObject();
+        }
     }
 
     @Override
