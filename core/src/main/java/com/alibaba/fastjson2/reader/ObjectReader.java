@@ -11,6 +11,7 @@ import java.util.function.Function;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ObjectReader<T> {
     long HASH_TYPE = Fnv.hashCode64("@type");
+    String VALUE_NAME = "@value";
 
     /**
      * @return {@link T}
