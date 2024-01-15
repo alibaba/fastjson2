@@ -275,6 +275,31 @@ public interface JSONB {
         return 5;
     }
 
+    /**
+     * @since 2.0.46
+     * @param jsonbBytes
+     * @param context
+     * @return
+     */
+    static Object parse(byte[] jsonbBytes, JSONReader.Context context) {
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+
+        try (JSONReaderJSONB reader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length)
+        ) {
+            ObjectReader objectReader = context.provider.getObjectReader(Object.class, fieldBased);
+
+            Object object = objectReader.readJSONBObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
     static Object parse(byte[] jsonbBytes, JSONReader.Feature... features) {
         ObjectReaderProvider provider = defaultObjectReaderProvider;
         JSONReader.Context context = new JSONReader.Context(provider, features);
