@@ -65,13 +65,25 @@ final class ObjectArrayTypedReader
             return Arrays.copyOf(values, size);
         }
 
-        if (jsonReader.current() == '"') {
-            String str = jsonReader.readString();
-            if (str.isEmpty()) {
-                return null;
+        if (jsonReader.current() == '{') {
+            jsonReader.next();
+            long filedHash = jsonReader.readFieldNameHashCode();
+            if (filedHash == HASH_TYPE) {
+                jsonReader.readString();
             }
         }
-
+        if (jsonReader.isString()) {
+            String str = jsonReader.readString();
+            if (str == null || str.isEmpty()) {
+                return null;
+            }
+            if (VALUE_NAME.equals(str)) {
+                jsonReader.next();
+                Object result = this.readObject(jsonReader, fieldType, fieldName, features);
+                jsonReader.nextIfObjectEnd();
+                return result;
+            }
+        }
         throw new JSONException(jsonReader.info("TODO"));
     }
 

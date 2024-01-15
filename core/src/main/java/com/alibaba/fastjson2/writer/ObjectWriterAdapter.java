@@ -643,7 +643,8 @@ public class ObjectWriterAdapter<T>
             if (fieldValue != null) {
                 String fieldValueClassName = fieldValue.getClass().getName();
                 if (Collection.class.isAssignableFrom(fieldClass)
-                        && (fieldValueClassName.startsWith("java.util.ImmutableCollections$") || fieldValueClassName.startsWith("java.util.Collections$"))
+                        && fieldValue.getClass() != JSONObject.class
+                        && !fieldValueClassName.equals("com.alibaba.fastjson.JSONObject")
                 ) {
                     Collection collection = (Collection) fieldValue;
                     JSONArray array = new JSONArray(collection.size());

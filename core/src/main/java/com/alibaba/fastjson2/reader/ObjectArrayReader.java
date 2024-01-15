@@ -80,7 +80,7 @@ public final class ObjectArrayReader
                         value = jsonReader.readBoolValue();
                         break;
                     case '{':
-                        value = jsonReader.readObject();
+                        value = jsonReader.read(Object.class);
                         break;
                     case '[':
                         value = jsonReader.readArray();
@@ -93,6 +93,26 @@ public final class ObjectArrayReader
             jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
+        }
+
+        if (jsonReader.current() == '{') {
+            jsonReader.next();
+            long filedHash = jsonReader.readFieldNameHashCode();
+            if (filedHash == HASH_TYPE) {
+                jsonReader.readString();
+            }
+        }
+        if (jsonReader.isString()) {
+            String str = jsonReader.readString();
+            if (str == null || str.isEmpty()) {
+                return null;
+            }
+            if (VALUE_NAME.equals(str)) {
+                jsonReader.next();
+                Object result = this.readObject(jsonReader, fieldType, fieldName, features);
+                jsonReader.nextIfObjectEnd();
+                return result;
+            }
         }
 
         throw new JSONException(jsonReader.info("TODO"));

@@ -209,7 +209,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>32.1.3-jre</version>
+                <version>33.0.0-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -659,7 +659,7 @@
                                 com/alibaba/fastjson/issues_compatible/Issue1303.java,
                                 com/alibaba/fastjson2/util/BeanUtilsTest.java,
                                 com/alibaba/fastjson2/issues_1000/Issue1395.java,
-                                com/alibaba/fastjson2/issues_2100/Issue2181.java,
+                                com/alibaba/fastjson2/issues_2100/Issue2164.java,
                                 com/alibaba/fastjson/v2issues/Issue1432.java
                             </excludes>
                         </configuration>
@@ -753,7 +753,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.12.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
