@@ -139,7 +139,9 @@ public class FieldReaderList<T, V>
     public Object readFieldValue(JSONReader jsonReader) {
         if (jsonReader.jsonb) {
             int entryCnt = jsonReader.startArray();
-
+            if (entryCnt == -1) {
+                return null;
+            }
             Object[] array = new Object[entryCnt];
             ObjectReader itemObjectReader
                     = getItemObjectReader(
