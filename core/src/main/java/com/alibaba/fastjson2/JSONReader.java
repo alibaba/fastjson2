@@ -2127,6 +2127,25 @@ public abstract class JSONReader
                 }
             }
 
+            if (isReference()) {
+                String reference = readReference();
+                Object value = null;
+                if ("..".equals(reference)) {
+                    value = map;
+                } else {
+                    JSONPath jsonPath;
+                    try {
+                        jsonPath = JSONPath.of(reference);
+                    } catch (Exception ignored) {
+                        map.put(name, new JSONObject().fluentPut("$ref", reference));
+                        continue;
+                    }
+                    addResolveTask(map, name, jsonPath);
+                }
+                map.put(name, value);
+                continue;
+            }
+
             comma = false;
             Object value;
             switch (ch) {
