@@ -546,6 +546,24 @@ class JSONPathParser {
                             }
                         }
                         return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
+                    } else if (jsonReader.ch == '.') {
+                        List<String> names = new ArrayList<>();
+                        names.add(fieldName);
+                        do {
+                            jsonReader.next();
+                            fieldName = jsonReader.readFieldNameUnquote();
+                            names.add(fieldName);
+                        } while (jsonReader.ch == '.');
+
+                        if (jsonReader.nextIfMatch(')')) {
+                            if (parentheses) {
+                                if (!jsonReader.nextIfMatch(')')) {
+                                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                                }
+                            }
+                        }
+
+                        return new JSONPathFilter.NamesExistsFilter(names);
                     }
                 }
             }
