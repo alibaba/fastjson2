@@ -649,7 +649,8 @@ public class ObjectWriterAdapter<T>
                     Collection collection = (Collection) fieldValue;
                     JSONArray array = new JSONArray(collection.size());
                     for (Object item : collection) {
-                        array.add(JSON.toJSON(item));
+                        Object itemJSON = item == object ? jsonObject : JSON.toJSON(item);
+                        array.add(itemJSON);
                     }
                     fieldValue = array;
                 }
@@ -659,6 +660,9 @@ public class ObjectWriterAdapter<T>
                 continue;
             }
 
+            if (fieldValue == object) {
+                fieldValue = jsonObject;
+            }
             jsonObject.put(fieldWriter.fieldName, fieldValue);
         }
 
