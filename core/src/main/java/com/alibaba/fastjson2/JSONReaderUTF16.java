@@ -6468,10 +6468,10 @@ class JSONReaderUTF16
 
     @Override
     public final String info(String message) {
-        int line = 1, column = 1;
+        int line = 1, column = 0;
         for (int i = 0; i < offset & i < end; i++, column++) {
             if (chars[i] == '\n') {
-                column = 1;
+                column = 0;
                 line++;
             }
         }
