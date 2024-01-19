@@ -899,14 +899,24 @@ public abstract class JSONWriter
         writeInt32(name);
     }
 
-    public void writeNameAny(Object name) {
+    public Object[] writeNameAny(Object name) {
         if (startObject) {
             startObject = false;
         } else {
             writeComma();
         }
-
+        int startOff = this.off;
         writeAny(name);
+        int endOff = this.off;
+        String result;
+        if (utf16) {
+            char[] chars = ((JSONWriterUTF16) this).chars;
+            result = new String(chars, startOff, endOff - startOff);
+        } else {
+            byte[] bytes = utf8 ? ((JSONWriterUTF8) this).bytes : ((JSONWriterJSONB) this).bytes;
+            result = new String(bytes, startOff, endOff - startOff);
+        }
+        return new Object[]{startOff, result};
     }
 
     public abstract void startObject();
@@ -1263,6 +1273,37 @@ public abstract class JSONWriter
     public abstract void writeString(char[] chars, int off, int len, boolean quote);
 
     public abstract void writeLocalDate(LocalDate date);
+
+    /**
+     * rewrite offset greater than or equal off chars
+     *
+     * @param chars rewrite chars
+     * @param off   rewrite start offset
+     * @param quote quoted content?
+     */
+    public void rewrite(char[] chars, int off, boolean quote) {
+        this.off = off;
+        this.writeString(chars, 0, chars.length, quote);
+        //The positions at the end are altered to be empty
+        int offset = this.off;
+        if (utf16) {
+            char[] currentChars = ((JSONWriterUTF16) this).chars;
+            for (int i = offset; i < currentChars.length; i++) {
+                if (currentChars[i] == '\u0000') {
+                    break;
+                }
+                currentChars[i] = '\u0000';
+            }
+        } else {
+            byte[] bytes = utf8 ? ((JSONWriterUTF8) this).bytes : ((JSONWriterJSONB) this).bytes;
+            for (int i = offset; i < bytes.length; i++) {
+                if (bytes[i] == 0) {
+                    break;
+                }
+                bytes[i] = 0;
+            }
+        }
+    }
 
     protected final boolean writeLocalDateWithFormat(LocalDate date, Context context) {
         if (context.dateFormatUnixTime || context.dateFormatMillis) {

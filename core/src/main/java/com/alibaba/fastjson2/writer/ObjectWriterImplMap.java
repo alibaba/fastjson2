@@ -436,15 +436,31 @@ public final class ObjectWriterImplMap
                     } else if (key instanceof String) {
                         jsonWriter.writeName((String) key);
                     } else {
-                        if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
+                        if ((features & (WriteNonStringKeyAsString.mask)) != 0) {
                             jsonWriter.writeName(key.toString());
                         } else {
+                            boolean isBrowserCompatible = (features & BrowserCompatible.mask) != 0;
                             if (key instanceof Integer) {
-                                jsonWriter.writeName((Integer) key);
+                                if (isBrowserCompatible) {
+                                    jsonWriter.writeName(key.toString());
+                                } else {
+                                    jsonWriter.writeName((Integer) key);
+                                }
                             } else if (key instanceof Long) {
-                                jsonWriter.writeName((Long) key);
+                                if (isBrowserCompatible) {
+                                    jsonWriter.writeName(key.toString());
+                                } else {
+                                    jsonWriter.writeName((Long) key);
+                                }
                             } else {
-                                jsonWriter.writeNameAny(key);
+                                Object[] nameResult = jsonWriter.writeNameAny(key);
+                                String result = (String) nameResult[1];
+                                if (isBrowserCompatible) {
+                                    char[] chars = result.toCharArray();
+                                    if (chars[0] != '"' && chars[0] != '\'') {
+                                        jsonWriter.rewrite(chars, (int) nameResult[0], true);
+                                    }
+                                }
                             }
                         }
                     }
@@ -469,16 +485,31 @@ public final class ObjectWriterImplMap
             } else if (key instanceof String) {
                 jsonWriter.writeName(strKey = (String) key);
             } else {
-                if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
+                if ((features & (WriteNonStringKeyAsString.mask)) != 0) {
                     jsonWriter.writeName(strKey = key.toString());
                 } else {
+                    boolean isBrowserCompatible = (features & BrowserCompatible.mask) != 0;
                     if (key instanceof Integer) {
-                        jsonWriter.writeName((Integer) key);
+                        if (isBrowserCompatible) {
+                            jsonWriter.writeName(key.toString());
+                        } else {
+                            jsonWriter.writeName((Integer) key);
+                        }
                     } else if (key instanceof Long) {
-                        long longKey = (Long) key;
-                        jsonWriter.writeName(longKey);
+                        if (isBrowserCompatible) {
+                            jsonWriter.writeName(key.toString());
+                        } else {
+                            jsonWriter.writeName((Long) key);
+                        }
                     } else {
-                        jsonWriter.writeNameAny(key);
+                        Object[] nameResult = jsonWriter.writeNameAny(key);
+                        String result = (String) nameResult[1];
+                        if (isBrowserCompatible) {
+                            char[] chars = result.toCharArray();
+                            if (chars[0] != '"' && chars[0] != '\'') {
+                                jsonWriter.rewrite(chars, (int) nameResult[0], true);
+                            }
+                        }
                     }
                 }
             }
