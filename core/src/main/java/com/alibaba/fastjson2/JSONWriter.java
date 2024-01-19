@@ -1275,7 +1275,7 @@ public abstract class JSONWriter
     public abstract void writeLocalDate(LocalDate date);
 
     /**
-     * rewrite offset >=off chars
+     * rewrite offset greater than or equal off chars
      *
      * @param chars rewrite chars
      * @param off   rewrite start offset
