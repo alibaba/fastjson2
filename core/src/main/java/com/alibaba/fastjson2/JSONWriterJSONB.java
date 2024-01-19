@@ -33,7 +33,7 @@ final class JSONWriterJSONB
     static final long WRITE_ENUM_USING_STRING_MASK = WriteEnumUsingToString.mask | WriteEnumsUsingName.mask;
 
     private final CacheItem cacheItem;
-    private byte[] bytes;
+    protected byte[] bytes;
     private TLongIntHashMap symbols;
     private int symbolIndex;
 
