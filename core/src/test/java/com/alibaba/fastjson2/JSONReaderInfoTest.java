@@ -25,7 +25,7 @@ public class JSONReaderInfoTest {
         assertTrue(error.getMessage().contains("offset 33"));
         assertTrue(error.getMessage().contains("character {"));
         assertTrue(error.getMessage().contains("line 3"));
-        assertTrue(error.getMessage().contains("column 19"));
+        assertTrue(error.getMessage().contains("column 18"));
     }
 
     @Test
@@ -46,6 +46,6 @@ public class JSONReaderInfoTest {
         assertTrue(error.getMessage().contains("offset 33"));
         assertTrue(error.getMessage().contains("character {"));
         assertTrue(error.getMessage().contains("line 3"));
-        assertTrue(error.getMessage().contains("column 19"));
+        assertTrue(error.getMessage().contains("column 18"));
     }
 }

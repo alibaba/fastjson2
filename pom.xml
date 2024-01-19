@@ -162,7 +162,7 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>5.8.24</version>
+                <version>5.8.25</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
@@ -372,7 +372,7 @@
             <dependency>
                 <groupId>org.gitlab4j</groupId>
                 <artifactId>gitlab4j-api</artifactId>
-                <version>5.4.0</version>
+                <version>5.5.0</version>
             </dependency>
 
             <dependency>
@@ -445,7 +445,7 @@
             <dependency>
                 <groupId>org.msgpack</groupId>
                 <artifactId>msgpack-core</artifactId>
-                <version>0.9.6</version>
+                <version>0.9.7</version>
             </dependency>
 
             <dependency>
