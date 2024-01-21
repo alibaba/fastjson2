@@ -56,6 +56,7 @@ public abstract class BeanUtils {
             1616814008855344660L,
             2164749833121980361L,
             3724195282986200606L,
+            3742915795806478647L,
             3977020351318456359L,
             4882459834864833642L,
             7981148566008458638L,
@@ -869,7 +870,7 @@ public abstract class BeanUtils {
             }
 
             Class<?> returnClass = method.getReturnType();
-            if (returnClass == Void.class) {
+            if (returnClass == Void.class || ignore(returnClass)) {
                 continue;
             }
 
