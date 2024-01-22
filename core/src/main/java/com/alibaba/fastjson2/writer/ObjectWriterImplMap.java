@@ -12,8 +12,6 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringKeyAsString;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
@@ -405,8 +403,6 @@ public final class ObjectWriterImplMap
             return;
         }
 
-        boolean refDetect = jsonWriter.isRefDetect();
-
         jsonWriter.startObject();
 
         if ((fieldType == this.objectType && jsonWriter.isWriteMapTypeInfo(object, objectClass, features))
@@ -431,23 +427,7 @@ public final class ObjectWriterImplMap
 
             if (value == null) {
                 if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
-                    if (key == null) {
-                        jsonWriter.writeName("null");
-                    } else if (key instanceof String) {
-                        jsonWriter.writeName((String) key);
-                    } else {
-                        if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-                            jsonWriter.writeName(key.toString());
-                        } else {
-                            if (key instanceof Integer) {
-                                jsonWriter.writeName((Integer) key);
-                            } else if (key instanceof Long) {
-                                jsonWriter.writeName((Long) key);
-                            } else {
-                                jsonWriter.writeNameAny(key);
-                            }
-                        }
-                    }
+                    jsonWriter.writeNameAny(key);
                     jsonWriter.writeColon();
                     jsonWriter.writeNull();
                 }
@@ -464,23 +444,8 @@ public final class ObjectWriterImplMap
             String strKey = null;
             if (keyWriter != null) {
                 keyWriter.write(jsonWriter, key, null, null, 0);
-            } else if (key == null) {
-                jsonWriter.writeName("null");
-            } else if (key instanceof String) {
-                jsonWriter.writeName(strKey = (String) key);
             } else {
-                if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-                    jsonWriter.writeName(strKey = key.toString());
-                } else {
-                    if (key instanceof Integer) {
-                        jsonWriter.writeName((Integer) key);
-                    } else if (key instanceof Long) {
-                        long longKey = (Long) key;
-                        jsonWriter.writeName(longKey);
-                    } else {
-                        jsonWriter.writeNameAny(key);
-                    }
-                }
+                strKey = jsonWriter.writeNameAny(key);
             }
             jsonWriter.writeColon();
 
@@ -542,7 +507,7 @@ public final class ObjectWriterImplMap
                 }
             }
 
-            boolean valueRefDetect = refDetect && strKey != null && !isPrimitiveOrEnum;
+            boolean valueRefDetect = jsonWriter.isRefDetect() && strKey != null && !isPrimitiveOrEnum;
             if (valueRefDetect) {
                 if (value == object) {
                     jsonWriter.writeReference("..");

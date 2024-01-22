@@ -885,7 +885,6 @@ public abstract class JSONWriter
         } else {
             writeComma();
         }
-
         writeInt64(name);
     }
 
@@ -899,14 +898,41 @@ public abstract class JSONWriter
         writeInt32(name);
     }
 
-    public void writeNameAny(Object name) {
+    public String writeNameAny(Object name) {
+        if (name == null) {
+            name = "null";
+        }
+        if (name instanceof String) {
+            String stringName = (String) name;
+            writeName(stringName);
+            return stringName;
+        }
         if (startObject) {
             startObject = false;
         } else {
             writeComma();
         }
-
-        writeAny(name);
+        String strName;
+        boolean needConvertToString = (context.features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0;
+        if (needConvertToString) {
+            strName = JSON.toJSONString(name, context);
+            boolean firstCharIsQuote = (strName.length() > 0 ? strName.charAt(0) : '\0') == quote;
+            if (firstCharIsQuote) {
+                writeRaw(strName);
+            } else {
+                writeString(strName);
+            }
+        } else {
+            int startOffset = this.off;
+            writeAny(name);
+            if (utf16) {
+                strName = new String(((JSONWriterUTF16) this).chars, startOffset, this.off - startOffset);
+            } else {
+                strName = new String(jsonb ? ((JSONWriterJSONB) this).getBytes() : ((JSONWriterUTF8) this).bytes, startOffset, this.off - startOffset);
+            }
+        }
+        boolean firstCharIsQuote = (strName.length() > 0 ? strName.charAt(0) : '\0') == quote;
+        return firstCharIsQuote ? strName.substring(1, strName.length() - 1) : strName;
     }
 
     public abstract void startObject();
