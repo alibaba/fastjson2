@@ -907,16 +907,15 @@ public abstract class JSONWriter
         }
         int startOff = this.off;
         writeAny(name);
-        int endOff = this.off;
         String result;
         if (utf16) {
             char[] chars = ((JSONWriterUTF16) this).chars;
-            result = new String(chars, startOff, endOff - startOff);
+            result = new String(chars, startOff, this.off - startOff);
         } else {
             byte[] bytes = utf8 ? ((JSONWriterUTF8) this).bytes : ((JSONWriterJSONB) this).bytes;
-            result = new String(bytes, startOff, endOff - startOff);
+            result = new String(bytes, startOff, this.off - startOff);
         }
-        return new Object[]{startOff, result};
+        return new Object[]{startOff, result, (result.length() > 0 ? result.charAt(0) : '\0') != quote};
     }
 
     public abstract void startObject();

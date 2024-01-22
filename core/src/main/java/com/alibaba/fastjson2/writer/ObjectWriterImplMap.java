@@ -455,11 +455,8 @@ public final class ObjectWriterImplMap
                             } else {
                                 Object[] nameResult = jsonWriter.writeNameAny(key);
                                 String result = (String) nameResult[1];
-                                if (isBrowserCompatible) {
-                                    char[] chars = result.toCharArray();
-                                    if (chars[0] != '"' && chars[0] != '\'') {
-                                        jsonWriter.rewrite(chars, (int) nameResult[0], true);
-                                    }
+                                if (isBrowserCompatible && (boolean) nameResult[2]) {
+                                    jsonWriter.rewrite(result.toCharArray(), (int) nameResult[0], true);
                                 }
                             }
                         }
@@ -504,11 +501,8 @@ public final class ObjectWriterImplMap
                     } else {
                         Object[] nameResult = jsonWriter.writeNameAny(key);
                         String result = (String) nameResult[1];
-                        if (isBrowserCompatible) {
-                            char[] chars = result.toCharArray();
-                            if (chars[0] != '"' && chars[0] != '\'') {
-                                jsonWriter.rewrite(chars, (int) nameResult[0], true);
-                            }
+                        if (isBrowserCompatible && (boolean) nameResult[2]) {
+                            jsonWriter.rewrite(result.toCharArray(), (int) nameResult[0], true);
                         }
                     }
                 }
