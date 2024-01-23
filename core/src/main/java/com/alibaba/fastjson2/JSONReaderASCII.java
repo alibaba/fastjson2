@@ -1455,75 +1455,37 @@ class JSONReaderASCII
 
             _for:
             {
-                int i = 0;
-                byte c0 = 0, c1 = 0, c2 = 0, c3;
-
-                // vector optimize
-                boolean quoted = false;
-                int upperBound = offset + ((end - offset) & ~3);
-                while (offset < upperBound) {
-                    c0 = bytes[offset];
-                    c1 = bytes[offset + 1];
-                    c2 = bytes[offset + 2];
-                    c3 = bytes[offset + 3];
-                    if (c0 == slash || c1 == slash || c2 == slash || c3 == slash) {
-                        break;
+                for (int i = 0; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
                     }
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
-                        quoted = true;
-                        break;
-                    }
-                    offset += 4;
-                    i += 4;
-                }
 
-                if (quoted) {
-                    if (c0 == quote) {
-                        // skip
-                    } else if (c1 == quote) {
-                        offset++;
-                        i++;
-                    } else if (c2 == quote) {
-                        offset += 2;
-                        i += 2;
-                    } else {
-                        offset += 3;
-                        i += 3;
-                    }
-                    valueLength = i;
-                } else {
-                    for (; ; ++i) {
-                        if (offset >= end) {
-                            throw new JSONException("invalid escape character EOI");
-                        }
-
-                        byte c = bytes[offset];
-                        if (c == slash) {
-                            valueEscape = true;
-                            c = bytes[++offset];
-                            switch (c) {
-                                case 'u': {
-                                    offset += 4;
-                                    break;
-                                }
-                                case 'x': {
-                                    offset += 2;
-                                    break;
-                                }
-                                default:
-                                    // skip
-                                    break;
+                    byte c = bytes[offset];
+                    if (c == slash) {
+                        valueEscape = true;
+                        c = bytes[++offset];
+                        switch (c) {
+                            case 'u': {
+                                offset += 4;
+                                break;
                             }
-                            offset++;
-                            continue;
-                        }
-
-                        if (c == quote) {
-                            valueLength = i;
-                            break _for;
+                            case 'x': {
+                                offset += 2;
+                                break;
+                            }
+                            default:
+                                // skip
+                                break;
                         }
                         offset++;
+                        continue;
                     }
+
+                    if (c == quote) {
+                        valueLength = i;
+                        break _for;
+                    }
+                    offset++;
                 }
             }
 

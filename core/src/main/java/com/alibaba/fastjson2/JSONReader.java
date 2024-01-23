@@ -337,14 +337,13 @@ public abstract class JSONReader
     }
 
     static char char2(int c1, int c2) {
-        return (char) (DIGITS2[c1] * 0x10
-                + DIGITS2[c2]);
+        return (char) ((DIGITS2[c1] << 4) + DIGITS2[c2]);
     }
 
     static char char4(int c1, int c2, int c3, int c4) {
-        return (char) (DIGITS2[c1] * 0x1000
-                + DIGITS2[c2] * 0x100
-                + DIGITS2[c3] * 0x10
+        return (char) ((DIGITS2[c1] << 12)
+                + (DIGITS2[c2] << 8)
+                + (DIGITS2[c3] << 4)
                 + DIGITS2[c4]);
     }
 

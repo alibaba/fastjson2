@@ -251,7 +251,9 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public final Map<String, Object> readObject() {
+    public Map<String, Object> readObject() {
+        final byte[] bytes = this.bytes;
+        final long features = context.features;
         type = bytes[offset++];
         if (type == BC_NULL) {
             return null;
@@ -259,27 +261,28 @@ final class JSONReaderJSONB
 
         if (type >= BC_OBJECT) {
             Map map;
-            if ((context.features & Feature.UseNativeObject.mask) != 0) {
+            if ((features & Feature.UseNativeObject.mask) != 0) {
                 map = new HashMap();
             } else {
                 map = new JSONObject();
             }
 
-            for (int i = 0; ; ++i) {
-                type = bytes[offset];
+            while (true) {
+                final byte type = bytes[offset];
                 if (type == BC_OBJECT_END) {
                     offset++;
                     break;
                 }
 
                 Object name;
-                if (isString()) {
+                if (type >= BC_STR_ASCII_FIX_MIN) {
                     name = readFieldName();
                 } else {
                     name = readAny();
                 }
 
-                if (offset < bytes.length && bytes[offset] == BC_REFERENCE) {
+                final byte valueType = bytes[offset];
+                if (valueType == BC_REFERENCE) {
                     String reference = readReference();
                     if ("..".equals(reference)) {
                         map.put(name, map);
@@ -289,7 +292,6 @@ final class JSONReaderJSONB
                     continue;
                 }
 
-                byte valueType = bytes[offset];
                 Object value;
                 if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
                     value = readString();
@@ -317,6 +319,9 @@ final class JSONReaderJSONB
                         if (itemType >= BC_INT32_NUM_MIN && itemType <= BC_INT32_NUM_MAX) {
                             offset++;
                             len = itemType;
+                        } else if (itemType >= BC_INT32_BYTE_MIN && itemType <= BC_INT32_BYTE_MAX) {
+                            len = ((itemType - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset + 1] & 0xFF);
+                            offset += 2;
                         } else {
                             len = readLength();
                         }
@@ -325,7 +330,7 @@ final class JSONReaderJSONB
                     }
 
                     if (len == 0) {
-                        if ((context.features & Feature.UseNativeObject.mask) != 0) {
+                        if ((features & Feature.UseNativeObject.mask) != 0) {
                             value = new ArrayList<>();
                         } else {
                             if (context.arraySupplier != null) {
@@ -336,20 +341,20 @@ final class JSONReaderJSONB
                         }
                     } else {
                         List list;
-                        if ((context.features & Feature.UseNativeObject.mask) != 0) {
+                        if ((features & Feature.UseNativeObject.mask) != 0) {
                             list = new ArrayList(len);
                         } else {
                             list = new JSONArray(len);
                         }
 
-                        for (int j = 0; j < len; ++j) {
-                            if (isReference()) {
+                        for (int i = 0; i < len; ++i) {
+                            if (bytes[offset] == BC_REFERENCE) {
                                 String reference = readReference();
                                 if ("..".equals(reference)) {
                                     list.add(list);
                                 } else {
                                     list.add(null);
-                                    addResolveTask(list, j, JSONPath.of(reference));
+                                    addResolveTask(list, i, JSONPath.of(reference));
                                 }
                                 continue;
                             }
@@ -383,7 +388,7 @@ final class JSONReaderJSONB
                     value = readAny();
                 }
 
-                if (value == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                if (value == null && (features & Feature.IgnoreNullPropertyValue.mask) != 0) {
                     continue;
                 }
 
@@ -737,7 +742,7 @@ final class JSONReaderJSONB
                             typeRedirect = true;
                             return autoTypeObjectReader.readJSONBObject(this, null, null, 0);
                         }
-                        name = getFieldName();
+                        name = getString();
                     } else {
                         if (type >= BC_STR_ASCII_FIX_MIN) {
                             name = readFieldName();
@@ -2349,7 +2354,7 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public final boolean skipName() {
+    public boolean skipName() {
         strtype = bytes[offset++];
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             offset += (strtype - BC_STR_ASCII_FIX_MIN);
@@ -2374,7 +2379,7 @@ final class JSONReaderJSONB
                 return true;
             }
 
-            String str = readString();
+            readString();
             readInt32Value();
             return true;
         }
@@ -2384,6 +2389,7 @@ final class JSONReaderJSONB
 
     @Override
     public String readFieldName() {
+        final byte[] bytes = this.bytes;
         strtype = bytes[offset];
         if (strtype == BC_NULL) {
             offset++;
@@ -2551,7 +2557,7 @@ final class JSONReaderJSONB
                                     + ((bytes[offset + 3] & 0xFFL) << 24)
                                     + ((bytes[offset + 2] & 0xFFL) << 16)
                                     + ((bytes[offset + 1] & 0xFFL) << 8)
-                                    + (bytes[offset + 0] & 0xFFL);
+                                    + (bytes[offset] & 0xFFL);
                             break;
                         case 7:
                             nameValue0
@@ -2575,7 +2581,7 @@ final class JSONReaderJSONB
                                     + (bytes[offset] & 0xFFL);
                             break;
                         case 9:
-                            nameValue0 = bytes[offset + 0];
+                            nameValue0 = bytes[offset];
                             nameValue1
                                     = (((long) bytes[offset + 8]) << 56)
                                     + ((bytes[offset + 7]) << 48)
@@ -2740,7 +2746,19 @@ final class JSONReaderJSONB
 
             charset = IOUtils.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
-            strlen = readLength();
+            byte type = bytes[offset];
+            if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                strlen = type;
+                offset++;
+            } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+                strlen = ((type - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset + 1] & 0xFF);
+                offset += 2;
+            } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                strlen = getInt3(bytes, offset + 1, type);
+                offset += 3;
+            } else {
+                strlen = readLength();
+            }
             strBegin = offset;
             charset = IOUtils.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
@@ -2798,12 +2816,12 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public final String getFieldName() {
+    public String getFieldName() {
         return getString();
     }
 
     @Override
-    public final String readString() {
+    public String readString() {
         final byte strtype = bytes[offset++];
         this.strtype = strtype;
         if (strtype == BC_NULL) {
@@ -2811,15 +2829,19 @@ final class JSONReaderJSONB
         }
 
         strBegin = offset;
-        boolean ascii = false;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
-            ascii = true;
             final int strlen;
             if (strtype == BC_STR_ASCII) {
                 byte strType = bytes[offset];
                 if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
                     offset++;
                     strlen = strType;
+                } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
+                    strlen = ((strType - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset + 1] & 0xFF);
+                    offset += 2;
+                } else if (strType >= BC_INT32_SHORT_MIN && strType <= BC_INT32_SHORT_MAX) {
+                    strlen = getInt3(bytes, offset + 1, strType);
+                    offset += 3;
                 } else {
                     strlen = readLength();
                 }
@@ -2827,10 +2849,22 @@ final class JSONReaderJSONB
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
             }
+
+            if (strlen < 0) {
+                return symbolTable.getName(-strlen);
+            }
+
             this.strlen = strlen;
+            String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+            offset += strlen;
+
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+            return str;
         }
 
-        return readStringNonAscii(null, ascii);
+        return readStringNonAscii();
     }
 
     public Date readDate() {
@@ -2871,12 +2905,21 @@ final class JSONReaderJSONB
         return new Date(millis);
     }
 
-    private String readStringNonAscii(String str, boolean ascii) {
+    private String readStringNonAscii() {
         Charset charset;
-        if (ascii) {
-            charset = IOUtils.ISO_8859_1;
-        } else if (strtype == BC_STR_UTF8) {
-            str = readStringUTF8();
+        String str = null;
+        if (strtype == BC_STR_UTF8) {
+            byte type = bytes[offset];
+            if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                strlen = type;
+                offset++;
+            } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+                strlen = ((type - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset + 1] & 0xFF);
+                offset += 2;
+            } else {
+                strlen = readLength();
+            }
+            strBegin = offset;
             charset = IOUtils.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
@@ -2905,11 +2948,6 @@ final class JSONReaderJSONB
             return str;
         }
 
-        return readString(charset);
-    }
-
-    private String readString(Charset charset) {
-        String str;
         if (strlen < 0) {
             return symbolTable.getName(-strlen);
         }

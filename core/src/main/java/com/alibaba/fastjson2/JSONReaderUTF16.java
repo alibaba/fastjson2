@@ -4018,108 +4018,68 @@ class JSONReaderUTF16
 
     @Override
     public String readString() {
+        final char[] chars = this.chars;
         if (ch == '"' || ch == '\'') {
             final char quote = ch;
-
             int offset = this.offset;
             int start = offset;
             int valueLength;
             boolean valueEscape = false;
-
-            _for:
-            {
-                int i = 0;
-                char c0 = 0, c1 = 0, c2 = 0, c3 = 0;
-
-                // vector optimize
-                boolean quoted = false;
-                int upperBound = offset + ((end - offset) & ~3);
-                while (offset < upperBound) {
-                    c0 = chars[offset];
-                    c1 = chars[offset + 1];
-                    c2 = chars[offset + 2];
-                    c3 = chars[offset + 3];
-                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
-                        break;
+            for (int i = 0; ; ++i) {
+                if (offset >= end) {
+                    throw new JSONException(info("invalid escape character EOI"));
+                }
+                char c = chars[offset];
+                if (c == '\\') {
+                    valueEscape = true;
+                    c = chars[++offset];
+                    switch (c) {
+                        case 'u': {
+                            offset += 4;
+                            break;
+                        }
+                        case 'x': {
+                            offset += 2;
+                            break;
+                        }
+                        default:
+                            // skip
+                            break;
                     }
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
-                        quoted = true;
-                        break;
-                    }
-                    offset += 4;
-                    i += 4;
+                    offset++;
+                    continue;
                 }
 
-                if (quoted) {
-                    if (c0 == quote) {
-                        // skip
-                    } else if (c1 == quote) {
-                        offset++;
-                        i++;
-                    } else if (c2 == quote) {
-                        offset += 2;
-                        i += 2;
-                    } else if (c3 == quote) {
-                        offset += 3;
-                        i += 3;
-                    }
+                if (c == quote) {
                     valueLength = i;
-                } else {
-                    for (; ; ++i) {
-                        if (offset >= end) {
-                            throw new JSONException(info("invalid escape character EOI"));
-                        }
-                        char c = chars[offset];
-                        if (c == '\\') {
-                            valueEscape = true;
-                            c = chars[++offset];
-                            switch (c) {
-                                case 'u': {
-                                    offset += 4;
-                                    break;
-                                }
-                                case 'x': {
-                                    offset += 2;
-                                    break;
-                                }
-                                default:
-                                    // skip
-                                    break;
-                            }
-                            offset++;
-                            continue;
-                        }
-
-                        if (c == quote) {
-                            valueLength = i;
-                            break _for;
-                        }
-                        offset++;
-                    }
+                    break;
                 }
+                offset++;
             }
 
             String str;
             if (valueEscape) {
-                char[] chars = new char[valueLength];
+                final char[] buf = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
-                    char c = this.chars[offset];
+                    char c = chars[offset];
                     if (c == '\\') {
-                        c = this.chars[++offset];
+                        c = chars[++offset];
                         switch (c) {
                             case 'u': {
-                                char c1 = this.chars[++offset];
-                                char c2 = this.chars[++offset];
-                                char c3 = this.chars[++offset];
-                                char c4 = this.chars[++offset];
+                                char c1 = chars[offset + 1];
+                                char c2 = chars[offset + 2];
+                                char c3 = chars[offset + 3];
+                                char c4 = chars[offset + 4];
                                 c = char4(c1, c2, c3, c4);
+                                offset += 4;
                                 break;
                             }
                             case 'x': {
-                                char c1 = this.chars[++offset];
-                                char c2 = this.chars[++offset];
+                                char c1 = chars[offset + 1];
+                                char c2 = chars[offset + 2];
                                 c = char2(c1, c2);
+                                offset += 2;
                                 break;
                             }
                             case '\\':
@@ -4147,19 +4107,19 @@ class JSONReaderUTF16
                     } else if (c == quote) {
                         break;
                     }
-                    chars[i] = c;
+                    buf[i] = c;
                     offset++;
                 }
 
-                str = new String(chars);
+                str = new String(buf);
             } else {
                 char c0, c1;
                 int strlen = offset - this.offset;
-                if (strlen == 1 && (c0 = this.chars[this.offset]) < 128) {
+                if (strlen == 1 && (c0 = chars[this.offset]) < 128) {
                     str = TypeUtils.toString(c0);
                 } else if (strlen == 2
-                        && (c0 = this.chars[this.offset]) < 128
-                        && (c1 = this.chars[this.offset + 1]) < 128
+                        && (c0 = chars[this.offset]) < 128
+                        && (c1 = chars[this.offset + 1]) < 128
                 ) {
                     str = TypeUtils.toString(c0, c1);
                 } else if (this.str != null) {

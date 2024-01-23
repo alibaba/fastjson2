@@ -56,8 +56,8 @@
     </properties>
 
     <modules>
-        <!--
         <module>benchmark</module>
+        <!--
         <module>codegen-test</module>
         -->
         <module>core</module>
