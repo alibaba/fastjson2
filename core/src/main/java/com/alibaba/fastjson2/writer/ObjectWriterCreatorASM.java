@@ -2335,7 +2335,7 @@ public class ObjectWriterCreatorASM
         gwFieldName(mwc, fieldWriter, i);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNumberNull", "()V", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt64Null", "()V", false);
 
         mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
 

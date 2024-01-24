@@ -1831,7 +1831,7 @@ class JSONWriterUTF16
     @Override
     public final void writeInt64(Long i) {
         if (i == null) {
-            writeNumberNull();
+            writeInt64Null();
         } else {
             writeInt64(i.longValue());
         }
