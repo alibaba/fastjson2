@@ -1139,6 +1139,14 @@ public abstract class JSONWriter
 
     public final void writeNumberNull() {
         if ((this.context.features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
+            writeInt32(0);
+        } else {
+            writeNull();
+        }
+    }
+
+    public final void writeInt64Null() {
+        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
             writeInt64(0);
         } else {
             writeNull();
