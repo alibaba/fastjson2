@@ -290,9 +290,7 @@ public interface JSONB {
                 0,
                 jsonbBytes.length)
         ) {
-            ObjectReader objectReader = context.provider.getObjectReader(Object.class, fieldBased);
-
-            Object object = objectReader.readJSONBObject(reader, null, null, 0);
+            Object object = reader.readAny();
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }

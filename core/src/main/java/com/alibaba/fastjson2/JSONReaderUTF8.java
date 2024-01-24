@@ -29,13 +29,17 @@ class JSONReaderUTF8
 
     protected final InputStream in;
 
+    protected byte[] byteBuf;
+    protected char[] charBuf;
     protected final CacheItem cacheItem;
+
+    {
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cacheIndex];
+    }
 
     JSONReaderUTF8(Context ctx, InputStream is) {
         super(ctx, false);
-
-        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-        cacheItem = CACHE_ITEMS[cacheIndex];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         if (bytes == null) {
             bytes = new byte[ctx.bufferSize];
@@ -58,7 +62,7 @@ class JSONReaderUTF8
             throw new JSONException("read error", ioe);
         }
 
-        this.bytes = bytes;
+        this.bytes = this.byteBuf = bytes;
         this.offset = 0;
         this.length = off;
         this.in = is;
@@ -74,8 +78,6 @@ class JSONReaderUTF8
     JSONReaderUTF8(Context ctx, ByteBuffer buffer) {
         super(ctx, false);
 
-        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-        cacheItem = CACHE_ITEMS[cacheIndex];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         final int remaining = buffer.remaining();
         if (bytes == null || bytes.length < remaining) {
@@ -83,7 +85,7 @@ class JSONReaderUTF8
         }
         buffer.get(bytes, 0, remaining);
 
-        this.bytes = bytes;
+        this.bytes = this.byteBuf = bytes;
         this.offset = 0;
         this.length = remaining;
         this.in = null;
@@ -105,7 +107,6 @@ class JSONReaderUTF8
         this.in = null;
         this.start = offset;
         this.end = offset + length;
-        this.cacheItem = null;
         next();
 
         if (ch == '/') {
@@ -1713,13 +1714,26 @@ class JSONReaderUTF8
         return hashCode;
     }
 
+    final String getLatin1String(int offset, int length) {
+        char[] charBuf = this.charBuf;
+        if (charBuf == null) {
+            this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+        }
+        if (charBuf == null || charBuf.length < length) {
+            this.charBuf = charBuf = new char[length];
+        }
+        for (int i = 0; i < length; i++) {
+            charBuf[i] = (char) (bytes[offset + i] & 0xFF);
+        }
+        return new String(charBuf, 0, length);
+    }
+
     @Override
     public String getFieldName() {
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
-            return new String(bytes, nameBegin, length,
-                    nameAscii ? IOUtils.ISO_8859_1 : IOUtils.UTF_8
-            );
+            return nameAscii ? getLatin1String(nameBegin, length)
+                    : new String(bytes, nameBegin, length, IOUtils.UTF_8);
         }
 
         char[] chars = new char[nameLength];
@@ -2102,7 +2116,7 @@ class JSONReaderUTF8
                         int indexMask = ((int) (nameValue01 ^ (nameValue01 >>> 32))) & (NAME_CACHE2.length - 1);
                         NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                         if (entry == null) {
-                            String name = new String(bytes, nameBegin, length, IOUtils.ISO_8859_1);
+                            String name = getLatin1String(nameBegin, length);
                             NAME_CACHE2[indexMask] = new NameCacheEntry2(name, nameValue0, nameValue1);
                             return name;
                         } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
@@ -2112,7 +2126,7 @@ class JSONReaderUTF8
                         int indexMask = ((int) (nameValue0 ^ (nameValue0 >>> 32))) & (NAME_CACHE.length - 1);
                         NameCacheEntry entry = NAME_CACHE[indexMask];
                         if (entry == null) {
-                            String name = new String(bytes, nameBegin, length, IOUtils.ISO_8859_1);
+                            String name = getLatin1String(nameBegin, length);
                             NAME_CACHE[indexMask] = new NameCacheEntry(name, nameValue0);
                             return name;
                         } else if (entry.value == nameValue0) {
@@ -2122,9 +2136,22 @@ class JSONReaderUTF8
                 }
             }
 
-            return new String(bytes, nameBegin, length,
-                    nameAscii ? IOUtils.ISO_8859_1 : IOUtils.UTF_8
-            );
+            if (nameAscii) {
+                // optimization for android
+                char[] charBuf = this.charBuf;
+                if (charBuf == null) {
+                    this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+                }
+                if (charBuf == null || charBuf.length < length) {
+                    this.charBuf = charBuf = new char[length];
+                }
+                for (int i = 0; i < length; i++) {
+                    charBuf[i] = (char) bytes[nameBegin + i];
+                }
+                return new String(charBuf, 0, length);
+            }
+
+            return new String(bytes, nameBegin, length, IOUtils.UTF_8);
         }
 
         return getFieldName();
@@ -3625,7 +3652,7 @@ class JSONReaderUTF8
 
             str = new String(chars);
         } else if (ascii) {
-            str = new String(bytes, this.offset, offset - this.offset, IOUtils.ISO_8859_1);
+            str = getLatin1String(this.offset, offset - this.offset);
         } else {
             str = new String(bytes, this.offset, offset - this.offset, IOUtils.UTF_8);
         }
@@ -3999,9 +4026,9 @@ class JSONReaderUTF8
 
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
-            return new String(bytes, nameBegin, length,
-                    nameAscii ? IOUtils.ISO_8859_1 : IOUtils.UTF_8
-            );
+            return nameAscii
+                    ? getLatin1String(nameBegin, length)
+                    : new String(bytes, nameBegin, length, IOUtils.UTF_8);
         }
 
         char[] chars = new char[nameLength];
@@ -4328,17 +4355,14 @@ class JSONReaderUTF8
 
             String str;
             if (valueEscape) {
-                CacheItem cacheItem = this.cacheItem;
-                if (cacheItem == null) {
-                    cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
+                char[] charBuf = this.charBuf;
+                if (charBuf == null) {
+                    this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
                 }
-                char[] buf = CHARS_UPDATER.getAndSet(cacheItem, null);
-                if (buf == null) {
-                    buf = new char[valueLength];
-                } else if (buf.length < valueLength) {
-                    CHARS_UPDATER.lazySet(cacheItem, buf);
-                    buf = new char[valueLength];
+                if (charBuf == null || charBuf.length < valueLength) {
+                    this.charBuf = charBuf = new char[valueLength];
                 }
+
                 off = start;
                 for (int i = 0; ; ++i) {
                     int c = bytes[off];
@@ -4376,25 +4400,25 @@ class JSONReaderUTF8
                                     break;
                             }
                         }
-                        buf[i] = (char) c;
+                        charBuf[i] = (char) c;
                         off++;
                     } else if (c == quote) {
                         break;
                     } else {
                         if (c >= 0) {
-                            buf[i] = (char) c;
+                            charBuf[i] = (char) c;
                             off++;
                         } else {
                             switch ((c & 0xFF) >> 4) {
                                 case 0b1100:
                                 case 0b1101: {
                                     /* 110x xxxx   10xx xxxx*/
-                                    buf[i] = (char) (((c & 0x1F) << 6) | (bytes[off + 1] & 0x3F));
+                                    charBuf[i] = (char) (((c & 0x1F) << 6) | (bytes[off + 1] & 0x3F));
                                     off += 2;
                                     break;
                                 }
                                 case 0b1110: {
-                                    buf[i] = (char) (((c & 0x0F) << 12)
+                                    charBuf[i] = (char) (((c & 0x0F) << 12)
                                             | ((bytes[off + 1] & 0x3F) << 6)
                                             | ((bytes[off + 2] & 0x3F)));
                                     off += 3;
@@ -4422,8 +4446,8 @@ class JSONReaderUTF8
                                         ) {
                                             throw new JSONException("malformed input around byte " + off);
                                         } else {
-                                            buf[i++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
-                                            buf[i] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
+                                            charBuf[i++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                                            charBuf[i] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
                                         }
                                         break;
                                     }
@@ -4435,9 +4459,9 @@ class JSONReaderUTF8
                     }
                 }
 
-                str = new String(buf, 0, valueLength);
-                if (buf.length < CACHE_THRESHOLD) {
-                    CHARS_UPDATER.lazySet(cacheItem, buf);
+                str = new String(charBuf, 0, valueLength);
+                if (charBuf.length < CACHE_THRESHOLD) {
+                    CHARS_UPDATER.lazySet(cacheItem, charBuf);
                 }
             } else if (ascii) {
                 int strlen = off - this.offset;
@@ -4449,7 +4473,23 @@ class JSONReaderUTF8
                             (char) (bytes[this.offset + 1] & 0xff)
                     );
                 } else {
-                    str = new String(bytes, this.offset, off - this.offset, IOUtils.ISO_8859_1);
+                    int len = off - this.offset;
+
+                    char[] charBuf = this.charBuf;
+                    if (charBuf == null) {
+                        this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+                    }
+                    if (charBuf == null || charBuf.length < len) {
+                        this.charBuf = charBuf = new char[len];
+                    }
+                    for (int i = 0; i < len; i++) {
+                        charBuf[i] = (char) bytes[nameBegin + i];
+                    }
+
+                    for (int i = 0; i < len; i++) {
+                        charBuf[i] = (char) bytes[this.offset + i];
+                    }
+                    str = new String(charBuf, 0, len);
                 }
             } else {
                 str = new String(bytes, this.offset, off - this.offset, IOUtils.UTF_8);
@@ -6775,8 +6815,8 @@ class JSONReaderUTF8
 
     @Override
     public final void close() {
-        if (cacheItem != null && bytes.length < CACHE_THRESHOLD) {
-            BYTES_UPDATER.lazySet(cacheItem, bytes);
+        if (byteBuf != null && byteBuf.length < CACHE_THRESHOLD) {
+            BYTES_UPDATER.lazySet(cacheItem, byteBuf);
         }
 
         if (in != null) {

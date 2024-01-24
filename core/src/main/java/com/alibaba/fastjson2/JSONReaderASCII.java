@@ -988,7 +988,7 @@ class JSONReaderASCII
             if (this.str != null) {
                 return this.str.substring(nameBegin, nameEnd);
             } else {
-                return new String(bytes, nameBegin, length, IOUtils.ISO_8859_1);
+                return getLatin1String(nameBegin, length);
             }
         }
 
@@ -1423,7 +1423,7 @@ class JSONReaderASCII
 
             str = new String(chars);
         } else {
-            str = new String(bytes, start, this.offset - start, IOUtils.ISO_8859_1);
+            str = getLatin1String(start, this.offset - start);
         }
 
         int b = bytes[++offset];
@@ -1546,7 +1546,21 @@ class JSONReaderASCII
                 if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
                 } else {
-                    str = new String(bytes, this.offset, offset - this.offset, IOUtils.ISO_8859_1);
+                    // optimization for android
+                    int strOff = this.offset;
+                    int strlen = offset - strOff;
+                    char[] charBuf = this.charBuf;
+                    if (charBuf == null) {
+                        this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+                    }
+                    if (charBuf == null || charBuf.length < strlen) {
+                        this.charBuf = charBuf = new char[strlen];
+                    }
+
+                    for (int i = 0; i < strlen; i++) {
+                        charBuf[i] = (char) (bytes[strOff + i] & 0xff);
+                    }
+                    str = new String(charBuf, 0, strlen);
                 }
             }
 

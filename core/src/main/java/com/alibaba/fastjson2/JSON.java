@@ -161,6 +161,31 @@ public interface JSON {
     }
 
     /**
+     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param utf8 the specified utf8 byte[] to be parsed
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     */
+    static Object parse(byte[] utf8, JSONReader.Context context) {
+        if (utf8 == null || utf8.length == 0) {
+            return null;
+        }
+
+        ObjectReader<?> objectReader = context.getObjectReader(Object.class);
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, utf8, 0, utf8.length)) {
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parses the json byte array as a {@link JSONArray} or {@link JSONObject}.
      * Returns {@code null} if received byte array is {@code null} or empty.
      *

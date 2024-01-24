@@ -37,6 +37,7 @@ final class JSONReaderJSONB
     protected int strBegin;
 
     protected byte[] valueBytes;
+    protected char[] charBuf;
     protected final CacheItem cacheItem;
 
     protected final SymbolTable symbolTable;
@@ -92,8 +93,22 @@ final class JSONReaderJSONB
         this.cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
     }
 
+    String getLatin1String(int offset, int length) {
+        char[] charBuf = this.charBuf;
+        if (charBuf == null) {
+            this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+        }
+        if (charBuf == null || charBuf.length < length) {
+            this.charBuf = charBuf = new char[length];
+        }
+        for (int i = 0; i < length; i++) {
+            charBuf[i] = (char) (bytes[offset + i] & 0xFF);
+        }
+        return new String(charBuf, 0, length);
+    }
+
     @Override
-    public final String getString() {
+    public String getString() {
         if (strtype == BC_NULL) {
             return null;
         }
@@ -103,11 +118,25 @@ final class JSONReaderJSONB
         }
 
         Charset charset;
-        if (strtype == BC_STR_ASCII) {
+        if (strtype == BC_STR_ASCII || strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             charset = IOUtils.ISO_8859_1;
-        } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
-            charset = IOUtils.ISO_8859_1;
-        } else if (strtype == BC_STR_UTF8) {
+
+            int strOff = this.strBegin;
+            char[] charBuf = this.charBuf;
+            if (charBuf == null) {
+                this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+            }
+            if (charBuf == null || charBuf.length < strlen) {
+                this.charBuf = charBuf = new char[strlen];
+            }
+
+            for (int i = 0; i < strlen; i++) {
+                charBuf[i] = (char) (bytes[strOff + i] & 0xff);
+            }
+            return new String(charBuf, 0, strlen);
+        }
+
+        if (strtype == BC_STR_UTF8) {
             charset = IOUtils.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             charset = IOUtils.UTF_16;
@@ -263,6 +292,8 @@ final class JSONReaderJSONB
             Map map;
             if ((features & Feature.UseNativeObject.mask) != 0) {
                 map = new HashMap();
+            } else if (context.objectSupplier != null) {
+                map = context.objectSupplier.get();
             } else {
                 map = new JSONObject();
             }
@@ -343,12 +374,15 @@ final class JSONReaderJSONB
                         List list;
                         if ((features & Feature.UseNativeObject.mask) != 0) {
                             list = new ArrayList(len);
+                        } else if (context.arraySupplier != null) {
+                            list = context.arraySupplier.get();
                         } else {
                             list = new JSONArray(len);
                         }
 
                         for (int i = 0; i < len; ++i) {
-                            if (bytes[offset] == BC_REFERENCE) {
+                            byte itemType = bytes[offset];
+                            if (itemType == BC_REFERENCE) {
                                 String reference = readReference();
                                 if ("..".equals(reference)) {
                                     list.add(list);
@@ -359,7 +393,6 @@ final class JSONReaderJSONB
                                 continue;
                             }
 
-                            byte itemType = bytes[offset];
                             Object item;
                             if (itemType >= BC_STR_ASCII_FIX_MIN && itemType <= BC_STR_GB18030) {
                                 item = readString();
@@ -754,6 +787,8 @@ final class JSONReaderJSONB
                     if (map == null) {
                         if ((context.features & Feature.UseNativeObject.mask) != 0) {
                             map = new HashMap();
+                        } else if (context.objectSupplier != null) {
+                            map = context.objectSupplier.get();
                         } else {
                             map = new JSONObject();
                         }
@@ -886,7 +921,7 @@ final class JSONReaderJSONB
                         return symbolTable.getName(-strlen);
                     }
 
-                    String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
 
                     if ((context.features & Feature.TrimString.mask) != 0) {
@@ -2723,7 +2758,7 @@ final class JSONReaderJSONB
                     int indexMask = ((int) (nameValue01 ^ (nameValue01 >>> 32))) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                     if (entry == null) {
-                        str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                        str = getLatin1String(offset, strlen);
                         NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(str, nameValue0, nameValue1);
                         offset += strlen;
                     } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
@@ -2734,7 +2769,7 @@ final class JSONReaderJSONB
                     int indexMask = ((int) (nameValue0 ^ (nameValue0 >>> 32))) & (NAME_CACHE.length - 1);
                     NameCacheEntry entry = NAME_CACHE[indexMask];
                     if (entry == null) {
-                        str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                        str = getLatin1String(offset, strlen);
                         NAME_CACHE[indexMask] = new NameCacheEntry(str, nameValue0);
                         offset += strlen;
                     } else if (entry.value == nameValue0) {
@@ -2789,7 +2824,26 @@ final class JSONReaderJSONB
         }
 
         if (str == null) {
-            str = new String(bytes, offset, strlen, charset);
+            // optimization for android
+            if (charset == IOUtils.ISO_8859_1) {
+                char[] charBuf = this.charBuf;
+                int strlen = this.strlen;
+                if (charBuf == null) {
+                    this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+                }
+                if (charBuf == null || charBuf.length < strlen) {
+                    this.charBuf = charBuf = new char[strlen];
+                }
+
+                for (int i = 0; i < strlen; i++) {
+                    charBuf[i] = (char) (bytes[offset + i] & 0xff);
+                }
+                str = new String(charBuf, 0, strlen);
+            }
+
+            if (str == null) {
+                str = new String(bytes, offset, strlen, charset);
+            }
             offset += strlen;
         }
 
@@ -2855,7 +2909,17 @@ final class JSONReaderJSONB
             }
 
             this.strlen = strlen;
-            String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+            char[] charBuf = this.charBuf;
+            if (charBuf == null) {
+                this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+            }
+            if (charBuf == null || charBuf.length < strlen) {
+                this.charBuf = charBuf = new char[strlen];
+            }
+            for (int i = 0; i < strlen; i++) {
+                charBuf[i] = (char) (bytes[offset + i] & 0xff);
+            }
+            String str = new String(charBuf, 0, strlen);
             offset += strlen;
 
             if ((context.features & Feature.TrimString.mask) != 0) {
@@ -3321,7 +3385,7 @@ final class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -3458,7 +3522,7 @@ final class JSONReaderJSONB
                 return int32Value;
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -3573,7 +3637,7 @@ final class JSONReaderJSONB
                     (char) (bytes[offset + 1] & 0xff)
             );
         } else {
-            str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+            str = getLatin1String(offset, strlen);
         }
         return str;
     }
@@ -3628,7 +3692,7 @@ final class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -3767,7 +3831,7 @@ final class JSONReaderJSONB
                 return readInt64Value();
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -3975,7 +4039,7 @@ final class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 return toBigDecimal(str);
             }
@@ -4101,7 +4165,7 @@ final class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 return toBigDecimal(str);
             }
@@ -4247,7 +4311,7 @@ final class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
@@ -4731,7 +4795,7 @@ final class JSONReaderJSONB
                     offset += 36;
                     return new UUID(hi, lo);
                 }
-                throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 36, IOUtils.ISO_8859_1));
+                throw new JSONException("Invalid UUID string:  " + getLatin1String(offset, 36));
             }
             case BC_STR_ASCII:
             case BC_STR_UTF8: {
@@ -4886,7 +4950,7 @@ final class JSONReaderJSONB
                         return false;
                     }
                 }
-                String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                String str = getLatin1String(offset, strlen);
                 offset += strlen;
                 throw new JSONException("not support input " + str);
             }
@@ -5176,10 +5240,15 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public final void close() {
+    public void close() {
         byte[] valueBytes = this.valueBytes;
         if (valueBytes != null && valueBytes.length < CACHE_THRESHOLD) {
             BYTES_UPDATER.lazySet(cacheItem, valueBytes);
+        }
+
+        char[] nameChars = this.charBuf;
+        if (nameChars != null && nameChars.length < CACHE_THRESHOLD) {
+            CHARS_UPDATER.lazySet(cacheItem, nameChars);
         }
     }
 

@@ -10534,28 +10534,28 @@ public class DateUtils {
         int s0 = second / 10 + '0';
         int s1 = second % 10 + '0';
 
-        byte[] bytes = new byte[19];
-        bytes[0] = (byte) y0;
-        bytes[1] = (byte) y1;
-        bytes[2] = (byte) y2;
-        bytes[3] = (byte) y3;
-        bytes[4] = '-';
-        bytes[5] = (byte) m0;
-        bytes[6] = (byte) m1;
-        bytes[7] = '-';
-        bytes[8] = (byte) d0;
-        bytes[9] = (byte) d1;
-        bytes[10] = ' ';
-        bytes[11] = (byte) h0;
-        bytes[12] = (byte) h1;
-        bytes[13] = ':';
-        bytes[14] = (byte) i0;
-        bytes[15] = (byte) i1;
-        bytes[16] = ':';
-        bytes[17] = (byte) s0;
-        bytes[18] = (byte) s1;
+        char[] chars = new char[19];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = '-';
+        chars[5] = (char) m0;
+        chars[6] = (char) m1;
+        chars[7] = '-';
+        chars[8] = (char) d0;
+        chars[9] = (char) d1;
+        chars[10] = ' ';
+        chars[11] = (char) h0;
+        chars[12] = (char) h1;
+        chars[13] = ':';
+        chars[14] = (char) i0;
+        chars[15] = (char) i1;
+        chars[16] = ':';
+        chars[17] = (char) s0;
+        chars[18] = (char) s1;
 
-        return new String(bytes, 0, bytes.length, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String formatHMS6(LocalTime time) {
@@ -10563,18 +10563,18 @@ public class DateUtils {
             return null;
         }
 
-        byte[] bytes = new byte[6];
+        char[] chars = new char[6];
         int v = DIGITS_K[time.hour];
-        bytes[0] = (byte) (v >> 8);
-        bytes[1] = (byte) (v);
+        chars[0] = (char) (byte) (v >> 8);
+        chars[1] = (char) (byte) (v);
         int v1 = DIGITS_K[time.minute];
-        bytes[2] = (byte) (v1 >> 8);
-        bytes[3] = (byte) (v1);
+        chars[2] = (char) (byte) (v1 >> 8);
+        chars[3] = (char) (byte) (v1);
         int v2 = DIGITS_K[time.second];
-        bytes[4] = (byte) (v2 >> 8);
-        bytes[5] = (byte) (v2);
+        chars[4] = (char) (byte) (v2 >> 8);
+        chars[5] = (char) (byte) (v2);
 
-        return new String(bytes, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String formatHMS8(LocalTime time) {
@@ -10582,20 +10582,20 @@ public class DateUtils {
             return null;
         }
 
-        byte[] bytes = new byte[8];
+        char[] chars = new char[8];
         int v = DIGITS_K[time.hour];
-        bytes[0] = (byte) (v >> 8);
-        bytes[1] = (byte) (v);
-        bytes[2] = ':';
+        chars[0] = (char) (byte) (v >> 8);
+        chars[1] = (char) (byte) (v);
+        chars[2] = ':';
         int v1 = DIGITS_K[time.minute];
-        bytes[3] = (byte) (v1 >> 8);
-        bytes[4] = (byte) (v1);
-        bytes[5] = ':';
+        chars[3] = (char) (byte) (v1 >> 8);
+        chars[4] = (char) (byte) (v1);
+        chars[5] = ':';
         int v2 = DIGITS_K[time.second];
-        bytes[6] = (byte) (v2 >> 8);
-        bytes[7] = (byte) (v2);
+        chars[6] = (char) (byte) (v2 >> 8);
+        chars[7] = (char) (byte) (v2);
 
-        return new String(bytes, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String formatYMD8(long timeMillis, ZoneId zoneId) {
@@ -10685,44 +10685,44 @@ public class DateUtils {
         int d0 = dayOfMonth / 10 + '0';
         int d1 = dayOfMonth % 10 + '0';
 
-        byte[] bytes = new byte[8];
-        bytes[0] = (byte) y0;
-        bytes[1] = (byte) y1;
-        bytes[2] = (byte) y2;
-        bytes[3] = (byte) y3;
-        bytes[4] = (byte) m0;
-        bytes[5] = (byte) m1;
-        bytes[6] = (byte) d0;
-        bytes[7] = (byte) d1;
+        char[] chars = new char[8];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = (char) m0;
+        chars[5] = (char) m1;
+        chars[6] = (char) d0;
+        chars[7] = (char) d1;
 
-        return new String(bytes, 0, bytes.length, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String formatYMD9(int year, int month, int dayOfMonth) {
-        byte[] bytes = new byte[10];
+        char[] chars = new char[10];
         final int q = year / 1000;
         int v = DIGITS_K[year - q * 1000];
-        bytes[0] = (byte) (q + '0');
-        bytes[1] = (byte) (v >> 16);
-        bytes[2] = (byte) (v >> 8);
-        bytes[3] = (byte) v;
-        bytes[4] = '-';
+        chars[0] = (char) (byte) (q + '0');
+        chars[1] = (char) (byte) (v >> 16);
+        chars[2] = (char) (byte) (v >> 8);
+        chars[3] = (char) (byte) v;
+        chars[4] = '-';
         int off;
         if (month < 10) {
-            bytes[5] = (byte) (month + '0');
-            bytes[6] = '-';
+            chars[5] = (char) (month + '0');
+            chars[6] = '-';
             off = 7;
         } else {
             v = DIGITS_K[month];
-            bytes[5] = (byte) (v >> 8);
-            bytes[6] = (byte) v;
-            bytes[7] = '-';
+            chars[5] = (char) (byte) (v >> 8);
+            chars[6] = (char) (byte) v;
+            chars[7] = '-';
             off = 8;
         }
         v = DIGITS_K[dayOfMonth];
-        bytes[off] = (byte) (v >> 8);
-        bytes[off + 1] = (byte) v;
-        return new String(bytes, 0, off + 2, IOUtils.ISO_8859_1);
+        chars[off] = (char) (byte) (v >> 8);
+        chars[off + 1] = (char) (byte) v;
+        return new String(chars, 0, off + 2);
     }
 
     public static String formatYMD10(LocalDate date) {
@@ -10745,19 +10745,19 @@ public class DateUtils {
 
         final char separator = '-';
 
-        byte[] bytes = new byte[10];
-        bytes[0] = (byte) y0;
-        bytes[1] = (byte) y1;
-        bytes[2] = (byte) y2;
-        bytes[3] = (byte) y3;
-        bytes[4] = separator;
-        bytes[5] = (byte) m0;
-        bytes[6] = (byte) m1;
-        bytes[7] = separator;
-        bytes[8] = (byte) d0;
-        bytes[9] = (byte) d1;
+        char[] chars = new char[10];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = separator;
+        chars[5] = (char) m0;
+        chars[6] = (char) m1;
+        chars[7] = separator;
+        chars[8] = (char) d0;
+        chars[9] = (char) d1;
 
-        return new String(bytes, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String formatYMD10(long timeMillis, ZoneId zoneId) {
@@ -10835,19 +10835,19 @@ public class DateUtils {
         int d0 = dayOfMonth / 10 + '0';
         int d1 = dayOfMonth % 10 + '0';
 
-        byte[] bytes = new byte[10];
-        bytes[0] = (byte) y0;
-        bytes[1] = (byte) y1;
-        bytes[2] = (byte) y2;
-        bytes[3] = (byte) y3;
-        bytes[4] = '-';
-        bytes[5] = (byte) m0;
-        bytes[6] = (byte) m1;
-        bytes[7] = '-';
-        bytes[8] = (byte) d0;
-        bytes[9] = (byte) d1;
+        char[] chars = new char[10];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = '-';
+        chars[5] = (char) m0;
+        chars[6] = (char) m1;
+        chars[7] = '-';
+        chars[8] = (char) d0;
+        chars[9] = (char) d1;
 
-        String str = new String(bytes, IOUtils.ISO_8859_1);
+        String str = new String(chars);
 
         if (off >= 0 && off < cache.length) {
             cache[off] = str;
@@ -10857,16 +10857,16 @@ public class DateUtils {
     }
 
     public static String formatYMD11(int year, int month, int dayOfMonth) {
-        byte[] bytes = new byte[11];
+        char[] chars = new char[11];
         final int q = year / 1000;
         int v = DIGITS_K[year - q * 1000];
-        bytes[0] = (byte) (q + '0');
-        bytes[1] = (byte) (v >> 16);
-        bytes[2] = (byte) (v >> 8);
-        bytes[3] = (byte) v;
-        bytes[4] = '-';
+        chars[0] = (char) (byte) (q + '0');
+        chars[1] = (char) (byte) (v >> 16);
+        chars[2] = (char) (byte) (v >> 8);
+        chars[3] = (char) (byte) v;
+        chars[4] = '-';
 
-        byte m0, m1, m2;
+        char m0, m1, m2;
         switch (month) {
             case 1:
                 m0 = 'J';
@@ -10931,14 +10931,14 @@ public class DateUtils {
             default:
                 throw new JSONException("illegal month " + month);
         }
-        bytes[5] = m0;
-        bytes[6] = m1;
-        bytes[7] = m2;
-        bytes[8] = '-';
+        chars[5] = m0;
+        chars[6] = m1;
+        chars[7] = m2;
+        chars[8] = '-';
         v = DIGITS_K[dayOfMonth];
-        bytes[9] = (byte) (v >> 8);
-        bytes[10] = (byte) v;
-        return new String(bytes, IOUtils.ISO_8859_1);
+        chars[9] = (char) (byte) (v >> 8);
+        chars[10] = (char) (byte) v;
+        return new String(chars);
     }
 
     public static String format(Date date, String format) {
@@ -11076,48 +11076,48 @@ public class DateUtils {
         int s0 = second / 10 + '0';
         int s1 = second % 10 + '0';
 
-        byte[] bytes = new byte[29];
-        bytes[0] = (byte) y0;
-        bytes[1] = (byte) y1;
-        bytes[2] = (byte) y2;
-        bytes[3] = (byte) y3;
-        bytes[4] = (byte) '-';
-        bytes[5] = (byte) m0;
-        bytes[6] = (byte) m1;
-        bytes[7] = (byte) '-';
-        bytes[8] = (byte) d0;
-        bytes[9] = (byte) d1;
-        bytes[10] = (byte) ' ';
-        bytes[11] = (byte) h0;
-        bytes[12] = (byte) h1;
-        bytes[13] = ':';
-        bytes[14] = (byte) i0;
-        bytes[15] = (byte) i1;
-        bytes[16] = ':';
-        bytes[17] = (byte) s0;
-        bytes[18] = (byte) s1;
+        char[] chars = new char[29];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = '-';
+        chars[5] = (char) m0;
+        chars[6] = (char) m1;
+        chars[7] = '-';
+        chars[8] = (char) d0;
+        chars[9] = (char) d1;
+        chars[10] = ' ';
+        chars[11] = (char) h0;
+        chars[12] = (char) h1;
+        chars[13] = ':';
+        chars[14] = (char) i0;
+        chars[15] = (char) i1;
+        chars[16] = ':';
+        chars[17] = (char) s0;
+        chars[18] = (char) s1;
 
         final int div = nano / 1000;
         final int div2 = div / 1000;
         final int rem1 = nano - div * 1000;
 
-        bytes[19] = '.';
+        chars[19] = '.';
         int v = DIGITS_K[div2];
-        bytes[20] = (byte) (v >> 16);
-        bytes[21] = (byte) (v >> 8);
-        bytes[22] = (byte) v;
+        chars[20] = (char) (byte) (v >> 16);
+        chars[21] = (char) (byte) (v >> 8);
+        chars[22] = (char) (byte) v;
 
         int v1 = DIGITS_K[div - div2 * 1000];
-        bytes[23] = (byte) (v1 >> 16);
-        bytes[24] = (byte) (v1 >> 8);
-        bytes[25] = (byte) v1;
+        chars[23] = (char) (byte) (v1 >> 16);
+        chars[24] = (char) (byte) (v1 >> 8);
+        chars[25] = (char) (byte) v1;
 
         int v2 = DIGITS_K[rem1];
-        bytes[26] = (byte) (v2 >> 16);
-        bytes[27] = (byte) (v2 >> 8);
-        bytes[28] = (byte) v2;
+        chars[26] = (char) (byte) (v2 >> 16);
+        chars[27] = (char) (byte) (v2 >> 8);
+        chars[28] = (char) (byte) v2;
 
-        return new String(bytes, 0, bytes.length, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String format(LocalDateTime ldt, String format) {
@@ -11226,32 +11226,32 @@ public class DateUtils {
         int d0 = dayOfMonth / 10 + '0';
         int d1 = dayOfMonth % 10 + '0';
 
-        byte[] bytes = new byte[10];
+        char[] chars = new char[10];
         if (pattern == DATE_FORMAT_10_DOT) {
-            bytes[0] = (byte) d0;
-            bytes[1] = (byte) d1;
-            bytes[2] = '.';
-            bytes[3] = (byte) m0;
-            bytes[4] = (byte) m1;
-            bytes[5] = '.';
-            bytes[6] = (byte) y0;
-            bytes[7] = (byte) y1;
-            bytes[8] = (byte) y2;
-            bytes[9] = (byte) y3;
+            chars[0] = (char) d0;
+            chars[1] = (char) d1;
+            chars[2] = '.';
+            chars[3] = (char) m0;
+            chars[4] = (char) m1;
+            chars[5] = '.';
+            chars[6] = (char) y0;
+            chars[7] = (char) y1;
+            chars[8] = (char) y2;
+            chars[9] = (char) y3;
         } else {
-            byte separator = (byte) (pattern == DATE_FORMAT_10_DASH ? '-' : '/');
-            bytes[0] = (byte) y0;
-            bytes[1] = (byte) y1;
-            bytes[2] = (byte) y2;
-            bytes[3] = (byte) y3;
-            bytes[4] = separator;
-            bytes[5] = (byte) m0;
-            bytes[6] = (byte) m1;
-            bytes[7] = separator;
-            bytes[8] = (byte) d0;
-            bytes[9] = (byte) d1;
+            char separator = pattern == DATE_FORMAT_10_DASH ? '-' : '/';
+            chars[0] = (char) y0;
+            chars[1] = (char) y1;
+            chars[2] = (char) y2;
+            chars[3] = (char) y3;
+            chars[4] = separator;
+            chars[5] = (char) m0;
+            chars[6] = (char) m1;
+            chars[7] = separator;
+            chars[8] = (char) d0;
+            chars[9] = (char) d1;
         }
-        return new String(bytes, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String format(long timeMillis, DateTimeFormatPattern pattern) {
@@ -11371,44 +11371,44 @@ public class DateUtils {
         int s0 = second / 10 + '0';
         int s1 = second % 10 + '0';
 
-        byte[] bytes = new byte[19];
+        char[] chars = new char[19];
         if (pattern == DATE_TIME_FORMAT_19_DOT) {
-            bytes[0] = (byte) d0;
-            bytes[1] = (byte) d1;
-            bytes[2] = '.';
-            bytes[3] = (byte) m0;
-            bytes[4] = (byte) m1;
-            bytes[5] = '.';
-            bytes[6] = (byte) y0;
-            bytes[7] = (byte) y1;
-            bytes[8] = (byte) y2;
-            bytes[9] = (byte) y3;
-            bytes[10] = (byte) ' ';
+            chars[0] = (char) d0;
+            chars[1] = (char) d1;
+            chars[2] = '.';
+            chars[3] = (char) m0;
+            chars[4] = (char) m1;
+            chars[5] = '.';
+            chars[6] = (char) y0;
+            chars[7] = (char) y1;
+            chars[8] = (char) y2;
+            chars[9] = (char) y3;
+            chars[10] = ' ';
         } else {
             char separator = pattern == DATE_TIME_FORMAT_19_DASH ? ' ' : 'T';
             char dateSeparator = pattern == DATE_TIME_FORMAT_19_SLASH ? '/' : '-';
-            bytes[0] = (byte) y0;
-            bytes[1] = (byte) y1;
-            bytes[2] = (byte) y2;
-            bytes[3] = (byte) y3;
-            bytes[4] = (byte) dateSeparator;
-            bytes[5] = (byte) m0;
-            bytes[6] = (byte) m1;
-            bytes[7] = (byte) dateSeparator;
-            bytes[8] = (byte) d0;
-            bytes[9] = (byte) d1;
-            bytes[10] = (byte) separator;
+            chars[0] = (char) y0;
+            chars[1] = (char) y1;
+            chars[2] = (char) y2;
+            chars[3] = (char) y3;
+            chars[4] = dateSeparator;
+            chars[5] = (char) m0;
+            chars[6] = (char) m1;
+            chars[7] = dateSeparator;
+            chars[8] = (char) d0;
+            chars[9] = (char) d1;
+            chars[10] = separator;
         }
-        bytes[11] = (byte) h0;
-        bytes[12] = (byte) h1;
-        bytes[13] = ':';
-        bytes[14] = (byte) i0;
-        bytes[15] = (byte) i1;
-        bytes[16] = ':';
-        bytes[17] = (byte) s0;
-        bytes[18] = (byte) s1;
+        chars[11] = (char) h0;
+        chars[12] = (char) h1;
+        chars[13] = ':';
+        chars[14] = (char) i0;
+        chars[15] = (char) i1;
+        chars[16] = ':';
+        chars[17] = (char) s0;
+        chars[18] = (char) s1;
 
-        return new String(bytes, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static String toString(long timeMillis, boolean timeZone, ZoneId zoneId) {
@@ -11525,78 +11525,78 @@ public class DateUtils {
         int s0 = second / 10 + '0';
         int s1 = second % 10 + '0';
 
-        byte[] bytes = new byte[len];
-        bytes[0] = (byte) y0;
-        bytes[1] = (byte) y1;
-        bytes[2] = (byte) y2;
-        bytes[3] = (byte) y3;
-        bytes[4] = '-';
-        bytes[5] = (byte) m0;
-        bytes[6] = (byte) m1;
-        bytes[7] = '-';
-        bytes[8] = (byte) d0;
-        bytes[9] = (byte) d1;
-        bytes[10] = ' ';
-        bytes[11] = (byte) h0;
-        bytes[12] = (byte) h1;
-        bytes[13] = ':';
-        bytes[14] = (byte) i0;
-        bytes[15] = (byte) i1;
-        bytes[16] = ':';
-        bytes[17] = (byte) s0;
-        bytes[18] = (byte) s1;
+        char[] chars = new char[len];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = '-';
+        chars[5] = (char) m0;
+        chars[6] = (char) m1;
+        chars[7] = '-';
+        chars[8] = (char) d0;
+        chars[9] = (char) d1;
+        chars[10] = ' ';
+        chars[11] = (char) h0;
+        chars[12] = (char) h1;
+        chars[13] = ':';
+        chars[14] = (char) i0;
+        chars[15] = (char) i1;
+        chars[16] = ':';
+        chars[17] = (char) s0;
+        chars[18] = (char) s1;
         if (millislen > 0) {
-            bytes[19] = '.';
+            chars[19] = '.';
             for (int i = 20; i < len; ++i) {
-                bytes[i] = '0';
+                chars[i] = '0';
             }
             if (millis < 10) {
-                IOUtils.writeInt32(bytes, 22, millis);
+                IOUtils.writeInt32(chars, 22, millis);
             } else {
                 if (millis % 100 == 0) {
-                    IOUtils.writeInt32(bytes, 20, millis / 100);
+                    IOUtils.writeInt32(chars, 20, millis / 100);
                 } else if (millis % 10 == 0) {
-                    IOUtils.writeInt32(bytes, 20, millis / 10);
+                    IOUtils.writeInt32(chars, 20, millis / 10);
                 } else {
-                    IOUtils.writeInt32(bytes, 20, millis);
+                    IOUtils.writeInt32(chars, 20, millis);
                 }
             }
         }
         if (timeZone) {
             int timeZoneOffset = offsetTotalSeconds / 3600;
             if (offsetTotalSeconds == 0) {
-                bytes[19 + millislen] = 'Z';
+                chars[19 + millislen] = 'Z';
             } else {
                 int offsetAbs = Math.abs(timeZoneOffset);
 
                 if (timeZoneOffset >= 0) {
-                    bytes[19 + millislen] = '+';
+                    chars[19 + millislen] = '+';
                 } else {
-                    bytes[19 + millislen] = '-';
+                    chars[19 + millislen] = '-';
                 }
                 if (offsetAbs < 10) {
-                    bytes[20 + millislen] = '0';
-                    bytes[21 + millislen] = (byte) ('0' + offsetAbs);
+                    chars[20 + millislen] = '0';
+                    chars[21 + millislen] = (char) ('0' + offsetAbs);
                 } else {
-                    bytes[20 + millislen] = (byte) ('0' + offsetAbs / 10);
-                    bytes[21 + millislen] = (byte) ('0' + offsetAbs % 10);
+                    chars[20 + millislen] = (char) ('0' + offsetAbs / 10);
+                    chars[21 + millislen] = (char) ('0' + offsetAbs % 10);
                 }
-                bytes[22 + millislen] = ':';
+                chars[22 + millislen] = ':';
                 int offsetMinutes = (offsetTotalSeconds - timeZoneOffset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
                 if (offsetMinutes < 10) {
-                    bytes[23 + millislen] = '0';
-                    bytes[24 + millislen] = (byte) ('0' + offsetMinutes);
+                    chars[23 + millislen] = '0';
+                    chars[24 + millislen] = (char) ('0' + offsetMinutes);
                 } else {
-                    bytes[23 + millislen] = (byte) ('0' + offsetMinutes / 10);
-                    bytes[24 + millislen] = (byte) ('0' + offsetMinutes % 10);
+                    chars[23 + millislen] = (char) ('0' + offsetMinutes / 10);
+                    chars[24 + millislen] = (char) ('0' + offsetMinutes % 10);
                 }
             }
         }
 
-        return new String(bytes, 0, bytes.length, IOUtils.ISO_8859_1);
+        return new String(chars);
     }
 
     public static int month(char c0, char c1, char c2) {

@@ -2217,6 +2217,8 @@ public abstract class JSONReader
             } else {
                 if (context.isEnabled(Feature.UseNativeObject)) {
                     list = i == 2 ? new ArrayList(2) : new ArrayList(1);
+                } else if (context.arraySupplier != null) {
+                    list = context.arraySupplier.get();
                 } else {
                     list = i == 2 ? new JSONArray(2) : new JSONArray(1);
                 }

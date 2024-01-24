@@ -111,7 +111,7 @@ public class TypeUtils {
         if (ch >= 0 && ch < X2.chars.length) {
             return X2.chars[ch];
         }
-        return new String(new byte[]{ch}, IOUtils.ISO_8859_1);
+        return new String(new char[]{(char) (ch & 0xff)});
     }
 
     public static String toString(char c0, char c1) {
@@ -127,7 +127,7 @@ public class TypeUtils {
             int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
             return X2.chars2[value];
         }
-        return new String(new byte[]{c0, c1}, IOUtils.ISO_8859_1);
+        return new String(new char[]{(char) (c0 & 0xff), (char) (c1 & 0xff)});
     }
 
     public static Type intern(Type type) {

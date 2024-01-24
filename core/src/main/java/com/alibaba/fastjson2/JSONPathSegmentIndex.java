@@ -150,10 +150,10 @@ final class JSONPathSegmentIndex
     @Override
     public String toString() {
         int size = IOUtils.stringSize(index);
-        byte[] bytes = new byte[size + 2];
-        bytes[0] = '[';
-        IOUtils.writeInt32(bytes, 1, index);
-        bytes[bytes.length - 1] = ']';
-        return new String(bytes, IOUtils.ISO_8859_1);
+        char[] chars = new char[size + 2];
+        chars[0] = '[';
+        IOUtils.writeInt32(chars, 1, index);
+        chars[chars.length - 1] = ']';
+        return new String(chars);
     }
 }
