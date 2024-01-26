@@ -6073,36 +6073,37 @@ class JSONReaderUTF8
 
     @Override
     public String readString() {
+        final byte[] bytes = this.bytes;
         if (ch == '"' || ch == '\'') {
             char quote = this.ch;
             int valueLength;
-            int offset = this.offset;
-            int start = offset;
+            int off = this.offset;
+            int start = off;
             boolean ascii = true;
             valueEscape = false;
 
             for (int i = 0; ; ++i) {
-                if (offset >= end) {
+                if (off >= end) {
                     throw new JSONException("invalid escape character EOI");
                 }
 
-                int c = bytes[offset];
+                int c = bytes[off];
                 if (c == '\\') {
                     valueEscape = true;
-                    c = bytes[++offset];
+                    c = bytes[++off];
                     switch (c) {
                         case 'u': {
-                            offset += 4;
+                            off += 4;
                             break;
                         }
                         case 'x': {
-                            offset += 2;
+                            off += 2;
                             break;
                         }
                         default:
                             break;
                     }
-                    offset++;
+                    off++;
                     continue;
                 }
 
@@ -6111,31 +6112,31 @@ class JSONReaderUTF8
                         valueLength = i;
                         break;
                     }
-                    offset++;
+                    off++;
                 } else {
                     switch ((c & 0xFF) >> 4) {
                         case 12:
                         case 13: {
                             /* 110x xxxx   10xx xxxx*/
-                            offset += 2;
+                            off += 2;
                             ascii = false;
                             break;
                         }
                         case 14: {
-                            offset += 3;
+                            off += 3;
                             ascii = false;
                             break;
                         }
                         default: {
                             /* 10xx xxxx,  1111 xxxx */
                             if ((c >> 3) == -2) {
-                                offset += 4;
+                                off += 4;
                                 i++;
                                 ascii = false;
                                 break;
                             }
 
-                            throw new JSONException("malformed input around byte " + offset);
+                            throw new JSONException("malformed input around byte " + off);
                         }
                     }
                 }
@@ -6144,24 +6145,26 @@ class JSONReaderUTF8
             String str;
             if (valueEscape) {
                 char[] chars = new char[valueLength];
-                offset = start;
+                off = start;
                 for (int i = 0; ; ++i) {
-                    int c = bytes[offset];
+                    int c = bytes[off];
                     if (c == '\\') {
-                        c = bytes[++offset];
+                        c = bytes[++off];
                         switch (c) {
                             case 'u': {
-                                int c1 = bytes[++offset];
-                                int c2 = bytes[++offset];
-                                int c3 = bytes[++offset];
-                                int c4 = bytes[++offset];
+                                int c1 = bytes[off + 1];
+                                int c2 = bytes[off + 2];
+                                int c3 = bytes[off + 3];
+                                int c4 = bytes[off + 4];
                                 c = char4(c1, c2, c3, c4);
+                                off += 4;
                                 break;
                             }
                             case 'x': {
-                                int c1 = bytes[++offset];
-                                int c2 = bytes[++offset];
+                                int c1 = bytes[off + 1];
+                                int c2 = bytes[off + 2];
                                 c = char2(c1, c2);
+                                off += 2;
                                 break;
                             }
                             case '\\':
@@ -6187,41 +6190,38 @@ class JSONReaderUTF8
                                 break;
                         }
                         chars[i] = (char) c;
-                        offset++;
+                        off++;
                     } else if (c == quote) {
                         break;
                     } else {
                         if (c >= 0) {
                             chars[i] = (char) c;
-                            offset++;
+                            off++;
                         } else {
                             switch ((c & 0xFF) >> 4) {
-                                case 12:
-                                case 13: {
+                                case 0b1100:
+                                case 0b1101: {
                                     /* 110x xxxx   10xx xxxx*/
-                                    offset++;
-                                    int c2 = bytes[offset++];
+                                    off++;
+                                    int c2 = bytes[off++];
                                     chars[i] = (char) (
                                             ((c & 0x1F) << 6) | (c2 & 0x3F));
                                     break;
                                 }
-                                case 14: {
-                                    offset++;
-                                    int c2 = bytes[offset++];
-                                    int c3 = bytes[offset++];
+                                case 0b1110: {
                                     chars[i] = (char)
                                             (((c & 0x0F) << 12) |
-                                                    ((c2 & 0x3F) << 6) |
-                                                    ((c3 & 0x3F)));
+                                                    ((bytes[off + 1] & 0x3F) << 6) |
+                                                    ((bytes[off + 2] & 0x3F)));
+                                    off += 3;
                                     break;
                                 }
                                 default: {
                                     /* 10xx xxxx,  1111 xxxx */
                                     if ((c >> 3) == -2) {
-                                        offset++;
-                                        int c2 = bytes[offset++];
-                                        int c3 = bytes[offset++];
-                                        int c4 = bytes[offset++];
+                                        int c2 = bytes[off + 1];
+                                        int c3 = bytes[off + 2];
+                                        int c4 = bytes[off + 3];
                                         int uc = ((c << 18) ^
                                                 (c2 << 12) ^
                                                 (c3 << 6) ^
@@ -6229,13 +6229,13 @@ class JSONReaderUTF8
                                                         ((byte) 0x80 << 12) ^
                                                         ((byte) 0x80 << 6) ^
                                                         ((byte) 0x80))));
-
+                                        off += 4;
                                         if (((c2 & 0xc0) != 0x80 || (c3 & 0xc0) != 0x80 || (c4 & 0xc0) != 0x80) // isMalformed4
                                                 ||
                                                 // shortest form check
                                                 !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
                                         ) {
-                                            throw new JSONException("malformed input around byte " + offset);
+                                            throw new JSONException("malformed input around byte " + off);
                                         } else {
                                             chars[i++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
                                             chars[i] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
@@ -6243,7 +6243,7 @@ class JSONReaderUTF8
                                         break;
                                     }
 
-                                    throw new JSONException("malformed input around byte " + offset);
+                                    throw new JSONException("malformed input around byte " + off);
                                 }
                             }
                         }
@@ -6252,7 +6252,7 @@ class JSONReaderUTF8
 
                 str = new String(chars);
             } else if (ascii) {
-                int strlen = offset - this.offset;
+                int strlen = off - this.offset;
                 if (strlen == 1) {
                     str = TypeUtils.toString((char) (bytes[this.offset] & 0xff));
                 } else if (strlen == 2) {
@@ -6268,13 +6268,13 @@ class JSONReaderUTF8
 
                     str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+                    byte[] buf = Arrays.copyOfRange(bytes, this.offset, off);
+                    str = STRING_CREATOR_JDK11.apply(buf, LATIN1);
                 } else {
-                    str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.ISO_8859_1);
+                    str = new String(bytes, this.offset, off - this.offset, StandardCharsets.ISO_8859_1);
                 }
             } else {
-                str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.UTF_8);
+                str = new String(bytes, this.offset, off - this.offset, StandardCharsets.UTF_8);
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
@@ -6282,40 +6282,40 @@ class JSONReaderUTF8
             }
 
             clear:
-            if (++offset != end) {
-                byte e = bytes[offset++];
+            if (++off != end) {
+                byte e = bytes[off++];
                 while (e <= ' ' && (1L << e & SPACE) != 0) {
-                    if (offset == end) {
+                    if (off == end) {
                         break clear;
                     } else {
-                        e = bytes[offset++];
+                        e = bytes[off++];
                     }
                 }
 
                 if (comma = e == ',') {
-                    if (offset == end) {
+                    if (off == end) {
                         e = EOI;
                     } else {
-                        e = bytes[offset++];
+                        e = bytes[off++];
                         while (e <= ' ' && (1L << e & SPACE) != 0) {
-                            if (offset == end) {
+                            if (off == end) {
                                 e = EOI;
                                 break;
                             } else {
-                                e = bytes[offset++];
+                                e = bytes[off++];
                             }
                         }
                     }
                 }
 
                 this.ch = (char) e;
-                this.offset = offset;
+                this.offset = off;
                 return str;
             }
 
             this.ch = EOI;
             this.comma = false;
-            this.offset = offset;
+            this.offset = off;
             return str;
         }
 
