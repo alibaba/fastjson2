@@ -569,6 +569,21 @@ class JSONReaderUTF16
         int offset = this.offset;
         char ch = this.ch;
         if (ch != ',') {
+            if (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = chars[offset];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    offset++;
+                    if (offset >= end) {
+                        this.offset = offset;
+                        this.ch = EOI;
+                        return true;
+                    }
+                    ch = chars[offset];
+                }
+                this.offset = offset + 1;
+                this.ch = ch;
+                return nextIfComma();
+            }
             return false;
         }
         comma = true;
@@ -6098,7 +6113,7 @@ class JSONReaderUTF16
 
     @Override
     public final String info(String message) {
-        int line = 1, column = 1;
+        int line = 1, column = 0;
         for (int i = 0; i < offset & i < end; i++, column++) {
             if (chars[i] == '\n') {
                 column = 1;

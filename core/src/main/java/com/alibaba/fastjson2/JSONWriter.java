@@ -941,6 +941,14 @@ public abstract class JSONWriter
         }
     }
 
+    public final void writeInt64Null() {
+        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
+            writeInt64(0);
+        } else {
+            writeNull();
+        }
+    }
+
     public final void writeBooleanNull() {
         if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullBooleanAsFalse.mask)) != 0) {
             writeBool(false);

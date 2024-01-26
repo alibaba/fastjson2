@@ -60,7 +60,7 @@ abstract class FieldWriterInt64<T>
                 return false;
             }
             writeFieldName(jsonWriter);
-            jsonWriter.writeNumberNull();
+            jsonWriter.writeInt64Null();
             return true;
         }
 

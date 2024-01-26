@@ -590,6 +590,7 @@ public class ObjectWriterAdapter<T>
 
         for (FieldWriter fieldWriter : fieldWriters) {
             Object fieldValue = fieldWriter.getFieldValue(object);
+            Class fieldClass = fieldWriter.fieldClass;
 
             long fieldFeatures = fieldWriter.features;
             if ((fieldFeatures & FieldInfo.UNWRAPPED_MASK) != 0) {
@@ -610,10 +611,29 @@ public class ObjectWriterAdapter<T>
                 continue;
             }
 
+            if (fieldValue != null) {
+                String fieldValueClassName = fieldValue.getClass().getName();
+                if (Collection.class.isAssignableFrom(fieldClass)
+                        && fieldValue.getClass() != JSONObject.class
+                        && !fieldValueClassName.equals("com.alibaba.fastjson.JSONObject")
+                ) {
+                    Collection collection = (Collection) fieldValue;
+                    JSONArray array = new JSONArray(collection.size());
+                    for (Object item : collection) {
+                        Object itemJSON = item == object ? jsonObject : JSON.toJSON(item);
+                        array.add(itemJSON);
+                    }
+                    fieldValue = array;
+                }
+            }
+
             if (fieldValue == null && ((this.features | features) & WriteNulls.mask) == 0) {
                 continue;
             }
 
+            if (fieldValue == object) {
+                fieldValue = jsonObject;
+            }
             jsonObject.put(fieldWriter.fieldName, fieldValue);
         }
 
