@@ -976,19 +976,20 @@ class JSONReaderASCII
 
     @Override
     public final String getFieldName() {
-        int length = nameEnd - nameBegin;
+        int offset = nameBegin;
+        int length = nameEnd - offset;
         if (!nameEscape) {
             if (this.str != null) {
-                return this.str.substring(nameBegin, nameEnd);
+                return this.str.substring(offset, nameEnd);
+            } else if (ANDROID) {
+                return getLatin1String(offset, length);
             } else {
-                return new String(bytes, nameBegin, length, StandardCharsets.ISO_8859_1);
+                return new String(bytes, offset, length, StandardCharsets.ISO_8859_1);
             }
         }
 
         if (JDKUtils.STRING_CREATOR_JDK11 != null) {
             byte[] chars = new byte[nameLength];
-
-            int offset = nameBegin;
             forStmt:
             for (int i = 0; offset < nameEnd; ++i) {
                 byte b = bytes[offset];
@@ -997,11 +998,12 @@ class JSONReaderASCII
                     b = bytes[++offset];
                     switch (b) {
                         case 'u': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
-                            int c3 = bytes[++offset];
-                            int c4 = bytes[++offset];
+                            int c1 = bytes[offset + 1];
+                            int c2 = bytes[offset + 2];
+                            int c3 = bytes[offset + 3];
+                            int c4 = bytes[offset + 4];
                             char c = char4(c1, c2, c3, c4);
+                            offset += 4;
                             if (c > 0xFF) {
                                 chars = null;
                                 break forStmt;
@@ -1010,8 +1012,9 @@ class JSONReaderASCII
                             break;
                         }
                         case 'x': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
+                            int c1 = bytes[offset + 1];
+                            int c2 = bytes[offset + 2];
+                            offset += 2;
                             char c = char2(c1, c2);
                             if (c > 0xFF) {
                                 chars = null;
@@ -1050,8 +1053,6 @@ class JSONReaderASCII
         }
 
         char[] chars = new char[nameLength];
-
-        int offset = nameBegin;
         for (int i = 0; offset < nameEnd; ++i) {
             char c = (char) (bytes[offset] & 0xff);
 
@@ -1059,17 +1060,19 @@ class JSONReaderASCII
                 c = (char) bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        int c1 = bytes[++offset];
-                        int c2 = bytes[++offset];
-                        int c3 = bytes[++offset];
-                        int c4 = bytes[++offset];
+                        int c1 = bytes[offset + 1];
+                        int c2 = bytes[offset + 2];
+                        int c3 = bytes[offset + 3];
+                        int c4 = bytes[offset + 4];
                         c = char4(c1, c2, c3, c4);
+                        offset += 4;
                         break;
                     }
                     case 'x': {
-                        int c1 = bytes[++offset];
-                        int c2 = bytes[++offset];
+                        int c1 = bytes[offset + 1];
+                        int c2 = bytes[offset + 2];
                         c = char2(c1, c2);
+                        offset += 2;
                         break;
                     }
                     case '.':
@@ -1612,17 +1615,17 @@ class JSONReaderASCII
                         c = (char) bytes[++offset];
                         switch (c) {
                             case 'u': {
-                                char c1 = (char) this.bytes[++offset];
-                                char c2 = (char) this.bytes[++offset];
-                                char c3 = (char) this.bytes[++offset];
-                                char c4 = (char) this.bytes[++offset];
-                                c = char4(c1, c2, c3, c4);
+                                c = char4(
+                                        (char) this.bytes[offset + 1],
+                                        (char) this.bytes[offset + 2],
+                                        (char) this.bytes[offset + 3],
+                                        (char) this.bytes[offset + 4]);
+                                offset += 4;
                                 break;
                             }
                             case 'x': {
-                                char c1 = (char) this.bytes[++offset];
-                                char c2 = (char) this.bytes[++offset];
-                                c = char2(c1, c2);
+                                c = char2((char) this.bytes[offset + 1], (char) this.bytes[offset + 2]);
+                                offset += 2;
                                 break;
                             }
                             case '\\':
@@ -1661,6 +1664,8 @@ class JSONReaderASCII
                 } else if (STRING_CREATOR_JDK11 != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+                } else if (ANDROID) {
+                    str = getLatin1String(this.offset, offset - this.offset);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.ISO_8859_1);
                 }
