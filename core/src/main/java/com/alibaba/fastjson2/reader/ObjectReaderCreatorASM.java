@@ -2888,6 +2888,7 @@ public class ObjectReaderCreatorASM
             }
 
             boolean list = List.class.isAssignableFrom(fieldClass)
+                    && fieldReader.getInitReader() == null
                     && !fieldClass.getName().startsWith("com.google.common.collect.Immutable");
 
             if (list) {
