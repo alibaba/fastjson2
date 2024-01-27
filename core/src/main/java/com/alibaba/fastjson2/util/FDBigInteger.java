@@ -4,20 +4,7 @@ import java.util.Arrays;
 
 public final class FDBigInteger {
     private static final int[] SMALL_5_POW = {
-            1,
-            5,
-            5 * 5,
-            5 * 5 * 5,
-            5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5
+            1, 5, 25, 125, 625, 3125, 15625, 78125, 390625, 1953125, 9765625, 48828125, 244140625, 1220703125
     };
 
     private static final int MAX_FIVE_POW = 340;
@@ -187,6 +174,9 @@ public final class FDBigInteger {
     }
 
     public FDBigInteger leftShift(int shift) {
+        final int[] data = this.data;
+        int nWords = this.nWords;
+        int offset = this.offset;
         if (shift == 0 || nWords == 0) {
             return this;
         }
@@ -236,14 +226,15 @@ public final class FDBigInteger {
                     int[] src = data;
                     if (hi != 0) {
                         if (nWords == data.length) {
-                            data = result = new int[nWords + 1];
+                            this.data = result = new int[nWords + 1];
                         }
                         result[nWords++] = hi;
                     }
                     leftShift(src, idx, result, bitcount, anticount, prev);
                 }
             }
-            offset += wordcount;
+            this.nWords = nWords;
+            this.offset = offset + wordcount;
             return this;
         }
     }

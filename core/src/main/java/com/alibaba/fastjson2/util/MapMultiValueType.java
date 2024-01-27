@@ -8,7 +8,7 @@ import java.util.Map;
 
 public final class MapMultiValueType<T extends Map>
         implements Type {
-    private final Class<T> mapType;
+    public final Class<T> mapType;
     private final Map<String, Type> valueTypes = new HashMap<>();
 
     MapMultiValueType(Class<T> mapType, String name, Type type) {
@@ -19,10 +19,6 @@ public final class MapMultiValueType<T extends Map>
     MapMultiValueType(Class<T> mapType, Map<String, Type> types) {
         this.mapType = mapType;
         this.valueTypes.putAll(types);
-    }
-
-    public Class<T> getMapType() {
-        return mapType;
     }
 
     public Type getType(String name) {

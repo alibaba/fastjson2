@@ -1,18 +1,25 @@
 package com.alibaba.fastjson2;
 
-public abstract class JSONPath {
+import java.util.ArrayList;
+import java.util.List;
+
+public class JSONPath {
+    static final JSONPath ROOT = new JSONPath("$", new ArrayList<>(), true, false);
+    static final JSONPath PREVIOUS = new JSONPath("#-1", new ArrayList<>(), false, true);
     static final JSONReader.Context PARSE_CONTEXT = JSONFactory.createReadContext();
 
     JSONReader.Context readerContext;
     JSONWriter.Context writerContext;
     final String path;
+    final List<JSONPathSegment> segments;
+    final boolean root;
+    public final boolean previous;
 
-    protected JSONPath(String path) {
+    protected JSONPath(String path, List<JSONPathSegment> segments, boolean root, boolean previous) {
         this.path = path;
-    }
-
-    public boolean isPrevious() {
-        return false;
+        this.segments = segments;
+        this.root = root;
+        this.previous = previous;
     }
 
     @Override
@@ -20,60 +27,43 @@ public abstract class JSONPath {
         return path;
     }
 
-    public abstract boolean isRef();
+    public Object eval(Object root) {
+        if (this.root) {
+            return root;
+        }
 
-    public abstract Object eval(Object object);
+        Context context = null;
+
+        int size = segments.size();
+        if (size == 0) {
+            return root;
+        }
+
+        for (int i = 0; i < size; i++) {
+            JSONPathSegment segment = segments.get(i);
+            JSONPathSegment nextSegment = null;
+            int nextIndex = i + 1;
+            if (nextIndex < size) {
+                nextSegment = segments.get(nextIndex);
+            }
+            context = new Context(this, context, segment, nextSegment, 0);
+            if (i == 0) {
+                context.root = root;
+            }
+
+            segment.eval(context);
+        }
+
+        return context.value;
+    }
 
     public static JSONPath of(String path) {
         if ("#-1".equals(path)) {
-            return PreviousPath.INSTANCE;
+            return JSONPath.PREVIOUS;
         }
 
         return new JSONPathParser(path)
                 .parse();
-    }
-
-    static final class PreviousPath
-            extends JSONPath {
-        static final PreviousPath INSTANCE = new PreviousPath("#-1");
-
-        PreviousPath(String path) {
-            super(path);
-        }
-
-        @Override
-        public boolean isRef() {
-            throw new JSONException("unsupported operation");
-        }
-
-        @Override
-        public boolean isPrevious() {
-            return true;
-        }
-
-        @Override
-        public Object eval(Object rootObject) {
-            throw new JSONException("unsupported operation");
-        }
-    }
-
-    static final class RootPath
-            extends JSONPath {
-        static final RootPath INSTANCE = new RootPath();
-
-        protected RootPath() {
-            super("$");
-        }
-
-        @Override
-        public boolean isRef() {
-            return true;
-        }
-
-        @Override
-        public Object eval(Object object) {
-            return object;
-        }
     }
 
     static final class Context {

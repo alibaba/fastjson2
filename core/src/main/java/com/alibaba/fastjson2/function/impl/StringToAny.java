@@ -12,7 +12,7 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 
-public class StringToAny
+public final class StringToAny
         implements Function {
     final Object defaultValue;
     final Class targetClass;

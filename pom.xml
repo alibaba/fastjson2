@@ -641,6 +641,7 @@
                                 com/alibaba/fastjson2/benchmark/taobao/aura/base/*.java,
                                 com/alibaba/fastjson2/issues/Issue895.java,
                                 com/alibaba/fastjson2/issues_1700/Issue1742.java,
+                                com/alibaba/fastjson2/issues_2100/Issue2164.java,
                             </excludes>
                         </configuration>
                     </execution>

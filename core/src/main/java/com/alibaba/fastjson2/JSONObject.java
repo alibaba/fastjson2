@@ -112,12 +112,8 @@ public class JSONObject
     }
 
     public Object getByPath(String jsonPath) {
-        JSONPath path = JSONPath.of(jsonPath);
-        if (path instanceof JSONPathSingleName) {
-            String name = ((JSONPathSingleName) path).name;
-            return get(name);
-        }
-        return path.eval(this);
+        return JSONPath.of(jsonPath)
+                .eval(this);
     }
 
     /**

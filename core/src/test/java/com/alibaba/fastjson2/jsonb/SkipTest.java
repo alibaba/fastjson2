@@ -26,6 +26,33 @@ public class SkipTest {
         assertNotNull(a);
     }
 
+    @Test
+    public void test_1() {
+        for (int i = 0; i < 100; i += 10) {
+            byte[] jsonbBytes = JSONObject.of("v", (byte) i).toJSONBBytes();
+            A a = JSONB.parseObject(jsonbBytes, A.class);
+            assertNotNull(a);
+        }
+
+        for (int i = 0; i < 1000; i += 10) {
+            byte[] jsonbBytes = JSONObject.of("v", (short) i).toJSONBBytes();
+            A a = JSONB.parseObject(jsonbBytes, A.class);
+            assertNotNull(a);
+        }
+
+        for (int i = 0; i < 100000; i += 10) {
+            byte[] jsonbBytes = JSONObject.of("v", i).toJSONBBytes();
+            A a = JSONB.parseObject(jsonbBytes, A.class);
+            assertNotNull(a);
+        }
+
+        for (int i = 0; i < 100000; i += 10) {
+            byte[] jsonbBytes = JSONObject.of("v", (long) i).toJSONBBytes();
+            A a = JSONB.parseObject(jsonbBytes, A.class);
+            assertNotNull(a);
+        }
+    }
+
     public static class A {
     }
 }

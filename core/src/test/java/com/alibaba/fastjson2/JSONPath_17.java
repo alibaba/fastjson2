@@ -13,7 +13,7 @@ public class JSONPath_17 {
     @Test
     public void test_for_jsonpath() throws Exception {
         String str = "cartGroups[0].cartItemGroups[0].cartItems[0].item.category.categoryExtra.stdCategoryDO.pathList";
-        JSONPathMulti path = (JSONPathMulti) JSONPath.of(str);
+        JSONPath path = JSONPath.of(str);
         List segments = path.segments;
         assertEquals(11, segments.size());
     }

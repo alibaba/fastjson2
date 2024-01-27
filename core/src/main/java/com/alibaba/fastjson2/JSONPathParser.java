@@ -11,47 +11,29 @@ class JSONPathParser {
     final String path;
     final JSONReader jsonReader;
 
-    boolean dollar;
-    boolean lax;
-    boolean strict;
-
-    int segmentIndex;
-    JSONPathSegment first;
-    JSONPathSegment second;
-
-    List<JSONPathSegment> segments;
-
-    boolean negative;
+    final boolean dollar;
 
     public JSONPathParser(String str) {
         this.jsonReader = JSONReader.of(this.path = str, JSONPath.PARSE_CONTEXT);
 
-        if (jsonReader.ch == 'l' && jsonReader.nextIfMatchIdent('l', 'a', 'x')) {
-            lax = true;
-        } else if (jsonReader.ch == 's' && jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't')) {
-            strict = true;
-        }
-
         if (jsonReader.ch == '-') {
-            jsonReader.next();
-            negative = true;
+            throw new JSONException("not support '-'");
         }
 
         if (jsonReader.ch == '$') {
             jsonReader.next();
             dollar = true;
+        } else {
+            this.dollar = false;
         }
     }
 
     JSONPath parse() {
         if (dollar && jsonReader.ch == EOI) {
-            if (negative) {
-                throw new JSONException("not support '-'");
-            } else {
-                return JSONPath.RootPath.INSTANCE;
-            }
+            return JSONPath.ROOT;
         }
 
+        List<JSONPathSegment> segments = new ArrayList<>();
         while (jsonReader.ch != EOI) {
             final JSONPathSegment segment;
 
@@ -59,12 +41,10 @@ class JSONPathParser {
             if (ch == '.') {
                 jsonReader.next();
                 segment = parseProperty();
-            } else if (jsonReader.ch == '[') {
+            } else if (ch == '[') {
                 segment = parseArrayAccess();
             } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_') {
                 segment = parseProperty();
-            } else if (ch == '?') {
-                throw new JSONException("not support filter '?'");
             } else if (ch == '@') {
                 jsonReader.next();
                 segment = JSONPathSegment.SelfSegment.INSTANCE;
@@ -72,45 +52,10 @@ class JSONPathParser {
                 throw new JSONException("not support " + ch);
             }
 
-            if (segmentIndex == 0) {
-                first = segment;
-            } else if (segmentIndex == 1) {
-                second = segment;
-            } else if (segmentIndex == 2) {
-                segments = new ArrayList<>();
-                segments.add(first);
-                segments.add(second);
-                segments.add(segment);
-            } else {
-                segments.add(segment);
-            }
-            segmentIndex++;
+            segments.add(segment);
         }
 
-        if (negative) {
-            throw new JSONException("not support '-'");
-        }
-
-        if (segmentIndex == 1) {
-            if (first instanceof JSONPathSegmentName) {
-                return new JSONPathSingleName(path, (JSONPathSegmentName) first);
-            }
-
-            if (first instanceof JSONPathSegmentIndex) {
-                JSONPathSegmentIndex firstIndex = (JSONPathSegmentIndex) first;
-                if (firstIndex.index >= 0) {
-                    return new JSONPathSingleIndex(path, firstIndex);
-                }
-            }
-
-            return new JSONPathSingle(first, path);
-        }
-
-        if (segmentIndex == 2) {
-            return new JSONPathTwoSegment(path, first, second);
-        }
-
-        return new JSONPathMulti(path, segments);
+        return new JSONPath(path, segments, false, false);
     }
 
     private JSONPathSegment parseArrayAccess() {

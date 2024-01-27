@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONPObject;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.*;
@@ -808,10 +807,6 @@ public class ObjectWriterModule {
 
             if (TimeZone.class.isAssignableFrom(clazz)) {
                 return ObjectWriterImplTimeZone.INSTANCE;
-            }
-
-            if (JSONPObject.class.isAssignableFrom(clazz)) {
-                return new ObjectWriterImplJSONP();
             }
 
             if (clazz == URI.class

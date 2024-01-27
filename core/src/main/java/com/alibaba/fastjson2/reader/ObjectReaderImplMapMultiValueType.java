@@ -28,7 +28,7 @@ public class ObjectReaderImplMapMultiValueType
 
     public ObjectReaderImplMapMultiValueType(MapMultiValueType multiValueType) {
         this.multiValueType = multiValueType;
-        mapType = multiValueType.getMapType();
+        mapType = multiValueType.mapType;
 
         Class instanceType = mapType;
         Function builder = null;
