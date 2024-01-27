@@ -349,7 +349,7 @@ public class ObjectReaderBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    if ("using".equals(name)) {
+                    if ("using".equals(name) || "contentUsing".equals(name)) {
                         Class using = processUsing((Class) result);
                         if (using != null) {
                             beanInfo.deserializer = using;
