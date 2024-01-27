@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.issues_2200;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,14 @@ public class Issue2211 {
     public void test() {
         UserDo userDo = new UserDo();
         String json = JSON.toJSONString(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString);
+        assertEquals("{\"b1\":true,\"d0\":0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
+    }
+
+    @Test
+    public void testNonASM() {
+        UserDo userDo = new UserDo();
+        ObjectWriter objectWriter = new ObjectWriterProvider().getObjectWriter(UserDo.class);
+        String json = objectWriter.toJSONString(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString);
         assertEquals("{\"b1\":true,\"d0\":0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
     }
 
