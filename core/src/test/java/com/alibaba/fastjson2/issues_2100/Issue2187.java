@@ -1,17 +1,16 @@
 package com.alibaba.fastjson2.issues_2100;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.*;
+import com.google.common.collect.Lists;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue2187 {
     @Test
@@ -68,5 +67,56 @@ public class Issue2187 {
 
     public static class Bean4 {
         public List<Bean4> values;
+    }
+
+    @Data
+    public class DynFormDto {
+        private String sysName;
+        private String name;
+        private boolean enableTab;
+        private int labelColSize;
+        private String title;
+        private String hint;
+        private List<DynFormComponentDto> componentList;
+        private String notes;
+    }
+
+    @Data
+    public class DynFormComponentDto {
+        private String name;
+        private String nameText;
+        private String functionName;
+        private String compTypeName;
+        private JSONObject props; // 组件完整配置
+        private int widthColSize;
+        protected int widthPercentage; //宽度百分比
+        private String tabName;
+        private boolean enabled;
+        private long uid;
+        private long parentFieldId;
+
+        private List<DynFormComponentDto> subComponentList; //子组件集合
+
+        public List<DynFormComponentDto> getFlatComponentDtos(){
+            List<DynFormComponentDto> flatList = Lists.newArrayList();
+            flatList.add(this);
+            if(this.subComponentList!=null) {
+                for(DynFormComponentDto tmpDto : this.subComponentList) {
+                    tmpDto.setParentFieldId(this.uid);
+                    flatList.addAll(tmpDto.getFlatComponentDtos());
+                }
+            }
+            return flatList;
+        }
+    }
+
+    @Test
+    public void test5() {
+        String dfDtoJsonStr = "{\"componentList\":[{\"compTypeName\":\"Text\",\"enabled\":true,\"name\":\"notes\",\"nameText\":\"备注\",\"parentFieldId\":0,\"props\":{\"compTypeNameText\":\"文本框\",\"fieldName\":\"notes\",\"notes\":\"\",\"widthColSize\":2,\"widthPercentage\":\"80\",\"nameText\":\"备注\",\"type\":\"SingleField\",\"compTypeName\":\"Text\",\"parentFieldId\":0,\"enabled\":true,\"uid\":156592457733,\"structType\":\"Single\",\"valueType\":\"String\",\"name\":\"notes\",\"readonly\":false,\"required\":false},\"structType\":\"Single\",\"subComponentList\":[],\"uid\":156592457733,\"widthColSize\":2,\"widthPercentage\":0}],\"enableTab\":false,\"hint\":\"\",\"id\":0,\"labelColSize\":2,\"name\":\"test_test\",\"notes\":\"\",\"sysName\":\"StandingBook\",\"title\":\"\"}";
+        DynFormDto dfDto = JSON.parseObject(dfDtoJsonStr, DynFormDto.class, JSONReader.Feature.FieldBased);
+        JSONObject dfDtoJson = (JSONObject)JSON.toJSON(dfDto);
+        assertNotNull(dfDtoJson);
+        JSONArray jsonArray = dfDtoJson.getJSONArray("componentList").getJSONObject(0).getJSONArray("subComponentList");
+        System.out.println(jsonArray);
     }
 }
