@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -97,11 +96,11 @@ public class Issue2187 {
 
         private List<DynFormComponentDto> subComponentList; //子组件集合
 
-        public List<DynFormComponentDto> getFlatComponentDtos(){
+        public List<DynFormComponentDto> getFlatComponentDtos() {
             List<DynFormComponentDto> flatList = Lists.newArrayList();
             flatList.add(this);
-            if(this.subComponentList!=null) {
-                for(DynFormComponentDto tmpDto : this.subComponentList) {
+            if (this.subComponentList != null) {
+                for (DynFormComponentDto tmpDto : this.subComponentList) {
                     tmpDto.setParentFieldId(this.uid);
                     flatList.addAll(tmpDto.getFlatComponentDtos());
                 }
@@ -114,9 +113,9 @@ public class Issue2187 {
     public void test5() {
         String dfDtoJsonStr = "{\"componentList\":[{\"compTypeName\":\"Text\",\"enabled\":true,\"name\":\"notes\",\"nameText\":\"备注\",\"parentFieldId\":0,\"props\":{\"compTypeNameText\":\"文本框\",\"fieldName\":\"notes\",\"notes\":\"\",\"widthColSize\":2,\"widthPercentage\":\"80\",\"nameText\":\"备注\",\"type\":\"SingleField\",\"compTypeName\":\"Text\",\"parentFieldId\":0,\"enabled\":true,\"uid\":156592457733,\"structType\":\"Single\",\"valueType\":\"String\",\"name\":\"notes\",\"readonly\":false,\"required\":false},\"structType\":\"Single\",\"subComponentList\":[],\"uid\":156592457733,\"widthColSize\":2,\"widthPercentage\":0}],\"enableTab\":false,\"hint\":\"\",\"id\":0,\"labelColSize\":2,\"name\":\"test_test\",\"notes\":\"\",\"sysName\":\"StandingBook\",\"title\":\"\"}";
         DynFormDto dfDto = JSON.parseObject(dfDtoJsonStr, DynFormDto.class, JSONReader.Feature.FieldBased);
-        JSONObject dfDtoJson = (JSONObject)JSON.toJSON(dfDto);
+        JSONObject dfDtoJson = (JSONObject) JSON.toJSON(dfDto);
         assertNotNull(dfDtoJson);
-        JSONArray jsonArray = dfDtoJson.getJSONArray("componentList").getJSONObject(0).getJSONArray("subComponentList");
-        System.out.println(jsonArray);
+        JSONArray jsonArray = dfDtoJson.getJSONArray("componentList").getJSONObject(0).getJSONArray("flatComponentDtos");
+        JSON.toJSONString(jsonArray, JSONWriter.Feature.ReferenceDetection);
     }
 }
