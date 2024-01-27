@@ -223,7 +223,7 @@ public abstract class BeanUtils {
             return;
         }
 
-        if (ignore(objectClass) || objectClass.getName().contains("$$Lambda")) {
+        if (ignore(objectClass) || objectClass.getName().contains("$$Lambda") || JdbcSupport.isStruct(objectClass)) {
             return;
         }
 
@@ -844,6 +844,7 @@ public abstract class BeanUtils {
         }
 
         boolean record = isRecord(objectClass);
+        boolean jdbcStruct = JdbcSupport.isStruct(objectClass);
 
         String[] recordFieldNames = null;
         if (record) {
@@ -880,6 +881,11 @@ public abstract class BeanUtils {
             }
 
             String methodName = method.getName();
+            if (jdbcStruct) {
+                if (!"getSQLTypeName".equals(methodName) && !"getAttributes".equals(methodName)) {
+                    continue;
+                }
+            }
 
             boolean methodSkip = false;
             switch (methodName) {
