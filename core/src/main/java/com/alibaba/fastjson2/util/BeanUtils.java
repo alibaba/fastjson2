@@ -1319,7 +1319,6 @@ public abstract class BeanUtils {
             case "UpperCaseWithDots":
                 return dots(methodName, prefixLength, true);
             case "KebabCase": {
-                StringBuilder buf = new StringBuilder();
                 final int firstIndex;
                 if (is) {
                     firstIndex = 2;
@@ -1329,17 +1328,16 @@ public abstract class BeanUtils {
                     firstIndex = 0;
                 }
 
+                StringBuilder buf = new StringBuilder();
                 for (int i = firstIndex; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char chUcase = (char) (ch + 32);
+                        ch = (char) (ch + 32);
                         if (i > firstIndex) {
                             buf.append('-');
                         }
-                        buf.append(chUcase);
-                    } else {
-                        buf.append(ch);
                     }
+                    buf.append(ch);
                 }
                 return buf.toString();
             }
@@ -1446,14 +1444,12 @@ public abstract class BeanUtils {
                 for (int i = 0; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char chUcase = (char) (ch + 32);
+                        ch = (char) (ch + 32);
                         if (i > 0) {
                             buf.append('-');
                         }
-                        buf.append(chUcase);
-                    } else {
-                        buf.append(ch);
                     }
+                    buf.append(ch);
                 }
                 return buf.toString();
             }
@@ -1474,14 +1470,12 @@ public abstract class BeanUtils {
             for (int i = prefixLength; i < methodNameLength; ++i) {
                 char ch = methodName.charAt(i);
                 if (ch >= 'A' && ch <= 'Z') {
-                    char chUcase = (char) (ch + 32);
+                    ch = (char) (ch + 32);
                     if (i > prefixLength) {
                         buf[off++] = '_';
                     }
-                    buf[off++] = chUcase;
-                } else {
-                    buf[off++] = ch;
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1506,16 +1500,13 @@ public abstract class BeanUtils {
                             && i + 1 < methodNameLength
                             && (c1 = methodName.charAt(i + 1)) >= 'a'
                             && c1 <= 'z') {
-                        buf[off++] = (char) (ch - 32);
+                        ch = (char) (ch - 32);
                     } else if (ch == '_' && i + 1 < methodNameLength
                             && (c1 = methodName.charAt(i + 1)) >= 'a'
                             && c1 <= 'z') {
-                        buf[off] = ch;
-                        buf[off + 1] = (char) (c1 - 32);
-                        off += 2;
-                        ++i;
-                    } else {
                         buf[off++] = ch;
+                        ch = (char) (c1 - 32);
+                        ++i;
                     }
                 } else if (ch >= 'A' && ch <= 'Z'
                         && i + 1 < methodNameLength
@@ -1523,7 +1514,6 @@ public abstract class BeanUtils {
                     if (i > prefixLength) {
                         buf[off++] = separator;
                     }
-                    buf[off++] = ch;
                 } else if (ch >= 'A' && ch <= 'Z'
                         && i > prefixLength
                         && i + 1 < methodNameLength
@@ -1532,10 +1522,8 @@ public abstract class BeanUtils {
                         && (c1 = methodName.charAt(i - 1)) >= 'a'
                         && c1 <= 'z') {
                     buf[off++] = separator;
-                    buf[off++] = ch;
-                } else {
-                    buf[off++] = ch;
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1555,26 +1543,24 @@ public abstract class BeanUtils {
             for (int i = prefixLength; i < methodNameLength; ++i) {
                 char ch = methodName.charAt(i);
                 if (upper) {
-                    if (ch >= 'A' && ch <= 'Z') {
-                        if (i > prefixLength) {
-                            buf[off++] = '_';
-                        }
-                    } else {
+                    if (ch < 'A' || ch > 'Z') {
                         if (ch >= 'a' && ch <= 'z') {
                             ch -= 32;
                         }
+                    } else {
+                        if (i > prefixLength) {
+                            buf[off++] = '_';
+                        }
                     }
-                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
                             buf[off++] = '_';
                         }
-                        buf[off++] = (char) (ch + 32);
-                    } else {
-                        buf[off++] = ch;
+                        ch = (char) (ch + 32);
                     }
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1603,17 +1589,15 @@ public abstract class BeanUtils {
                             ch -= 32;
                         }
                     }
-                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
                             buf[off++] = '-';
                         }
-                        buf[off++] = (char) (ch + 32);
-                    } else {
-                        buf[off++] = ch;
+                        ch = (char) (ch + 32);
                     }
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1642,17 +1626,15 @@ public abstract class BeanUtils {
                             ch -= 32;
                         }
                     }
-                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
                             buf[off++] = '.';
                         }
-                        buf[off++] = (char) (ch + 32);
-                    } else {
-                        buf[off++] = ch;
+                        ch = (char) (ch + 32);
                     }
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1661,12 +1643,7 @@ public abstract class BeanUtils {
     }
 
     public static Type getFieldType(TypeReference typeReference, Class<?> raw, Member field, Type fieldType) {
-        Class<?> declaringClass;
-        if (field == null) {
-            declaringClass = null;
-        } else {
-            declaringClass = field.getDeclaringClass();
-        }
+        final Class<?> declaringClass = field == null ? null : field.getDeclaringClass();
 
         while (raw != Object.class) {
             Type type = typeReference == null ? null : typeReference.getType();
@@ -1728,13 +1705,11 @@ public abstract class BeanUtils {
      * this returns {@code ?}, which is shorthand for {@code ? extends Object}.
      */
     public static WildcardType subtypeOf(Type bound) {
-        Type[] upperBounds;
-        if (bound instanceof WildcardType) {
-            upperBounds = ((WildcardType) bound).getUpperBounds();
-        } else {
-            upperBounds = new Type[]{bound};
-        }
-        return new WildcardTypeImpl(upperBounds, EMPTY_TYPE_ARRAY);
+        return new WildcardTypeImpl(
+                bound instanceof WildcardType
+                        ? ((WildcardType) bound).getUpperBounds()
+                        : new Type[]{bound},
+                EMPTY_TYPE_ARRAY);
     }
 
     /**
@@ -1743,13 +1718,12 @@ public abstract class BeanUtils {
      * super String}.
      */
     public static WildcardType supertypeOf(Type bound) {
-        Type[] lowerBounds;
-        if (bound instanceof WildcardType) {
-            lowerBounds = ((WildcardType) bound).getLowerBounds();
-        } else {
-            lowerBounds = new Type[]{bound};
-        }
-        return new WildcardTypeImpl(new Type[]{Object.class}, lowerBounds);
+        return new WildcardTypeImpl(
+                new Type[]{Object.class},
+                bound instanceof WildcardType
+                        ? ((WildcardType) bound).getLowerBounds()
+                        : new Type[]{bound}
+        );
     }
 
     /**

@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.impl.ToBigDecimal;
+import com.alibaba.fastjson2.function.impl.ToAny;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 final class ObjectReaderImplBigDecimal
         extends ObjectReaderPrimitive {
-    private Function converter = new ToBigDecimal();
+    private Function converter = new ToAny(BigDecimal.class);
     static final ObjectReaderImplBigDecimal INSTANCE = new ObjectReaderImplBigDecimal(null);
 
     final Function<BigDecimal, Object> function;

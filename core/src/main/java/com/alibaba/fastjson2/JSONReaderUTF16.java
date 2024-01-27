@@ -16,13 +16,13 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 
-class JSONReaderUTF16
+final class JSONReaderUTF16
         extends JSONReader {
-    protected final String str;
-    protected final char[] chars;
-    protected final int length;
-    protected final int start;
-    protected final int end;
+    protected String str;
+    protected char[] chars;
+    protected int length;
+    protected int start;
+    protected int end;
 
     private int nameBegin;
     private int nameEnd;
@@ -85,7 +85,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final byte[] readHex() {
+    public byte[] readHex() {
         if (ch == 'x') {
             next();
         }
@@ -167,7 +167,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean isReference() {
+    public boolean isReference() {
         // should be codeSize <= FreqInlineSize 325
         final char[] chars = this.chars;
         char ch = this.ch;
@@ -237,7 +237,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final String readReference() {
+    public String readReference() {
         if (referenceBegin == end) {
             return null;
         }
@@ -522,7 +522,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfMatch(char m) {
+    public boolean nextIfMatch(char m) {
         final char[] chars = this.chars;
         int offset = this.offset;
         char ch = this.ch;
@@ -564,7 +564,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfComma() {
+    public boolean nextIfComma() {
         final char[] chars = this.chars;
         int offset = this.offset;
         char ch = this.ch;
@@ -613,7 +613,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfArrayStart() {
+    public boolean nextIfArrayStart() {
         char ch = this.ch;
         if (ch != '[') {
             return false;
@@ -647,7 +647,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfArrayEnd() {
+    public boolean nextIfArrayEnd() {
         char ch = this.ch;
         if (ch == '}' || ch == EOI) {
             throw new JSONException(info("Illegal syntax: `" + ch + '`'));
@@ -698,7 +698,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfNullOrEmptyString() {
+    public boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
         final int end = this.end;
         int offset = this.offset;
@@ -757,7 +757,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2) {
+    public boolean nextIfMatchIdent(char c0, char c1, char c2) {
         if (ch != c0) {
             return false;
         }
@@ -794,7 +794,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
         if (ch != c0) {
             return false;
         }
@@ -835,7 +835,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4) {
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4) {
         if (ch != c0) {
             return false;
         }
@@ -877,7 +877,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
         if (ch != c0) {
             return false;
         }
@@ -920,7 +920,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfSet() {
+    public boolean nextIfSet() {
         final char[] chars = this.chars;
         int offset = this.offset;
         char ch = this.ch;
@@ -950,7 +950,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfInfinity() {
+    public boolean nextIfInfinity() {
         final char[] chars = this.chars;
         int offset = this.offset;
         char ch = this.ch;
@@ -985,7 +985,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfObjectStart() {
+    public boolean nextIfObjectStart() {
         char ch = this.ch;
         if (ch != '{') {
             return false;
@@ -1018,7 +1018,7 @@ class JSONReaderUTF16
         return true;
     }
 
-    public final boolean nextIfObjectEnd() {
+    public boolean nextIfObjectEnd() {
         char ch = this.ch;
         if (ch == ']' || ch == EOI) {
             throw new JSONException(info("Illegal syntax: `" + ch + '`'));
@@ -1069,7 +1069,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final void next() {
+    public void next() {
         int offset = this.offset;
         if (offset >= end) {
             ch = EOI;
@@ -1095,7 +1095,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final long readFieldNameHashCodeUnquote() {
+    public long readFieldNameHashCodeUnquote() {
         this.nameEscape = false;
         this.nameBegin = this.offset - 1;
         char first = ch;
@@ -1341,7 +1341,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final long readFieldNameHashCode() {
+    public long readFieldNameHashCode() {
         final char[] chars = this.chars;
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
@@ -1644,7 +1644,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final long readValueHashCode() {
+    public long readValueHashCode() {
         if (ch != '"' && ch != '\'') {
             return -1;
         }
@@ -1819,7 +1819,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final long getNameHashCodeLCase() {
+    public long getNameHashCodeLCase() {
         int offset = nameBegin;
 
         {
@@ -1957,7 +1957,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final String getFieldName() {
+    public String getFieldName() {
         if (!nameEscape) {
             if (this.str != null) {
                 return this.str.substring(nameBegin, nameEnd);
@@ -2016,7 +2016,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final String readFieldName() {
+    public String readFieldName() {
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameUnquote();
@@ -2610,7 +2610,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean skipName() {
+    public boolean skipName() {
         char ch = this.ch;
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
@@ -2677,7 +2677,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final int readInt32Value() {
+    public int readInt32Value() {
         boolean negative = false;
         int firstOffset = offset;
         final char firstChar = ch;
@@ -2805,7 +2805,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final Integer readInt32() {
+    public Integer readInt32() {
         boolean negative = false;
         int firstOffset = offset;
         char firstChar = ch;
@@ -2948,7 +2948,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final long readInt64Value() {
+    public long readInt64Value() {
         boolean negative = false;
         final int firstOffset = offset;
         final char firstChar = ch;
@@ -3073,7 +3073,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final Long readInt64() {
+    public Long readInt64() {
         boolean negative = false;
         int firstOffset = offset;
         char firstChar = ch;
@@ -3204,7 +3204,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final double readDoubleValue() {
+    public double readDoubleValue() {
         this.wasNull = false;
 
         boolean value = false;
@@ -3508,7 +3508,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final float readFloatValue() {
+    public float readFloatValue() {
         this.wasNull = false;
 
         boolean value = false;
@@ -3872,7 +3872,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final String getString() {
+    public String getString() {
         if (stringValue != null) {
             return stringValue;
         }
@@ -3921,7 +3921,7 @@ class JSONReaderUTF16
         return stringValue = new String(chars);
     }
 
-    protected final void readString0() {
+    protected void readString0() {
         char quote = this.ch;
         int offset = this.offset;
         int start = offset;
@@ -4222,7 +4222,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final void skipValue() {
+    public void skipValue() {
         final char[] chars = this.chars;
         switch (ch) {
             case '[': {
@@ -4514,7 +4514,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final void skipComment() {
+    public void skipComment() {
         int offset = this.offset;
         if (offset + 1 >= this.end) {
             throw new JSONException(info());
@@ -4582,7 +4582,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final void readNumber0() {
+    public void readNumber0() {
         this.wasNull = false;
         this.mag0 = 0;
         this.mag1 = 0;
@@ -4853,7 +4853,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean readIfNull() {
+    public boolean readIfNull() {
         if (ch == 'n'
                 && chars[offset] == 'u'
                 && chars[offset + 1] == 'l'
@@ -4891,7 +4891,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final Date readNullOrNewDate() {
+    public Date readNullOrNewDate() {
         Date date = null;
         if (offset + 2 < end
                 && chars[offset] == 'u'
@@ -4996,17 +4996,17 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean isArray() {
+    public boolean isArray() {
         return this.ch == '[';
     }
 
     @Override
-    public final boolean isNull() {
+    public boolean isNull() {
         return ch == 'n' && offset < end && chars[offset] == 'u';
     }
 
     @Override
-    public final boolean nextIfNull() {
+    public boolean nextIfNull() {
         if (ch == 'n' && offset + 2 < end && chars[offset] == 'u') {
             this.readNull();
             return true;
@@ -5015,7 +5015,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final void readNull() {
+    public void readNull() {
         if (chars[offset] == 'u'
                 && chars[offset + 1] == 'l'
                 && chars[offset + 2] == 'l') {
@@ -5053,7 +5053,7 @@ class JSONReaderUTF16
         }
     }
 
-    public final BigDecimal readBigDecimal() {
+    public BigDecimal readBigDecimal() {
         final char[] chars = this.chars;
         boolean value = false;
 
@@ -5315,7 +5315,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final UUID readUUID() {
+    public UUID readUUID() {
         char ch = this.ch;
         if (ch == 'n') {
             readNull();
@@ -5417,7 +5417,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final int getStringLength() {
+    public int getStringLength() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5452,7 +5452,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTime14() {
+    protected LocalDateTime readLocalDateTime14() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5471,7 +5471,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTime12() {
+    protected LocalDateTime readLocalDateTime12() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5490,7 +5490,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTime16() {
+    protected LocalDateTime readLocalDateTime16() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5509,7 +5509,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTime17() {
+    protected LocalDateTime readLocalDateTime17() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5528,7 +5528,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTime18() {
+    protected LocalDateTime readLocalDateTime18() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5544,7 +5544,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalTime readLocalTime5() {
+    protected LocalTime readLocalTime5() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
@@ -5564,7 +5564,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalTime readLocalTime8() {
+    protected LocalTime readLocalTime8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
@@ -5584,7 +5584,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final LocalDate readLocalDate8() {
+    public LocalDate readLocalDate8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -5605,7 +5605,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final LocalDate readLocalDate9() {
+    public LocalDate readLocalDate9() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -5626,7 +5626,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final LocalDate readLocalDate10() {
+    public LocalDate readLocalDate10() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -5651,7 +5651,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final LocalDate readLocalDate11() {
+    public LocalDate readLocalDate11() {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -5669,7 +5669,7 @@ class JSONReaderUTF16
         return ldt;
     }
 
-    public final LocalDate readLocalDate() {
+    public LocalDate readLocalDate() {
         final char[] chars = this.chars;
         if (this.ch == '"' || this.ch == '\'') {
             if (context.dateFormat == null
@@ -5750,7 +5750,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final ZonedDateTime readZonedDateTimeX(int len) {
+    protected ZonedDateTime readZonedDateTimeX(int len) {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5789,7 +5789,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTime19() {
+    protected LocalDateTime readLocalDateTime19() {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5808,7 +5808,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTime20() {
+    protected LocalDateTime readLocalDateTime20() {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5827,7 +5827,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final long readMillis19() {
+    public long readMillis19() {
         char quote = ch;
         if (quote != '"' && quote != '\'') {
             throw new JSONException("date only support string input");
@@ -5854,7 +5854,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalDateTime readLocalDateTimeX(int len) {
+    protected LocalDateTime readLocalDateTimeX(int len) {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");
         }
@@ -5873,7 +5873,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalTime readLocalTime10() {
+    protected LocalTime readLocalTime10() {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
@@ -5893,7 +5893,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalTime readLocalTime11() {
+    protected LocalTime readLocalTime11() {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
@@ -5913,7 +5913,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalTime readLocalTime12() {
+    protected LocalTime readLocalTime12() {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
@@ -5933,7 +5933,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    protected final LocalTime readLocalTime18() {
+    protected LocalTime readLocalTime18() {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
@@ -5953,7 +5953,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final String readPattern() {
+    public String readPattern() {
         if (ch != '/') {
             throw new JSONException("illegal pattern");
         }
@@ -6003,7 +6003,7 @@ class JSONReaderUTF16
         return str;
     }
 
-    public final boolean readBoolValue() {
+    public boolean readBoolValue() {
         wasNull = false;
         boolean val;
         final char[] chars = this.chars;
@@ -6112,7 +6112,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final String info(String message) {
+    public String info(String message) {
         int line = 1, column = 0;
         for (int i = 0; i < offset & i < end; i++, column++) {
             if (chars[i] == '\n') {
@@ -6141,7 +6141,7 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final void close() {
+    public void close() {
         if (cacheIndex != -1 && chars.length < CACHE_THRESHOLD) {
             final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
             CHARS_UPDATER.lazySet(cacheItem, chars);

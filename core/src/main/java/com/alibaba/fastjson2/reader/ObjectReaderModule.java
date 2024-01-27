@@ -1218,10 +1218,6 @@ public final class ObjectReaderModule {
                 return new ObjectArrayTypedReader(objectClass);
             }
 
-            if (JSONPObject.class.isAssignableFrom(objectClass)) {
-                return new ObjectReaderImplJSONP(objectClass);
-            }
-
             ObjectReaderCreator creator = JSONFactory
                     .defaultObjectReaderProvider
                     .creator;

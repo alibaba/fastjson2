@@ -15,6 +15,7 @@ public class JDKUtils {
     public static final Unsafe UNSAFE;
     public static final long ARRAY_BYTE_BASE_OFFSET;
     public static final long ARRAY_CHAR_BASE_OFFSET;
+    public static final int ANDROID_SDK_INT;
 
     static {
         Unsafe unsafe = null;
@@ -64,6 +65,16 @@ public class JDKUtils {
             // ignored
         }
         FIELD_DECIMAL_INT_COMPACT_OFFSET = fieldOffset;
+
+        int android_sdk_int = -1;
+        try {
+            android_sdk_int = Class.forName("android.os.Build$VERSION")
+                    .getField("SDK_INT")
+                    .getInt(null);
+        } catch (Throwable ignored) {
+            // ignored
+        }
+        ANDROID_SDK_INT = android_sdk_int;
     }
 
     public static boolean isSQLDataSourceOrRowSet(Class<?> type) {

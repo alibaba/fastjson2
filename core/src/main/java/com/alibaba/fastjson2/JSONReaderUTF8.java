@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.JDKUtils.ANDROID_SDK_INT;
 
 class JSONReaderUTF8
         extends JSONReader {
@@ -1145,17 +1146,13 @@ class JSONReaderUTF8
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            byte c3 = bytes[++offset];
-                            byte c4 = bytes[++offset];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            offset += 4;
                             break;
                         }
                         case 'x': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            c = char2(c1, c2);
+                            c = char2(bytes[offset + 1], bytes[offset + 2]);
+                            offset += 2;
                             break;
                         }
                         case '\\':
@@ -1223,17 +1220,13 @@ class JSONReaderUTF8
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            byte c3 = bytes[++offset];
-                            byte c4 = bytes[++offset];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            offset += 4;
                             break;
                         }
                         case 'x': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            c = char2(c1, c2);
+                            c = char2(bytes[offset + 1], bytes[offset + 2]);
+                            offset += 2;
                             break;
                         }
                         case '\\':
@@ -1337,6 +1330,7 @@ class JSONReaderUTF8
 
         this.nameAscii = true;
         this.nameEscape = false;
+        final byte[] bytes = this.bytes;
         int offset = this.nameBegin = this.offset;
 
         long nameValue = 0;
@@ -1362,17 +1356,13 @@ class JSONReaderUTF8
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            byte c3 = bytes[++offset];
-                            byte c4 = bytes[++offset];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            offset += 4;
                             break;
                         }
                         case 'x': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            c = char2(c1, c2);
+                            c = char2(bytes[offset + 1], bytes[offset + 2]);
+                            offset += 2;
                             break;
                         }
                         case '\\':
@@ -1437,17 +1427,13 @@ class JSONReaderUTF8
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            byte c3 = bytes[++offset];
-                            byte c4 = bytes[++offset];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            offset += 4;
                             break;
                         }
                         case 'x': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            c = char2(c1, c2);
+                            c = char2(bytes[offset + 1], bytes[offset + 2]);
+                            offset += 2;
                             break;
                         }
                         case '\\':
@@ -1765,6 +1751,10 @@ class JSONReaderUTF8
     }
 
     final String getLatin1String(int offset, int length) {
+        if (JDKUtils.ANDROID_SDK_INT >= 34) {
+            return new String(bytes, offset, length, IOUtils.ISO_8859_1);
+        }
+
         char[] charBuf = this.charBuf;
         if (charBuf == null) {
             this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
@@ -2188,17 +2178,21 @@ class JSONReaderUTF8
 
             if (nameAscii) {
                 // optimization for android
-                char[] charBuf = this.charBuf;
-                if (charBuf == null) {
-                    this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+                if (ANDROID_SDK_INT < 34) {
+                    char[] charBuf = this.charBuf;
+                    if (charBuf == null) {
+                        this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+                    }
+                    if (charBuf == null || charBuf.length < length) {
+                        this.charBuf = charBuf = new char[length];
+                    }
+                    for (int i = 0; i < length; i++) {
+                        charBuf[i] = (char) bytes[nameBegin + i];
+                    }
+                    return new String(charBuf, 0, length);
+                } else {
+                    return new String(bytes, nameBegin, length, IOUtils.ISO_8859_1);
                 }
-                if (charBuf == null || charBuf.length < length) {
-                    this.charBuf = charBuf = new char[length];
-                }
-                for (int i = 0; i < length; i++) {
-                    charBuf[i] = (char) bytes[nameBegin + i];
-                }
-                return new String(charBuf, 0, length);
             }
 
             return new String(bytes, nameBegin, length, IOUtils.UTF_8);
@@ -4525,21 +4519,25 @@ class JSONReaderUTF8
                 } else {
                     int len = off - this.offset;
 
-                    char[] charBuf = this.charBuf;
-                    if (charBuf == null) {
-                        this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
-                    }
-                    if (charBuf == null || charBuf.length < len) {
-                        this.charBuf = charBuf = new char[len];
-                    }
-                    for (int i = 0; i < len; i++) {
-                        charBuf[i] = (char) bytes[nameBegin + i];
-                    }
+                    if (ANDROID_SDK_INT < 34) {
+                        char[] charBuf = this.charBuf;
+                        if (charBuf == null) {
+                            this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+                        }
+                        if (charBuf == null || charBuf.length < len) {
+                            this.charBuf = charBuf = new char[len];
+                        }
+                        for (int i = 0; i < len; i++) {
+                            charBuf[i] = (char) bytes[nameBegin + i];
+                        }
 
-                    for (int i = 0; i < len; i++) {
-                        charBuf[i] = (char) bytes[this.offset + i];
+                        for (int i = 0; i < len; i++) {
+                            charBuf[i] = (char) bytes[this.offset + i];
+                        }
+                        str = new String(charBuf, 0, len);
+                    } else {
+                        str = new String(bytes, this.offset, len, IOUtils.ISO_8859_1);
                     }
-                    str = new String(charBuf, 0, len);
                 }
             } else {
                 str = new String(bytes, this.offset, off - this.offset, IOUtils.UTF_8);
@@ -6865,8 +6863,15 @@ class JSONReaderUTF8
 
     @Override
     public final void close() {
+        CacheItem cacheItem = this.cacheItem;
+        final byte[] byteBuf = this.byteBuf;
         if (byteBuf != null && byteBuf.length < CACHE_THRESHOLD) {
             BYTES_UPDATER.lazySet(cacheItem, byteBuf);
+        }
+
+        final char[] charBuf = this.charBuf;
+        if (charBuf != null && charBuf.length < CACHE_THRESHOLD) {
+            CHARS_UPDATER.lazySet(cacheItem, charBuf);
         }
 
         if (in != null) {

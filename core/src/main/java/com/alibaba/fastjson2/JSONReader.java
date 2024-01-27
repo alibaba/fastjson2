@@ -152,12 +152,9 @@ public abstract class JSONReader
             FieldReader fieldReader = resolveTask.fieldReader;
 
             Object fieldValue;
-            if (path.isPrevious()) {
+            if (path.previous) {
                 fieldValue = previous;
             } else {
-                if (!path.isRef()) {
-                    throw new JSONException("reference path invalid : " + path);
-                }
                 path.readerContext = context;
                 if ((context.features & Feature.FieldBased.mask) != 0) {
                     JSONWriter.Context writeContext = JSONFactory.createWriteContext();
@@ -2851,15 +2848,11 @@ public abstract class JSONReader
             return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
-        throw new JSONException("not support charset " + charset);
+        return of(new String(bytes, offset, length, charset), context);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
         if (charset == IOUtils.UTF_8) {
-            if (offset == 0 && bytes.length == length) {
-                return of(bytes, context);
-            }
-
             return new JSONReaderUTF8(context, null, bytes, offset, length);
         }
 
@@ -2871,7 +2864,7 @@ public abstract class JSONReader
             return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
-        throw new JSONException("not support charset " + charset);
+        return of(new String(bytes, offset, length, charset), context);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length) {

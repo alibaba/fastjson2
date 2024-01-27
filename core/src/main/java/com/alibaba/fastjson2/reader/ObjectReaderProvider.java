@@ -584,92 +584,92 @@ public class ObjectReaderProvider {
                 AtomicLong.class,
         };
 
-        Function<Object, Boolean> TO_BOOLEAN = new ToBoolean(null);
+        Function<Object, Boolean> TO_BOOLEAN = new ToAny(Boolean.class, null);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Boolean.class, TO_BOOLEAN);
         }
 
-        Function<Object, Boolean> TO_BOOLEAN_VALUE = new ToBoolean(Boolean.FALSE);
+        Function<Object, Boolean> TO_BOOLEAN_VALUE = new ToAny(Boolean.class, Boolean.FALSE);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, boolean.class, TO_BOOLEAN_VALUE);
         }
 
-        Function<Object, String> TO_STRING = new ToString();
+        Function<Object, String> TO_STRING = new ToAny(String.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, String.class, TO_STRING);
         }
 
-        Function<Object, BigDecimal> TO_DECIMAL = new ToBigDecimal();
+        Function<Object, BigDecimal> TO_DECIMAL = new ToAny(BigDecimal.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, BigDecimal.class, TO_DECIMAL);
         }
 
-        Function<Object, BigInteger> TO_BIGINT = new ToBigInteger();
+        Function<Object, BigInteger> TO_BIGINT = new ToAny(BigInteger.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, BigInteger.class, TO_BIGINT);
         }
 
-        Function<Object, Byte> TO_BYTE = new ToByte(null);
+        Function<Object, Byte> TO_BYTE = new ToAny(Byte.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Byte.class, TO_BYTE);
         }
 
-        Function<Object, Byte> TO_BYTE_VALUE = new ToByte((byte) 0);
+        Function<Object, Byte> TO_BYTE_VALUE = new ToAny(Byte.class, (byte) 0);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, byte.class, TO_BYTE_VALUE);
         }
 
-        Function<Object, Short> TO_SHORT = new ToShort(null);
+        Function<Object, Short> TO_SHORT = new ToAny(Short.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Short.class, TO_SHORT);
         }
 
-        Function<Object, Short> TO_SHORT_VALUE = new ToShort((short) 0);
+        Function<Object, Short> TO_SHORT_VALUE = new ToAny(Short.class, (short) 0);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, short.class, TO_SHORT_VALUE);
         }
 
-        Function<Object, Integer> TO_INTEGER = new ToInteger(null);
+        Function<Object, Integer> TO_INTEGER = new ToAny(Integer.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Integer.class, TO_INTEGER);
         }
 
-        Function<Object, Integer> TO_INT = new ToInteger(0);
+        Function<Object, Integer> TO_INT = new ToAny(Integer.class, 0);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, int.class, TO_INT);
         }
 
-        Function<Object, Long> TO_LONG = new ToLong(null);
+        Function<Object, Long> TO_LONG = new ToAny(Long.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Long.class, TO_LONG);
         }
 
-        Function<Object, Long> TO_LONG_VALUE = new ToLong(0L);
+        Function<Object, Long> TO_LONG_VALUE = new ToAny(Long.class, 0L);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, long.class, TO_LONG_VALUE);
         }
 
-        Function<Object, Float> TO_FLOAT = new ToFloat(null);
+        Function<Object, Float> TO_FLOAT = new ToAny(Float.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Float.class, TO_FLOAT);
         }
 
-        Function<Object, Float> TO_FLOAT_VALUE = new ToFloat(0F);
+        Function<Object, Float> TO_FLOAT_VALUE = new ToAny(Float.class, 0F);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, float.class, TO_FLOAT_VALUE);
         }
 
-        Function<Object, Double> TO_DOUBLE = new ToDouble(null);
+        Function<Object, Double> TO_DOUBLE = new ToAny(Double.class);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Double.class, TO_DOUBLE);
         }
 
-        Function<Object, Double> TO_DOUBLE_VALUE = new ToDouble(0D);
+        Function<Object, Double> TO_DOUBLE_VALUE = new ToAny(Double.class, 0D);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, double.class, TO_DOUBLE_VALUE);
         }
 
-        Function<Object, Number> TO_NUMBER = new ToNumber(0D);
+        Function<Object, Number> TO_NUMBER = new ToAny(Number.class, 0D);
         for (Class type : numberTypes) {
             registerTypeConvert(typeConverts, type, Number.class, TO_NUMBER);
         }
