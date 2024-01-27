@@ -216,8 +216,7 @@ public final class ObjectReaderImplObject
                         value = jsonReader.readBoolValue();
                         break;
                     case 'n':
-                        jsonReader.readNull();
-                        value = null;
+                        value = jsonReader.readNullOrNewDate();
                         break;
                     case 'S':
                         if (jsonReader.nextIfSet()) {
