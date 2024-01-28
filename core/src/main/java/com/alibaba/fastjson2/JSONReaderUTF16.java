@@ -1493,17 +1493,13 @@ class JSONReaderUTF16
                     c = chars[++offset];
                     switch (c) {
                         case 'u': {
-                            char c1 = chars[++offset];
-                            char c2 = chars[++offset];
-                            char c3 = chars[++offset];
-                            char c4 = chars[++offset];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(chars[offset + 1], chars[offset + 2], chars[offset + 3], chars[offset + 4]);
+                            offset += 4;
                             break;
                         }
                         case 'x': {
-                            char c1 = chars[++offset];
-                            char c2 = chars[++offset];
-                            c = char2(c1, c2);
+                            c = char2(chars[offset + 1], chars[offset + 2]);
+                            offset += 2;
                             break;
                         }
                         case '\\':
@@ -1563,17 +1559,13 @@ class JSONReaderUTF16
                     c = chars[++offset];
                     switch (c) {
                         case 'u': {
-                            char c1 = chars[++offset];
-                            char c2 = chars[++offset];
-                            char c3 = chars[++offset];
-                            char c4 = chars[++offset];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(chars[offset + 1], chars[offset + 2], chars[offset + 3], chars[offset + 4]);
+                            offset += 4;
                             break;
                         }
                         case 'x': {
-                            char c1 = chars[++offset];
-                            char c2 = chars[++offset];
-                            c = char2(c1, c2);
+                            c = char2(chars[offset + 1], chars[offset + 2]);
+                            offset += 2;
                             break;
                         }
                         case '\\':
@@ -1641,6 +1633,7 @@ class JSONReaderUTF16
             return -1;
         }
 
+        final char[] chars = this.chars;
         final char quote = ch;
 
         this.nameEscape = false;
@@ -1668,17 +1661,13 @@ class JSONReaderUTF16
                 c = chars[++offset];
                 switch (c) {
                     case 'u': {
-                        char c1 = chars[++offset];
-                        char c2 = chars[++offset];
-                        char c3 = chars[++offset];
-                        char c4 = chars[++offset];
-                        c = char4(c1, c2, c3, c4);
+                        c = char4(chars[offset + 1], chars[offset + 2], chars[offset + 3], chars[offset + 4]);
+                        offset += 4;
                         break;
                     }
                     case 'x': {
-                        char c1 = chars[++offset];
-                        char c2 = chars[++offset];
-                        c = char2(c1, c2);
+                        c = char2(chars[offset + 1], chars[offset + 2]);
+                        offset += 2;
                         break;
                     }
                     case '\\':
@@ -1737,17 +1726,13 @@ class JSONReaderUTF16
                     c = chars[++offset];
                     switch (c) {
                         case 'u': {
-                            char c1 = chars[++offset];
-                            char c2 = chars[++offset];
-                            char c3 = chars[++offset];
-                            char c4 = chars[++offset];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(chars[offset + 1], chars[offset + 2], chars[offset + 3], chars[offset + 4]);
+                            offset += 4;
                             break;
                         }
                         case 'x': {
-                            char c1 = chars[++offset];
-                            char c2 = chars[++offset];
-                            c = char2(c1, c2);
+                            c = char2(chars[offset + 1], chars[offset + 2]);
+                            offset += 2;
                             break;
                         }
                         case '\\':

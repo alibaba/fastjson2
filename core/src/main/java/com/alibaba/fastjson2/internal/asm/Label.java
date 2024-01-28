@@ -228,9 +228,9 @@ public class Label {
             System.arraycopy(forwardReferences, 0, newValues, 0, forwardReferences.length);
             forwardReferences = newValues;
         }
-        forwardReferences[++lastElementIndex] = sourceInsnBytecodeOffset;
-        forwardReferences[++lastElementIndex] = referenceType | referenceHandle;
-        forwardReferences[0] = lastElementIndex;
+        forwardReferences[lastElementIndex + 1] = sourceInsnBytecodeOffset;
+        forwardReferences[lastElementIndex + 2] = referenceType | referenceHandle;
+        forwardReferences[0] = lastElementIndex + 2;
     }
 
     /**
