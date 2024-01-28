@@ -998,11 +998,7 @@ class JSONReaderASCII
                     b = bytes[++offset];
                     switch (b) {
                         case 'u': {
-                            int c1 = bytes[offset + 1];
-                            int c2 = bytes[offset + 2];
-                            int c3 = bytes[offset + 3];
-                            int c4 = bytes[offset + 4];
-                            char c = char4(c1, c2, c3, c4);
+                            char c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
                             offset += 4;
                             if (c > 0xFF) {
                                 chars = null;
@@ -1012,10 +1008,8 @@ class JSONReaderASCII
                             break;
                         }
                         case 'x': {
-                            int c1 = bytes[offset + 1];
-                            int c2 = bytes[offset + 2];
+                            char c = char2(bytes[offset + 1], bytes[offset + 2]);
                             offset += 2;
-                            char c = char2(c1, c2);
                             if (c > 0xFF) {
                                 chars = null;
                                 break forStmt;
@@ -1052,6 +1046,7 @@ class JSONReaderASCII
             }
         }
 
+        offset = nameBegin;
         char[] chars = new char[nameLength];
         for (int i = 0; offset < nameEnd; ++i) {
             char c = (char) (bytes[offset] & 0xff);

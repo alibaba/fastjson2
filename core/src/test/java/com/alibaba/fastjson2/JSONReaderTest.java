@@ -310,6 +310,16 @@ public class JSONReaderTest {
             assertEquals(value, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
+        {
+            JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.ISO_8859_1);
+            assertTrue(reader.nextIfObjectStart());
+            assertEquals(hash, reader.readFieldNameHashCode());
+            assertEquals(hash, reader.getNameHashCodeLCase());
+            assertEquals(fieldName, reader.getFieldName());
+            assertEquals(hash, reader.readValueHashCode());
+            assertEquals(value, reader.getString());
+            assertTrue(reader.nextIfObjectEnd());
+        }
     }
 
     @Test
@@ -333,6 +343,11 @@ public class JSONReaderTest {
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
+            assertEquals(hash, reader.readFieldNameHashCodeUnquote());
+            assertEquals(fieldName, reader.getFieldName());
+        }
+        {
+            JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.ISO_8859_1);
             assertEquals(hash, reader.readFieldNameHashCodeUnquote());
             assertEquals(fieldName, reader.getFieldName());
         }

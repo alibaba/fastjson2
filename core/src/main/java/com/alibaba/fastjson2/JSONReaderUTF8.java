@@ -3528,23 +3528,23 @@ class JSONReaderUTF8
                     case 12:
                     case 13: {
                         /* 110x xxxx   10xx xxxx*/
-                        int char2 = bytes[offset + 1];
-                        if ((char2 & 0xC0) != 0x80) {
+                        int c2 = bytes[offset + 1];
+                        if ((c2 & 0xC0) != 0x80) {
                             throw new JSONException("malformed input around byte " + offset);
                         }
-                        c = (((c & 0x1F) << 6) | (char2 & 0x3F));
+                        c = (((c & 0x1F) << 6) | (c2 & 0x3F));
                         offset += 2;
                         break;
                     }
                     case 14: {
-                        int char2 = bytes[offset + 1];
-                        int char3 = bytes[offset + 2];
-                        if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
+                        int c2 = bytes[offset + 1];
+                        int c3 = bytes[offset + 2];
+                        if (((c2 & 0xC0) != 0x80) || ((c3 & 0xC0) != 0x80)) {
                             throw new JSONException("malformed input around byte " + (offset + 2));
                         }
                         c = (((c & 0x0F) << 12)
-                                | ((char2 & 0x3F) << 6)
-                                | ((char3 & 0x3F)));
+                                | ((c2 & 0x3F) << 6)
+                                | ((c3 & 0x3F)));
                         offset += 3;
                         break;
                     }
@@ -3560,18 +3560,12 @@ class JSONReaderUTF8
                 c = (char) bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        int c1 = bytes[offset + 1];
-                        int c2 = bytes[offset + 2];
-                        int c3 = bytes[offset + 3];
-                        int c4 = bytes[offset + 4];
-                        c = char4(c1, c2, c3, c4);
+                        c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
                         offset += 4;
                         break;
                     }
                     case 'x': {
-                        int c1 = bytes[offset + 1];
-                        int c2 = bytes[offset + 2];
-                        c = char2(c1, c2);
+                        c = char2(bytes[offset + 1], bytes[offset + 2]);
                         offset += 2;
                         break;
                     }
