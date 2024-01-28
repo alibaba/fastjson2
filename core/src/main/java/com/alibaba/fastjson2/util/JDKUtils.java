@@ -2,9 +2,6 @@ package com.alibaba.fastjson2.util;
 
 import sun.misc.Unsafe;
 
-import javax.sql.DataSource;
-import javax.sql.RowSet;
-
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.ByteOrder;
