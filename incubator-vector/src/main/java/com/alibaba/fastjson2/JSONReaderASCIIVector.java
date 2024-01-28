@@ -23,6 +23,7 @@ final class JSONReaderASCIIVector
             final byte quote = (byte) ch;
             final byte slash = (byte) '\\';
 
+            final byte[] bytes = this.bytes;
             int offset = this.offset;
             int start = offset;
             int valueLength;
@@ -83,17 +84,17 @@ final class JSONReaderASCIIVector
                         c = (char) (bytes[++offset] & 0xff);
                         switch (c) {
                             case 'u': {
-                                char c1 = (char) this.bytes[1 + offset];
-                                char c2 = (char) this.bytes[2 + offset];
-                                char c3 = (char) this.bytes[3 + offset];
-                                char c4 = (char) this.bytes[4 + offset];
+                                char c1 = (char) bytes[1 + offset];
+                                char c2 = (char) bytes[2 + offset];
+                                char c3 = (char) bytes[3 + offset];
+                                char c4 = (char) bytes[4 + offset];
                                 offset += 4;
                                 c = char4(c1, c2, c3, c4);
                                 break;
                             }
                             case 'x': {
-                                char c1 = (char) this.bytes[1 + offset];
-                                char c2 = (char) this.bytes[2 + offset];
+                                char c1 = (char) bytes[1 + offset];
+                                char c2 = (char) bytes[2 + offset];
                                 offset += 2;
                                 c = char2(c1, c2);
                                 break;
@@ -125,8 +126,8 @@ final class JSONReaderASCIIVector
                 } else if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+                    byte[] buf = Arrays.copyOfRange(bytes, this.offset, offset);
+                    str = STRING_CREATOR_JDK11.apply(buf, LATIN1);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.ISO_8859_1);
                 }

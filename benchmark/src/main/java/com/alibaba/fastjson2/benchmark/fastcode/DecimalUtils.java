@@ -286,8 +286,8 @@ public class DecimalUtils {
             }
 
             if (adjusted != 0) {             // [!sci could have made 0]
-                buf[off++] = 'E';
-                buf[off] = (byte) (adjusted > 0 ? '+' : '-');
+                buf[off] = 'E';
+                buf[off + 1] = (byte) (adjusted > 0 ? '+' : '-');
                 getChars(Math.abs(adjusted), buf.length, buf);
             }
         }
@@ -430,8 +430,8 @@ public class DecimalUtils {
                 }
             }
             if (adjusted != 0) {             // [!sci could have made 0]
-                buf[off++] = 'E';
-                buf[off] = (byte) (adjusted > 0 ? '+' : '-');
+                buf[off] = 'E';
+                buf[off + 1] = (byte) (adjusted > 0 ? '+' : '-');
                 getChars(Math.abs(adjusted), buf.length, buf);
             }
         }
