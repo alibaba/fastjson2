@@ -1798,7 +1798,7 @@ public class TypeUtils {
             return null;
         }
 
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         return parseBigDecimal(chars, 0, chars.length);
     }
 

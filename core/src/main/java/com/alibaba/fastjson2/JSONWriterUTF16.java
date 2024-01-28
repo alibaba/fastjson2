@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -27,7 +28,7 @@ class JSONWriterUTF16
     final CacheItem cacheItem;
 
     JSONWriterUTF16(Context ctx) {
-        super(ctx, null, false, IOUtils.UTF_16);
+        super(ctx, null, false, StandardCharsets.UTF_16);
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         cacheItem = CACHE_ITEMS[cacheIndex];
         char[] chars = CHARS_UPDATER.getAndSet(cacheItem, null);
@@ -2265,9 +2266,9 @@ class JSONWriterUTF16
         }
 
         if (ascii) {
-            if (charset == IOUtils.UTF_8
-                    || charset == IOUtils.ISO_8859_1
-                    || charset == IOUtils.US_ASCII
+            if (charset == StandardCharsets.UTF_8
+                    || charset == StandardCharsets.ISO_8859_1
+                    || charset == StandardCharsets.US_ASCII
             ) {
                 byte[] bytes = new byte[off];
                 for (int i = 0; i < off; i++) {
@@ -2279,7 +2280,7 @@ class JSONWriterUTF16
 
         String str = new String(chars, 0, off);
         if (charset == null) {
-            charset = IOUtils.UTF_8;
+            charset = StandardCharsets.UTF_8;
         }
         return str.getBytes(charset);
     }

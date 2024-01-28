@@ -1,13 +1,12 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.util.IOUtils;
-
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
 public interface ValueConsumer {
     default void accept(byte[] bytes, int off, int len) {
-        accept(new String(bytes, off, len, IOUtils.UTF_8));
+        accept(new String(bytes, off, len, StandardCharsets.UTF_8));
     }
 
     default void acceptNull() {

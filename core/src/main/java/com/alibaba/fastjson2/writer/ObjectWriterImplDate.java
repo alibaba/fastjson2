@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Locale;
 
@@ -16,10 +17,10 @@ final class ObjectWriterImplDate
     static final ObjectWriterImplDate INSTANCE = new ObjectWriterImplDate(null, null);
 
     static final char[] PREFIX_CHARS = "new Date(".toCharArray();
-    static final byte[] PREFIX_BYTES = "new Date(".getBytes(IOUtils.UTF_8);
+    static final byte[] PREFIX_BYTES = "new Date(".getBytes(StandardCharsets.UTF_8);
 
     static final char[] PREFIX_CHARS_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".toCharArray();
-    static final byte[] PREFIX_BYTES_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".getBytes(IOUtils.UTF_8);
+    static final byte[] PREFIX_BYTES_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".getBytes(StandardCharsets.UTF_8);
 
     public ObjectWriterImplDate(String format, Locale locale) {
         super(format, locale);

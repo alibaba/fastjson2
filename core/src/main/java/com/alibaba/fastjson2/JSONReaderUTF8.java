@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -1752,7 +1753,7 @@ class JSONReaderUTF8
 
     final String getLatin1String(int offset, int length) {
         if (JDKUtils.ANDROID_SDK_INT >= 34) {
-            return new String(bytes, offset, length, IOUtils.ISO_8859_1);
+            return new String(bytes, offset, length, StandardCharsets.ISO_8859_1);
         }
 
         char[] charBuf = this.charBuf;
@@ -1773,7 +1774,7 @@ class JSONReaderUTF8
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
             return nameAscii ? getLatin1String(nameBegin, length)
-                    : new String(bytes, nameBegin, length, IOUtils.UTF_8);
+                    : new String(bytes, nameBegin, length, StandardCharsets.UTF_8);
         }
 
         char[] chars = new char[nameLength];
@@ -2191,11 +2192,11 @@ class JSONReaderUTF8
                     }
                     return new String(charBuf, 0, length);
                 } else {
-                    return new String(bytes, nameBegin, length, IOUtils.ISO_8859_1);
+                    return new String(bytes, nameBegin, length, StandardCharsets.ISO_8859_1);
                 }
             }
 
-            return new String(bytes, nameBegin, length, IOUtils.UTF_8);
+            return new String(bytes, nameBegin, length, StandardCharsets.UTF_8);
         }
 
         return getFieldName();
@@ -3698,7 +3699,7 @@ class JSONReaderUTF8
         } else if (ascii) {
             str = getLatin1String(this.offset, offset - this.offset);
         } else {
-            str = new String(bytes, this.offset, offset - this.offset, IOUtils.UTF_8);
+            str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.UTF_8);
         }
 
         int b = bytes[++offset];
@@ -4072,7 +4073,7 @@ class JSONReaderUTF8
         if (!nameEscape) {
             return nameAscii
                     ? getLatin1String(nameBegin, length)
-                    : new String(bytes, nameBegin, length, IOUtils.UTF_8);
+                    : new String(bytes, nameBegin, length, StandardCharsets.UTF_8);
         }
 
         char[] chars = new char[nameLength];
@@ -4536,11 +4537,11 @@ class JSONReaderUTF8
                         }
                         str = new String(charBuf, 0, len);
                     } else {
-                        str = new String(bytes, this.offset, len, IOUtils.ISO_8859_1);
+                        str = new String(bytes, this.offset, len, StandardCharsets.ISO_8859_1);
                     }
                 }
             } else {
-                str = new String(bytes, this.offset, off - this.offset, IOUtils.UTF_8);
+                str = new String(bytes, this.offset, off - this.offset, StandardCharsets.UTF_8);
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
@@ -6194,7 +6195,7 @@ class JSONReaderUTF8
                 break;
             }
         }
-        String str = new String(bytes, this.offset, offset - this.offset, IOUtils.UTF_8);
+        String str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.UTF_8);
 
         if (offset + 1 == end) {
             this.offset = end;

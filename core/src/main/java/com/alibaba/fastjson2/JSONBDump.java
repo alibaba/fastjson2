@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.time.LocalDateTime;
-import com.alibaba.fastjson2.util.IOUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -176,7 +176,7 @@ final class JSONBDump {
             case BC_STR_UTF8: {
                 int strlen = readLength();
 
-                String str = new String(bytes, offset, strlen, IOUtils.UTF_8);
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
@@ -188,21 +188,21 @@ final class JSONBDump {
             }
             case BC_STR_UTF16: {
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, IOUtils.UTF_16);
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
             }
             case BC_STR_UTF16LE: {
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, IOUtils.UTF_16LE);
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
             }
             case BC_STR_UTF16BE: {
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, IOUtils.UTF_16BE);
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
@@ -415,7 +415,7 @@ final class JSONBDump {
                         return;
                     }
 
-                    String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
+                    String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                     offset += strlen;
                     jsonWriter.writeString(str);
                     return;
@@ -829,24 +829,24 @@ final class JSONBDump {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
             }
 
-            charset = IOUtils.ISO_8859_1;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
 
-            charset = IOUtils.UTF_8;
+            charset = StandardCharsets.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
             strBegin = offset;
-            charset = IOUtils.UTF_16;
+            charset = StandardCharsets.UTF_16;
         } else if (strtype == BC_STR_UTF16LE) {
             strlen = readLength();
             strBegin = offset;
-            charset = IOUtils.UTF_16LE;
+            charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             strlen = readLength();
             strBegin = offset;
-            charset = IOUtils.UTF_16BE;
+            charset = StandardCharsets.UTF_16BE;
         } else if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
             return Byte.toString(strtype);
         } else {

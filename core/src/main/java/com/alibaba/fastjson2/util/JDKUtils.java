@@ -76,13 +76,4 @@ public class JDKUtils {
         }
         ANDROID_SDK_INT = android_sdk_int;
     }
-
-    public static boolean isSQLDataSourceOrRowSet(Class<?> type) {
-        return DataSource.class.isAssignableFrom(type)
-                || RowSet.class.isAssignableFrom(type);
-    }
-
-    public static char[] getCharArray(String str) {
-        return str.toCharArray();
-    }
 }

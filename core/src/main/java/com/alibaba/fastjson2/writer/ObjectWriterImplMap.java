@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
@@ -71,7 +72,7 @@ public final class ObjectWriterImplMap
         String typeName = TypeUtils.getTypeName(objectClass);
         String typeInfoStr = "\"@type\":\"" + objectClass.getName() + "\"";
         this.typeInfoUTF16 = typeInfoStr.toCharArray();
-        this.typeInfoUTF8 = typeInfoStr.getBytes(IOUtils.UTF_8);
+        this.typeInfoUTF8 = typeInfoStr.getBytes(StandardCharsets.UTF_8);
 
         jsonObject1 = "JO1".equals(typeName);
         this.jsonbTypeInfo = JSONB.toBytes(typeName);

@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
@@ -1093,15 +1094,15 @@ public interface JSONB {
         }
 
         final byte type;
-        if (charset == IOUtils.UTF_16) {
+        if (charset == StandardCharsets.UTF_16) {
             type = BC_STR_UTF16;
-        } else if (charset == IOUtils.UTF_16BE) {
+        } else if (charset == StandardCharsets.UTF_16BE) {
             type = BC_STR_UTF16BE;
-        } else if (charset == IOUtils.UTF_16LE) {
+        } else if (charset == StandardCharsets.UTF_16LE) {
             type = BC_STR_UTF16LE;
-        } else if (charset == IOUtils.UTF_8) {
+        } else if (charset == StandardCharsets.UTF_8) {
             type = BC_STR_UTF8;
-        } else if (charset == IOUtils.US_ASCII || charset == IOUtils.ISO_8859_1) {
+        } else if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
             type = BC_STR_ASCII;
         } else if (charset != null && "GB18030".equals(charset.name())) { // GraalVM support
             type = BC_STR_GB18030;

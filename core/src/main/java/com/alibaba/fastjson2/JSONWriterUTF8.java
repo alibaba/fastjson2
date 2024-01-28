@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -21,13 +22,13 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class JSONWriterUTF8
         extends JSONWriter {
-    static final byte[] REF_PREF = "{\"$ref\":".getBytes(IOUtils.ISO_8859_1);
+    static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.ISO_8859_1);
 
     final CacheItem cacheItem;
     protected byte[] bytes;
 
     JSONWriterUTF8(Context ctx) {
-        super(ctx, null, false, IOUtils.UTF_8);
+        super(ctx, null, false, StandardCharsets.UTF_8);
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         cacheItem = CACHE_ITEMS[cacheIndex];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
@@ -145,7 +146,7 @@ class JSONWriterUTF8
 
     @Override
     public final byte[] getBytes(Charset charset) {
-        if (charset == IOUtils.UTF_8) {
+        if (charset == StandardCharsets.UTF_8) {
             return Arrays.copyOf(bytes, off);
         }
 
@@ -300,7 +301,7 @@ class JSONWriterUTF8
             return;
         }
 
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
@@ -1468,7 +1469,7 @@ class JSONWriterUTF8
 
     @Override
     public final void writeRaw(String str) {
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         int off = this.off;
         int minCapacity = off
                 + chars.length * 3; // utf8 3 bytes
@@ -2443,12 +2444,12 @@ class JSONWriterUTF8
 
     @Override
     public final String toString() {
-        return new String(bytes, 0, off, IOUtils.UTF_8);
+        return new String(bytes, 0, off, StandardCharsets.UTF_8);
     }
 
     @Override
     public final int flushTo(OutputStream out, Charset charset) throws IOException {
-        if (charset != null && charset != IOUtils.UTF_8) {
+        if (charset != null && charset != StandardCharsets.UTF_8) {
             throw new JSONException("UnsupportedOperation");
         }
         if (off == 0) {

@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -56,8 +57,8 @@ public abstract class JSONWriter
         this.symbolTable = symbolTable;
         this.charset = charset;
         this.jsonb = jsonb;
-        this.utf8 = !jsonb && charset == IOUtils.UTF_8;
-        this.utf16 = !jsonb && charset == IOUtils.UTF_16;
+        this.utf8 = !jsonb && charset == StandardCharsets.UTF_8;
+        this.utf16 = !jsonb && charset == StandardCharsets.UTF_16;
         this.useSingleQuote = !jsonb && (context.features & Feature.UseSingleQuotes.mask) != 0;
 
         quote = useSingleQuote ? '\'' : '"';
@@ -1967,7 +1968,7 @@ public abstract class JSONWriter
                 }
             }
 
-            return fullPath = new String(buf, 0, off, ascii ? IOUtils.ISO_8859_1 : IOUtils.UTF_8);
+            return fullPath = new String(buf, 0, off, ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
         }
     }
 }

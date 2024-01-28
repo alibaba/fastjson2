@@ -13,6 +13,8 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import javax.sql.DataSource;
+import javax.sql.RowSet;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -883,7 +885,7 @@ public class ObjectReaderProvider {
         clazz = loadClass(typeName);
 
         if (clazz != null) {
-            if (ClassLoader.class.isAssignableFrom(clazz) || JDKUtils.isSQLDataSourceOrRowSet(clazz)) {
+            if (ClassLoader.class.isAssignableFrom(clazz) || DataSource.class.isAssignableFrom(clazz) || RowSet.class.isAssignableFrom(clazz)) {
                 throw new JSONException("autoType is not support. " + typeName);
             }
 

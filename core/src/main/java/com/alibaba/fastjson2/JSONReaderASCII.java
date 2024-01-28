@@ -3,6 +3,8 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.*;
 import sun.misc.Unsafe;
 
+import java.nio.charset.StandardCharsets;
+
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -1545,7 +1547,7 @@ final class JSONReaderASCII
                         }
                         str = new String(charBuf, 0, strlen);
                     } else {
-                        str = new String(bytes, strOff, strlen, IOUtils.ISO_8859_1);
+                        str = new String(bytes, strOff, strlen, StandardCharsets.ISO_8859_1);
                     }
                 }
             }

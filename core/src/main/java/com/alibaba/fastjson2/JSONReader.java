@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -2836,15 +2837,15 @@ public abstract class JSONReader
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset) {
         Context context = JSONFactory.createReadContext();
 
-        if (charset == IOUtils.UTF_8) {
+        if (charset == StandardCharsets.UTF_8) {
             return new JSONReaderUTF8(context, null, bytes, offset, length);
         }
 
-        if (charset == IOUtils.UTF_16) {
+        if (charset == StandardCharsets.UTF_16) {
             return new JSONReaderUTF16(context, bytes, offset, length);
         }
 
-        if (charset == IOUtils.US_ASCII || charset == IOUtils.ISO_8859_1) {
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
             return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
@@ -2852,15 +2853,15 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
-        if (charset == IOUtils.UTF_8) {
+        if (charset == StandardCharsets.UTF_8) {
             return new JSONReaderUTF8(context, null, bytes, offset, length);
         }
 
-        if (charset == IOUtils.UTF_16) {
+        if (charset == StandardCharsets.UTF_16) {
             return new JSONReaderUTF16(context, bytes, offset, length);
         }
 
-        if (charset == IOUtils.US_ASCII || charset == IOUtils.ISO_8859_1) {
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
             return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
@@ -2886,7 +2887,7 @@ public abstract class JSONReader
 
     public static JSONReader of(URL url, Context context) throws IOException {
         try (InputStream is = url.openStream()) {
-            return of(is, IOUtils.UTF_8, context);
+            return of(is, StandardCharsets.UTF_8, context);
         }
     }
 
@@ -2895,11 +2896,11 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(InputStream is, Charset charset, Context context) {
-        if (charset == IOUtils.UTF_8 || charset == null) {
+        if (charset == StandardCharsets.UTF_8 || charset == null) {
             return new JSONReaderUTF8(context, is);
         }
 
-        if (charset == IOUtils.UTF_16) {
+        if (charset == StandardCharsets.UTF_16) {
             return new JSONReaderUTF16(context, is);
         }
 
@@ -2925,7 +2926,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(ByteBuffer buffer, Context context, Charset charset) {
-        if (charset == IOUtils.UTF_8 || charset == null) {
+        if (charset == StandardCharsets.UTF_8 || charset == null) {
             return new JSONReaderUTF8(context, buffer);
         }
 

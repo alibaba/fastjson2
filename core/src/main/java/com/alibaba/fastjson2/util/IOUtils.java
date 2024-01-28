@@ -6,20 +6,12 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 
 public class IOUtils {
-    public static final Charset US_ASCII = Charset.forName("US-ASCII");
-    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
-    public static final Charset UTF_16BE = Charset.forName("UTF-16BE");
-    public static final Charset UTF_16LE = Charset.forName("UTF-16LE");
-    public static final Charset UTF_16 = Charset.forName("UTF-16");
-
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
     public static final int[] DIGITS_K = new int[1000];
     private static final byte[] MIN_INT_BYTES = "-2147483648".getBytes();

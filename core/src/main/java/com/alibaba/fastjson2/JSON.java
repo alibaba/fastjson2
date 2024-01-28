@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -452,7 +453,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext(features);
-        try (JSONReader reader = JSONReader.of(input, IOUtils.UTF_8, context)) {
+        try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8, context)) {
             if (reader.isEnd()) {
                 return null;
             }
@@ -585,7 +586,7 @@ public interface JSON {
         }
 
         try (InputStream is = url.openStream()) {
-            return parseObject(is, IOUtils.UTF_8);
+            return parseObject(is, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new JSONException("JSON#parseObject cannot parse '" + url + "'", e);
         }
@@ -1844,7 +1845,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(input, IOUtils.UTF_8, context)) {
+        try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8, context)) {
             if (reader.isEnd()) {
                 return null;
             }
@@ -1965,7 +1966,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(input, IOUtils.UTF_8, context)) {
+        try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8, context)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -2102,7 +2103,7 @@ public interface JSON {
      * @since 2.0.2
      */
     static <T> void parseObject(InputStream input, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
-        parseObject(input, IOUtils.UTF_8, '\n', type, consumer, features);
+        parseObject(input, StandardCharsets.UTF_8, '\n', type, consumer, features);
     }
 
     /**
@@ -2481,7 +2482,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(in, IOUtils.UTF_8, context)) {
+        try (JSONReader reader = JSONReader.of(in, StandardCharsets.UTF_8, context)) {
             if (reader.nextIfNull()) {
                 return null;
             }

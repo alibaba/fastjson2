@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -31,7 +32,7 @@ final class JSONWriterJSONB
     protected long rootTypeNameHash;
 
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
-        super(ctx, symbolTable, true, IOUtils.UTF_8);
+        super(ctx, symbolTable, true, StandardCharsets.UTF_8);
         cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         if (bytes == null) {
@@ -658,7 +659,7 @@ final class JSONWriterJSONB
         }
 
         writeString(
-                JDKUtils.getCharArray(str)
+                str.toCharArray()
         );
     }
 

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 import com.alibaba.fastjson2.time.*;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -138,7 +139,7 @@ public class DateUtils {
             return 0;
         }
 
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         return parseMillis(chars, 0, chars.length, zoneId);
     }
 
@@ -1151,7 +1152,7 @@ public class DateUtils {
         }
 
         LocalDate localDate;
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         localDate = parseLocalDate(chars, 0, chars.length);
 
         if (localDate == null) {
@@ -1228,7 +1229,7 @@ public class DateUtils {
     }
 
     public static long parseMillis(byte[] bytes, int off, int len) {
-        return parseMillis(bytes, off, len, IOUtils.UTF_8, DEFAULT_ZONE_ID);
+        return parseMillis(bytes, off, len, StandardCharsets.UTF_8, DEFAULT_ZONE_ID);
     }
 
     public static long parseMillis(byte[] chars, int off, int len, Charset charset, ZoneId zoneId) {
@@ -6118,7 +6119,7 @@ public class DateUtils {
         }
 
         ZonedDateTime zdt;
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         zdt = parseZonedDateTime(chars, 0, chars.length, defaultZoneId);
 
         if (zdt == null) {
