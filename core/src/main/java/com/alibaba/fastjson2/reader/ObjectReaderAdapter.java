@@ -114,7 +114,7 @@ public class ObjectReaderAdapter<T>
         }
 
         if (constructor != null) {
-            parameterCount = constructor.getParameterTypes().length;
+            parameterCount = constructor.getParameterCount();
         } else {
             parameterCount = -1;
         }
@@ -303,7 +303,7 @@ public class ObjectReaderAdapter<T>
     protected Object createInstance0(long features) throws InstantiationException {
         if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
                 && constructor != null
-                && constructor.getParameterTypes().length == 0) {
+                && constructor.getParameterCount() == 0) {
             T object;
             try {
                 object = (T) constructor.newInstance();

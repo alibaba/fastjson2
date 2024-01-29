@@ -337,7 +337,7 @@ public final class ObjectReaderModule {
         }
 
         int paIndex;
-        if (parameterAnnotations.length == constructor.getParameterTypes().length) {
+        if (parameterAnnotations.length == constructor.getParameterCount()) {
             paIndex = paramIndex;
         } else {
             paIndex = paramIndex - 1;

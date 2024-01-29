@@ -17,7 +17,7 @@ final class ConstructorSupplier
         constructor.setAccessible(true);
         this.constructor = constructor;
         this.objectClass = this.constructor.getDeclaringClass();
-        this.parameterCount = constructor.getParameterTypes().length;
+        this.parameterCount = constructor.getParameterCount();
         this.useClassNewInstance = parameterCount == 0
                 && Modifier.isPublic(constructor.getModifiers())
                 && Modifier.isPublic(objectClass.getModifiers());

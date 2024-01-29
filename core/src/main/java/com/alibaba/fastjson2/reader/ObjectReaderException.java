@@ -53,7 +53,7 @@ final class ObjectReaderException<T>
 
         for (Constructor constructor : constructors) {
             if (constructor != null && constructorMessageCause == null) {
-                int paramCount = constructor.getParameterTypes().length;
+                int paramCount = constructor.getParameterCount();
 
                 if (paramCount == 0) {
                     constructorDefault = constructor;
@@ -84,8 +84,8 @@ final class ObjectReaderException<T>
         this.constructorCause = constructorCause;
 
         Collections.sort(constructors, (Constructor left, Constructor right) -> {
-            int x = left.getParameterTypes().length;
-            int y = right.getParameterTypes().length;
+            int x = left.getParameterCount();
+            int y = right.getParameterCount();
             if (x < y) {
                 return 1;
             }

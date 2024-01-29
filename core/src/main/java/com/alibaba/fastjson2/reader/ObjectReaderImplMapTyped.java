@@ -47,7 +47,7 @@ class ObjectReaderImplMapTyped
         Constructor defaultConstructor = null;
         Constructor[] constructors = this.instanceType.getDeclaredConstructors();
         for (Constructor constructor : constructors) {
-            if (constructor.getParameterTypes().length == 0
+            if (constructor.getParameterCount() == 0
                     && !Modifier.isPublic(constructor.getModifiers())) {
                 constructor.setAccessible(true);
                 defaultConstructor = constructor;

@@ -347,7 +347,7 @@ public class ObjectReaderCreator {
                 fieldName = fieldInfo.fieldName;
             }
 
-            if (method.getParameterTypes().length == 0) {
+            if (method.getParameterCount() == 0) {
                 FieldReader fieldReader = createFieldReaderMethod(
                         builderClass,
                         builderClass,
@@ -801,7 +801,7 @@ public class ObjectReaderCreator {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
         }
 
-        if (Enum.class.isAssignableFrom(objectClass) && (beanInfo.createMethod == null || beanInfo.createMethod.getParameterTypes().length == 1)) {
+        if (Enum.class.isAssignableFrom(objectClass) && (beanInfo.createMethod == null || beanInfo.createMethod.getParameterCount() == 1)) {
             return createEnumReader(objectClass, beanInfo.createMethod, provider);
         }
 
@@ -850,7 +850,7 @@ public class ObjectReaderCreator {
         for (int i = 0; i < alternateConstructors.size(); i++) {
             Constructor constructor = alternateConstructors.get(i);
 
-            int parameterCount = constructor.getParameterTypes().length;
+            int parameterCount = constructor.getParameterCount();
             if (parameterCount == 0) {
                 defaultConstructor = constructor;
             }
@@ -867,7 +867,7 @@ public class ObjectReaderCreator {
             } else if (parameterCount == 0) {
                 creatorConstructor = constructor;
                 index = i;
-            } else if (creatorConstructor.getParameterTypes().length < parameterCount) {
+            } else if (creatorConstructor.getParameterCount() < parameterCount) {
                 creatorConstructor = constructor;
                 index = i;
             }
@@ -875,7 +875,7 @@ public class ObjectReaderCreator {
 
         int creatorConstructorParameterCount;
         if (creatorConstructor != null) {
-            creatorConstructorParameterCount = creatorConstructor.getParameterTypes().length;
+            creatorConstructorParameterCount = creatorConstructor.getParameterCount();
         } else {
             creatorConstructorParameterCount = -1;
         }
@@ -1820,7 +1820,7 @@ public class ObjectReaderCreator {
             );
         }
 
-        if (method.getParameterTypes().length == 0) {
+        if (method.getParameterCount() == 0) {
             if (fieldClass == AtomicInteger.class) {
                 return new FieldReaderAtomicIntegerMethodReadOnly(fieldName, fieldClass, ordinal, method);
             }

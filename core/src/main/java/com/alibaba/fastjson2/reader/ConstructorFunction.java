@@ -43,7 +43,7 @@ final class ConstructorFunction<T>
         this.function = function;
         this.biFunction = biFunction;
         this.constructor = kotlinMaker ? markerConstructor : constructor;
-        this.parameterCount = this.constructor.getParameterTypes().length;
+        this.parameterCount = this.constructor.getParameterCount();
         this.parameterTypes = constructor.getParameterTypes();
         this.hashCodes = new long[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {

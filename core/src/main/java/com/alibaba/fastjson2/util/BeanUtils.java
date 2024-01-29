@@ -49,7 +49,7 @@ public abstract class BeanUtils {
         String[] paramNames = beanInfo.createParameterNames;
 
         for (Constructor<?> constructor : constructors) {
-            int parameterCount = constructor.getParameterTypes().length;
+            int parameterCount = constructor.getParameterCount();
             if (paramNames != null && parameterCount != paramNames.length) {
                 continue;
             }
@@ -64,7 +64,7 @@ public abstract class BeanUtils {
                 }
             }
 
-            if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterCount) {
+            if (creatorConstructor != null && creatorConstructor.getParameterCount() >= parameterCount) {
                 continue;
             }
 
@@ -204,7 +204,7 @@ public abstract class BeanUtils {
             if (!method.getName().equals(signature.getName())) {
                 continue;
             }
-            if (method.getParameterTypes().length != signature.getParameterTypes().length) {
+            if (method.getParameterCount() != signature.getParameterCount()) {
                 continue;
             }
             Class<?>[] parameterTypes0 = method.getParameterTypes();
@@ -461,7 +461,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (method.getParameterTypes().length != 0) {
+            if (method.getParameterCount() != 0) {
                 continue;
             }
 
@@ -507,7 +507,7 @@ public abstract class BeanUtils {
         }
 
         for (Constructor constructor : constructors) {
-            if (constructor.getParameterTypes().length == 0) {
+            if (constructor.getParameterCount() == 0) {
                 return constructor;
             }
         }
@@ -519,7 +519,7 @@ public abstract class BeanUtils {
         Class declaringClass = objectClass.getDeclaringClass();
         if (declaringClass != null) {
             for (Constructor constructor : constructors) {
-                if (constructor.getParameterTypes().length == 1) {
+                if (constructor.getParameterCount() == 1) {
                     Class firstParamType = constructor.getParameterTypes()[0];
                     if (declaringClass.equals(firstParamType)) {
                         return constructor;
@@ -669,7 +669,7 @@ public abstract class BeanUtils {
         }
 
         for (Method method : methods) {
-            int paramType = method.getParameterTypes().length;
+            int paramType = method.getParameterCount();
 
             // read only getter
             if (paramType == 0) {
@@ -719,7 +719,7 @@ public abstract class BeanUtils {
 
         for_:
         for (Method method : methods) {
-            if (method.getParameterTypes().length != 0) {
+            if (method.getParameterCount() != 0) {
                 continue;
             }
             Class<?> declaringClass = method.getDeclaringClass();
@@ -833,7 +833,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (method.getParameterTypes().length != 0) {
+            if (method.getParameterCount() != 0) {
                 continue;
             }
 
@@ -952,7 +952,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (method.getParameterTypes().length != 0) {
+            if (method.getParameterCount() != 0) {
                 continue;
             }
 
@@ -996,14 +996,14 @@ public abstract class BeanUtils {
                 String unsetName = "un" + setterName;
                 for (Method m : methods) {
                     if (m.getName().equals(setterName)
-                            && m.getParameterTypes().length == 1
+                            && m.getParameterCount() == 1
                             && m.getReturnType() == void.class) {
                         setterFound = true;
                     } else if (m.getName().equals(getterName)
-                            && m.getParameterTypes().length == 0) {
+                            && m.getParameterCount() == 0) {
                         getterFound = true;
                     } else if (m.getName().equals(unsetName)
-                            && m.getParameterTypes().length == 0
+                            && m.getParameterCount() == 0
                             && m.getReturnType() == void.class) {
                         unsetFound = true;
                     }
@@ -1197,7 +1197,7 @@ public abstract class BeanUtils {
             } else if (c0 == 'g' && c1 == 'e' && c2 == 't') {
                 get = len > 3;
             } else if (c0 == 's' && c1 == 'e' && c2 == 't') {
-                set = len > 3 && method.getParameterTypes().length == 1;
+                set = len > 3 && method.getParameterCount() == 1;
             }
         }
 

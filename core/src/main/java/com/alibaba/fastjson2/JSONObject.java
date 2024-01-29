@@ -1489,8 +1489,7 @@ public class JSONObject
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        int parameterCount = parameterTypes.length;
+        int parameterCount = method.getParameterCount();
 
         Class<?> returnType = method.getReturnType();
         if (parameterCount == 1) {
