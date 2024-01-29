@@ -2435,6 +2435,11 @@ final class JSONReaderJSONB
                     return;
                 }
 
+                if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                    offset += 2;
+                    return;
+                }
+
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     offset += (type - BC_STR_ASCII_FIX_MIN);
                     return;
