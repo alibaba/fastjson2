@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.time.LocalDate;
-import com.alibaba.fastjson2.time.ZoneId;
+import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,10 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class JSON_copyTo {
     @Test
     public void test() {
-        LocalDate ldt = LocalDate.of(2012, 12, 13);
-
         Bean bean = new Bean();
-        bean.date = ldt.toDate();
+        bean.date = LocalDate.of(2012, 12, 13);
 
         Bean1 bean1 = JSON.copyTo(bean, Bean1.class);
         assertEquals("20121213", bean1.date);
@@ -27,7 +25,7 @@ public class JSON_copyTo {
         Bean2 bean2 = JSON.copyTo(bean1, Bean2.class);
         assertNotNull(bean2.date);
         assertEquals(
-                ldt.atStartOfDay(ZoneId.DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                bean.date.atStartOfDay(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
                 bean2.date.getTime()
         );
 
@@ -37,7 +35,7 @@ public class JSON_copyTo {
 
     public static class Bean {
         @JSONField(format = "yyyyMMdd")
-        public Date date;
+        public LocalDate date;
     }
 
     public static class Bean1 {

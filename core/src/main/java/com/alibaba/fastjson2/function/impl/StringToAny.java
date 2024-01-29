@@ -2,8 +2,6 @@ package com.alibaba.fastjson2.function.impl;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
@@ -11,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public final class StringToAny
         implements Function {
@@ -44,7 +43,7 @@ public final class StringToAny
         if (targetClass == long.class || targetClass == Long.class) {
             if (!IOUtils.isNumber(str)) {
                 if (str.length() == 19) {
-                    return DateUtils.parseMillis(str, ZoneId.DEFAULT_ZONE_ID);
+                    return DateUtils.parseMillis(str, DateUtils.DEFAULT_ZONE_ID);
                 }
             }
             return Long.parseLong(str);

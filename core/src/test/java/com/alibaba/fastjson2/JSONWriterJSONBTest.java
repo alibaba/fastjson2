@@ -1,17 +1,16 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.time.LocalDate;
-import com.alibaba.fastjson2.time.LocalDateTime;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -198,12 +197,18 @@ public class JSONWriterJSONBTest {
             JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
             bytes.set(jsonWriter, new byte[0]);
             jsonWriter.writeInt64(new long[1]);
-            jsonWriter.writeInt64(null);
+            jsonWriter.writeInt64((long[]) null);
+            jsonWriter.writeInt64((Long) null);
             jsonWriter.writeFloat((Float) null);
             jsonWriter.writeFloat((float[]) null);
             jsonWriter.writeDouble((double[]) null);
-            jsonWriter.writeInt32(null);
+            jsonWriter.writeInt32((int[]) null);
+            jsonWriter.writeInt32((Integer) null);
+            jsonWriter.writeLocalDate(null);
+            jsonWriter.writeLocalTime(null);
             jsonWriter.writeLocalDateTime(null);
+            jsonWriter.writeZonedDateTime(null);
+            jsonWriter.writeInstant(null);
             jsonWriter.writeUUID(null);
             jsonWriter.writeBigInt(null);
             jsonWriter.writeBinary(null);
@@ -319,12 +324,12 @@ public class JSONWriterJSONBTest {
     @Test
     public void testInstant() {
         Bean bean = new Bean();
-        bean.date = new Date(1679826319000L);
+        bean.date = Instant.ofEpochMilli(1679826319000L);
 
         byte[] bytes = JSONB.toBytes(bean);
         System.out.println(JSONB.toJSONString(bytes));
         Bean bean1 = JSONB.parseObject(bytes, Bean.class);
-        assertEquals(bean.date.getTime(), bean1.date.getTime());
+        assertEquals(bean.date.toEpochMilli(), bean1.date.toEpochMilli());
     }
 
     @Test
@@ -332,18 +337,18 @@ public class JSONWriterJSONBTest {
         LocalDateTime ldt = LocalDateTime.of(2023, 3, 26, 10, 25, 19);
         JSONWriter jsonWriter = JSONWriter.ofJSONB();
         jsonWriter.writeDateTime14(
-                ldt.date.year,
-                ldt.date.monthValue,
-                ldt.date.dayOfMonth,
-                ldt.time.hour,
-                ldt.time.minute,
-                ldt.time.second
+                ldt.getYear(),
+                ldt.getMonthValue(),
+                ldt.getDayOfMonth(),
+                ldt.getHour(),
+                ldt.getMinute(),
+                ldt.getSecond()
         );
 
         byte[] bytes = jsonWriter.getBytes();
         assertEquals("\"2023-03-26 10:25:19\"", JSONB.toJSONString(bytes));
-        Date ldt1 = JSONB.parseObject(bytes, Date.class);
-        assertEquals(ldt.toDate().getTime(), ldt1.getTime());
+        LocalDateTime ldt1 = JSONB.parseObject(bytes, LocalDateTime.class);
+        assertEquals(ldt, ldt1);
     }
 
     @Test
@@ -351,21 +356,20 @@ public class JSONWriterJSONBTest {
         LocalDate localDate = LocalDate.of(2023, 3, 26);
         JSONWriter jsonWriter = JSONWriter.ofJSONB();
         jsonWriter.writeDateYYYMMDD8(
-                localDate.year,
-                localDate.monthValue,
-                localDate.dayOfMonth
+                localDate.getYear(),
+                localDate.getMonthValue(),
+                localDate.getDayOfMonth()
         );
 
         byte[] bytes = jsonWriter.getBytes();
         assertEquals("\"2023-03-26\"", JSONB.toJSONString(bytes));
-        Date date = JSONB.parseObject(bytes, Date.class);
-        assertEquals(localDate.atStartOfDay().toInstant(
-                ZoneId.of(ZoneId.DEFAULT_ZONE_ID.id)).toEpochMilli(), date.getTime());
+        LocalDate localDate1 = JSONB.parseObject(bytes, LocalDate.class);
+        assertEquals(localDate, localDate1);
     }
 
     public static class Bean {
         @JSONField(format = "yyyyMMddHHmmss")
-        public Date date;
+        public Instant date;
     }
 
     @Test

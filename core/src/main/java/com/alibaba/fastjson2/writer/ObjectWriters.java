@@ -9,6 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.function.*;
 
 public class ObjectWriters {
     static ObjectWriterCreator INSTANCE = ObjectWriterCreator.INSTANCE;

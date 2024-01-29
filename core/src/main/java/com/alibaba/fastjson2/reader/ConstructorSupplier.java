@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.function.Supplier;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.function.Supplier;
 
 final class ConstructorSupplier
         implements Supplier {

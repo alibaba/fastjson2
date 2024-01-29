@@ -1,13 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.function.BiFunction;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 final class FactoryFunction<T>
         implements Function<Map<Long, Object>, T> {

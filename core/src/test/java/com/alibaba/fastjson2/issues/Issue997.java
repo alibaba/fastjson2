@@ -3,12 +3,11 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.time.Instant;
-import com.alibaba.fastjson2.time.ZoneId;
-import com.alibaba.fastjson2.time.ZonedDateTime;
+import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,13 +17,13 @@ public class Issue997 {
     @Test
     public void test() {
         Bean bean = JSON.parseObject("{\"date\":\"Dec 7, 2022 10:55:19 AM\"}", Bean.class);
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-        assertEquals(2022, zdt.dateTime.date.year);
-        assertEquals(12, zdt.dateTime.date.monthValue);
-        assertEquals(7, zdt.dateTime.date.dayOfMonth);
-        assertEquals(10, zdt.dateTime.time.hour);
-        assertEquals(55, zdt.dateTime.time.minute);
-        assertEquals(19, zdt.dateTime.time.second);
+        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+        assertEquals(2022, zdt.getYear());
+        assertEquals(12, zdt.getMonthValue());
+        assertEquals(7, zdt.getDayOfMonth());
+        assertEquals(10, zdt.getHour());
+        assertEquals(55, zdt.getMinute());
+        assertEquals(19, zdt.getSecond());
     }
 
     @Test
@@ -128,23 +127,23 @@ public class Issue997 {
 
                     {
                         Bean bean = JSONReader.of(str.getBytes()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                     {
                         Bean bean = JSONReader.of(str.toCharArray()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                 }
 
@@ -153,23 +152,23 @@ public class Issue997 {
 
                     {
                         Bean bean = JSONReader.of(str.getBytes()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                     {
                         Bean bean = JSONReader.of(str.toCharArray()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                 }
 
@@ -177,23 +176,23 @@ public class Issue997 {
                     String str = "{\"date\":\"" + month + " " + day + ", 2022 1" + hour + ":55:19 AM\"}";
                     {
                         Bean bean = JSONReader.of(str.getBytes()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour + 10, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour + 10, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                     {
                         Bean bean = JSONReader.of(str.toCharArray()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour + 10, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour + 10, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                 }
 
@@ -201,23 +200,23 @@ public class Issue997 {
                     String str = "{\"date\":\"" + month + " " + day + ", 2022 0" + hour + ":55:19 PM\"}";
                     {
                         Bean bean = JSONReader.of(str.getBytes()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour + 12, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour + 12, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                     {
                         Bean bean = JSONReader.of(str.toCharArray()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour + 12, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour + 12, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                 }
 
@@ -225,23 +224,23 @@ public class Issue997 {
                     String str = "{\"date\":\"" + month + " " + day + ", 2022 1" + hour + ":55:19 PM\"}";
                     {
                         Bean bean = JSONReader.of(str.getBytes()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour + 22, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour + 22, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                     {
                         Bean bean = JSONReader.of(str.toCharArray()).read(Bean.class);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-                        assertEquals(2022, zdt.dateTime.date.year);
-                        assertEquals(i + 1, zdt.dateTime.date.monthValue);
-                        assertEquals(day, zdt.dateTime.date.dayOfMonth);
-                        assertEquals(hour + 22, zdt.dateTime.time.hour);
-                        assertEquals(55, zdt.dateTime.time.minute);
-                        assertEquals(19, zdt.dateTime.time.second);
+                        ZonedDateTime zdt = bean.date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+                        assertEquals(2022, zdt.getYear());
+                        assertEquals(i + 1, zdt.getMonthValue());
+                        assertEquals(day, zdt.getDayOfMonth());
+                        assertEquals(hour + 22, zdt.getHour());
+                        assertEquals(55, zdt.getMinute());
+                        assertEquals(19, zdt.getSecond());
                     }
                 }
             }

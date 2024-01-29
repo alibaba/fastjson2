@@ -1,11 +1,10 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.time.LocalDateTime;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 

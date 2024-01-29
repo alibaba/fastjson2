@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.*;
 
 import java.lang.reflect.*;
@@ -11,6 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;

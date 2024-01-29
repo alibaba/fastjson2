@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
@@ -9,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 

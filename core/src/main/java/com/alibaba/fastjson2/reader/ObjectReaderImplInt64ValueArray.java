@@ -3,11 +3,11 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.function.Function;
 
 public final class ObjectReaderImplInt64ValueArray
         extends ObjectReaderPrimitive {

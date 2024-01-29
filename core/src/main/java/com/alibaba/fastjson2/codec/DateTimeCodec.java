@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
-import com.alibaba.fastjson2.time.DateTimeFormatter;
-
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public abstract class DateTimeCodec {
@@ -18,6 +17,10 @@ public abstract class DateTimeCodec {
 
     protected final boolean yyyyMMddhhmmss19;
     protected final boolean yyyyMMddhhmm16;
+    protected final boolean yyyyMMddhhmmss14;
+    protected final boolean yyyyMMdd10;
+    protected final boolean yyyyMMdd8;
+    protected final boolean useSimpleDateFormat;
 
     DateTimeFormatter dateFormatter;
 
@@ -32,8 +35,12 @@ public abstract class DateTimeCodec {
 
         this.format = format;
         this.locale = locale;
+        this.yyyyMMddhhmmss14 = "yyyyMMddHHmmss".equals(format);
         this.yyyyMMddhhmmss19 = "yyyy-MM-dd HH:mm:ss".equals(format);
         this.yyyyMMddhhmm16 = "yyyy-MM-dd HH:mm".equals(format);
+        this.yyyyMMdd10 = "yyyy-MM-dd".equals(format);
+        this.yyyyMMdd8 = "yyyyMMdd".equals(format);
+        this.useSimpleDateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX".equals(format);
 
         boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
         if (format != null) {

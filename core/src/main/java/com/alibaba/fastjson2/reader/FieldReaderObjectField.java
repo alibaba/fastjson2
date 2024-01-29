@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -175,9 +174,9 @@ class FieldReaderObjectField<T>
                     String str = (String) value;
                     if (fieldClass == java.util.Date.class) {
                         if (format != null) {
-                            value = DateUtils.parseDate(str, format, ZoneId.DEFAULT_ZONE_ID);
+                            value = DateUtils.parseDate(str, format, DateUtils.DEFAULT_ZONE_ID);
                         } else {
-                            long millis = DateUtils.parseMillis(str, ZoneId.DEFAULT_ZONE_ID);
+                            long millis = DateUtils.parseMillis(str, DateUtils.DEFAULT_ZONE_ID);
                             if (millis == 0) {
                                 value = null;
                             } else {

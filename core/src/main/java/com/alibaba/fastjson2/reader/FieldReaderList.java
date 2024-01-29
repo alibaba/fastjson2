@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.BiConsumer;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -13,6 +11,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class FieldReaderList<T, V>
         extends FieldReaderObject<T> {

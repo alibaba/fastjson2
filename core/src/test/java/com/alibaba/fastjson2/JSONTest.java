@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.PascalNameFilter;
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
-import com.alibaba.fastjson2.function.Consumer;
 import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2.reader.ObjectReaderImplListStr;
 import com.alibaba.fastjson2.util.Fnv;
@@ -21,6 +20,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 

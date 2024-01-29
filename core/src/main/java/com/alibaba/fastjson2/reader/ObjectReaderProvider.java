@@ -5,8 +5,6 @@ import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.Consumer;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.function.impl.*;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
@@ -25,6 +23,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
@@ -493,6 +493,9 @@ public class ObjectReaderProvider {
         } else if (objectReader instanceof ObjectReaderImplList) {
             ObjectReaderImplList list = (ObjectReaderImplList) objectReader;
             return list.itemClass != null && list.itemClass.getClassLoader() == classLoader;
+        } else if (objectReader instanceof ObjectReaderImplOptional) {
+            Class itemClass = ((ObjectReaderImplOptional) objectReader).itemClass;
+            return itemClass != null && itemClass.getClassLoader() == classLoader;
         } else if (objectReader instanceof ObjectReaderAdapter) {
             FieldReader[] fieldReaders = ((ObjectReaderAdapter<?>) objectReader).fieldReaders;
             for (FieldReader fieldReader : fieldReaders) {

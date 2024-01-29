@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.File;
@@ -17,6 +16,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
@@ -686,6 +686,22 @@ public class ObjectWriterModule {
             return ObjectWriterImplBigDecimal.INSTANCE;
         }
 
+        if (objectType == OptionalInt.class) {
+            return ObjectWriterImplOptionalInt.INSTANCE;
+        }
+
+        if (objectType == OptionalLong.class) {
+            return ObjectWriterImplOptionalLong.INSTANCE;
+        }
+
+        if (objectType == OptionalDouble.class) {
+            return ObjectWriterImplOptionalDouble.INSTANCE;
+        }
+
+        if (objectType == Optional.class) {
+            return ObjectWriterImplOptional.INSTANCE;
+        }
+
         if (objectType == Boolean.class) {
             return ObjectWriterImplBoolean.INSTANCE;
         }
@@ -842,6 +858,58 @@ public class ObjectWriterModule {
                 }
 
                 return ObjectWriterImplCalendar.INSTANCE;
+            }
+
+            if (ZonedDateTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplZonedDateTime(beanInfo.format, beanInfo.locale);
+                }
+
+                return ObjectWriterImplZonedDateTime.INSTANCE;
+            }
+
+            if (OffsetDateTime.class == clazz) {
+                return ObjectWriterImplOffsetDateTime.of(beanInfo.format, beanInfo.locale);
+            }
+
+            if (LocalDateTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplLocalDateTime(beanInfo.format, beanInfo.locale);
+                }
+
+                return ObjectWriterImplLocalDateTime.INSTANCE;
+            }
+
+            if (LocalDate.class == clazz) {
+                return ObjectWriterImplLocalDate.of(beanInfo.format, beanInfo.locale);
+            }
+
+            if (LocalTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplLocalTime(beanInfo.format, beanInfo.locale);
+                }
+
+                return ObjectWriterImplLocalTime.INSTANCE;
+            }
+
+            if (OffsetTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplOffsetTime(beanInfo.format, beanInfo.locale);
+                }
+
+                return ObjectWriterImplOffsetTime.INSTANCE;
+            }
+
+            if (Instant.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplInstant(beanInfo.format, beanInfo.locale);
+                }
+
+                return ObjectWriterImplInstant.INSTANCE;
+            }
+
+            if (Duration.class == clazz) {
+                return ObjectWriterImplToString.INSTANCE;
             }
 
             if (StackTraceElement.class == clazz) {

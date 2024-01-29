@@ -1,26 +1,16 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 abstract class FieldWriterDate<T>
         extends FieldWriter<T> {
-    volatile byte[] cacheFormat19UTF8;
-    static AtomicReferenceFieldUpdater<FieldWriterDate, byte[]> CACHE_UTF8_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, byte[].class, "cacheFormat19UTF8");
-
-    volatile char[] cacheFormat19UTF16;
-    static AtomicReferenceFieldUpdater<FieldWriterDate, char[]> CACHE_UTF16_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, char[].class, "cacheFormat19UTF16");
-
     protected DateTimeFormatter formatter;
     final boolean formatMillis;
     final boolean formatISO8601;
@@ -154,18 +144,18 @@ abstract class FieldWriterDate<T>
                 : ctx.getDateFormat();
         boolean formatyyyyMMddhhmmss19 = this.formatyyyyMMddhhmmss19 || (ctx.isFormatyyyyMMddhhmmss19() && this.format == null);
         if (dateFormat == null || formatyyyyMMddhhmmss14 || formatyyyyMMddhhmmss19) {
-            long epochSecond = IOUtils.floorDiv(timeMillis, 1000L);
+            long epochSecond = Math.floorDiv(timeMillis, 1000L);
             int offsetTotalSeconds;
-            if (ZoneId.SHANGHAI_ZONE_ID.equals(zoneId)) {
+            if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
                 offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
             } else {
                 Instant instant = Instant.ofEpochMilli(timeMillis);
-                offsetTotalSeconds = zoneId.getOffsetTotalSeconds(instant);
+                offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
             }
 
             long localSecond = epochSecond + offsetTotalSeconds;
-            long localEpochDay = IOUtils.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) IOUtils.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;
@@ -198,7 +188,11 @@ abstract class FieldWriterDate<T>
                 yearEst += marchMonth0 / 10;
 
                 // check year now we are certain it is correct
-                year = LocalDateTime.checkYear(yearEst);
+                if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                    throw new DateTimeException("Invalid year " + yearEst);
+                }
+
+                year = (int) yearEst;
             }
 
             int hour, minute, second;
@@ -248,12 +242,14 @@ abstract class FieldWriterDate<T>
                     return;
                 }
 
-                int millis = (int) IOUtils.floorMod(timeMillis, 1000L);
+                int millis = (int) Math.floorMod(timeMillis, 1000L);
                 if (millis != 0) {
                     Instant instant = Instant.ofEpochMilli(timeMillis);
                     int offsetSeconds = ctx
                             .getZoneId()
-                            .getOffsetTotalSeconds(instant);
+                            .getRules()
+                            .getOffset(instant)
+                            .getTotalSeconds();
                     writeFieldName(jsonWriter);
                     jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, false);
                     return;
@@ -270,25 +266,25 @@ abstract class FieldWriterDate<T>
                         Instant.ofEpochMilli(timeMillis), zoneId);
 
         if (formatISO8601 || (ctx.isDateFormatISO8601() && this.format == null)) {
-            int year = zdt.dateTime.date.year;
+            int year = zdt.getYear();
             if (year >= 0 && year <= 9999) {
-                int month = zdt.dateTime.date.monthValue;
-                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
-                int hour = zdt.dateTime.time.hour;
-                int minute = zdt.dateTime.time.minute;
-                int second = zdt.dateTime.time.second;
-                int millis = zdt.dateTime.time.nano / 1000_000;
-                int offsetSeconds = zdt.offsetSeconds;
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+                int millis = zdt.getNano() / 1000_000;
+                int offsetSeconds = zdt.getOffset().getTotalSeconds();
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
             }
         }
 
         if (formatyyyyMMdd8) {
-            int year = zdt.dateTime.date.year;
+            int year = zdt.getYear();
             if (year >= 0 && year <= 9999) {
-                int month = zdt.dateTime.date.monthValue;
-                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
                 jsonWriter.writeDateYYYMMDD8(year, month, dayOfMonth);
                 return;
             }
@@ -299,13 +295,12 @@ abstract class FieldWriterDate<T>
             formatter = ctx.getDateFormatter();
         }
 
-        Date date = new Date(timeMillis);
-        String str;
         if (formatter != null) {
-            str = formatter.format(date);
+            jsonWriter.writeString(
+                    formatter.format(zdt)
+            );
         } else {
-            str = DateUtils.formatYMDHMS19(date, jsonWriter.context.getZoneId());
+            jsonWriter.writeZonedDateTime(zdt);
         }
-        jsonWriter.writeString(str);
     }
 }

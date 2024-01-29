@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class ObjectReaderInterface<T>
         extends ObjectReaderAdapter<T> {

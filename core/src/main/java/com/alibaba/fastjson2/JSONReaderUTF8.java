@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.reader.ValueConsumer;
-import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -5395,6 +5395,229 @@ class JSONReaderUTF8
         return super.readLocalDate();
     }
 
+    public final OffsetDateTime readOffsetDateTime() {
+        final byte[] bytes = this.bytes;
+        final int offset = this.offset;
+        final Context context = this.context;
+        if (this.ch == '"' || this.ch == '\'') {
+            if (context.dateFormat == null
+                    || context.formatyyyyMMddhhmmss19
+                    || context.formatyyyyMMddhhmmssT19
+                    || context.formatyyyyMMdd8
+                    || context.formatISO8601
+            ) {
+                char quote = this.ch;
+                byte c10;
+                int off21 = offset + 19;
+                if (off21 < bytes.length
+                        && off21 < end
+                        && bytes[offset + 4] == '-'
+                        && bytes[offset + 7] == '-'
+                        && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
+                        && bytes[offset + 13] == ':'
+                        && bytes[offset + 16] == ':'
+                ) {
+                    byte y0 = bytes[offset];
+                    byte y1 = bytes[offset + 1];
+                    byte y2 = bytes[offset + 2];
+                    byte y3 = bytes[offset + 3];
+                    byte m0 = bytes[offset + 5];
+                    byte m1 = bytes[offset + 6];
+                    byte d0 = bytes[offset + 8];
+                    byte d1 = bytes[offset + 9];
+                    byte h0 = bytes[offset + 11];
+                    byte h1 = bytes[offset + 12];
+                    byte i0 = bytes[offset + 14];
+                    byte i1 = bytes[offset + 15];
+                    byte s0 = bytes[offset + 17];
+                    byte s1 = bytes[offset + 18];
+
+                    int year;
+                    int month;
+                    if (y0 >= '0' && y0 <= '9'
+                            && y1 >= '0' && y1 <= '9'
+                            && y2 >= '0' && y2 <= '9'
+                            && y3 >= '0' && y3 <= '9'
+                    ) {
+                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    if (m0 >= '0' && m0 <= '9'
+                            && m1 >= '0' && m1 <= '9'
+                    ) {
+                        month = (m0 - '0') * 10 + (m1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int dom;
+                    if (d0 >= '0' && d0 <= '9'
+                            && d1 >= '0' && d1 <= '9'
+                    ) {
+                        dom = (d0 - '0') * 10 + (d1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int hour;
+                    if (h0 >= '0' && h0 <= '9'
+                            && h1 >= '0' && h1 <= '9'
+                    ) {
+                        hour = (h0 - '0') * 10 + (h1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int minute;
+                    if (i0 >= '0' && i0 <= '9'
+                            && i1 >= '0' && i1 <= '9'
+                    ) {
+                        minute = (i0 - '0') * 10 + (i1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int second;
+                    if (s0 >= '0' && s0 <= '9'
+                            && s1 >= '0' && s1 <= '9'
+                    ) {
+                        second = (s0 - '0') * 10 + (s1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    LocalDate localDate;
+                    try {
+                        if (year == 0 && month == 0 && dom == 0) {
+                            localDate = null;
+                        } else {
+                            localDate = LocalDate.of(year, month, dom);
+                        }
+                    } catch (DateTimeException ex) {
+                        throw new JSONException(info("read date error"), ex);
+                    }
+
+                    int nanoSize = -1;
+                    int len = 0;
+                    for (int start = offset + 19, i = start, end = offset + 31; i < end && i < this.end && i < bytes.length; ++i) {
+                        if (bytes[i] == quote && bytes[i - 1] == 'Z') {
+                            nanoSize = i - start - 2;
+                            len = i - offset + 1;
+                            break;
+                        }
+                    }
+                    if (nanoSize != -1 || len == 21) {
+                        int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 20);
+                        LocalTime localTime = LocalTime.of(hour, minute, second, nano);
+                        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
+                        OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
+                        this.offset += len;
+                        next();
+                        if (comma = (this.ch == ',')) {
+                            next();
+                        }
+                        return oft;
+                    }
+                }
+            }
+        }
+        ZonedDateTime zdt = readZonedDateTime();
+        return zdt == null ? null : zdt.toOffsetDateTime();
+    }
+
+    @Override
+    public final OffsetTime readOffsetTime() {
+        final byte[] bytes = this.bytes;
+        final int offset = this.offset;
+        final Context context = this.context;
+        if (this.ch == '"' || this.ch == '\'') {
+            if (context.dateFormat == null) {
+                char quote = this.ch;
+                int off10 = offset + 8;
+                if (off10 < bytes.length
+                        && off10 < end
+                        && bytes[offset + 2] == ':'
+                        && bytes[offset + 5] == ':'
+                ) {
+                    byte h0 = bytes[offset];
+                    byte h1 = bytes[offset + 1];
+                    byte i0 = bytes[offset + 3];
+                    byte i1 = bytes[offset + 4];
+                    byte s0 = bytes[offset + 6];
+                    byte s1 = bytes[offset + 7];
+
+                    int hour;
+                    if (h0 >= '0' && h0 <= '9'
+                            && h1 >= '0' && h1 <= '9'
+                    ) {
+                        hour = (h0 - '0') * 10 + (h1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int minute;
+                    if (i0 >= '0' && i0 <= '9'
+                            && i1 >= '0' && i1 <= '9'
+                    ) {
+                        minute = (i0 - '0') * 10 + (i1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int second;
+                    if (s0 >= '0' && s0 <= '9'
+                            && s1 >= '0' && s1 <= '9'
+                    ) {
+                        second = (s0 - '0') * 10 + (s1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int nanoSize = -1;
+                    int len = 0;
+                    for (int start = offset + 8, i = start, end = offset + 25; i < end && i < this.end && i < bytes.length; ++i) {
+                        byte b = bytes[i];
+                        if (nanoSize == -1 && (b == 'Z' || b == '+' || b == '-')) {
+                            nanoSize = i - start - 1;
+                        }
+                        if (b == quote) {
+                            len = i - offset;
+                            break;
+                        }
+                    }
+
+                    int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 9);
+
+                    ZoneOffset zoneOffset;
+                    int zoneOffsetSize = len - 9 - nanoSize;
+                    if (zoneOffsetSize <= 1) {
+                        zoneOffset = ZoneOffset.UTC;
+                    } else {
+                        String zonedId = new String(bytes, offset + 9 + nanoSize, zoneOffsetSize);
+                        zoneOffset = ZoneOffset.of(zonedId);
+                    }
+                    LocalTime localTime = LocalTime.of(hour, minute, second, nano);
+                    OffsetTime oft = OffsetTime.of(localTime, zoneOffset);
+                    this.offset += len + 2;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return oft;
+                }
+            }
+        }
+        throw new JSONException(this.info("illegal offsetTime"));
+    }
+
     @Override
     protected final ZonedDateTime readZonedDateTimeX(int len) {
         if (!isString()) {
@@ -5408,16 +5631,16 @@ class JSONReaderUTF8
         ZonedDateTime zdt;
         if (len == 30 && bytes[offset + 29] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime29(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else if (len == 29 && bytes[offset + 28] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime28(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else if (len == 28 && bytes[offset + 27] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime27(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else if (len == 27 && bytes[offset + 26] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime26(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else {
             zdt = DateUtils.parseZonedDateTime(bytes, offset, len, context.zoneId);
         }
@@ -5570,6 +5793,26 @@ class JSONReaderUTF8
         }
 
         offset += 9;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return time;
+    }
+
+    @Override
+    protected final LocalTime readLocalTime9() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("localTime only support string input");
+        }
+
+        LocalTime time = DateUtils.parseLocalTime8(bytes, offset);
+        if (time == null) {
+            return null;
+        }
+
+        offset += 10;
         next();
         if (comma = (ch == ',')) {
             next();

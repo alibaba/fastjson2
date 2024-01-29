@@ -1,8 +1,9 @@
 package com.alibaba.jdk;
 
-import com.alibaba.fastjson2.time.DateTimeException;
-import com.alibaba.fastjson2.time.LocalTime;
 import org.junit.jupiter.api.Test;
+
+import java.time.DateTimeException;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

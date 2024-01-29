@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.*;
-import com.alibaba.fastjson2.time.*;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -17,6 +17,8 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -754,7 +756,23 @@ public abstract class JSONWriter
 
     public abstract void writeInt32(int value);
 
+    public void writeInt64(Long i) {
+        if (i == null) {
+            writeInt64Null();
+            return;
+        }
+        writeInt64(i.longValue());
+    }
+
     public abstract void writeInt64(long i);
+
+    public void writeInt32(Integer i) {
+        if (i == null) {
+            writeNull();
+            return;
+        }
+        writeInt32(i.intValue());
+    }
 
     public final void writeInt32(int value, String format) {
         if (format == null || jsonb) {
@@ -1082,8 +1100,52 @@ public abstract class JSONWriter
 
     public abstract void writeLocalDateTime(LocalDateTime dateTime);
 
+    public abstract void writeLocalDate(LocalDate date);
+
+    protected final boolean writeLocalDateWithFormat(LocalDate date, Context context) {
+        if (context.dateFormatUnixTime || context.dateFormatMillis) {
+            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+            long millis = dateTime.atZone(context.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            writeInt64(context.dateFormatMillis ? millis : millis / 1000);
+            return true;
+        }
+
+        DateTimeFormatter formatter = context.getDateFormatter();
+        if (formatter != null) {
+            String str;
+            if (context.isDateFormatHasHour()) {
+                str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
+            } else {
+                str = formatter.format(date);
+            }
+            writeString(str);
+            return true;
+        }
+        return false;
+    }
+
+    public abstract void writeLocalTime(LocalTime time);
+
+    public abstract void writeZonedDateTime(ZonedDateTime dateTime);
+
+    public abstract void writeOffsetDateTime(OffsetDateTime dateTime);
+
+    public abstract void writeOffsetTime(OffsetTime dateTime);
+
+    public void writeInstant(Instant instant) {
+        if (instant == null) {
+            writeNull();
+            return;
+        }
+
+        String str = DateTimeFormatter.ISO_INSTANT.format(instant);
+        writeString(str);
+    }
+
     public void writeInstant(long seconds, int nano) {
-        throw new JSONException("TODO");
+        writeInstant(Instant.ofEpochSecond(seconds, nano));
     }
 
     public abstract void writeDateTime14(
@@ -1348,13 +1410,6 @@ public abstract class JSONWriter
             }
         }
 
-        public TimeZone getTimeZone() {
-            if (timeZone == null) {
-                timeZone = ZoneId.DEFAULT_TIME_ZONE;
-            }
-            return timeZone;
-        }
-
         public void setTimeZone(TimeZone timeZone) {
             this.timeZone = timeZone;
         }
@@ -1464,7 +1519,7 @@ public abstract class JSONWriter
 
         public ZoneId getZoneId() {
             if (zoneId == null) {
-                zoneId = ZoneId.DEFAULT_ZONE_ID;
+                zoneId = DateUtils.DEFAULT_ZONE_ID;
             }
             return zoneId;
         }

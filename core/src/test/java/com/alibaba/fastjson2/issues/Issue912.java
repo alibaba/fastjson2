@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.time.DateTimeException;
 import org.junit.jupiter.api.Test;
+
+import java.time.DateTimeException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

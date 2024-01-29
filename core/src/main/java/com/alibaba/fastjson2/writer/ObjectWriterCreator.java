@@ -13,6 +13,7 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.NameCacheEntry;
@@ -12,6 +11,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -5584,6 +5584,26 @@ final class JSONReaderUTF16
     }
 
     @Override
+    protected LocalTime readLocalTime9() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("localTime only support string input");
+        }
+
+        LocalTime time = DateUtils.parseLocalTime8(chars, offset);
+        if (time == null) {
+            return null;
+        }
+
+        offset += 10;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return time;
+    }
+
+    @Override
     public LocalDate readLocalDate8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
@@ -5749,6 +5769,229 @@ final class JSONReaderUTF16
         return super.readLocalDate();
     }
 
+    public final OffsetDateTime readOffsetDateTime() {
+        final char[] chars = this.chars;
+        final int offset = this.offset;
+        final Context context = this.context;
+        if (this.ch == '"' || this.ch == '\'') {
+            if (context.dateFormat == null
+                    || context.formatyyyyMMddhhmmss19
+                    || context.formatyyyyMMddhhmmssT19
+                    || context.formatyyyyMMdd8
+                    || context.formatISO8601
+            ) {
+                char quote = this.ch;
+                char c10;
+                int off21 = offset + 19;
+                if (off21 < chars.length
+                        && off21 < end
+                        && chars[offset + 4] == '-'
+                        && chars[offset + 7] == '-'
+                        && ((c10 = chars[offset + 10]) == ' ' || c10 == 'T')
+                        && chars[offset + 13] == ':'
+                        && chars[offset + 16] == ':'
+                ) {
+                    char y0 = chars[offset];
+                    char y1 = chars[offset + 1];
+                    char y2 = chars[offset + 2];
+                    char y3 = chars[offset + 3];
+                    char m0 = chars[offset + 5];
+                    char m1 = chars[offset + 6];
+                    char d0 = chars[offset + 8];
+                    char d1 = chars[offset + 9];
+                    char h0 = chars[offset + 11];
+                    char h1 = chars[offset + 12];
+                    char i0 = chars[offset + 14];
+                    char i1 = chars[offset + 15];
+                    char s0 = chars[offset + 17];
+                    char s1 = chars[offset + 18];
+
+                    int year;
+                    int month;
+                    if (y0 >= '0' && y0 <= '9'
+                            && y1 >= '0' && y1 <= '9'
+                            && y2 >= '0' && y2 <= '9'
+                            && y3 >= '0' && y3 <= '9'
+                    ) {
+                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    if (m0 >= '0' && m0 <= '9'
+                            && m1 >= '0' && m1 <= '9'
+                    ) {
+                        month = (m0 - '0') * 10 + (m1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int dom;
+                    if (d0 >= '0' && d0 <= '9'
+                            && d1 >= '0' && d1 <= '9'
+                    ) {
+                        dom = (d0 - '0') * 10 + (d1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int hour;
+                    if (h0 >= '0' && h0 <= '9'
+                            && h1 >= '0' && h1 <= '9'
+                    ) {
+                        hour = (h0 - '0') * 10 + (h1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int minute;
+                    if (i0 >= '0' && i0 <= '9'
+                            && i1 >= '0' && i1 <= '9'
+                    ) {
+                        minute = (i0 - '0') * 10 + (i1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    int second;
+                    if (s0 >= '0' && s0 <= '9'
+                            && s1 >= '0' && s1 <= '9'
+                    ) {
+                        second = (s0 - '0') * 10 + (s1 - '0');
+                    } else {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    }
+
+                    LocalDate localDate;
+                    try {
+                        if (year == 0 && month == 0 && dom == 0) {
+                            localDate = null;
+                        } else {
+                            localDate = LocalDate.of(year, month, dom);
+                        }
+                    } catch (DateTimeException ex) {
+                        throw new JSONException(info("read date error"), ex);
+                    }
+
+                    int nanoSize = -1;
+                    int len = 0;
+                    for (int start = offset + 19, i = start, end = offset + 31; i < end && i < this.end && i < chars.length; ++i) {
+                        if (chars[i] == quote && chars[i - 1] == 'Z') {
+                            nanoSize = i - start - 2;
+                            len = i - offset + 1;
+                            break;
+                        }
+                    }
+                    if (nanoSize != -1 || len == 21) {
+                        int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(chars, nanoSize, offset + 20);
+                        LocalTime localTime = LocalTime.of(hour, minute, second, nano);
+                        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
+                        OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
+                        this.offset += len;
+                        next();
+                        if (comma = (ch == ',')) {
+                            next();
+                        }
+                        return oft;
+                    }
+                }
+            }
+        }
+        ZonedDateTime zdt = readZonedDateTime();
+        return zdt == null ? null : zdt.toOffsetDateTime();
+    }
+
+    @Override
+    public final OffsetTime readOffsetTime() {
+        final char[] chars = this.chars;
+        final int offset = this.offset;
+        final Context context = this.context;
+        if (this.ch == '"' || this.ch == '\'') {
+            if (context.dateFormat == null) {
+                char quote = this.ch;
+                int off10 = offset + 8;
+                if (off10 < chars.length
+                        && off10 < end
+                        && chars[offset + 2] == ':'
+                        && chars[offset + 5] == ':'
+                ) {
+                    char h0 = chars[offset];
+                    char h1 = chars[offset + 1];
+                    char i0 = chars[offset + 3];
+                    char i1 = chars[offset + 4];
+                    char s0 = chars[offset + 6];
+                    char s1 = chars[offset + 7];
+
+                    int hour;
+                    if (h0 >= '0' && h0 <= '9'
+                            && h1 >= '0' && h1 <= '9'
+                    ) {
+                        hour = (h0 - '0') * 10 + (h1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int minute;
+                    if (i0 >= '0' && i0 <= '9'
+                            && i1 >= '0' && i1 <= '9'
+                    ) {
+                        minute = (i0 - '0') * 10 + (i1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int second;
+                    if (s0 >= '0' && s0 <= '9'
+                            && s1 >= '0' && s1 <= '9'
+                    ) {
+                        second = (s0 - '0') * 10 + (s1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int nanoSize = -1;
+                    int len = 0;
+                    for (int start = offset + 8, i = start, end = offset + 25; i < end && i < this.end && i < chars.length; ++i) {
+                        char b = chars[i];
+                        if (nanoSize == -1 && (b == 'Z' || b == '+' || b == '-')) {
+                            nanoSize = i - start - 1;
+                        }
+                        if (b == quote) {
+                            len = i - offset;
+                            break;
+                        }
+                    }
+
+                    int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(chars, nanoSize, offset + 9);
+
+                    ZoneOffset zoneOffset;
+                    int zoneOffsetSize = len - 9 - nanoSize;
+                    if (zoneOffsetSize <= 1) {
+                        zoneOffset = ZoneOffset.UTC;
+                    } else {
+                        String zonedId = new String(chars, offset + 9 + nanoSize, zoneOffsetSize);
+                        zoneOffset = ZoneOffset.of(zonedId);
+                    }
+                    LocalTime localTime = LocalTime.of(hour, minute, second, nano);
+                    OffsetTime oft = OffsetTime.of(localTime, zoneOffset);
+                    this.offset += len + 2;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return oft;
+                }
+            }
+        }
+        throw new JSONException(this.info("illegal offsetTime"));
+    }
+
     @Override
     protected ZonedDateTime readZonedDateTimeX(int len) {
         if (this.ch != '"' && this.ch != '\'') {
@@ -5762,16 +6005,16 @@ final class JSONReaderUTF16
         ZonedDateTime zdt;
         if (len == 30 && chars[offset + 29] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime29(chars, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else if (len == 29 && chars[offset + 28] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime28(chars, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else if (len == 28 && chars[offset + 27] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime27(chars, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else if (len == 27 && chars[offset + 26] == 'Z') {
             LocalDateTime ldt = DateUtils.parseLocalDateTime26(chars, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneId.UTC);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
         } else {
             zdt = DateUtils.parseZonedDateTime(chars, offset, len, context.zoneId);
         }

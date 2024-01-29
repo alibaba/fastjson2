@@ -3,11 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.function.BiFunction;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.Closeable;
@@ -23,7 +19,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
@@ -799,8 +800,8 @@ public abstract class JSONReader
                 millis *= 1000L;
             }
             Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
-            return zdt.dateTime.date;
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalDate();
         }
 
         if (context.dateFormat == null
@@ -841,7 +842,7 @@ public abstract class JSONReader
                     break;
             }
             if (ldt != null) {
-                return ldt.date;
+                return ldt.toLocalDate();
             }
         }
 
@@ -853,17 +854,18 @@ public abstract class JSONReader
         DateTimeFormatter formatter = context.getDateFormatter();
         if (formatter != null) {
             if (context.formatHasHour) {
-                return formatter.parseLocalDateTime(str)
-                        .date;
+                return LocalDateTime
+                        .parse(str, formatter)
+                        .toLocalDate();
             }
-            return formatter.parseLocalDate(str);
+            return LocalDate.parse(str, formatter);
         }
 
         if (IOUtils.isNumber(str)) {
             long millis = Long.parseLong(str);
             Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
-            return zdt.dateTime.date;
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalDate();
         }
 
         throw new JSONException("not support input : " + str);
@@ -906,8 +908,8 @@ public abstract class JSONReader
         if (isInt()) {
             long millis = readInt64Value();
             Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
-            return zdt.dateTime;
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalDateTime();
         }
 
         if (context.dateFormat == null
@@ -960,7 +962,7 @@ public abstract class JSONReader
                     }
                     ZonedDateTime zdt = readZonedDateTimeX(len);
                     if (zdt != null) {
-                        return zdt.dateTime;
+                        return zdt.toLocalDateTime();
                     }
                     break;
                 }
@@ -980,10 +982,10 @@ public abstract class JSONReader
                     ZonedDateTime zdt = readZonedDateTimeX(len);
                     if (zdt != null) {
                         ZoneId contextZoneId = context.getZoneId();
-                        if (!zdt.zone.equals(contextZoneId)) {
-                            ldt = ZonedDateTime.ofInstant(zdt.toInstant(), contextZoneId).dateTime;
+                        if (!zdt.getZone().equals(contextZoneId)) {
+                            ldt = zdt.toInstant().atZone(contextZoneId).toLocalDateTime();
                         } else {
-                            ldt = zdt.dateTime;
+                            ldt = zdt.toLocalDateTime();
                         }
                         return ldt;
                     }
@@ -1003,11 +1005,11 @@ public abstract class JSONReader
         if (formatter != null) {
             if (!context.formatHasHour) {
                 return LocalDateTime.of(
-                        formatter.parseLocalDate(str),
+                        LocalDate.parse(str, formatter),
                         LocalTime.MIN
                 );
             }
-            return formatter.parseLocalDateTime(str);
+            return LocalDateTime.parse(str, formatter);
         }
 
         if (IOUtils.isNumber(str)) {
@@ -1021,7 +1023,7 @@ public abstract class JSONReader
             return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
-        if (str.startsWith("/Date(", 0) && str.endsWith(")/")) {
+        if (str.startsWith("/Date(") && str.endsWith(")/")) {
             String dotnetDateStr = str.substring(6, str.length() - 2);
             int i = dotnetDateStr.indexOf('+');
             if (i == -1) {
@@ -1035,12 +1037,14 @@ public abstract class JSONReader
             return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
-        if (str.equals("0000-00-00 00:00:00")) {
+        if ("0000-00-00 00:00:00".equals(str)) {
             wasNull = true;
             return null;
         }
         throw new JSONException(info("read LocalDateTime error " + str));
     }
+
+    public abstract OffsetDateTime readOffsetDateTime();
 
     public ZonedDateTime readZonedDateTime() {
         if (isInt()) {
@@ -1049,7 +1053,7 @@ public abstract class JSONReader
                 millis *= 1000L;
             }
             Instant instant = Instant.ofEpochMilli(millis);
-            return ZonedDateTime.ofInstant(instant, context.getZoneId());
+            return instant.atZone(context.getZoneId());
         }
 
         if (isString()) {
@@ -1104,7 +1108,8 @@ public abstract class JSONReader
                 if (ldt != null) {
                     return ZonedDateTime.ofLocal(
                             ldt,
-                            context.getZoneId()
+                            context.getZoneId(),
+                            null
                     );
                 }
             }
@@ -1117,10 +1122,10 @@ public abstract class JSONReader
             DateTimeFormatter formatter = context.getDateFormatter();
             if (formatter != null) {
                 if (!context.formatHasHour) {
-                    LocalDate localDate = formatter.parseLocalDate(str);
+                    LocalDate localDate = LocalDate.parse(str, formatter);
                     return ZonedDateTime.of(localDate, LocalTime.MIN, context.getZoneId());
                 }
-                LocalDateTime localDateTime = formatter.parseLocalDateTime(str);
+                LocalDateTime localDateTime = LocalDateTime.parse(str, formatter);
                 return ZonedDateTime.of(localDateTime, context.getZoneId());
             }
 
@@ -1130,10 +1135,14 @@ public abstract class JSONReader
                     millis *= 1000L;
                 }
                 Instant instant = Instant.ofEpochMilli(millis);
-                return ZonedDateTime.ofInstant(instant, context.getZoneId());
+                return instant.atZone(context.getZoneId());
             }
 
-            return DateUtils.parseZonedDateTime(str);
+            return ZonedDateTime.parse(str);
+        }
+
+        if (nextIfNull()) {
+            return null;
         }
         throw new JSONException("TODO : " + ch);
     }
@@ -1146,8 +1155,8 @@ public abstract class JSONReader
         if (isInt()) {
             long millis = readInt64Value();
             Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
-            return zdt.dateTime.time;
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalTime();
         }
 
         int len = getStringLength();
@@ -1156,6 +1165,8 @@ public abstract class JSONReader
                 return readLocalTime5();
             case 8:
                 return readLocalTime8();
+            case 9:
+                return readLocalTime9();
             case 10:
                 return readLocalTime10();
             case 11:
@@ -1166,10 +1177,10 @@ public abstract class JSONReader
                 return readLocalTime18();
             case 19:
                 return readLocalDateTime19()
-                        .time;
+                        .toLocalTime();
             case 20:
                 return readLocalDateTime20()
-                        .time;
+                        .toLocalTime();
             default:
                 break;
         }
@@ -1182,18 +1193,17 @@ public abstract class JSONReader
         if (IOUtils.isNumber(str)) {
             long millis = Long.parseLong(str);
             Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
-            return zdt.dateTime.time;
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalTime();
         }
 
-        throw new JSONException("not support len : " + len);
+        throw new JSONException("not support len : " + str);
     }
 
     protected abstract int getStringLength();
 
     public Instant readInstant() {
-        if (nextIfNullOrEmptyString()) {
-            wasNull = true;
+        if (nextIfNull()) {
             return null;
         }
 
@@ -1220,7 +1230,7 @@ public abstract class JSONReader
 
         return Instant.ofEpochSecond(
                 zdt.toEpochSecond(),
-                zdt.dateTime.time.nano);
+                zdt.toLocalTime().getNano());
     }
 
     public final long readMillisFromString() {
@@ -1313,7 +1323,7 @@ public abstract class JSONReader
 
             ZonedDateTime zdt = null;
             if (ldt != null) {
-                zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId());
+                zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
             } else if (len >= 20) {
                 zdt = readZonedDateTimeX(len);
                 if (zdt == null && (len >= 32 && len <= 35)) {
@@ -1324,7 +1334,7 @@ public abstract class JSONReader
 
             if (zdt != null) {
                 long seconds = zdt.toEpochSecond();
-                int nanos = zdt.dateTime.time.nano;
+                int nanos = zdt.toLocalTime().getNano();
                 if (seconds < 0 && nanos > 0) {
                     long millis = (seconds + 1) * 1000;
                     long adjustment = nanos / 1000_000 - 1000;
@@ -1374,7 +1384,7 @@ public abstract class JSONReader
             return 0;
         }
 
-        if (str.startsWith("/Date(", 0) && str.endsWith(")/")) {
+        if (str.startsWith("/Date(") && str.endsWith(")/")) {
             String dotnetDateStr = str.substring(6, str.length() - 2);
             int i = dotnetDateStr.indexOf('+');
             if (i == -1) {
@@ -1412,6 +1422,8 @@ public abstract class JSONReader
     protected abstract LocalTime readLocalTime5();
 
     protected abstract LocalTime readLocalTime8();
+
+    protected abstract LocalTime readLocalTime9();
 
     protected abstract LocalTime readLocalTime10();
 
@@ -1451,16 +1463,38 @@ public abstract class JSONReader
     public abstract String readString();
 
     public Date readDate() {
-        if ((context.formatMillis || context.formatUnixTime || context.dateFormat == null) && isInt()) {
+        if (isInt()) {
             long millis = readInt64Value();
-            if (context.formatUnixTime) {
-                millis *= 1000;
-            }
             return new Date(millis);
         }
 
-        String str = readString();
-        return DateUtils.parseDate(str, context.dateFormat, context.getZoneId());
+        if (readIfNull()) {
+            return null;
+        }
+
+        if (nextIfNullOrEmptyString()) {
+            return null;
+        }
+
+        long millis;
+        if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
+            nextIfMatch(':');
+            millis = readInt64Value();
+            nextIfObjectEnd();
+            setTypeRedirect(false);
+        } else {
+            millis = readMillisFromString();
+        }
+
+        if (millis == 0 && wasNull) {
+            return null;
+        }
+
+        return new Date(millis);
+    }
+
+    public OffsetTime readOffsetTime() {
+        throw new JSONException("TODO");
     }
 
     public Calendar readCalendar() {
@@ -3634,7 +3668,7 @@ public abstract class JSONReader
 
         public ZoneId getZoneId() {
             if (zoneId == null) {
-                zoneId = ZoneId.DEFAULT_ZONE_ID;
+                zoneId = DateUtils.DEFAULT_ZONE_ID;
             }
             return zoneId;
         }
@@ -3664,9 +3698,6 @@ public abstract class JSONReader
         }
 
         public TimeZone getTimeZone() {
-            if (timeZone == null) {
-                timeZone = ZoneId.DEFAULT_TIME_ZONE;
-            }
             return timeZone;
         }
 

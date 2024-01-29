@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
-import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Reader;
@@ -14,6 +13,8 @@ import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -83,18 +84,18 @@ public class JdbcSupport {
                     LocalDateTime ldt;
                     if (!formatHasHour) {
                         ldt = LocalDateTime.of(
-                                formatter.parseLocalDate(str),
+                                LocalDate.parse(str, formatter),
                                 LocalTime.MIN
                         );
                     } else if (!formatHasDay) {
                         ldt = LocalDateTime.of(
                                 LocalDate.of(1970, 1, 1),
-                                formatter.parseLocalTime(str)
+                                LocalTime.parse(str, formatter)
                         );
                     } else {
-                        ldt = formatter.parseLocalDateTime(str);
+                        ldt = LocalDateTime.parse(str, formatter);
                     }
-                    zdt = ZonedDateTime.of(ldt, jsonReader.context.getZoneId());
+                    zdt = ldt.atZone(jsonReader.getContext().getZoneId());
                 } else {
                     zdt = jsonReader.readZonedDateTime();
                 }
@@ -102,14 +103,30 @@ public class JdbcSupport {
             } else {
                 String str = jsonReader.readString();
                 if ("0000-00-00".equals(str) || "0000-00-00 00:00:00".equals(str)) {
-                    return new Time(0);
+                    millis = 0;
+                } else {
+                    if (str.length() == 9 && str.charAt(8) == 'Z') {
+                        LocalTime localTime = DateUtils.parseLocalTime(
+                                str.charAt(0),
+                                str.charAt(1),
+                                str.charAt(2),
+                                str.charAt(3),
+                                str.charAt(4),
+                                str.charAt(5),
+                                str.charAt(6),
+                                str.charAt(7)
+                        );
+                        millis = LocalDateTime.of(DateUtils.LOCAL_DATE_19700101, localTime)
+                                .atZone(DateUtils.DEFAULT_ZONE_ID)
+                                .toInstant()
+                                .toEpochMilli();
+                    } else {
+                        if (str.isEmpty() || "null".equals(str)) {
+                            return null;
+                        }
+                        return Time.valueOf(str);
+                    }
                 }
-
-                if (str.isEmpty() || "null".equals(str)) {
-                    return null;
-                }
-
-                return Time.valueOf(str);
             }
 
             return new Time(millis);
@@ -149,22 +166,24 @@ public class JdbcSupport {
             }
 
             if (formatMillis || context.isDateFormatMillis()) {
-                long millis = ((Time) object).getTime();
+                long millis = ((Date) object).getTime();
                 jsonWriter.writeInt64(millis);
                 return;
             }
 
             if (formatISO8601 || context.isDateFormatISO8601()) {
-                Instant instant = Instant.ofEpochMilli(((Time) object).getTime());
-                ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, ZoneId.UTC);
-                int offsetSeconds = zdt.offsetSeconds;
+                ZoneId zoneId = context.getZoneId();
+                long millis = ((Date) object).getTime();
+                Instant instant = Instant.ofEpochMilli(millis);
+                ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
+                int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-                int year = zdt.dateTime.date.year;
-                int month = zdt.dateTime.date.monthValue;
-                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
-                int hour = zdt.dateTime.time.hour;
-                int minute = zdt.dateTime.time.minute;
-                int second = zdt.dateTime.time.second;
+                int year = zdt.getYear();
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
                 int nano = 0;
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
                 return;
@@ -233,27 +252,27 @@ public class JdbcSupport {
 
             JSONWriter.Context ctx = jsonWriter.context;
 
-            Timestamp ts = (Timestamp) object;
+            Timestamp date = (Timestamp) object;
 
             if (formatUnixTime || ctx.isDateFormatUnixTime()) {
-                long millis = ts.getTime();
+                long millis = date.getTime();
                 jsonWriter.writeInt64(millis / 1000L);
                 return;
             }
 
             ZoneId zoneId = ctx.getZoneId();
-            Instant instant = Instant.of(ts);
+            Instant instant = date.toInstant();
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
-            int offsetSeconds = zoneId.getOffsetTotalSeconds(instant);
+            int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-            if ((formatISO8601 || ctx.isDateFormatISO8601()) && (zdt.dateTime.time.nano % 1000_000 == 0)) {
-                int year = zdt.dateTime.date.year;
-                int month = zdt.dateTime.date.monthValue;
-                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
-                int hour = zdt.dateTime.time.hour;
-                int minute = zdt.dateTime.time.minute;
-                int second = zdt.dateTime.time.second;
-                int nano = zdt.dateTime.time.nano;
+            if ((formatISO8601 || ctx.isDateFormatISO8601()) && (zdt.getNano() % 1000_000 == 0)) {
+                int year = zdt.getYear();
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+                int nano = zdt.getNano();
                 int millis = nano / 1000_000;
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
@@ -266,28 +285,28 @@ public class JdbcSupport {
 
             if (dateFormatter == null) {
                 if (formatMillis || ctx.isDateFormatMillis()) {
-                    long millis = ts.getTime();
+                    long millis = date.getTime();
                     jsonWriter.writeInt64(millis);
                     return;
                 }
 
-                int nanos = ts.getNanos();
+                int nanos = date.getNanos();
 
                 if (nanos == 0) {
-                    jsonWriter.writeInt64(ts.getTime());
+                    jsonWriter.writeInt64(date.getTime());
                     return;
                 }
 
-                int year = zdt.dateTime.date.year;
-                int month = zdt.dateTime.date.monthValue;
-                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
-                int hour = zdt.dateTime.time.hour;
-                int minute = zdt.dateTime.time.minute;
-                int second = zdt.dateTime.time.second;
+                int year = zdt.getYear();
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
                 if (nanos % 1000_000 == 0) {
                     jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds, false);
                 } else {
-                    jsonWriter.writeLocalDateTime(zdt.dateTime);
+                    jsonWriter.writeLocalDateTime(zdt.toLocalDateTime());
                 }
             } else {
                 String str = dateFormatter.format(zdt);
@@ -348,7 +367,7 @@ public class JdbcSupport {
             if (format == null || formatISO8601 || formatMillis) {
                 LocalDateTime localDateTime = jsonReader.readLocalDateTime();
                 if (localDateTime != null) {
-                    return localDateTime.toTimestamp();
+                    return Timestamp.valueOf(localDateTime);
                 }
 
                 if (jsonReader.wasNull()) {
@@ -371,16 +390,16 @@ public class JdbcSupport {
 
             Instant instant;
             if (!formatHasHour) {
-                LocalDate localDate = dateFormatter.parseLocalDate(str);
+                LocalDate localDate = LocalDate.parse(str, dateFormatter);
                 LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                instant = ZonedDateTime.of(ldt, jsonReader.context.getZoneId()).toInstant();
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
             } else {
-                LocalDateTime ldt = DateUtils.parseLocalDateTime(str, 0, str.length());
-                instant = ldt.toInstant(jsonReader.context.getZoneId());
+                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
             }
 
             long millis = instant.toEpochMilli();
-            int nanos = instant.nanos;
+            int nanos = instant.getNano();
 
             return createTimestamp(millis, nanos);
         }
@@ -425,8 +444,7 @@ public class JdbcSupport {
             if (format == null || formatISO8601 || formatMillis) {
                 LocalDateTime localDateTime = jsonReader.readLocalDateTime();
                 if (localDateTime != null) {
-                    Instant instant = localDateTime.toInstant(jsonReader.getZoneId());
-                    return new java.sql.Date(instant.toEpochMilli());
+                    return java.sql.Date.valueOf(localDateTime.toLocalDate());
                 }
 
                 if (jsonReader.wasNull()) {
@@ -449,12 +467,12 @@ public class JdbcSupport {
 
             Instant instant;
             if (!formatHasHour) {
-                LocalDate localDate = dateFormatter.parseLocalDate(str);
+                LocalDate localDate = LocalDate.parse(str, dateFormatter);
                 LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                instant = ZonedDateTime.of(ldt, jsonReader.context.getZoneId()).toInstant();
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
             } else {
-                LocalDateTime ldt = dateFormatter.parseLocalDateTime(str);
-                instant = ZonedDateTime.of(ldt, jsonReader.context.getZoneId()).toInstant();
+                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
             }
 
             return new java.sql.Date(

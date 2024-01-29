@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -10,6 +8,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.ErrorOnUnknownProperties;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportSmartMatch;

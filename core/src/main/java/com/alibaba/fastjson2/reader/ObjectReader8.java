@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.Supplier;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ObjectReader8<T>
         extends ObjectReaderAdapter<T> {

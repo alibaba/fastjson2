@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
@@ -95,7 +94,7 @@ abstract class FieldReaderDateTimeCodec<T>
                 accept(object, millis);
                 return;
             } else {
-                value = DateUtils.parseDate(str, format, ZoneId.DEFAULT_ZONE_ID);
+                value = DateUtils.parseDate(str, format, DateUtils.DEFAULT_ZONE_ID);
             }
         }
 

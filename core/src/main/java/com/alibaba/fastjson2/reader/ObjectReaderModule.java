@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.*;
@@ -16,9 +14,11 @@ import java.math.BigInteger;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static com.alibaba.fastjson2.util.BeanUtils.*;
@@ -899,6 +899,22 @@ public final class ObjectReaderModule {
             return ObjectReaderImplNumber.INSTANCE;
         }
 
+        if (type == OptionalInt.class) {
+            return ObjectReaderImplOptionalInt.INSTANCE;
+        }
+
+        if (type == OptionalLong.class) {
+            return ObjectReaderImplOptionalLong.INSTANCE;
+        }
+
+        if (type == OptionalDouble.class) {
+            return ObjectReaderImplOptionalDouble.INSTANCE;
+        }
+
+        if (type == Optional.class) {
+            return ObjectReaderImplOptional.INSTANCE;
+        }
+
         if (type == UUID.class) {
             return ObjectReaderImplUUID.INSTANCE;
         }
@@ -995,6 +1011,38 @@ public final class ObjectReaderModule {
 
         if (type == Date.class) {
             return ObjectReaderImplDate.INSTANCE;
+        }
+
+        if (type == LocalDate.class) {
+            return ObjectReaderImplLocalDate.INSTANCE;
+        }
+
+        if (type == LocalTime.class) {
+            return ObjectReaderImplLocalTime.INSTANCE;
+        }
+
+        if (type == LocalDateTime.class) {
+            return ObjectReaderImplLocalDateTime.INSTANCE;
+        }
+
+        if (type == ZonedDateTime.class) {
+            return ObjectReaderImplZonedDateTime.INSTANCE;
+        }
+
+        if (type == OffsetDateTime.class) {
+            return ObjectReaderImplOffsetDateTime.INSTANCE;
+        }
+
+        if (type == OffsetTime.class) {
+            return ObjectReaderImplOffsetTime.INSTANCE;
+        }
+
+        if (type == ZoneOffset.class) {
+            return new ObjectReaderImplFromString<>(ZoneOffset.class, ZoneOffset::of);
+        }
+
+        if (type == Instant.class) {
+            return ObjectReaderImplInstant.INSTANCE;
         }
 
         if (type == Locale.class) {
@@ -1347,6 +1395,10 @@ public final class ObjectReaderModule {
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
+                }
+
+                if (rawType == Optional.class) {
+                    return ObjectReaderImplOptional.of(type, null, null);
                 }
 
                 if (rawType == AtomicReference.class) {

@@ -3,8 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.BiFunction;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -14,6 +12,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class ConstructorFunction<T>

@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.BiConsumer;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.util.Locale;
+import java.util.function.BiConsumer;
 
 final class FieldReaderDoubleFunc<T>
         extends FieldReader<T> {

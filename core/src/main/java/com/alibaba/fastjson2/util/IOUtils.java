@@ -1,11 +1,10 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.time.LocalTime;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.time.LocalTime;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -618,20 +617,20 @@ public class IOUtils {
     }
 
     public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
-        int v = DIGITS_K[time.hour];
+        int v = DIGITS_K[time.getHour()];
         bytes[off] = (byte) (v >> 8);
         bytes[off + 1] = (byte) (v);
         bytes[off + 2] = ':';
-        v = DIGITS_K[time.minute];
+        v = DIGITS_K[time.getMinute()];
         bytes[off + 3] = (byte) (v >> 8);
         bytes[off + 4] = (byte) (v);
         bytes[off + 5] = ':';
-        v = DIGITS_K[time.second];
+        v = DIGITS_K[time.getSecond()];
         bytes[off + 6] = (byte) (v >> 8);
         bytes[off + 7] = (byte) (v);
         off += 8;
 
-        int nano = time.nano;
+        int nano = time.getNano();
         if (nano != 0) {
             final int div = nano / 1000;
             final int div2 = div / 1000;
@@ -674,20 +673,20 @@ public class IOUtils {
     }
 
     public static int writeLocalTime(char[] bytes, int off, LocalTime time) {
-        int v = DIGITS_K[time.hour];
+        int v = DIGITS_K[time.getHour()];
         bytes[off] = (char) (byte) (v >> 8);
         bytes[off + 1] = (char) (byte) (v);
         bytes[off + 2] = ':';
-        v = DIGITS_K[time.minute];
+        v = DIGITS_K[time.getMinute()];
         bytes[off + 3] = (char) (byte) (v >> 8);
         bytes[off + 4] = (char) (byte) (v);
         bytes[off + 5] = ':';
-        v = DIGITS_K[time.second];
+        v = DIGITS_K[time.getSecond()];
         bytes[off + 6] = (char) (byte) (v >> 8);
         bytes[off + 7] = (char) (byte) (v);
         off += 8;
 
-        int nano = time.nano;
+        int nano = time.getNano();
         if (nano != 0) {
             final int div = nano / 1000;
             final int div2 = div / 1000;
@@ -727,6 +726,22 @@ public class IOUtils {
         }
 
         return off;
+    }
+
+    public static void writeLocalTime(byte[] bytes, int off, int hour, int minute, int second) {
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off, PACKED_DIGITS[hour]);
+        bytes[off + 2] = ':';
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 3, PACKED_DIGITS[minute]);
+        bytes[off + 5] = ':';
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 6, PACKED_DIGITS[second]);
+    }
+
+    public static void writeLocalTime(char[] chars, int off, int hour, int minute, int second) {
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), PACKED_DIGITS_UTF16[hour]);
+        chars[off + 2] = ':';
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 3) << 1), PACKED_DIGITS_UTF16[minute]);
+        chars[off + 5] = ':';
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 6) << 1), PACKED_DIGITS_UTF16[second]);
     }
 
     public static int writeInt64(final byte[] buf, int pos, final long value) {
@@ -1339,5 +1354,172 @@ public class IOUtils {
             }
         }
         return r;
+    }
+
+    public static void getChars(int i, int index, byte[] buf) {
+        int q, r;
+        int charPos = index;
+
+        boolean negative = i < 0;
+        if (!negative) {
+            i = -i;
+        }
+
+        // Generate two digits per iteration
+        while (i <= -100) {
+            q = i / 100;
+            r = (q * 100) - i;
+            i = q;
+            charPos -= 2;
+            UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + charPos, PACKED_DIGITS[r]);
+        }
+
+        // We know there are at most two digits left at this point.
+        if (i < -9) {
+            charPos -= 2;
+            UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + charPos, PACKED_DIGITS[-i]);
+        } else {
+            buf[--charPos] = (byte) ('0' - i);
+        }
+
+        if (negative) {
+            buf[charPos - 1] = (byte) '-';
+        }
+    }
+
+    public static void getChars(int i, int index, char[] buf) {
+        int q, r;
+        int charPos = index;
+
+        boolean negative = (i < 0);
+        if (!negative) {
+            i = -i;
+        }
+
+        // Get 2 digits/iteration using ints
+        while (i <= -100) {
+            q = i / 100;
+            r = (q * 100) - i;
+            i = q;
+
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[r]);
+        }
+
+        // We know there are at most two digits left at this point.
+        if (i < -9) {
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[-i]);
+        } else {
+            buf[--charPos] = (char) ('0' - i);
+        }
+
+        if (negative) {
+            buf[charPos - 1] = '-';
+        }
+    }
+
+    public static void getChars(long i, int index, byte[] buf) {
+        long q;
+        int charPos = index;
+
+        boolean negative = (i < 0);
+        if (!negative) {
+            i = -i;
+        }
+
+        // Get 2 digits/iteration using longs until quotient fits into an int
+        while (i <= Integer.MIN_VALUE) {
+            q = i / 100;
+            charPos -= 2;
+            UNSAFE.putShort(
+                    buf,
+                    ARRAY_BYTE_BASE_OFFSET + charPos,
+                    PACKED_DIGITS[(int) ((q * 100) - i)]);
+            i = q;
+        }
+
+        // Get 2 digits/iteration using ints
+        int q2;
+        int i2 = (int) i;
+        while (i2 <= -100) {
+            q2 = i2 / 100;
+            charPos -= 2;
+            UNSAFE.putShort(
+                    buf,
+                    ARRAY_BYTE_BASE_OFFSET + charPos,
+                    PACKED_DIGITS[(q2 * 100) - i2]);
+            i2 = q2;
+        }
+
+        // We know there are at most two digits left at this point.
+        if (i2 < -9) {
+            charPos -= 2;
+            UNSAFE.putShort(
+                    buf,
+                    ARRAY_BYTE_BASE_OFFSET + charPos,
+                    PACKED_DIGITS[-i2]);
+        } else {
+            buf[--charPos] = (byte) ('0' - i2);
+        }
+
+        if (negative) {
+            buf[charPos - 1] = (byte) '-';
+        }
+    }
+
+    public static void getChars(long i, int index, char[] buf) {
+        long q;
+        int charPos = index;
+
+        boolean negative = (i < 0);
+        if (!negative) {
+            i = -i;
+        }
+
+        // Get 2 digits/iteration using longs until quotient fits into an int
+        while (i <= Integer.MIN_VALUE) {
+            q = i / 100;
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[(int) ((q * 100) - i)]);
+            i = q;
+        }
+
+        // Get 2 digits/iteration using ints
+        int q2;
+        int i2 = (int) i;
+        while (i2 <= -100) {
+            q2 = i2 / 100;
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[(q2 * 100) - i2]);
+            i2 = q2;
+        }
+
+        // We know there are at most two digits left at this point.
+        if (i2 < -9) {
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[-i2]);
+        } else {
+            buf[--charPos] = (char) ('0' - i2);
+        }
+
+        if (negative) {
+            buf[--charPos] = '-';
+        }
     }
 }

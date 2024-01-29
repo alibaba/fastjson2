@@ -3,11 +3,11 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Type;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;

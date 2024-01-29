@@ -1,21 +1,24 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterPrimitiveImpl;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 
@@ -1177,20 +1180,20 @@ public class TypeUtils {
 
         if (obj instanceof LocalDate) {
             LocalDate localDate = (LocalDate) obj;
-            ZonedDateTime zdt = localDate.atStartOfDay(ZoneId.DEFAULT_ZONE_ID);
+            ZonedDateTime zdt = localDate.atStartOfDay(DateUtils.DEFAULT_ZONE_ID);
             return new Date(
                     zdt.toInstant().toEpochMilli());
         }
 
         if (obj instanceof LocalDateTime) {
             LocalDateTime ldt = (LocalDateTime) obj;
-            ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.DEFAULT_ZONE_ID);
+            ZonedDateTime zdt = ZonedDateTime.of(ldt, DateUtils.DEFAULT_ZONE_ID);
             return new Date(
                     zdt.toInstant().toEpochMilli());
         }
 
         if (obj instanceof String) {
-            long millis = DateUtils.parseMillis((String) obj, ZoneId.DEFAULT_ZONE_ID);
+            long millis = DateUtils.parseMillis((String) obj, DateUtils.DEFAULT_ZONE_ID);
             if (millis == 0) {
                 return null;
             } else {
@@ -1215,7 +1218,7 @@ public class TypeUtils {
         }
 
         if (obj instanceof Date) {
-            Instant.ofEpochMilli(((Date) obj).getTime());
+            return ((Date) obj).toInstant();
         }
 
         if (obj instanceof ZonedDateTime) {
@@ -1229,13 +1232,17 @@ public class TypeUtils {
                 return null;
             }
 
-            try (JSONReader jsonReader = JSONReader.of(
-                    str.charAt(0) != '"'
-                            ? '"' + str + '"'
-                            : str
-            )) {
-                return jsonReader.read(Instant.class);
+            JSONReader jsonReader;
+            if (str.charAt(0) != '"') {
+                jsonReader = JSONReader.of('"' + str + '"');
+            } else {
+                jsonReader = JSONReader.of(str);
             }
+            return jsonReader.read(Instant.class);
+        }
+
+        if (obj instanceof Map) {
+            return (Instant) ObjectReaderImplInstant.INSTANCE.createInstance((Map) obj, 0L);
         }
 
         throw new JSONException("can not cast to Date from " + obj.getClass());

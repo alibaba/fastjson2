@@ -3,8 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.BiConsumer;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -13,6 +11,8 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class FieldReaderObject<T>
         extends FieldReader<T> {
@@ -121,7 +121,7 @@ public class FieldReaderObject<T>
         try {
             Object value;
             if (jsonReader.nextIfNull()) {
-                value = null;
+                value = fieldClass == Optional.class ? Optional.empty() : null;
             } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);

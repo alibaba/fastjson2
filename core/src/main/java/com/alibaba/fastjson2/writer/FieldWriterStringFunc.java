@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.Function;
 
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 final class FieldWriterStringFunc<T>
         extends FieldWriter<T> {

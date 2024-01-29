@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 
-import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1216 {

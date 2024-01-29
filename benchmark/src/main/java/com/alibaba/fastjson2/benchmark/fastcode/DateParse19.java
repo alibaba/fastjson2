@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 public class DateParse19 {
     static final String pattern = "yyyy-MM-dd HH:mm:ss";

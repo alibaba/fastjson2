@@ -2,12 +2,12 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
-import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -88,15 +88,15 @@ final class ObjectWriterImplDate
         ZoneId zoneId = ctx.getZoneId();
         int offsetSeconds;
 
-        if (ZoneId.SHANGHAI_ZONE_ID.equals(zoneId)) {
+        if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
             offsetSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(
-                    IOUtils.floorDiv(millis, 1000L)
+                    Math.floorDiv(millis, 1000L)
             );
-        } else if (zoneId == ZoneId.UTC || "UTC".equals(zoneId.id)) {
+        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             offsetSeconds = 0;
         } else {
             ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId);
-            offsetSeconds = zdt.offsetSeconds;
+            offsetSeconds = zdt.getOffset().getTotalSeconds();
         }
 
         String dateFormat;
@@ -113,18 +113,18 @@ final class ObjectWriterImplDate
         if (dateFormat == null) {
             final int SECONDS_PER_DAY = 60 * 60 * 24;
 
-            long epochSecond = IOUtils.floorDiv(millis, 1000L);
+            long epochSecond = Math.floorDiv(millis, 1000L);
             int offsetTotalSeconds;
-            if (ZoneId.SHANGHAI_ZONE_ID.equals(zoneId)) {
+            if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
                 offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
             } else {
                 Instant instant = Instant.ofEpochMilli(millis);
-                offsetTotalSeconds = zoneId.getOffsetTotalSeconds(instant);
+                offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
             }
 
             long localSecond = epochSecond + offsetTotalSeconds;
-            long localEpochDay = IOUtils.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) IOUtils.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;
@@ -157,7 +157,11 @@ final class ObjectWriterImplDate
                 yearEst += marchMonth0 / 10;
 
                 // check year now we are certain it is correct
-                year = LocalDateTime.checkYear(yearEst);
+                if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                    throw new DateTimeException("Invalid year " + yearEst);
+                }
+
+                year = (int) yearEst;
             }
 
             int hour, minute, second;
@@ -181,7 +185,7 @@ final class ObjectWriterImplDate
             }
 
             if (year >= 0 && year <= 9999) {
-                int mos = (int) IOUtils.floorMod(millis, 1000L);
+                int mos = (int) Math.floorMod(millis, 1000L);
                 if (mos == 0 && !formatISO8601) {
                     if (hour == 0 && minute == 0 && second == 0 && "java.sql.Date".equals(date.getClass().getName())) {
                         jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
@@ -201,7 +205,8 @@ final class ObjectWriterImplDate
         } else {
             formatter = ctx.getDateFormatter();
         }
-        String str = formatter.format(date);
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId);
+        String str = formatter.format(zdt);
         jsonWriter.writeString(str);
     }
 }

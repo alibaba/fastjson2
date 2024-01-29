@@ -1,15 +1,15 @@
 package com.alibaba.fastjson2.date;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.time.DateTimeFormatter;
-import com.alibaba.fastjson2.time.ZoneId;
-import com.alibaba.fastjson2.time.ZonedDateTime;
 import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTest {
@@ -112,7 +112,7 @@ public class DateTest {
     public void cookieUTC() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss zzz");
         ZonedDateTime zdt = ZonedDateTime.now(ZoneId.of("UTC"));
-        zdt = zdt.minusNanos(zdt.dateTime.time.nano);
+        zdt = zdt.minusNanos(zdt.getNano());
         for (int i = 0; i < 500; i++) {
             ZonedDateTime zdtI = zdt.plusDays(i);
             long millisI = zdtI.toInstant().toEpochMilli();
@@ -133,8 +133,8 @@ public class DateTest {
 //    @Test
     public void cookieCST() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss zzz");
-        ZonedDateTime zdt = ZonedDateTime.now(ZoneId.SHANGHAI_ZONE_ID);
-        zdt = zdt.minusNanos(zdt.dateTime.time.nano);
+        ZonedDateTime zdt = ZonedDateTime.now(DateUtils.SHANGHAI_ZONE_ID);
+        zdt = zdt.minusNanos(zdt.getNano());
         for (int i = 0; i < 500; i++) {
             ZonedDateTime zdtI = zdt.plusDays(i);
             long millisI = zdtI.toInstant().toEpochMilli();

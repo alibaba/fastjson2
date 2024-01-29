@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
-import com.alibaba.fastjson2.time.*;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -14,16 +14,24 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNameAsSymbol;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.DateUtils.OFFSET_8_ZONE_ID_NAME;
+import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
+    // optimize for write ZonedDateTime
+    static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
+    static final byte[] OFFSET_8_ZONE_ID_NAME_BYTES = JSONB.toBytes(OFFSET_8_ZONE_ID_NAME);
+    static final long WRITE_ENUM_USING_STRING_MASK = WriteEnumUsingToString.mask | WriteEnumsUsingName.mask;
+
     private final CacheItem cacheItem;
     private byte[] bytes;
     private TLongIntHashMap symbols;
@@ -1226,6 +1234,47 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeLocalDate(LocalDate date) {
+        if (date == null) {
+            writeNull();
+            return;
+        }
+
+        int off = this.off;
+        ensureCapacity(off + 5);
+
+        final byte[] bytes = this.bytes;
+        bytes[off] = BC_LOCAL_DATE;
+        int year = date.getYear();
+        bytes[off + 1] = (byte) (year >>> 8);
+        bytes[off + 2] = (byte) year;
+        bytes[off + 3] = (byte) date.getMonthValue();
+        bytes[off + 4] = (byte) date.getDayOfMonth();
+        this.off = off + 5;
+    }
+
+    @Override
+    public void writeLocalTime(LocalTime time) {
+        if (time == null) {
+            writeNull();
+            return;
+        }
+
+        int off = this.off;
+        ensureCapacity(off + 4);
+
+        final byte[] bytes = this.bytes;
+        bytes[off] = BC_LOCAL_TIME;
+        bytes[off + 1] = (byte) time.getHour();
+        bytes[off + 2] = (byte) time.getMinute();
+        bytes[off + 3] = (byte) time.getSecond();
+        this.off = off + 4;
+
+        int nano = time.getNano();
+        writeInt32(nano);
+    }
+
+    @Override
     public void writeLocalDateTime(LocalDateTime dateTime) {
         if (dateTime == null) {
             writeNull();
@@ -1237,24 +1286,111 @@ final class JSONWriterJSONB
 
         final byte[] bytes = this.bytes;
         bytes[off] = BC_LOCAL_DATETIME;
-        int year = dateTime.date.year;
+        int year = dateTime.getYear();
         bytes[off + 1] = (byte) (year >>> 8);
         bytes[off + 2] = (byte) year;
-        bytes[off + 3] = (byte) dateTime.date.monthValue;
-        bytes[off + 4] = (byte) dateTime.date.dayOfMonth;
-        bytes[off + 5] = dateTime.time.hour;
-        bytes[off + 6] = dateTime.time.minute;
-        bytes[off + 7] = dateTime.time.second;
+        bytes[off + 3] = (byte) dateTime.getMonthValue();
+        bytes[off + 4] = (byte) dateTime.getDayOfMonth();
+        bytes[off + 5] = (byte) dateTime.getHour();
+        bytes[off + 6] = (byte) dateTime.getMinute();
+        bytes[off + 7] = (byte) dateTime.getSecond();
         this.off = off + 8;
 
-        int nano = dateTime.time.nano;
+        int nano = dateTime.getNano();
         writeInt32(nano);
     }
 
     @Override
-    public void writeInstant(long second, int nano) {
+    public void writeZonedDateTime(ZonedDateTime dateTime) {
+        if (dateTime == null) {
+            writeNull();
+            return;
+        }
+
+        int off = this.off;
+        ensureCapacity(off + 8);
+
+        final byte[] bytes = this.bytes;
+        bytes[off] = BC_TIMESTAMP_WITH_TIMEZONE;
+        int year = dateTime.getYear();
+        bytes[off + 1] = (byte) (year >>> 8);
+        bytes[off + 2] = (byte) year;
+        bytes[off + 3] = (byte) dateTime.getMonthValue();
+        bytes[off + 4] = (byte) dateTime.getDayOfMonth();
+        bytes[off + 5] = (byte) dateTime.getHour();
+        bytes[off + 6] = (byte) dateTime.getMinute();
+        bytes[off + 7] = (byte) dateTime.getSecond();
+        this.off = off + 8;
+
+        int nano = dateTime.getNano();
+        writeInt32(nano);
+
+        ZoneId zoneId = dateTime.getZone();
+        String zoneIdStr = zoneId.getId();
+        if (zoneIdStr.equals(SHANGHAI_ZONE_ID_NAME)) {
+            writeRaw(SHANGHAI_ZONE_ID_NAME_BYTES);
+        } else {
+            writeString(zoneIdStr);
+        }
+    }
+
+    @Override
+    public void writeOffsetDateTime(OffsetDateTime dateTime) {
+        if (dateTime == null) {
+            writeNull();
+            return;
+        }
+
+        int off = this.off;
+        ensureCapacity(off + 8);
+
+        final byte[] bytes = this.bytes;
+        bytes[off] = BC_TIMESTAMP_WITH_TIMEZONE;
+        int year = dateTime.getYear();
+        bytes[off + 1] = (byte) (year >>> 8);
+        bytes[off + 2] = (byte) year;
+        bytes[off + 3] = (byte) dateTime.getMonthValue();
+        bytes[off + 4] = (byte) dateTime.getDayOfMonth();
+        bytes[off + 5] = (byte) dateTime.getHour();
+        bytes[off + 6] = (byte) dateTime.getMinute();
+        bytes[off + 7] = (byte) dateTime.getSecond();
+        this.off = off + 8;
+
+        int nano = dateTime.getNano();
+        writeInt32(nano);
+
+        ZoneId zoneId = dateTime.getOffset();
+        String zoneIdStr = zoneId.getId();
+        if (zoneIdStr.equals(OFFSET_8_ZONE_ID_NAME)) {
+            writeRaw(OFFSET_8_ZONE_ID_NAME_BYTES);
+        } else {
+            writeString(zoneIdStr);
+        }
+    }
+
+    @Override
+    public void writeOffsetTime(OffsetTime offsetTime) {
+        if (offsetTime == null) {
+            writeNull();
+            return;
+        }
+
+        writeOffsetDateTime(
+                OffsetDateTime.of(DateUtils.LOCAL_DATE_19700101, offsetTime.toLocalTime(), offsetTime.getOffset())
+        );
+    }
+
+    @Override
+    public void writeInstant(Instant instant) {
+        if (instant == null) {
+            writeNull();
+            return;
+        }
+
         ensureCapacity(off + 1);
         bytes[off++] = BC_TIMESTAMP;
+        long second = instant.getEpochSecond();
+        int nano = instant.getNano();
         writeInt64(second);
         writeInt32(nano);
     }

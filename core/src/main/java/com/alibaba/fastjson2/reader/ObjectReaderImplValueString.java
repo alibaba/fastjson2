@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.Function;
 
 import java.lang.reflect.Type;
+import java.util.function.Function;
 
 public class ObjectReaderImplValueString<T>
         implements ObjectReader<T> {

@@ -1,10 +1,8 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -15,7 +13,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONFactory.defaultObjectReaderProvider;
 import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
@@ -230,7 +230,7 @@ public class JSONArray
 
         if (value instanceof Date) {
             long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, ZoneId.DEFAULT_ZONE_ID);
+            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
         }
 
         if (value instanceof Boolean
@@ -857,6 +857,35 @@ public class JSONArray
             date = defaultValue;
         }
         return date;
+    }
+
+    /**
+     * Returns the {@link Instant} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @return {@link Instant} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     */
+    public Instant getInstant(int index) {
+        Object value = get(index);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Instant) {
+            return (Instant) value;
+        }
+
+        if (value instanceof Number) {
+            long millis = ((Number) value).longValue();
+            if (millis == 0) {
+                return null;
+            }
+            return Instant.ofEpochMilli(millis);
+        }
+
+        return TypeUtils.toInstant(value);
     }
 
     /**

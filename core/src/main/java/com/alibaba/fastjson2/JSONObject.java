@@ -3,13 +3,9 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
-import com.alibaba.fastjson2.function.Consumer;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.time.Instant;
-import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
@@ -18,7 +14,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONFactory.defaultObjectReaderProvider;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -313,7 +312,7 @@ public class JSONObject
 
         if (value instanceof Date) {
             long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, ZoneId.DEFAULT_ZONE_ID);
+            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
         }
 
         if (value instanceof Boolean
@@ -1044,7 +1043,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            long millis = DateUtils.parseMillis((String) value, ZoneId.DEFAULT_ZONE_ID);
+            long millis = DateUtils.parseMillis((String) value, DateUtils.DEFAULT_ZONE_ID);
             if (millis == 0) {
                 return null;
             }

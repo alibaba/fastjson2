@@ -3,15 +3,16 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.time.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DateUtilsTestFormat {
@@ -30,21 +31,21 @@ public class DateUtilsTestFormat {
     @Test
     public void autoCase() {
         Bean bean = JSONObject.of("date", "23/06/2012 12:13:14").to(Bean.class);
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.of(bean.date), ZoneId.SHANGHAI_ZONE_ID);
-        assertEquals(23, zdt.dateTime.date.dayOfMonth);
-        assertEquals(6, zdt.dateTime.date.monthValue);
-        assertEquals(2012, zdt.dateTime.date.year);
-        assertEquals(12, zdt.dateTime.time.hour);
-        assertEquals(13, zdt.dateTime.time.minute);
-        assertEquals(14, zdt.dateTime.time.second);
+        ZonedDateTime zdt = bean.date.toInstant().atZone(DEFAULT_ZONE_ID);
+        assertEquals(23, zdt.getDayOfMonth());
+        assertEquals(6, zdt.getMonthValue());
+        assertEquals(2012, zdt.getYear());
+        assertEquals(12, zdt.getHour());
+        assertEquals(13, zdt.getMinute());
+        assertEquals(14, zdt.getSecond());
     }
 
     @Test
     public void format() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
-        LocalDateTime ldt = formatter.parseLocalDateTime(str);
-        long epochMilli = ZonedDateTime.of(ldt, DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+        LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+        long epochMilli = ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
 
         Bean bean = new Bean();
         bean.date = new Date(epochMilli);
@@ -68,27 +69,28 @@ public class DateUtilsTestFormat {
     @Test
     public void format1() {
         assertSame(
-                ZoneId.of("Asia/Shanghai"),
-                ZoneId.of("Asia/Shanghai")
+                ZoneId.of("Asia/Shanghai").getRules(),
+                ZoneId.of("Asia/Shanghai").getRules()
         );
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
-        LocalDateTime ldt = formatter.parseLocalDateTime(str);
-        long epochMilli = ZonedDateTime.of(ldt, DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+        LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+        long epochMilli = ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
 
         Date date = new Date(epochMilli);
 
         assertEquals(epochMilli, DateUtils.millis(ldt));
         assertEquals(epochMilli, DateUtils.millis(ldt, DEFAULT_ZONE_ID));
 
-        assertNull(DateUtils.formatYMDHMS19((Date) null, DEFAULT_ZONE_ID));
+        assertNull(DateUtils.format((Date) null));
+        assertNull(DateUtils.formatYMDHMS19((Date) null));
         assertNull(DateUtils.format((Date) null, "yyyy-MM-dd HH:mm:ss"));
-        assertEquals("2012-06-23 12:13:14", DateUtils.format(date.getTime(), DateUtils.DateTimeFormatPattern.DATE_TIME_FORMAT_19_DASH));
+        assertEquals("2012-06-23 12:13:14", DateUtils.format(date));
         assertEquals("2012-06-23 12:13:14", DateUtils.format(date, null));
-        assertEquals("2012-06-23 12:13:14", DateUtils.formatYMDHMS19(date, DEFAULT_ZONE_ID));
+        assertEquals("2012-06-23 12:13:14", DateUtils.formatYMDHMS19(date));
 
-        assertEquals("2012-06-23 12:13:14", DateUtils.format(epochMilli, DateUtils.DateTimeFormatPattern.DATE_TIME_FORMAT_19_DASH));
+        assertEquals("2012-06-23 12:13:14", DateUtils.format(epochMilli));
         assertEquals("2012-06-23 12:13:14", DateUtils.format(date, "yyyy-MM-dd HH:mm:ss"));
         assertEquals("2012-06-23T12:13:14", DateUtils.format(date, "yyyy-MM-ddTHH:mm:ss"));
         assertEquals("2012-06-23T12:13:14", DateUtils.format(date, "yyyy-MM-dd'T'HH:mm:ss"));
@@ -99,8 +101,8 @@ public class DateUtilsTestFormat {
         assertEquals("2012-6-23", DateUtils.format(date, "yyyy-M-dd"));
         assertEquals("2012-Jun-23", DateUtils.format(date, "yyyy-MMM-dd"));
         assertEquals("2012-06-23", DateUtils.format(date, "yyyy-MM-dd"));
-        assertEquals("2012-06-23", DateUtils.formatYMD10(date.getTime(), DEFAULT_ZONE_ID));
-        assertEquals("20120623", DateUtils.formatYMD8(date.getTime(), DEFAULT_ZONE_ID));
+        assertEquals("2012-06-23", DateUtils.formatYMD10(date));
+        assertEquals("20120623", DateUtils.formatYMD8(date));
 
         assertEquals("2012-06-23", DateUtils.format(2012, 6, 23));
         assertEquals("2012-06-23 12:13:14", DateUtils.format(2012, 6, 23, 12, 13, 14));
@@ -110,10 +112,10 @@ public class DateUtilsTestFormat {
     public void format1_zdt() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
-        LocalDateTime ldt = formatter.parseLocalDateTime(str);
-        ZonedDateTime zdt = ZonedDateTime.of(ldt, DEFAULT_ZONE_ID);
+        LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+        ZonedDateTime zdt = ldt.atZone(DEFAULT_ZONE_ID);
 
-        assertNull(DateUtils.formatYMDHMS19((Date) null, DEFAULT_ZONE_ID));
+        assertNull(DateUtils.formatYMDHMS19((Date) null));
         assertNull(DateUtils.format((ZonedDateTime) null, "yyyy-MM-dd HH:mm:ss"));
         assertEquals("2012-06-23 12:13:14", DateUtils.formatYMDHMS19(zdt));
 
@@ -131,9 +133,9 @@ public class DateUtilsTestFormat {
     public void format1_ldt() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
-        LocalDateTime ldt = formatter.parseLocalDateTime(str);
+        LocalDateTime ldt = LocalDateTime.parse(str, formatter);
 
-        assertNull(DateUtils.formatYMDHMS19((Date) null, DEFAULT_ZONE_ID));
+        assertNull(DateUtils.formatYMDHMS19((Date) null));
         assertNull(DateUtils.format((LocalDateTime) null, "yyyy-MM-dd HH:mm:ss"));
         assertEquals("2012-06-23 12:13:14", DateUtils.formatYMDHMS19(ldt));
 
@@ -151,8 +153,8 @@ public class DateUtilsTestFormat {
     public void format1_localDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
-        LocalDateTime ldt = formatter.parseLocalDateTime(str);
-        LocalDate localDate = ldt.date;
+        LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+        LocalDate localDate = ldt.toLocalDate();
 
         assertNull(DateUtils.formatYMDHMS19((LocalDate) null));
         assertNull(DateUtils.format((LocalDate) null, "yyyy-MM-dd HH:mm:ss"));
@@ -172,24 +174,27 @@ public class DateUtilsTestFormat {
     public void utcSeconds() {
         LocalDateTime ldt = LocalDateTime.of(2012, 6, 23, 12, 13, 14);
         long utcSeconds = DateUtils.utcSeconds(
-                ldt.date.year,
-                ldt.date.monthValue,
-                ldt.date.dayOfMonth,
-                ldt.time.hour,
-                ldt.time.minute,
-                ldt.time.second
+                ldt.getYear(),
+                ldt.getMonthValue(),
+                ldt.getDayOfMonth(),
+                ldt.getHour(),
+                ldt.getMinute(),
+                ldt.getSecond()
         );
         long utcMillis = utcSeconds * 1000;
         assertEquals(
-                ZonedDateTime.of(ldt, ZoneId.UTC).toInstant().toEpochMilli(),
+                ldt.atZone(ZoneOffset.UTC).toInstant().toEpochMilli(),
                 utcMillis
         );
     }
 
     @Test
     public void formatYMD8() {
+        assertNull(DateUtils.formatYMD8((Date) null));
+        assertNull(DateUtils.formatYMD8((LocalDate) null));
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        long epochDay = LocalDateTime.now().date.toEpochDay();
+        long epochDay = LocalDate.now().toEpochDay();
         long start = epochDay - 1000;
         long end = epochDay + 1000;
         for (long i = start; i <= end; i++) {
@@ -197,14 +202,17 @@ public class DateUtilsTestFormat {
             long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
             Date date = new Date(epochMilli);
 
-            String result = formatter.format(localDate);
-            assertEquals(result, DateUtils.formatYMD8(localDate.year, localDate.monthValue, localDate.dayOfMonth));
+            String result = localDate.format(formatter);
+            assertEquals(result, DateUtils.formatYMD8(date));
+            assertEquals(result, DateUtils.formatYMD8(localDate));
             assertEquals(result, DateUtils.formatYMD8(date.getTime(), DEFAULT_ZONE_ID));
         }
     }
 
     @Test
     public void formatYMD8_1() {
+        assertNull(DateUtils.formatYMD8((Date) null));
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         long epochDay = LocalDate.of(1900, 1, 1).toEpochDay();
         long start = epochDay - 1000;
@@ -214,18 +222,20 @@ public class DateUtilsTestFormat {
             long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
             Date date = new Date(epochMilli);
 
-            String result = formatter.format(localDate);
-            assertEquals(result, DateUtils.formatYMD8(localDate.year, localDate.monthValue, localDate.dayOfMonth));
+            String result = localDate.format(formatter);
+            assertEquals(result, DateUtils.formatYMD8(date));
+            assertEquals(result, DateUtils.formatYMD8(localDate));
             assertEquals(result, DateUtils.formatYMD8(date.getTime(), DEFAULT_ZONE_ID));
         }
     }
 
     @Test
     public void formatYMD10() {
+        assertNull(DateUtils.formatYMD10((Date) null));
         assertNull(DateUtils.formatYMD10((LocalDate) null));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        long epochDay = LocalDateTime.now().date.toEpochDay();
+        long epochDay = LocalDate.now().toEpochDay();
         long start = epochDay - 1000;
         long end = epochDay + 1000;
         for (long i = start; i <= end; i++) {
@@ -233,26 +243,29 @@ public class DateUtilsTestFormat {
             long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
             Date date = new Date(epochMilli);
 
-            String result = formatter.format(localDate);
+            String result = localDate.format(formatter);
             assertEquals(result, DateUtils.formatYMD10(localDate));
+            assertEquals(result, DateUtils.formatYMD10(date));
             assertEquals(result, DateUtils.formatYMD10(date.getTime(), DEFAULT_ZONE_ID));
         }
     }
 
     @Test
     public void formatYMD10_1() {
+        assertNull(DateUtils.formatYMD10((Date) null));
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        long epochDay = LocalDate.of(1900, 1, 1).toEpochDay();
+        long epochDay = LocalDate.of(1100, 1, 1).toEpochDay();
         long start = epochDay - 1000;
         long end = epochDay + 1000;
         for (long i = start; i <= end; i++) {
             LocalDate localDate = LocalDate.ofEpochDay(i);
-            ZonedDateTime zdt = localDate.atStartOfDay(DEFAULT_ZONE_ID);
-            long epochMilli = zdt.toInstant().toEpochMilli();
+            long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
             Date date = new Date(epochMilli);
 
-            String result = formatter.format(localDate);
+            String result = localDate.format(formatter);
             assertEquals(result, DateUtils.formatYMD10(localDate));
+            assertEquals(result, DateUtils.formatYMD10(date));
             assertEquals(result, DateUtils.formatYMD10(date.getTime(), DEFAULT_ZONE_ID));
         }
     }

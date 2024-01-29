@@ -3,12 +3,13 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
+import java.time.*;
 import java.util.*;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.READ_ONLY;
 
@@ -492,6 +493,30 @@ public abstract class FieldReader<T>
 
                     if (fieldClass == Date.class) {
                         return ObjectReaderImplDate.of(format, locale);
+                    }
+
+                    if (fieldClass == ZonedDateTime.class) {
+                        return ObjectReaderImplZonedDateTime.of(format, locale);
+                    }
+
+                    if (fieldClass == LocalDateTime.class) {
+                        return new ObjectReaderImplLocalDateTime(format, locale);
+                    }
+
+                    if (fieldClass == LocalDate.class) {
+                        return ObjectReaderImplLocalDate.of(format, locale);
+                    }
+
+                    if (fieldClass == LocalTime.class) {
+                        return new ObjectReaderImplLocalTime(format, locale);
+                    }
+
+                    if (fieldClass == Instant.class) {
+                        return ObjectReaderImplInstant.of(format, locale);
+                    }
+
+                    if (fieldClass == Optional.class) {
+                        return ObjectReaderImplOptional.of(fieldType, format, locale);
                     }
 
                     break;

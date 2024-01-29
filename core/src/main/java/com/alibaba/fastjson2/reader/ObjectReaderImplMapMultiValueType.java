@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.function.Function;
-import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.MapMultiValueType;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -15,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.reader.ObjectReaderImplMap.CLASS_SINGLETON_MAP;
 import static com.alibaba.fastjson2.reader.ObjectReaderImplMap.CLASS_UNMODIFIABLE_MAP;
