@@ -1,17 +1,15 @@
 package com.alibaba.fastjson2.issues_1800;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -79,6 +77,31 @@ public class Issue1835 {
 
         public void setName(String name) {
             this.name = name;
+        }
+    }
+
+    @Test
+    public void test1() {
+        Page<Person> page = new Page<>();
+        List<Person> data = new ArrayList<>();
+        data.add(null);
+        data.add(new Person("abc"));
+        data.add(null);
+        page.data = Collections.unmodifiableList(data);
+
+        byte[] bytes = JSONB.toBytes(page, JSONWriter.Feature.WriteClassName);
+        Page page1 = JSONB.parseObject(bytes, Page.class);
+        assertNotNull(page1);
+    }
+
+    public static class Page<T> {
+        public List<T> data = new ArrayList<>();
+
+        public void setData(List<T> items) {
+            if (items == null || items.isEmpty()) {
+                return;
+            }
+            this.data = items.stream().filter(Objects::nonNull).collect(Collectors.toList());
         }
     }
 }
