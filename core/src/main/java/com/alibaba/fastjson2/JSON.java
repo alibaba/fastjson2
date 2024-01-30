@@ -247,6 +247,32 @@ public interface JSON {
     }
 
     /**
+     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param in the specified stream to be parsed
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     * @since 2.0.47
+     */
+    static Object parse(InputStream in, JSONReader.Context context) {
+        if (in == null) {
+            return null;
+        }
+
+        ObjectReader<?> objectReader = context.getObjectReader(Object.class);
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, in)) {
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parses the json string as a {@link JSONObject}. Returns {@code null}
      * if received {@link String} is {@code null} or empty or its content is null.
      *
@@ -555,6 +581,40 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext();
         try (JSONReader reader = JSONReader.of(in, charset, context)) {
             if (reader.nextIfNull()) {
+                return null;
+            }
+
+            JSONObject object = new JSONObject();
+            reader.read(object, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONObject}. Returns {@code null} if
+     * received {@link InputStream} is {@code null} or closed or its content is null.
+     *
+     * @param input the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @param context the specified custom context
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     *
+     * @since 2.0.47
+     */
+    static JSONObject parseObject(InputStream input, Charset charset, JSONReader.Context context) {
+        if (input == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(input, charset, context)) {
+            if (reader.isEnd()) {
                 return null;
             }
 
@@ -1862,6 +1922,76 @@ public interface JSON {
     }
 
     /**
+     * Parses the json stream as a {@link T}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
+     *
+     * @param input the specified stream to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Context context) {
+        if (input == null) {
+            return null;
+        }
+
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+
+        try (JSONReader reader = JSONReader.of(input, charset, context)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json stream as a {@link T}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
+     *
+     * @param input the specified stream to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(InputStream input, Charset charset, Class<T> type, JSONReader.Context context) {
+        if (input == null) {
+            return null;
+        }
+
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+
+        try (JSONReader reader = JSONReader.of(input, charset, context)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parses the json stream of the url as {@link T}.
      * Returns {@code null} if received {@link URL} is {@code null}.
      *
@@ -2483,6 +2613,37 @@ public interface JSON {
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
         try (JSONReader reader = JSONReader.of(in, StandardCharsets.UTF_8, context)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            JSONArray array = new JSONArray();
+            reader.read(array);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return array;
+        }
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONArray}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
+     *
+     * @param in the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @param context the specified custom context
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     */
+    static JSONArray parseArray(InputStream in, Charset charset, JSONReader.Context context) {
+        if (in == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(in, charset, context)) {
             if (reader.nextIfNull()) {
                 return null;
             }
