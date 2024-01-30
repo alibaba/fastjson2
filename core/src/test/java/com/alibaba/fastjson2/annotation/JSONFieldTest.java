@@ -40,7 +40,7 @@ public class JSONFieldTest {
         ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         VO_Method vo = new VO_Method();
-        vo.date = 0;
+        vo.date = 1000;
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<VO_Method> objectWriter = creator
@@ -51,9 +51,9 @@ public class JSONFieldTest {
 
             int rawOffset = TimeZone.getDefault().getRawOffset();
             if (rawOffset == 0) {
-                assertEquals("{\"date\":\"1970-01-01T00:00:00Z\"}", jsonWriter.toString());
+                assertEquals("{\"date\":\"1970-01-01T00:00:01Z\"}", jsonWriter.toString());
             } else {
-                assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}", jsonWriter.toString());
+                assertEquals("{\"date\":\"1970-01-01T08:00:01+08:00\"}", jsonWriter.toString());
             }
         }
     }

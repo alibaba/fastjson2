@@ -3,9 +3,14 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONCreator;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ObjectReader11Test {
     @Test
@@ -68,6 +73,21 @@ public class ObjectReader11Test {
             assertEquals(11, bean.f11);
         }
         {
+            Bean1 bean = JSON.parseObject(str)
+                    .toJavaObject(Bean1.class);
+            assertEquals(1, bean.f01);
+            assertEquals(2, bean.f02);
+            assertEquals(3, bean.f03);
+            assertEquals(4, bean.f04);
+            assertEquals(5, bean.f05);
+            assertEquals(6, bean.f06);
+            assertEquals(7, bean.f07);
+            assertEquals(8, bean.f08);
+            assertEquals(9, bean.f09);
+            assertEquals(10, bean.f10);
+            assertEquals(11, bean.f11);
+        }
+        {
             Bean2 bean = JSON.parseObject(str, Bean2.class);
             assertEquals(1, bean.f01);
             assertEquals(2, bean.f02);
@@ -81,6 +101,62 @@ public class ObjectReader11Test {
             assertEquals(10, bean.f10);
             assertEquals(11, bean.f11);
         }
+        {
+            Bean2 bean = JSON.parseObject(str).toJavaObject(Bean2.class);
+            assertEquals(1, bean.f01);
+            assertEquals(2, bean.f02);
+            assertEquals(3, bean.f03);
+            assertEquals(4, bean.f04);
+            assertEquals(5, bean.f05);
+            assertEquals(6, bean.f06);
+            assertEquals(7, bean.f07);
+            assertEquals(8, bean.f08);
+            assertEquals(9, bean.f09);
+            assertEquals(10, bean.f10);
+            assertEquals(11, bean.f11);
+        }
+
+        {
+            Bean3 bean = JSON.parseObject(str)
+                    .toJavaObject(Bean3.class);
+            assertEquals(1, bean.f01);
+            assertEquals(2, bean.f02);
+            assertEquals(3, bean.f03);
+            assertEquals(4, bean.f04);
+            assertEquals(5, bean.f05);
+            assertEquals(6, bean.f06);
+            assertEquals(7, bean.f07);
+            assertEquals(8, bean.f08);
+            assertEquals(9, bean.f09);
+            assertEquals(10, bean.f10);
+            assertEquals(11, bean.attributes.get("f11"));
+        }
+    }
+
+    @Test
+    public void test1() {
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
+        String[] fieldNames = new String[] {
+                "f01",
+                "f02",
+                "f03",
+                "f04",
+                "f05",
+                "f06",
+                "f07",
+                "f08",
+                "f09",
+                "f10",
+                "f11"
+        };
+        for (String fieldName : fieldNames) {
+            assertEquals(fieldName,
+                    objectReader.getFieldReader(fieldName).fieldName);
+            assertEquals(fieldName,
+                    objectReader.getFieldReader(fieldName.toUpperCase()).fieldName);
+        }
+        assertNull(objectReader.getFieldReader("xx"));
+        assertNull(objectReader.getFieldReaderLCase(0));
     }
 
     public static class Bean {
@@ -148,5 +224,20 @@ public class ObjectReader11Test {
             this.f10 = f10;
             this.f11 = f11;
         }
+    }
+
+    private static class Bean3 {
+        public int f01;
+        public int f02;
+        public int f03;
+        public int f04;
+        public int f05;
+        public int f06;
+        public int f07;
+        public int f08;
+        public int f09;
+        public int f10;
+        @JSONField(unwrapped = true)
+        public Map<String, Object> attributes = new HashMap<>();
     }
 }

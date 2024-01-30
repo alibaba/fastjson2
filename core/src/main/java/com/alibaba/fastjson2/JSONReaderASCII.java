@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -18,6 +19,12 @@ class JSONReaderASCII
         super(ctx, str, bytes, offset, length);
         this.str = str;
         nameAscii = true;
+    }
+
+    JSONReaderASCII(Context ctx, InputStream is) {
+        super(ctx, is);
+        nameAscii = true;
+        str = null;
     }
 
     @Override
@@ -647,13 +654,6 @@ class JSONReaderASCII
         this.ch = (char) c;
 
         return hashCode;
-    }
-
-    public static int getInt(byte[] bytes, int off) {
-        return UNSAFE.getInt(
-                bytes,
-                ARRAY_BYTE_BASE_OFFSET + off
-        );
     }
 
     public static long getLong(byte[] bytes, int off) {

@@ -7,8 +7,13 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -538,9 +543,101 @@ public class JSONWriterTest {
 
     @Test
     public void writeList() {
-        JSONWriter jsonWriter = JSONWriter.of();
-        jsonWriter.write(JSONArray.of(1, 2, 3));
-        assertEquals("[1,2,3]", jsonWriter.toString());
+        JSONArray array = JSONArray.of(1, 2, 3);
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.write(array);
+            assertEquals("[1,2,3]", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write(array);
+            assertEquals("[1,2,3]", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write(array);
+            assertEquals("[1,2,3]", jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void writeList2() {
+        JSONArray array = JSONArray.of(1L, 2L, 3L);
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.write(array);
+            assertEquals("[1,2,3]", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write(array);
+            assertEquals("[1,2,3]", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write(array);
+            assertEquals("[1,2,3]", jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void writeList3() {
+        JSONArray array = JSONArray.of(
+                "abc",
+                BigDecimal.ONE,
+                2F,
+                3D,
+                true,
+                false,
+                JSONArray.of(),
+                JSONObject.of(),
+                new HashMap<>(),
+                null
+        );
+        String expected = "[\"abc\",1,2.0,3.0,true,false,[],{},{},null]";
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.write(array);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write(array);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write(array);
+            assertEquals(expected, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void writeObject() {
+        JSONObject object = JSONObject.of(
+                "v0", true,
+                "v1", BigDecimal.ONE,
+                "v2", JSONObject.of(),
+                "v3", JSONArray.of(),
+                "v4", new HashMap<>());
+
+        String expected = "{\"v0\":true,\"v1\":1,\"v2\":{},\"v3\":[],\"v4\":{}}";
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.write(object);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write(object);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write(object);
+            assertEquals(expected, jsonWriter.toString());
+        }
     }
 
     @Test
@@ -1368,5 +1465,759 @@ public class JSONWriterTest {
             byte[] jsonbBytes = jsonWriter.getBytes();
             assertArrayEquals(values, JSONB.parseObject(jsonbBytes, long[].class));
         }
+    }
+
+    @Test
+    public void testWriteChar() {
+        Map<Character, String> map = new LinkedHashMap<>();
+        map.put('\n', "\"\\n\"");
+        map.put('\r', "\"\\r\"");
+        map.put('\b', "\"\\b\"");
+        map.put('\f', "\"\\f\"");
+        map.put('\t', "\"\\t\"");
+        map.put('\0', "\"\\u0000\"");
+        map.put('\7', "\"\\u0007\"");
+        map.put((char) 11, "\"\\u000b\"");
+        map.put((char) 16, "\"\\u0010\"");
+
+        map.forEach((k, v) -> {
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeChar(k.charValue());
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeChar(k.charValue());
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeStringUTF16() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("中", "\"中\"");
+        map.put("中\"", "\"中\\\"\"");
+        map.put("ØÝ©", "\"ØÝ©\"");
+        map.put("中\\\r\n\b\f\t", "\"中\\\\\\r\\n\\b\\f\\t\"");
+        map.put("中\0", "\"中\\u0000\"");
+        map.put("中\7", "\"中\\u0007\"");
+        map.put("中" + ((char) 11), "\"中\\u000b\"");
+        map.put("中" + ((char) 26), "\"中\\u001a\"");
+        map.put("中" + ((char) 27), "\"中\\u001b\"");
+        map.put("中" + ((char) 28), "\"中\\u001c\"");
+        map.put("中" + ((char) 29), "\"中\\u001d\"");
+        map.put("中\u0010", "\"中\\u0010\"");
+        map.put("中\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D", "\"中\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D\"");
+
+        map.forEach((k, v) -> {
+            byte[] bytes = k.getBytes(StandardCharsets.UTF_16LE);
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeStringUTF16(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeStringUTF16(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeStringUTF16_browserSecure() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("中<", "\"中\\u003c\"");
+        map.put("中>", "\"中\\u003e\"");
+        map.put("中(", "\"中\\u0028\"");
+        map.put("中)", "\"中\\u0029\"");
+        map.put("中\r)", "\"中\\r\\u0029\"");
+
+        map.forEach((k, v) -> {
+            byte[] bytes = k.getBytes(StandardCharsets.UTF_16LE);
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16(BrowserSecure);
+                jsonWriter.writeStringUTF16(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8(BrowserSecure);
+                jsonWriter.writeStringUTF16(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeStringUTF16_EscapeNoneAscii() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("中\r中", "\"\\u4e2d\\r\\u4e2d\"");
+        map.put("\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D", "\"\\ud83d\\udc81\\ud83d\\udc4c\\ud83c\\udf8d\\ud83d\\ude0d\"");
+        map.put("中", "\"\\u4e2d\"");
+
+        map.forEach((k, v) -> {
+            byte[] bytes = k.getBytes(StandardCharsets.UTF_16LE);
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16(EscapeNoneAscii);
+                jsonWriter.writeStringUTF16(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8(EscapeNoneAscii);
+                jsonWriter.writeStringUTF16(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeString_chars_EscapeNoneAscii_2() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D", "\"\\ud83d\\udc81\\ud83d\\udc4c\\ud83c\\udf8d\\ud83d\\ude0d\"");
+        map.put("中\r中", "\"\\u4e2d\\r\\u4e2d\"");
+        map.put("中", "\"\\u4e2d\"");
+
+        map.forEach((k, v) -> {
+            char[] chars = k.toCharArray();
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16(EscapeNoneAscii);
+                jsonWriter.writeString(chars);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16(EscapeNoneAscii);
+                jsonWriter.writeString(chars, 0, chars.length);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16(EscapeNoneAscii);
+                jsonWriter.writeString(chars, 0, chars.length, true);
+                assertEquals(v, jsonWriter.toString());
+            }
+
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8(EscapeNoneAscii);
+                jsonWriter.writeString(chars);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8(EscapeNoneAscii);
+                jsonWriter.writeString(chars, 0, chars.length);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8(EscapeNoneAscii);
+                jsonWriter.writeString(chars, 0, chars.length, true);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeString_chars() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D", "\"\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D\"");
+        map.put("中\r中", "\"中\\r中\"");
+        map.put("中", "\"中\"");
+
+        map.forEach((k, v) -> {
+            char[] chars = k.toCharArray();
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeString(chars);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeString(chars, 0, chars.length);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeString(chars, 0, chars.length, true);
+                assertEquals(v, jsonWriter.toString());
+            }
+
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeString(chars);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeString(chars, 0, chars.length);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeString(chars, 0, chars.length, true);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeStringLatin1() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("abc\rabc", "\"abc\\rabc\"");
+        map.put("abc\"abc", "\"abc\\\"abc\"");
+        map.put("abc\\abc", "\"abc\\\\abc\"");
+
+        map.forEach((k, v) -> {
+            byte[] bytes = k.getBytes(StandardCharsets.ISO_8859_1);
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeStringLatin1(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeStringLatin1(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeStringLatin1_BrowserSecure() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("abc<abc", "\"abc\\u003cabc\"");
+        map.put("abc>abc", "\"abc\\u003eabc\"");
+        map.put("abc(abc", "\"abc\\u0028abc\"");
+        map.put("abc)abc", "\"abc\\u0029abc\"");
+
+        map.forEach((k, v) -> {
+            byte[] bytes = k.getBytes(StandardCharsets.ISO_8859_1);
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16(BrowserSecure);
+                jsonWriter.writeStringLatin1(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8(BrowserSecure);
+                jsonWriter.writeStringLatin1(bytes);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeChar() {
+        Map<Character, String> map = new LinkedHashMap<>();
+        map.put('c', "\"c\"");
+        map.put('\u000b', "\"\\u000b\"");
+        map.put('\u001b', "\"\\u001b\"");
+
+        map.forEach((k, v) -> {
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeChar(k);
+                assertEquals(v, jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeChar(k);
+                assertEquals(v, jsonWriter.toString());
+            }
+        });
+    }
+
+    @Test
+    public void test_writeStringArray() {
+        String[] k = new String[]{"a", "b"};
+        String v = "[\"a\",\"b\"]";
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test_writeStringArray_null() {
+        String[] k = null;
+        String v = "null";
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test_writeStringArray_1() {
+        String[] k = new String[]{null, null};
+        String v = "[\"\",\"\"]";
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16(NullAsDefaultValue);
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8(NullAsDefaultValue);
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test_writeStringArray_3() {
+        String[] k = new String[]{null, null};
+        String v = "[\"\",\"\"]";
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16(WriteNullStringAsEmpty);
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8(WriteNullStringAsEmpty);
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test_writeStringArray_2() {
+        String[] k = new String[]{null, null};
+        String v = "[null,null]";
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16(BrowserSecure);
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8(BrowserSecure);
+            jsonWriter.writeString(k);
+            assertEquals(v, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test_flushTo() throws Exception {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("abc", "\"abc\"");
+
+        for (Iterator<Map.Entry<String, String>> it = map.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, String> entry = it.next();
+            String k = entry.getKey();
+            String v = entry.getValue();
+            byte[] bytes = k.getBytes(StandardCharsets.ISO_8859_1);
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.UTF_8);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.US_ASCII);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.US_ASCII));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.ISO_8859_1);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.ISO_8859_1));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.UTF_16);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_16));
+            }
+
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.UTF_8);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.US_ASCII);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.US_ASCII));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.ISO_8859_1);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.ISO_8859_1));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeStringLatin1(bytes);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.UTF_16);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_16));
+            }
+        }
+    }
+
+    @Test
+    public void test_flushTo1() throws Exception {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("中国", "\"中国\"");
+
+        for (Iterator<Map.Entry<String, String>> it = map.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, String> entry = it.next();
+            String k = entry.getKey();
+            String v = entry.getValue();
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeString(k);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeString(k);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.UTF_8);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
+            }
+
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeString(k);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeString(k);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                jsonWriter.flushTo(out, StandardCharsets.UTF_8);
+                byte[] outBytes = out.toByteArray();
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
+            }
+        }
+    }
+
+    @Test
+    public void test_writeOffsetTime() {
+        LocalTime localTime = LocalTime.of(12, 13, 14);
+        OffsetTime offsetTime = OffsetTime.of(localTime, ZoneOffset.ofHours(8));
+
+        String expected = "\"12:13:14+08:00\"";
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test_writeOffsetTimeZ() {
+        LocalTime localTime = LocalTime.of(12, 13, 14);
+        OffsetTime offsetTime = OffsetTime.of(localTime, ZoneOffset.UTC);
+
+        String expected = "\"12:13:14Z\"";
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test_writeOffsetTime_null() {
+        OffsetTime offsetTime = null;
+
+        String expected = "null";
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeOffsetTime(offsetTime);
+            assertEquals(expected, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test5() {
+        JSONReader jsonReader = JSONReader.ofJSONB(new byte[0]);
+        assertEquals(0, jsonReader.getRawInt());
+        assertEquals(0, jsonReader.getRawLong());
+        assertFalse(jsonReader.nextIfName4Match2());
+        assertFalse(jsonReader.nextIfValue4Match2());
+        assertFalse(jsonReader.nextIfName4Match3());
+        assertFalse(jsonReader.nextIfValue4Match3());
+        assertFalse(jsonReader.nextIfName4Match4((byte) 0));
+        assertFalse(jsonReader.nextIfValue4Match4((byte) 0));
+        assertFalse(jsonReader.nextIfName4Match5(0));
+        assertFalse(jsonReader.nextIfValue4Match5((byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match6(0));
+        assertFalse(jsonReader.nextIfValue4Match6(0));
+        assertFalse(jsonReader.nextIfName4Match7(0));
+        assertFalse(jsonReader.nextIfValue4Match7(0));
+        assertFalse(jsonReader.nextIfName4Match8((byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfValue4Match8((byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match9(0));
+        assertFalse(jsonReader.nextIfValue4Match9(0, (byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match10(0));
+        assertFalse(jsonReader.nextIfValue4Match10(0));
+        assertFalse(jsonReader.nextIfName4Match11(0));
+        assertFalse(jsonReader.nextIfValue4Match11(0));
+        assertFalse(jsonReader.nextIfName4Match12(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match13(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match14(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match15(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match16(0, (byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match17(0, 0));
+        assertFalse(jsonReader.nextIfName4Match18(0, 0));
+        assertFalse(jsonReader.nextIfName4Match19(0, 0));
+        assertFalse(jsonReader.nextIfName4Match20(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match21(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match22(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match23(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match24(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match25(0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match26(0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match27(0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match28(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match29(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match30(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match31(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match32(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match33(0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match34(0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match35(0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match36(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match37(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match38(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match39(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match40(0, 0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match41(0, 0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match42(0, 0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match43(0, 0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName8Match0());
+        assertFalse(jsonReader.nextIfName8Match1());
+        assertFalse(jsonReader.nextIfName8Match2());
+    }
+
+    @Test
+    public void test6() {
+        {
+            JSONReader jsonReader = JSONReader.of("1");
+            assertEquals(1, jsonReader.readInt8Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of("1");
+            assertEquals(1, jsonReader.readInt16Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of("{}");
+            assertEquals(0, jsonReader.readJSONObject().size());
+        }
+    }
+
+    @Test
+    public void test7() {
+        String[] strings = new String[] {
+                "1",
+                "1234567890",
+                "1234567890123456789",
+                "12345678901234567891234567890123456789",
+                "1234567890123456789123456789012345678912345678901234567891234567890123456789",
+                "1234567890123456789123456789012345678912345678901234567891234567890123456789",
+                "1234567890123456789.1",
+                "12345678901234567891234567890123456789.1",
+                "12345678901234567891234567890123456789.123",
+                "12345678901234567891234567890123456789.1234567890123456789"
+        };
+        for (String string : strings) {
+            JSONReader jsonReader = JSONReader.of(string);
+            jsonReader.readNumber0();
+            assertEquals(new BigDecimal(string), jsonReader.getBigDecimal());
+        }
+        for (String string : strings) {
+            JSONReader jsonReader = JSONReader.of(string, 0, string.length());
+            jsonReader.readNumber0();
+            assertEquals(new BigDecimal(string), jsonReader.getBigDecimal());
+        }
+    }
+
+    @Test
+    public void test8() {
+        assertFalse(JSONWriter.of().hasFilter());
+
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        assertThrows(JSONException.class, () -> jsonWriter.writeRaw('a', 'b'));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName2Raw(1L));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName3Raw(1L));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName4Raw(1L));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName5Raw(1L));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName6Raw(1L));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName7Raw(1L));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName8Raw(1L));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName9Raw(1L, 1));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName10Raw(1L, 1));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName11Raw(1L, 1));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName12Raw(1L, 1));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName13Raw(1L, 1));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName14Raw(1L, 1));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName15Raw(1L, 1));
+    }
+
+    @Test
+    public void test9() {
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeInt32(1, new DecimalFormat("##"));
+            assertEquals("\"1\"", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeInt32(1, (DecimalFormat) null);
+            assertEquals("1", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.writeInt32(1, (DecimalFormat) null);
+            assertEquals("1", JSONB.toJSONString(jsonWriter.getBytes()));
+        }
+    }
+
+    @Test
+    public void test10() {
+        String[] strings = {"a", "b"};
+
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeString(strings);
+        byte[] bytes = jsonWriter.getBytes();
+
+        JSONArray array = JSONB.parseArray(bytes);
+        assertEquals(2, array.size());
+        assertEquals(strings[0], array.get(0));
+        assertEquals(strings[1], array.get(1));
+    }
+
+    @Test
+    public void test11() {
+        String str = "中国";
+        byte[] utf16 = str.getBytes(StandardCharsets.UTF_16LE);
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeStringUTF16(utf16);
+        byte[] jsonb = jsonWriter.getBytes();
+        Object parsed = JSONB.parse(jsonb);
+        assertEquals(str, parsed);
+    }
+
+    @Test
+    public void test12() {
+        assertTrue(
+                (((JSONWriterJSONB) JSONWriter.ofJSONB()))
+                        .tryWriteStringUTF16("abc123456".getBytes(StandardCharsets.UTF_16LE)));
+        assertTrue(
+                (((JSONWriterJSONB) JSONWriter.ofJSONB()))
+                        .tryWriteStringUTF16("中文12345678901234567890".getBytes(StandardCharsets.UTF_16LE)));
+        assertTrue(
+                (((JSONWriterJSONB) JSONWriter.ofJSONB()))
+                        .tryWriteStringUTF16(
+                                "1234567890123456789012345678901234567890中文".getBytes(StandardCharsets.UTF_16LE)));
+    }
+
+    @Test
+    public void test13() {
+        String str = "1234567890123456789012345678901234567890中文";
+        byte[] bytes = JSONB.toBytes(str);
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes, 0, bytes.length, JSONFactory.createReadContext());
+        assertEquals(str, jsonReader.readAny());
+    }
+
+    @Test
+    public void test14() {
+        String str = "1234567890123456789012345678901234567890";
+        byte[] bytes = JSON.toJSONBytes(str);
+        ByteBuffer buf = ByteBuffer.wrap(bytes);
+        JSONReader jsonReader = JSONReader.of(buf, StandardCharsets.UTF_8);
+        assertEquals(str, jsonReader.readAny());
     }
 }

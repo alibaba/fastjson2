@@ -15,4 +15,10 @@ public class JSONPParseTest4 {
         p.setFunction("f");
         assertEquals("f()", p.toString());
     }
+
+    @Test
+    public void test_1() throws Exception {
+        JSONPObject p = new JSONPObject("f");
+        assertEquals("f()", p.toString());
+    }
 }

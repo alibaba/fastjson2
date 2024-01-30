@@ -767,8 +767,7 @@ public abstract class JSONWriter
     public abstract void writeRaw(char ch);
 
     public void writeRaw(char c0, char c1) {
-        writeRaw(c0);
-        writeRaw(c1);
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void writeNameRaw(byte[] bytes);
@@ -1002,21 +1001,7 @@ public abstract class JSONWriter
         writeRaw(str);
     }
 
-    public void writeFloat(float[] value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-
-        startArray();
-        for (int i = 0; i < value.length; i++) {
-            if (i != 0) {
-                writeComma();
-            }
-            writeFloat(value[i]);
-        }
-        endArray();
-    }
+    public abstract void writeFloat(float[] value);
 
     public final void writeFloat(float[] value, DecimalFormat format) {
         if (format == null || jsonb) {
@@ -1350,33 +1335,7 @@ public abstract class JSONWriter
 
     public abstract void writeTimeHHMMSS8(int hour, int minute, int second);
 
-    public void write(List array) {
-        if (array == null) {
-            this.writeArrayNull();
-            return;
-        }
-
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
-
-        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
-            ObjectWriter objectWriter = context.getObjectWriter(array.getClass());
-            objectWriter.write(this, array, null, null, 0);
-            return;
-        }
-
-        write0('[');
-        for (int i = 0; i < array.size(); i++) {
-            Object item = array.get(i);
-            if (i != 0) {
-                write0(',');
-            }
-            writeAny(item);
-        }
-        write0(']');
-    }
+    public abstract void write(List array);
 
     public void write(Map map) {
         if (map == null) {
@@ -1413,9 +1372,7 @@ public abstract class JSONWriter
         write0('}');
     }
 
-    public void write(JSONObject map) {
-        write((Map) map);
-    }
+    public abstract void write(JSONObject map);
 
     public void writeAny(Object value) {
         if (value == null) {

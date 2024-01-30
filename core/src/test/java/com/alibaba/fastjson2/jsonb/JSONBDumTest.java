@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.jsonb;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2_vo.Int1;
 import org.junit.jupiter.api.Test;
 
@@ -45,5 +46,21 @@ public class JSONBDumTest {
         JSONB.dump(jsonbBytes);
 
         assertEquals("{}", JSONB.toJSONString(jsonbBytes));
+    }
+
+    @Test
+    public void test_2() {
+        SymbolTable symbolTable = JSONB.symbolTable("id");
+        Bean bean = new Bean();
+        bean.id = 123;
+        byte[] bytes = JSONB.toBytes(bean, symbolTable);
+        String str = JSONB.toJSONString(bytes, symbolTable);
+        assertEquals("{\n" +
+                "\t\"id\":123\n" +
+                "}", str);
+    }
+
+    public static class Bean {
+        public int id;
     }
 }

@@ -1465,7 +1465,7 @@ final class JSONReaderJSONB
             strlen = readLength();
             strBegin = offset;
         } else {
-            throw readFieldNameHashCodeEror();
+            throw readFieldNameHashCodeError();
         }
 
         long hashCode;
@@ -1557,7 +1557,7 @@ final class JSONReaderJSONB
         return hashCode;
     }
 
-    protected JSONException readFieldNameHashCodeEror() {
+    JSONException readFieldNameHashCodeError() {
         StringBuilder message = new StringBuilder()
                 .append("fieldName not support input type ")
                 .append(typeName(strtype));
@@ -4751,6 +4751,8 @@ final class JSONReaderJSONB
                     return readLocalTime5();
                 case 8:
                     return readLocalTime8();
+                case 9:
+                    return readLocalTime9();
                 case 10:
                     return readLocalTime10();
                 case 11:
@@ -5285,7 +5287,7 @@ final class JSONReaderJSONB
     @Override
     protected LocalTime readLocalTime9() {
         LocalTime time;
-        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 8
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 9
                 || (time = DateUtils.parseLocalTime8(bytes, offset + 1)) == null
         ) {
             throw new JSONException("date only support string input");

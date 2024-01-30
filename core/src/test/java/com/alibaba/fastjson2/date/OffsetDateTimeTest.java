@@ -2,12 +2,16 @@ package com.alibaba.fastjson2.date;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OffsetDateTimeTest {
     @Test
@@ -195,6 +199,46 @@ public class OffsetDateTimeTest {
             byte[] strBytes = JSON.toJSONBytes(odt);
             OffsetDateTime odt1 = JSON.parseObject(strBytes, OffsetDateTime.class);
             assertEquals(odt, odt1);
+        }
+    }
+
+    @Test
+    public void test1() {
+        ObjectWriter objectWriter = ObjectWriters.objectWriter(Bean.class, ObjectWriters.fieldWriter("time", OffsetDateTime.class, Bean::getTime));
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            Bean bean = new Bean();
+            bean.time = OffsetDateTime.of(LocalDateTime.of(1981, 1, 2, 12, 13, 14), ZoneOffset.ofHours(11));
+            objectWriter.write(jsonWriter, bean);
+            assertEquals("{\"time\":\"1981-01-02T12:13:14+11:00\"}", jsonWriter.toString());
+
+            assertNotNull(objectWriter.getFieldWriter("time").getFunction());
+            assertSame(bean.time, objectWriter.getFieldWriter("time").getFieldValue(bean));
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            Bean bean = new Bean();
+            objectWriter.write(jsonWriter, bean);
+            assertEquals("{}", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.WriteNulls);
+            Bean bean = new Bean();
+            objectWriter.write(jsonWriter, bean);
+            assertEquals("{\"time\":null}", jsonWriter.toString());
+        }
+    }
+
+    public static class Bean {
+        private OffsetDateTime time;
+
+        public OffsetDateTime getTime() {
+            return time;
+        }
+
+        public void setTime(OffsetDateTime time) {
+            this.time = time;
         }
     }
 }
