@@ -69,8 +69,8 @@ public class JDKUtils {
     static final AtomicInteger reflectErrorCount = new AtomicInteger();
 
     static {
-        Unsafe unsafe = null;
-        long offset = -1, charOffset = -1;
+        Unsafe unsafe;
+        long offset, charOffset;
         try {
             Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeField.setAccessible(true);
@@ -78,7 +78,7 @@ public class JDKUtils {
             offset = unsafe.arrayBaseOffset(byte[].class);
             charOffset = unsafe.arrayBaseOffset(char[].class);
         } catch (Throwable e) {
-            initErrorLast = e;
+            throw new JSONException("init unsafe error");
         }
 
         UNSAFE = unsafe;
