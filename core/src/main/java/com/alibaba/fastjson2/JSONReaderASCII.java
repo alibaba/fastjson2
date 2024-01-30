@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.*;
 import sun.misc.Unsafe;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -16,6 +17,12 @@ final class JSONReaderASCII
         super(ctx, str, bytes, offset, length);
         this.str = str;
         nameAscii = true;
+    }
+
+    JSONReaderASCII(Context ctx, InputStream is) {
+        super(ctx, is);
+        nameAscii = true;
+        str = null;
     }
 
     @Override

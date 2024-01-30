@@ -2938,6 +2938,10 @@ public abstract class JSONReader
             return new JSONReaderUTF16(context, is);
         }
 
+        if (charset == StandardCharsets.US_ASCII) {
+            return new JSONReaderASCII(context, is);
+        }
+
         throw new JSONException("not support charset " + charset);
     }
 
