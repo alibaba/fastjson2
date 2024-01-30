@@ -152,13 +152,13 @@ public final class XxHash64 {
         long millis;
         int nanos2;
         if (seconds < 0 && nanos > 0) {
-            millis = IOUtils.multiplyExact(seconds + 1, 1000);
+            millis = Math.multiplyExact(seconds + 1, 1000L);
             long adjustment = nanos / 1000_000 - 1000;
-            millis = IOUtils.addExact(millis, adjustment);
+            millis = Math.addExact(millis, adjustment);
             nanos2 = nanos + (nanos / 1000) * 1000;
         } else {
-            millis = IOUtils.multiplyExact(seconds, 1000);
-            millis = IOUtils.addExact(millis, nanos / 1000_000);
+            millis = Math.multiplyExact(seconds, 1000);
+            millis = Math.addExact(millis, nanos / 1000_000L);
             nanos2 = nanos - (nanos / 1000) * 1000;
         }
         return hash(millis, nanos2);

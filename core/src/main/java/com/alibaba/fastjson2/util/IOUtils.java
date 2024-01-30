@@ -1318,44 +1318,6 @@ public class IOUtils {
         return dArr;
     }
 
-    public static long floorDiv(long x, long y) {
-        long r = x / y;
-        // if the signs are different and modulo not zero, round down
-        if ((x ^ y) < 0 && (r * y != x)) {
-            r--;
-        }
-        return r;
-    }
-
-    public static long floorMod(long x, long y) {
-        return x - floorDiv(x, y) * y;
-    }
-
-    public static long addExact(long x, long y) {
-        long r = x + y;
-        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
-        if (((x ^ r) & (y ^ r)) < 0) {
-            throw new ArithmeticException("long overflow");
-        }
-        return r;
-    }
-
-    public static long multiplyExact(long x, long y) {
-        long r = x * y;
-        long ax = Math.abs(x);
-        long ay = Math.abs(y);
-        if (((ax | ay) >>> 31 != 0)) {
-            // Some bits greater than 2^31 that might cause overflow
-            // Check the result using the divide operator
-            // and check for the special case of Long.MIN_VALUE * -1
-            if (((y != 0) && (r / y != x)) ||
-                    (x == Long.MIN_VALUE && y == -1)) {
-                throw new ArithmeticException("long overflow");
-            }
-        }
-        return r;
-    }
-
     public static void getChars(int i, int index, byte[] buf) {
         int q, r;
         int charPos = index;
