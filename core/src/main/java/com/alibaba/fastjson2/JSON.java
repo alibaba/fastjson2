@@ -3270,7 +3270,7 @@ public interface JSON {
         try (JSONReader jsonReader = JSONReader.of(text)) {
             jsonReader.skipValue();
             return jsonReader.isEnd() && !jsonReader.comma;
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3290,7 +3290,7 @@ public interface JSON {
         try (JSONReader jsonReader = JSONReader.of(text, JSONFactory.createReadContext(features))) {
             jsonReader.skipValue();
             return jsonReader.isEnd() && !jsonReader.comma;
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3309,7 +3309,7 @@ public interface JSON {
         try (JSONReader jsonReader = JSONReader.of(chars)) {
             jsonReader.skipValue();
             return jsonReader.isEnd();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3331,7 +3331,7 @@ public interface JSON {
             }
             jsonReader.skipValue();
             return jsonReader.isEnd();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3353,7 +3353,7 @@ public interface JSON {
             }
             jsonReader.skipValue();
             return jsonReader.isEnd();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3375,7 +3375,7 @@ public interface JSON {
             }
             jsonReader.skipValue();
             return jsonReader.isEnd();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3394,7 +3394,7 @@ public interface JSON {
         try (JSONReader jsonReader = JSONReader.of(bytes)) {
             jsonReader.skipValue();
             return jsonReader.isEnd();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3431,7 +3431,7 @@ public interface JSON {
             }
             jsonReader.skipValue();
             return jsonReader.isEnd();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3453,7 +3453,7 @@ public interface JSON {
         try (JSONReader jsonReader = JSONReader.of(bytes, offset, length, charset)) {
             jsonReader.skipValue();
             return jsonReader.isEnd();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
