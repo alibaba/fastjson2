@@ -928,6 +928,8 @@ public abstract class JSONPath {
                 String fieldName = jsonReader.getFieldName();
                 if ("in".equalsIgnoreCase(fieldName)) {
                     operator = JSONPathFilter.Operator.IN;
+                } else if ("is".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.EQ;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
                 }
@@ -959,15 +961,16 @@ public abstract class JSONPath {
             case 'S': {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (!"starts".equalsIgnoreCase(fieldName)) {
+                if ("starts".equalsIgnoreCase(fieldName)) {
+                    jsonReader.readFieldNameHashCodeUnquote();
+                    fieldName = jsonReader.getFieldName();
+                    if (!"with".equalsIgnoreCase(fieldName)) {
+                        throw new JSONException("not support operator : " + fieldName);
+                    }
+                } else if (!"startsWith".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
 
-                jsonReader.readFieldNameHashCodeUnquote();
-                fieldName = jsonReader.getFieldName();
-                if (!"with".equalsIgnoreCase(fieldName)) {
-                    throw new JSONException("not support operator : " + fieldName);
-                }
                 operator = JSONPathFilter.Operator.STARTS_WITH;
                 break;
             }
@@ -975,15 +978,16 @@ public abstract class JSONPath {
             case 'E':
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (!"ends".equalsIgnoreCase(fieldName)) {
+                if ("ends".equalsIgnoreCase(fieldName)) {
+                    jsonReader.readFieldNameHashCodeUnquote();
+                    fieldName = jsonReader.getFieldName();
+                    if (!"with".equalsIgnoreCase(fieldName)) {
+                        throw new JSONException("not support operator : " + fieldName);
+                    }
+                } else if (!"endsWith".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
 
-                jsonReader.readFieldNameHashCodeUnquote();
-                fieldName = jsonReader.getFieldName();
-                if (!"with".equalsIgnoreCase(fieldName)) {
-                    throw new JSONException("not support operator : " + fieldName);
-                }
                 operator = JSONPathFilter.Operator.ENDS_WITH;
                 break;
             default: {

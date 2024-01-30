@@ -33,6 +33,10 @@ final class FieldReaderNumberFunc<T, V>
             schema.assertValidate(value);
         }
 
+        if (value instanceof Boolean) {
+            value = ((Boolean) value).booleanValue() ? 1 : 0;
+        }
+
         function.accept(object, (V) value);
     }
 

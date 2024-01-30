@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONCreator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ObjectReader13Test {
     @Test
@@ -91,6 +92,34 @@ public class ObjectReader13Test {
             assertEquals(12, bean.f12);
             assertEquals(13, bean.f13);
         }
+    }
+
+    @Test
+    public void test1() {
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
+        String[] fieldNames = new String[] {
+                "f01",
+                "f02",
+                "f03",
+                "f04",
+                "f05",
+                "f06",
+                "f07",
+                "f08",
+                "f09",
+                "f10",
+                "f11",
+                "f12",
+                "f13"
+        };
+        for (String fieldName : fieldNames) {
+            assertEquals(fieldName,
+                    objectReader.getFieldReader(fieldName).fieldName);
+            assertEquals(fieldName,
+                    objectReader.getFieldReader(fieldName.toUpperCase()).fieldName);
+        }
+        assertNull(objectReader.getFieldReader("xx"));
+        assertNull(objectReader.getFieldReaderLCase(0));
     }
 
     public static class Bean {

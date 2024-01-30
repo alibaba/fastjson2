@@ -435,6 +435,7 @@ class JSONWriterUTF8
         }
 
         boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + value.length * 4 + 2;
@@ -546,6 +547,22 @@ class JSONWriterUTF8
                         bytes[off + 4] = '1';
                         bytes[off + 5] = (byte) ('a' + (b0 - 26));
                         off += 6;
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            bytes[off] = '\\';
+                            bytes[off + 1] = 'u';
+                            bytes[off + 2] = '0';
+                            bytes[off + 3] = '0';
+                            bytes[off + 4] = (byte) DIGITS[(b0 >>> 4) & 15];
+                            bytes[off + 5] = (byte) DIGITS[b0 & 15];
+                            off += 6;
+                        } else {
+                            bytes[off++] = b0;
+                        }
                         break;
                     default:
                         if (b0 == quote) {
@@ -3035,16 +3052,37 @@ class JSONWriterUTF8
 
     @Override
     public final int flushTo(OutputStream out, Charset charset) throws IOException {
-        if (charset != null && charset != StandardCharsets.UTF_8) {
-            throw new JSONException("UnsupportedOperation");
-        }
         if (off == 0) {
             return 0;
         }
 
-        int len = off;
-        out.write(bytes, 0, off);
-        off = 0;
-        return len;
+        if (charset == null || charset == StandardCharsets.UTF_8 || charset == StandardCharsets.US_ASCII) {
+            int len = off;
+            out.write(bytes, 0, off);
+            off = 0;
+            return len;
+        }
+
+        if (charset == StandardCharsets.ISO_8859_1) {
+            boolean hasNegative = false;
+            if (METHOD_HANDLE_HAS_NEGATIVE != null) {
+                try {
+                    hasNegative = (Boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, 0, bytes.length);
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+            if (!hasNegative) {
+                int len = off;
+                out.write(bytes, 0, off);
+                off = 0;
+                return len;
+            }
+        }
+
+        String str = new String(bytes, 0, off);
+        byte[] encodedBytes = str.getBytes(charset);
+        out.write(encodedBytes);
+        return encodedBytes.length;
     }
 }

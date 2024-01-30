@@ -392,4 +392,9 @@ public class JSONValidatorTest {
             assertFalse(JSON.isValid(string.getBytes()), string);
         }
     }
+
+    @Test
+    public void test() {
+        assertTrue(JSONValidator.from(JSONReader.of("123")).validate());
+    }
 }

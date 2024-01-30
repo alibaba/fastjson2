@@ -767,7 +767,7 @@ final class JSONWriterJSONB
         this.off = off + strlen;
     }
 
-    private boolean tryWriteStringUTF16(byte[] value) {
+    protected boolean tryWriteStringUTF16(byte[] value) {
         int check_cnt = 128;
         if (check_cnt > value.length) {
             check_cnt = value.length;

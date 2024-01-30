@@ -1165,4 +1165,16 @@ public class JSONTest {
             assertNull(JSONFactory.createWriteContext().getDateFormat());
         }
     }
+
+    @Test
+    public void isValid1() {
+        assertFalse(JSON.isValid(null, JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertFalse(JSON.isValid("", JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertTrue(JSON.isValid("1", JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertFalse(JSON.isValid("1a", JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertFalse(JSON.isValid("[", JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertFalse(JSON.isValid("{", JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertFalse(JSON.isValid("\"", JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertFalse(JSON.isValid("'", JSONReader.Feature.AllowUnQuotedFieldNames));
+    }
 }

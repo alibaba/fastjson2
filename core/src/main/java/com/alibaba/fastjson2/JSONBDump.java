@@ -529,11 +529,9 @@ final class JSONBDump {
                         if (raw) {
                             jsonWriter.writeName("#" + symbol);
                         } else {
-                            String name = symbols.get(symbol);
-                            if (name == null) {
-                                throw new JSONException("symbol not found " + symbol);
-                            }
-                            jsonWriter.writeName(name);
+                            jsonWriter.writeName(
+                                    getString(symbol)
+                            );
                         }
                     } else {
                         String name = readString();

@@ -739,7 +739,15 @@ abstract class JSONPathFilter
                 return false;
             }
 
-            int cmp = ((String) fieldValue).compareTo(this.value);
+            String fieldValueStr = ((String) fieldValue);
+            if (operator == Operator.STARTS_WITH) {
+                return fieldValueStr.startsWith(value);
+            }
+            if (operator == Operator.ENDS_WITH) {
+                return fieldValueStr.endsWith(value);
+            }
+
+            int cmp = fieldValueStr.compareTo(this.value);
 
             switch (operator) {
                 case LT:
@@ -1077,11 +1085,10 @@ abstract class JSONPathFilter
 
         @Override
         public String toString() {
-            StringBuilder buf = new StringBuilder("exists(");
+            StringBuilder buf = new StringBuilder("exists(@");
             for (int i = 0; i < names.length; i++) {
-                if (i != 0) {
-                    buf.append(", ");
-                }
+                buf.append('.');
+                buf.append(names[i]);
             }
             buf.append(')');
             return buf.toString();

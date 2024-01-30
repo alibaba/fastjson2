@@ -855,6 +855,72 @@ public class ObjectReaderCreator {
                         fieldReaders[4],
                         fieldReaders[5]
                 );
+            case 7:
+                return new ObjectReader7(
+                        objectClass,
+                        null,
+                        null,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders
+                );
+            case 8:
+                return new ObjectReader8(
+                        objectClass,
+                        null,
+                        null,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders
+                );
+            case 9:
+                return new ObjectReader9(
+                        objectClass,
+                        null,
+                        null,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders
+                );
+            case 10:
+                return new ObjectReader10(
+                        objectClass,
+                        null,
+                        null,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders
+                );
+            case 11:
+                return new ObjectReader11(
+                        objectClass,
+                        null,
+                        null,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders
+                );
+            case 12:
+                return new ObjectReader12(
+                        objectClass,
+                        null,
+                        null,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders
+                );
             default:
                 return new ObjectReaderAdapter(objectClass, typeKey, null, features, schema, defaultCreator, buildFunction, fieldReaders);
         }
@@ -2556,6 +2622,23 @@ public class ObjectReaderCreator {
 
         if (fieldClass == String.class) {
             return new FieldReaderStringField(fieldName, fieldClass, ordinal, features, format, (String) defaultValue, jsonSchema, field);
+        }
+
+        if (fieldType == String[].class) {
+            return new FieldReaderStringArray(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    null,
+                    field,
+                    null
+            );
         }
 
         if (fieldClass == Date.class) {

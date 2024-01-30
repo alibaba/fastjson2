@@ -22,11 +22,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -534,6 +530,14 @@ public abstract class FieldReader<T>
 
                     if (fieldClass == Instant.class) {
                         return ObjectReaderImplInstant.of(format, locale);
+                    }
+
+                    if (fieldClass == OffsetTime.class) {
+                        return ObjectReaderImplOffsetTime.of(format, locale);
+                    }
+
+                    if (fieldClass == OffsetDateTime.class) {
+                        return ObjectReaderImplOffsetDateTime.of(format, locale);
                     }
 
                     if (fieldClass == Optional.class) {
