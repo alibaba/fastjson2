@@ -761,33 +761,6 @@ public abstract class JSONReader
 
     public abstract UUID readUUID();
 
-    public final boolean isLocalDate() {
-        if (!isString()) {
-            return false;
-        }
-
-        LocalDate localDate;
-        int len = getStringLength();
-        switch (len) {
-            case 8:
-                localDate = readLocalDate8();
-                break;
-            case 9:
-                localDate = readLocalDate9();
-                break;
-            case 10:
-                localDate = readLocalDate10();
-                break;
-            case 11:
-                localDate = readLocalDate11();
-                break;
-            default:
-                return false;
-        }
-
-        return localDate != null;
-    }
-
     public LocalDate readLocalDate() {
         if (nextIfNull()) {
             return null;
@@ -867,39 +840,6 @@ public abstract class JSONReader
         }
 
         throw new JSONException("not support input : " + str);
-    }
-
-    public final boolean isLocalDateTime() {
-        if (!isString()) {
-            return false;
-        }
-
-        int len = getStringLength();
-        switch (len) {
-            case 16:
-                return readLocalDateTime16() != null;
-            case 17:
-                return readLocalDateTime17() != null;
-            case 18:
-                return readLocalDateTime18() != null;
-            case 19:
-                return readLocalDateTime19() != null;
-            case 20:
-                return readLocalDateTime20() != null;
-            case 21:
-            case 22:
-            case 23:
-            case 24:
-            case 25:
-            case 26:
-            case 27:
-            case 28:
-            case 29:
-                return readLocalDateTimeX(len) != null;
-            default:
-                break;
-        }
-        return false;
     }
 
     public LocalDateTime readLocalDateTime() {
