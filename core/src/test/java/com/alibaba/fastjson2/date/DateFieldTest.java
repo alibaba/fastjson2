@@ -70,4 +70,12 @@ public class DateFieldTest {
             this.value = value;
         }
     }
+
+    @Test
+    public void parse() {
+        V0 v = new V0();
+
+        String text = "{\"value\":null}";
+        JSON.parseObject(text, V0.class);
+    }
 }

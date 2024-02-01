@@ -9,10 +9,10 @@ import java.lang.reflect.Field;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class FieldReaderInt64ValueField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     final long fieldOffset;
     FieldReaderInt64ValueField(String fieldName, Class fieldType, int ordinal, long features, String format, Long defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, null, field);
         fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
     }
 
@@ -25,6 +25,11 @@ class FieldReaderInt64ValueField<T>
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         readFieldValue(jsonReader, object);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readInt64();
     }
 
     @Override

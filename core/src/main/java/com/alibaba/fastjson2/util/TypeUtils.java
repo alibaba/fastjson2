@@ -20,9 +20,8 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 
 public class TypeUtils {
-    public static final Class CLASS_JSON_OBJECT_1x;
-    public static final Field FIELD_JSON_OBJECT_1x_map;
-    public static final Class CLASS_JSON_ARRAY_1x;
+    private static Field FIELD_JSON_OBJECT_1x_map;
+    private static volatile boolean REFLECT_JSON_1x_ERROR;
 
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
     public static final Class CLASS_SINGLE_LIST = Collections.singletonList(1).getClass();
@@ -64,31 +63,233 @@ public class TypeUtils {
         return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
     }
 
-    static class X2 {
-        static final String[] chars;
-        static final String[] chars2;
-        static final char START = ' '; // 32
-        static final char END = '~'; // 126
-        static final int SIZE2 = (END - START + 1);
+    static final class Mapping {
+        static final Map<Class, String> NAME_MAPPINGS = new IdentityHashMap<>(192);
+        static final Map<String, Class> TYPE_MAPPINGS = new ConcurrentHashMap<>(256);
 
         static {
-            String[] array0 = new String[128];
-            for (char i = 0; i < array0.length; i++) {
-                array0[i] = Character.toString(i);
-            }
-            chars = array0;
+            NAME_MAPPINGS.put(byte.class, "B");
+            NAME_MAPPINGS.put(short.class, "S");
+            NAME_MAPPINGS.put(int.class, "I");
+            NAME_MAPPINGS.put(long.class, "J");
+            NAME_MAPPINGS.put(float.class, "F");
+            NAME_MAPPINGS.put(double.class, "D");
+            NAME_MAPPINGS.put(char.class, "C");
+            NAME_MAPPINGS.put(boolean.class, "Z");
 
-            String[] array1 = new String[SIZE2 * SIZE2];
-            char[] c2 = new char[2];
-            for (char i = START; i <= END; i++) {
-                for (char j = START; j <= END; j++) {
-                    int value = (i - START) * SIZE2 + (j - START);
-                    c2[0] = i;
-                    c2[1] = j;
-                    array1[value] = new String(c2);
+            NAME_MAPPINGS.put(Object[].class, "[O");
+            NAME_MAPPINGS.put(Object[][].class, "[[O");
+            NAME_MAPPINGS.put(byte[].class, "[B");
+            NAME_MAPPINGS.put(byte[][].class, "[[B");
+            NAME_MAPPINGS.put(short[].class, "[S");
+            NAME_MAPPINGS.put(short[][].class, "[[S");
+            NAME_MAPPINGS.put(int[].class, "[I");
+            NAME_MAPPINGS.put(int[][].class, "[[I");
+            NAME_MAPPINGS.put(long[].class, "[J");
+            NAME_MAPPINGS.put(long[][].class, "[[J");
+            NAME_MAPPINGS.put(float[].class, "[F");
+            NAME_MAPPINGS.put(float[][].class, "[[F");
+            NAME_MAPPINGS.put(double[].class, "[D");
+            NAME_MAPPINGS.put(double[][].class, "[[D");
+            NAME_MAPPINGS.put(char[].class, "[C");
+            NAME_MAPPINGS.put(char[][].class, "[[C");
+            NAME_MAPPINGS.put(boolean[].class, "[Z");
+            NAME_MAPPINGS.put(boolean[][].class, "[[Z");
+
+            NAME_MAPPINGS.put(Byte[].class, "[Byte");
+            NAME_MAPPINGS.put(Byte[][].class, "[[Byte");
+            NAME_MAPPINGS.put(Short[].class, "[Short");
+            NAME_MAPPINGS.put(Short[][].class, "[[Short");
+            NAME_MAPPINGS.put(Integer[].class, "[Integer");
+            NAME_MAPPINGS.put(Integer[][].class, "[[Integer");
+            NAME_MAPPINGS.put(Long[].class, "[Long");
+            NAME_MAPPINGS.put(Long[][].class, "[[Long");
+            NAME_MAPPINGS.put(Float[].class, "[Float");
+            NAME_MAPPINGS.put(Float[][].class, "[[Float");
+            NAME_MAPPINGS.put(Double[].class, "[Double");
+            NAME_MAPPINGS.put(Double[][].class, "[[Double");
+            NAME_MAPPINGS.put(Character[].class, "[Character");
+            NAME_MAPPINGS.put(Character[][].class, "[[Character");
+            NAME_MAPPINGS.put(Boolean[].class, "[Boolean");
+            NAME_MAPPINGS.put(Boolean[][].class, "[[Boolean");
+
+            NAME_MAPPINGS.put(String[].class, "[String");
+            NAME_MAPPINGS.put(String[][].class, "[[String");
+
+            NAME_MAPPINGS.put(BigDecimal[].class, "[BigDecimal");
+            NAME_MAPPINGS.put(BigDecimal[][].class, "[[BigDecimal");
+
+            NAME_MAPPINGS.put(BigInteger[].class, "[BigInteger");
+            NAME_MAPPINGS.put(BigInteger[][].class, "[[BigInteger");
+
+            NAME_MAPPINGS.put(UUID[].class, "[UUID");
+            NAME_MAPPINGS.put(UUID[][].class, "[[UUID");
+
+            NAME_MAPPINGS.put(Object.class, "Object");
+
+            NAME_MAPPINGS.put(HashMap.class, "M");
+            TYPE_MAPPINGS.put("HashMap", HashMap.class);
+            TYPE_MAPPINGS.put("java.util.HashMap", HashMap.class);
+
+            NAME_MAPPINGS.put(LinkedHashMap.class, "LM");
+            TYPE_MAPPINGS.put("LinkedHashMap", LinkedHashMap.class);
+            TYPE_MAPPINGS.put("java.util.LinkedHashMap", LinkedHashMap.class);
+
+            NAME_MAPPINGS.put(TreeMap.class, "TM");
+            TYPE_MAPPINGS.put("TreeMap", TreeMap.class);
+
+            NAME_MAPPINGS.put(ArrayList.class, "A");
+            TYPE_MAPPINGS.put("ArrayList", ArrayList.class);
+            TYPE_MAPPINGS.put("java.util.ArrayList", ArrayList.class);
+
+            NAME_MAPPINGS.put(LinkedList.class, "LA");
+            TYPE_MAPPINGS.put("LA", LinkedList.class);
+            TYPE_MAPPINGS.put("LinkedList", LinkedList.class);
+            TYPE_MAPPINGS.put("java.util.LinkedList", LinkedList.class);
+            TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedQueue", ConcurrentLinkedQueue.class);
+
+            //java.util.LinkedHashMap.class,
+
+            NAME_MAPPINGS.put(HashSet.class, "HashSet");
+            NAME_MAPPINGS.put(TreeSet.class, "TreeSet");
+            NAME_MAPPINGS.put(LinkedHashSet.class, "LinkedHashSet");
+            NAME_MAPPINGS.put(ConcurrentHashMap.class, "ConcurrentHashMap");
+            NAME_MAPPINGS.put(ConcurrentLinkedQueue.class, "ConcurrentLinkedQueue");
+            NAME_MAPPINGS.put(JSONObject.class, "JSONObject");
+            NAME_MAPPINGS.put(JSONArray.class, "JSONArray");
+            NAME_MAPPINGS.put(Currency.class, "Currency");
+            NAME_MAPPINGS.put(TimeUnit.class, "TimeUnit");
+
+            Class<?>[] classes = new Class[]{
+                    Object.class,
+                    Cloneable.class,
+                    AutoCloseable.class,
+                    java.lang.Exception.class,
+                    java.lang.RuntimeException.class,
+                    java.lang.IllegalAccessError.class,
+                    java.lang.IllegalAccessException.class,
+                    java.lang.IllegalArgumentException.class,
+                    java.lang.IllegalMonitorStateException.class,
+                    java.lang.IllegalStateException.class,
+                    java.lang.IllegalThreadStateException.class,
+                    java.lang.IndexOutOfBoundsException.class,
+                    java.lang.InstantiationError.class,
+                    java.lang.InstantiationException.class,
+                    java.lang.InternalError.class,
+                    java.lang.InterruptedException.class,
+                    java.lang.LinkageError.class,
+                    java.lang.NegativeArraySizeException.class,
+                    java.lang.NoClassDefFoundError.class,
+                    java.lang.NoSuchFieldError.class,
+                    java.lang.NoSuchFieldException.class,
+                    java.lang.NoSuchMethodError.class,
+                    java.lang.NoSuchMethodException.class,
+                    java.lang.NullPointerException.class,
+                    java.lang.NumberFormatException.class,
+                    java.lang.OutOfMemoryError.class,
+                    java.lang.SecurityException.class,
+                    java.lang.StackOverflowError.class,
+                    java.lang.StringIndexOutOfBoundsException.class,
+                    java.lang.TypeNotPresentException.class,
+                    java.lang.VerifyError.class,
+                    java.lang.StackTraceElement.class,
+                    java.util.Hashtable.class,
+                    java.util.TreeMap.class,
+                    java.util.IdentityHashMap.class,
+                    java.util.WeakHashMap.class,
+                    java.util.HashSet.class,
+                    java.util.LinkedHashSet.class,
+                    java.util.TreeSet.class,
+                    java.util.LinkedList.class,
+                    java.util.concurrent.TimeUnit.class,
+                    java.util.concurrent.ConcurrentHashMap.class,
+                    java.util.concurrent.atomic.AtomicInteger.class,
+                    java.util.concurrent.atomic.AtomicLong.class,
+                    java.util.Collections.EMPTY_MAP.getClass(),
+                    java.lang.Boolean.class,
+                    java.lang.Character.class,
+                    java.lang.Byte.class,
+                    java.lang.Short.class,
+                    java.lang.Integer.class,
+                    java.lang.Long.class,
+                    java.lang.Float.class,
+                    java.lang.Double.class,
+                    java.lang.Number.class,
+                    java.lang.String.class,
+                    java.math.BigDecimal.class,
+                    java.math.BigInteger.class,
+                    java.util.BitSet.class,
+                    java.util.Calendar.class,
+                    java.util.Date.class,
+                    java.util.Locale.class,
+                    java.util.UUID.class,
+                    java.util.Currency.class,
+                    java.text.SimpleDateFormat.class,
+                    JSONObject.class,
+                    JSONArray.class,
+                    java.util.concurrent.ConcurrentSkipListMap.class,
+                    java.util.concurrent.ConcurrentSkipListSet.class,
+            };
+            for (Class clazz : classes) {
+                String simpleName = clazz.getSimpleName();
+                TYPE_MAPPINGS.put(simpleName, clazz);
+                TYPE_MAPPINGS.put(clazz.getName(), clazz);
+                NAME_MAPPINGS.put(clazz, simpleName);
+            }
+
+            TYPE_MAPPINGS.put("JO10", JSONObject1O.class);
+            TYPE_MAPPINGS.put("[O", Object[].class);
+            TYPE_MAPPINGS.put("[Ljava.lang.Object;", Object[].class);
+            TYPE_MAPPINGS.put("[java.lang.Object", Object[].class);
+            TYPE_MAPPINGS.put("[Object", Object[].class);
+            TYPE_MAPPINGS.put("StackTraceElement", StackTraceElement.class);
+            TYPE_MAPPINGS.put("[StackTraceElement", StackTraceElement[].class);
+
+            TYPE_MAPPINGS.put("java.util.Collections$UnmodifiableMap", Collections.unmodifiableMap(Collections.EMPTY_MAP).getClass());
+            TYPE_MAPPINGS.put("java.util.Collections$UnmodifiableCollection", Collections.unmodifiableCollection(Collections.EMPTY_LIST).getClass());
+
+            {
+                Class classJSONObject1x = JSONFactory.getClassJSONObject1x();
+                if (classJSONObject1x != null) {
+                    TYPE_MAPPINGS.put("JO1", classJSONObject1x);
+                    TYPE_MAPPINGS.put(classJSONObject1x.getName(), classJSONObject1x);
+                }
+                Class classJSONArray1x = JSONFactory.getClassJSONArray1x();
+                if (classJSONArray1x != null) {
+                    TYPE_MAPPINGS.put("JA1", classJSONArray1x);
+                    TYPE_MAPPINGS.put(classJSONArray1x.getName(), classJSONArray1x);
                 }
             }
-            chars2 = array1;
+
+            NAME_MAPPINGS.put(new HashMap().keySet().getClass(), "Set");
+            NAME_MAPPINGS.put(new LinkedHashMap().keySet().getClass(), "Set");
+            NAME_MAPPINGS.put(new TreeMap<>().keySet().getClass(), "Set");
+            NAME_MAPPINGS.put(((Map) new ConcurrentHashMap()).keySet().getClass(), "Set"); // bug fix for android9
+            NAME_MAPPINGS.put(((Map) new ConcurrentSkipListMap()).keySet().getClass(), "Set"); // bug fix for android9
+            TYPE_MAPPINGS.put("Set", HashSet.class);
+
+            NAME_MAPPINGS.put(new HashMap().values().getClass(), "List");
+            NAME_MAPPINGS.put(new LinkedHashMap().values().getClass(), "List");
+            NAME_MAPPINGS.put(new TreeMap().values().getClass(), "List");
+            NAME_MAPPINGS.put(new ConcurrentHashMap().values().getClass(), "List");
+            NAME_MAPPINGS.put(new ConcurrentSkipListMap().values().getClass(), "List");
+
+            TYPE_MAPPINGS.put("List", ArrayList.class);
+            TYPE_MAPPINGS.put("java.util.ImmutableCollections$Map1", HashMap.class);
+            TYPE_MAPPINGS.put("java.util.ImmutableCollections$MapN", LinkedHashMap.class);
+            TYPE_MAPPINGS.put("java.util.ImmutableCollections$Set12", LinkedHashSet.class);
+            TYPE_MAPPINGS.put("java.util.ImmutableCollections$SetN", LinkedHashSet.class);
+            TYPE_MAPPINGS.put("java.util.ImmutableCollections$List12", ArrayList.class);
+            TYPE_MAPPINGS.put("java.util.ImmutableCollections$ListN", ArrayList.class);
+            TYPE_MAPPINGS.put("java.util.ImmutableCollections$SubList", ArrayList.class);
+
+            for (Map.Entry<Class, String> entry : NAME_MAPPINGS.entrySet()) {
+                String entryValue = entry.getValue();
+                Class origin = TYPE_MAPPINGS.get(entryValue);
+                if (origin == null) {
+                    TYPE_MAPPINGS.put(entryValue, entry.getKey());
+                }
+            }
         }
     }
 
@@ -98,36 +299,6 @@ public class TypeUtils {
             charArray[i] = (char) bytes[i];
         }
         return charArray;
-    }
-
-    public static String toString(char ch) {
-        if (ch < X2.chars.length) {
-            return X2.chars[ch];
-        }
-        return Character.toString(ch);
-    }
-
-    public static String toString(byte ch) {
-        if (ch >= 0 && ch < X2.chars.length) {
-            return X2.chars[ch];
-        }
-        return new String(new char[]{(char) (ch & 0xff)});
-    }
-
-    public static String toString(char c0, char c1) {
-        if (c0 >= X2.START && c0 <= X2.END && c1 >= X2.START && c1 <= X2.END) {
-            int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
-            return X2.chars2[value];
-        }
-        return new String(new char[]{c0, c1});
-    }
-
-    public static String toString(byte c0, byte c1) {
-        if (c0 >= X2.START && c0 <= X2.END && c1 >= X2.START && c1 <= X2.END) {
-            int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
-            return X2.chars2[value];
-        }
-        return new String(new char[]{(char) (c0 & 0xff), (char) (c1 & 0xff)});
     }
 
     public static Type intern(Type type) {
@@ -1458,254 +1629,6 @@ public class TypeUtils {
         throw new JSONException("can not cast to " + className + ", from " + obj.getClass());
     }
 
-    static final Map<Class, String> NAME_MAPPINGS = new IdentityHashMap<>();
-    static final Map<String, Class> TYPE_MAPPINGS = new ConcurrentHashMap<>();
-
-    static {
-        CLASS_JSON_OBJECT_1x = loadClass("com.alibaba.fastjson.JSONObject");
-        {
-            Field field = null;
-            if (CLASS_JSON_OBJECT_1x != null) {
-                try {
-                    field = CLASS_JSON_OBJECT_1x.getDeclaredField("map");
-                    field.setAccessible(true);
-                } catch (Throwable ignore) {
-                    // ignore
-                }
-            }
-            FIELD_JSON_OBJECT_1x_map = field;
-        }
-
-        CLASS_JSON_ARRAY_1x = loadClass("com.alibaba.fastjson.JSONArray");
-
-        NAME_MAPPINGS.put(byte.class, "B");
-        NAME_MAPPINGS.put(short.class, "S");
-        NAME_MAPPINGS.put(int.class, "I");
-        NAME_MAPPINGS.put(long.class, "J");
-        NAME_MAPPINGS.put(float.class, "F");
-        NAME_MAPPINGS.put(double.class, "D");
-        NAME_MAPPINGS.put(char.class, "C");
-        NAME_MAPPINGS.put(boolean.class, "Z");
-
-        NAME_MAPPINGS.put(Object[].class, "[O");
-        NAME_MAPPINGS.put(Object[][].class, "[[O");
-        NAME_MAPPINGS.put(byte[].class, "[B");
-        NAME_MAPPINGS.put(byte[][].class, "[[B");
-        NAME_MAPPINGS.put(short[].class, "[S");
-        NAME_MAPPINGS.put(short[][].class, "[[S");
-        NAME_MAPPINGS.put(int[].class, "[I");
-        NAME_MAPPINGS.put(int[][].class, "[[I");
-        NAME_MAPPINGS.put(long[].class, "[J");
-        NAME_MAPPINGS.put(long[][].class, "[[J");
-        NAME_MAPPINGS.put(float[].class, "[F");
-        NAME_MAPPINGS.put(float[][].class, "[[F");
-        NAME_MAPPINGS.put(double[].class, "[D");
-        NAME_MAPPINGS.put(double[][].class, "[[D");
-        NAME_MAPPINGS.put(char[].class, "[C");
-        NAME_MAPPINGS.put(char[][].class, "[[C");
-        NAME_MAPPINGS.put(boolean[].class, "[Z");
-        NAME_MAPPINGS.put(boolean[][].class, "[[Z");
-
-        NAME_MAPPINGS.put(Byte[].class, "[Byte");
-        NAME_MAPPINGS.put(Byte[][].class, "[[Byte");
-        NAME_MAPPINGS.put(Short[].class, "[Short");
-        NAME_MAPPINGS.put(Short[][].class, "[[Short");
-        NAME_MAPPINGS.put(Integer[].class, "[Integer");
-        NAME_MAPPINGS.put(Integer[][].class, "[[Integer");
-        NAME_MAPPINGS.put(Long[].class, "[Long");
-        NAME_MAPPINGS.put(Long[][].class, "[[Long");
-        NAME_MAPPINGS.put(Float[].class, "[Float");
-        NAME_MAPPINGS.put(Float[][].class, "[[Float");
-        NAME_MAPPINGS.put(Double[].class, "[Double");
-        NAME_MAPPINGS.put(Double[][].class, "[[Double");
-        NAME_MAPPINGS.put(Character[].class, "[Character");
-        NAME_MAPPINGS.put(Character[][].class, "[[Character");
-        NAME_MAPPINGS.put(Boolean[].class, "[Boolean");
-        NAME_MAPPINGS.put(Boolean[][].class, "[[Boolean");
-
-        NAME_MAPPINGS.put(String[].class, "[String");
-        NAME_MAPPINGS.put(String[][].class, "[[String");
-
-        NAME_MAPPINGS.put(BigDecimal[].class, "[BigDecimal");
-        NAME_MAPPINGS.put(BigDecimal[][].class, "[[BigDecimal");
-
-        NAME_MAPPINGS.put(BigInteger[].class, "[BigInteger");
-        NAME_MAPPINGS.put(BigInteger[][].class, "[[BigInteger");
-
-        NAME_MAPPINGS.put(UUID[].class, "[UUID");
-        NAME_MAPPINGS.put(UUID[][].class, "[[UUID");
-
-        NAME_MAPPINGS.put(Object.class, "Object");
-
-        NAME_MAPPINGS.put(HashMap.class, "M");
-        TYPE_MAPPINGS.put("HashMap", HashMap.class);
-        TYPE_MAPPINGS.put("java.util.HashMap", HashMap.class);
-
-        NAME_MAPPINGS.put(LinkedHashMap.class, "LM");
-        TYPE_MAPPINGS.put("LinkedHashMap", LinkedHashMap.class);
-        TYPE_MAPPINGS.put("java.util.LinkedHashMap", LinkedHashMap.class);
-
-        NAME_MAPPINGS.put(TreeMap.class, "TM");
-        TYPE_MAPPINGS.put("TreeMap", TreeMap.class);
-
-        NAME_MAPPINGS.put(ArrayList.class, "A");
-        TYPE_MAPPINGS.put("ArrayList", ArrayList.class);
-        TYPE_MAPPINGS.put("java.util.ArrayList", ArrayList.class);
-
-        NAME_MAPPINGS.put(LinkedList.class, "LA");
-        TYPE_MAPPINGS.put("LA", LinkedList.class);
-        TYPE_MAPPINGS.put("LinkedList", LinkedList.class);
-        TYPE_MAPPINGS.put("java.util.LinkedList", LinkedList.class);
-        TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedQueue", ConcurrentLinkedQueue.class);
-
-        //java.util.LinkedHashMap.class,
-
-        NAME_MAPPINGS.put(HashSet.class, "HashSet");
-        NAME_MAPPINGS.put(TreeSet.class, "TreeSet");
-        NAME_MAPPINGS.put(LinkedHashSet.class, "LinkedHashSet");
-        NAME_MAPPINGS.put(ConcurrentHashMap.class, "ConcurrentHashMap");
-        NAME_MAPPINGS.put(ConcurrentLinkedQueue.class, "ConcurrentLinkedQueue");
-        NAME_MAPPINGS.put(JSONObject.class, "JSONObject");
-        NAME_MAPPINGS.put(JSONArray.class, "JSONArray");
-        NAME_MAPPINGS.put(Currency.class, "Currency");
-        NAME_MAPPINGS.put(TimeUnit.class, "TimeUnit");
-
-        Class<?>[] classes = new Class[]{
-                Object.class,
-                Cloneable.class,
-                AutoCloseable.class,
-                java.lang.Exception.class,
-                java.lang.RuntimeException.class,
-                java.lang.IllegalAccessError.class,
-                java.lang.IllegalAccessException.class,
-                java.lang.IllegalArgumentException.class,
-                java.lang.IllegalMonitorStateException.class,
-                java.lang.IllegalStateException.class,
-                java.lang.IllegalThreadStateException.class,
-                java.lang.IndexOutOfBoundsException.class,
-                java.lang.InstantiationError.class,
-                java.lang.InstantiationException.class,
-                java.lang.InternalError.class,
-                java.lang.InterruptedException.class,
-                java.lang.LinkageError.class,
-                java.lang.NegativeArraySizeException.class,
-                java.lang.NoClassDefFoundError.class,
-                java.lang.NoSuchFieldError.class,
-                java.lang.NoSuchFieldException.class,
-                java.lang.NoSuchMethodError.class,
-                java.lang.NoSuchMethodException.class,
-                java.lang.NullPointerException.class,
-                java.lang.NumberFormatException.class,
-                java.lang.OutOfMemoryError.class,
-                java.lang.SecurityException.class,
-                java.lang.StackOverflowError.class,
-                java.lang.StringIndexOutOfBoundsException.class,
-                java.lang.TypeNotPresentException.class,
-                java.lang.VerifyError.class,
-                java.lang.StackTraceElement.class,
-                java.util.Hashtable.class,
-                java.util.TreeMap.class,
-                java.util.IdentityHashMap.class,
-                java.util.WeakHashMap.class,
-                java.util.HashSet.class,
-                java.util.LinkedHashSet.class,
-                java.util.TreeSet.class,
-                java.util.LinkedList.class,
-                java.util.concurrent.TimeUnit.class,
-                java.util.concurrent.ConcurrentHashMap.class,
-                java.util.concurrent.atomic.AtomicInteger.class,
-                java.util.concurrent.atomic.AtomicLong.class,
-                java.util.Collections.EMPTY_MAP.getClass(),
-                java.lang.Boolean.class,
-                java.lang.Character.class,
-                java.lang.Byte.class,
-                java.lang.Short.class,
-                java.lang.Integer.class,
-                java.lang.Long.class,
-                java.lang.Float.class,
-                java.lang.Double.class,
-                java.lang.Number.class,
-                java.lang.String.class,
-                java.math.BigDecimal.class,
-                java.math.BigInteger.class,
-                java.util.BitSet.class,
-                java.util.Calendar.class,
-                java.util.Date.class,
-                java.util.Locale.class,
-                java.util.UUID.class,
-                java.util.Currency.class,
-                java.text.SimpleDateFormat.class,
-                JSONObject.class,
-                JSONArray.class,
-                java.util.concurrent.ConcurrentSkipListMap.class,
-                java.util.concurrent.ConcurrentSkipListSet.class,
-        };
-        for (Class clazz : classes) {
-            TYPE_MAPPINGS.put(clazz.getSimpleName(), clazz);
-            TYPE_MAPPINGS.put(clazz.getName(), clazz);
-            NAME_MAPPINGS.put(clazz, clazz.getSimpleName());
-        }
-
-        TYPE_MAPPINGS.put("JO10", JSONObject1O.class);
-        TYPE_MAPPINGS.put("[O", Object[].class);
-        TYPE_MAPPINGS.put("[Ljava.lang.Object;", Object[].class);
-        TYPE_MAPPINGS.put("[java.lang.Object", Object[].class);
-        TYPE_MAPPINGS.put("[Object", Object[].class);
-        TYPE_MAPPINGS.put("StackTraceElement", StackTraceElement.class);
-        TYPE_MAPPINGS.put("[StackTraceElement", StackTraceElement[].class);
-
-        String[] items = new String[]{
-                "java.util.Collections$UnmodifiableMap",
-                "java.util.Collections$UnmodifiableCollection",
-        };
-
-        for (String className : items) {
-            Class<?> clazz = loadClass(className);
-            TYPE_MAPPINGS.put(clazz.getName(), clazz);
-        }
-
-        {
-            if (CLASS_JSON_OBJECT_1x != null) {
-                TYPE_MAPPINGS.put("JO1", CLASS_JSON_OBJECT_1x);
-                TYPE_MAPPINGS.put(CLASS_JSON_OBJECT_1x.getName(), CLASS_JSON_OBJECT_1x);
-            }
-            if (CLASS_JSON_ARRAY_1x != null) {
-                TYPE_MAPPINGS.put("JA1", CLASS_JSON_ARRAY_1x);
-                TYPE_MAPPINGS.put(CLASS_JSON_ARRAY_1x.getName(), CLASS_JSON_ARRAY_1x);
-            }
-        }
-
-        NAME_MAPPINGS.put(new HashMap().keySet().getClass(), "Set");
-        NAME_MAPPINGS.put(new LinkedHashMap().keySet().getClass(), "Set");
-        NAME_MAPPINGS.put(new TreeMap<>().keySet().getClass(), "Set");
-        NAME_MAPPINGS.put(((Map) new ConcurrentHashMap()).keySet().getClass(), "Set"); // bug fix for android9
-        NAME_MAPPINGS.put(((Map) new ConcurrentSkipListMap()).keySet().getClass(), "Set"); // bug fix for android9
-        TYPE_MAPPINGS.put("Set", HashSet.class);
-
-        NAME_MAPPINGS.put(new HashMap().values().getClass(), "List");
-        NAME_MAPPINGS.put(new LinkedHashMap().values().getClass(), "List");
-        NAME_MAPPINGS.put(new TreeMap().values().getClass(), "List");
-        NAME_MAPPINGS.put(new ConcurrentHashMap().values().getClass(), "List");
-        NAME_MAPPINGS.put(new ConcurrentSkipListMap().values().getClass(), "List");
-
-        TYPE_MAPPINGS.put("List", ArrayList.class);
-        TYPE_MAPPINGS.put("java.util.ImmutableCollections$Map1", HashMap.class);
-        TYPE_MAPPINGS.put("java.util.ImmutableCollections$MapN", LinkedHashMap.class);
-        TYPE_MAPPINGS.put("java.util.ImmutableCollections$Set12", LinkedHashSet.class);
-        TYPE_MAPPINGS.put("java.util.ImmutableCollections$SetN", LinkedHashSet.class);
-        TYPE_MAPPINGS.put("java.util.ImmutableCollections$List12", ArrayList.class);
-        TYPE_MAPPINGS.put("java.util.ImmutableCollections$ListN", ArrayList.class);
-        TYPE_MAPPINGS.put("java.util.ImmutableCollections$SubList", ArrayList.class);
-
-        for (Map.Entry<Class, String> entry : NAME_MAPPINGS.entrySet()) {
-            String entryValue = entry.getValue();
-            Class origin = TYPE_MAPPINGS.get(entryValue);
-            if (origin == null) {
-                TYPE_MAPPINGS.put(entryValue, entry.getKey());
-            }
-        }
-    }
-
     public static String getTypeName(Type type) {
         if (type instanceof Class) {
             return getTypeName((Class) type);
@@ -1737,7 +1660,7 @@ public class TypeUtils {
                 break;
         }
 
-        String mapTypeName = NAME_MAPPINGS.get(type);
+        String mapTypeName = Mapping.NAME_MAPPINGS.get(type);
         if (mapTypeName != null) {
             return mapTypeName;
         }
@@ -1754,7 +1677,7 @@ public class TypeUtils {
     }
 
     public static Class getMapping(String typeName) {
-        return TYPE_MAPPINGS.get(typeName);
+        return Mapping.TYPE_MAPPINGS.get(typeName);
     }
 
     public static BigDecimal toBigDecimal(Object value) {
@@ -3337,7 +3260,7 @@ public class TypeUtils {
                 break;
         }
 
-        Class mapping = TYPE_MAPPINGS.get(className);
+        Class mapping = Mapping.TYPE_MAPPINGS.get(className);
         if (mapping != null) {
             return mapping;
         }
@@ -3491,7 +3414,22 @@ public class TypeUtils {
     }
 
     public static Map getInnerMap(Map object) {
-        if (CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
+        Class classJSONObject1x = JSONFactory.getClassJSONObject1x();
+        if (classJSONObject1x == null || !classJSONObject1x.isInstance(object)) {
+            return object;
+        }
+
+        if (FIELD_JSON_OBJECT_1x_map == null && !REFLECT_JSON_1x_ERROR) {
+            try {
+                Field field = classJSONObject1x.getDeclaredField("map");
+                field.setAccessible(true);
+                FIELD_JSON_OBJECT_1x_map = field;
+            } catch (NoSuchFieldException ignored) {
+                REFLECT_JSON_1x_ERROR = true;
+            }
+        }
+
+        if (FIELD_JSON_OBJECT_1x_map == null) {
             return object;
         }
 
@@ -4090,23 +4028,41 @@ public class TypeUtils {
         return colonCount > 0 && colonCount < 8;
     }
 
-    private static final BigInteger[] BIG_TEN_POWERS_TABLE;
+    private static final BigInteger[] BIG_TEN_POWERS_TABLE_0;
+    private static volatile BigInteger[] BIG_TEN_POWERS_TABLE_1;
 
     static {
-        BigInteger[] bigInts = new BigInteger[128];
-        bigInts[0] = BigInteger.ONE;
-        bigInts[1] = BigInteger.TEN;
+        BigInteger[] bigInts0 = new BigInteger[19];
+
+        bigInts0[0] = BigInteger.ONE;
+        bigInts0[1] = BigInteger.TEN;
         long longValue = 10;
         for (int i = 2; i < 19; ++i) {
             longValue *= 10;
-            bigInts[i] = BigInteger.valueOf(longValue);
+            bigInts0[i] = BigInteger.valueOf(longValue);
         }
-        BigInteger bigInt = bigInts[18];
-        for (int i = 19; i < 128; ++i) {
-            bigInt = bigInt.multiply(BigInteger.TEN);
-            bigInts[i] = bigInt;
+
+        BIG_TEN_POWERS_TABLE_0 = bigInts0;
+    }
+
+    private static BigInteger power10(int scale) {
+        if (scale < BIG_TEN_POWERS_TABLE_0.length) {
+            return BIG_TEN_POWERS_TABLE_0[scale];
         }
-        BIG_TEN_POWERS_TABLE = bigInts;
+
+        BigInteger[] bigInts = BIG_TEN_POWERS_TABLE_1;
+
+        if (bigInts == null) {
+            bigInts = new BigInteger[128];
+            BigInteger bigInt = BIG_TEN_POWERS_TABLE_0[18];
+            for (int i = 19; i < 128; ++i) {
+                bigInt = bigInt.multiply(BigInteger.TEN);
+                bigInts[i] = bigInt;
+            }
+            BIG_TEN_POWERS_TABLE_1 = bigInts;
+        }
+
+        return bigInts[scale];
     }
 
     public static double doubleValue(int signNum, long intCompact, int scale) {
@@ -4126,7 +4082,7 @@ public class TypeUtils {
         }
 
         if (scale < 0) {
-            BigInteger pow10 = BIG_TEN_POWERS_TABLE[-scale];
+            BigInteger pow10 = power10(-scale);
             BigInteger w = BigInteger.valueOf(intCompact);
             return signNum * w.multiply(pow10).doubleValue();
         }
@@ -4136,7 +4092,7 @@ public class TypeUtils {
 
         BigInteger w = BigInteger.valueOf(intCompact);
         int ql = (int) qb - (P_D + 3);  // narrowing qb to an int is safe
-        BigInteger pow10 = BIG_TEN_POWERS_TABLE[scale];
+        BigInteger pow10 = power10(scale);
         BigInteger m, n;
         if (ql <= 0) {
             m = w.shiftLeft(-ql);
@@ -4177,12 +4133,12 @@ public class TypeUtils {
         }
         if (scale < 0) {
             BigInteger w = BigInteger.valueOf(intCompact);
-            return signNum * w.multiply(BIG_TEN_POWERS_TABLE[-scale]).floatValue();
+            return signNum * w.multiply(power10(-scale)).floatValue();
         }
 
         BigInteger w = BigInteger.valueOf(intCompact);
         int ql = (int) qb - (P_F + 3);
-        BigInteger pow10 = BIG_TEN_POWERS_TABLE[scale];
+        BigInteger pow10 = power10(scale);
         BigInteger m, n;
         if (ql <= 0) {
             m = w.shiftLeft(-ql);

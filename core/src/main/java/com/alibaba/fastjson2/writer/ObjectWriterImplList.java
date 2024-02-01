@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -14,8 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_ARRAY_1x;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
+import static com.alibaba.fastjson2.JSONFactory.getClassJSONArray1x;
 
 final class ObjectWriterImplList
         extends ObjectWriterPrimitiveImpl {
@@ -27,10 +23,11 @@ final class ObjectWriterImplList
     static final ObjectWriterImplList INSTANCE_JSON_ARRAY_1x;
 
     static {
-        if (CLASS_JSON_ARRAY_1x == null) {
+        Class classJSONArray1x = getClassJSONArray1x();
+        if (classJSONArray1x == null) {
             INSTANCE_JSON_ARRAY_1x = null;
         } else {
-            INSTANCE_JSON_ARRAY_1x = new ObjectWriterImplList(CLASS_JSON_ARRAY_1x, null, null, null, 0);
+            INSTANCE_JSON_ARRAY_1x = new ObjectWriterImplList(classJSONArray1x, null, null, null, 0);
         }
     }
 
@@ -200,11 +197,11 @@ final class ObjectWriterImplList
 
                 if (itemClass == JSONObject.class) {
                     itemObjectWriter = ObjectWriterImplMap.INSTANCE;
-                } else if (itemClass == CLASS_JSON_OBJECT_1x) {
-                    itemObjectWriter = ObjectWriterImplMap.INSTANCE_1x;
+                } else if (itemClass == JSONFactory.getClassJSONObject1x()) {
+                    itemObjectWriter = ObjectWriterImplMap.getINSTANCE1();
                 } else if (itemClass == JSONArray.class) {
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY;
-                } else if (itemClass == CLASS_JSON_ARRAY_1x) {
+                } else if (itemClass == getClassJSONArray1x()) {
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY_1x;
                 } else {
                     itemObjectWriter = context.getObjectWriter(itemClass);
@@ -337,13 +334,13 @@ final class ObjectWriterImplList
                 if (itemClass == JSONObject.class) {
                     itemObjectWriter = ObjectWriterImplMap.INSTANCE;
                     refDetect = jsonWriter.isRefDetect();
-                } else if (itemClass == CLASS_JSON_OBJECT_1x) {
-                    itemObjectWriter = ObjectWriterImplMap.INSTANCE_1x;
+                } else if (itemClass == JSONFactory.getClassJSONObject1x()) {
+                    itemObjectWriter = ObjectWriterImplMap.getINSTANCE1();
                     refDetect = jsonWriter.isRefDetect();
                 } else if (itemClass == JSONArray.class) {
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY;
                     refDetect = jsonWriter.isRefDetect();
-                } else if (itemClass == CLASS_JSON_ARRAY_1x) {
+                } else if (itemClass == getClassJSONArray1x()) {
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY_1x;
                     refDetect = jsonWriter.isRefDetect();
                 } else {

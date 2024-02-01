@@ -14,7 +14,6 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringKeyAsString;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectWriterImplMap
         extends ObjectWriterPrimitiveImpl {
@@ -22,15 +21,7 @@ public final class ObjectWriterImplMap
     static final long TYPE_HASH_JSONObject1O = Fnv.hashCode64("JO10");
 
     static final ObjectWriterImplMap INSTANCE = new ObjectWriterImplMap(String.class, Object.class, JSONObject.class, JSONObject.class, 0);
-    static final ObjectWriterImplMap INSTANCE_1x;
-
-    static {
-        if (CLASS_JSON_OBJECT_1x == null) {
-            INSTANCE_1x = null;
-        } else {
-            INSTANCE_1x = new ObjectWriterImplMap(String.class, Object.class, CLASS_JSON_OBJECT_1x, CLASS_JSON_OBJECT_1x, 0);
-        }
-    }
+    static ObjectWriterImplMap INSTANCE_1x;
 
     final Type objectType;
     final Class objectClass;
@@ -88,13 +79,25 @@ public final class ObjectWriterImplMap
         }
     }
 
+    public static ObjectWriterImplMap getINSTANCE1() {
+        if (INSTANCE_1x == null) {
+            Class classJSONObject1x = JSONFactory.getClassJSONObject1x();
+            if (classJSONObject1x == null) {
+                INSTANCE_1x = null;
+            } else {
+                INSTANCE_1x = new ObjectWriterImplMap(String.class, Object.class, classJSONObject1x, classJSONObject1x, 0);
+            }
+        }
+        return INSTANCE_1x;
+    }
+
     public static ObjectWriterImplMap of(Class objectClass) {
         if (objectClass == JSONObject.class) {
             return INSTANCE;
         }
 
-        if (objectClass == CLASS_JSON_OBJECT_1x) {
-            return INSTANCE_1x;
+        if (objectClass == JSONFactory.getClassJSONObject1x()) {
+            return getINSTANCE1();
         }
 
         return new ObjectWriterImplMap(null, null, objectClass, objectClass, 0);
@@ -337,11 +340,11 @@ public final class ObjectWriterImplMap
             } else {
                 if (valueClass == JSONObject.class) {
                     valueWriter = ObjectWriterImplMap.INSTANCE;
-                } else if (valueClass == CLASS_JSON_OBJECT_1x) {
-                    valueWriter = ObjectWriterImplMap.INSTANCE_1x;
+                } else if (valueClass == JSONFactory.getClassJSONObject1x()) {
+                    valueWriter = ObjectWriterImplMap.getINSTANCE1();
                 } else if (valueClass == JSONArray.class) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
-                } else if (valueClass == TypeUtils.CLASS_JSON_ARRAY_1x) {
+                } else if (valueClass == JSONFactory.getClassJSONArray1x()) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                 } else {
                     valueWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
@@ -514,13 +517,13 @@ public final class ObjectWriterImplMap
                 if (valueClass == JSONObject.class) {
                     valueWriter = ObjectWriterImplMap.INSTANCE;
                     isPrimitiveOrEnum = false;
-                } else if (valueClass == CLASS_JSON_OBJECT_1x) {
-                    valueWriter = ObjectWriterImplMap.INSTANCE_1x;
+                } else if (valueClass == JSONFactory.getClassJSONObject1x()) {
+                    valueWriter = ObjectWriterImplMap.getINSTANCE1();
                     isPrimitiveOrEnum = false;
                 } else if (valueClass == JSONArray.class) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                     isPrimitiveOrEnum = false;
-                } else if (valueClass == TypeUtils.CLASS_JSON_ARRAY_1x) {
+                } else if (valueClass == JSONFactory.getClassJSONArray1x()) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                     isPrimitiveOrEnum = false;
                 } else {

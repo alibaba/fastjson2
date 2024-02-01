@@ -1,32 +1,21 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.function.Supplier;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.time.ZoneId;
-import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.NameCacheEntry;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public final class JSONFactory {
-    public static final String PROPERTY_DENY_PROPERTY = "fastjson2.parser.deny";
-    public static final String PROPERTY_AUTO_TYPE_ACCEPT = "fastjson2.autoTypeAccept";
-    public static final String PROPERTY_AUTO_TYPE_HANDLER = "fastjson2.autoTypeHandler";
-    public static final String PROPERTY_AUTO_TYPE_BEFORE_HANDLER = "fastjson2.autoTypeBeforeHandler";
-
-    public static String getProperty(String key) {
-        return DEFAULT_PROPERTIES.getProperty(key);
-    }
-
     static long defaultReaderFeatures;
     static String defaultReaderFormat;
     static ZoneId defaultReaderZoneId;
@@ -40,6 +29,13 @@ public final class JSONFactory {
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
+
+    static Class JSON_OBJECT_CLASS_1x;
+    static Supplier JSON_OBJECT_1x_SUPPLIER;
+    static Function JSON_OBJECT_1x_BUILDER;
+    static Class JSON_ARRAY_CLASS_1x;
+    static Supplier JSON_ARRAY_1x_SUPPLIER;
+    static volatile boolean JSON_REFLECT_1x_ERROR;
 
     static final class NameCacheEntry2 {
         final String name;
@@ -94,31 +90,6 @@ public final class JSONFactory {
 
     static final Double DOUBLE_ZERO = Double.valueOf(0);
 
-    static {
-        Properties properties = new Properties();
-
-        InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-            final String resourceFile = "fastjson2.properties";
-
-            if (cl != null) {
-                return cl.getResourceAsStream(resourceFile);
-            } else {
-                return ClassLoader.getSystemResourceAsStream(resourceFile);
-            }
-        });
-        if (inputStream != null) {
-            try {
-                properties.load(inputStream);
-            } catch (java.io.IOException ignored) {
-            } finally {
-                IOUtils.close(inputStream);
-            }
-        }
-        DEFAULT_PROPERTIES = properties;
-    }
-
     static final CacheItem[] CACHE_ITEMS;
 
     static {
@@ -140,13 +111,11 @@ public final class JSONFactory {
         volatile byte[] bytes;
     }
 
-    static final Properties DEFAULT_PROPERTIES;
-
     public static final ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     public static final ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
-    static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.defaultObjectReaderProvider.getObjectReader(JSONArray.class, false);
-    static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.defaultObjectReaderProvider.getObjectReader(JSONObject.class, false);
+    static final ObjectReader<JSONArray> ARRAY_READER = ObjectReaderImplList.JSON_ARRAY_READER;
+    static final ObjectReader<JSONObject> OBJECT_READER = ObjectReaderImplMap.INSTANCE_OBJECT;
 
     static final char[] UUID_LOOKUP;
     static final byte[] UUID_VALUES;
@@ -276,5 +245,78 @@ public final class JSONFactory {
 
     public static ObjectReaderProvider getDefaultObjectReaderProvider() {
         return defaultObjectReaderProvider;
+    }
+
+    public static void setFastjson1x(
+            Class jsonObjectClass,
+            Supplier jsonObjectSuppier,
+            Function jsonObjectBuilder,
+            Class jsonArrayClass,
+            Supplier jsonArraySupplier
+    ) {
+        JSON_OBJECT_CLASS_1x = jsonObjectClass;
+        JSON_OBJECT_1x_SUPPLIER = jsonObjectSuppier;
+        JSON_OBJECT_1x_BUILDER = jsonObjectBuilder;
+        JSON_ARRAY_CLASS_1x = jsonArrayClass;
+        JSON_ARRAY_1x_SUPPLIER = jsonArraySupplier;
+    }
+
+    public static Class getClassJSONObject1x() {
+        if (JSON_OBJECT_CLASS_1x == null && !JSON_REFLECT_1x_ERROR) {
+            try {
+                JSON_OBJECT_CLASS_1x = Class.forName("com.alibaba.fastjson.JSONObject");
+            } catch (ClassNotFoundException ignored) {
+                JSON_REFLECT_1x_ERROR = true;
+            }
+        }
+
+        return JSON_OBJECT_CLASS_1x;
+    }
+
+    public static Class getClassJSONArray1x() {
+        if (JSON_ARRAY_CLASS_1x == null && !JSON_REFLECT_1x_ERROR) {
+            try {
+                JSON_ARRAY_CLASS_1x = Class.forName("com.alibaba.fastjson.JSONArray");
+            } catch (ClassNotFoundException ignored) {
+                JSON_REFLECT_1x_ERROR = true;
+            }
+        }
+
+        return JSON_ARRAY_CLASS_1x;
+    }
+
+    public static Function getBuilderJSONObject1x() {
+        if (JSON_OBJECT_1x_BUILDER == null && !JSON_REFLECT_1x_ERROR) {
+            Class classJSONObject1x = getClassJSONObject1x();
+            if (classJSONObject1x != null) {
+                Constructor constructor;
+                try {
+                    constructor = classJSONObject1x.getConstructor(Map.class);
+                } catch (NoSuchMethodException e) {
+                    throw new JSONException("create JSONObject1 error");
+                }
+                JSON_OBJECT_1x_BUILDER = new ConstructorFunction(constructor);
+            }
+        }
+
+        return JSON_OBJECT_1x_BUILDER;
+    }
+
+    private static final class ConstructorFunction
+            implements Function {
+        final Constructor constructor;
+
+        ConstructorFunction(Constructor constructor) {
+            this.constructor = constructor;
+        }
+
+        @Override
+        public Object apply(Object arg) {
+            try {
+                return constructor.newInstance(arg);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("create JSONObject1 error");
+            }
+        }
     }
 }

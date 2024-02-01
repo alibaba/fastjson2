@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -13,7 +12,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 public final class ObjectArrayReader
         extends ObjectReaderPrimitive {
     public static final ObjectArrayReader INSTANCE = new ObjectArrayReader();
-    public static final long TYPE_HASH_CODE = Fnv.hashCode64("[O");
+    public static final long TYPE_HASH_CODE = 20315; // Fnv.hashCode64("[O");
 
     public ObjectArrayReader() {
         super(Object[].class);

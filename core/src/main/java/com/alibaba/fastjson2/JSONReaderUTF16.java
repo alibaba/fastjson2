@@ -370,9 +370,9 @@ final class JSONReaderUTF16
             }
             chars = new char[Math.max(length, 8192)];
         }
-        str.getChars(offset, length, chars, 0);
+        str.getChars(offset, offset + length, chars, 0);
 
-        this.str = str;
+        this.str = offset == 0 ? str : null;
         this.chars = chars;
         this.offset = 0;
         this.length = length;
@@ -2097,9 +2097,19 @@ final class JSONReaderUTF16
             int c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15;
             switch (nameLength) {
                 case 1:
-                    return TypeUtils.toString(chars[nameBegin]);
+                    c0 = chars[nameBegin];
+                    if ((c0 & 0xFF) == c0) {
+                        nameValue0 = c0;
+                    }
+                    break;
                 case 2:
-                    return TypeUtils.toString(chars[nameBegin], chars[nameBegin + 1]);
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1) {
+                        nameValue0 = (c1 << 8) + c0;
+                    }
+                    break;
                 case 3:
                     c0 = chars[nameBegin];
                     c1 = chars[nameBegin + 1];
@@ -2627,17 +2637,10 @@ final class JSONReaderUTF16
             ch = chars[offset];
             if (ch == '\\') {
                 ch = chars[++offset];
-                switch (ch) {
-                    case 'u': {
-                        offset += 4;
-                        break;
-                    }
-                    case 'x': {
-                        offset += 2;
-                        break;
-                    }
-                    default:
-                        break;
+                if (ch == 'u') {
+                    offset += 4;
+                } else if (ch == 'x') {
+                    offset += 2;
                 }
                 offset++;
                 continue;
@@ -3816,14 +3819,12 @@ final class JSONReaderUTF16
                 ch = chars[offset++];
                 if (ch == '\\' || ch == '"') {
                     ch = chars[offset++];
-                    continue;
-                }
-                if (ch == 'u') {
+                } else if (ch == 'u') {
                     offset += 4;
                     ch = chars[offset++];
-                    continue;
+                } else {
+                    ch = char1(ch);
                 }
-                ch = char1(ch);
                 continue;
             }
 
@@ -4128,16 +4129,7 @@ final class JSONReaderUTF16
 
                 str = new String(buf);
             } else {
-                char c0, c1;
-                int strlen = offset - this.offset;
-                if (strlen == 1 && (c0 = chars[this.offset]) < 128) {
-                    str = TypeUtils.toString(c0);
-                } else if (strlen == 2
-                        && (c0 = chars[this.offset]) < 128
-                        && (c1 = chars[this.offset + 1]) < 128
-                ) {
-                    str = TypeUtils.toString(c0, c1);
-                } else if (this.str != null) {
+                if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
                 } else {
                     str = new String(chars, this.offset, offset - this.offset);
@@ -4236,7 +4228,14 @@ final class JSONReaderUTF16
                         throw new JSONException(info("illegal value"));
                     }
                     comma = false;
-                    skipValue();
+                    if (ch == '"') {
+                        skipString();
+                        if (!comma && ch != ']') {
+                            throw error();
+                        }
+                    } else {
+                        skipValue();
+                    }
                 }
                 break;
             }
@@ -4249,7 +4248,14 @@ final class JSONReaderUTF16
                         break;
                     }
                     skipName();
-                    skipValue();
+                    if (ch == '"') {
+                        skipString();
+                        if (!comma && ch != '}') {
+                            throw error();
+                        }
+                    } else {
+                        skipValue();
+                    }
                 }
                 break;
             }

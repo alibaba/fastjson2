@@ -18,7 +18,8 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.defaultObjectReaderProvider;
-import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 public class JSONArray
@@ -883,6 +884,7 @@ public class JSONArray
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
+            long NONE_DIRECT_FEATURES = ReferenceDetection.mask | PrettyFormat.mask | NotWriteEmptyArray.mask | NotWriteDefaultValue.mask;
             if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
                 writer.write(this);
             } else {

@@ -10,7 +10,7 @@ import java.util.Map;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ObjectReader<T> {
-    long HASH_TYPE = Fnv.hashCode64("@type");
+    long HASH_TYPE = 435678704704L; // Fnv.hashCode64("@type");
 
     /**
      * @return {@link T}

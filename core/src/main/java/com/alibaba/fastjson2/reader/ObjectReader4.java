@@ -67,7 +67,7 @@ public class ObjectReader4<T>
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, null, null, null, fieldReaders);
         this.fieldReader0 = fieldReaders[0];
         this.fieldReader1 = fieldReaders[1];
         this.fieldReader2 = fieldReaders[2];
@@ -130,7 +130,7 @@ public class ObjectReader4<T>
             return (T) object;
         }
 
-        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
+        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.getTypeNameHash(), this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }

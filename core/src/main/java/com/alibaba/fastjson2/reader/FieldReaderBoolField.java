@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 
 final class FieldReaderBoolField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     FieldReaderBoolField(
             String fieldName,
             Class fieldType,
@@ -17,7 +17,7 @@ final class FieldReaderBoolField<T>
             Boolean defaultValue,
             Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, null, field);
     }
 
     @Override

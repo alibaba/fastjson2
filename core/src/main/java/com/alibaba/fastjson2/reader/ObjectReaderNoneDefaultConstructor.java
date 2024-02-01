@@ -77,7 +77,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         if (type == BC_TYPED_ANY) {
-            ObjectReader objectReader = jsonReader.checkAutoType(this.objectClass, typeNameHash, this.features | features);
+            ObjectReader objectReader = jsonReader.checkAutoType(this.objectClass, getTypeNameHash(), this.features | features);
             if (objectReader != null && objectReader != this) {
                 return (T) objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
@@ -242,7 +242,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
             if (hashCode == typeKeyHashCode && i == 0) {
                 long typeHash = jsonReader.readTypeHashCode();
-                if (typeHash == typeNameHash) {
+                if (typeHash == getTypeNameHash()) {
                     continue;
                 }
 

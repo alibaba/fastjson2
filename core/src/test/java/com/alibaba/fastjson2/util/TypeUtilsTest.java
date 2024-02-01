@@ -538,19 +538,6 @@ public class TypeUtilsTest {
     }
 
     @Test
-    public void toStringTest() {
-        for (char i = 0; i < 512; i++) {
-            assertEquals(Character.toString(i), TypeUtils.toString(i));
-        }
-
-        for (char i = 0; i < 512; i++) {
-            for (char j = 0; j < 512; j++) {
-                assertEquals(new String(new char[]{i, j}), TypeUtils.toString(i, j));
-            }
-        }
-    }
-
-    @Test
     public void toStringTestJSON() {
         for (char i = 0; i < 512; i++) {
             String s1 = Character.toString(i);

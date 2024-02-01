@@ -9,10 +9,10 @@ import java.lang.reflect.Field;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class FieldReaderInt32ValueField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     final long fieldOffset;
     FieldReaderInt32ValueField(String fieldName, Class fieldType, int ordinal, String format, Integer defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, field);
+        super(fieldName, fieldType, fieldType, ordinal, 0, format, null, defaultValue, null, field);
         fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
     }
 

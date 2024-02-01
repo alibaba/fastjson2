@@ -33,10 +33,10 @@ public class ObjectWriterAdapter<T>
 
     final String typeKey;
     byte[] typeKeyJSONB;
-    protected final String typeName;
-    protected final long typeNameHash;
+    private String typeName;
+    protected long typeNameHash;
     protected long typeNameSymbolCache;
-    protected final byte[] typeNameJSONB;
+    protected byte[] typeNameJSONB;
 
     byte[] nameWithColonUTF8;
     char[] nameWithColonUTF16;
@@ -62,19 +62,9 @@ public class ObjectWriterAdapter<T>
             long features,
             List<FieldWriter> fieldWriters
     ) {
-        if (typeName == null && objectClass != null) {
-            if (Enum.class.isAssignableFrom(objectClass) && !objectClass.isEnum()) {
-                typeName = objectClass.getSuperclass().getName();
-            } else {
-                typeName = TypeUtils.getTypeName(objectClass);
-            }
-        }
-
         this.objectClass = objectClass;
-        this.typeKey = typeKey == null || typeKey.isEmpty() ? TYPE : typeKey;
         this.typeName = typeName;
-        this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
-        this.typeNameJSONB = JSONB.toBytes(typeName);
+        this.typeKey = typeKey == null || typeKey.isEmpty() ? TYPE : typeKey;
         this.features = features;
         this.fieldWriters = fieldWriters;
         this.serializable = objectClass == null || java.io.Serializable.class.isAssignableFrom(objectClass);
@@ -109,6 +99,35 @@ public class ObjectWriterAdapter<T>
             int index = Arrays.binarySearch(this.hashCodes, hashCode);
             mapping[index] = (short) i;
         }
+    }
+
+    protected String getTypeName() {
+        if (typeName == null && objectClass != null) {
+            if (Enum.class.isAssignableFrom(objectClass) && !objectClass.isEnum()) {
+                typeName = objectClass.getSuperclass().getName();
+            } else {
+                typeName = TypeUtils.getTypeName(objectClass);
+            }
+        }
+        return typeName;
+    }
+
+    protected byte[] getTypeNameJSONB() {
+        if (this.typeNameJSONB == null) {
+            String typeName = this.getTypeName();
+            if (typeName != null) {
+                typeNameJSONB = JSONB.toBytes(typeName);
+            }
+        }
+        return typeNameJSONB;
+    }
+
+    protected long getTypeNameHash() {
+        String typeName;
+        if (typeNameHash == 0 && (typeName = getTypeName()) != null) {
+            this.typeNameHash = Fnv.hashCode64(typeName);
+        }
+        return this.typeNameHash;
     }
 
     @Override
@@ -215,7 +234,7 @@ public class ObjectWriterAdapter<T>
             }
         }
 
-        jsonWriter.writeTypeName(typeNameJSONB, typeNameHash);
+        jsonWriter.writeTypeName(getTypeNameJSONB(), getTypeNameHash());
     }
 
     private boolean writeClassInfoSymbol(JSONWriter jsonWriter, SymbolTable symbolTable) {
@@ -223,7 +242,7 @@ public class ObjectWriterAdapter<T>
 
         int symbol;
         if (typeNameSymbolCache == 0) {
-            symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
+            symbol = symbolTable.getOrdinalByHashCode(getTypeNameHash());
             if (symbol != -1) {
                 typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
             }
@@ -232,7 +251,7 @@ public class ObjectWriterAdapter<T>
             if (identity == symbolTableIdentity) {
                 symbol = (int) (typeNameSymbolCache >> 32);
             } else {
-                symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
+                symbol = symbolTable.getOrdinalByHashCode(getTypeNameHash());
                 if (symbol != -1) {
                     typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
                 }
@@ -331,6 +350,7 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
+        String typeName = this.getTypeName();
         if (jsonWriter.utf8) {
             if (nameWithColonUTF8 == null) {
                 byte[] chars = new byte[typeKey.length() + typeName.length() + 5];
@@ -366,7 +386,7 @@ public class ObjectWriterAdapter<T>
                 typeKeyJSONB = JSONB.toBytes(typeKey);
             }
             jsonWriter.writeRaw(typeKeyJSONB);
-            jsonWriter.writeRaw(typeNameJSONB);
+            jsonWriter.writeRaw(getTypeNameJSONB());
             return true;
         }
 

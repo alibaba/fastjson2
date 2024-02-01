@@ -7,13 +7,13 @@ import java.lang.reflect.Field;
 
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
-class FieldReaderStringField<T>
-        extends FieldReaderObjectField<T> {
+final class FieldReaderStringField<T>
+        extends FieldReader<T> {
     final boolean trim;
     final long fieldOffset;
 
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, null, field);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
         fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
     }

@@ -13,16 +13,23 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectReaderImplMap
         implements ObjectReader {
-    static final Class CLASS_SINGLETON_MAP = Collections.singletonMap(1, 1).getClass();
-    static final Class CLASS_EMPTY_MAP = Collections.EMPTY_MAP.getClass();
-    static final Class CLASS_UNMODIFIABLE_MAP = Collections.unmodifiableMap(Collections.emptyMap()).getClass();
-
-    public static ObjectReaderImplMap INSTANCE = new ObjectReaderImplMap(null, HashMap.class, HashMap.class, 0, null);
-    public static ObjectReaderImplMap INSTANCE_OBJECT = new ObjectReaderImplMap(null, JSONObject.class, JSONObject.class, 0, null);
+    public static final ObjectReaderImplMap INSTANCE = new ObjectReaderImplMap(
+            null,
+            HashMap.class,
+            77, // Fnv.hashCode64(TypeUtils.getTypeName(HashMap.class)),
+            HashMap.class,
+            0,
+            null);
+    public static final ObjectReaderImplMap INSTANCE_OBJECT = new ObjectReaderImplMap(
+            null,
+            JSONObject.class,
+            -2622135058008237800L, /// Fnv.hashCode64(TypeUtils.getTypeName(JSONObject.class)),
+            JSONObject.class,
+            0,
+            null);
 
     final Type fieldType;
     final Class mapType;
@@ -44,12 +51,14 @@ public final class ObjectReaderImplMap
             }
         }
 
+        String mapClassName = mapType.getName();
+
         if (mapType == Map.class
                 || mapType == AbstractMap.class
-                || mapType == CLASS_SINGLETON_MAP
+                || mapClassName.equals("java.util.Collections$SingletonMap")
         ) {
             instanceType = HashMap.class;
-        } else if (mapType == CLASS_UNMODIFIABLE_MAP) {
+        } else if (mapClassName.equals("java.util.Collections$UnmodifiableMap")) {
             instanceType = LinkedHashMap.class;
         } else if (mapType == ConcurrentMap.class) {
             instanceType = ConcurrentHashMap.class;
@@ -98,7 +107,7 @@ public final class ObjectReaderImplMap
 
         String instanceTypeName = instanceType.getName();
         if (instanceTypeName.equals("com.alibaba.fastjson.JSONObject")) {
-            builder = createObjectSupplier(instanceType);
+            builder = JSONFactory.getBuilderJSONObject1x();
             instanceType = HashMap.class;
         } else if (instanceTypeName.equals("java.util.Collections$EmptyMap")) {
             return new ObjectReaderImplMap(instanceType, features, Collections.EMPTY_MAP);
@@ -116,16 +125,12 @@ public final class ObjectReaderImplMap
             return new ObjectReaderImplMap(instanceType, features, mapSingleton);
         } else {
             if (instanceType == JSONObject1O.class) {
-                Class objectClass = CLASS_JSON_OBJECT_1x;
-                builder = createObjectSupplier(objectClass);
+                builder = JSONFactory.getBuilderJSONObject1x();
                 instanceType = LinkedHashMap.class;
-            } else if (mapType == CLASS_UNMODIFIABLE_MAP) {
+            } else if (mapClassName.equals("java.util.Collections$UnmodifiableMap")) {
                 builder = (Function<Map, Map>) Collections::unmodifiableMap;
-            } else if (mapType == CLASS_SINGLETON_MAP) {
-                builder = (Function<Map, Map>) (Map map) -> {
-                    Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
-                    return Collections.singletonMap(entry.getKey(), entry.getValue());
-                };
+            } else if (mapClassName.equals("java.util.Collections$SingletonMap")) {
+                builder = new SingleMapBuilder();
             }
         }
 
@@ -138,9 +143,13 @@ public final class ObjectReaderImplMap
     }
 
     ObjectReaderImplMap(Type fieldType, Class mapType, Class instanceType, long features, Function builder) {
+        this(fieldType, mapType, Fnv.hashCode64(TypeUtils.getTypeName(mapType)), instanceType, features, builder);
+    }
+
+    private ObjectReaderImplMap(Type fieldType, Class mapType, long mapTypeHash, Class instanceType, long features, Function builder) {
         this.fieldType = fieldType;
         this.mapType = mapType;
-        this.mapTypeHash = Fnv.hashCode64(TypeUtils.getTypeName(mapType));
+        this.mapTypeHash = mapTypeHash;
         this.instanceType = instanceType;
         this.features = features;
         this.builder = builder;
@@ -238,7 +247,9 @@ public final class ObjectReaderImplMap
                 map = new LinkedHashMap<>();
             } else if (instanceType == JSONObject.class) {
                 map = new JSONObject();
-            } else if (instanceType == CLASS_EMPTY_MAP) {
+            } else if (instanceType != null
+                    && instanceType.getName().equals("java.util.Collections$EmptyMap")
+            ) {
                 map = Collections.EMPTY_MAP;
             } else {
                 JSONException error = null;
@@ -385,20 +396,12 @@ public final class ObjectReaderImplMap
         return object;
     }
 
-    static Function createObjectSupplier(Class objectClass) {
-        Constructor constructor;
-        try {
-            constructor = objectClass.getConstructor(Map.class);
-        } catch (NoSuchMethodException e) {
-            throw new JSONException("create JSONObject1 error");
+    static final class SingleMapBuilder
+            implements Function<Map, Map> {
+        @Override
+        public Map apply(Map map) {
+            Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
+            return Collections.singletonMap(entry.getKey(), entry.getValue());
         }
-
-        return (Object arg) -> {
-            try {
-                return constructor.newInstance(arg);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create JSONObject1 error");
-            }
-        };
     }
 }

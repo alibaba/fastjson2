@@ -69,7 +69,7 @@ public class FieldWriterObject<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         final Class initValueClass = this.initValueClass;
-        if (initValueClass == null || initObjectWriter == ObjectWriterModule.VoidObjectWriter.INSTANCE) {
+        if (initValueClass == null || initObjectWriter == ObjectWriterProvider.VoidObjectWriter.INSTANCE) {
             return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
             boolean typeMatch = initValueClass == valueClass

@@ -3993,4 +3993,8 @@ public abstract class JSONReader
 
         nextIfComma();
     }
+
+    protected JSONException error() {
+        return new JSONException(info("illegal ch " + ch));
+    }
 }

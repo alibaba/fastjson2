@@ -21,8 +21,8 @@ public abstract class ObjectReaderBean<T>
     protected final Supplier<T> creator;
     protected final Function buildFunction;
     protected final long features;
-    protected final String typeName;
-    protected final long typeNameHash;
+    private String typeName;
+    private long typeNameHash;
 
     protected FieldReader extraFieldReader;
 
@@ -38,12 +38,6 @@ public abstract class ObjectReaderBean<T>
             long features,
             Function buildFunction
     ) {
-        if (typeName == null) {
-            if (objectClass != null) {
-                typeName = TypeUtils.getTypeName(objectClass);
-            }
-        }
-
         this.objectClass = objectClass;
         this.creator = creator;
         this.buildFunction = buildFunction;
@@ -52,6 +46,25 @@ public abstract class ObjectReaderBean<T>
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
 
         this.serializable = objectClass != null && Serializable.class.isAssignableFrom(objectClass);
+    }
+
+    protected String getTypeName() {
+        if (typeName == null) {
+            if (objectClass != null) {
+                typeName = TypeUtils.getTypeName(objectClass);
+            }
+        }
+        return typeName;
+    }
+
+    protected long getTypeNameHash() {
+        if (typeNameHash == 0) {
+            String typeName = this.getTypeName();
+            if (typeName != null) {
+                this.typeNameHash = Fnv.hashCode64(typeName);
+            }
+        }
+        return typeNameHash;
     }
 
     @Override
@@ -178,7 +191,7 @@ public abstract class ObjectReaderBean<T>
                 throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
             }
 
-            if (typeHash == this.typeNameHash) {
+            if (typeHash == this.getTypeNameHash()) {
                 return this;
             }
 

@@ -27,17 +27,6 @@ public class ObjectReader2<T>
 
     public ObjectReader2(
             Class objectClass,
-            long features,
-            Supplier<T> creator,
-            Function buildFunction,
-            FieldReader first,
-            FieldReader second
-    ) {
-        this(objectClass, null, null, features, creator, buildFunction, first, second);
-    }
-
-    public ObjectReader2(
-            Class objectClass,
             String typeKey,
             String typeName,
             long features,
@@ -45,7 +34,7 @@ public class ObjectReader2<T>
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, null, null, null, fieldReaders);
 
         this.fieldReader0 = fieldReaders[0];
         this.fieldReader1 = fieldReaders[1];
@@ -102,7 +91,7 @@ public class ObjectReader2<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
+        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.getTypeNameHash(), this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }

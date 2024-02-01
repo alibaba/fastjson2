@@ -16,9 +16,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import static com.alibaba.fastjson2.reader.ObjectReaderImplMap.CLASS_SINGLETON_MAP;
-import static com.alibaba.fastjson2.reader.ObjectReaderImplMap.CLASS_UNMODIFIABLE_MAP;
-
 public class ObjectReaderImplMapMultiValueType
         implements ObjectReader {
     final Class mapType;
@@ -30,14 +27,15 @@ public class ObjectReaderImplMapMultiValueType
         this.multiValueType = multiValueType;
         mapType = multiValueType.mapType;
 
+        String mapClassName = mapType.getName();
+
         Class instanceType = mapType;
-        Function builder = null;
         if (mapType == Map.class
                 || mapType == AbstractMap.class
-                || mapType == CLASS_SINGLETON_MAP
+                || mapClassName.equals("java.util.Collections$SingletonMap")
         ) {
             instanceType = HashMap.class;
-        } else if (mapType == CLASS_UNMODIFIABLE_MAP) {
+        } else if (mapClassName.equals("java.util.Collections$UnmodifiableMap")) {
             instanceType = LinkedHashMap.class;
         } else if (mapType == SortedMap.class) {
             instanceType = TreeMap.class;
