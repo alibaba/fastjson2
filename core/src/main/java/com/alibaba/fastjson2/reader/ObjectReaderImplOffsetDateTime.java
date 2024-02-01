@@ -40,7 +40,7 @@ final class ObjectReaderImplOffsetDateTime
 
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
-            if (formatUnixTime) {
+            if (formatUnixTime || context.isFormatUnixTime()) {
                 millis *= 1000;
             }
 
@@ -81,7 +81,7 @@ final class ObjectReaderImplOffsetDateTime
                     LocalDate.of(1970, 1, 1),
                     LocalTime.parse(str, formatter),
                     zoneId
-            );
+            ).toOffsetDateTime();
         }
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
         return OffsetDateTime.of(ldt, zoneId.getRules().getOffset(ldt));

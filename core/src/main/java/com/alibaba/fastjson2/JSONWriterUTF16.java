@@ -2632,7 +2632,7 @@ final class JSONWriterUTF16
         }
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
-        boolean special = false;
+        boolean special = (context.features & EscapeNoneAscii.mask) != 0;
         for (int i = 0; i < chars.length; ++i) {
             char c = chars[i];
             if (c == '\\' || c == quote || c < ' ') {
@@ -2669,9 +2669,10 @@ final class JSONWriterUTF16
             return;
         }
 
-        boolean special = false;
+        boolean special = (context.features & EscapeNoneAscii.mask) != 0;
         for (int i = off; i < len; ++i) {
-            if (chars[i] == '\\' || chars[i] == '"') {
+            char c = chars[i];
+            if (c == '\\' || c == quote || c < ' ') {
                 special = true;
                 break;
             }

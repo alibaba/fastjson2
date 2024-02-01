@@ -515,6 +515,14 @@ public abstract class FieldReader<T>
                         return ObjectReaderImplInstant.of(format, locale);
                     }
 
+                    if (fieldClass == OffsetTime.class) {
+                        return ObjectReaderImplOffsetTime.of(format, locale);
+                    }
+
+                    if (fieldClass == OffsetDateTime.class) {
+                        return ObjectReaderImplOffsetDateTime.of(format, locale);
+                    }
+
                     if (fieldClass == Optional.class) {
                         return ObjectReaderImplOptional.of(fieldType, format, locale);
                     }
