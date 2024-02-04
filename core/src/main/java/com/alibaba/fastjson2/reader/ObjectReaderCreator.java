@@ -2918,19 +2918,22 @@ public class ObjectReaderCreator {
                     itemType = actualTypeArguments[0];
                     itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
-                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, defaultValue, schema, method, null, function);
+                        return new FieldReaderList<>(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, defaultValue, schema, method, null, function);
                     }
                 }
             }
-
-            return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, defaultValue, schema, method, null, function);
+            boolean nullResolvedType = fieldTypeResolved == null;
+            return new FieldReaderList<>(
+                    fieldName,
+                    nullResolvedType ? fieldType : fieldTypeResolved,
+                    nullResolvedType ? fieldClass : fieldClassResolved,
+                    itemType,
+                    itemClass,
+                    ordinal, features, format, locale, defaultValue, schema, method, null, function
+            );
         }
 
-        if (fieldTypeResolved != null) {
-            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, null);
-        }
-
-        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, null);
+        return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved == null ? fieldType : fieldTypeResolved, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, null);
     }
 
     protected ObjectReader createEnumReader(
