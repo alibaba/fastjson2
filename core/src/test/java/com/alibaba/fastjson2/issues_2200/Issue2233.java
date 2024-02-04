@@ -30,6 +30,33 @@ public class Issue2233 {
         JSONAssert.assertEquals(json, JSON.toJSONString(obj, JSONWriter.Feature.WriteNulls), true);
     }
 
+    @Test
+    void test2() throws JSONException {
+        String json = "{\"log_entries\": null,\"test\":[]}";
+        Obj2 obj = assertDoesNotThrow(
+                () -> JSON.parseObject(json, Obj2.class)
+        );
+        JSONAssert.assertEquals(json, JSON.toJSONString(obj, JSONWriter.Feature.WriteNulls), true);
+    }
+
+    @Getter
+    @Setter
+    static class Obj2{
+        @JsonProperty("log_entries")
+        private List<LogEntry> logEntries;
+        private List test;
+
+        public Obj2(List<LogEntry> logEntries) {
+            this.logEntries = logEntries;
+        }
+    }
+
+    @Getter
+    @Setter
+    static class LogEntry{
+        private String name;
+    }
+
     @Getter
     @Setter
     static class Obj{
