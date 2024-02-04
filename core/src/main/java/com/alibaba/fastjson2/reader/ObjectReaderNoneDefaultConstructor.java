@@ -279,7 +279,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 }
                 continue;
             }
-
+            if (jsonReader.nextIfNull()) {
+                continue;
+            }
             FieldReader fieldReader = getFieldReader(hashCode);
             FieldReader paramReader = paramFieldReaderMap.get(hashCode);
             if (paramReader != null
