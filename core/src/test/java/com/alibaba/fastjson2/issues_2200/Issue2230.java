@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -15,21 +16,21 @@ import java.util.List;
  */
 public class Issue2230 {
     @Test
-    void  test(){
+    void test() {
         JSONObject dfDtoJson = new JSONObject();
+        JSONObject value = new JSONObject()
+                .fluentPut("compTypeName", "test11")
+                .fluentPut("name", "test22");
         dfDtoJson.put(
                 "componentList",
                 new JSONArray().fluentAdd(
-                        new JSONObject().fluentPut(
-                                "props",
-                                new JSONObject()
-                                        .fluentPut("compTypeName", "test11")
-                                        .fluentPut("name", "test22")
-                        )
+                        new JSONObject()
+                                .fluentPut("props", value)
                 )
         );
         DynFormDto newDfDto = dfDtoJson.toJavaObject(DynFormDto.class);
-        System.out.println(newDfDto.getComponentList().get(0).getProps());
+        JSONObject props = newDfDto.getComponentList().get(0).getProps();
+        Assertions.assertEquals(value, props);
     }
     @Data
     static class DynFormDto {
@@ -37,15 +38,17 @@ public class Issue2230 {
         private String notes;
     }
     @Data
-    static class DynFormComponentDto implements Serializable {
+    static class DynFormComponentDto
+            implements Serializable {
         private JSONObject props; // 组件完整配置
         // 这个方法会导致props字段反序列化结果出现{"h":{***}}结构
         public DynFormComponentDto props(IFormComponent comp) {
-            this.props = (JSONObject) JSONObject.from(comp, JSONWriter.Feature.FieldBased);
+            this.props = JSONObject.from(comp, JSONWriter.Feature.FieldBased);
             return this;
         }
     }
-    interface  IFormComponent {
+
+    interface IFormComponent {
         String getCompTypeName();
         String getName();
     }

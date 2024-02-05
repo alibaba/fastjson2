@@ -253,16 +253,17 @@ public abstract class FieldReader<T>
         if (this.method != null && o.method != null) {
             Class<?> thisDeclaringClass = this.method.getDeclaringClass();
             Class<?> otherDeclaringClass = o.method.getDeclaringClass();
-
-            for (Class s = thisDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
-                if (s == otherDeclaringClass) {
-                    return -1;
+            //declaring class compare
+            if (thisDeclaringClass != otherDeclaringClass) {
+                for (Class s = thisDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
+                    if (s == otherDeclaringClass) {
+                        return -1;
+                    }
                 }
-            }
-
-            for (Class s = otherDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
-                if (s == thisDeclaringClass) {
-                    return 1;
+                for (Class s = otherDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
+                    if (s == thisDeclaringClass) {
+                        return 1;
+                    }
                 }
             }
 
@@ -286,16 +287,12 @@ public abstract class FieldReader<T>
                     if (otherParamType.isEnum() && (thisParamType == Integer.class || thisParamType == int.class)) {
                         return -1;
                     }
-
+                    //JSONField annotation priority over non JSONField annotation
                     JSONField thisAnnotation = BeanUtils.findAnnotation(this.method, JSONField.class);
                     JSONField otherAnnotation = BeanUtils.findAnnotation(o.method, JSONField.class);
-
-                    if (thisAnnotation != null && otherAnnotation == null) {
-                        return -1;
-                    }
-
-                    if (thisAnnotation == null && otherAnnotation != null) {
-                        return 1;
+                    boolean thisAnnotatedWithJsonFiled = thisAnnotation != null;
+                    if (thisAnnotatedWithJsonFiled == (otherAnnotation == null)) {
+                        return thisAnnotatedWithJsonFiled ? -1 : 1;
                     }
                 }
             }
@@ -303,13 +300,17 @@ public abstract class FieldReader<T>
             String thisMethodName = this.method.getName();
             String otherMethodName = o.method.getName();
             if (!thisMethodName.equals(otherMethodName)) {
+                //setter priority over non setter
+                boolean thisMethodNameSetStart = thisMethodName.startsWith("set");
+                if (thisMethodNameSetStart != otherMethodName.startsWith("set")) {
+                    return thisMethodNameSetStart ? -1 : 1;
+                }
+                //different field name priority over same field name
                 String thisName = BeanUtils.setterName(thisMethodName, null);
                 String otherName = BeanUtils.setterName(otherMethodName, null);
-                if (this.fieldName.equals(thisName) && !o.fieldName.equals(otherName)) {
-                    return 1;
-                }
-                if (o.fieldName.equals(otherName) && !this.fieldName.equals(thisName)) {
-                    return -1;
+                boolean thisFieldNameEquals = this.fieldName.equals(thisName);
+                if (thisFieldNameEquals != o.fieldName.equals(otherName)) {
+                    return thisFieldNameEquals ? 1 : -1;
                 }
             }
         }
