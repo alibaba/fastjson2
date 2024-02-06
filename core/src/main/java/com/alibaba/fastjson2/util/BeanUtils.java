@@ -1918,14 +1918,18 @@ public abstract class BeanUtils {
                 boolean changed = !equal(newOwnerType, ownerType);
 
                 Type[] args = original.getActualTypeArguments();
-                for (int t = 0, length = args.length; t < length; t++) {
-                    Type resolvedTypeArgument = resolve(context, contextRawType, args[t], visitedTypeVariables);
-                    if (!equal(resolvedTypeArgument, args[t])) {
+                for (int i = 0, length = args.length; i < length; i++) {
+                    Type arg = args[i];
+                    if (arg == String.class) {
+                        continue;
+                    }
+                    Type resolvedTypeArgument = resolve(context, contextRawType, arg, visitedTypeVariables);
+                    if (!equal(resolvedTypeArgument, arg)) {
                         if (!changed) {
                             args = args.clone();
                             changed = true;
                         }
-                        args[t] = resolvedTypeArgument;
+                        args[i] = resolvedTypeArgument;
                     }
                 }
 

@@ -365,9 +365,9 @@ class JSONReaderUTF16
         if (chars == null || chars.length < length) {
             chars = new char[Math.max(length, 8192)];
         }
-        str.getChars(offset, length, chars, 0);
+        str.getChars(offset, offset + length, chars, 0);
 
-        this.str = str;
+        this.str = offset == 0 ? str : null;
         this.chars = chars;
         this.offset = 0;
         this.length = length;
