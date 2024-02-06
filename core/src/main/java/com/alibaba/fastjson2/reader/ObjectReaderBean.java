@@ -126,6 +126,7 @@ public abstract class ObjectReaderBean<T>
         if ((jsonReader.features(features) & JSONReader.Feature.ErrorOnUnknownProperties.mask) != 0) {
             throw new JSONException("Unknown Property " + jsonReader.getFieldName());
         }
+
         jsonReader.skipValue();
     }
 
