@@ -66,7 +66,7 @@ public class ObjectReader12<T>
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, null, null, null, fieldReaders);
 
         this.fieldReader0 = fieldReaders[0];
         this.fieldReader1 = fieldReaders[1];

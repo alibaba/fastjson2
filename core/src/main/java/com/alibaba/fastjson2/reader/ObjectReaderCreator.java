@@ -320,7 +320,7 @@ public class ObjectReaderCreator {
         final FieldInfo fieldInfo = new FieldInfo();
         BeanUtils.setters(builderClass, false, method -> {
             fieldInfo.init();
-            provider.module.getFieldInfo(fieldInfo, objectClass, method);
+            provider.getFieldInfo(fieldInfo, objectClass, method);
 
             if (fieldInfo.ignore) {
                 return;
@@ -503,7 +503,7 @@ public class ObjectReaderCreator {
                 }
 
                 FieldInfo methodFieldInfo = new FieldInfo();
-                provider.module.getFieldInfo(methodFieldInfo, objectClass, method);
+                provider.getFieldInfo(methodFieldInfo, objectClass, method);
                 String methodFieldName = methodFieldInfo.fieldName;
                 if (methodFieldName == null) {
                     methodFieldName = BeanUtils.getterName(method, PropertyNamingStrategy.CamelCase.name());
@@ -678,64 +678,61 @@ public class ObjectReaderCreator {
             case 1:
                 return new ObjectReader1(
                         objectClass,
+                        null,
+                        null,
                         features,
                         defaultCreator,
                         buildFunction,
-                        fieldReaders[0]
+                        fieldReaders
                 );
             case 2:
                 return new ObjectReader2(
                         objectClass,
+                        null,
+                        null,
                         features,
                         defaultCreator,
                         buildFunction,
-                        fieldReaders[0],
-                        fieldReaders[1]);
+                        fieldReaders);
             case 3:
                 return new ObjectReader3(
                         objectClass,
-                        defaultCreator,
+                        null,
+                        null,
                         features,
+                        defaultCreator,
                         buildFunction,
-                        fieldReaders[0],
-                        fieldReaders[1],
-                        fieldReaders[2]
+                        fieldReaders
                 );
             case 4:
                 return new ObjectReader4(
                         objectClass,
+                        null,
+                        null,
                         features,
                         defaultCreator,
                         buildFunction,
-                        fieldReaders[0],
-                        fieldReaders[1],
-                        fieldReaders[2],
-                        fieldReaders[3]
+                        fieldReaders
                 );
             case 5:
                 return new ObjectReader5(
                         objectClass,
-                        defaultCreator,
+                        null,
+                        null,
                         features,
+                        defaultCreator,
                         buildFunction,
-                        fieldReaders[0],
-                        fieldReaders[1],
-                        fieldReaders[2],
-                        fieldReaders[3],
-                        fieldReaders[4]
+                        fieldReaders
                 );
             case 6:
                 return new ObjectReader6(
                         objectClass,
-                        defaultCreator,
+                        null,
+                        null,
                         features,
+                        defaultCreator,
                         buildFunction,
-                        fieldReaders[0],
-                        fieldReaders[1],
-                        fieldReaders[2],
-                        fieldReaders[3],
-                        fieldReaders[4],
-                        fieldReaders[5]
+                        fieldReaders
                 );
             default:
                 return new ObjectReaderAdapter(objectClass, typeKey, null, features, defaultCreator, buildFunction, fieldReaders);
@@ -1259,7 +1256,7 @@ public class ObjectReaderCreator {
             fieldInfo.features |= beanInfo.readerFeatures;
             fieldInfo.format = beanInfo.format;
 
-            provider.module.getFieldInfo(fieldInfo, objectClass, method);
+            provider.getFieldInfo(fieldInfo, objectClass, method);
 
             if (fieldInfo.ignore) {
                 return;
@@ -1448,7 +1445,7 @@ public class ObjectReaderCreator {
     ) {
         if (beanInfo == null) {
             beanInfo = new BeanInfo();
-            provider.module.getBeanInfo(beanInfo, objectClass);
+            provider.getBeanInfo(beanInfo, objectClass);
         }
 
         final String namingStrategy = beanInfo.namingStrategy;

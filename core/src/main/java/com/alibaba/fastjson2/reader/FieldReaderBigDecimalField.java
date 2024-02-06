@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 final class FieldReaderBigDecimalField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     FieldReaderBigDecimalField(
             String fieldName,
             Class fieldType,
@@ -18,7 +18,7 @@ final class FieldReaderBigDecimalField<T>
             BigDecimal defaultValue,
             Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, null, field);
     }
 
     @Override
@@ -30,6 +30,11 @@ final class FieldReaderBigDecimalField<T>
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readBigDecimal();
     }
 
     @Override

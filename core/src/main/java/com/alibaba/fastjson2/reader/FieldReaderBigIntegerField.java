@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.math.BigInteger;
 
 final class FieldReaderBigIntegerField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     FieldReaderBigIntegerField(
             String fieldName,
             Class fieldType,
@@ -18,7 +18,7 @@ final class FieldReaderBigIntegerField<T>
             BigInteger defaultValue,
             Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, null, field);
     }
 
     @Override
@@ -30,6 +30,11 @@ final class FieldReaderBigIntegerField<T>
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readBigInteger();
     }
 
     @Override

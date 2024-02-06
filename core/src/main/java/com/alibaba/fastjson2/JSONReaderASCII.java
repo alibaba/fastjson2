@@ -1110,12 +1110,11 @@ final class JSONReaderASCII
             int length = nameEnd - nameBegin;
             switch (length) {
                 case 1:
-                    return TypeUtils.toString(bytes[nameBegin]);
+                    nameValue0 = bytes[nameBegin] & 0xFF;
+                    break;
                 case 2:
-                    return TypeUtils.toString(
-                            bytes[nameBegin],
-                            bytes[nameBegin + 1]
-                    );
+                    nameValue0 = ((bytes[nameBegin + 1] & 0xFF) << 8) + (bytes[nameBegin] & 0xFF);
+                    break;
                 case 3:
                     nameValue0
                             = (bytes[nameBegin + 2] << 16)

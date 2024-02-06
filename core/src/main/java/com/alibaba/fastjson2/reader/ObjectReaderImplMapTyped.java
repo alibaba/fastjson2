@@ -13,8 +13,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_ARRAY_1x;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 class ObjectReaderImplMapTyped
         implements ObjectReader {
@@ -90,7 +88,7 @@ class ObjectReaderImplMapTyped
                 Class<?> valueClass = value.getClass();
                 if (valueType == Object.class) {
                     // do nothing
-                } else if (valueClass == JSONObject.class || valueClass == CLASS_JSON_OBJECT_1x) {
+                } else if (valueClass == JSONObject.class || valueClass == JSONFactory.getClassJSONObject1x()) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
@@ -99,7 +97,7 @@ class ObjectReaderImplMapTyped
                     } catch (Exception ignored) {
                         // ignored
                     }
-                } else if ((valueClass == JSONArray.class || valueClass == CLASS_JSON_ARRAY_1x)
+                } else if ((valueClass == JSONArray.class || valueClass == JSONFactory.getClassJSONArray1x())
                         && this.valueClass == List.class
                 ) {
                     if (valueObjectReader == null) {

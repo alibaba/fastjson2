@@ -22,16 +22,6 @@ public class ObjectReader1<T>
 
     public ObjectReader1(
             Class objectClass,
-            long features,
-            Supplier<T> creator,
-            Function buildFunction,
-            FieldReader fieldReader
-    ) {
-        this(objectClass, null, null, features, creator, buildFunction, fieldReader);
-    }
-
-    public ObjectReader1(
-            Class objectClass,
             String typeKey,
             String typeName,
             long features,
@@ -39,7 +29,7 @@ public class ObjectReader1<T>
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, null, null, null, fieldReaders);
 
         this.fieldReader0 = fieldReaders[0];
         this.hashCode0 = fieldReader0.fieldNameHash;

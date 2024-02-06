@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 
 final class FieldReaderInt64Field<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     FieldReaderInt64Field(
             String fieldName,
             Class fieldType,
@@ -17,7 +17,7 @@ final class FieldReaderInt64Field<T>
             Long defaultValue,
             Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, null, field);
     }
 
     @Override

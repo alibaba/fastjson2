@@ -31,7 +31,7 @@ public final class ObjectReaderInterface<T>
             return null;
         }
 
-        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
+        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.getTypeNameHash(), this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }

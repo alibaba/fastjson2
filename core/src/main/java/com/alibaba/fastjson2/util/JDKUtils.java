@@ -17,28 +17,21 @@ public class JDKUtils {
     static {
         Unsafe unsafe = null;
         try {
-            unsafe = Unsafe.getUnsafe();
+            Field theUnsafeField = null;
+            for (Field field : Unsafe.class.getDeclaredFields()) {
+                String fieldName = field.getName();
+                if (fieldName.equals("theUnsafe") || fieldName.equals("THE_ONE")) {
+                    theUnsafeField = field;
+                    break;
+                }
+            }
+
+            if (theUnsafeField != null) {
+                theUnsafeField.setAccessible(true);
+                unsafe = (Unsafe) theUnsafeField.get(null);
+            }
         } catch (Throwable ignored) {
             // ignored
-        }
-        if (unsafe == null) {
-            try {
-                Field theUnsafeField = null;
-                for (Field field : Unsafe.class.getDeclaredFields()) {
-                    String fieldName = field.getName();
-                    if (fieldName.equals("theUnsafe") || fieldName.equals("THE_ONE")) {
-                        theUnsafeField = field;
-                        break;
-                    }
-                }
-
-                if (theUnsafeField != null) {
-                    theUnsafeField.setAccessible(true);
-                    unsafe = (Unsafe) theUnsafeField.get(null);
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
         }
         UNSAFE = unsafe;
 

@@ -173,7 +173,7 @@ public class ObjectWriterCreator {
         }
 
         if (writeUsingWriter == null && fieldInfo.fieldClassMixIn) {
-            writeUsingWriter = ObjectWriterModule.VoidObjectWriter.INSTANCE;
+            writeUsingWriter = ObjectWriterProvider.VoidObjectWriter.INSTANCE;
         }
 
         if (writeUsingWriter == null) {
@@ -347,7 +347,7 @@ public class ObjectWriterCreator {
                     }
 
                     if (writeUsingWriter == null && fieldInfo.fieldClassMixIn) {
-                        writeUsingWriter = ObjectWriterModule.VoidObjectWriter.INSTANCE;
+                        writeUsingWriter = ObjectWriterProvider.VoidObjectWriter.INSTANCE;
                     }
 
                     FieldWriter fieldWriter = createFieldWriter(
@@ -589,7 +589,7 @@ public class ObjectWriterCreator {
 
             FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
             objImp.initValueClass = fieldClass;
-            if (initObjectWriter != ObjectWriterModule.VoidObjectWriter.INSTANCE) {
+            if (initObjectWriter != ObjectWriterProvider.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
             }
             return objImp;
@@ -742,7 +742,7 @@ public class ObjectWriterCreator {
         if (initObjectWriter != null) {
             FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, method);
             objMethod.initValueClass = fieldClass;
-            if (initObjectWriter != ObjectWriterModule.VoidObjectWriter.INSTANCE) {
+            if (initObjectWriter != ObjectWriterProvider.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
             }
             return objMethod;

@@ -34,30 +34,6 @@ public class ObjectReader4<T>
     protected ObjectReader objectReader2;
     protected ObjectReader objectReader3;
 
-    ObjectReader4(
-            Class objectClass,
-            long features,
-            Supplier<T> creator,
-            Function buildFunction,
-            FieldReader fieldReader0,
-            FieldReader fieldReader1,
-            FieldReader fieldReader2,
-            FieldReader fieldReader3
-    ) {
-        this(
-                objectClass,
-                null,
-                null,
-                features,
-                creator,
-                buildFunction,
-                fieldReader0,
-                fieldReader1,
-                fieldReader2,
-                fieldReader3
-        );
-    }
-
     public ObjectReader4(
             Class objectClass,
             String typeKey,
@@ -67,7 +43,7 @@ public class ObjectReader4<T>
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, null, null, null, fieldReaders);
         this.fieldReader0 = fieldReaders[0];
         this.fieldReader1 = fieldReaders[1];
         this.fieldReader2 = fieldReaders[2];
@@ -130,7 +106,7 @@ public class ObjectReader4<T>
             return (T) object;
         }
 
-        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
+        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.getTypeNameHash(), this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }

@@ -1959,12 +1959,10 @@ class JSONReaderUTF8
                 long nameValue0 = -1, nameValue1 = -1;
                 switch (length) {
                     case 1:
-                        return TypeUtils.toString((char) (bytes[nameBegin] & 0xff));
+                        nameValue0 = bytes[nameBegin];
                     case 2:
-                        return TypeUtils.toString(
-                                (char) (bytes[nameBegin] & 0xff),
-                                (char) (bytes[nameBegin + 1] & 0xff)
-                        );
+                        nameValue0 = (bytes[nameBegin + 1] << 8) + (bytes[nameBegin]);
+                        break;
                     case 3:
                         nameValue0
                                 = (bytes[nameBegin + 2] << 16)
@@ -3783,10 +3781,17 @@ class JSONReaderUTF8
                     }
 
                     if (i != 0 && !comma) {
-                        throw new JSONException("offset " + this.offset);
+                        throw error();
                     }
                     comma = false;
-                    skipValue();
+                    if (ch == '"') {
+                        skipString();
+                        if (!comma && ch != ']') {
+                            throw error();
+                        }
+                    } else {
+                        skipValue();
+                    }
                 }
                 break;
             }
@@ -3798,7 +3803,14 @@ class JSONReaderUTF8
                         break;
                     }
                     skipName();
-                    skipValue();
+                    if (ch == '"') {
+                        skipString();
+                        if (!comma && ch != '}') {
+                            throw error();
+                        }
+                    } else {
+                        skipValue();
+                    }
                 }
                 break;
             }
@@ -4509,32 +4521,21 @@ class JSONReaderUTF8
                     CHARS_UPDATER.lazySet(cacheItem, charBuf);
                 }
             } else if (ascii) {
-                int strlen = off - start;
-                if (strlen == 1) {
-                    str = TypeUtils.toString((char) (bytes[start] & 0xff));
-                } else if (strlen == 2) {
-                    str = TypeUtils.toString(
-                            (char) (bytes[start] & 0xff),
-                            (char) (bytes[start + 1] & 0xff)
-                    );
-                } else {
-                    int len = off - start;
-
-                    if (ANDROID_SDK_INT < 34) {
-                        char[] charBuf = this.charBuf;
-                        if (charBuf == null) {
-                            this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
-                        }
-                        if (charBuf == null || charBuf.length < len) {
-                            this.charBuf = charBuf = new char[len];
-                        }
-                        for (int i = 0; i < len; i++) {
-                            charBuf[i] = (char) bytes[start + i];
-                        }
-                        str = new String(charBuf, 0, len);
-                    } else {
-                        str = new String(bytes, start, len, StandardCharsets.ISO_8859_1);
+                int len = off - start;
+                if (ANDROID_SDK_INT < 34) {
+                    char[] charBuf = this.charBuf;
+                    if (charBuf == null) {
+                        this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
                     }
+                    if (charBuf == null || charBuf.length < len) {
+                        this.charBuf = charBuf = new char[len];
+                    }
+                    for (int i = 0; i < len; i++) {
+                        charBuf[i] = (char) bytes[start + i];
+                    }
+                    str = new String(charBuf, 0, len);
+                } else {
+                    str = new String(bytes, start, len, StandardCharsets.ISO_8859_1);
                 }
             } else {
                 str = new String(bytes, start, off - start, StandardCharsets.UTF_8);

@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import java.lang.reflect.Field;
 
 final class FieldReaderCharValueField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     FieldReaderCharValueField(
             String fieldName,
             int ordinal,
@@ -15,7 +15,7 @@ final class FieldReaderCharValueField<T>
             Character defaultValue,
             Field field
     ) {
-        super(fieldName, char.class, char.class, ordinal, features, format, defaultValue, field);
+        super(fieldName, char.class, char.class, ordinal, features, format, null, defaultValue, null, field);
     }
 
     @Override
@@ -30,8 +30,7 @@ final class FieldReaderCharValueField<T>
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        String str = jsonReader.readString();
-        return str == null || str.isEmpty() ? '\0' : str.charAt(0);
+        return jsonReader.readCharValue();
     }
 
     @Override
@@ -44,6 +43,10 @@ final class FieldReaderCharValueField<T>
         } else {
             throw new JSONException("cast to char error");
         }
-        accept(object, charValue);
+        try {
+            field.set(object, charValue);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error", e);
+        }
     }
 }

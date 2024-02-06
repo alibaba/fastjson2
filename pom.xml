@@ -61,7 +61,6 @@
         <module>codegen-test</module>
         -->
         <module>core</module>
-        <module>safemode-test</module>
     </modules>
 
     <organization>

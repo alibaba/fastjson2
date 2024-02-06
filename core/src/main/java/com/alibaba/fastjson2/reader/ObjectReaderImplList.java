@@ -10,8 +10,6 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
-
 public final class ObjectReaderImplList
         implements ObjectReader {
     static final Class CLASS_EMPTY_SET = Collections.emptySet().getClass();
@@ -24,7 +22,29 @@ public final class ObjectReaderImplList
     static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(Collections.emptyList()).getClass();
     static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(Collections.emptySet()).getClass();
 
-    public static ObjectReaderImplList INSTANCE = new ObjectReaderImplList(ArrayList.class, ArrayList.class, ArrayList.class, Object.class, null);
+    public static ObjectReaderImplList INSTANCE = new ObjectReaderImplList(
+            ArrayList.class,
+            ArrayList.class,
+            ArrayList.class,
+            65, // Fnv.hashCode64(TypeUtils.getTypeName(ArrayList.class)),
+            Object.class,
+            Object.class,
+            null,
+            "Object", // TypeUtils.getTypeName(Object.class)
+            127970252055119L // Fnv.hashCode64("Object")
+    );
+
+    public static ObjectReaderImplList JSON_ARRAY_READER = new ObjectReaderImplList(
+            JSONArray.class,
+            JSONArray.class,
+            JSONArray.class,
+            8893561198416334968L, // Fnv.hashCode64(TypeUtils.getTypeName(JSONArray.class)),
+            Object.class,
+            Object.class,
+            null,
+            "Object", // TypeUtils.getTypeName(Object.class)
+            127970252055119L // Fnv.hashCode64("Object")
+    );
 
     final Type listType;
     final Class listClass;
@@ -195,6 +215,28 @@ public final class ObjectReaderImplList
         this.itemClassNameHash = itemClassName != null ? Fnv.hashCode64(itemClassName) : 0;
     }
 
+    private ObjectReaderImplList(
+            Type listType,
+            Class listClass,
+            Class instanceType,
+            long instanceTypeHash,
+            Type itemType,
+            Class itemClass,
+            Function builder,
+            String itemClassName,
+            long itemClassNameHash
+    ) {
+        this.listType = listType;
+        this.listClass = listClass;
+        this.instanceType = instanceType;
+        this.instanceTypeHash = instanceTypeHash;
+        this.itemType = itemType;
+        this.itemClass = itemClass;
+        this.builder = builder;
+        this.itemClassName = itemClassName;
+        this.itemClassNameHash = itemClassNameHash;
+    }
+
     @Override
     public Class getObjectClass() {
         return listClass;
@@ -234,7 +276,7 @@ public final class ObjectReaderImplList
 
             Object value = item;
             Class<?> valueClass = value.getClass();
-            if ((valueClass == JSONObject.class || valueClass == CLASS_JSON_OBJECT_1x)
+            if ((valueClass == JSONObject.class || valueClass == JSONFactory.getClassJSONObject1x())
                     && this.itemClass != valueClass
             ) {
                 if (itemObjectReader == null) {

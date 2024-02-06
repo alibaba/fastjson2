@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.reader.ObjectReaderModule;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -294,7 +293,7 @@ public abstract class BeanUtils {
     public static void getFieldInfo(
             Class objectClass,
             FieldInfo fieldInfo,
-            ObjectReaderModule processor,
+            ObjectReaderProvider processor,
             String fieldName,
             String fieldName1,
             String fieldName2
@@ -1648,14 +1647,14 @@ public abstract class BeanUtils {
         while (raw != Object.class) {
             Type type = typeReference == null ? null : typeReference.getType();
             if (declaringClass == raw) {
-                return resolve(type, declaringClass, fieldType);
+                return resolve(type, declaringClass, fieldType, new HashMap<>());
             }
             Type superType = raw.getGenericSuperclass();
             // interface has no generic super class
             if (superType == null) {
                 break;
             }
-            typeReference = TypeReference.get(resolve(type, raw, superType));
+            typeReference = TypeReference.get(resolve(type, raw, superType, new HashMap<>()));
             raw = typeReference.getRawType();
         }
         return null;
@@ -1669,9 +1668,9 @@ public abstract class BeanUtils {
     ) {
         while (raw != Object.class) {
             if (declaringClass == raw) {
-                return resolve(type.getType(), declaringClass, fieldType);
+                return resolve(type.getType(), declaringClass, fieldType, new HashMap<>());
             }
-            type = TypeReference.get(resolve(type.getType(), raw, raw.getGenericSuperclass()));
+            type = TypeReference.get(resolve(type.getType(), raw, raw.getGenericSuperclass(), new HashMap<>()));
             raw = type.getRawType();
         }
         return null;
@@ -1883,10 +1882,6 @@ public abstract class BeanUtils {
         return toResolve;
     }
 
-    public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
-        return resolve(context, contextRawType, toResolve, new HashMap<TypeVariable<?>, Type>());
-    }
-
     private static Type resolve(Type context, Class<?> contextRawType, Type toResolve,
                                 Map<TypeVariable<?>, Type> visitedTypeVariables) {
         // this implementation is made a little more complicated in an attempt to avoid object-creation
@@ -1933,14 +1928,19 @@ public abstract class BeanUtils {
                 boolean changed = !equal(newOwnerType, ownerType);
 
                 Type[] args = original.getActualTypeArguments();
-                for (int t = 0, length = args.length; t < length; t++) {
-                    Type resolvedTypeArgument = resolve(context, contextRawType, args[t], visitedTypeVariables);
-                    if (!equal(resolvedTypeArgument, args[t])) {
+                for (int i = 0, length = args.length; i < length; i++) {
+                    Type arg = args[i];
+                    if (arg == String.class) {
+                        continue;
+                    }
+
+                    Type resolvedTypeArgument = resolve(context, contextRawType, arg, visitedTypeVariables);
+                    if (!equal(resolvedTypeArgument, arg)) {
                         if (!changed) {
                             args = args.clone();
                             changed = true;
                         }
-                        args[t] = resolvedTypeArgument;
+                        args[i] = resolvedTypeArgument;
                     }
                 }
 
@@ -2290,6 +2290,7 @@ public abstract class BeanUtils {
                 || memberClass.isPrimitive()
                 || memberClass == String.class
                 || memberClass == List.class
+                || memberClass == Map.class
                 || memberClass.isEnum()
         ) {
             return false;

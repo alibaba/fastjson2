@@ -2472,20 +2472,7 @@ final class JSONReaderJSONB
         strBegin = offset;
         Charset charset;
         String str = null;
-        if (strtype == BC_STR_ASCII_FIX_MIN + 1) {
-            str = TypeUtils.toString((char) (bytes[offset] & 0xff));
-            strlen = 1;
-            offset++;
-            charset = StandardCharsets.ISO_8859_1;
-        } else if (strtype == BC_STR_ASCII_FIX_MIN + 2) {
-            str = TypeUtils.toString(
-                    (char) (bytes[offset] & 0xff),
-                    (char) (bytes[offset + 1] & 0xff)
-            );
-            strlen = 2;
-            offset += 2;
-            charset = StandardCharsets.ISO_8859_1;
-        } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
+        if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             long nameValue0 = -1, nameValue1 = -1;
 
             if (strtype == BC_STR_ASCII) {
@@ -2496,6 +2483,14 @@ final class JSONReaderJSONB
 
                 if (JDKUtils.BIG_ENDIAN) {
                     switch (strlen) {
+                        case 1:
+                            nameValue0 = (bytes[offset] & 0xFFL);
+                            break;
+                        case 2:
+                            nameValue0
+                                    = ((bytes[offset + 1] & 0xFFL) << 8)
+                                    + (bytes[offset] & 0xFFL);
+                            break;
                         case 3:
                             nameValue0
                                     = (bytes[offset + 2] << 16)
@@ -3396,7 +3391,7 @@ final class JSONReaderJSONB
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = readFixedAsciiString(strlen);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).longValue();
@@ -3544,7 +3539,7 @@ final class JSONReaderJSONB
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = readFixedAsciiString(strlen);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
@@ -3605,21 +3600,6 @@ final class JSONReaderJSONB
             return null;
         }
         return value;
-    }
-
-    protected final String readFixedAsciiString(int strlen) {
-        String str;
-        if (strlen == 1) {
-            str = TypeUtils.toString((char) (bytes[offset] & 0xff));
-        } else if (strlen == 2) {
-            str = TypeUtils.toString(
-                    (char) (bytes[offset] & 0xff),
-                    (char) (bytes[offset + 1] & 0xff)
-            );
-        } else {
-            str = getLatin1String(offset, strlen);
-        }
-        return str;
     }
 
     @Override
@@ -3752,7 +3732,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = readFixedAsciiString(strlen);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
@@ -3891,7 +3871,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = readFixedAsciiString(strlen);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
@@ -4036,7 +4016,7 @@ final class JSONReaderJSONB
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = readFixedAsciiString(strlen);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
                     return toBigDecimal(str);
                 }
@@ -4198,7 +4178,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = readFixedAsciiString(strlen);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
                     return toBigDecimal(str);
                 }
@@ -4356,7 +4336,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = readFixedAsciiString(strlen);
+                    String str = getLatin1String(offset, strlen);
                     offset += strlen;
                     return new BigInteger(str);
                 }
