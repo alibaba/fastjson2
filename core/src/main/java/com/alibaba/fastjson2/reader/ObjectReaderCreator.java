@@ -1647,7 +1647,7 @@ public class ObjectReaderCreator {
             }
 
             Class mixIn = provider.getMixIn(objectClass);
-            BeanUtils.setters(objectClass, mixIn, method -> {
+            BeanUtils.setters(objectClass, beanInfo, mixIn, method -> {
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
                 fieldInfo.format = beanFormat;
