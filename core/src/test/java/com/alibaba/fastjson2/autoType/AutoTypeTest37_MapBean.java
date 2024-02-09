@@ -37,7 +37,7 @@ public class AutoTypeTest37_MapBean {
 
         JSONB.dump(bytes);
 
-        assertEquals(144, bytes.length);
+        assertEquals(186, bytes.length);
         // 142 200 202 216 141 151 144
 
         Bean bean2 = (Bean) JSONB.parseObject(
