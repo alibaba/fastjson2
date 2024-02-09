@@ -15,7 +15,9 @@ public class ListTest {
         assertEquals(expected, new String(JSON.toJSONBytes(bean, JSONWriter.Feature.WriteNulls)));
         assertEquals(expected, JSON.toJSONString(bean, JSONWriter.Feature.WriteNulls));
         byte[] jsonbBytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteNulls);
-        assertEquals("{}", JSONB.toJSONString(jsonbBytes, true));
+        assertEquals("{\n" +
+                "\t\"list\":null\n" +
+                "}", JSONB.toJSONString(jsonbBytes, true));
     }
 
     @Test
@@ -50,7 +52,9 @@ public class ListTest {
         assertEquals(expected, new String(JSON.toJSONBytes(bean, JSONWriter.Feature.WriteNulls)));
         assertEquals(expected, JSON.toJSONString(bean, JSONWriter.Feature.WriteNulls));
         byte[] jsonbBytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteNulls);
-        assertEquals("{}", JSONB.toJSONString(jsonbBytes, true));
+        assertEquals("{\n" +
+                "\t\"list\":null\n" +
+                "}", JSONB.toJSONString(jsonbBytes, true));
     }
 
     @Test
