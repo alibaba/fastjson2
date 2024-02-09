@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,18 @@ public class UnwrappedTest {
         bean.properties.put("attr1", "val1");
         String str = JSON.toJSONString(bean);
         assertEquals("{\"name\":\"My bean\",\"attr1\":\"val1\"}", str);
+
+        ExtendableBean bean1 = JSON.parseObject(str, ExtendableBean.class);
+        assertEquals(bean.properties, bean1.properties);
+
+        byte[] jsonb = JSONB.toBytes(bean);
+        assertEquals("{\n" +
+                "\t\"name\":\"My bean\",\n" +
+                "\t\"attr1\":\"val1\"\n" +
+                "}", JSONB.toJSONString(jsonb));
+
+        ExtendableBean bean2 = JSONB.parseObject(jsonb, ExtendableBean.class);
+        assertEquals(bean.properties, bean2.properties);
     }
 
     public static class ExtendableBean {
