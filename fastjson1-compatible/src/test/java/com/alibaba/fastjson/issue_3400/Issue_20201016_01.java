@@ -24,7 +24,7 @@ public class Issue_20201016_01 {
             return;
         }
 
-        assertEquals("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":null},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
+        assertEquals("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":null},\"owner\":{\"$ref\":\"$.creator\"},\"owner\":null}", s);
     }
 
     @Test
