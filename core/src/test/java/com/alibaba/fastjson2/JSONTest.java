@@ -1177,4 +1177,51 @@ public class JSONTest {
         assertFalse(JSON.isValid("\"", JSONReader.Feature.AllowUnQuotedFieldNames));
         assertFalse(JSON.isValid("'", JSONReader.Feature.AllowUnQuotedFieldNames));
     }
+
+    @Test
+    public void toBytes() {
+        JSONObject jsonObject = JSONObject.of();
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.config(JSONWriter.Feature.OptimizedForAscii);
+
+        {
+            byte[] bytes = JSON.toJSONBytes(jsonObject, StandardCharsets.ISO_8859_1, context);
+            assertEquals("{}", new String(bytes, StandardCharsets.ISO_8859_1));
+        }
+        {
+            byte[] bytes = JSON.toJSONBytes(jsonObject, StandardCharsets.ISO_8859_1, JSONWriter.Feature.OptimizedForAscii);
+            assertEquals("{}", new String(bytes, StandardCharsets.ISO_8859_1));
+        }
+    }
+
+    @Test
+    public void toBytes1() {
+        JSONArray array = JSONArray.of();
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.config(JSONWriter.Feature.OptimizedForAscii);
+
+        {
+            byte[] bytes = JSON.toJSONBytes(array, StandardCharsets.ISO_8859_1, context);
+            assertEquals("[]", new String(bytes, StandardCharsets.ISO_8859_1));
+        }
+        {
+            byte[] bytes = JSON.toJSONBytes(array, StandardCharsets.ISO_8859_1, JSONWriter.Feature.OptimizedForAscii);
+            assertEquals("[]", new String(bytes, StandardCharsets.ISO_8859_1));
+        }
+    }
+
+    @Test
+    public void toBytesNull() {
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.config(JSONWriter.Feature.OptimizedForAscii);
+
+        {
+            byte[] bytes = JSON.toJSONBytes(null, StandardCharsets.ISO_8859_1, context);
+            assertEquals("null", new String(bytes, StandardCharsets.ISO_8859_1));
+        }
+        {
+            byte[] bytes = JSON.toJSONBytes(null, StandardCharsets.ISO_8859_1, JSONWriter.Feature.OptimizedForAscii);
+            assertEquals("null", new String(bytes, StandardCharsets.ISO_8859_1));
+        }
+    }
 }
