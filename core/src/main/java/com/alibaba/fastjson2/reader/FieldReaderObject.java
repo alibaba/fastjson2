@@ -125,8 +125,10 @@ public class FieldReaderObject<T>
 
         Object value;
         try {
-            if (jsonReader.nextIfNull()) {
-                if (fieldClass == OptionalInt.class) {
+            if (jsonReader.nextIfNullOrEmptyString()) {
+                if (defaultValue != null) {
+                    value = defaultValue;
+                } else if (fieldClass == OptionalInt.class) {
                     value = OptionalInt.empty();
                 } else if (fieldClass == OptionalLong.class) {
                     value = OptionalLong.empty();
