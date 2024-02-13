@@ -2524,6 +2524,9 @@ public class ObjectReaderCreator {
             Field field,
             ObjectReader initReader
     ) {
+        if (defaultValue instanceof String && fieldClass.isEnum()) {
+            defaultValue = Enum.valueOf(fieldClass, (String) defaultValue);
+        }
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
             ObjectReaderProvider provider = JSONFactory
                     .getDefaultObjectReaderProvider();
