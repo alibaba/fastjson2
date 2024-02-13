@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,5 +68,14 @@ public class DateFormatTest {
         assertEquals("\"yyyy-MM-dd\"", json);
         SimpleDateFormat format1 = JSON.parseObject(json, SimpleDateFormat.class);
         assertEquals(format, format1);
+    }
+
+    @Test
+    public void testFormat2() {
+        LocalDateTime ldt = LocalDateTime.of(2012, 1, 2, 12, 13, 14);
+        assertEquals("\"2012-01-02\"", JSON.toJSONString(ldt, "yyyy-MM-dd"));
+        assertEquals("\"12-13-14\"", JSON.toJSONString(ldt, "HH-mm-ss"));
+        assertEquals("1325477594000", JSON.toJSONString(ldt, "millis"));
+        assertEquals("1325477594", JSON.toJSONString(ldt, "unixtime"));
     }
 }
