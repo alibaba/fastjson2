@@ -22,4 +22,46 @@ public class Issue2239 {
     public enum Type {
         NONE, ONE, TWO
     }
+
+    @Test
+    public void test1() {
+        assertEquals(Type1.NONE, JSON.parseObject("{}", Bean1.class).type);
+        assertEquals(Type1.NONE, JSON.parseObject("{\"type\":null}", Bean1.class).type);
+        assertEquals(Type1.NONE, JSON.parseObject("{\"type\":\"\"}", Bean1.class).type);
+    }
+
+    private static class Bean1 {
+        @JSONField(defaultValue = "NONE")
+        private Type1 type;
+
+        public Type1 getType() {
+            return type;
+        }
+
+        public void setType(Type1 type) {
+            this.type = type;
+        }
+    }
+
+    private enum Type1 {
+        NONE, ONE, TWO
+    }
+
+    @Test
+    public void test2() {
+        assertEquals(Type1.NONE, JSON.parseObject("{}", Bean2.class).type);
+        assertEquals(Type1.NONE, JSON.parseObject("{\"type\":null}", Bean2.class).type);
+        assertEquals(Type1.NONE, JSON.parseObject("{\"type\":\"\"}", Bean2.class).type);
+    }
+
+    private static class Bean2 {
+        private final Type1 type;
+
+        private Bean2(@JSONField(defaultValue = "NONE") Type1 type) {
+            if (type == null) {
+                throw new IllegalArgumentException();
+            }
+            this.type = type;
+        }
+    }
 }

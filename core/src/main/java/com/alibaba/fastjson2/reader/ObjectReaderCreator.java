@@ -231,6 +231,8 @@ public class ObjectReaderCreator {
                     i,
                     fieldInfo.features,
                     fieldInfo.format,
+                    fieldInfo.locale,
+                    fieldInfo.defaultValue,
                     paramType,
                     parameter.getType(),
                     paramName,
@@ -2028,6 +2030,46 @@ public class ObjectReaderCreator {
             JSONSchema schema,
             ObjectReader initReader
     ) {
+        return createFieldReaderParam(
+                objectClass,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                null,
+                fieldType,
+                fieldClass,
+                paramName,
+                declaringClass,
+                parameter,
+                schema,
+                initReader
+        );
+    }
+
+    public <T> FieldReader createFieldReaderParam(
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            Type fieldType,
+            Class fieldClass,
+            String paramName,
+            Class declaringClass,
+            Parameter parameter,
+            JSONSchema schema,
+            ObjectReader initReader
+    ) {
+        if (defaultValue instanceof String && fieldClass.isEnum()) {
+            defaultValue = Enum.valueOf(fieldClass, (String) defaultValue);
+        }
+
         if (initReader != null) {
             FieldReaderObjectParam paramReader = new FieldReaderObjectParam(
                     fieldName,
@@ -2038,6 +2080,8 @@ public class ObjectReaderCreator {
                     ordinal,
                     features,
                     format,
+                    locale,
+                    defaultValue,
                     schema
             );
             paramReader.initReader = initReader;
@@ -2045,19 +2089,19 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == byte.class || fieldType == Byte.class) {
-            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
         }
 
         if (fieldType == short.class || fieldType == Short.class) {
-            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
         }
 
         if (fieldType == int.class || fieldType == Integer.class) {
-            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
         }
 
         if (fieldType == long.class || fieldType == Long.class) {
-            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
         }
 
         Type fieldTypeResolved = null;
@@ -2075,7 +2119,18 @@ public class ObjectReaderCreator {
             fieldClassResolved = fieldClass;
         }
 
-        return new FieldReaderObjectParam(fieldName, fieldTypeResolved, fieldClassResolved, paramName, parameter, ordinal, features, format, schema);
+        return new FieldReaderObjectParam(
+                fieldName,
+                fieldTypeResolved,
+                fieldClassResolved,
+                paramName,
+                parameter,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema);
     }
 
     public <T> FieldReader createFieldReaderMethod(
@@ -2095,6 +2150,10 @@ public class ObjectReaderCreator {
     ) {
         if (method != null) {
             method.setAccessible(true);
+        }
+
+        if (defaultValue instanceof String && fieldClass.isEnum()) {
+            defaultValue = Enum.valueOf(fieldClass, (String) defaultValue);
         }
 
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
