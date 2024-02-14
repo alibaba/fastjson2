@@ -402,7 +402,7 @@
             <dependency>
                 <groupId>org.javamoney.moneta</groupId>
                 <artifactId>moneta-core</artifactId>
-                <version>1.4.2</version>
+                <version>1.4.4</version>
             </dependency>
 
             <dependency>
