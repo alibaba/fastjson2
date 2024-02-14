@@ -1,13 +1,11 @@
 package com.alibaba.fastjson2.jsonpath;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class JSONPahRandomIndex {
+public class RandomIndexTest {
     @Test
     public void testRandomIndex() {
         JSONArray array = JSONArray.of("1", "2", "3");
@@ -47,5 +45,25 @@ public class JSONPahRandomIndex {
             System.out.println(value);
             assertNotNull(value);
         }
+    }
+
+    @Test
+    public void set() {
+        JSONPath path = JSONPath.of("$.data[randomIndex()]");
+        JSONObject root = JSONObject.of("data", JSONArray.of(1));
+        path.setCallback(
+                root,
+                e -> ((int) e) + 1);
+        assertEquals(2, root.getJSONArray("data").get(0));
+    }
+
+    @Test
+    public void setError() {
+        JSONPath path = JSONPath.of("$.data[randomIndex()]");
+        JSONObject root = JSONObject.of("data", JSONObject.of());
+        assertThrows(JSONException.class,
+                () -> path.setCallback(
+                        root,
+                        e -> ((int) e) + 1));
     }
 }
