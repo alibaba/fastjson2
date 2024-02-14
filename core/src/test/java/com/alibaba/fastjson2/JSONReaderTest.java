@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.ValueConsumer;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -996,6 +998,9 @@ public class JSONReaderTest {
 
         Bean bean2 = JSON.parseObject(str.getBytes(), Bean.class);
         assertArrayEquals(bean.value, bean2.value);
+
+        Bean bean3 = JSON.parseObject(str.toCharArray(), Bean.class);
+        assertArrayEquals(bean.value, bean3.value);
     }
 
     public static class Bean {
@@ -1006,11 +1011,20 @@ public class JSONReaderTest {
     @Test
     public void readLocalTime5() {
         String str = "\"12:34\"";
-        JSONReader jsonReader = JSONReader.of(str.getBytes());
-        LocalTime localTime = jsonReader.readLocalTime();
-        assertEquals(12, localTime.getHour());
-        assertEquals(34, localTime.getMinute());
-        assertEquals(0, localTime.getSecond());
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes());
+            LocalTime localTime = jsonReader.readLocalTime();
+            assertEquals(12, localTime.getHour());
+            assertEquals(34, localTime.getMinute());
+            assertEquals(0, localTime.getSecond());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            LocalTime localTime = jsonReader.readLocalTime();
+            assertEquals(12, localTime.getHour());
+            assertEquals(34, localTime.getMinute());
+            assertEquals(0, localTime.getSecond());
+        }
     }
 
     @Test
@@ -1316,5 +1330,50 @@ public class JSONReaderTest {
             reader.next();
             assertEquals(ch, reader.current());
         }
+    }
+
+    @Test
+    public void readNumber() {
+        String str = "123";
+        JSONReader jsonReader = JSONReader.of(str.toCharArray());
+        final AtomicReference ref = new AtomicReference();
+        jsonReader.readNumber(
+                new ValueConsumer() {
+                    @Override
+                    public void accept(Number val) {
+                        ref.set(val);
+                    }
+                }, false);
+        assertEquals(123, ref.get());
+    }
+
+    @Test
+    public void readString() {
+        String str = "\"123\"";
+        JSONReader jsonReader = JSONReader.of(str.toCharArray());
+        final AtomicReference ref = new AtomicReference();
+        jsonReader.readString(
+                new ValueConsumer() {
+                    @Override
+                    public void accept(String val) {
+                        ref.set(val);
+                    }
+                }, true);
+        assertEquals("\"123\"", ref.get());
+    }
+
+    @Test
+    public void readString1() {
+        String str = "123";
+        JSONReader jsonReader = JSONReader.of(str.toCharArray());
+        final AtomicReference ref = new AtomicReference();
+        jsonReader.readString(
+                new ValueConsumer() {
+                    @Override
+                    public void accept(String val) {
+                        ref.set(val);
+                    }
+                }, false);
+        assertEquals("123", ref.get());
     }
 }

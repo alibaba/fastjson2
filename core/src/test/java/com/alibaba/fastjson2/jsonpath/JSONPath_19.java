@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import org.apache.commons.io.IOUtils;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JSONPath_19 {
     private static String str;
@@ -35,6 +37,14 @@ public class JSONPath_19 {
                                 JSONReader.of(str)
                         )
                 )
+        );
+    }
+
+    @Test
+    public void error() {
+        assertThrows(
+                JSONException.class,
+                () -> JSONPath.of("@").setCallback(new Object(), e -> e)
         );
     }
 }
