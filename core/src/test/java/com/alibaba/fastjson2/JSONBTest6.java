@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONBTest6 {
@@ -90,5 +91,83 @@ public class JSONBTest6 {
 
     public static class Bean1 {
         public int id;
+    }
+
+    @Test
+    public void test5() {
+        JSONWriterJSONB w = (JSONWriterJSONB) JSONWriter.ofJSONB();
+        w.writeRaw(BC_DECIMAL);
+        w.writeInt32(1);
+        w.writeRaw(BC_BIGINT_LONG);
+        w.writeInt64(1234);
+
+        byte[] bytes = w.getBytes();
+
+        assertEquals("123.4", JSONB.toJSONString(bytes));
+    }
+
+    @Test
+    public void bigint() {
+        int[] values = new int[] {1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890};
+        for (int value : values) {
+            JSONWriterJSONB w = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            w.writeRaw(BC_BIGINT_LONG);
+            w.writeInt32(value);
+
+            assertEquals(JSON.toJSONString(value), JSONB.toJSONString(w.getBytes()));
+        }
+    }
+
+    @Test
+    public void bigint1() {
+        byte[] values = new byte[] {1, 12, 123};
+        for (byte value : values) {
+            JSONWriterJSONB w = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            w.writeRaw(BC_BIGINT_LONG);
+            w.writeInt8(value);
+
+            assertEquals(JSON.toJSONString(value), JSONB.toJSONString(w.getBytes()));
+        }
+    }
+
+    @Test
+    public void bigint2() {
+        short[] values = new short[] {1, 12, 123, 1234, 12345};
+        for (short value : values) {
+            JSONWriterJSONB w = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            w.writeRaw(BC_BIGINT_LONG);
+            w.writeInt16(value);
+
+            assertEquals(JSON.toJSONString(value), JSONB.toJSONString(w.getBytes()));
+        }
+    }
+
+    @Test
+    public void length() {
+        int[] values = new int[] {1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890};
+        for (int value : values) {
+            JSONWriterJSONB w = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            w.writeInt32(value);
+            w.writeInt32(value);
+
+            JSONBDump dump = new JSONBDump(w.getBytes(), true);
+
+            assertEquals(
+                    value,
+                    dump.readLength());
+        }
+    }
+
+    @Test
+    public void lengthError() {
+        JSONWriterJSONB w = (JSONWriterJSONB) JSONWriter.ofJSONB();
+        w.writeInt32(1);
+        w.writeRaw(BC_NULL);
+
+        JSONBDump dump = new JSONBDump(w.getBytes(), true);
+
+        assertThrows(
+                JSONException.class,
+                () -> dump.readLength());
     }
 }
