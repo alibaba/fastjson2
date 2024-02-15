@@ -757,6 +757,34 @@ public abstract class JSON
         }
     }
 
+    public static <T> T parseObject(byte[] jsonBytes, Class<T> type, Feature... features) {
+        if (jsonBytes == null) {
+            return null;
+        }
+
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
+        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
     public static <T> T parseObject(byte[] jsonBytes, Type type, Feature... features) {
         if (jsonBytes == null) {
             return null;
