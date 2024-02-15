@@ -397,4 +397,36 @@ public class JSONValidatorTest {
     public void test() {
         assertTrue(JSONValidator.from(JSONReader.of("123")).validate());
     }
+
+    @Test
+    public void test1() {
+        String str = "{\"k\":\"\\x01\"}";
+        assertTrue(JSON.isValid(str.getBytes(StandardCharsets.UTF_8)));
+        assertTrue(JSON.isValid(str.toCharArray()));
+        assertTrue(JSON.isValid(str));
+    }
+
+    @Test
+    public void validFalse() {
+        String str = "{\"k\":\"\\x0\"}";
+        assertFalse(JSON.isValid(str.getBytes(StandardCharsets.UTF_8)));
+        assertFalse(JSON.isValid(str.toCharArray()));
+        assertFalse(JSON.isValid(str));
+    }
+
+    @Test
+    public void validFalse1() {
+        String str = "{\"k\":\"\\q01\"}";
+        assertFalse(JSON.isValid(str.getBytes(StandardCharsets.UTF_8)));
+        assertFalse(JSON.isValid(str.toCharArray()));
+        assertFalse(JSON.isValid(str));
+    }
+
+    @Test
+    public void validFalse2() {
+        String str = "{\"k\":\"\\x01\"";
+        assertFalse(JSON.isValid(str.getBytes(StandardCharsets.UTF_8)));
+        assertFalse(JSON.isValid(str.toCharArray()));
+        assertFalse(JSON.isValid(str));
+    }
 }

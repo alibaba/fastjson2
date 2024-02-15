@@ -515,18 +515,12 @@ class JSONReaderASCII
                     c = bytes[offset + 1];
                     switch (c) {
                         case 'u': {
-                            byte c1 = bytes[offset + 2];
-                            byte c2 = bytes[offset + 3];
-                            byte c3 = bytes[offset + 4];
-                            byte c4 = bytes[offset + 5];
-                            c = char4(c1, c2, c3, c4);
+                            c = char4(bytes[offset + 2], bytes[offset + 3], bytes[offset + 4], bytes[offset + 5]);
                             offset += 5;
                             break;
                         }
                         case 'x': {
-                            byte c1 = bytes[offset + 2];
-                            byte c2 = bytes[offset + 3];
-                            c = char2(c1, c2);
+                            c = char2(bytes[offset + 2], bytes[offset + 3]);
                             offset += 3;
                             break;
                         }
@@ -1087,29 +1081,17 @@ class JSONReaderASCII
             return null;
         }
 
+        final byte[] bytes = this.bytes;
         final char quote = ch;
-
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
+        final int nameBegin = this.nameBegin;
         for (int i = 0; offset < end; ++i) {
             int c = bytes[offset];
             if (c == '\\') {
                 nameEscape = true;
-                c = bytes[++offset];
-                switch (c) {
-                    case 'u': {
-                        offset += 4;
-                        break;
-                    }
-                    case 'x': {
-                        offset += 2;
-                        break;
-                    }
-                    default:
-                        // skip
-                        break;
-                }
-                offset++;
+                c = bytes[offset + 1];
+                offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
                 continue;
             }
 
@@ -1499,11 +1481,12 @@ class JSONReaderASCII
     @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
+            final byte[] bytes = this.bytes;
             final byte quote = (byte) ch;
             final byte slash = (byte) '\\';
 
             int offset = this.offset;
-            int start = offset;
+            final int start = offset;
             int valueLength;
             boolean valueEscape = false;
 
@@ -1554,21 +1537,8 @@ class JSONReaderASCII
                         byte c = bytes[offset];
                         if (c == slash) {
                             valueEscape = true;
-                            c = bytes[++offset];
-                            switch (c) {
-                                case 'u': {
-                                    offset += 4;
-                                    break;
-                                }
-                                case 'x': {
-                                    offset += 2;
-                                    break;
-                                }
-                                default:
-                                    // skip
-                                    break;
-                            }
-                            offset++;
+                            c = bytes[offset + 1];
+                            offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
                             continue;
                         }
 
@@ -1583,7 +1553,7 @@ class JSONReaderASCII
 
             String str;
             if (valueEscape) {
-                char[] chars = new char[valueLength];
+                char[] buf = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
                     char c = (char) (bytes[offset] & 0xff);
@@ -1592,15 +1562,15 @@ class JSONReaderASCII
                         switch (c) {
                             case 'u': {
                                 c = char4(
-                                        (char) this.bytes[offset + 1],
-                                        (char) this.bytes[offset + 2],
-                                        (char) this.bytes[offset + 3],
-                                        (char) this.bytes[offset + 4]);
+                                        (char) bytes[offset + 1],
+                                        (char) bytes[offset + 2],
+                                        (char) bytes[offset + 3],
+                                        (char) bytes[offset + 4]);
                                 offset += 4;
                                 break;
                             }
                             case 'x': {
-                                c = char2((char) this.bytes[offset + 1], (char) this.bytes[offset + 2]);
+                                c = char2((char) bytes[offset + 1], (char) bytes[offset + 2]);
                                 offset += 2;
                                 break;
                             }
@@ -1629,21 +1599,20 @@ class JSONReaderASCII
                     } else if (c == quote) {
                         break;
                     }
-                    chars[i] = c;
+                    buf[i] = c;
                     offset++;
                 }
 
-                str = new String(chars);
+                str = new String(buf);
             } else {
                 if (this.str != null) {
-                    str = this.str.substring(this.offset, offset);
+                    str = this.str.substring(start, offset);
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+                    str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1);
                 } else if (ANDROID) {
-                    str = getLatin1String(this.offset, offset - this.offset);
+                    str = getLatin1String(start, offset - start);
                 } else {
-                    str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.ISO_8859_1);
+                    str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
                 }
             }
 
