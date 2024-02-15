@@ -120,8 +120,8 @@ public class FieldReaderObject<T>
 
         try {
             Object value;
-            if (jsonReader.nextIfNull()) {
-                value = null;
+            if (jsonReader.nextIfNullOrEmptyString()) {
+                value = defaultValue;
             } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);

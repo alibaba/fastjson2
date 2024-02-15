@@ -145,6 +145,8 @@ public class ObjectReaderCreator {
                     i,
                     fieldInfo.features,
                     fieldInfo.format,
+                    fieldInfo.locale,
+                    fieldInfo.defaultValue,
                     paramType,
                     parameters[i],
                     paramName,
@@ -1469,7 +1471,7 @@ public class ObjectReaderCreator {
 
             Class mixIn = provider.mixInCache.get(objectClass);
             final Consumer<Method> consumer = new CreateFieldReaderConsumer(objectClass, objectType, namingStrategy, orders, beanInfo, fieldInfo, fieldReaders, provider);
-            BeanUtils.setters(objectClass, mixIn, consumer);
+            BeanUtils.setters(objectClass, beanInfo, mixIn, consumer);
 
             if (objectClass.isInterface()) {
                 BeanUtils.getters(objectClass, consumer);
@@ -1598,6 +1600,8 @@ public class ObjectReaderCreator {
                 ordinal,
                 features,
                 format,
+                null,
+                null,
                 fieldType,
                 fieldClass,
                 paramName,
@@ -1619,6 +1623,38 @@ public class ObjectReaderCreator {
             Class declaringClass,
             ObjectReader initReader
     ) {
+        return createFieldReaderParam(
+                objectClass,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                null,
+                fieldType,
+                fieldClass,
+                paramName,
+                declaringClass,
+                initReader
+        );
+    }
+
+    public <T> FieldReader createFieldReaderParam(
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            Type fieldType,
+            Class fieldClass,
+            String paramName,
+            Class declaringClass,
+            ObjectReader initReader
+    ) {
         if (initReader != null) {
             FieldReaderObjectParam paramReader = new FieldReaderObjectParam(
                     fieldName,
@@ -1627,26 +1663,28 @@ public class ObjectReaderCreator {
                     paramName,
                     ordinal,
                     features,
-                    format
+                    format,
+                    locale,
+                    defaultValue
             );
             paramReader.initReader = initReader;
             return paramReader;
         }
 
         if (fieldType == byte.class || fieldType == Byte.class) {
-            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, ordinal, features, format);
+            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, ordinal, features, format, locale, defaultValue);
         }
 
         if (fieldType == short.class || fieldType == Short.class) {
-            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, ordinal, features, format);
+            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, ordinal, features, format, locale, defaultValue);
         }
 
         if (fieldType == int.class || fieldType == Integer.class) {
-            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, ordinal, features, format);
+            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, ordinal, features, format, locale, defaultValue);
         }
 
         if (fieldType == long.class || fieldType == Long.class) {
-            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, ordinal, features, format);
+            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, ordinal, features, format, locale, defaultValue);
         }
 
         Type fieldTypeResolved = null;
@@ -1664,7 +1702,7 @@ public class ObjectReaderCreator {
             fieldClassResolved = fieldClass;
         }
 
-        return new FieldReaderObjectParam(fieldName, fieldTypeResolved, fieldClassResolved, paramName, ordinal, features, format);
+        return new FieldReaderObjectParam(fieldName, fieldTypeResolved, fieldClassResolved, paramName, ordinal, features, format, locale, defaultValue);
     }
 
     public <T> FieldReader createFieldReaderMethod(
@@ -1683,6 +1721,10 @@ public class ObjectReaderCreator {
     ) {
         if (method != null) {
             method.setAccessible(true);
+        }
+
+        if (defaultValue instanceof String && fieldClass.isEnum()) {
+            defaultValue = Enum.valueOf(fieldClass, (String) defaultValue);
         }
 
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
@@ -2014,6 +2056,10 @@ public class ObjectReaderCreator {
             Field field,
             ObjectReader initReader
     ) {
+        if (defaultValue instanceof String && fieldClass.isEnum()) {
+            defaultValue = Enum.valueOf(fieldClass, (String) defaultValue);
+        }
+
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
             ObjectReaderProvider provider = JSONFactory
                     .getDefaultObjectReaderProvider();

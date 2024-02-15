@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 class FieldReaderObjectParam<T>
         extends FieldReaderObject<T> {
@@ -18,9 +19,11 @@ class FieldReaderObjectParam<T>
             String paramName,
             int ordinal,
             long features,
-            String format
+            String format,
+            Locale locale,
+            Object defaultValue
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, null, null, null);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, null, null, null);
         this.paramName = paramName;
         this.paramNameHash = Fnv.hashCode64(paramName);
     }

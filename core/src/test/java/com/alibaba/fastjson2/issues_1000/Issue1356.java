@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue1356 {
     @Test
@@ -40,7 +39,7 @@ public class Issue1356 {
     public void test1() {
         String str = "{\"map\":\"\"}";
         Bean1 bean = JSON.parseObject(str, Bean1.class);
-        assertTrue(bean.map.isEmpty());
+        assertNull(bean.map);
     }
 
     public static class Bean1 {

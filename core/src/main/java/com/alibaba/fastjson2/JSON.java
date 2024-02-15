@@ -3239,6 +3239,76 @@ public interface JSON {
      * Serializes the specified object to the json byte array
      *
      * @param object the specified object will be serialized
+     * @param charset the specified charset of the bytes
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
+     * @since 2.0.47
+     */
+    static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Feature... features) {
+        final ObjectWriterProvider provider = defaultObjectWriterProvider;
+        final JSONWriter.Context context = new JSONWriter.Context(provider, features);
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                Class<?> valueClass = object.getClass();
+                if (valueClass == JSONObject.class && writer.context.features == 0) {
+                    writer.write((JSONObject) object);
+                } else {
+                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
+                            valueClass,
+                            valueClass,
+                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                    );
+                    objectWriter.write(writer, object, null, null, 0);
+                }
+            }
+            return writer.getBytes(charset);
+        }
+    }
+
+    /**
+     * Serializes the specified object to the json byte array
+     *
+     * @param object the specified object will be serialized
+     * @param charset the specified charset of the bytes
+     * @param context the specified custom context
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
+     * @since 2.0.47
+     */
+    static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Context context) {
+        final ObjectWriterProvider provider = context.provider;
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                Class<?> valueClass = object.getClass();
+                if (valueClass == JSONObject.class && writer.context.features == 0) {
+                    writer.write((JSONObject) object);
+                } else {
+                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
+                            valueClass,
+                            valueClass,
+                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                    );
+                    objectWriter.write(writer, object, null, null, 0);
+                }
+            }
+            return writer.getBytes(charset);
+        }
+    }
+
+    /**
+     * Serializes the specified object to the json byte array
+     *
+     * @param object the specified object will be serialized
      * @param format the specified date format
      * @param features the specified features is applied to serialization
      * @return {@code byte[]} that is not null
