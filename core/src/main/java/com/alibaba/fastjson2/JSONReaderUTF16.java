@@ -18,11 +18,11 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 
 final class JSONReaderUTF16
         extends JSONReader {
-    protected String str;
-    protected char[] chars;
-    protected int length;
-    protected int start;
-    protected int end;
+    protected final String str;
+    protected final char[] chars;
+    protected final int length;
+    protected final int start;
+    protected final int end;
 
     private int nameBegin;
     private int nameEnd;
