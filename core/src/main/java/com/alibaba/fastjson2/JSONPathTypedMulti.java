@@ -34,7 +34,7 @@ class JSONPathTypedMulti
 
     @Override
     public JSONPath getParent() {
-        return null;
+        return paths[0].getParent();
     }
 
     @Override

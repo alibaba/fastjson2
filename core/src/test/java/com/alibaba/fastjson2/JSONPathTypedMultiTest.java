@@ -36,6 +36,8 @@ public class JSONPathTypedMultiTest {
                 "[1001,\"DataWorks\",\"2017-07-14 00:00:00\"]",
                 jsonPath.extractScalar(JSONReader.of(object.toString()))
         );
+
+        assertSame(JSONPath.RootPath.INSTANCE, jsonPath.getParent());
     }
 
     @Test
