@@ -41,6 +41,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 null,
                 seeAlso,
                 seeAlsoNames,
+                null,
                 concat(paramFieldReaders, setterFieldReaders)
         );
 
@@ -296,6 +297,20 @@ public class ObjectReaderNoneDefaultConstructor<T>
             valueMap.put(hash, fieldValue);
         }
 
+        if (hasDefaultValue) {
+            if (valueMap == null) {
+                valueMap = new LinkedHashMap<>();
+            }
+            for (FieldReader fieldReader : fieldReaders) {
+                if (fieldReader.defaultValue != null) {
+                    Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
+                    if (fieldValue == null) {
+                        valueMap.put(fieldReader.fieldNameHash, fieldReader.defaultValue);
+                    }
+                }
+            }
+        }
+
         Map<Long, Object> argsMap = valueMap == null ? Collections.emptyMap() : valueMap;
         T object = creator.apply(argsMap);
 
@@ -312,23 +327,6 @@ public class ObjectReaderNoneDefaultConstructor<T>
         jsonReader.nextIfComma();
 
         return object;
-    }
-
-    public T readFromCSV(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (!serializable) {
-            jsonReader.errorOnNoneSerializable(objectClass);
-        }
-
-        LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
-        for (int i = 0; i < fieldReaders.length; i++) {
-            FieldReader fieldReader = fieldReaders[i];
-            Object fieldValue = fieldReader.readFieldValue(jsonReader);
-            valueMap.put(fieldReader.fieldNameHash, fieldValue);
-        }
-
-        jsonReader.nextIfMatch('\n');
-
-        return createInstanceNoneDefaultConstructor(valueMap);
     }
 
     public T createInstance(Collection collection) {

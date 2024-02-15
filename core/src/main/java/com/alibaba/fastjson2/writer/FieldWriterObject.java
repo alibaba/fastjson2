@@ -287,6 +287,7 @@ public class FieldWriterObject<T>
 
         if (unwrapped) {
             if (value instanceof Map) {
+                boolean jsonb = jsonWriter.jsonb;
                 for (Iterator<Map.Entry> it = ((Map) value).entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry entry = it.next();
                     String entryKey = entry.getKey().toString();
@@ -298,7 +299,9 @@ public class FieldWriterObject<T>
                     }
 
                     jsonWriter.writeName(entryKey);
-                    jsonWriter.writeColon();
+                    if (!jsonb) {
+                        jsonWriter.writeColon();
+                    }
                     if (entryValue == null) {
                         jsonWriter.writeNull();
                     } else {

@@ -531,10 +531,10 @@ public abstract class BeanUtils {
     }
 
     public static void setters(Class objectClass, Consumer<Method> methodConsumer) {
-        setters(objectClass, null, methodConsumer);
+        setters(objectClass, null, null, methodConsumer);
     }
 
-    public static void setters(Class objectClass, Class mixin, Consumer<Method> methodConsumer) {
+    public static void setters(Class objectClass, BeanInfo beanInfo, Class mixin, Consumer<Method> methodConsumer) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = objectClass.getMethods();
@@ -559,6 +559,11 @@ public abstract class BeanUtils {
                 case "hashCode":
                 case "toString":
                     methodSkip = true;
+                    break;
+                case "copy":
+                    if (beanInfo != null && beanInfo.kotlin) {
+                        methodSkip = true;
+                    }
                     break;
                 default:
                     break;
