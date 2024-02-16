@@ -83,6 +83,21 @@ final class JSONReaderASCIIVector
                             case '\\':
                             case '"':
                                 break;
+                            case 'b':
+                                c = '\b';
+                                break;
+                            case 't':
+                                c = '\t';
+                                break;
+                            case 'n':
+                                c = '\n';
+                                break;
+                            case 'f':
+                                c = '\f';
+                                break;
+                            case 'r':
+                                c = '\r';
+                                break;
                             default:
                                 c = char1(c);
                                 break;
@@ -118,40 +133,19 @@ final class JSONReaderASCIIVector
                 str = str.trim();
             }
 
-            clear:
-            if (++offset != end) {
-                byte e = bytes[offset++];
-                while (e <= ' ' && (1L << e & SPACE) != 0) {
-                    if (offset == end) {
-                        break clear;
-                    } else {
-                        e = bytes[offset++];
-                    }
-                }
-
-                if (comma = e == ',') {
-                    if (offset == end) {
-                        e = EOI;
-                    } else {
-                        e = bytes[offset++];
-                        while (e <= ' ' && (1L << e & SPACE) != 0) {
-                            if (offset == end) {
-                                e = EOI;
-                                break;
-                            } else {
-                                e = bytes[offset++];
-                            }
-                        }
-                    }
-                }
-
-                this.ch = (char) e;
-                this.offset = offset;
-                return str;
+            int ch = ++offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
-            this.ch = EOI;
-            this.comma = false;
+            if (comma = ch == ',') {
+                ch = offset == end ? EOI : bytes[offset++];
+                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            this.ch = (char) (ch & 0xFF);
             this.offset = offset;
             return str;
         }

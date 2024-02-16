@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.NonZeroNumberCastToBooleanAsTrue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,8 +40,17 @@ public class BooleanTest {
                 DateUtils.SHANGHAI_ZONE_ID,
                 NonZeroNumberCastToBooleanAsTrue
         );
-        Object[] values = (Object[]) path.extract("{\"id\":123,\"value\":3}");
-        assertEquals(Boolean.TRUE, values[1]);
+
+        String json = "{\"id\":123,\"value\":3}";
+        byte[] utf8 = json.getBytes(StandardCharsets.UTF_8);
+        {
+            Object[] values = (Object[]) path.extract(utf8);
+            assertEquals(Boolean.TRUE, values[1]);
+        }
+        {
+            Object[] values = (Object[]) path.extract(json);
+            assertEquals(Boolean.TRUE, values[1]);
+        }
     }
 
     @Test

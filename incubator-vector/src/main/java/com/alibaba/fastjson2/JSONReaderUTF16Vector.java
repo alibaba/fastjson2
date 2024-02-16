@@ -110,40 +110,19 @@ final class JSONReaderUTF16Vector
                 str = str.trim();
             }
 
-            clear:
-            if (++offset != end) {
-                char e = chars[offset++];
-                while (e <= ' ' && (1L << e & SPACE) != 0) {
-                    if (offset == end) {
-                        break clear;
-                    } else {
-                        e = chars[offset++];
-                    }
-                }
-
-                if (comma = e == ',') {
-                    if (offset == end) {
-                        e = EOI;
-                    } else {
-                        e = chars[offset++];
-                        while (e <= ' ' && (1L << e & SPACE) != 0) {
-                            if (offset == end) {
-                                e = EOI;
-                                break;
-                            } else {
-                                e = chars[offset++];
-                            }
-                        }
-                    }
-                }
-
-                this.ch = e;
-                this.offset = offset;
-                return str;
+            int ch = ++offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
             }
 
-            this.ch = EOI;
-            this.comma = false;
+            if (comma = ch == ',') {
+                ch = offset == end ? EOI : chars[offset++];
+                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                    ch = offset == end ? EOI : chars[offset++];
+                }
+            }
+
+            this.ch = (char) ch;
             this.offset = offset;
             return str;
         }
