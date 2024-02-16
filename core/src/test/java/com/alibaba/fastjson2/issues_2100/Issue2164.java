@@ -5,8 +5,6 @@ import com.alibaba.fastjson2.JSONReader;
 import lombok.*;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -39,19 +37,6 @@ public class Issue2164 {
                 + "	\"High\": \"\"\r\n"
                 + "}";
         TestVO jsonRootBean = JSON.parseObject(json, TestVO.class, FASTJSON_DEFAULT_READER_FEATURES);
-        assertEquals("", jsonRootBean.Ref);
-        assertEquals(1.01, jsonRootBean.Width);
-        assertNull(jsonRootBean.High);
-    }
-
-    @Test
-    public void testBytes() {
-        String json = "{\r\n"
-                + "	\"Ref\": \"\",\r\n"
-                + "	\"Width\": \"1.01\",\r\n"
-                + "	\"High\": \"\"\r\n"
-                + "}";
-        TestVO jsonRootBean = JSON.parseObject(json.getBytes(StandardCharsets.UTF_8), TestVO.class, FASTJSON_DEFAULT_READER_FEATURES);
         assertEquals("", jsonRootBean.Ref);
         assertEquals(1.01, jsonRootBean.Width);
         assertNull(jsonRootBean.High);

@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -39,9 +41,27 @@ public class Issue1488 {
         dog.dogName = "dog1001";
 
         String text = JSON.toJSONString(dog);
-        Dog dog1 = (Dog) JSON.parseObject(text, Animal.class);
-        assertNotNull(dog1);
-        assertEquals(1, dog1.aniType);
+        byte[] utf8 = text.getBytes(StandardCharsets.UTF_8);
+        {
+            Dog dog1 = (Dog) JSON.parseObject(text.toCharArray(), Animal.class);
+            assertNotNull(dog1);
+            assertEquals(1, dog1.aniType);
+        }
+        {
+            Dog dog1 = (Dog) JSON.parseObject(utf8, Animal.class);
+            assertNotNull(dog1);
+            assertEquals(1, dog1.aniType);
+        }
+        {
+            Dog dog1 = (Dog) JSON.parseObject(utf8, 0, utf8.length, StandardCharsets.ISO_8859_1, Animal.class);
+            assertNotNull(dog1);
+            assertEquals(1, dog1.aniType);
+        }
+        {
+            Dog dog1 = (Dog) JSON.parseObject(text, Animal.class);
+            assertNotNull(dog1);
+            assertEquals(1, dog1.aniType);
+        }
     }
 
     @Test
@@ -50,8 +70,26 @@ public class Issue1488 {
         cat.catName = "cat1001";
 
         String text = JSON.toJSONString(cat);
-        Cat cat1 = (Cat) JSON.parseObject(text, Animal.class);
-        assertNotNull(cat1);
-        assertEquals(2, cat1.aniType);
+        byte[] utf8 = text.getBytes(StandardCharsets.UTF_8);
+        {
+            Cat cat1 = (Cat) JSON.parseObject(text.toCharArray(), Animal.class);
+            assertNotNull(cat1);
+            assertEquals(2, cat1.aniType);
+        }
+        {
+            Cat cat1 = (Cat) JSON.parseObject(utf8, Animal.class);
+            assertNotNull(cat1);
+            assertEquals(2, cat1.aniType);
+        }
+        {
+            Cat cat1 = (Cat) JSON.parseObject(utf8, 0, utf8.length, StandardCharsets.ISO_8859_1, Animal.class);
+            assertNotNull(cat1);
+            assertEquals(2, cat1.aniType);
+        }
+        {
+            Cat cat1 = (Cat) JSON.parseObject(text, Animal.class);
+            assertNotNull(cat1);
+            assertEquals(2, cat1.aniType);
+        }
     }
 }
