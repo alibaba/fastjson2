@@ -811,4 +811,137 @@ public class JSONReaderTest2 {
             assertTrue(jsonReader.isEnd());
         }
     }
+
+    @Test
+    public void skipValueNumber() {
+        String str = "123";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueNumber1() {
+        String str = "123.";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueNumber2() {
+        String str = "123.34";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueNumber3() {
+        String str = ".34";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueNumber4() {
+        String str = "1.34e123";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueNumberError() {
+        String str = "1.34e";
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.toCharArray())
+                        .skipValue());
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                        .skipValue());
+    }
+
+    @Test
+    public void skipValueNumberError1() {
+        String str = "1e";
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.toCharArray())
+                        .skipValue());
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                        .skipValue());
+    }
+
+    @Test
+    public void skipValueNumberError2() {
+        String str = "1234.45a";
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.toCharArray())
+                        .skipValue());
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                        .skipValue());
+    }
+
+    @Test
+    public void skipValueString0() {
+        String str = "\"1234\"";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueString1() {
+        String str = "'1234'";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueStringError() {
+        String str = "\"1234.45\"a";
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.toCharArray())
+                        .skipValue());
+        assertThrows(
+                Exception.class,
+                () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                        .skipValue());
+    }
+
+    @Test
+    public void skipValueTrue() {
+        String str = "true";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
+
+    @Test
+    public void skipValueFalse() {
+        String str = "false";
+        JSONReader.of(str.toCharArray())
+                .skipValue();
+        JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
+                .skipValue();
+    }
 }

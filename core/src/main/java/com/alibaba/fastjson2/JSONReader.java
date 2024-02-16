@@ -144,89 +144,65 @@ public abstract class JSONReader
         return context.features | features;
     }
 
-    public int getRawInt() {
-        return 0;
-    }
+    public abstract int getRawInt();
 
-    public long getRawLong() {
-        return 0;
-    }
+    public abstract long getRawLong();
 
-    public boolean nextIfName4Match2() {
-        return false;
-    }
+    public abstract boolean nextIfName4Match2();
 
     public boolean nextIfValue4Match2() {
         return false;
     }
 
-    public boolean nextIfName4Match3() {
-        return false;
-    }
+    public abstract boolean nextIfName4Match3();
 
     public boolean nextIfValue4Match3() {
         return false;
     }
 
-    public boolean nextIfName4Match4(byte c4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match4(byte c4);
 
     public boolean nextIfValue4Match4(byte c4) {
         return false;
     }
 
-    public boolean nextIfName4Match5(int name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match5(int name1);
 
     public boolean nextIfValue4Match5(byte c4, byte c5) {
         return false;
     }
 
-    public boolean nextIfName4Match6(int name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match6(int name1);
 
     public boolean nextIfValue4Match6(int name1) {
         return false;
     }
 
-    public boolean nextIfName4Match7(int name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match7(int name1);
 
     public boolean nextIfValue4Match7(int name1) {
         return false;
     }
 
-    public boolean nextIfName4Match8(int name1, byte c8) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match8(int name1, byte c8);
 
     public boolean nextIfValue4Match8(int name1, byte c8) {
         return false;
     }
 
-    public boolean nextIfName4Match9(long name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match9(long name1);
 
     public boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
         return false;
     }
 
-    public boolean nextIfName4Match10(long name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match10(long name1);
 
     public boolean nextIfValue4Match10(long name1) {
         return false;
     }
 
-    public boolean nextIfName4Match11(long name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match11(long name1);
 
     public boolean nextIfValue4Match11(long name1) {
         return false;
@@ -4550,6 +4526,30 @@ public abstract class JSONReader
         this.ch = (char) savePoint.current;
     }
 
+    final JSONException notSupportName() {
+        return new JSONException(info("not support unquoted name"));
+    }
+
+    final JSONException valueError() {
+        return new JSONException(info("illegal value"));
+    }
+
+    final JSONException error(int offset, int ch) {
+        throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
+    }
+
+    static JSONException syntaxError(int ch) {
+        return new JSONException("syntax error, expect ',', but '" + (char) ch + "'");
+    }
+
+    static JSONException syntaxError(int offset, int ch) {
+        throw new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
+    }
+
+    static JSONException numberError(int offset, int ch) {
+        throw new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+    }
+
     public final String info() {
         return info(null);
     }
@@ -4561,7 +4561,7 @@ public abstract class JSONReader
         return message + ", offset " + offset;
     }
 
-    static boolean isFirstIdentifier(char ch) {
+    static boolean isFirstIdentifier(int ch) {
         return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '$' || (ch >= '0' && ch <= '9') || ch > 0x7F;
     }
 
