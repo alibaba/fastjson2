@@ -3644,7 +3644,7 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(chars)) {
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }
@@ -3666,7 +3666,7 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }
@@ -3688,7 +3688,7 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }
@@ -3710,7 +3710,7 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }
@@ -3729,7 +3729,7 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(bytes)) {
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }
@@ -3766,7 +3766,7 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }
@@ -3788,7 +3788,7 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(bytes, offset, length, charset)) {
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }

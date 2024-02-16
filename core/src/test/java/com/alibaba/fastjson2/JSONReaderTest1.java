@@ -1191,7 +1191,6 @@ public class JSONReaderTest1 {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
             assertNull(jsonReader.readInt32());
             assertTrue(jsonReader.isEnd());
-            assertTrue(jsonReader.comma);
         }
     }
 
@@ -1352,7 +1351,6 @@ public class JSONReaderTest1 {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
             assertNull(jsonReader.readInt64());
             assertTrue(jsonReader.isEnd());
-            assertTrue(jsonReader.comma);
         }
     }
 

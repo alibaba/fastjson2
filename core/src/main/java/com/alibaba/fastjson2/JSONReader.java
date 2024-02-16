@@ -1383,21 +1383,6 @@ public abstract class JSONReader
 
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
-    public void readNumber(ValueConsumer consumer, boolean quoted) {
-        readNumber0();
-        Number number = getNumber();
-        consumer.accept(number);
-    }
-
-    public void readString(ValueConsumer consumer, boolean quoted) {
-        String str = readString(); //
-        if (quoted) {
-            consumer.accept(JSON.toJSONString(str));
-        } else {
-            consumer.accept(str);
-        }
-    }
-
     protected abstract void readNumber0();
 
     public abstract String readString();
@@ -1930,7 +1915,7 @@ public abstract class JSONReader
 
     public abstract void skipComment();
 
-    public final Boolean readBool() {
+    public Boolean readBool() {
         if (nextIfNull()) {
             return null;
         }
@@ -3820,6 +3805,30 @@ public abstract class JSONReader
         this.ch = (char) savePoint.current;
     }
 
+    final JSONException notSupportName() {
+        return new JSONException(info("not support unquoted name"));
+    }
+
+    final JSONException valueError() {
+        return new JSONException(info("illegal value"));
+    }
+
+    final JSONException error(int offset, int ch) {
+        throw new JSONException("error, offset " + offset + ", char " + (char) ch);
+    }
+
+    static JSONException syntaxError(int ch) {
+        return new JSONException("syntax error, expect ',', but '" + (char) ch + "'");
+    }
+
+    static JSONException syntaxError(int offset, int ch) {
+        throw new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
+    }
+
+    static JSONException numberError(int offset, int ch) {
+        throw new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+    }
+
     public final String info() {
         return info(null);
     }
@@ -3831,7 +3840,7 @@ public abstract class JSONReader
         return message + ", offset " + offset;
     }
 
-    static boolean isFirstIdentifier(char ch) {
+    static boolean isFirstIdentifier(int ch) {
         return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '$' || (ch >= '0' && ch <= '9') || ch > 0x7F;
     }
 
