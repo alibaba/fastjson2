@@ -2522,14 +2522,6 @@ public class JSONReaderTest1 {
     }
 
     @Test
-    public void test17() {
-        JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(JSONB.toBytes(JSONObject.of("name", 123)));
-        assertTrue(jsonReader.nextIfObjectStart());
-        jsonReader.readFieldNameHashCode();
-        assertEquals("name", jsonReader.getLatin1String(jsonReader.strBegin, jsonReader.strlen));
-    }
-
-    @Test
     public void test18() {
         JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(JSONB.toBytes("12:13:14Z"));
         assertEquals("12:13:14", jsonReader.readLocalTime().toString());

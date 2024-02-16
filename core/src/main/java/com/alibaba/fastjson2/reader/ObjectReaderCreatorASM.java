@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
@@ -954,6 +951,7 @@ public class ObjectReaderCreatorASM
 
         Label object_ = new Label();
 
+        int fieldNameLengthMin = 0, fieldNameLengthMax = 0;
         // if (jsonReader.isArray() && jsonReader.isSupportBeanArray()) {
         {
             Label startArray_ = new Label(), endArray_ = new Label();
@@ -979,6 +977,24 @@ public class ObjectReaderCreatorASM
 
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 FieldReader fieldReader = fieldReaderArray[i];
+
+                byte[] nameUTF8 = fieldReader.fieldName.getBytes(StandardCharsets.UTF_8);
+                int fieldNameLength = nameUTF8.length;
+                for (byte ch : nameUTF8) {
+                    if (ch <= 0) {
+                        fieldNameLength = -1;
+                        break;
+                    }
+                }
+
+                if (i == 0) {
+                    fieldNameLengthMin = fieldNameLength;
+                    fieldNameLengthMax = fieldNameLength;
+                } else {
+                    fieldNameLengthMin = Math.min(fieldNameLength, fieldNameLengthMin);
+                    fieldNameLengthMax = Math.max(fieldNameLength, fieldNameLengthMax);
+                }
+
                 varIndex = genReadFieldValue(
                         context,
                         fieldReader,
@@ -1036,9 +1052,34 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(for_start_i_);
 
+        Label hashCode64Start = new Label();
+
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectEnd", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFNE, for_end_i_);
+
+//        if (fieldNameLengthMin >= 2 && fieldNameLengthMax <= 43) {
+//            varIndex = genRead243(
+//                    context,
+//                    TYPE_OBJECT,
+//                    fieldReaderArray,
+//                    classNameType,
+//                    fieldBased,
+//                    mw,
+//                    JSON_READER,
+//                    FEATURES,
+//                    OBJECT,
+//                    ITEM_CNT,
+//                    J,
+//                    varIndex,
+//                    variants,
+//                    for_inc_i_,
+//                    hashCode64Start,
+//                    true
+//            );
+//        }
+
+        mw.visitLabel(hashCode64Start);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readFieldNameHashCode", "()J", false);
@@ -1597,7 +1638,8 @@ public class ObjectReaderCreatorASM
                     varIndex,
                     variants,
                     for_inc_i_,
-                    hashCode64Start
+                    hashCode64Start,
+                    false
             );
         }
 
@@ -1890,7 +1932,8 @@ public class ObjectReaderCreatorASM
             int varIndex,
             Map<Object, Integer> variants,
             Label for_inc_i_,
-            Label hashCode64Start
+            Label hashCode64Start,
+            boolean jsonb
     ) {
         IdentityHashMap<FieldReader, Integer> readerIndexMap = new IdentityHashMap<>();
         Map<Integer, List<FieldReader>> name0Map = new TreeMap<>();
@@ -1898,14 +1941,19 @@ public class ObjectReaderCreatorASM
             FieldReader fieldReader = fieldReaderArray[i];
             readerIndexMap.put(fieldReader, i);
 
-            byte[] fieldName = fieldReader.fieldName.getBytes(StandardCharsets.UTF_8);
             byte[] name0Bytes = new byte[4];
-            name0Bytes[0] = '"';
-            if (fieldName.length == 2) {
-                System.arraycopy(fieldName, 0, name0Bytes, 1, 2);
-                name0Bytes[3] = '"';
+            if (jsonb) {
+                byte[] fieldNameJSONB = JSONB.toBytes(fieldReader.fieldName);
+                System.arraycopy(fieldNameJSONB, 0, name0Bytes, 0, Math.min(4, fieldNameJSONB.length));
             } else {
-                System.arraycopy(fieldName, 0, name0Bytes, 1, 3);
+                byte[] fieldName = fieldReader.fieldName.getBytes(StandardCharsets.UTF_8);
+                name0Bytes[0] = '"';
+                if (fieldName.length == 2) {
+                    System.arraycopy(fieldName, 0, name0Bytes, 1, 2);
+                    name0Bytes[3] = '"';
+                } else {
+                    System.arraycopy(fieldName, 0, name0Bytes, 1, 3);
+                }
             }
 
             int name0 = UNSAFE.getInt(name0Bytes, ARRAY_BYTE_BASE_OFFSET);
@@ -1970,6 +2018,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        if (jsonb) {
+                            name1 &= 0xFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match5", "(I)Z", false);
@@ -1982,6 +2033,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = fieldName[5];
                         bytes4[3] = '"';
                         int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        if (jsonb) {
+                            name1 &= 0xFFFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match6", "(I)Z", false);
@@ -2008,6 +2062,9 @@ public class ObjectReaderCreatorASM
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        if (jsonb) {
+                            name1 &= 0xFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match9", "(J)Z", false);
@@ -2018,6 +2075,9 @@ public class ObjectReaderCreatorASM
                         System.arraycopy(fieldName, 3, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        if (jsonb) {
+                            name1 &= 0xFFFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match10", "(J)Z", false);
@@ -2046,6 +2106,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        if (jsonb) {
+                            name2 &= 0xFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2060,6 +2123,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = fieldName[13];
                         bytes4[3] = '"';
                         int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        if (jsonb) {
+                            name2 &= 0xFFFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2093,7 +2159,9 @@ public class ObjectReaderCreatorASM
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name2 &= 0xFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2107,7 +2175,9 @@ public class ObjectReaderCreatorASM
                         System.arraycopy(fieldName, 11, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name2 &= 0xFFFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2142,7 +2212,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name3 &= 0xFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2159,7 +2231,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = fieldName[21];
                         bytes4[3] = '"';
                         int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name3 &= 0xFFFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2199,7 +2273,9 @@ public class ObjectReaderCreatorASM
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name3 &= 0xFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2215,7 +2291,9 @@ public class ObjectReaderCreatorASM
                         System.arraycopy(fieldName, 19, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name3 &= 0xFFFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2256,7 +2334,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name4 &= 0xFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2275,7 +2355,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = fieldName[29];
                         bytes4[3] = '"';
                         int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name4 &= 0xFFFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2320,7 +2402,9 @@ public class ObjectReaderCreatorASM
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name4 &= 0xFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2337,7 +2421,9 @@ public class ObjectReaderCreatorASM
                         System.arraycopy(fieldName, 27, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name4 &= 0xFFFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2386,7 +2472,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name5 &= 0xFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2407,7 +2495,9 @@ public class ObjectReaderCreatorASM
                         bytes4[2] = fieldName[37];
                         bytes4[3] = '"';
                         int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name5 &= 0xFFFFFF;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2461,7 +2551,9 @@ public class ObjectReaderCreatorASM
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name5 &= 0xFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2481,7 +2573,9 @@ public class ObjectReaderCreatorASM
                         System.arraycopy(fieldName, 35, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-
+                        if (jsonb) {
+                            name5 &= 0xFFFFFFFFFFFFFFL;
+                        }
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2526,7 +2620,7 @@ public class ObjectReaderCreatorASM
                         ITEM_CNT,
                         J,
                         fieldReaderIndex,
-                        false,
+                        jsonb,
                         false, // arrayMapping
                         TYPE_OBJECT
                 );

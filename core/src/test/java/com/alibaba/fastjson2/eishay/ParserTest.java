@@ -258,8 +258,7 @@ public class ParserTest {
         JSONReader jsonReader1 = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length, symbolTable);
         Object jsonb = jsonReader1.readAny();
 
-        JSONReader jsonReader2 = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length, symbolTable);
-        MediaContent o1 = jsonReader2.read(MediaContent.class);
+        MediaContent o1 = JSONB.parseObject(jsonbBytes, MediaContent.class, symbolTable);
 //        ObjectWriterContext ctx = JSONFactory.createWriteContext();
 //        JSONSerializer<MediaContent> js = JSONReader.of(MediaContent.class);
 //        js.wr
