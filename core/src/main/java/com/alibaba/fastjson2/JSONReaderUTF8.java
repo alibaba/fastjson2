@@ -954,7 +954,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final boolean nextIfName4Match12(long name1, byte c12) {
+    public final boolean nextIfName4Match12(long name1, byte name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 14;
         if (offset >= end) {
@@ -962,7 +962,7 @@ class JSONReaderUTF8
         }
 
         if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name1
-                || bytes[offset - 3] != c12
+                || bytes[offset - 3] != name2
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1059,7 +1059,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final boolean nextIfName4Match16(long name1, int name2, byte c16) {
+    public final boolean nextIfName4Match16(long name1, int name2, byte name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 18;
         if (offset >= end) {
@@ -1068,7 +1068,7 @@ class JSONReaderUTF8
 
         if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name1
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name2
-                || bytes[offset - 3] != c16
+                || bytes[offset - 3] != name3
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1165,7 +1165,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final boolean nextIfName4Match20(long name1, long name2, byte c20) {
+    public final boolean nextIfName4Match20(long name1, long name2, byte name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 22;
         if (offset >= end) {
@@ -1174,7 +1174,7 @@ class JSONReaderUTF8
 
         if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name2
-                || bytes[offset - 3] != c20
+                || bytes[offset - 3] != name3
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1274,7 +1274,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final boolean nextIfName4Match24(long name1, long name2, int name3, byte c24) {
+    public final boolean nextIfName4Match24(long name1, long name2, int name3, byte name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 26;
         if (offset >= end) {
@@ -1284,7 +1284,7 @@ class JSONReaderUTF8
         if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 23) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name2
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name3
-                || bytes[offset - 3] != c24
+                || bytes[offset - 3] != name4
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -3351,7 +3351,6 @@ class JSONReaderUTF8
 
     @Override
     public final int readInt32Value() {
-        boolean valid = false;
         boolean negative = false;
         int firstOffset = offset;
         int ch = this.ch;
@@ -3376,13 +3375,14 @@ class JSONReaderUTF8
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            valid = true;
-            int intValue10 = intValue * 10 + (ch - '0');
-            if (intValue10 < intValue) {
-                overflow = true;
-                break;
-            } else {
-                intValue = intValue10;
+            if (!overflow) {
+                int intValue10 = intValue * 10 + (ch - '0');
+                if (intValue10 < intValue) {
+                    overflow = true;
+                    break;
+                } else {
+                    intValue = intValue10;
+                }
             }
             if (offset == end) {
                 ch = EOI;
@@ -3412,10 +3412,10 @@ class JSONReaderUTF8
             readNumber0();
             if (valueType == JSON_TYPE_INT) {
                 BigInteger bigInteger = getBigInteger();
-                try {
-                    return bigInteger.intValueExact();
-                } catch (ArithmeticException ex) {
-                    throw new JSONException("int overflow, value " + bigInteger);
+                if (bigInteger.bitLength() <= 31) {
+                    return bigInteger.intValue();
+                } else {
+                    throw numberError(offset, ch);
                 }
             } else {
                 return getInt32Value();
@@ -3424,9 +3424,6 @@ class JSONReaderUTF8
 
         if (quote != 0) {
             wasNull = firstOffset + 1 == offset;
-            if (wasNull) {
-                valid = true;
-            }
             ch = offset == end ? EOI : bytes[offset++];
         }
 
@@ -3440,7 +3437,6 @@ class JSONReaderUTF8
 
         if (comma = (ch == ',')) {
             ch = offset == end ? EOI : (char) bytes[offset++];
-            // next inline
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : bytes[offset++];
             }
@@ -3449,11 +3445,7 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
 
-        if (valid) {
-            return negative ? -intValue : intValue;
-        } else {
-            throw new JSONException(info("illegal input error"));
-        }
+        return negative ? -intValue : intValue;
     }
 
     @Override
@@ -3574,9 +3566,8 @@ class JSONReaderUTF8
 
     @Override
     public final long readInt64Value() {
-        boolean valid = false;
         boolean negative = false;
-        final int firstOffset = offset;
+        int firstOffset = offset;
         int ch = this.ch;
         int offset = this.offset;
         final char firstChar = (char) ch;
@@ -3599,13 +3590,14 @@ class JSONReaderUTF8
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            valid = true;
-            long intValue10 = longValue * 10 + (ch - '0');
-            if (intValue10 < longValue) {
-                overflow = true;
-                break;
-            } else {
-                longValue = intValue10;
+            if (!overflow) {
+                long intValue10 = longValue * 10 + (ch - '0');
+                if (intValue10 < longValue) {
+                    overflow = true;
+                    break;
+                } else {
+                    longValue = intValue10;
+                }
             }
             if (offset == end) {
                 ch = EOI;
@@ -3635,10 +3627,10 @@ class JSONReaderUTF8
             readNumber0();
             if (valueType == JSON_TYPE_INT) {
                 BigInteger bigInteger = getBigInteger();
-                try {
-                    return bigInteger.longValueExact();
-                } catch (ArithmeticException ex) {
-                    throw new JSONException("long overflow, value " + bigInteger);
+                if (bigInteger.bitLength() <= 63) {
+                    return bigInteger.longValue();
+                } else {
+                    throw numberError(offset, ch);
                 }
             } else {
                 return getInt64Value();
@@ -3647,9 +3639,6 @@ class JSONReaderUTF8
 
         if (quote != 0) {
             wasNull = firstOffset + 1 == offset;
-            if (wasNull) {
-                valid = true;
-            }
             ch = offset == end ? EOI : bytes[offset++];
         }
 
@@ -3662,18 +3651,15 @@ class JSONReaderUTF8
         }
 
         if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
+            ch = offset == end ? EOI : (char) bytes[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : bytes[offset++];
             }
         }
 
-        if (!valid) {
-            throw new JSONException(info("illegal input error"));
-        }
-
         this.ch = (char) ch;
         this.offset = offset;
+
         return negative ? -longValue : longValue;
     }
 

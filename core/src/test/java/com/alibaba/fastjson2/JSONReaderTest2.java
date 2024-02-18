@@ -1,8 +1,11 @@
 package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
@@ -809,6 +812,82 @@ public class JSONReaderTest2 {
             assertEquals(1, jsonReader.readInt32Value());
             assertTrue(jsonReader.nextIfObjectEnd());
             assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void nameX() throws Exception {
+        char[] ascii = "a234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890".toCharArray();
+        int value = 123;
+        for (int nameLength = 3; nameLength < 44; nameLength++) {
+            String[] names = new String[]{
+                    new String(ascii, 0, nameLength)
+            };
+
+            for (String name : names) {
+                assertEquals(nameLength, name.length());
+                String json = JSONObject.of(name, value).toJSONString();
+                byte[] jsonbBytes = json.getBytes(StandardCharsets.UTF_8);
+                int name0 = UNSAFE.getInt(jsonbBytes, Unsafe.ARRAY_BYTE_BASE_OFFSET + 1);
+
+                JSONReader[] jsonReaders = new JSONReader[] {
+                        JSONReader.of(jsonbBytes),
+                        JSONReader.of(json.toCharArray())
+                };
+
+                for (JSONReader jsonReader : jsonReaders) {
+                    assertTrue(jsonReader.nextIfObjectStart());
+                    assertEquals(name0, jsonReader.getRawInt());
+
+                    Method method = null;
+                    String methodName = "nextIfName4Match" + nameLength;
+                    for (Method m : JSONReader.class.getMethods()) {
+                        if (m.getName().equals(methodName)) {
+                            method = m;
+                            break;
+                        }
+                    }
+                    assertNotNull(method);
+
+                    Object[] args = new Object[method.getParameterCount()];
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    int byteIndex = 3;
+                    for (int i = 0; i < parameterTypes.length; i++) {
+                        Class<?> paramType = parameterTypes[i];
+                        if (paramType == byte.class) {
+                            args[i] = jsonbBytes[byteIndex + 2];
+                            byteIndex++;
+                        } else if (paramType == int.class) {
+                            byte[] bytes = Arrays.copyOfRange(jsonbBytes, byteIndex + 2, byteIndex + 6);
+                            if (nameLength - byteIndex == 2) {
+                                byteIndex += 2;
+                            } else if (nameLength - byteIndex == 3) {
+                                byteIndex += 3;
+                            } else {
+                                byteIndex += 4;
+                            }
+                            args[i] = UNSAFE.getInt(bytes, Unsafe.ARRAY_BYTE_BASE_OFFSET);
+                        } else if (paramType == long.class) {
+                            byte[] bytes = Arrays.copyOfRange(jsonbBytes, byteIndex + 2, byteIndex + 10);
+                            if (nameLength - byteIndex == 6) {
+                                byteIndex += 6;
+                            } else if (nameLength - byteIndex == 7) {
+                                byteIndex += 7;
+                            } else {
+                                byteIndex += 8;
+                            }
+                            args[i] = UNSAFE.getLong(bytes, Unsafe.ARRAY_BYTE_BASE_OFFSET);
+                        } else {
+                            throw new UnsupportedOperationException();
+                        }
+                    }
+
+                    assertEquals(Boolean.TRUE, method.invoke(jsonReader, args), methodName);
+
+                    assertEquals(value, jsonReader.readInt32Value());
+                    assertTrue(jsonReader.nextIfObjectEnd());
+                }
+            }
         }
     }
 
