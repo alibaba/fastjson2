@@ -1242,7 +1242,26 @@ public class JSONReaderTest1 {
             assertTrue(jsonReader.isEnd());
             assertFalse(jsonReader.comma);
         }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\",")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\" ,")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("''  ,")) {
             assertEquals(0, jsonReader.readInt32Value());
             assertTrue(jsonReader.wasNull);
             assertTrue(jsonReader.isEnd());
