@@ -14,6 +14,7 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONReader.Feature.ErrorOnNullForPrimitives;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONReaderUTF16
@@ -2359,9 +2360,9 @@ class JSONReaderUTF16
     public final int readInt32Value() {
         boolean negative = false;
         int firstOffset = offset;
-        int ch = this.ch;
+        char ch = this.ch;
         int offset = this.offset;
-        final char firstChar = (char) ch;
+        final char firstChar = ch;
         final char[] chars = this.chars;
 
         int intValue = 0;
@@ -2377,6 +2378,8 @@ class JSONReaderUTF16
             ch = chars[offset++];
         } else if (ch == '+') {
             ch = chars[offset++];
+        } else if (ch == ',') {
+            throw numberError();
         }
 
         boolean overflow = false;
@@ -2397,7 +2400,7 @@ class JSONReaderUTF16
             ch = chars[offset++];
         }
 
-        boolean notMatch = false;
+        boolean notMatch = ch < '0' || ch > '9';
         if (ch == '.'
                 || ch == 'e'
                 || ch == 'E'
@@ -2413,9 +2416,10 @@ class JSONReaderUTF16
         }
 
         if (notMatch) {
-            this.offset = firstOffset;
-            this.ch = firstChar;
             readNumber0();
+            if (wasNull && (context.features & ErrorOnNullForPrimitives.mask) == 0) {
+                return 0;
+            }
             if (valueType == JSON_TYPE_INT) {
                 BigInteger bigInteger = getBigInteger();
                 if (bigInteger.bitLength() <= 31) {
@@ -2448,7 +2452,7 @@ class JSONReaderUTF16
             }
         }
 
-        this.ch = (char) ch;
+        this.ch = ch;
         this.offset = offset;
 
         return negative ? -intValue : intValue;
@@ -2456,38 +2460,19 @@ class JSONReaderUTF16
 
     @Override
     public final Integer readInt32() {
-        boolean valid = false;
         boolean negative = false;
-        final char[] chars = this.chars;
-        int offset = this.offset;
-        char ch = this.ch;
         int firstOffset = offset;
-        char firstChar = ch;
+        char ch = this.ch;
+        int offset = this.offset;
+        final char firstChar = ch;
+        final char[] chars = this.chars;
 
         int intValue = 0;
 
-        char quote = '\0';
-        if (ch == '"' || ch == '\'') {
+        int quote = '\0';
+        if (firstChar == '"' || firstChar == '\'') {
             quote = ch;
             ch = chars[offset++];
-            if (ch == quote) {
-                ch = offset == end ? EOI : chars[offset++];
-
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : chars[offset++];
-                }
-
-                if (comma = (ch == ',')) {
-                    ch = offset == end ? EOI : chars[offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        ch = offset == end ? EOI : chars[offset++];
-                    }
-                }
-
-                this.ch = ch;
-                this.offset = offset;
-                return null;
-            }
         }
 
         if (ch == '-') {
@@ -2495,27 +2480,29 @@ class JSONReaderUTF16
             ch = chars[offset++];
         } else if (ch == '+') {
             ch = chars[offset++];
+        } else if (ch == ',') {
+            throw numberError();
         }
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            valid = true;
-            int intValue10 = intValue * 10 + (ch - '0');
-            if (intValue10 < intValue) {
-                overflow = true;
-                break;
-            } else {
-                intValue = intValue10;
+            if (!overflow) {
+                int intValue10 = intValue * 10 + (ch - '0');
+                if (intValue10 < intValue) {
+                    overflow = true;
+                    break;
+                } else {
+                    intValue = intValue10;
+                }
             }
             if (offset == end) {
                 ch = EOI;
-                offset++;
                 break;
             }
             ch = chars[offset++];
         }
 
-        boolean notMatch = false;
+        boolean notMatch = ch < '0' || ch > '9';
         if (ch == '.'
                 || ch == 'e'
                 || ch == 'E'
@@ -2524,6 +2511,7 @@ class JSONReaderUTF16
                 || ch == 'n'
                 || ch == '{'
                 || ch == '['
+                || ch == EOI
                 || overflow) {
             notMatch = true;
         } else if (quote != 0 && ch != quote) {
@@ -2531,16 +2519,24 @@ class JSONReaderUTF16
         }
 
         if (notMatch) {
-            this.offset = firstOffset;
-            this.ch = firstChar;
             readNumber0();
             if (wasNull) {
                 return null;
             }
-            return getInt32Value();
+            if (valueType == JSON_TYPE_INT) {
+                BigInteger bigInteger = getBigInteger();
+                if (bigInteger.bitLength() <= 31) {
+                    return bigInteger.intValue();
+                } else {
+                    throw numberError(offset, ch);
+                }
+            } else {
+                return getInt32Value();
+            }
         }
 
         if (quote != 0) {
+            wasNull = firstOffset + 1 == offset;
             ch = offset == end ? EOI : chars[offset++];
         }
 
@@ -2559,12 +2555,10 @@ class JSONReaderUTF16
             }
         }
 
-        if (!valid) {
-            throw new JSONException(info("illegal input error"));
-        }
         this.ch = ch;
         this.offset = offset;
-        return negative ? -intValue : intValue;
+
+        return wasNull ? null : (negative ? -intValue : intValue);
     }
 
     @Override
@@ -2573,7 +2567,7 @@ class JSONReaderUTF16
         int firstOffset = offset;
         char ch = this.ch;
         int offset = this.offset;
-        final char firstChar = (char) ch;
+        final char firstChar = ch;
         final char[] chars = this.chars;
 
         long longValue = 0;
@@ -2589,6 +2583,8 @@ class JSONReaderUTF16
             ch = chars[offset++];
         } else if (ch == '+') {
             ch = chars[offset++];
+        } else if (ch == ',') {
+            throw numberError();
         }
 
         boolean overflow = false;
@@ -2609,7 +2605,7 @@ class JSONReaderUTF16
             ch = chars[offset++];
         }
 
-        boolean notMatch = false;
+        boolean notMatch = ch < '0' || ch > '9';
         if (ch == '.'
                 || ch == 'e'
                 || ch == 'E'
@@ -2628,6 +2624,9 @@ class JSONReaderUTF16
             this.offset = firstOffset;
             this.ch = firstChar;
             readNumber0();
+            if (wasNull && (context.features & ErrorOnNullForPrimitives.mask) == 0) {
+                return 0;
+            }
             if (valueType == JSON_TYPE_INT) {
                 BigInteger bigInteger = getBigInteger();
                 if (bigInteger.bitLength() <= 63) {
@@ -2668,38 +2667,19 @@ class JSONReaderUTF16
 
     @Override
     public final Long readInt64() {
-        boolean valid = false;
         boolean negative = false;
-        int offset = this.offset;
-        char ch = this.ch;
         int firstOffset = offset;
-        char firstChar = ch;
+        char ch = this.ch;
+        int offset = this.offset;
+        final char firstChar = ch;
+        final char[] chars = this.chars;
 
         long longValue = 0;
 
-        final char[] chars = this.chars;
         char quote = '\0';
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = chars[offset++];
-            if (ch == quote) {
-                ch = offset == end ? EOI : chars[offset++];
-
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : chars[offset++];
-                }
-
-                if (comma = (ch == ',')) {
-                    ch = offset == end ? EOI : chars[offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        ch = offset == end ? EOI : chars[offset++];
-                    }
-                }
-
-                this.ch = ch;
-                this.offset = offset;
-                return null;
-            }
         }
 
         if (ch == '-') {
@@ -2707,19 +2687,21 @@ class JSONReaderUTF16
             ch = chars[offset++];
         } else if (ch == '+') {
             ch = chars[offset++];
+        } else if (ch == ',') {
+            throw numberError();
         }
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            valid = true;
-            long intValue10 = longValue * 10 + (ch - '0');
-            if (intValue10 < longValue) {
-                overflow = true;
-                break;
-            } else {
-                longValue = intValue10;
+            if (!overflow) {
+                long intValue10 = longValue * 10 + (ch - '0');
+                if (intValue10 < longValue) {
+                    overflow = true;
+                    break;
+                } else {
+                    longValue = intValue10;
+                }
             }
-
             if (offset == end) {
                 ch = EOI;
                 break;
@@ -2727,7 +2709,7 @@ class JSONReaderUTF16
             ch = chars[offset++];
         }
 
-        boolean notMatch = false;
+        boolean notMatch = ch < '0' || ch > '9';
         if (ch == '.'
                 || ch == 'e'
                 || ch == 'E'
@@ -2746,10 +2728,23 @@ class JSONReaderUTF16
             this.offset = firstOffset;
             this.ch = firstChar;
             readNumber0();
-            return getInt64();
+            if (wasNull) {
+                return null;
+            }
+            if (valueType == JSON_TYPE_INT) {
+                BigInteger bigInteger = getBigInteger();
+                if (bigInteger.bitLength() <= 63) {
+                    return bigInteger.longValue();
+                } else {
+                    throw numberError(offset, ch);
+                }
+            } else {
+                return getInt64Value();
+            }
         }
 
         if (quote != 0) {
+            wasNull = firstOffset + 1 == offset;
             ch = offset == end ? EOI : chars[offset++];
         }
 
@@ -2768,13 +2763,10 @@ class JSONReaderUTF16
             }
         }
 
-        if (!valid) {
-            throw new JSONException(info("illegal input error"));
-        }
-
         this.ch = ch;
         this.offset = offset;
-        return negative ? -longValue : longValue;
+
+        return wasNull ? null : (negative ? -longValue : longValue);
     }
 
     @Override
@@ -3948,9 +3940,14 @@ class JSONReaderUTF16
             ch = chars[offset++];
 
             if (ch == quote) {
-                this.ch = offset >= end ? EOI : chars[offset++];
+                ch = offset == end ? EOI : chars[offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    ch = offset == end ? EOI : chars[offset++];
+                }
+
+                this.ch = ch;
                 this.offset = offset;
-                nextIfComma();
+                comma = nextIfComma();
                 wasNull = true;
                 return;
             }
