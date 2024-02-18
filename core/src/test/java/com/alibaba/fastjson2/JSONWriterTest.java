@@ -2143,6 +2143,66 @@ public class JSONWriterTest {
     }
 
     @Test
+    public void test5_utf8() {
+        JSONReader jsonReader = JSONReader.of("1234567890".getBytes(StandardCharsets.UTF_8));
+        assertFalse(jsonReader.nextIfName4Match2());
+        assertFalse(jsonReader.nextIfValue4Match2());
+        assertFalse(jsonReader.nextIfName4Match3());
+        assertFalse(jsonReader.nextIfValue4Match3());
+        assertFalse(jsonReader.nextIfName4Match4((byte) 0));
+        assertFalse(jsonReader.nextIfValue4Match4((byte) 0));
+        assertFalse(jsonReader.nextIfName4Match5(0));
+        assertFalse(jsonReader.nextIfValue4Match5((byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match6(0));
+        assertFalse(jsonReader.nextIfValue4Match6(0));
+        assertFalse(jsonReader.nextIfName4Match7(0));
+        assertFalse(jsonReader.nextIfValue4Match7(0));
+        assertFalse(jsonReader.nextIfName4Match8((byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfValue4Match8((byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match9(0));
+        assertFalse(jsonReader.nextIfValue4Match9(0, (byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match10(0));
+        assertFalse(jsonReader.nextIfValue4Match10(0));
+        assertFalse(jsonReader.nextIfName4Match11(0));
+        assertFalse(jsonReader.nextIfValue4Match11(0));
+        assertFalse(jsonReader.nextIfName4Match12(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match13(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match14(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match15(0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match16(0, (byte) 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match17(0, 0));
+        assertFalse(jsonReader.nextIfName4Match18(0, 0));
+        assertFalse(jsonReader.nextIfName4Match19(0, 0));
+        assertFalse(jsonReader.nextIfName4Match20(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match21(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match22(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match23(0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match24(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match25(0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match26(0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match27(0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match28(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match29(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match30(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match31(0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match32(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match33(0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match34(0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match35(0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match36(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match37(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match38(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match39(0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match40(0, 0, 0, 0, 0, (byte) 0));
+        assertFalse(jsonReader.nextIfName4Match41(0, 0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match42(0, 0, 0, 0, 0));
+        assertFalse(jsonReader.nextIfName4Match43(0, 0, 0, 0, 0));
+        assertTrue(jsonReader.nextIfName8Match0());
+        assertFalse(jsonReader.nextIfName8Match1());
+        assertFalse(jsonReader.nextIfName8Match2());
+    }
+
+    @Test
     public void test6() {
         {
             JSONReader jsonReader = JSONReader.of("1");

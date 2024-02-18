@@ -208,13 +208,9 @@ public abstract class JSONReader
         return false;
     }
 
-    public boolean nextIfName4Match12(long name1, byte c12) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match12(long name1, byte name2);
 
-    public boolean nextIfName4Match13(long name1, int name2) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match13(long name1, int name2);
 
     public boolean nextIfName4Match14(long name1, int name2) {
         return false;
@@ -224,117 +220,65 @@ public abstract class JSONReader
         return false;
     }
 
-    public boolean nextIfName4Match16(long name1, int name2, byte c16) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match16(long name1, int name2, byte name3);
 
-    public boolean nextIfName4Match17(long name1, long name2) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match17(long name1, long name2);
 
-    public boolean nextIfName4Match18(long name1, long name2) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match18(long name1, long name2);
 
     public boolean nextIfName4Match19(long name1, long name2) {
         return false;
     }
 
-    public boolean nextIfName4Match20(long name1, long name2, byte c20) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match20(long name1, long name2, byte name3);
 
     public boolean nextIfName4Match21(long name1, long name2, int name3) {
         return false;
     }
 
-    public boolean nextIfName4Match22(long name1, long name2, int name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match22(long name1, long name2, int name3);
 
-    public boolean nextIfName4Match23(long name1, long name2, int name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match23(long name1, long name2, int name3);
 
-    public boolean nextIfName4Match24(long name1, long name2, int name3, byte c24) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match24(long name1, long name2, int name3, byte name4);
 
-    public boolean nextIfName4Match25(long name1, long name2, long name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match25(long name1, long name2, long name3);
 
-    public boolean nextIfName4Match26(long name1, long name2, long name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match26(long name1, long name2, long name3);
 
-    public boolean nextIfName4Match27(long name1, long name2, long name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match27(long name1, long name2, long name3);
 
-    public boolean nextIfName4Match28(long name1, long name2, long name3, byte c28) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match28(long name1, long name2, long name3, byte c28);
 
-    public boolean nextIfName4Match29(long name1, long name2, long name3, int name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match29(long name1, long name2, long name3, int name4);
 
-    public boolean nextIfName4Match30(long name1, long name2, long name3, int name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match30(long name1, long name2, long name3, int name4);
 
-    public boolean nextIfName4Match31(long name1, long name2, long name3, int name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match31(long name1, long name2, long name3, int name4);
 
-    public boolean nextIfName4Match32(long name1, long name2, long name3, int name4, byte c32) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match32(long name1, long name2, long name3, int name4, byte c32);
 
-    public boolean nextIfName4Match33(long name1, long name2, long name3, long name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match33(long name1, long name2, long name3, long name4);
 
-    public boolean nextIfName4Match34(long name1, long name2, long name3, long name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match34(long name1, long name2, long name3, long name4);
 
-    public boolean nextIfName4Match35(long name1, long name2, long name3, long name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match35(long name1, long name2, long name3, long name4);
 
-    public boolean nextIfName4Match36(long name1, long name2, long name3, long name4, byte c35) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match36(long name1, long name2, long name3, long name4, byte c35);
 
-    public boolean nextIfName4Match37(long name1, long name2, long name3, long name4, int name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match37(long name1, long name2, long name3, long name4, int name5);
 
-    public boolean nextIfName4Match38(long name1, long name2, long name3, long name4, int name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match38(long name1, long name2, long name3, long name4, int name5);
 
-    public boolean nextIfName4Match39(long name1, long name2, long name3, long name4, int name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match39(long name1, long name2, long name3, long name4, int name5);
 
-    public boolean nextIfName4Match40(long name1, long name2, long name3, long name4, int name5, byte c40) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match40(long name1, long name2, long name3, long name4, int name5, byte c40);
 
-    public boolean nextIfName4Match41(long name1, long name2, long name3, long name4, long name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match41(long name1, long name2, long name3, long name4, long name5);
 
-    public boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5);
 
-    public boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5);
 
     public boolean nextIfName8Match0() {
         return false;
@@ -4543,11 +4487,15 @@ public abstract class JSONReader
     }
 
     static JSONException syntaxError(int offset, int ch) {
-        throw new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
+        return new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
     }
 
     static JSONException numberError(int offset, int ch) {
-        throw new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+    }
+
+    JSONException numberError() {
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
     }
 
     public final String info() {
