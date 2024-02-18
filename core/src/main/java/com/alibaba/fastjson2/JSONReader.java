@@ -546,6 +546,8 @@ public abstract class JSONReader
 
     public final int getInt32Value() {
         switch (valueType) {
+            case JSON_TYPE_INT8:
+            case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
@@ -578,6 +580,10 @@ public abstract class JSONReader
                 }
                 return 0;
             }
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
+                return getNumber().intValue();
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
@@ -588,6 +594,8 @@ public abstract class JSONReader
 
     public final long getInt64Value() {
         switch (valueType) {
+            case JSON_TYPE_INT8:
+            case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
@@ -611,8 +619,12 @@ public abstract class JSONReader
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
+                return getNumber().longValue();
             default:
-                throw new JSONException("TODO");
+                throw new JSONException("TODO : " + valueType);
         }
     }
 
@@ -3822,11 +3834,15 @@ public abstract class JSONReader
     }
 
     static JSONException syntaxError(int offset, int ch) {
-        throw new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
+        return new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
     }
 
     static JSONException numberError(int offset, int ch) {
-        throw new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+    }
+
+    JSONException numberError() {
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
     }
 
     public final String info() {
