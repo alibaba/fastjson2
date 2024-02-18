@@ -545,6 +545,8 @@ public abstract class JSONReader
 
     public final int getInt32Value() {
         switch (valueType) {
+            case JSON_TYPE_INT8:
+            case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
@@ -577,6 +579,10 @@ public abstract class JSONReader
                 }
                 return 0;
             }
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
+                return getNumber().intValue();
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
@@ -587,6 +593,8 @@ public abstract class JSONReader
 
     public final long getInt64Value() {
         switch (valueType) {
+            case JSON_TYPE_INT8:
+            case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
@@ -610,60 +618,12 @@ public abstract class JSONReader
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
-            default:
-                throw new JSONException("TODO");
-        }
-    }
-
-    protected final Long getInt64() {
-        switch (valueType) {
-            case JSON_TYPE_INT:
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return Long.valueOf(negative ? -mag3 : mag3);
-                }
-                int[] mag;
-                if (mag0 == 0) {
-                    if (mag1 == 0) {
-                        if (mag2 == Integer.MIN_VALUE && mag3 == 0 && !negative) {
-                            return Long.MIN_VALUE;
-                        }
-
-                        long v3 = mag3 & 0XFFFFFFFFL;
-                        long v2 = mag2 & 0XFFFFFFFFL;
-
-                        if (v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
-                            return negative ? -v23 : v23;
-                        }
-                        mag = new int[]{mag2, mag3};
-                    } else {
-                        mag = new int[]{mag1, mag2, mag3};
-                    }
-                } else {
-                    mag = new int[]{mag0, mag1, mag2, mag3};
-                }
-
-                int signum = negative ? -1 : 1;
-                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                return bigInt.longValue();
-            case JSON_TYPE_DEC:
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
                 return getNumber().longValue();
-            case JSON_TYPE_BOOL:
-                return Long.valueOf(boolValue ? 1 : 0);
-            case JSON_TYPE_NULL:
-                return null;
-            case JSON_TYPE_STRING: {
-                return toInt64(stringValue);
-            }
-            case JSON_TYPE_OBJECT: {
-                Number num = toNumber((Map) complex);
-                if (num != null) {
-                    return num.longValue();
-                }
-                return null;
-            }
             default:
-                throw new JSONException("TODO");
+                throw new JSONException("TODO : " + valueType);
         }
     }
 
@@ -3791,11 +3751,15 @@ public abstract class JSONReader
     }
 
     static JSONException syntaxError(int offset, int ch) {
-        throw new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
+        return new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
     }
 
     static JSONException numberError(int offset, int ch) {
-        throw new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+    }
+
+    JSONException numberError() {
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
     }
 
     public final String info() {
