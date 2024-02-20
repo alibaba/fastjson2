@@ -804,6 +804,13 @@ public abstract class JSONReader
                     }
                     return (int) longValue;
                 }
+                if (number instanceof BigInteger) {
+                    try {
+                        return ((BigInteger) number).intValueExact();
+                    } catch (ArithmeticException e) {
+                        throw numberError();
+                    }
+                }
                 return number.intValue();
             case JSON_TYPE_DEC:
                 return getNumber().intValue();
@@ -828,6 +835,13 @@ public abstract class JSONReader
             case JSON_TYPE_FLOAT:
             case JSON_TYPE_DOUBLE:
                 return getNumber().intValue();
+            case JSON_TYPE_BIG_DEC:
+                try {
+                    return getBigDecimal()
+                            .intValueExact();
+                } catch (ArithmeticException e) {
+                    throw numberError();
+                }
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
@@ -844,7 +858,15 @@ public abstract class JSONReader
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
                 }
-                return getNumber().longValue();
+                Number number = getNumber();
+                if (number instanceof BigInteger) {
+                    try {
+                        return ((BigInteger) number).longValueExact();
+                    } catch (ArithmeticException e) {
+                        throw numberError();
+                    }
+                }
+                return number.longValue();
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
@@ -866,61 +888,17 @@ public abstract class JSONReader
             case JSON_TYPE_INT64:
             case JSON_TYPE_FLOAT:
             case JSON_TYPE_DOUBLE:
-                return getNumber().longValue();
+                return getNumber()
+                        .longValue();
+            case JSON_TYPE_BIG_DEC:
+                try {
+                    return getBigDecimal()
+                            .longValueExact();
+                } catch (ArithmeticException e) {
+                    throw numberError();
+                }
             default:
                 throw new JSONException("TODO : " + valueType);
-        }
-    }
-
-    protected final Long getInt64() {
-        switch (valueType) {
-            case JSON_TYPE_INT:
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return (long) (negative ? -mag3 : mag3);
-                }
-                int[] mag;
-                if (mag0 == 0) {
-                    if (mag1 == 0) {
-                        if (mag2 == Integer.MIN_VALUE && mag3 == 0 && !negative) {
-                            return Long.MIN_VALUE;
-                        }
-
-                        long v3 = mag3 & 0XFFFFFFFFL;
-                        long v2 = mag2 & 0XFFFFFFFFL;
-
-                        if (v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
-                            return negative ? -v23 : v23;
-                        }
-                        mag = new int[]{mag2, mag3};
-                    } else {
-                        mag = new int[]{mag1, mag2, mag3};
-                    }
-                } else {
-                    mag = new int[]{mag0, mag1, mag2, mag3};
-                }
-
-                int signum = negative ? -1 : 1;
-                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                return bigInt.longValue();
-            case JSON_TYPE_DEC:
-                return getNumber().longValue();
-            case JSON_TYPE_BOOL:
-                return (long) (boolValue ? 1 : 0);
-            case JSON_TYPE_NULL:
-                return null;
-            case JSON_TYPE_STRING: {
-                return toInt64(stringValue);
-            }
-            case JSON_TYPE_OBJECT: {
-                Number num = toNumber((Map) complex);
-                if (num != null) {
-                    return num.longValue();
-                }
-                return null;
-            }
-            default:
-                throw new JSONException("TODO");
         }
     }
 
@@ -4649,5 +4627,41 @@ public abstract class JSONReader
         }
 
         return context.provider.getObjectReader(typeName, expectClass, context.features | features);
+    }
+
+    protected final String readStringNotMatch() {
+        switch (ch) {
+            case '[':
+                return toString(
+                        readArray());
+            case '{':
+                return toString(
+                        readObject());
+            case '-':
+            case '+':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                readNumber0();
+                Number number = getNumber();
+                return number.toString();
+            case 't':
+            case 'f':
+                boolValue = readBoolValue();
+                return boolValue ? "true" : "false";
+            case 'n': {
+                readNull();
+                return null;
+            }
+            default:
+                throw new JSONException(info("illegal input : " + ch));
+        }
     }
 }

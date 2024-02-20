@@ -401,8 +401,8 @@ public class JSONValidatorTest {
     @Test
     public void test1() {
         String str = "{\"k\":\"\\x01\"}";
-        assertTrue(JSON.isValid(str.getBytes(StandardCharsets.UTF_8)));
         assertTrue(JSON.isValid(str.toCharArray()));
+        assertTrue(JSON.isValid(str.getBytes(StandardCharsets.UTF_8)));
         assertTrue(JSON.isValid(str));
     }
 
