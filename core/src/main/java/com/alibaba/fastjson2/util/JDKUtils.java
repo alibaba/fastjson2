@@ -46,11 +46,8 @@ public class JDKUtils {
 
         long fieldOffset = -1;
         try {
-            for (Field field : BigDecimal.class.getDeclaredFields()) {
-                if ("intCompact".equals(field.getName())) {
-                    fieldOffset = UNSAFE.objectFieldOffset(field);
-                }
-            }
+            Field field = BigDecimal.class.getDeclaredField("intCompact");
+            fieldOffset = UNSAFE.objectFieldOffset(field);
         } catch (Throwable ignored) {
             // ignored
         }

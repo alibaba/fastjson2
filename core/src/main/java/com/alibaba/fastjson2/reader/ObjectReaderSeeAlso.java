@@ -142,7 +142,7 @@ final class ObjectReaderSeeAlso<T>
         for (int i = 0; ; i++) {
             if (jsonReader.nextIfObjectEnd()) {
                 if (object == null) {
-                    object = createInstance(jsonReader.context.getFeatures() | features);
+                    object = createInstance(jsonReader.context.features | features);
                 }
                 break;
             }
@@ -151,7 +151,7 @@ final class ObjectReaderSeeAlso<T>
             long features3, hash = jsonReader.readFieldNameHashCode();
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (hash == getTypeKeyHash()
-                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
+                    && ((((features3 = (features | getFeatures() | context.features)) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
                 ObjectReader reader = null;
                 long typeHash = jsonReader.readTypeHashCode();
@@ -232,7 +232,7 @@ final class ObjectReaderSeeAlso<T>
             }
 
             if (object == null) {
-                object = createInstance(jsonReader.context.getFeatures() | features);
+                object = createInstance(jsonReader.context.features | features);
             }
 
             if (fieldReader == null) {

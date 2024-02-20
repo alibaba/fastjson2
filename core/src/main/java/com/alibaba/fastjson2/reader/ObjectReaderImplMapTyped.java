@@ -182,7 +182,7 @@ class ObjectReaderImplMapTyped
         }
 
         JSONReader.Context context = jsonReader.context;
-        long contextFeatures = features | context.getFeatures();
+        long contextFeatures = features | context.features;
 
         Map object;
         if (objectReader != null) {
@@ -248,7 +248,8 @@ class ObjectReaderImplMapTyped
                     value = autoTypeValueReader.readJSONBObject(jsonReader, valueType, name, features);
                 } else {
                     if (valueObjectReader == null) {
-                        valueObjectReader = jsonReader.getObjectReader(valueType);
+                        boolean fieldBased = (contextFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+                        valueObjectReader = context.provider.getObjectReader(valueType, fieldBased);
                     }
                     value = valueObjectReader.readJSONBObject(jsonReader, valueType, name, features);
                 }
@@ -284,7 +285,7 @@ class ObjectReaderImplMapTyped
         }
 
         JSONReader.Context context = jsonReader.context;
-        long contextFeatures = context.getFeatures() | features;
+        long contextFeatures = context.features | features;
         Map object, innerMap = null;
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();
@@ -369,7 +370,8 @@ class ObjectReaderImplMapTyped
                 }
             }
             if (valueObjectReader == null) {
-                valueObjectReader = jsonReader.getObjectReader(valueType);
+                boolean fieldBased = (contextFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+                valueObjectReader = context.provider.getObjectReader(valueType, fieldBased);
             }
 
             Object value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);

@@ -228,7 +228,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         JSONReader.Context context = jsonReader.context;
-        long featuresAll = this.features | features | context.getFeatures();
+        long featuresAll = this.features | features | context.features;
 
         LinkedHashMap<Long, Object> valueMap = null;
         for (int i = 0; ; i++) {

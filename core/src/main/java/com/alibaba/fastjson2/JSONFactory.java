@@ -8,8 +8,6 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.NameCacheEntry;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.ZoneId;
@@ -35,6 +33,7 @@ public final class JSONFactory {
 
     static Class JSON_OBJECT_CLASS_1x;
     static Supplier JSON_OBJECT_1x_SUPPLIER;
+    static Function JSON_OBJECT_1x_INNER_MAP;
     static Function JSON_OBJECT_1x_BUILDER;
     static Class JSON_ARRAY_CLASS_1x;
     static Supplier JSON_ARRAY_1x_SUPPLIER;
@@ -250,25 +249,11 @@ public final class JSONFactory {
         return defaultObjectReaderProvider;
     }
 
-    public static void setFastjson1x(
-            Class jsonObjectClass,
-            Supplier jsonObjectSuppier,
-            Function jsonObjectBuilder,
-            Class jsonArrayClass,
-            Supplier jsonArraySupplier
-    ) {
-        JSON_OBJECT_CLASS_1x = jsonObjectClass;
-        JSON_OBJECT_1x_SUPPLIER = jsonObjectSuppier;
-        JSON_OBJECT_1x_BUILDER = jsonObjectBuilder;
-        JSON_ARRAY_CLASS_1x = jsonArrayClass;
-        JSON_ARRAY_1x_SUPPLIER = jsonArraySupplier;
-    }
-
     public static Class getClassJSONObject1x() {
         if (JSON_OBJECT_CLASS_1x == null && !JSON_REFLECT_1x_ERROR) {
             try {
-                JSON_OBJECT_CLASS_1x = Class.forName("com.alibaba.fastjson.JSONObject");
-            } catch (ClassNotFoundException ignored) {
+                JSON_OBJECT_CLASS_1x = com.alibaba.fastjson.JSONObject.class;
+            } catch (Throwable ignored) {
                 JSON_REFLECT_1x_ERROR = true;
             }
         }
@@ -279,8 +264,8 @@ public final class JSONFactory {
     public static Class getClassJSONArray1x() {
         if (JSON_ARRAY_CLASS_1x == null && !JSON_REFLECT_1x_ERROR) {
             try {
-                JSON_ARRAY_CLASS_1x = Class.forName("com.alibaba.fastjson.JSONArray");
-            } catch (ClassNotFoundException ignored) {
+                JSON_ARRAY_CLASS_1x = com.alibaba.fastjson.JSONArray.class;
+            } catch (Throwable ignored) {
                 JSON_REFLECT_1x_ERROR = true;
             }
         }
@@ -292,34 +277,51 @@ public final class JSONFactory {
         if (JSON_OBJECT_1x_BUILDER == null && !JSON_REFLECT_1x_ERROR) {
             Class classJSONObject1x = getClassJSONObject1x();
             if (classJSONObject1x != null) {
-                Constructor constructor;
                 try {
-                    constructor = classJSONObject1x.getConstructor(Map.class);
-                } catch (NoSuchMethodException e) {
+                    JSON_OBJECT_1x_BUILDER = new FJ1OjbectBuilder();
+                } catch (Throwable e) {
+                    JSON_REFLECT_1x_ERROR = true;
                     throw new JSONException("create JSONObject1 error");
                 }
-                JSON_OBJECT_1x_BUILDER = new ConstructorFunction(constructor);
             }
         }
 
         return JSON_OBJECT_1x_BUILDER;
     }
 
-    private static final class ConstructorFunction
-            implements Function {
-        final Constructor constructor;
-
-        ConstructorFunction(Constructor constructor) {
-            this.constructor = constructor;
+    public static Function getInnerMap() {
+        if (JSON_OBJECT_1x_INNER_MAP == null && !JSON_REFLECT_1x_ERROR) {
+            Class classJSONObject1x = getClassJSONObject1x();
+            if (classJSONObject1x != null) {
+                try {
+                    JSON_OBJECT_1x_INNER_MAP = new FJ1ObjectInnerSupplier();
+                } catch (Throwable e) {
+                    JSON_REFLECT_1x_ERROR = true;
+                    throw new JSONException("create getInnerMap error");
+                }
+            }
         }
 
+        return JSON_OBJECT_1x_INNER_MAP;
+    }
+
+    public static Map createJSONObject1(Map map) {
+        return new com.alibaba.fastjson.JSONObject(map);
+    }
+
+    private static final class FJ1ObjectInnerSupplier
+            implements Function {
         @Override
-        public Object apply(Object arg) {
-            try {
-                return constructor.newInstance(arg);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create JSONObject1 error");
-            }
+        public Object apply(Object o) {
+            return ((com.alibaba.fastjson.JSONObject) o).getInnerMap();
+        }
+    }
+
+    private static final class FJ1OjbectBuilder
+            implements Function {
+        @Override
+        public Object apply(Object o) {
+            return new com.alibaba.fastjson.JSONObject((Map) o);
         }
     }
 }

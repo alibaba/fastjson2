@@ -70,7 +70,7 @@ public class ObjectWriterAdapter<T>
         this.serializable = objectClass == null || java.io.Serializable.class.isAssignableFrom(objectClass);
         this.googleCollection =
                 "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
-                || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
+                        || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
 
         this.fieldWriterArray = new FieldWriter[fieldWriters.size()];
         fieldWriters.toArray(fieldWriterArray);
@@ -346,21 +346,21 @@ public class ObjectWriterAdapter<T>
         return fieldWriters;
     }
 
-    byte[] jsonbClassInfo;
-
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
         String typeName = this.getTypeName();
         if (jsonWriter.utf8) {
             if (nameWithColonUTF8 == null) {
-                byte[] chars = new byte[typeKey.length() + typeName.length() + 5];
+                int typeKeyLength = typeKey.length();
+                int typeNameLength = typeName.length();
+                byte[] chars = new byte[typeKeyLength + typeNameLength + 5];
                 chars[0] = '"';
-                typeKey.getBytes(0, typeKey.length(), chars, 1);
-                chars[typeKey.length() + 1] = '"';
-                chars[typeKey.length() + 2] = ':';
-                chars[typeKey.length() + 3] = '"';
-                typeName.getBytes(0, typeName.length(), chars, typeKey.length() + 4);
-                chars[typeKey.length() + typeName.length() + 4] = '"';
+                typeKey.getBytes(0, typeKeyLength, chars, 1);
+                chars[typeKeyLength + 1] = '"';
+                chars[typeKeyLength + 2] = ':';
+                chars[typeKeyLength + 3] = '"';
+                typeName.getBytes(0, typeNameLength, chars, typeKeyLength + 4);
+                chars[typeKeyLength + typeNameLength + 4] = '"';
 
                 nameWithColonUTF8 = chars;
             }
@@ -368,14 +368,16 @@ public class ObjectWriterAdapter<T>
             return true;
         } else if (jsonWriter.utf16) {
             if (nameWithColonUTF16 == null) {
-                char[] chars = new char[typeKey.length() + typeName.length() + 5];
+                int typeKeyLength = typeKey.length();
+                int typeNameLength = typeName.length();
+                char[] chars = new char[typeKeyLength + typeNameLength + 5];
                 chars[0] = '"';
-                typeKey.getChars(0, typeKey.length(), chars, 1);
-                chars[typeKey.length() + 1] = '"';
-                chars[typeKey.length() + 2] = ':';
-                chars[typeKey.length() + 3] = '"';
-                typeName.getChars(0, typeName.length(), chars, typeKey.length() + 4);
-                chars[typeKey.length() + typeName.length() + 4] = '"';
+                typeKey.getChars(0, typeKeyLength, chars, 1);
+                chars[typeKeyLength + 1] = '"';
+                chars[typeKeyLength + 2] = ':';
+                chars[typeKeyLength + 3] = '"';
+                typeName.getChars(0, typeNameLength, chars, typeKeyLength + 4);
+                chars[typeKeyLength + typeNameLength + 4] = '"';
 
                 nameWithColonUTF16 = chars;
             }
@@ -386,7 +388,7 @@ public class ObjectWriterAdapter<T>
                 typeKeyJSONB = JSONB.toBytes(typeKey);
             }
             jsonWriter.writeRaw(typeKeyJSONB);
-            jsonWriter.writeRaw(getTypeNameJSONB());
+            jsonWriter.writeRaw(typeNameJSONB);
             return true;
         }
 

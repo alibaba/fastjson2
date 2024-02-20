@@ -109,7 +109,7 @@ public class ObjectReader1<T>
         T object;
         if (creator != null) {
             object = creator.get();
-        } else if (((features | jsonReader.context.getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
+        } else if (((features | jsonReader.context.features) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
                 object = (T) JDKUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
@@ -290,14 +290,5 @@ public class ObjectReader1<T>
         }
 
         return null;
-    }
-
-    @Override
-    public boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, int value) {
-        if (this.hashCode0 != fieldNameHashCode) {
-            return false;
-        }
-        fieldReader0.accept(object, value);
-        return true;
     }
 }

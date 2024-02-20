@@ -44,8 +44,8 @@ final class ObjectReaderImplMapString
         Map<String, Object> object
                 = instanceType == HashMap.class
                 ? new HashMap<>()
-                : (Map) createInstance(context.getFeatures() | features);
-        long contextFeatures = features | context.getFeatures();
+                : (Map) createInstance(context.features | features);
+        long contextFeatures = features | context.features;
 
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfObjectEnd()) {

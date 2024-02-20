@@ -878,26 +878,12 @@ public class ObjectReaderProvider {
             }
         }
 
-        Class<?> objectClass = TypeUtils.getMapping(objectType);
-        if (objectClass.isAnnotationPresent(JSONCompiled.class)) {
-            String codeGenClassName = objectClass.getName() + "_FASTJOSNReader";
-            ClassLoader classLoader = objectClass.getClassLoader();
-
-            try {
-                Class<?> loadedClass = classLoader.loadClass(codeGenClassName);
-                if (ObjectReader.class.isAssignableFrom(loadedClass)) {
-                    objectReader = (ObjectReader) loadedClass.newInstance();
-                }
-            } catch (Exception ignored) {
-                ignored.printStackTrace();
-                // ignored
-            }
-        }
-
-        if (objectReader == null) {
-            ObjectReaderCreator creator = getCreator();
-            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
-        }
+        ObjectReaderCreator creator = getCreator();
+        objectReader = creator.createObjectReader(
+                TypeUtils.getMapping(objectType),
+                objectType,
+                fieldBased,
+                this);
 
         ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);
         if (previous != null) {

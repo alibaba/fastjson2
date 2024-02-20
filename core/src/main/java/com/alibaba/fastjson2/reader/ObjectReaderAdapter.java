@@ -11,9 +11,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.JSONReader.Feature.ErrorOnUnknownProperties;
-import static com.alibaba.fastjson2.JSONReader.Feature.SupportSmartMatch;
-
 public class ObjectReaderAdapter<T>
         extends ObjectReaderBean<T> {
     protected final String typeKey;
@@ -222,7 +219,7 @@ public class ObjectReaderAdapter<T>
         }
         if (autoTypeObjectReader == null) {
             String typeName = jsonReader.getString();
-            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, this.features | features | context.getFeatures());
+            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, this.features | features | context.features);
 
             if (autoTypeObjectReader == null) {
                 if (expectClass == objectClass) {
@@ -477,14 +474,14 @@ public class ObjectReaderAdapter<T>
             }
 
             if (object == null) {
-                object = createInstance(jsonReader.context.getFeatures() | features);
+                object = createInstance(jsonReader.context.features | features);
             }
 
             fieldReader.readFieldValue(jsonReader, object);
         }
 
         if (object == null) {
-            object = createInstance(jsonReader.context.getFeatures() | features);
+            object = createInstance(jsonReader.context.features | features);
         }
 
         return (T) object;
@@ -527,9 +524,10 @@ public class ObjectReaderAdapter<T>
     }
 
     public T createInstance(Map map, long features) {
-        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         Object typeKey = map.get(this.typeKey);
 
+        long features2 = features | this.features;
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
             long typeHash = Fnv.hashCode64(typeName);
@@ -540,7 +538,7 @@ public class ObjectReaderAdapter<T>
 
             if (reader == null) {
                 reader = provider.getObjectReader(
-                        typeName, getObjectClass(), features | getFeatures()
+                        typeName, getObjectClass(), features2
                 );
             }
 
@@ -552,8 +550,9 @@ public class ObjectReaderAdapter<T>
         T object = createInstance(0L);
 
         if (extraFieldReader == null
-                && ((features | this.features) & (SupportSmartMatch.mask | ErrorOnUnknownProperties.mask)) == 0
+                && (features2 & (JSONReader.Feature.SupportSmartMatch.mask | JSONReader.Feature.ErrorOnUnknownProperties.mask)) == 0
         ) {
+            boolean fieldBased = (features2 & JSONReader.Feature.FieldBased.mask) != 0;
             for (int i = 0; i < fieldReaders.length; i++) {
                 FieldReader fieldReader = fieldReaders[i];
                 Object fieldValue = map.get(fieldReader.fieldName);
@@ -575,8 +574,9 @@ public class ObjectReaderAdapter<T>
                             && fieldReader.fieldType != JSONObject.class
                     ) {
                         JSONObject jsonObject = (JSONObject) fieldValue;
-                        ObjectReader<T> objectReader = fieldReader.getObjectReader(provider);
-                        Object fieldValueJavaBean = objectReader.createInstance(jsonObject, features);
+                        Object fieldValueJavaBean = provider
+                                .getObjectReader(fieldReader.fieldType, fieldBased)
+                                .createInstance(jsonObject, features);
                         fieldReader.accept(object, fieldValueJavaBean);
                         continue;
                     }
@@ -605,11 +605,8 @@ public class ObjectReaderAdapter<T>
             }
         }
 
-        Function buildFunction = getBuildFunction();
-        if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
-        }
-
-        return object;
+        return buildFunction != null
+                ? (T) buildFunction.apply(object)
+                : object;
     }
 }

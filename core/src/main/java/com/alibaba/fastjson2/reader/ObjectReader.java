@@ -130,24 +130,6 @@ public interface ObjectReader<T> {
         return null;
     }
 
-    default boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, int value) {
-        FieldReader fieldReader = getFieldReader(fieldNameHashCode);
-        if (fieldReader == null) {
-            return false;
-        }
-        fieldReader.accept(object, value);
-        return true;
-    }
-
-    default boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, long value) {
-        FieldReader fieldReader = getFieldReader(fieldNameHashCode);
-        if (fieldReader == null) {
-            return false;
-        }
-        fieldReader.accept(object, value);
-        return true;
-    }
-
     default FieldReader getFieldReader(String fieldName) {
         long fieldNameHash = Fnv.hashCode64(fieldName);
         FieldReader fieldReader = getFieldReader(fieldNameHash);
@@ -230,14 +212,14 @@ public interface ObjectReader<T> {
             }
 
             if (object == null) {
-                object = createInstance(jsonReader.context.getFeatures() | features);
+                object = createInstance(jsonReader.context.features | features);
             }
 
             fieldReader.readFieldValue(jsonReader, object);
         }
 
         if (object == null) {
-            object = createInstance(jsonReader.context.getFeatures() | features);
+            object = createInstance(jsonReader.context.features | features);
         }
 
         return object;

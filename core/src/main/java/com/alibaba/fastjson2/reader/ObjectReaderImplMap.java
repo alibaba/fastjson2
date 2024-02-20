@@ -37,6 +37,7 @@ public final class ObjectReaderImplMap
     final Class instanceType;
     final long features;
     final Function builder;
+    final boolean fastjson1x;
     Object mapSingleton;
     volatile boolean instanceError;
 
@@ -107,7 +108,6 @@ public final class ObjectReaderImplMap
 
         String instanceTypeName = instanceType.getName();
         if (instanceTypeName.equals("com.alibaba.fastjson.JSONObject")) {
-            builder = createObjectSupplier(instanceType);
             instanceType = HashMap.class;
         } else if (instanceTypeName.equals("java.util.Collections$EmptyMap")) {
             return new ObjectReaderImplMap(instanceType, features, Collections.EMPTY_MAP);
@@ -153,6 +153,8 @@ public final class ObjectReaderImplMap
         this.instanceType = instanceType;
         this.features = features;
         this.builder = builder;
+        this.fastjson1x = mapType != null
+                && mapType.getName().equals("com.alibaba.fastjson.JSONObject");
     }
 
     @Override
@@ -212,6 +214,10 @@ public final class ObjectReaderImplMap
 
         Map instance = (Map) this.createInstance(features);
         instance.putAll(map);
+
+        if (fastjson1x) {
+            return JSONFactory.createJSONObject1(instance);
+        }
 
         if (builder != null) {
             return builder.apply(instance);
@@ -351,6 +357,10 @@ public final class ObjectReaderImplMap
             }
         }
 
+        if (fastjson1x) {
+            return JSONFactory.createJSONObject1(map);
+        }
+
         if (builder != null) {
             return builder.apply(map);
         }
@@ -373,7 +383,7 @@ public final class ObjectReaderImplMap
         if (objectSupplier != null && (mapType == null || mapType == JSONObject.class || "com.alibaba.fastjson.JSONObject".equals(mapType.getName()))) {
             object = objectSupplier.get();
         } else {
-            object = (Map) createInstance(context.getFeatures() | features);
+            object = (Map) createInstance(context.features | features);
         }
 
         if (jsonReader.isString() && !jsonReader.isTypeRedirect()) {
@@ -388,6 +398,10 @@ public final class ObjectReaderImplMap
         }
 
         jsonReader.nextIfComma();
+
+        if (fastjson1x) {
+            return JSONFactory.createJSONObject1(object);
+        }
 
         if (builder != null) {
             return builder.apply(object);

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
-import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -555,8 +554,8 @@ public class JSONBTest {
                 BigInteger.ZERO,
                 BigInteger.ONE,
                 BigInteger.TEN,
-                TypeUtils.BIGINT_INT64_MIN,
-                TypeUtils.BIGINT_INT64_MAX,
+                JSONWriterJSONB.BIGINT_INT64_MIN,
+                JSONWriterJSONB.BIGINT_INT64_MAX,
                 new BigInteger("12345678901234567890123456789012345678901234567890123456789012345678901234567890"),
         };
         for (BigInteger i : numbers) {

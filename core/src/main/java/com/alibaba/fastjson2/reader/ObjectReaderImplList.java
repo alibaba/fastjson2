@@ -478,7 +478,7 @@ public final class ObjectReaderImplList
                 throw new JSONException(jsonReader.info("create instance error " + listType), e);
             }
         } else {
-            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.features | features);
         }
 
         ObjectReader itemObjectReader = this.itemObjectReader;
@@ -547,7 +547,7 @@ public final class ObjectReaderImplList
         if (jsonReader.nextIfSet()) {
             list = new HashSet();
         } else {
-            list = (Collection) createInstance(context.getFeatures() | features);
+            list = (Collection) createInstance(context.features | features);
         }
         char ch = jsonReader.current();
         if (ch == '"') {

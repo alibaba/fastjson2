@@ -2291,22 +2291,9 @@ public abstract class BeanUtils {
     }
 
     public static boolean isNoneStaticMemberClass(Class objectClass, Class memberClass) {
-        if (memberClass == null
-                || memberClass.isPrimitive()
-                || memberClass == String.class
-                || memberClass == List.class
-                || memberClass == Map.class
-                || memberClass.isEnum()
-        ) {
-            return false;
-        }
-
         Class enclosingClass = memberClass.getEnclosingClass();
-        if (enclosingClass == null) {
-            return false;
-        }
-
-        if (objectClass != null && !objectClass.equals(enclosingClass)) {
+        if (enclosingClass == null
+                || (objectClass != null && !objectClass.equals(enclosingClass))) {
             return false;
         }
 
@@ -2320,8 +2307,7 @@ public abstract class BeanUtils {
             return false;
         }
 
-        Constructor firstConstructor = constructors[0];
-        Class[] parameterTypes = firstConstructor.getParameterTypes();
+        Class[] parameterTypes = constructors[0].getParameterTypes();
         if (parameterTypes.length == 0) {
             return false;
         }

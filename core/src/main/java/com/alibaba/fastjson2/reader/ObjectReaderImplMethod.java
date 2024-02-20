@@ -31,7 +31,7 @@ public class ObjectReaderImplMethod
         String methodName = jsonReader.readString();
         List<String> paramTypeNames = jsonReader.readArray(String.class);
 
-        return getMethod(jsonReader.context.getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.context.features | features, methodName, declaringClassName, paramTypeNames);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ObjectReaderImplMethod
 
         jsonReader.nextIfComma();
 
-        return getMethod(jsonReader.context.getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.context.features | features, methodName, declaringClassName, paramTypeNames);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class ObjectReaderImplMethod
             jsonReader.nextIfComma();
         }
 
-        return getMethod(jsonReader.context.getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.context.features | features, methodName, declaringClassName, paramTypeNames);
     }
 
     private Method getMethod(long features,

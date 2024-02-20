@@ -47,7 +47,7 @@ final class ObjectReaderImplClass
         }
 
         String className = jsonReader.getString();
-        boolean classForName = ((context.getFeatures() | features) & JSONReader.Feature.SupportClassForName.mask) != 0;
+        boolean classForName = ((context.features | features) & JSONReader.Feature.SupportClassForName.mask) != 0;
         if (!classForName) {
             String msg = jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'");
             throw new JSONException(msg);
