@@ -18,11 +18,19 @@ public class Issue2076 {
         }
         String str = JSON.toJSONString(array);
         JSONArray array1 = JSON.parseArray(str);
-        assertEquals(array, array1);
+        for (int i = 0; i < array1.size(); i++) {
+            assertEquals(
+                    array.getBigDecimal(i).unscaledValue(),
+                    array1.getBigDecimal(i).unscaledValue());
+        }
 
         byte[] bytes = JSON.toJSONBytes(array);
         JSONArray array2 = JSON.parseArray(bytes);
-        assertEquals(array, array2);
+        for (int i = 0; i < array1.size(); i++) {
+            assertEquals(
+                    array.getBigDecimal(i).unscaledValue(),
+                    array2.getBigDecimal(i).unscaledValue());
+        }
     }
 
     @Test

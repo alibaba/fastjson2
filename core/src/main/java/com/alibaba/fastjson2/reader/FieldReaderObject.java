@@ -62,7 +62,9 @@ public class FieldReaderObject<T>
             return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
         }
 
-        return reader = jsonReader.getObjectReader(fieldType);
+        JSONReader.Context context = jsonReader.context;
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        return reader = context.provider.getObjectReader(fieldType, fieldBased);
     }
 
     public ObjectReader getObjectReader(JSONReader.Context context) {
@@ -81,13 +83,14 @@ public class FieldReaderObject<T>
             return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
         }
 
-        return reader = context.getObjectReader(fieldType);
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        return reader = context.provider.getObjectReader(fieldType, fieldBased);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (!fieldClassSerializable) {
-            long contextFeatures = jsonReader.context.getFeatures();
+            long contextFeatures = jsonReader.context.features;
             if ((contextFeatures & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
                 jsonReader.skipValue();
                 return;
@@ -155,8 +158,9 @@ public class FieldReaderObject<T>
 
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        JSONReader.Context context = jsonReader.context;
+        long contextFeatures = context.features;
         if (!fieldClassSerializable && jsonReader.getType() != JSONB.Constants.BC_TYPED_ANY) {
-            long contextFeatures = jsonReader.context.getFeatures();
             if ((contextFeatures & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
                 jsonReader.skipValue();
                 return;
@@ -166,7 +170,8 @@ public class FieldReaderObject<T>
         }
 
         if (initReader == null) {
-            initReader = jsonReader.context.getObjectReader(fieldType);
+            boolean fieldBased = (contextFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+            initReader = context.provider.getObjectReader(fieldType, fieldBased);
         }
 
         if (jsonReader.isReference()) {

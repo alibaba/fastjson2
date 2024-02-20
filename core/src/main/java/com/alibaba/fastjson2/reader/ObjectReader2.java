@@ -126,7 +126,7 @@ public class ObjectReader2<T>
         T object;
         if (creator != null) {
             object = creator.get();
-        } else if (((features | jsonReader.context.getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
+        } else if (((features | jsonReader.context.features) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
                 object = (T) JDKUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {

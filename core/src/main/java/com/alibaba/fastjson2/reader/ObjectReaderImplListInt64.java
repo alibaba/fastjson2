@@ -72,7 +72,7 @@ public final class ObjectReaderImplListInt64
         } else if (listType != null && listType != this.listType) {
             list = (Collection) objectReader.createInstance(features);
         } else {
-            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.features | features);
         }
 
         int entryCnt = jsonReader.startArray();
@@ -101,7 +101,7 @@ public final class ObjectReaderImplListInt64
         }
 
         if (jsonReader.isString()) {
-            Collection list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
+            Collection list = (Collection) createInstance(jsonReader.context.features | features);
             String str = jsonReader.readString();
             if (str.indexOf(',') != -1) {
                 String[] items = str.split(",");
@@ -128,7 +128,7 @@ public final class ObjectReaderImplListInt64
         if (set && instanceType == Collection.class) {
             list = new LinkedHashSet();
         } else {
-            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.features | features);
         }
 
         for (; ; ) {

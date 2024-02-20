@@ -48,7 +48,8 @@ public class ObjectWriterProvider {
     volatile long userDefineMask;
 
     public ObjectWriterProvider() {
-        this((PropertyNamingStrategy) null);
+        this.namingStrategy = null;
+        this.creator = ObjectWriterCreator.INSTANCE;
     }
 
     public ObjectWriterProvider(PropertyNamingStrategy namingStrategy) {

@@ -279,7 +279,7 @@ public abstract class ObjectReaderBean<T>
         for (int i = 0; ; i++) {
             if (jsonReader.nextIfObjectEnd()) {
                 if (object == null) {
-                    object = createInstance(jsonReader.context.getFeatures() | features);
+                    object = createInstance(jsonReader.context.features | features);
                     if (object != null && (featuresAll & JSONReader.Feature.InitStringFieldAsEmpty.mask) != 0) {
                         initStringFieldAsEmpty(object);
                     }
@@ -296,7 +296,7 @@ public abstract class ObjectReaderBean<T>
 
             if (i == 0
                     && hash == getTypeKeyHash()
-                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & SupportAutoType.mask) != 0) || autoTypeFilter != null)
+                    && ((((features3 = (features | getFeatures() | context.features)) & SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
                 ObjectReader reader = null;
 
@@ -354,7 +354,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (object == null) {
-                object = createInstance(jsonReader.context.getFeatures() | features);
+                object = createInstance(jsonReader.context.features | features);
             }
 
             if (fieldReader == null) {

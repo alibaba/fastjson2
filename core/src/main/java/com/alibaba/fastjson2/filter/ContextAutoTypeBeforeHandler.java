@@ -19,6 +19,9 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 public class ContextAutoTypeBeforeHandler
         implements JSONReader.AutoTypeBeforeHandler {
+    static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
+    static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(Collections.emptySet()).getClass();
+    static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(Collections.emptyList()).getClass();
     final long[] acceptHashCodes;
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, Class>> tclHashCaches = new ConcurrentHashMap<>();
     final Map<Long, Class> classCache = new ConcurrentHashMap<>(16, 0.75f, 1);

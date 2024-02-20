@@ -24,6 +24,12 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
+    static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
+    static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
+
+    static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
+    static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+
     private final CacheItem cacheItem;
     private byte[] bytes;
     private TLongIntHashMap symbols;
@@ -1342,28 +1348,7 @@ final class JSONWriterJSONB
             return;
         }
 
-        int precision = value.precision();
         int scale = value.scale();
-
-        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-            long intCompact = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
-            if (scale == 0) {
-                ensureCapacity(off + 1);
-                this.bytes[off++] = BC_DECIMAL_LONG;
-                writeInt64(intCompact);
-                return;
-            }
-
-            ensureCapacity(off + 1);
-            this.bytes[off++] = BC_DECIMAL;
-            writeInt32(scale);
-            if (intCompact >= Integer.MIN_VALUE && intCompact <= Integer.MAX_VALUE) {
-                writeInt32((int) intCompact);
-            } else {
-                writeInt64(intCompact);
-            }
-            return;
-        }
 
         BigInteger unscaledValue = value.unscaledValue();
         if (scale == 0
@@ -1388,6 +1373,14 @@ final class JSONWriterJSONB
         } else {
             writeBigInt(unscaledValue, 0);
         }
+    }
+
+    private static boolean isInt32(BigInteger value) {
+        return value.compareTo(BIGINT_INT32_MIN) >= 0 && value.compareTo(BIGINT_INT32_MAX) <= 0;
+    }
+
+    private static boolean isInt64(BigInteger value) {
+        return value.compareTo(BIGINT_INT64_MIN) >= 0 && value.compareTo(BIGINT_INT64_MAX) <= 0;
     }
 
     @Override

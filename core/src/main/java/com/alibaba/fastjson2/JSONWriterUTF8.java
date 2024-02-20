@@ -2238,20 +2238,9 @@ final class JSONWriterUTF8
         }
 
         boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
-        long unscaleValue;
-        int scale;
-        if (precision < 19
-                && (scale = value.scale()) >= 0
-                && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
-                && (unscaleValue = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
-                && !asPlain
-        ) {
-            off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);
-        } else {
-            String str = asPlain ? value.toPlainString() : value.toString();
-            str.getBytes(0, str.length(), bytes, off);
-            off += str.length();
-        }
+        String str = asPlain ? value.toPlainString() : value.toString();
+        str.getBytes(0, str.length(), bytes, off);
+        off += str.length();
 
         if (writeAsString) {
             bytes[off++] = '"';

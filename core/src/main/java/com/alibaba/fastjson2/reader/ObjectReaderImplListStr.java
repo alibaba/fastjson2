@@ -123,7 +123,7 @@ public final class ObjectReaderImplListStr
                 throw new JSONException(jsonReader.info("create instance error " + instanceType), e);
             }
         } else {
-            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.features | features);
         }
 
         for (int i = 0; i < entryCnt; ++i) {
@@ -150,7 +150,7 @@ public final class ObjectReaderImplListStr
         boolean set = jsonReader.nextIfSet();
         Collection list = set
                 ? new HashSet()
-                : (Collection) createInstance(jsonReader.context.getFeatures() | features);
+                : (Collection) createInstance(jsonReader.context.features | features);
 
         char ch = jsonReader.current();
         if (ch == '[') {

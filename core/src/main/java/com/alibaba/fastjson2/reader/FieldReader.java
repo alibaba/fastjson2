@@ -89,14 +89,26 @@ public abstract class FieldReader<T>
             }
         }
 
-        Class declaringClass = null;
-        if (method != null) {
-            declaringClass = method.getDeclaringClass();
-        } else if (field != null) {
-            declaringClass = field.getDeclaringClass();
+        boolean noneStaticMemberClass;
+        if (fieldClass == null
+                || fieldClass.isPrimitive()
+                || fieldClass == String.class
+                || fieldClass == List.class
+                || fieldClass == Map.class
+                || fieldClass.isEnum()
+        ) {
+            noneStaticMemberClass = false;
+        } else {
+            Class declaringClass = null;
+            if (method != null) {
+                declaringClass = method.getDeclaringClass();
+            } else if (field != null) {
+                declaringClass = field.getDeclaringClass();
+            }
+            noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
         }
 
-        this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
+        this.noneStaticMemberClass = noneStaticMemberClass;
     }
 
     public void acceptDefaultValue(T object) {

@@ -158,6 +158,7 @@ class FieldReaderObjectField<T>
                 return;
             }
         } else {
+            Class fieldClass = this.fieldClass;
             if (fieldClass.isPrimitive()) {
                 acceptPrimitive(object, value);
                 return;
@@ -170,7 +171,7 @@ class FieldReaderObjectField<T>
             ) {
                 ObjectReader objectReader = getObjectReader(JSONFactory.createReadContext());
                 value = objectReader.createInstance((Map) value);
-            } else if (!fieldClass.isInstance(value)) {
+            } else if (fieldClass != value.getClass() && !fieldClass.isInstance(value)) {
                 if (value instanceof String) {
                     String str = (String) value;
                     if (fieldClass == java.util.Date.class) {

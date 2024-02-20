@@ -17,7 +17,6 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class JSONWriterUTF16
@@ -1254,20 +1253,9 @@ final class JSONWriterUTF16
         }
 
         boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
-        long unscaleValue;
-        int scale;
-        if (precision < 19
-                && (scale = value.scale()) >= 0
-                && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
-                && (unscaleValue = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
-                && !asPlain
-        ) {
-            off = IOUtils.writeDecimal(chars, off, unscaleValue, scale);
-        } else {
-            String str = asPlain ? value.toPlainString() : value.toString();
-            str.getChars(0, str.length(), chars, off);
-            off += str.length();
-        }
+        String str = asPlain ? value.toPlainString() : value.toString();
+        str.getChars(0, str.length(), chars, off);
+        off += str.length();
 
         if (writeAsString) {
             chars[off++] = '"';

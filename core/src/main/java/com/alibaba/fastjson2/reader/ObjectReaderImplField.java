@@ -29,7 +29,7 @@ public class ObjectReaderImplField
         String declaringClassName = jsonReader.readString();
         String methodName = jsonReader.readString();
 
-        return getField(jsonReader.context.getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.context.features | features, methodName, declaringClassName);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ObjectReaderImplField
 
         jsonReader.nextIfComma();
 
-        return getField(jsonReader.context.getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.context.features | features, methodName, declaringClassName);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class ObjectReaderImplField
             jsonReader.nextIfComma();
         }
 
-        return getField(jsonReader.context.getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.context.features | features, methodName, declaringClassName);
     }
 
     private Field getField(long features,

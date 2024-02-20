@@ -1485,12 +1485,7 @@ public class ObjectReaderCreator {
     }
 
     public <T> Supplier<T> createSupplier(Class<T> objectClass) {
-        if (objectClass.isInterface()) {
-            return null;
-        }
-
-        int modifiers = objectClass.getModifiers();
-        if (Modifier.isAbstract(modifiers)) {
+        if (objectClass.isInterface() || Modifier.isAbstract(objectClass.getModifiers())) {
             return null;
         }
 
@@ -1504,10 +1499,6 @@ public class ObjectReaderCreator {
             throw new JSONException("get constructor error, class " + objectClass.getName(), e);
         }
 
-        return createSupplier(constructor, true);
-    }
-
-    public <T> Supplier<T> createSupplier(Constructor constructor, boolean jit) {
         return new ConstructorSupplier(constructor);
     }
 
@@ -2525,7 +2516,7 @@ public class ObjectReaderCreator {
             FieldInfo fieldInfo
     ) {
         ObjectReader initReader = fieldInfo.getInitReader();
-        if (initReader == null && Map.class.isAssignableFrom(fieldClass) && (fieldInfo.keyUsing != null || fieldInfo.valueUsing != null)) {
+        if (initReader == null && (fieldInfo.keyUsing != null || fieldInfo.valueUsing != null) && Map.class.isAssignableFrom(fieldClass)) {
             ObjectReader keyReader = null;
             if (fieldInfo.keyUsing != null) {
                 try {

@@ -70,7 +70,7 @@ public class ObjectReaderImplMapMultiValueType
         }
 
         JSONReader.Context context = jsonReader.getContext();
-        long contextFeatures = context.getFeatures() | features;
+        long contextFeatures = context.features | features;
         Map object, innerMap = null;
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();

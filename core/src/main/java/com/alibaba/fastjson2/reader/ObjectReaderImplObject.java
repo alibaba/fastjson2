@@ -67,7 +67,7 @@ public final class ObjectReaderImplObject
         }
 
         JSONReader.Context context = jsonReader.context;
-        long contextFeatures = features | context.getFeatures();
+        long contextFeatures = features | context.features;
 
         String typeName = null;
         if (jsonReader.isObject()) {
@@ -133,7 +133,7 @@ public final class ObjectReaderImplObject
             if (objectSupplier != null) {
                 object = objectSupplier.get();
             } else {
-                if (((features | context.getFeatures()) & JSONReader.Feature.UseNativeObject.mask) != 0) {
+                if (((features | context.features) & JSONReader.Feature.UseNativeObject.mask) != 0) {
                     object = new HashMap();
                 } else {
                     object = (Map) ObjectReaderImplMap.INSTANCE_OBJECT.createInstance(jsonReader.features(features));

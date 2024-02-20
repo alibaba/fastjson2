@@ -856,26 +856,12 @@ public class ObjectReaderProvider {
             }
         }
 
-        Class<?> objectClass = TypeUtils.getMapping(objectType);
-        if (objectClass.isAnnotationPresent(JSONCompiled.class)) {
-            String codeGenClassName = objectClass.getName() + "_FASTJOSNReader";
-            ClassLoader classLoader = objectClass.getClassLoader();
-
-            try {
-                Class<?> loadedClass = classLoader.loadClass(codeGenClassName);
-                if (ObjectReader.class.isAssignableFrom(loadedClass)) {
-                    objectReader = (ObjectReader) loadedClass.newInstance();
-                }
-            } catch (Exception ignored) {
-                ignored.printStackTrace();
-                // ignored
-            }
-        }
-
-        if (objectReader == null) {
-            ObjectReaderCreator creator = getCreator();
-            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
-        }
+        ObjectReaderCreator creator = getCreator();
+        objectReader = creator.createObjectReader(
+                TypeUtils.getMapping(objectType),
+                objectType,
+                fieldBased,
+                this);
 
         ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);
         if (previous != null) {
@@ -964,7 +950,12 @@ public class ObjectReaderProvider {
         Class mixInSource = mixInCache.get(objectClass);
         if (mixInSource != null && mixInSource != objectClass) {
             beanInfo.mixIn = true;
-            getBeanInfo(beanInfo, mixInSource.getDeclaredAnnotations());
+
+            for (Annotation annotation : mixInSource.getDeclaredAnnotations()) {
+                if (annotation.annotationType() == JSONType.class) {
+                    getBeanInfo1x(beanInfo, annotation);
+                }
+            }
 
             BeanUtils.staticMethod(mixInSource,
                     method -> getCreator(beanInfo, objectClass, method)
@@ -1002,7 +993,11 @@ public class ObjectReaderProvider {
         }
 
         Annotation[] annotations = objectClass.getDeclaredAnnotations();
-        getBeanInfo(beanInfo, annotations);
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType() == JSONType.class) {
+                getBeanInfo1x(beanInfo, annotation);
+            }
+        }
 
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
@@ -1032,19 +1027,6 @@ public class ObjectReaderProvider {
                 && beanInfo.kotlin) {
             BeanUtils.getKotlinConstructor(objectClass, beanInfo);
             beanInfo.createParameterNames = BeanUtils.getKotlinConstructorParameters(objectClass);
-        }
-    }
-
-    private void getBeanInfo(BeanInfo beanInfo, Annotation[] annotations) {
-        for (Annotation annotation : annotations) {
-            Class<? extends Annotation> annotationType = annotation.annotationType();
-            JSONType jsonType = findAnnotation(annotation, JSONType.class);
-            if (jsonType != null) {
-                getBeanInfo1x(beanInfo, annotation);
-                if (jsonType == annotation) {
-                    continue;
-                }
-            }
         }
     }
 

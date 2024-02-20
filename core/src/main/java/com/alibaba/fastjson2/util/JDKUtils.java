@@ -3,11 +3,9 @@ package com.alibaba.fastjson2.util;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.nio.ByteOrder;
 
 public class JDKUtils {
-    public static final long FIELD_DECIMAL_INT_COMPACT_OFFSET;
     public static final boolean BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
     public static final Unsafe UNSAFE;
     public static final long ARRAY_BYTE_BASE_OFFSET;
@@ -43,18 +41,6 @@ public class JDKUtils {
         }
         ARRAY_BYTE_BASE_OFFSET = arrayByteBaseOffset;
         ARRAY_CHAR_BASE_OFFSET = arrayCharBaseOffset;
-
-        long fieldOffset = -1;
-        try {
-            for (Field field : BigDecimal.class.getDeclaredFields()) {
-                if ("intCompact".equals(field.getName())) {
-                    fieldOffset = UNSAFE.objectFieldOffset(field);
-                }
-            }
-        } catch (Throwable ignored) {
-            // ignored
-        }
-        FIELD_DECIMAL_INT_COMPACT_OFFSET = fieldOffset;
 
         int android_sdk_int = -1;
         try {

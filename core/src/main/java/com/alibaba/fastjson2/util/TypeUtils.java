@@ -17,24 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
-
 public class TypeUtils {
-    private static Field FIELD_JSON_OBJECT_1x_map;
     private static volatile boolean REFLECT_JSON_1x_ERROR;
 
-    public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
-    public static final Class CLASS_SINGLE_LIST = Collections.singletonList(1).getClass();
-    public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
+    public static final Class CLASS_SINGLE_SET = Collections.singleton(Boolean.TRUE).getClass();
+    public static final Class CLASS_SINGLE_LIST = Collections.singletonList(Boolean.TRUE).getClass();
+    public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(Collections.emptyList()).getClass();
     public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
-
-    public static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
-    public static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
-    public static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
-    public static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
     /**
      * All the positive powers of 10 that can be
@@ -1739,58 +1728,6 @@ public class TypeUtils {
         return parseBigDecimal(strBytes, 0, strBytes.length);
     }
 
-    public static boolean isInt32(BigInteger value) {
-        return value.compareTo(BIGINT_INT32_MIN) >= 0 && value.compareTo(BIGINT_INT32_MAX) <= 0;
-    }
-
-    public static boolean isInt64(BigInteger value) {
-        return value.compareTo(BIGINT_INT64_MIN) >= 0 && value.compareTo(BIGINT_INT64_MAX) <= 0;
-    }
-
-    /**
-     * decimal is integer, check has non-zero small
-     *
-     * @param decimal
-     * @return
-     */
-    public static boolean isInteger(BigDecimal decimal) {
-        int scale = decimal.scale();
-        if (scale == 0) {
-            return true;
-        }
-
-        int precision = decimal.precision();
-        if (precision < 20) {
-            if (FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-                long intCompact = JDKUtils.UNSAFE.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
-                switch (scale) {
-                    case 1:
-                        return intCompact % 10 == 0;
-                    case 2:
-                        return intCompact % 100 == 0;
-                    case 3:
-                        return intCompact % 1000 == 0;
-                    case 4:
-                        return intCompact % 10000 == 0;
-                    case 5:
-                        return intCompact % 100000 == 0;
-                    case 6:
-                        return intCompact % 1000000 == 0;
-                    case 7:
-                        return intCompact % 10000000 == 0;
-                    case 8:
-                        return intCompact % 100000000 == 0;
-                    case 9:
-                        return intCompact % 1000000000 == 0;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        return decimal.stripTrailingZeros().scale() == 0;
-    }
-
     public static BigInteger toBigInteger(Object value) {
         if (value == null || value instanceof BigInteger) {
             return (BigInteger) value;
@@ -3394,52 +3331,8 @@ public class TypeUtils {
         return Object.class;
     }
 
-    public static boolean isProxy(Class<?> clazz) {
-        for (Class<?> item : clazz.getInterfaces()) {
-            String interfaceName = item.getName();
-            switch (interfaceName) {
-                case "org.springframework.cglib.proxy.Factory":
-                case "javassist.util.proxy.ProxyObject":
-                case "org.apache.ibatis.javassist.util.proxy.ProxyObject":
-                case "org.hibernate.proxy.HibernateProxy":
-                case "org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration":
-                case "org.mockito.cglib.proxy.Factory":
-                case "net.sf.cglib.proxy.Factory":
-                    return true;
-                default:
-                    break;
-            }
-        }
-        return false;
-    }
-
     public static Map getInnerMap(Map object) {
-        Class classJSONObject1x = JSONFactory.getClassJSONObject1x();
-        if (classJSONObject1x == null || !classJSONObject1x.isInstance(object)) {
-            return object;
-        }
-
-        if (FIELD_JSON_OBJECT_1x_map == null && !REFLECT_JSON_1x_ERROR) {
-            try {
-                Field field = classJSONObject1x.getDeclaredField("map");
-                field.setAccessible(true);
-                FIELD_JSON_OBJECT_1x_map = field;
-            } catch (NoSuchFieldException ignored) {
-                REFLECT_JSON_1x_ERROR = true;
-            }
-        }
-
-        if (FIELD_JSON_OBJECT_1x_map == null) {
-            return object;
-        }
-
-        try {
-            object = (Map) FIELD_JSON_OBJECT_1x_map.get(object);
-        } catch (IllegalAccessException ignore) {
-            // ignore
-        }
-
-        return object;
+        return (Map) JSONFactory.getInnerMap().apply(object);
     }
 
     public static boolean isInteger(String str) {
