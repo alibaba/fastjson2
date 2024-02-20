@@ -1394,10 +1394,9 @@ final class JSONReaderJSONB
         Class contextClass = TypeUtils.getMapping(typeName);
         if (contextClass == null) {
             try {
-                if (contextClassLoader == null) {
-                    contextClassLoader = JSON.class.getClassLoader();
-                }
-                contextClass = contextClassLoader.loadClass(typeName);
+                contextClass
+                        = (contextClassLoader != null ? contextClassLoader : JSON.class.getClassLoader())
+                        .loadClass(typeName);
             } catch (ClassNotFoundException ignored) {
             }
         }
@@ -2958,9 +2957,7 @@ final class JSONReaderJSONB
 
         strBegin = offset;
         String str = null;
-        boolean ascii = false;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
-            ascii = true;
             final int strlen;
             if (strtype == BC_STR_ASCII) {
                 byte strType = bytes[offset];
@@ -3000,12 +2997,14 @@ final class JSONReaderJSONB
             }
         }
 
-        return readStringNonAscii(null, ascii);
+        return readStringNonAscii();
     }
 
-    private String readStringNonAscii(String str, boolean ascii) {
+    private String readStringNonAscii() {
+        String str = null;
         Charset charset;
-        if (ascii) {
+        int strtype = this.strtype;
+        if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             charset = ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             str = readStringUTF8();
@@ -3800,6 +3799,8 @@ final class JSONReaderJSONB
     }
 
     protected String readFixedAsciiString(int strlen) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
         String str;
         if (strlen == 1) {
             str = TypeUtils.toString((char) (bytes[offset] & 0xff));

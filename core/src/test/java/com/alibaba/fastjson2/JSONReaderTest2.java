@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -1022,5 +1024,436 @@ public class JSONReaderTest2 {
                 .skipValue();
         JSONReader.of(str.getBytes(StandardCharsets.UTF_8))
                 .skipValue();
+    }
+
+    @Test
+    public void readInt64Value() {
+        long value = 123;
+        String str = value + "L,";
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertEquals(value, jsonReader.readInt64Value());
+            assertTrue(jsonReader.comma);
+            assertTrue(jsonReader.isEnd());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertEquals(value, jsonReader.readInt64Value());
+            assertTrue(jsonReader.comma);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void readInt64ValueOverflow() {
+        BigDecimal decimal = new BigDecimal("+1234567890123456789012345678901234567890");
+        String str = decimal + ",";
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64Value());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64());
+        }
+
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64());
+        }
+    }
+
+    @Test
+    public void readInt64ValueOverflow1() {
+        BigDecimal decimal = new BigDecimal("1234567890123456789012345678901234567890");
+        String str = "+" + decimal + "L,";
+        long value = decimal.longValue();
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64Value());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64());
+        }
+
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64());
+        }
+    }
+
+    @Test
+    public void readInt64ValueOverflow2() {
+        BigDecimal decimal = new BigDecimal("123456789012345678901234567890");
+        String str = decimal + ",";
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64Value());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64());
+        }
+
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt64());
+        }
+    }
+
+    @Test
+    public void readInt32ValueOverflow() {
+        BigDecimal decimal = new BigDecimal("1234567890123456789012345678901234567890");
+        String str = decimal + ",";
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32Value());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32());
+        }
+
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32());
+        }
+    }
+
+    @Test
+    public void readInt32ValueOverflow1() {
+        BigDecimal decimal = new BigDecimal("1234567890123456789012345678901234567890");
+        String str = "+" + decimal + "L,";
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32Value());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32());
+        }
+
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32());
+        }
+    }
+
+    @Test
+    public void readInt32ValueOverflow2() {
+        BigDecimal decimal = new BigDecimal("12345678901234567890");
+        String str = "+" + decimal + "L,";
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32Value());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32());
+        }
+
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32Value());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readInt32());
+        }
+    }
+
+    @Test
+    public void readFieldNameHashCodeUnquote() {
+        String key = "©®£";
+        String str = "{" + key + ":123}";
+        long expected = Fnv.hashCode64(key);
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(
+                    expected,
+                    jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            JSONReader jsonReader = JSONReader.of(bytes);
+            jsonReader.nextIfObjectStart();
+            assertEquals(
+                    expected,
+                    jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.ISO_8859_1);
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            jsonReader.nextIfObjectStart();
+            assertEquals(
+                    expected,
+                    jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+    }
+
+    @Test
+    public void readFieldNameHashCodeUnquote1() {
+        String key = "中国";
+        String str = "{" + key + ":123}";
+        long expected = Fnv.hashCode64(key);
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+    }
+
+    @Test
+    public void readFieldNameHashCodeUnquote2() {
+        String key = "中国©®£";
+        String str = "{" + key + ":123}";
+        long expected = Fnv.hashCode64(key);
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+    }
+
+    @Test
+    public void readFieldNameHashCodeUnquote3() {
+        String key = "a\uD83D\uDE0D\uD83D\uDC81";
+        String str = "{" + key + ":123}";
+        long expected = Fnv.hashCode64(key);
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+        }
+    }
+//
+//    @Test
+//    public void readFieldNameHashCodeUnquote4() {
+//        String key = "\uD83D\uDE0D\uD83D\uDC81";
+//        String str = "{" + key + ":123}";
+//        long expected = Fnv.hashCode64(key);
+//        {
+//            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+//            jsonReader.nextIfObjectStart();
+//            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+//        }
+//        {
+//            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+//            jsonReader.nextIfObjectStart();
+//            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+//        }
+//        {
+//            JSONReader jsonReader = JSONReader.of(str);
+//            jsonReader.nextIfObjectStart();
+//            assertEquals(expected, jsonReader.readFieldNameHashCodeUnquote());
+//        }
+//    }
+
+    @Test
+    public void readFieldName() {
+        String key = "中国©®£";
+        String str = "{\"" + key + "\":123}";
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.readFieldName());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.readFieldName());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.readFieldName());
+        }
+    }
+
+    @Test
+    public void readFieldName1() {
+        String key = "\uD83D\uDE0D\uD83D\uDC81";
+        String str = "{\"" + key + "\":123}";
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.readFieldName());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.readFieldName());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.readFieldName());
+        }
+    }
+
+    @Test
+    public void nextIfObjectStart() {
+        char key = '中';
+        String str = "{" + key + ":123}";
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.current());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.current());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.current());
+        }
+    }
+
+    @Test
+    public void nextIfObjectStart1() {
+        char key = '£';
+        String str = "{" + key + ":123}";
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.current());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.current());
+        }
+        {
+            byte[] bytes = str.getBytes(StandardCharsets.ISO_8859_1);
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.current());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            jsonReader.nextIfObjectStart();
+            assertEquals(key, jsonReader.current());
+        }
     }
 }

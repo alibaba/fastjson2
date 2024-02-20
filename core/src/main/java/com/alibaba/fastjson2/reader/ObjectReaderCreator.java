@@ -3088,7 +3088,7 @@ public class ObjectReaderCreator {
             FieldInfo fieldInfo
     ) {
         ObjectReader initReader = fieldInfo.getInitReader();
-        if (initReader == null && Map.class.isAssignableFrom(fieldClass) && (fieldInfo.keyUsing != null || fieldInfo.valueUsing != null)) {
+        if (initReader == null && (fieldInfo.keyUsing != null || fieldInfo.valueUsing != null) && Map.class.isAssignableFrom(fieldClass)) {
             ObjectReader keyReader = null;
             if (fieldInfo.keyUsing != null) {
                 try {

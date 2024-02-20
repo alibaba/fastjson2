@@ -201,8 +201,8 @@ public class ObjectWriterAdapter<T>
         }
         jsonWriter.startObject();
         for (int i = 0; i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
-            fieldWriter.write(jsonWriter, object);
+            fieldWriters.get(i)
+                    .write(jsonWriter, object);
         }
         jsonWriter.endObject();
     }
@@ -335,14 +335,16 @@ public class ObjectWriterAdapter<T>
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
         if (jsonWriter.utf8) {
             if (nameWithColonUTF8 == null) {
-                byte[] chars = new byte[typeKey.length() + typeName.length() + 5];
+                int typeKeyLength = typeKey.length();
+                int typeNameLength = typeName.length();
+                byte[] chars = new byte[typeKeyLength + typeNameLength + 5];
                 chars[0] = '"';
-                typeKey.getBytes(0, typeKey.length(), chars, 1);
-                chars[typeKey.length() + 1] = '"';
-                chars[typeKey.length() + 2] = ':';
-                chars[typeKey.length() + 3] = '"';
-                typeName.getBytes(0, typeName.length(), chars, typeKey.length() + 4);
-                chars[typeKey.length() + typeName.length() + 4] = '"';
+                typeKey.getBytes(0, typeKeyLength, chars, 1);
+                chars[typeKeyLength + 1] = '"';
+                chars[typeKeyLength + 2] = ':';
+                chars[typeKeyLength + 3] = '"';
+                typeName.getBytes(0, typeNameLength, chars, typeKeyLength + 4);
+                chars[typeKeyLength + typeNameLength + 4] = '"';
 
                 nameWithColonUTF8 = chars;
             }
@@ -350,14 +352,16 @@ public class ObjectWriterAdapter<T>
             return true;
         } else if (jsonWriter.utf16) {
             if (nameWithColonUTF16 == null) {
-                char[] chars = new char[typeKey.length() + typeName.length() + 5];
+                int typeKeyLength = typeKey.length();
+                int typeNameLength = typeName.length();
+                char[] chars = new char[typeKeyLength + typeNameLength + 5];
                 chars[0] = '"';
-                typeKey.getChars(0, typeKey.length(), chars, 1);
-                chars[typeKey.length() + 1] = '"';
-                chars[typeKey.length() + 2] = ':';
-                chars[typeKey.length() + 3] = '"';
-                typeName.getChars(0, typeName.length(), chars, typeKey.length() + 4);
-                chars[typeKey.length() + typeName.length() + 4] = '"';
+                typeKey.getChars(0, typeKeyLength, chars, 1);
+                chars[typeKeyLength + 1] = '"';
+                chars[typeKeyLength + 2] = ':';
+                chars[typeKeyLength + 3] = '"';
+                typeName.getChars(0, typeNameLength, chars, typeKeyLength + 4);
+                chars[typeKeyLength + typeNameLength + 4] = '"';
 
                 nameWithColonUTF16 = chars;
             }

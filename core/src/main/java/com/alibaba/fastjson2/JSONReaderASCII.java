@@ -385,6 +385,226 @@ class JSONReaderASCII
         return hashCode;
     }
 
+    @Override
+    public final long readFieldNameHashCodeUnquote() {
+        this.nameEscape = false;
+        int offset = this.offset, end = this.end;
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        this.nameBegin = offset - 1;
+        int first = ch;
+        long nameValue = 0;
+        _for:
+        for (int i = 0; offset <= end; ++i) {
+            switch (ch) {
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                case '\f':
+                case '\b':
+                case '.':
+                case '-':
+                case '+':
+                case '*':
+                case '/':
+                case '>':
+                case '<':
+                case '=':
+                case '!':
+                case '[':
+                case ']':
+                case '{':
+                case '}':
+                case '(':
+                case ')':
+                case ',':
+                case ':':
+                case EOI:
+                    nameLength = i;
+                    this.nameEnd = ch == EOI ? offset : offset - 1;
+                    if (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                        ch = offset == end ? EOI : (char) bytes[offset++];
+                    }
+                    break _for;
+                default:
+                    break;
+            }
+
+            if (ch == '\\') {
+                nameEscape = true;
+                ch = (char) bytes[offset++];
+                switch (ch) {
+                    case 'u': {
+                        ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                        offset += 4;
+                        break;
+                    }
+                    case 'x': {
+                        ch = char2(bytes[offset], bytes[offset + 1]);
+                        offset += 2;
+                        break;
+                    }
+                    case '\\':
+                    case '"':
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
+                    case ':':
+                        break;
+                    default:
+                        ch = char1(ch);
+                        break;
+                }
+            }
+
+            if (ch > 0xFF || i >= 8 || (i == 0 && ch == 0)) {
+                nameValue = 0;
+                ch = first;
+                offset = this.nameBegin + 1;
+                break;
+            }
+
+            byte c = (byte) ch;
+            switch (i) {
+                case 0:
+                    nameValue = c;
+                    break;
+                case 1:
+                    nameValue = (c << 8) + (nameValue & 0xFFL);
+                    break;
+                case 2:
+                    nameValue = (c << 16) + (nameValue & 0xFFFFL);
+                    break;
+                case 3:
+                    nameValue = (c << 24) + (nameValue & 0xFFFFFFL);
+                    break;
+                case 4:
+                    nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                    break;
+                case 5:
+                    nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                    break;
+                case 6:
+                    nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                    break;
+                case 7:
+                    nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                    break;
+                default:
+                    break;
+            }
+
+            ch = offset == end ? EOI : (bytes[offset++] & 0xFF);
+        }
+
+        long hashCode;
+
+        if (nameValue != 0) {
+            hashCode = nameValue;
+        } else {
+            hashCode = Fnv.MAGIC_HASH_CODE;
+            _for:
+            for (int i = 0; ; ++i) {
+                if (ch == '\\') {
+                    nameEscape = true;
+                    ch = bytes[offset++];
+                    switch (ch) {
+                        case 'u': {
+                            ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                            offset += 4;
+                            break;
+                        }
+                        case 'x': {
+                            ch = char2(bytes[offset], bytes[offset + 1]);
+                            offset += 2;
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        case '.':
+                        case '-':
+                        case '+':
+                        case '*':
+                        case '/':
+                        case '>':
+                        case '<':
+                        case '=':
+                        case '@':
+                        case ':':
+                            break;
+                        default:
+                            ch = char1(ch);
+                            break;
+                    }
+
+                    hashCode ^= ch;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                    ch = offset == end ? EOI : (bytes[offset++] & 0xFF);
+                    continue;
+                }
+
+                switch (ch) {
+                    case ' ':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                    case '\f':
+                    case '\b':
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '!':
+                    case '[':
+                    case ']':
+                    case '{':
+                    case '}':
+                    case '(':
+                    case ')':
+                    case ',':
+                    case ':':
+                    case EOI:
+                        nameLength = i;
+                        this.nameEnd = ch == EOI ? offset : offset - 1;
+                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                            ch = offset == end ? EOI : (bytes[offset++] & 0xFF);
+                        }
+                        break _for;
+                    default:
+                        break;
+                }
+
+                hashCode ^= ch;
+                hashCode *= Fnv.MAGIC_PRIME;
+
+                ch = offset == end ? EOI : (bytes[offset++] & 0xFF);
+            }
+        }
+
+        if (ch == ':') {
+            ch = offset == end ? EOI : (bytes[offset++] & 0xFF);
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : (bytes[offset++] & 0xFF);
+            }
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        return hashCode;
+    }
+
     public static long getLong(byte[] bytes, int off) {
         return UNSAFE.getLong(
                 bytes,
@@ -1192,7 +1412,7 @@ class JSONReaderASCII
             final byte slash = (byte) '\\';
 
             int offset = this.offset;
-            final int start = offset;
+            final int start = offset, end = this.end;
             int valueLength;
             boolean valueEscape = false;
 
@@ -1339,38 +1559,6 @@ class JSONReaderASCII
             return str;
         }
 
-        switch (ch) {
-            case '[':
-                return toString(
-                        readArray());
-            case '{':
-                return toString(
-                        readObject());
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                readNumber0();
-                Number number = getNumber();
-                return number.toString();
-            case 't':
-            case 'f':
-                boolValue = readBoolValue();
-                return boolValue ? "true" : "false";
-            case 'n': {
-                readNull();
-                return null;
-            }
-            default:
-                throw new JSONException(info("illegal input : " + ch));
-        }
+        return readStringNotMatch();
     }
 }

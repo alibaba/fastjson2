@@ -94,11 +94,9 @@ public interface ObjectReader<T> {
         }
 
         Function buildFunction = getBuildFunction();
-        if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
-        }
-
-        return object;
+        return buildFunction != null
+                ? (T) buildFunction.apply(object)
+                : object;
     }
 
     /**
@@ -192,6 +190,8 @@ public interface ObjectReader<T> {
         T object = null;
         jsonReader.nextIfObjectStart();
 
+        JSONReader.Context context = jsonReader.getContext();
+        long features2 = context.getFeatures() | features;
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
@@ -200,7 +200,6 @@ public interface ObjectReader<T> {
 
             if (hash == getTypeKeyHash() && i == 0) {
                 long typeHash = jsonReader.readTypeHashCode();
-                JSONReader.Context context = jsonReader.getContext();
                 ObjectReader reader = autoType(context, typeHash);
 
                 if (reader == null) {
@@ -224,9 +223,11 @@ public interface ObjectReader<T> {
             }
 
             FieldReader fieldReader = getFieldReader(hash);
-            if (fieldReader == null && jsonReader.isSupportSmartMatch(features | getFeatures())) {
+            if (fieldReader == null && jsonReader.isSupportSmartMatch(features2 | getFeatures())) {
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                fieldReader = getFieldReaderLCase(nameHashCodeLCase);
+                if (nameHashCodeLCase != hash) {
+                    fieldReader = getFieldReaderLCase(nameHashCodeLCase);
+                }
             }
 
             if (fieldReader == null) {
@@ -235,17 +236,15 @@ public interface ObjectReader<T> {
             }
 
             if (object == null) {
-                object = createInstance(jsonReader.getContext().getFeatures() | features);
+                object = createInstance(features2);
             }
 
             fieldReader.readFieldValue(jsonReader, object);
         }
 
-        if (object == null) {
-            object = createInstance(jsonReader.getContext().getFeatures() | features);
-        }
-
-        return object;
+        return object != null
+                ? object
+                : createInstance(features2);
     }
 
     /**
