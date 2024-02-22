@@ -72,7 +72,14 @@ public class JDKUtils {
         Unsafe unsafe;
         long offset, charOffset;
         try {
-            Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            Field theUnsafeField = null;
+            for (Field field : Unsafe.class.getDeclaredFields()) {
+                String fieldName = field.getName();
+                if (fieldName.equals("theUnsafe") || fieldName.equals("THE_ONE")) {
+                    theUnsafeField = field;
+                    break;
+                }
+            }
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
             offset = unsafe.arrayBaseOffset(byte[].class);
