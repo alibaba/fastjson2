@@ -457,7 +457,7 @@ public class ObjectWriterCreator {
     ) {
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-            fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
+            fieldName = BeanUtils.getterName(method, beanInfo.kotlin, beanInfo.namingStrategy);
 
             char c0 = '\0', c1;
             int len = fieldName.length();
@@ -749,7 +749,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldName == null) {
-            fieldName = BeanUtils.getterName(method, null);
+            fieldName = BeanUtils.getterName(method, false, null);
         }
 
         if (fieldClass == boolean.class || fieldClass == Boolean.class) {
