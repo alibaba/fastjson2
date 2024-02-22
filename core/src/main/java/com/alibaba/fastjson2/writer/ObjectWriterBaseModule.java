@@ -774,7 +774,7 @@ public class ObjectWriterBaseModule
                     && beanInfo.creatorConstructor != null
                     && beanInfo.createParameterNames != null
             ) {
-                String fieldName = BeanUtils.getterName(method, null);
+                String fieldName = BeanUtils.getterName(method, beanInfo.kotlin, null);
                 for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
                     if (fieldName.equals(beanInfo.createParameterNames[i])) {
                         Annotation[][] creatorConsParamAnnotations
