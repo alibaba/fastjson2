@@ -576,7 +576,7 @@ public class ObjectReaderCreator {
                 provider.getFieldInfo(methodFieldInfo, objectClass, method);
                 String methodFieldName = methodFieldInfo.fieldName;
                 if (methodFieldName == null) {
-                    methodFieldName = BeanUtils.getterName(method, PropertyNamingStrategy.CamelCase.name());
+                    methodFieldName = BeanUtils.getterName(method, beanInfo.kotlin, PropertyNamingStrategy.CamelCase.name());
                 }
 
                 if (methodFieldInfo.readUsing != null && finalFieldName.equals(methodFieldName)
@@ -1416,7 +1416,7 @@ public class ObjectReaderCreator {
             if (methodName.startsWith("set")) {
                 fieldName = BeanUtils.setterName(methodName, namingStrategy);
             } else {
-                fieldName = BeanUtils.getterName(method, namingStrategy);
+                fieldName = BeanUtils.getterName(method, beanInfo.kotlin, namingStrategy);
             }
 
             char c0 = '\0', c1;

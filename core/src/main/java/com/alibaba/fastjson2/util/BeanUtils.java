@@ -1166,10 +1166,14 @@ public abstract class BeanUtils {
     }
 
     public static String getterName(Method method, String namingStrategy) {
+        return getterName(method, false, namingStrategy);
+    }
+
+    public static String getterName(Method method, boolean kotlin, String namingStrategy) {
         String methodName = method.getName();
         if (methodName.startsWith("is")) {
             Class<?> returnType = method.getReturnType();
-            if (returnType != Boolean.class && returnType != boolean.class) {
+            if ((returnType != Boolean.class && returnType != boolean.class) || kotlin) {
                 return methodName;
             }
         }
