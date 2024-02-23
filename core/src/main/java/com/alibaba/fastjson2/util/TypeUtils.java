@@ -21,8 +21,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
 public class TypeUtils {
-    private static volatile boolean REFLECT_JSON_1x_ERROR;
-
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
     public static final Class CLASS_SINGLE_LIST = Collections.singletonList(1).getClass();
     public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
