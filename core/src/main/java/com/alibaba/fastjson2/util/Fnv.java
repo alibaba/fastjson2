@@ -10,7 +10,8 @@ public final class Fnv {
         long nameValue = 0;
 
         int scoreCount = 0;
-        for (int i = 0; i < name.length(); ++i) {
+        final int strlen = name.length();
+        for (int i = 0; i < strlen; ++i) {
             char ch = name.charAt(i);
             if (ch > 0xFF || (i == 0 && ch == 0)) {
                 ascii = false;
@@ -22,8 +23,8 @@ public final class Fnv {
             }
         }
 
-        if (ascii && (name.length() - scoreCount) <= 8) {
-            for (int i = name.length() - 1, j = 0; i >= 0; --i) {
+        if (ascii && (strlen - scoreCount) <= 8) {
+            for (int i = strlen - 1, j = 0; i >= 0; --i) {
                 char ch = name.charAt(i);
                 if (ch == '-' || ch == '_' || ch == ' ') {
                     continue;
@@ -46,7 +47,7 @@ public final class Fnv {
         }
 
         long hashCode = MAGIC_HASH_CODE;
-        for (int i = 0; i < name.length(); ++i) {
+        for (int i = 0; i < strlen; ++i) {
             char ch = name.charAt(i);
 
             if (ch == '-' || ch == '_' || ch == ' ') {
@@ -63,11 +64,12 @@ public final class Fnv {
     }
 
     public static long hashCode64(String name) {
-        if (name.length() <= 8) {
+        final int strlen = name.length();
+        if (strlen <= 8) {
             boolean ascii = true;
             long nameValue = 0;
 
-            for (int i = 0; i < name.length(); ++i) {
+            for (int i = 0; i < strlen; ++i) {
                 char ch = name.charAt(i);
                 if (ch > 0xFF || (i == 0 && ch == 0)) {
                     ascii = false;
@@ -76,7 +78,7 @@ public final class Fnv {
             }
 
             if (ascii) {
-                for (int i = name.length() - 1; i >= 0; --i) {
+                for (int i = strlen - 1; i >= 0; --i) {
                     char ch = name.charAt(i);
                     if (i == name.length() - 1) {
                         nameValue = (byte) ch;
@@ -92,7 +94,7 @@ public final class Fnv {
         }
 
         long hashCode = MAGIC_HASH_CODE;
-        for (int i = 0; i < name.length(); ++i) {
+        for (int i = 0; i < strlen; ++i) {
             char ch = name.charAt(i);
             hashCode ^= ch;
             hashCode *= MAGIC_PRIME;
