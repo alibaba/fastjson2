@@ -385,15 +385,14 @@ class JSONReaderUTF16
 
     @Override
     public final boolean isReference() {
-        // should be codeSize <= FreqInlineSize 325
+        // should be codeSize <= FreqInlineSize 325, current is 276
         final char[] chars = this.chars;
         char ch = this.ch;
-        int offset = this.offset;
-
         if (ch != '{') {
             return false;
         }
 
+        int offset = this.offset, end = this.end;
         if (offset == end) {
             return false;
         }
@@ -2338,13 +2337,12 @@ class JSONReaderUTF16
         boolean negative = false;
         char ch = this.ch;
         int offset = this.offset, end = this.end;
-        final char firstChar = ch;
         final char[] chars = this.chars;
 
         int intValue = 0;
 
         int quote = '\0';
-        if (firstChar == '"' || firstChar == '\'') {
+        if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = chars[offset++];
         }
@@ -2360,20 +2358,14 @@ class JSONReaderUTF16
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
                 break;
+            } else {
+                intValue = intValue10;
             }
-            ch = chars[offset++];
+            ch = offset == end ? EOI : chars[offset++];
         }
 
         if (ch == '.'
@@ -2424,13 +2416,12 @@ class JSONReaderUTF16
         boolean negative = false;
         char ch = this.ch;
         int offset = this.offset;
-        final char firstChar = ch;
         final char[] chars = this.chars;
 
         int intValue = 0;
 
         int quote = '\0';
-        if (firstChar == '"' || firstChar == '\'') {
+        if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = chars[offset++];
         }
@@ -2446,20 +2437,14 @@ class JSONReaderUTF16
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
                 break;
+            } else {
+                intValue = intValue10;
             }
-            ch = chars[offset++];
+            ch = offset == end ? EOI : chars[offset++];
         }
 
         if (ch == '.'
@@ -2534,20 +2519,14 @@ class JSONReaderUTF16
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
                 break;
+            } else {
+                longValue = intValue10;
             }
-            ch = chars[offset++];
+            ch = offset == end ? EOI : chars[offset++];
         }
 
         if (ch == '.'
@@ -2619,20 +2598,14 @@ class JSONReaderUTF16
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
                 break;
+            } else {
+                longValue = intValue10;
             }
-            ch = chars[offset++];
+            ch = offset == end ? EOI : chars[offset++];
         }
 
         if (ch == '.'

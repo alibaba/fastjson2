@@ -1456,4 +1456,150 @@ public class JSONReaderTest2 {
             assertEquals(key, jsonReader.current());
         }
     }
+
+    @Test
+    public void isReference() {
+        String str = "{\"$ref\":\"$\"}";
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+    }
+
+    @Test
+    public void isReference1() {
+        String str = "{   \"$ref\"  :  \"$\"}";
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            assertTrue(jsonReader.isReference());
+            assertEquals("$", jsonReader.readReference());
+        }
+    }
+
+    @Test
+    public void isReference_false() {
+        String str = "{   \"$ref\"  :";
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            assertFalse(jsonReader.isReference());
+        }
+    }
+
+    @Test
+    public void isReference_false_2() {
+        String str = "{   \"$ref\"";
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            assertFalse(jsonReader.isReference());
+        }
+    }
+
+    @Test
+    public void isReference_false_1() {
+        String str = "{   \"$ref\"  , ";
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            assertFalse(jsonReader.isReference());
+        }
+    }
+
+    @Test
+    public void isReference1_false_3() {
+        String str = "{   \"$ref\"  :  \"#\"}";
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            assertFalse(jsonReader.isReference());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str);
+            assertFalse(jsonReader.isReference());
+        }
+    }
 }

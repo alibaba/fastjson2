@@ -3482,13 +3482,12 @@ class JSONReaderUTF8
         boolean negative = false;
         int ch = this.ch;
         int offset = this.offset, end = this.end;
-        final int firstChar = ch;
         final byte[] bytes = this.bytes;
 
         int intValue = 0;
 
         int quote = '\0';
-        if (firstChar == '"' || firstChar == '\'') {
+        if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = bytes[offset++];
         }
@@ -3504,20 +3503,14 @@ class JSONReaderUTF8
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
                 break;
+            } else {
+                intValue = intValue10;
             }
-            ch = bytes[offset++];
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
         if (ch == '.'
@@ -3568,13 +3561,12 @@ class JSONReaderUTF8
         boolean negative = false;
         int ch = this.ch;
         int offset = this.offset;
-        final char firstChar = (char) ch;
         final byte[] bytes = this.bytes;
 
         int intValue = 0;
 
         int quote = '\0';
-        if (firstChar == '"' || firstChar == '\'') {
+        if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = bytes[offset++];
         }
@@ -3590,20 +3582,14 @@ class JSONReaderUTF8
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
                 break;
+            } else {
+                intValue = intValue10;
             }
-            ch = bytes[offset++];
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
         if (ch == '.'
@@ -3678,20 +3664,14 @@ class JSONReaderUTF8
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
                 break;
+            } else {
+                longValue = intValue10;
             }
-            ch = bytes[offset++];
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
         if (ch == '.'
@@ -3763,20 +3743,14 @@ class JSONReaderUTF8
 
         boolean overflow = ch < '0' || ch > '9';
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
                 break;
+            } else {
+                longValue = intValue10;
             }
-            ch = bytes[offset++];
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
         if (ch == '.'
@@ -7260,17 +7234,20 @@ class JSONReaderUTF8
 
     @Override
     public boolean isReference() {
-        // should be codeSize <= FreqInlineSize 325
+        // should be codeSize <= FreqInlineSize 325, current : 284
         final byte[] bytes = this.bytes;
         int ch = this.ch;
-        int offset = this.offset;
+        if (ch != '{') {
+            return false;
+        }
 
-        if (ch != '{' || offset == end) {
+        int offset = this.offset, end = this.end;
+        if (offset == end) {
             return false;
         }
 
         ch = bytes[offset];
-        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
             if (offset >= end) {
                 return false;
@@ -7279,13 +7256,12 @@ class JSONReaderUTF8
         }
 
         int quote = ch;
-        if ((quote != '"' && quote != '\'')
-                || offset + 6 >= end
-                || (bytes[offset + 1] != '$'
+        if (offset + 6 >= end
+                || bytes[offset + 1] != '$'
                 || bytes[offset + 2] != 'r'
                 || bytes[offset + 3] != 'e'
                 || bytes[offset + 4] != 'f'
-                || bytes[offset + 5] != quote)
+                || bytes[offset + 5] != quote
         ) {
             return false;
         }
@@ -7293,7 +7269,8 @@ class JSONReaderUTF8
         offset += 6;
         ch = bytes[offset];
         while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            if (++offset >= end) {
+            offset++;
+            if (offset >= end) {
                 return false;
             }
             ch = bytes[offset];
@@ -7305,7 +7282,8 @@ class JSONReaderUTF8
 
         ch = bytes[++offset];
         while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            if (++offset >= end) {
+            offset++;
+            if (offset >= end) {
                 return false;
             }
             ch = bytes[offset];
