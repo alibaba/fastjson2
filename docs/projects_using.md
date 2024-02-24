@@ -82,3 +82,6 @@
 * https://github.com/XiaoMi/ozhera
 * https://github.com/rstyro/admin-plus
   https://github.com/zfoo-project/zfoo
+* https://github.com/TongchengOpenSource/ckibana
+* https://github.com/geekidea/spring-boot-plus
+* 
