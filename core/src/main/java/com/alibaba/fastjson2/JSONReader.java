@@ -3907,10 +3907,7 @@ public abstract class JSONReader
             this.symbolTable = null;
             this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
+            initDefaultReaderFormat();
         }
 
         public Context(ObjectReaderProvider provider, long features) {
@@ -3921,10 +3918,7 @@ public abstract class JSONReader
             this.symbolTable = null;
             this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
+            initDefaultReaderFormat();
         }
 
         public Context(Feature... features) {
@@ -3935,14 +3929,8 @@ public abstract class JSONReader
             this.symbolTable = null;
             this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
+            initDefaultReaderFormat();
+            initFeatures(features);
         }
 
         public Context(String dateFormat, Feature... features) {
@@ -3953,14 +3941,8 @@ public abstract class JSONReader
             this.symbolTable = null;
             this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
+            initDefaultReaderFormat();
+            initFeatures(features);
             setDateFormat(dateFormat);
         }
 
@@ -3972,14 +3954,8 @@ public abstract class JSONReader
             this.symbolTable = null;
             this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
+            initDefaultReaderFormat();
+            initFeatures(features);
         }
 
         public Context(ObjectReaderProvider provider, Filter filter, Feature... features) {
@@ -3992,14 +3968,8 @@ public abstract class JSONReader
 
             config(filter);
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
+            initDefaultReaderFormat();
+            initFeatures(features);
         }
 
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable) {
@@ -4008,10 +3978,7 @@ public abstract class JSONReader
             this.symbolTable = symbolTable;
             this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
+            initDefaultReaderFormat();
         }
 
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Feature... features) {
@@ -4020,14 +3987,8 @@ public abstract class JSONReader
             this.symbolTable = symbolTable;
             this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
+            initDefaultReaderFormat();
+            initFeatures(features);
         }
 
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Filter[] filters, Feature... features) {
@@ -4038,11 +3999,18 @@ public abstract class JSONReader
 
             config(filters);
 
+            initDefaultReaderFormat();
+            initFeatures(features);
+        }
+
+        private void initDefaultReaderFormat() {
             String format = defaultReaderFormat;
             if (format != null) {
                 setDateFormat(format);
             }
+        }
 
+        private void initFeatures(Feature... features) {
             for (Feature feature : features) {
                 this.features |= feature.mask;
             }
@@ -4289,9 +4257,7 @@ public abstract class JSONReader
                 extraProcessor = (ExtraProcessor) filter;
             }
 
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
+            initFeatures(features);
         }
 
         public void config(Filter filter) {
@@ -4315,9 +4281,7 @@ public abstract class JSONReader
                 }
             }
 
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
+            initFeatures(features);
         }
 
         public void config(Filter[] filters) {
