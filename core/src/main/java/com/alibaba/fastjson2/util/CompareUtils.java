@@ -27,6 +27,7 @@ public class CompareUtils {
 
     public static final String FIELD_NAME_OF_VALUE_EQUAL = "valueEqual";
     public static final String FIELD_NAME_OF_TYPE_EQUAL = "typeEqual";
+    public static final String FIELD_NAME_OF_DIFF_TYPE = "diffType";
 
     /**
      * 比较json是否相同
@@ -38,6 +39,13 @@ public class CompareUtils {
     public static boolean equals(JSONObject json1, JSONObject json2) {
         JSONObject result = diff(json1, json2);
         return result.isEmpty();
+    }
+
+    public static JSONArray diffToArray(JSONObject json1, JSONObject json2) {
+        JSONObject diffJson = diff(json1, json2);
+        JSONArray array = new JSONArray(diffJson.size());
+        array.addAll(diffJson.values());
+        return array;
     }
 
     /**
@@ -54,6 +62,13 @@ public class CompareUtils {
             result.remove(path);
         }
         return result;
+    }
+
+    public static JSONArray compareToArray(JSONObject json1, JSONObject json2) {
+        JSONObject diffJson = compare(json1, json2);
+        JSONArray array = new JSONArray(diffJson.size());
+        array.addAll(diffJson.values());
+        return array;
     }
 
     /**
@@ -85,13 +100,13 @@ public class CompareUtils {
             pathResult.put("path", path);
 
             if (json1Contain && !json2Contain) {
-                pathResult.put("equal", false);
-                pathResult.put("type", DIFF_TYPE_OF_REMOVE);
+                pathResult.put(FIELD_NAME_OF_VALUE_EQUAL, false);
+                pathResult.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_REMOVE);
                 Object value1 = json1.getByPath(path);
                 pathResult.put("value1", value1);
             } else if (!json1Contain && json2Contain) {
-                pathResult.put("equal", false);
-                pathResult.put("type", DIFF_TYPE_OF_ADD);
+                pathResult.put(FIELD_NAME_OF_VALUE_EQUAL, false);
+                pathResult.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_ADD);
                 Object value2 = json2.getByPath(path);
                 pathResult.put("value2", value2);
             } else if (json1Contain && json2Contain) {
@@ -101,7 +116,6 @@ public class CompareUtils {
                 if (Boolean.FALSE.equals(pathResult.get(FIELD_NAME_OF_VALUE_EQUAL))) {
                     pathResult.put("value1", value1);
                     pathResult.put("value2", value2);
-                    pathResult.put("type", DIFF_TYPE_OF_MODIFY);
                 }
             }
 
@@ -174,6 +188,7 @@ public class CompareUtils {
         result.put(FIELD_NAME_OF_VALUE_EQUAL, equal);
 
         if (!equal) {
+            result.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_MODIFY);
             if (value1 != null && value2 != null) {
                 boolean typeEqual = (value1.getClass().equals(value2.getClass()));
                 result.put(FIELD_NAME_OF_TYPE_EQUAL, typeEqual);
