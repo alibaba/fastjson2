@@ -62,7 +62,7 @@ class CompareUtilsTest {
                 "}");
         JSONObject result = CompareUtils.diff(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
-        String expected = "{\"number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"object.number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"object.string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"array[0].number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"array[0].string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"}}";
+        String expected = "{\"number\":{\"path\":\"number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":1,\"type\":\"MODIFY\"},\"string\":{\"path\":\"string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"},\"object.number\":{\"path\":\"object.number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":123,\"type\":\"MODIFY\"},\"object.string\":{\"path\":\"object.string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"},\"array[0].number\":{\"path\":\"array[0].number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":123,\"type\":\"MODIFY\"},\"array[0].string\":{\"path\":\"array[0].string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"}}";
         Assert.assertEquals(expected, result.toString());
     }
 
@@ -82,7 +82,7 @@ class CompareUtilsTest {
                 "}");
         JSONObject result = CompareUtils.diff(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
-        String expected = "{\"string\":{\"equal\":false,\"type\":\"REMOVE\"},\"object.number\":{\"equal\":false,\"type\":\"REMOVE\"},\"object.string\":{\"equal\":false,\"type\":\"REMOVE\"},\"array[0].number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"array[0].string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"number\":{\"equal\":false,\"type\":\"ADD\"}}";
+        String expected = "{\"string\":{\"path\":\"string\",\"equal\":false,\"type\":\"REMOVE\",\"value1\":123},\"object.number\":{\"path\":\"object.number\",\"equal\":false,\"type\":\"REMOVE\",\"value1\":\"abc\"},\"object.string\":{\"path\":\"object.string\",\"equal\":false,\"type\":\"REMOVE\",\"value1\":123},\"array[0].number\":{\"path\":\"array[0].number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":123,\"type\":\"MODIFY\"},\"array[0].string\":{\"path\":\"array[0].string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"},\"number\":{\"path\":\"number\",\"equal\":false,\"type\":\"ADD\",\"value2\":1}}";
         Assert.assertEquals(expected, result.toString());
     }
 
@@ -102,7 +102,7 @@ class CompareUtilsTest {
                 "}");
         JSONObject result = CompareUtils.compare(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
-        String expected = "{\"number\":{\"equal\":true},\"string\":{\"equal\":true},\"object.number\":{\"equal\":true},\"object.string\":{\"equal\":true},\"array[0].number\":{\"equal\":true},\"array[0].string\":{\"equal\":true}}";
+        String expected = "{\"number\":{\"path\":\"number\",\"valueEqual\":true},\"string\":{\"path\":\"string\",\"valueEqual\":true},\"object.number\":{\"path\":\"object.number\",\"valueEqual\":true},\"object.string\":{\"path\":\"object.string\",\"valueEqual\":true},\"array[0].number\":{\"path\":\"array[0].number\",\"valueEqual\":true},\"array[0].string\":{\"path\":\"array[0].string\",\"valueEqual\":true}}";
         Assert.assertEquals(expected, result.toString());
     }
 
@@ -124,7 +124,7 @@ class CompareUtilsTest {
         System.out.println(json2);
         JSONObject result = CompareUtils.compare(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
-        String expected = "{\"number\":{\"equal\":false,\"typeEqual\":true,\"type\":\"MODIFY\"},\"string\":{\"equal\":false,\"typeEqual\":true,\"type\":\"MODIFY\"},\"object.number\":{\"equal\":false,\"typeEqual\":true,\"type\":\"MODIFY\"},\"object.string\":{\"equal\":false,\"typeEqual\":true,\"type\":\"MODIFY\"},\"array[0].number\":{\"equal\":false,\"typeEqual\":true,\"type\":\"MODIFY\"},\"array[0].string\":{\"equal\":false,\"typeEqual\":true,\"type\":\"MODIFY\"}}";
+        String expected = "{\"number\":{\"path\":\"number\",\"valueEqual\":false,\"typeEqual\":true,\"value1\":11,\"value2\":1,\"type\":\"MODIFY\"},\"string\":{\"path\":\"string\",\"valueEqual\":false,\"typeEqual\":true,\"value1\":\"abcd\",\"value2\":\"abc\",\"type\":\"MODIFY\"},\"object.number\":{\"path\":\"object.number\",\"valueEqual\":false,\"typeEqual\":true,\"value1\":11,\"value2\":1,\"type\":\"MODIFY\"},\"object.string\":{\"path\":\"object.string\",\"valueEqual\":false,\"typeEqual\":true,\"value1\":\"abcd\",\"value2\":\"abc\",\"type\":\"MODIFY\"},\"array[0].number\":{\"path\":\"array[0].number\",\"valueEqual\":false,\"typeEqual\":true,\"value1\":11,\"value2\":1,\"type\":\"MODIFY\"},\"array[0].string\":{\"path\":\"array[0].string\",\"valueEqual\":false,\"typeEqual\":true,\"value1\":\"abcd\",\"value2\":\"abc\",\"type\":\"MODIFY\"}}";
         Assert.assertEquals(expected, result.toString());
     }
 
@@ -146,7 +146,7 @@ class CompareUtilsTest {
         System.out.println(json2);
         JSONObject result = CompareUtils.compare(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
-        String expected = "{\"number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"object.number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"object.string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"array[0].number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"array[0].string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"}}";
+        String expected = "{\"number\":{\"path\":\"number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":1,\"type\":\"MODIFY\"},\"string\":{\"path\":\"string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"},\"object.number\":{\"path\":\"object.number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":123,\"type\":\"MODIFY\"},\"object.string\":{\"path\":\"object.string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"},\"array[0].number\":{\"path\":\"array[0].number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":123,\"type\":\"MODIFY\"},\"array[0].string\":{\"path\":\"array[0].string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"}}";
         Assert.assertEquals(expected, result.toString());
     }
 
@@ -168,7 +168,7 @@ class CompareUtilsTest {
         System.out.println(json2);
         JSONObject result = CompareUtils.compare(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
-        String expected = "{\"string\":{\"equal\":false,\"type\":\"REMOVE\"},\"object.number\":{\"equal\":false,\"type\":\"REMOVE\"},\"object.string\":{\"equal\":false,\"type\":\"REMOVE\"},\"array[0].number\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"array[0].string\":{\"equal\":false,\"typeEqual\":false,\"type\":\"MODIFY\"},\"number\":{\"equal\":false,\"type\":\"ADD\"}}";
+        String expected = "{\"string\":{\"path\":\"string\",\"equal\":false,\"type\":\"REMOVE\",\"value1\":123},\"object.number\":{\"path\":\"object.number\",\"equal\":false,\"type\":\"REMOVE\",\"value1\":\"abc\"},\"object.string\":{\"path\":\"object.string\",\"equal\":false,\"type\":\"REMOVE\",\"value1\":123},\"array[0].number\":{\"path\":\"array[0].number\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":\"abc\",\"value2\":123,\"type\":\"MODIFY\"},\"array[0].string\":{\"path\":\"array[0].string\",\"valueEqual\":false,\"typeEqual\":false,\"value1\":123,\"value2\":\"abc\",\"type\":\"MODIFY\"},\"number\":{\"path\":\"number\",\"equal\":false,\"type\":\"ADD\",\"value2\":1}}";
         Assert.assertEquals(expected, result.toString());
     }
 

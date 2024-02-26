@@ -25,6 +25,9 @@ public class CompareUtils {
     public static final String DIFF_TYPE_OF_ADD = "ADD";
     public static final String DIFF_TYPE_OF_REMOVE = "REMOVE";
 
+    public static final String FIELD_NAME_OF_VALUE_EQUAL = "valueEqual";
+    public static final String FIELD_NAME_OF_TYPE_EQUAL = "typeEqual";
+
     /**
      * 比较json是否相同
      *
@@ -79,17 +82,25 @@ public class CompareUtils {
             boolean json2Contain = jsonPath2.containsKey(path);
 
             JSONObject pathResult = new JSONObject();
+            pathResult.put("path", path);
+
             if (json1Contain && !json2Contain) {
                 pathResult.put("equal", false);
                 pathResult.put("type", DIFF_TYPE_OF_REMOVE);
+                Object value1 = json1.getByPath(path);
+                pathResult.put("value1", value1);
             } else if (!json1Contain && json2Contain) {
                 pathResult.put("equal", false);
                 pathResult.put("type", DIFF_TYPE_OF_ADD);
+                Object value2 = json2.getByPath(path);
+                pathResult.put("value2", value2);
             } else if (json1Contain && json2Contain) {
                 Object value1 = json1.getByPath(path);
                 Object value2 = json2.getByPath(path);
-                pathResult = compareValue(value1, value2);
-                if (Boolean.FALSE.equals(pathResult.get("equal"))) {
+                pathResult.putAll(compareValue(value1, value2));
+                if (Boolean.FALSE.equals(pathResult.get(FIELD_NAME_OF_VALUE_EQUAL))) {
+                    pathResult.put("value1", value1);
+                    pathResult.put("value2", value2);
                     pathResult.put("type", DIFF_TYPE_OF_MODIFY);
                 }
             }
@@ -160,14 +171,14 @@ public class CompareUtils {
         JSONObject result = new JSONObject();
 
         boolean equal = Objects.equals(value1, value2);
-        result.put("equal", equal);
+        result.put(FIELD_NAME_OF_VALUE_EQUAL, equal);
 
         if (!equal) {
             if (value1 != null && value2 != null) {
                 boolean typeEqual = (value1.getClass().equals(value2.getClass()));
-                result.put("typeEqual", typeEqual);
+                result.put(FIELD_NAME_OF_TYPE_EQUAL, typeEqual);
             } else {
-                result.put("typeEqual", false);
+                result.put(FIELD_NAME_OF_TYPE_EQUAL, false);
             }
         }
 
@@ -183,7 +194,7 @@ public class CompareUtils {
     private static List<String> getEqualsJSONPathList(JSONObject jsonCompareResult) {
         List<String> equalPathList = new ArrayList<>();
         for (Map.Entry<String, Object> entry : jsonCompareResult.entrySet()) {
-            if (Boolean.TRUE.equals(((JSONObject) entry.getValue()).get("equal"))) {
+            if (Boolean.TRUE.equals(((JSONObject) entry.getValue()).get(FIELD_NAME_OF_VALUE_EQUAL))) {
                 equalPathList.add(entry.getKey());
             }
         }
