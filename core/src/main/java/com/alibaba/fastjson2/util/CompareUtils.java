@@ -21,7 +21,6 @@ import java.util.Objects;
  * * @author yanchangyou
  */
 public class CompareUtils {
-
     public static final String DIFF_TYPE_OF_MODIFY = "MODIFY";
     public static final String DIFF_TYPE_OF_ADD = "ADD";
     public static final String DIFF_TYPE_OF_REMOVE = "REMOVE";
@@ -62,7 +61,6 @@ public class CompareUtils {
      * @return result
      */
     public static JSONObject compare(JSONObject json1, JSONObject json2) {
-
         JSONObject jsonPath1 = convertWithJsonPath(json1);
         JSONObject jsonPath2 = convertWithJsonPath(json2);
 
@@ -109,7 +107,6 @@ public class CompareUtils {
      * @return 返回 json object
      */
     private static JSONObject convertWithJsonPath(JSONObject json) {
-
         JSONObject newMap = new JSONObject();
         if (json == null) {
             return newMap;
