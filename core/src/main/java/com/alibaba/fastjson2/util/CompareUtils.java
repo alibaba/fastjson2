@@ -188,13 +188,13 @@ public class CompareUtils {
         result.put(FIELD_NAME_OF_VALUE_EQUAL, equal);
 
         if (!equal) {
-            result.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_MODIFY);
             if (value1 != null && value2 != null) {
                 boolean typeEqual = (value1.getClass().equals(value2.getClass()));
                 result.put(FIELD_NAME_OF_TYPE_EQUAL, typeEqual);
             } else {
                 result.put(FIELD_NAME_OF_TYPE_EQUAL, false);
             }
+            result.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_MODIFY);
         }
 
         return result;
