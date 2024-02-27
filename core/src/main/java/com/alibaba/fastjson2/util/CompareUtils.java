@@ -9,16 +9,23 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 两个json比较<br/>
- * 实现思路：<br/>
- * 1，把json按照json path平铺展开<br/>
- * 2，对平铺展开的json进行对比<br/>
- * 3，返回对比接口<br/>
+ * 两个json比较
  * <p>
- * compare: 返回所有结果<br/>
- * diff: 返回差异结果<br/>
+ * 实现思路：
  * <p>
- * * @author yanchangyou
+ * 1，把json按照json path平铺展开
+ * <p>
+ * 2，对平铺展开的json进行对比
+ * <p>
+ * 3，返回对比接口
+ * <p>
+ * 两个主要接口:
+ * <p>
+ * compare: 返回所有结果
+ * <p>
+ * diff: 返回差异结果
+ *
+ * @author yanchangyou
  */
 public class CompareUtils {
     public static final String DIFF_TYPE_OF_MODIFY = "MODIFY";
