@@ -72,7 +72,6 @@ public class CompareUtils {
                 case DIFF_TYPE_OF_REMOVE:
                     removeCount++;
             }
-
         }
         result.put("equal", equal);
         result.put("total", list.size());
