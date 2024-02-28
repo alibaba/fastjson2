@@ -307,9 +307,9 @@ public class CompareUtilsTest {
     public void testCompare1() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':11," +
-                "'string':'abcd'," +
-                "'object': {'number':11,'string':'abcd',}," +
-                "'array': [{'number':11,'string':'abcd',}]," +
+                "'string':'ab'," +
+                "'object': {'number':11,'string':'ab',}," +
+                "'array': [{'number':11,'string':'ab',}]," +
                 "}");
         JSONObject json2 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -335,7 +335,7 @@ public class CompareUtilsTest {
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"typeEqual\":true,\n" +
                 "\t\t\"diffType\":\"MODIFY\",\n" +
-                "\t\t\"value1\":\"abcd\",\n" +
+                "\t\t\"value1\":\"ab\",\n" +
                 "\t\t\"value2\":\"abc\"\n" +
                 "\t},\n" +
                 "\t\"object.number\":{\n" +
@@ -351,7 +351,7 @@ public class CompareUtilsTest {
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"typeEqual\":true,\n" +
                 "\t\t\"diffType\":\"MODIFY\",\n" +
-                "\t\t\"value1\":\"abcd\",\n" +
+                "\t\t\"value1\":\"ab\",\n" +
                 "\t\t\"value2\":\"abc\"\n" +
                 "\t},\n" +
                 "\t\"array[0].number\":{\n" +
@@ -367,7 +367,7 @@ public class CompareUtilsTest {
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"typeEqual\":true,\n" +
                 "\t\t\"diffType\":\"MODIFY\",\n" +
-                "\t\t\"value1\":\"abcd\",\n" +
+                "\t\t\"value1\":\"ab\",\n" +
                 "\t\t\"value2\":\"abc\"\n" +
                 "\t}\n" +
                 "}";
