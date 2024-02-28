@@ -58,19 +58,21 @@ public class CompareUtils {
             } else {
                 valueEqualCount++;
             }
-            if (Boolean.FALSE.equals(item.get(FIELD_NAME_OF_TYPE_EQUAL))) {
+            if (Boolean.TRUE.equals(item.get(FIELD_NAME_OF_TYPE_EQUAL))) {
                 typeEqualCount++;
             }
             String diffType = item.getString(FIELD_NAME_OF_DIFF_TYPE);
-            switch (diffType) {
-                case DIFF_TYPE_OF_MODIFY:
-                    modifyCount++;
-                    break;
-                case DIFF_TYPE_OF_ADD:
-                    addCount++;
-                    break;
-                case DIFF_TYPE_OF_REMOVE:
-                    removeCount++;
+            if (diffType != null) {
+                switch (diffType) {
+                    case DIFF_TYPE_OF_MODIFY:
+                        modifyCount++;
+                        break;
+                    case DIFF_TYPE_OF_ADD:
+                        addCount++;
+                        break;
+                    case DIFF_TYPE_OF_REMOVE:
+                        removeCount++;
+                }
             }
         }
         result.put("equal", equal);

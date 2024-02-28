@@ -605,26 +605,31 @@ public class CompareUtilsTest {
     @Test
     public void testSum() {
         JSONObject json1 = JSONObject.parseObject("{" +
-                "'string':123," +
+                "'number':123," +
+                "'string':'abc'," +
+                "'remove':'abc'," +
                 "'object': {'number':'abc','string':123,}," +
                 "'array': [{'number':'abc','string':123,}]," +
                 "}");
         JSONObject json2 = JSONObject.parseObject("{" +
                 "'number':1," +
+                "'new':'abc'," +
+                "'string':'abc'," +
                 "'array': [{'number':123,'string':'abc',}]," +
                 "}");
-        JSONArray list = CompareUtils.diffToArray(json1, json2);
+        JSONArray list = CompareUtils.compareToArray(json1, json2);
+        System.out.println(list.toString(JSONWriter.Feature.PrettyFormat));
         JSONObject result = CompareUtils.sum(list);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
         Object expected = "{\n" +
                 "\t\"equal\":false,\n" +
-                "\t\"total\":6,\n" +
-                "\t\"valueEqualCount\":0,\n" +
-                "\t\"typeEqualCount\":2,\n" +
-                "\t\"diffCount\":6,\n" +
+                "\t\"total\":8,\n" +
+                "\t\"valueEqualCount\":1,\n" +
+                "\t\"typeEqualCount\":1,\n" +
+                "\t\"diffCount\":7,\n" +
                 "\t\"addCount\":1,\n" +
                 "\t\"removeCount\":3,\n" +
-                "\t\"modifyCount\":2\n" +
+                "\t\"modifyCount\":3\n" +
                 "}";
         Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
