@@ -187,6 +187,7 @@ public abstract class JSONWriter
         if ((context.features & ReferenceDetection.mask) == 0
                 || object == Collections.EMPTY_LIST
                 || object == Collections.EMPTY_SET
+                || (object != null && ObjectWriterProvider.isNotReferenceDetect(object.getClass()))
         ) {
             return null;
         }
