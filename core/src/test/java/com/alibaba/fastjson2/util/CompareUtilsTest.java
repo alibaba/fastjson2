@@ -3,11 +3,12 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CompareUtilsTest {
-    @org.junit.Test
+    @Test
     public void diffToArray() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -26,10 +27,10 @@ public class CompareUtilsTest {
         String expected = "[\n" +
                 "\t\n" +
                 "]";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void diffToArray3() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'string':123," +
@@ -84,10 +85,10 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":1\n" +
                 "\t}\n" +
                 "]";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testDiff() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -106,10 +107,10 @@ public class CompareUtilsTest {
         String expected = "{\n" +
                 "\t\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testDiff1() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -128,10 +129,10 @@ public class CompareUtilsTest {
         String expected = "{\n" +
                 "\t\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testDiff2() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':'abc'," +
@@ -197,10 +198,10 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":\"abc\"\n" +
                 "\t}\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testDiff3() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'string':123," +
@@ -255,10 +256,10 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":1\n" +
                 "\t}\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testCompare() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -300,10 +301,10 @@ public class CompareUtilsTest {
                 "\t\t\"valueEqual\":true\n" +
                 "\t}\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testCompare1() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':11," +
@@ -371,10 +372,10 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":\"abc\"\n" +
                 "\t}\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testCompare2() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':'abc'," +
@@ -442,10 +443,10 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":\"abc\"\n" +
                 "\t}\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testCompare3() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'string':123," +
@@ -502,10 +503,10 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":1\n" +
                 "\t}\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testCompareToArray3() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'string':123," +
@@ -562,10 +563,10 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":1\n" +
                 "\t}\n" +
                 "]";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 
-    @org.junit.Test
+    @Test
     public void testEquals() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -582,10 +583,10 @@ public class CompareUtilsTest {
         boolean result = CompareUtils.equals(json1, json2);
         System.out.println(result);
         Object expected = true;
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
-    @org.junit.Test
+    @Test
     public void testEquals3() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'string':123," +
@@ -599,7 +600,7 @@ public class CompareUtilsTest {
         boolean result = CompareUtils.equals(json1, json2);
         System.out.println(result);
         Object expected = false;
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -631,6 +632,6 @@ public class CompareUtilsTest {
                 "\t\"removeCount\":3,\n" +
                 "\t\"modifyCount\":3\n" +
                 "}";
-        Assert.assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
     }
 }
