@@ -1488,34 +1488,36 @@ class JSONWriterUTF8
         final int off = this.off;
         buf[off] = '"';
 
+        final long base = ARRAY_BYTE_BASE_OFFSET + off;
+
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 1,
+                base + 1,
                 packDigits((int) (msb >> 56), (int) (msb >> 48), (int) (msb >> 40), (int) (msb >> 32))
         );
         buf[off + 9] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 10,
+                base + 10,
                 packDigits(((int) msb) >> 24, ((int) msb) >> 16));
         buf[off + 14] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 15,
+                base + 15,
                 packDigits(((int) msb) >> 8, (int) msb));
         buf[off + 19] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 20,
+                base + 20,
                 packDigits((int) (lsb >> 56), (int) (lsb >> 48)));
         buf[off + 24] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 25,
+                base + 25,
                 packDigits(((int) (lsb >> 40)), (int) (lsb >> 32), ((int) lsb) >> 24, ((int) lsb) >> 16));
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 33,
+                base + 33,
                 packDigits(((int) lsb) >> 8, (int) lsb));
         buf[off + 37] = '"';
         this.off += 38;
