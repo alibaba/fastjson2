@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IOUtilsTest {
     @Test
@@ -42,8 +44,9 @@ public class IOUtilsTest {
     public void encodeUTF8_error() {
         byte[] bytes = new byte[]{-127, -36};
         byte[] dst = new byte[100];
-        int result = IOUtils.encodeUTF8(bytes, 0, bytes.length, dst, 0);
-        assertEquals(-1, result);
+        assertThrows(
+                JSONException.class,
+                () -> IOUtils.encodeUTF8(bytes, 0, bytes.length, dst, 0));
     }
 
     @Test

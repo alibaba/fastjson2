@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONException;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -384,52 +386,21 @@ public class IOUtils {
     public static int encodeUTF8(byte[] src, int offset, int len, byte[] dst, int dp) {
         int sl = offset + len;
         while (offset < sl) {
-            byte b0 = src[offset];
-            byte b1 = src[offset + 1];
+            char c = UNSAFE.getChar(src, ARRAY_BYTE_BASE_OFFSET + offset);
             offset += 2;
 
-            if (b1 == 0 && b0 >= 0) {
-                dst[dp++] = b0;
+            if (c < 0x80) {
+                dst[dp++] = (byte) c;
             } else {
-                char c = (char) (((b0 & 0xff)) | ((b1 & 0xff) << 8));
                 if (c < 0x800) {
                     // 2 bytes, 11 bits
                     dst[dp] = (byte) (0xc0 | (c >> 6));
                     dst[dp + 1] = (byte) (0x80 | (c & 0x3f));
                     dp += 2;
-                } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
-                    final int uc;
-                    int ip = offset - 1;
-                    if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
-                        if (sl - ip < 2) {
-                            uc = -1;
-                        } else {
-                            b0 = src[ip + 1];
-                            b1 = src[ip + 2];
-                            char d = (char) (((b0 & 0xff)) | ((b1 & 0xff) << 8));
-                            // d >= '\uDC00' && d < ('\uDFFF' + 1)
-                            if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
-                                offset += 2;
-                                uc = ((c << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
-                            } else {
-                                return -1;
-                            }
-                        }
-                    } else {
-                        //
-                        // Character.isLowSurrogate(c)
-                        return -1;
-                    }
-
-                    if (uc < 0) {
-                        dst[dp++] = (byte) '?';
-                    } else {
-                        dst[dp] = (byte) (0xf0 | ((uc >> 18)));
-                        dst[dp + 1] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                        dst[dp + 2] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                        dst[dp + 3] = (byte) (0x80 | (uc & 0x3f));
-                        dp += 4;
-                    }
+                } else if (c >= '\uD800' && c <= '\uDFFF') {
+                    utf8_char2(src, offset, sl, c, dst, dp);
+                    offset += 2;
+                    dp += 4;
                 } else {
                     // 3 bytes, 16 bits
                     dst[dp] = (byte) (0xe0 | ((c >> 12)));
@@ -461,41 +432,10 @@ public class IOUtils {
                 dst[dp] = (byte) (0xc0 | (c >> 6));
                 dst[dp + 1] = (byte) (0x80 | (c & 0x3f));
                 dp += 2;
-            } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
-                final int uc;
-                int ip = offset - 1;
-                if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
-                    if (sl - ip < 2) {
-                        uc = -1;
-                    } else {
-                        char d = src[ip + 1];
-                        // d >= '\uDC00' && d < ('\uDFFF' + 1)
-                        if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
-                            uc = ((c << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
-                        } else {
-//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                            dst[dp++] = (byte) '?';
-                            continue;
-                        }
-                    }
-                } else {
-                    //
-                    // Character.isLowSurrogate(c)
-                    dst[dp++] = (byte) '?';
-                    continue;
-//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                }
-
-                if (uc < 0) {
-                    dst[dp++] = (byte) '?';
-                } else {
-                    dst[dp] = (byte) (0xf0 | ((uc >> 18)));
-                    dst[dp + 1] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                    dst[dp + 2] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                    dst[dp + 3] = (byte) (0x80 | (uc & 0x3f));
-                    dp += 4;
-                    offset++; // 2 chars
-                }
+            } else if (c >= '\uD800' && c <= '\uDFFF') {
+                utf8_char2(src, offset, sl, c, dst, dp);
+                offset++;
+                dp += 4;
             } else {
                 // 3 bytes, 16 bits
                 dst[dp] = (byte) (0xe0 | ((c >> 12)));
@@ -505,6 +445,36 @@ public class IOUtils {
             }
         }
         return dp;
+    }
+
+    private static void utf8_char2(byte[] src, int offset, int sl, char c, byte[] dst, int dp) {
+        char d;
+        if (c > '\uDBFF'
+                || sl - offset < 1
+                || (d = UNSAFE.getChar(src, ARRAY_BYTE_BASE_OFFSET + offset)) < '\uDC00'
+                || d > '\uDFFF'
+        ) {
+            throw new JSONException("malformed input off : " + offset);
+        }
+
+        int uc = ((c << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00');
+        dst[dp] = (byte) (0xf0 | ((uc >> 18)));
+        dst[dp + 1] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+        dst[dp + 2] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+        dst[dp + 3] = (byte) (0x80 | (uc & 0x3f));
+    }
+
+    private static void utf8_char2(char[] src, int offset, int sl, char c, byte[] dst, int dp) {
+        char d;
+        if (c > '\uDBFF' || sl - offset < 1 || (d = src[offset]) < '\uDC00' || d > '\uDFFF') {
+            throw new JSONException("malformed input off : " + offset);
+        }
+
+        int uc = ((c << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00');
+        dst[dp] = (byte) (0xf0 | ((uc >> 18)));
+        dst[dp + 1] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+        dst[dp + 2] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+        dst[dp + 3] = (byte) (0x80 | (uc & 0x3f));
     }
 
     public static boolean isNumber(String str) {
