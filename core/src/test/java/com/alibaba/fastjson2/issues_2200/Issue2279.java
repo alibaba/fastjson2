@@ -18,6 +18,6 @@ public class Issue2279 {
         ParameterizedTypeImpl parameterizedType = new ParameterizedTypeImpl(Map.class, Integer.class, new ParameterizedTypeImpl(List.class, Integer.class));
         Map<Integer, List<Integer>> o = JSONB.parseObject(bytes, parameterizedType);
         Integer i = o.get(1).get(0);
-        Assert.assertEquals(-1,(int) i);
+        Assert.assertEquals(-1, (int) i);
     }
 }
