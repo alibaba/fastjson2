@@ -2065,11 +2065,46 @@ class JSONWriterUTF8
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }
-        off = IOUtils.writeInt32(bytes, off, i);
+        off = IOUtils.writeInt8(bytes, off, i);
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }
         this.off = off;
+    }
+
+    @Override
+    public final void writeInt8(byte[] values) {
+        if (values == null) {
+            writeNull();
+            return;
+        }
+
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+
+        int off = this.off;
+        int minCapacity = off + values.length * 5 + 2;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        bytes[off++] = '[';
+
+        for (int i = 0; i < values.length; i++) {
+            if (i != 0) {
+                bytes[off++] = ',';
+            }
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
+            }
+            off = IOUtils.writeInt8(bytes, off, values[i]);
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
+            }
+        }
+
+        bytes[off] = ']';
+        this.off = off + 1;
     }
 
     @Override

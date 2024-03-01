@@ -1156,6 +1156,48 @@ public class IOUtils {
         return pos + 15;
     }
 
+    public static int writeInt8(final byte[] buf, int pos, final byte value) {
+        int i;
+        if (value < 0) {
+            i = -value;
+            buf[pos++] = '-';
+        } else {
+            i = value;
+        }
+
+        int v = DIGITS_K_32[i];
+        final int start = (byte) v;
+        if (start == 0) {
+            putShort(buf, pos, (short) (v >> 8));
+            pos += 2;
+        } else if (start == 1) {
+            buf[pos++] = (byte) (v >> 16);
+        }
+        buf[pos] = (byte) (v >> 24);
+        return pos + 1;
+    }
+
+    public static int writeInt8(final char[] buf, int pos, final byte value) {
+        int i;
+        if (value < 0) {
+            i = -value;
+            buf[pos++] = '-';
+        } else {
+            i = value;
+        }
+
+        long v = DIGITS_K_64[i];
+        final int start = (byte) v;
+        if (start == 0) {
+            putInt(buf, pos, (int) (v >> 16));
+            pos += 2;
+        } else if (start == 1) {
+            buf[pos++] = (char) (v >> 32);
+        }
+        buf[pos] = (char) (v >> 48);
+        return pos + 1;
+    }
+
     public static int writeInt16(final byte[] buf, int pos, final short value) {
         int i;
         if (value < 0) {
