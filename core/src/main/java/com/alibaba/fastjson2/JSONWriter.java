@@ -120,10 +120,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(String name, Object object) {
-        if ((context.features & ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -146,10 +143,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(FieldWriter fieldWriter, Object object) {
-        if ((context.features & ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -184,11 +178,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(int index, Object object) {
-        if ((context.features & ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-                || (object != null && ObjectWriterProvider.isNotReferenceDetect(object.getClass()))
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
