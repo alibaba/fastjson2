@@ -1638,7 +1638,7 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = quote;
         }
-        off = IOUtils.writeInt32(chars, off, i);
+        off = IOUtils.writeInt16(chars, off, i);
         if (writeAsString) {
             chars[off++] = quote;
         }

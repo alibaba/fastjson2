@@ -2086,7 +2086,7 @@ class JSONWriterUTF8
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }
-        off = IOUtils.writeInt32(bytes, off, i);
+        off = IOUtils.writeInt16(bytes, off, i);
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }

@@ -2340,4 +2340,56 @@ public class JSONWriterTest {
         JSONReader jsonReader = JSONReader.of(buf, StandardCharsets.UTF_8);
         assertEquals(str, jsonReader.readAny());
     }
+
+    @Test
+    public void writeInt16() {
+        short[] values = new short[] {
+                0,
+                1,
+                2,
+                5,
+                10,
+                20,
+                50,
+                100,
+                200,
+                500,
+                1000,
+                2000,
+                5000,
+                10000,
+                20000,
+                -1,
+                -2,
+                -5,
+                -10,
+                -20,
+                -50,
+                -100,
+                -200,
+                -500,
+                -1000,
+                -2000,
+                -5000,
+                -10000,
+                -20000,
+                Short.MIN_VALUE,
+                Short.MAX_VALUE
+        };
+
+        for (int i = 0; i < values.length; i++) {
+            short value = values[i];
+
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeInt16(value);
+                assertEquals(Short.toString(value), jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeInt16(value);
+                assertEquals(Short.toString(value), jsonWriter.toString());
+            }
+        }
+    }
 }

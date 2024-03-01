@@ -1156,6 +1156,68 @@ public class IOUtils {
         return pos + 15;
     }
 
+    public static int writeInt16(final byte[] buf, int pos, final short value) {
+        int i;
+        if (value < 0) {
+            i = -value;
+            buf[pos++] = '-';
+        } else {
+            i = value;
+        }
+
+        if (i < 1000) {
+            int v = DIGITS_K_32[i];
+            final int start = (byte) v;
+            if (start == 0) {
+                putShort(buf, pos, (short) (v >> 8));
+                pos += 2;
+            } else if (start == 1) {
+                buf[pos++] = (byte) (v >> 16);
+            }
+            buf[pos] = (byte) (v >> 24);
+            return pos + 1;
+        }
+
+        final int q1 = i / 1000;
+        final int v2 = DIGITS_K_32[q1];
+        if ((byte) v2 == 1) {
+            buf[pos++] = (byte) (v2 >> 16);
+        }
+        putInt(buf, pos, (DIGITS_K_32[i - q1 * 1000]) & 0xffffff00 | (v2 >> 24));
+        return pos + 4;
+    }
+
+    public static int writeInt16(final char[] buf, int pos, final short value) {
+        int i;
+        if (value < 0) {
+            i = -value;
+            buf[pos++] = '-';
+        } else {
+            i = value;
+        }
+
+        if (i < 1000) {
+            long v = DIGITS_K_64[i];
+            final int start = (byte) v;
+            if (start == 0) {
+                putInt(buf, pos, (int) (v >> 16));
+                pos += 2;
+            } else if (start == 1) {
+                buf[pos++] = (char) (v >> 32);
+            }
+            buf[pos] = (char) (v >> 48);
+            return pos + 1;
+        }
+
+        final int q1 = i / 1000;
+        final long v2 = DIGITS_K_64[q1];
+        if ((byte) v2 == 1) {
+            buf[pos++] = (char) (v2 >> 32);
+        }
+        putLong(buf, pos, DIGITS_K_64[i - q1 * 1000] & 0xffffffffffff0000L | (v2 >> 48));
+        return pos + 4;
+    }
+
     public static int writeInt32(final byte[] buf, int pos, final int value) {
         int i;
         if (value < 0) {
