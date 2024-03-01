@@ -1312,6 +1312,44 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeInt8(byte[] values) {
+        if (values == null) {
+            writeArrayNull();
+            return;
+        }
+
+        int size = values.length;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        if (size <= ARRAY_FIX_LEN) {
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
+        } else {
+            bytes[off++] = BC_ARRAY;
+            writeInt32(size);
+        }
+
+        int off = this.off;
+        int minCapacity = off + values.length * 2;
+        if (minCapacity - bytes.length > 0) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        for (int i = 0; i < values.length; i++) {
+            int val = values[i];
+            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) val;
+            } else {
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
+                bytes[off++] = (byte) (val);
+            }
+        }
+        this.off = off;
+    }
+
+    @Override
     public void writeInt8(byte val) {
         int off = this.off;
         int minCapacity = off + 2;

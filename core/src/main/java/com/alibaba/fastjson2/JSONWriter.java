@@ -935,6 +935,7 @@ public abstract class JSONWriter
     }
 
     public abstract void writeInt8(byte value);
+    public abstract void writeInt8(byte[] value);
 
     public abstract void writeInt16(short value);
 

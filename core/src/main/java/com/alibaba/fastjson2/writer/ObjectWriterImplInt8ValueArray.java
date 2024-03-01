@@ -92,13 +92,6 @@ final class ObjectWriterImplInt8ValueArray
             return;
         }
 
-        jsonWriter.startArray();
-        for (int i = 0; i < bytes.length; i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-            jsonWriter.writeInt32(bytes[i]);
-        }
-        jsonWriter.endArray();
+        jsonWriter.writeInt8(bytes);
     }
 }

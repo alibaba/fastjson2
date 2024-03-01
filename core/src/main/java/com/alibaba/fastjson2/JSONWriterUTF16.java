@@ -1617,11 +1617,45 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = quote;
         }
-        off = IOUtils.writeInt32(chars, off, i);
+        off = IOUtils.writeInt8(chars, off, i);
         if (writeAsString) {
             chars[off++] = quote;
         }
         this.off = off;
+    }
+
+    public final void writeInt8(byte[] value) {
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+
+        int off = this.off;
+        int minCapacity = off + value.length * 5 + 2;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        chars[off++] = '[';
+
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                chars[off++] = ',';
+            }
+            if (writeAsString) {
+                chars[off++] = quote;
+            }
+            off = IOUtils.writeInt8(chars, off, value[i]);
+            if (writeAsString) {
+                chars[off++] = quote;
+            }
+        }
+
+        chars[off] = ']';
+        this.off = off + 1;
     }
 
     @Override
