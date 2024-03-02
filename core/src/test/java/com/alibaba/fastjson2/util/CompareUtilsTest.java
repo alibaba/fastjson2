@@ -746,7 +746,7 @@ public class CompareUtilsTest {
     }
 
     @Test
-    void buildJsonPathKey() {
+    public void buildJsonPathKey() {
         String[] keys = new String[]{"a", "a-b", "'ab'", "[ab]"};
         String[] expected = new String[]{"a", "['a-b']", "'ab'", "ab"};
         for (int i = 0; i < keys.length; i++) {
