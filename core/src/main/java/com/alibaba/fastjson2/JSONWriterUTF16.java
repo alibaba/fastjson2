@@ -1954,8 +1954,7 @@ class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        int len = DoubleToDecimal.toString(value, chars, off, true);
-        off += len;
+        off += DoubleToDecimal.toString(value, chars, off, true);
 
         if (writeAsString) {
             chars[off++] = '"';
@@ -2058,7 +2057,7 @@ class JSONWriterUTF16
         final char[] bytes = this.chars;
         bytes[off] = quote;
         if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+            throw illegalYear(year);
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
@@ -2087,7 +2086,7 @@ class JSONWriterUTF16
         int off = this.off;
         chars[off] = quote;
         if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+            throw illegalYear(year);
         }
         off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
         chars[off] = ' ';
@@ -2103,11 +2102,9 @@ class JSONWriterUTF16
             return;
         }
 
-        final Context context = this.context;
-        if (context.dateFormat != null) {
-            if (writeLocalDateWithFormat(date, context)) {
-                return;
-            }
+        if (context.dateFormat != null
+                && writeLocalDateWithFormat(date)) {
+            return;
         }
 
         int off = this.off;
@@ -2224,7 +2221,7 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off] = quote;
         if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+            throw illegalYear(year);
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
@@ -2313,11 +2310,11 @@ class JSONWriterUTF16
         }
 
         final char[] chars = this.chars;
-        chars[off++] = quote;
+        chars[off] = quote;
         LocalDate localDate = dateTime.toLocalDate();
-        off = IOUtils.writeLocalDate(chars, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-        chars[off++] = 'T';
-        off = IOUtils.writeLocalTime(chars, off, dateTime.toLocalTime());
+        off = IOUtils.writeLocalDate(chars, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+        chars[off] = 'T';
+        off = IOUtils.writeLocalTime(chars, off + 1, dateTime.toLocalTime());
         if (zoneSize == 1) {
             chars[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
@@ -2340,7 +2337,6 @@ class JSONWriterUTF16
             return;
         }
 
-        ZoneOffset offset = dateTime.getOffset();
         int off = this.off;
         int minCapacity = off + 45;
         if (minCapacity >= chars.length) {
@@ -2348,12 +2344,14 @@ class JSONWriterUTF16
         }
 
         final char[] chars = this.chars;
-        chars[off++] = quote;
+        chars[off] = quote;
         LocalDateTime ldt = dateTime.toLocalDateTime();
         LocalDate date = ldt.toLocalDate();
-        off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-        chars[off++] = 'T';
-        off = IOUtils.writeLocalTime(chars, off, ldt.toLocalTime());
+        off = IOUtils.writeLocalDate(chars, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        chars[off] = 'T';
+        off = IOUtils.writeLocalTime(chars, off + 1, ldt.toLocalTime());
+
+        ZoneOffset offset = dateTime.getOffset();
         if (offset.getTotalSeconds() == 0) {
             chars[off++] = 'Z';
         } else {
@@ -2380,8 +2378,8 @@ class JSONWriterUTF16
         }
 
         final char[] chars = this.chars;
-        chars[off++] = quote;
-        off = IOUtils.writeLocalTime(chars, off, time.toLocalTime());
+        chars[off] = quote;
+        off = IOUtils.writeLocalTime(chars, off + 1, time.toLocalTime());
         if (offset.getTotalSeconds() == 0) {
             chars[off++] = 'Z';
         } else {

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.lang.reflect.GenericArrayType;
@@ -1249,7 +1250,8 @@ public abstract class JSONWriter
 
     public abstract void writeLocalDate(LocalDate date);
 
-    protected final boolean writeLocalDateWithFormat(LocalDate date, Context context) {
+    protected final boolean writeLocalDateWithFormat(LocalDate date) {
+        Context context = this.context;
         if (context.dateFormatUnixTime || context.dateFormatMillis) {
             LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
             long millis = dateTime.atZone(context.getZoneId())
@@ -2260,5 +2262,10 @@ public abstract class JSONWriter
 
             return fullPath = new String(buf, 0, off, ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
         }
+    }
+
+    @NotNull
+    protected static IllegalArgumentException illegalYear(int year) {
+        return new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
     }
 }
