@@ -820,6 +820,10 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
+    public void writeName16Raw(long name0, long name2) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
     public void writeSymbol(int symbol) {
         throw new JSONException("UnsupportedOperation");
     }

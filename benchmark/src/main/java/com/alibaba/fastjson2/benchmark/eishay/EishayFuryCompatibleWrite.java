@@ -26,7 +26,6 @@ public class EishayFuryCompatibleWrite {
             JSONWriter.Feature.ReferenceDetection,
             JSONWriter.Feature.WriteNulls,
             JSONWriter.Feature.NotWriteDefaultValue,
-            JSONWriter.Feature.WriteNameAsSymbol,
             JSONWriter.Feature.NotWriteHashMapArrayListClassName
     };
     static JSONWriter.Context context = new JSONWriter.Context(

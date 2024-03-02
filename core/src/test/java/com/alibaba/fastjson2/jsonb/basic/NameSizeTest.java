@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NameSizeTest {
@@ -111,7 +112,10 @@ public class NameSizeTest {
     public void name5() {
         int value = 13;
         byte[] jsonbBytes = JSONObject.of("n2345", value).toJSONBBytes();
-        assertEquals(value, JSONB.parseObject(jsonbBytes, Name5.class).n2345);
+        Name5 bean = JSONB.parseObject(jsonbBytes, Name5.class);
+        assertEquals(value, bean.n2345);
+        byte[] bytes = JSONB.toBytes(bean);
+        assertArrayEquals(jsonbBytes, bytes);
     }
 
     public static class Name5 {
