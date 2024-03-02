@@ -2353,8 +2353,7 @@ class JSONWriterUTF8
             bytes[off++] = '"';
         }
 
-        int len = DoubleToDecimal.toString(value, bytes, off, true);
-        off += len;
+        off += DoubleToDecimal.toString(value, bytes, off, true);
 
         if (writeAsString) {
             bytes[off++] = '"';
@@ -2455,17 +2454,18 @@ class JSONWriterUTF8
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
         if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+            throw illegalYear(year);
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[y01]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 3, PACKED_DIGITS[y23]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 5, PACKED_DIGITS[month]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[dayOfMonth]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, PACKED_DIGITS[hour]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 11, PACKED_DIGITS[minute]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 13, PACKED_DIGITS[second]);
+        final long base = ARRAY_BYTE_BASE_OFFSET + off;
+        UNSAFE.putShort(bytes, base + 1, PACKED_DIGITS[y01]);
+        UNSAFE.putShort(bytes, base + 3, PACKED_DIGITS[y23]);
+        UNSAFE.putShort(bytes, base + 5, PACKED_DIGITS[month]);
+        UNSAFE.putShort(bytes, base + 7, PACKED_DIGITS[dayOfMonth]);
+        UNSAFE.putShort(bytes, base + 9, PACKED_DIGITS[hour]);
+        UNSAFE.putShort(bytes, base + 11, PACKED_DIGITS[minute]);
+        UNSAFE.putShort(bytes, base + 13, PACKED_DIGITS[second]);
         bytes[off + 15] = (byte) quote;
         this.off = off + 16;
     }
@@ -2500,11 +2500,9 @@ class JSONWriterUTF8
             return;
         }
 
-        final Context context = this.context;
-        if (context.dateFormat != null) {
-            if (writeLocalDateWithFormat(date, context)) {
-                return;
-            }
+        if (context.dateFormat != null
+                && writeLocalDateWithFormat(date)) {
+            return;
         }
 
         int off = this.off;
@@ -2548,7 +2546,7 @@ class JSONWriterUTF8
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
         if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+            throw illegalYear(year);
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
@@ -2633,11 +2631,11 @@ class JSONWriterUTF8
         }
 
         final byte[] bytes = this.bytes;
-        bytes[off++] = (byte) quote;
+        bytes[off] = (byte) quote;
         LocalDate localDate = dateTime.toLocalDate();
-        off = IOUtils.writeLocalDate(bytes, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-        bytes[off++] = 'T';
-        off = IOUtils.writeLocalTime(bytes, off, dateTime.toLocalTime());
+        off = IOUtils.writeLocalDate(bytes, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+        bytes[off] = 'T';
+        off = IOUtils.writeLocalTime(bytes, off + 1, dateTime.toLocalTime());
         if (zoneSize == 1) {
             bytes[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
@@ -2660,20 +2658,21 @@ class JSONWriterUTF8
             return;
         }
 
-        ZoneOffset offset = dateTime.getOffset();
+        int off = this.off;
         int minCapacity = off + 45;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
 
         final byte[] bytes = this.bytes;
-        int off = this.off;
-        bytes[off++] = (byte) quote;
+        bytes[off] = (byte) quote;
         LocalDateTime ldt = dateTime.toLocalDateTime();
         LocalDate date = ldt.toLocalDate();
-        off = IOUtils.writeLocalDate(bytes, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-        bytes[off++] = 'T';
-        off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
+        off = IOUtils.writeLocalDate(bytes, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        bytes[off] = 'T';
+        off = IOUtils.writeLocalTime(bytes, off + 1, ldt.toLocalTime());
+
+        ZoneOffset offset = dateTime.getOffset();
         if (offset.getTotalSeconds() == 0) {
             bytes[off++] = 'Z';
         } else {
@@ -2691,16 +2690,17 @@ class JSONWriterUTF8
             return;
         }
 
-        ZoneOffset offset = time.getOffset();
+        int off = this.off;
         int minCapacity = off + 45;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
 
         final byte[] bytes = this.bytes;
-        int off = this.off;
-        bytes[off++] = (byte) quote;
-        off = IOUtils.writeLocalTime(bytes, off, time.toLocalTime());
+        bytes[off] = (byte) quote;
+        off = IOUtils.writeLocalTime(bytes, off + 1, time.toLocalTime());
+
+        ZoneOffset offset = time.getOffset();
         if (offset.getTotalSeconds() == 0) {
             bytes[off++] = 'Z';
         } else {

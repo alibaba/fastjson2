@@ -118,7 +118,6 @@ final class JSONWriterJSONB
             ensureCapacity(off + 1);
         }
 
-        final byte[] bytes = this.bytes;
         boolean tinyInt = size <= ARRAY_FIX_LEN;
         bytes[off] = tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY;
         this.off = off + 1;
@@ -134,7 +133,6 @@ final class JSONWriterJSONB
             ensureCapacity(off + 1);
         }
 
-        final byte[] bytes = this.bytes;
         boolean tinyInt = size <= ARRAY_FIX_LEN;
         bytes[off] = tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY;
         this.off = off + 1;
@@ -1954,10 +1952,12 @@ final class JSONWriterJSONB
 
     @Override
     public void writeBool(boolean value) {
+        int off = this.off;
         if (off == bytes.length) {
             ensureCapacity(off + 1);
         }
-        this.bytes[off++] = value ? BC_TRUE : BC_FALSE;
+        this.bytes[off] = value ? BC_TRUE : BC_FALSE;
+        this.off = off + 1;
     }
 
     @Override
@@ -1976,10 +1976,12 @@ final class JSONWriterJSONB
 
     @Override
     public void writeReference(String path) {
+        int off = this.off;
         if (off == bytes.length) {
             ensureCapacity(off + 1);
         }
-        bytes[off++] = BC_REFERENCE;
+        bytes[off] = BC_REFERENCE;
+        this.off = off + 1;
 
         if (path == this.lastReference) {
             writeString("#-1");
