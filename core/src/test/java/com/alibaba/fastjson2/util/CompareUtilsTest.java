@@ -34,11 +34,13 @@ public class CompareUtilsTest {
     public void diffToArray3() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'string':123," +
+                "'null':null," +
                 "'object': {'number':'abc','string':123,}," +
                 "'array': [{'number':'abc','string':123,}]," +
                 "}");
         JSONObject json2 = JSONObject.parseObject("{" +
                 "'number':1," +
+                "'null':1," +
                 "'array': [{'number':123,'string':'abc',}]," +
                 "}");
         JSONArray result = CompareUtils.diffToArray(json1, json2);
@@ -49,6 +51,14 @@ public class CompareUtilsTest {
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"diffType\":\"REMOVE\",\n" +
                 "\t\t\"value1\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"null\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":null,\n" +
+                "\t\t\"value2\":1\n" +
                 "\t},\n" +
                 "\t{\n" +
                 "\t\t\"path\":\"object.number\",\n" +
@@ -85,7 +95,7 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":1\n" +
                 "\t}\n" +
                 "]";
-        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteNulls));
     }
 
     @Test
@@ -567,6 +577,100 @@ public class CompareUtilsTest {
     }
 
     @Test
+    public void testCompareNull() {
+        JSONObject json1 = JSONObject.parseObject("{" +
+                "'array1':[123]," +
+                "'object': {'number':'abc','string':123,}," +
+                "'array': [{'number':'abc','string':123,}]," +
+                "}");
+        JSONObject json2 = JSONObject.parseObject("{" +
+                "'number':1," +
+                "'array': [{'number':123,'string':'abc',}]," +
+                "}");
+        System.out.println(json1);
+        System.out.println(json2);
+        JSONArray result = CompareUtils.compareToArray(json1, json2);
+        System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
+        String expected = "[\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array1[0]\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"object.number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":\"abc\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"object.string\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array[0].number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":\"abc\",\n" +
+                "\t\t\"value2\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array[0].string\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":123,\n" +
+                "\t\t\"value2\":\"abc\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":1\n" +
+                "\t}\n" +
+                "]";
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+    }
+
+    @Test
+    public void testCompareArray() {
+        JSONObject json1 = null;
+        JSONObject json2 = JSONObject.parseObject("{" +
+                "'number':1," +
+                "'array': [{'number':123,'string':'abc',}]," +
+                "}");
+        System.out.println(json1);
+        System.out.println(json2);
+        JSONArray result = CompareUtils.compareToArray(json1, json2);
+        System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
+        String expected = "[\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":1\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array[0].number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array[0].string\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":\"abc\"\n" +
+                "\t}\n" +
+                "]";
+        assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+    }
+
+    @Test
     public void testEquals() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -633,5 +737,17 @@ public class CompareUtilsTest {
                 "\t\"modifyCount\":3\n" +
                 "}";
         assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat));
+    }
+
+    @Test
+    void buildJsonPathKey() {
+        String[] keys = new String[]{"a", "a-b", "'ab'", "[ab]"};
+        String[] expected = new String[]{"a", "['a-b']", "'ab'", "ab"};
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+            String newKey = CompareUtils.buildJsonPathKey(key);
+            System.out.println(newKey);
+            assertEquals(newKey, expected[i]);
+        }
     }
 }
