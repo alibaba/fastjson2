@@ -76,7 +76,7 @@ public class CompareUtils {
             }
         }
         result.put("equal", equal);
-        result.put("total", list.size());
+        result.put("total", addCount + removeCount + modifyCount + valueEqualCount);
         result.put("valueEqualCount", valueEqualCount);
         result.put("typeEqualCount", typeEqualCount);
         result.put("diffCount", addCount + removeCount + modifyCount);
@@ -149,6 +149,8 @@ public class CompareUtils {
             }
         }
 
+        List<String> ignorePathPrefixList = new ArrayList<>();
+        outer:
         for (String path : jsonPathList) {
             boolean json1Contain = jsonPath1.containsKey(path);
             boolean json2Contain = jsonPath2.containsKey(path);
@@ -156,23 +158,46 @@ public class CompareUtils {
             JSONObject pathResult = new JSONObject();
             pathResult.put("path", path);
 
+            for (String ignorePathPrefix : ignorePathPrefixList) {
+                if (path.startsWith(ignorePathPrefix)) {
+                    continue outer;
+                }
+            }
             if (json1Contain && !json2Contain) {
                 pathResult.put(FIELD_NAME_OF_VALUE_EQUAL, false);
                 pathResult.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_REMOVE);
                 Object value1 = json1.getByPath(path);
+                if (value1 instanceof JSONObject || value1 instanceof JSONArray) {
+                    ignorePathPrefixList.add(path);
+                }
                 pathResult.put("value1", value1);
             } else if (!json1Contain && json2Contain) {
                 pathResult.put(FIELD_NAME_OF_VALUE_EQUAL, false);
                 pathResult.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_ADD);
                 Object value2 = json2.getByPath(path);
                 pathResult.put("value2", value2);
+                if (value2 instanceof JSONObject || value2 instanceof JSONArray) {
+                    ignorePathPrefixList.add(path);
+                }
             } else if (json1Contain) {
                 Object value1 = json1.getByPath(path);
                 Object value2 = json2.getByPath(path);
-                pathResult.putAll(compareValue(value1, value2));
-                if (Boolean.FALSE.equals(pathResult.get(FIELD_NAME_OF_VALUE_EQUAL))) {
+                if ((value1 instanceof JSONObject && value2 instanceof JSONObject) || (value2 instanceof JSONArray && value1 instanceof JSONArray)) {
+                    continue;
+                }
+                if ((value1 instanceof JSONObject && value2 instanceof JSONArray) || (value2 instanceof JSONObject && value1 instanceof JSONArray)) {
+                    pathResult.put(FIELD_NAME_OF_VALUE_EQUAL, false);
+                    pathResult.put(FIELD_NAME_OF_TYPE_EQUAL, false);
+                    pathResult.put(FIELD_NAME_OF_DIFF_TYPE, DIFF_TYPE_OF_MODIFY);
                     pathResult.put("value1", value1);
                     pathResult.put("value2", value2);
+                    ignorePathPrefixList.add(path);
+                } else {
+                    pathResult.putAll(compareValue(value1, value2));
+                    if (Boolean.FALSE.equals(pathResult.get(FIELD_NAME_OF_VALUE_EQUAL))) {
+                        pathResult.put("value1", value1);
+                        pathResult.put("value2", value2);
+                    }
                 }
             }
 
@@ -206,6 +231,8 @@ public class CompareUtils {
                 } else {
                     array = (JSONArray) value;
                 }
+                newMap.put((fieldName), value);
+
                 int index = 0;
                 for (Object item : array) {
                     String arrayFieldName = fieldName.concat("[".concat(index + "").concat("]"));
