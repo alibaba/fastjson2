@@ -2248,8 +2248,7 @@ public class JSONWriterTest {
     public void test8() {
         assertFalse(JSONWriter.of().hasFilter());
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB();
-        assertThrows(JSONException.class, () -> jsonWriter.writeRaw('a', 'b'));
+        JSONWriter jsonWriter = JSONWriter.ofUTF16();
         assertThrows(JSONException.class, () -> jsonWriter.writeName2Raw(1L));
         assertThrows(JSONException.class, () -> jsonWriter.writeName3Raw(1L));
         assertThrows(JSONException.class, () -> jsonWriter.writeName4Raw(1L));
@@ -2264,6 +2263,7 @@ public class JSONWriterTest {
         assertThrows(JSONException.class, () -> jsonWriter.writeName13Raw(1L, 1));
         assertThrows(JSONException.class, () -> jsonWriter.writeName14Raw(1L, 1));
         assertThrows(JSONException.class, () -> jsonWriter.writeName15Raw(1L, 1));
+        assertThrows(JSONException.class, () -> jsonWriter.writeName16Raw(1L, 1));
     }
 
     @Test

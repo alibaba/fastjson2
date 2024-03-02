@@ -1058,26 +1058,26 @@ public class ObjectReaderCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectEnd", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFNE, for_end_i_);
 
-//        if (fieldNameLengthMin >= 2 && fieldNameLengthMax <= 43) {
-//            varIndex = genRead243(
-//                    context,
-//                    TYPE_OBJECT,
-//                    fieldReaderArray,
-//                    classNameType,
-//                    fieldBased,
-//                    mw,
-//                    JSON_READER,
-//                    FEATURES,
-//                    OBJECT,
-//                    ITEM_CNT,
-//                    J,
-//                    varIndex,
-//                    variants,
-//                    for_inc_i_,
-//                    hashCode64Start,
-//                    true
-//            );
-//        }
+        if (fieldNameLengthMin >= 2 && fieldNameLengthMax <= 43) {
+            varIndex = genRead243(
+                    context,
+                    TYPE_OBJECT,
+                    fieldReaderArray,
+                    classNameType,
+                    fieldBased,
+                    mw,
+                    JSON_READER,
+                    FEATURES,
+                    OBJECT,
+                    ITEM_CNT,
+                    J,
+                    varIndex,
+                    variants,
+                    for_inc_i_,
+                    hashCode64Start,
+                    true
+            );
+        }
 
         mw.visitLabel(hashCode64Start);
 
