@@ -98,7 +98,7 @@ public class EishayParseBinary {
         );
     }
 
-    @Benchmark
+//    @Benchmark
     public void jsonbValid(Blackhole bh) {
         JSONReader jsonReader = JSONReader.ofJSONB(fastjson2JSONBBytes);
         jsonReader.skipValue();
