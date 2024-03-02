@@ -1114,11 +1114,11 @@ public class ObjectWriterCreatorASM
                     METHOD_DESC_WRITE_LIST,
                     false
             );
-
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitVarInsn(Opcodes.ALOAD, LIST);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "popPath", "(Ljava/lang/Object;)V", false);
         }
+
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+        mw.visitVarInsn(Opcodes.ALOAD, LIST);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "popPath", "(Ljava/lang/Object;)V", false);
 
         mw.visitLabel(endIfListNull_);
     }
