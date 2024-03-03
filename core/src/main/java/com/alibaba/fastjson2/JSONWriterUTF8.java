@@ -2726,21 +2726,26 @@ class JSONWriterUTF8
 
         String str = value.toString(10);
 
-        if (isWriteAsString(value, context.features | features)) {
-            writeString(str);
-            return;
+        boolean writeAsString = isWriteAsString(value, context.features | features);
+
+        int off = this.off;
+        int strlen = str.length();
+
+        int minCapacity = off + strlen + (writeAsString ? 2 : 0);
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
         }
 
-        int strlen = str.length();
-        {
-            // inline ensureCapacity
-            int minCapacity = off + strlen;
-            if (minCapacity >= this.bytes.length) {
-                ensureCapacity(minCapacity);
-            }
+        final byte[] bytes = this.bytes;
+        if (writeAsString) {
+            bytes[off++] = '"';
         }
-        str.getBytes(0, strlen, this.bytes, off);
+        str.getBytes(0, strlen, bytes, off);
         off += strlen;
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+        this.off = off;
     }
 
     @Override

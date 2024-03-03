@@ -1245,23 +1245,24 @@ class JSONWriterUTF16
 
         String str = value.toString(10);
 
-        features |= context.features;
-        boolean browserCompatible = (features & Feature.BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
-        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
-        boolean writeAsString = browserCompatible || nonStringAsString;
+        boolean writeAsString = isWriteAsString(value, context.features | features);
 
-        final int strlen = str.length();
-        ensureCapacity(off + strlen + 2);
-        final char[] chars = this.chars;
         int off = this.off;
+        int strlen = str.length();
+
+        int minCapacity = off + strlen + (writeAsString ? 2 : 0);
+        if (minCapacity >= this.chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final char[] bytes = this.chars;
         if (writeAsString) {
-            chars[off++] = '"';
-            str.getChars(0, strlen, chars, off);
-            off += strlen;
-            chars[off++] = '"';
-        } else {
-            str.getChars(0, strlen, chars, off);
-            off += strlen;
+            bytes[off++] = '"';
+        }
+        str.getChars(0, strlen, bytes, off);
+        off += strlen;
+        if (writeAsString) {
+            bytes[off++] = '"';
         }
         this.off = off;
     }
