@@ -34,14 +34,25 @@ public class CompareUtilsTest {
     public void diffToArray3() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'string':123," +
-                "'null':null," +
-                "'object': {'number':'abc','string':123,}," +
-                "'array': [{'number':'abc','string':123,}]," +
+                "'null1':null," +
+                "'null2':1," +
+                "'objectNull1':null," +
+                "'objectNull2':{'number':'abc','string':123,}," +
+                "'object1': {'number':'abc','string':123,}," +
+                "'arrayNull1': null," +
+                "'arrayNull2': [{'number':'abc','string':123,}]," +
+                "'array1': [{'number':'abc','string':123,}]," +
                 "}");
         JSONObject json2 = JSONObject.parseObject("{" +
                 "'number':1," +
-                "'null':1," +
-                "'array': [{'number':123,'string':'abc',}]," +
+                "'null1':1," +
+                "'null2':null," +
+                "'objectNull1':{'number':'abc','string':123,}," +
+                "'objectNull2':null," +
+                "'object2': {'number':'abc','string':123,}," +
+                "'arrayNull1': [{'number':'abc','string':123,}]," +
+                "'arrayNull2': null," +
+                "'array2': [{'number':'abc','string':123,}]," +
                 "}");
         JSONArray result = CompareUtils.diffToArray(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
@@ -53,7 +64,7 @@ public class CompareUtilsTest {
                 "\t\t\"value1\":123\n" +
                 "\t},\n" +
                 "\t{\n" +
-                "\t\t\"path\":\"null\",\n" +
+                "\t\t\"path\":\"null1\",\n" +
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"typeEqual\":false,\n" +
                 "\t\t\"diffType\":\"MODIFY\",\n" +
@@ -61,7 +72,49 @@ public class CompareUtilsTest {
                 "\t\t\"value2\":1\n" +
                 "\t},\n" +
                 "\t{\n" +
-                "\t\t\"path\":\"object\",\n" +
+                "\t\t\"path\":\"null2\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":1,\n" +
+                "\t\t\"value2\":null\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"objectNull1\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":null,\n" +
+                "\t\t\"value2\":{\n" +
+                "\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\"string\":123\n" +
+                "\t\t}\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"objectNull2\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":{\n" +
+                "\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\"string\":123\n" +
+                "\t\t},\n" +
+                "\t\t\"value2\":null\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"objectNull2.number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":\"abc\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"objectNull2.string\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"object1\",\n" +
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"diffType\":\"REMOVE\",\n" +
                 "\t\t\"value1\":{\n" +
@@ -70,26 +123,103 @@ public class CompareUtilsTest {
                 "\t\t}\n" +
                 "\t},\n" +
                 "\t{\n" +
-                "\t\t\"path\":\"array[0].number\",\n" +
+                "\t\t\"path\":\"arrayNull1\",\n" +
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"typeEqual\":false,\n" +
                 "\t\t\"diffType\":\"MODIFY\",\n" +
-                "\t\t\"value1\":\"abc\",\n" +
-                "\t\t\"value2\":123\n" +
+                "\t\t\"value1\":null,\n" +
+                "\t\t\"value2\":[\n" +
+                "\t\t\t{\n" +
+                "\t\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\t\"string\":123\n" +
+                "\t\t\t}\n" +
+                "\t\t]\n" +
                 "\t},\n" +
                 "\t{\n" +
-                "\t\t\"path\":\"array[0].string\",\n" +
+                "\t\t\"path\":\"arrayNull2\",\n" +
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"typeEqual\":false,\n" +
                 "\t\t\"diffType\":\"MODIFY\",\n" +
-                "\t\t\"value1\":123,\n" +
-                "\t\t\"value2\":\"abc\"\n" +
+                "\t\t\"value1\":[\n" +
+                "\t\t\t{\n" +
+                "\t\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\t\"string\":123\n" +
+                "\t\t\t}\n" +
+                "\t\t],\n" +
+                "\t\t\"value2\":null\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"arrayNull2[0].number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":\"abc\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"arrayNull2[0].string\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array1\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"REMOVE\",\n" +
+                "\t\t\"value1\":[\n" +
+                "\t\t\t{\n" +
+                "\t\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\t\"string\":123\n" +
+                "\t\t\t}\n" +
+                "\t\t]\n" +
                 "\t},\n" +
                 "\t{\n" +
                 "\t\t\"path\":\"number\",\n" +
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"diffType\":\"ADD\",\n" +
                 "\t\t\"value2\":1\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"objectNull1.number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":\"abc\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"objectNull1.string\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"object2\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":{\n" +
+                "\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\"string\":123\n" +
+                "\t\t}\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"arrayNull1[0].number\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":\"abc\"\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"arrayNull1[0].string\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":123\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array2\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"diffType\":\"ADD\",\n" +
+                "\t\t\"value2\":[\n" +
+                "\t\t\t{\n" +
+                "\t\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\t\"string\":123\n" +
+                "\t\t\t}\n" +
+                "\t\t]\n" +
                 "\t}\n" +
                 "]";
         assertEquals(expected, result.toString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteNulls));
@@ -746,9 +876,47 @@ public class CompareUtilsTest {
     }
 
     @Test
+    public void testCorner() {
+        JSONObject json1 = JSONObject.parseObject("{" +
+                "'number-1':123," +
+                "'object': {'number-1':'abc','string':123,}," +
+                "'array': [{'number-1':'abc','string':123,}]," +
+                "}");
+        JSONObject json2 = JSONObject.parseObject("{" +
+                "'number-1':123," +
+                "'object': {'number-1':'abc','string':123,}," +
+                "'array': [{'number-1':'abc','string':123,}]," +
+                "}");
+        JSONArray list = CompareUtils.compareToArray(json1, json2);
+        System.out.println(list.toString(JSONWriter.Feature.PrettyFormat));
+        Object expected = "[\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"['number-1']\",\n" +
+                "\t\t\"valueEqual\":true\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"object['number-1']\",\n" +
+                "\t\t\"valueEqual\":true\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"object.string\",\n" +
+                "\t\t\"valueEqual\":true\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array[0]['number-1']\",\n" +
+                "\t\t\"valueEqual\":true\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"array[0].string\",\n" +
+                "\t\t\"valueEqual\":true\n" +
+                "\t}\n" +
+                "]";
+        assertEquals(expected, list.toString(JSONWriter.Feature.PrettyFormat));
+    }
+    @Test
     public void buildJsonPathKey() {
-        String[] keys = new String[]{"a", "a-b", "'ab'", "[ab]"};
-        String[] expected = new String[]{"a", "['a-b']", "'ab'", "ab"};
+        String[] keys = new String[]{"a", "a-b", "'ab'", "[ab]", "a.b"};
+        String[] expected = new String[]{"a", "['a-b']", "'ab'", "ab", "['a.b']"};
         for (int i = 0; i < keys.length; i++) {
             String key = keys[i];
             String newKey = CompareUtils.buildJsonPathKey(key);
