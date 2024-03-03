@@ -764,65 +764,35 @@ public abstract class JSONWriter
 
     public abstract void writeNameRaw(byte[] bytes);
 
-    public void writeName2Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName2Raw(long name);
 
-    public void writeName3Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName3Raw(long name);
 
-    public void writeName4Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName4Raw(long name);
 
-    public void writeName5Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName5Raw(long name);
 
-    public void writeName6Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName6Raw(long name);
 
-    public void writeName7Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName7Raw(long name);
 
-    public void writeName8Raw(long name0) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName8Raw(long name0);
 
-    public void writeName9Raw(long name0, int name1) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName9Raw(long name0, int name1);
 
-    public void writeName10Raw(long name0, long name1) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName10Raw(long name0, long name1);
 
-    public void writeName11Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName11Raw(long name0, long name2);
 
-    public void writeName12Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName12Raw(long name0, long name2);
 
-    public void writeName13Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName13Raw(long name0, long name2);
 
-    public void writeName14Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName14Raw(long name0, long name2);
 
-    public void writeName15Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName15Raw(long name0, long name2);
 
-    public void writeName16Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName16Raw(long name0, long name2);
 
     public void writeSymbol(int symbol) {
         throw new JSONException("UnsupportedOperation");

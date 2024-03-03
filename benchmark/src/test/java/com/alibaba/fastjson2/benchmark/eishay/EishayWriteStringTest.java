@@ -14,9 +14,9 @@ public class EishayWriteStringTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.70.0.23 : 3001
-            // zulu11.62.17 : 3288
-            // zulu17.32.13 : 3305 2909
+            // zulu8.70.0.23 : 3001 2795
+            // zulu11.62.17 : 3288 2549
+            // zulu17.32.13 : 3305 2909 2503
             // zulu17.40.91_vec : 2527 2536
         }
     }
@@ -49,28 +49,28 @@ public class EishayWriteStringTest {
             System.out.println("jackson millis : " + millis);
             // zulu8.58.0.13 :
             // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu17.32.13 : 5896
         }
     }
 
     public static void wastjson() throws Exception {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
+            for (int i = 0; i < LOOP; ++i) {
                 benchmark.wastjson(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("wastjson millis : " + millis);
-            // zulu8.58.0.13 : 467
-            // zulu17.32.13 : 542
-            // zulu11.52.13 :
+            // zulu8.58.0.13 :
+            // zulu17.32.13 :
+            // zulu11.52.13 : 5246
         }
     }
 
     public static void gson() throws Exception {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
+            for (int i = 0; i < LOOP; ++i) {
                 benchmark.gson(BH);
             }
             long millis = System.currentTimeMillis() - start;
