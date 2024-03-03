@@ -42,6 +42,8 @@ public class CompareUtilsTest {
                 "'arrayNull1': null," +
                 "'arrayNull2': [{'number':'abc','string':123,}]," +
                 "'array1': [{'number':'abc','string':123,}]," +
+                "'field1': [{'number':'abc','string':123,}]," +
+                "'field2': {'number':'abc','string':123,}," +
                 "}");
         JSONObject json2 = JSONObject.parseObject("{" +
                 "'number':1," +
@@ -53,6 +55,8 @@ public class CompareUtilsTest {
                 "'arrayNull1': [{'number':'abc','string':123,}]," +
                 "'arrayNull2': null," +
                 "'array2': [{'number':'abc','string':123,}]," +
+                "'field1': {'number':'abc','string':123,}," +
+                "'field2': [{'number':'abc','string':123,}]," +
                 "}");
         JSONArray result = CompareUtils.diffToArray(json1, json2);
         System.out.println(result.toJSONString(JSONWriter.Feature.PrettyFormat));
@@ -165,6 +169,38 @@ public class CompareUtilsTest {
                 "\t\t\"valueEqual\":false,\n" +
                 "\t\t\"diffType\":\"REMOVE\",\n" +
                 "\t\t\"value1\":[\n" +
+                "\t\t\t{\n" +
+                "\t\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\t\"string\":123\n" +
+                "\t\t\t}\n" +
+                "\t\t]\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"field1\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":[\n" +
+                "\t\t\t{\n" +
+                "\t\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\t\"string\":123\n" +
+                "\t\t\t}\n" +
+                "\t\t],\n" +
+                "\t\t\"value2\":{\n" +
+                "\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\"string\":123\n" +
+                "\t\t}\n" +
+                "\t},\n" +
+                "\t{\n" +
+                "\t\t\"path\":\"field2\",\n" +
+                "\t\t\"valueEqual\":false,\n" +
+                "\t\t\"typeEqual\":false,\n" +
+                "\t\t\"diffType\":\"MODIFY\",\n" +
+                "\t\t\"value1\":{\n" +
+                "\t\t\t\"number\":\"abc\",\n" +
+                "\t\t\t\"string\":123\n" +
+                "\t\t},\n" +
+                "\t\t\"value2\":[\n" +
                 "\t\t\t{\n" +
                 "\t\t\t\t\"number\":\"abc\",\n" +
                 "\t\t\t\t\"string\":123\n" +
@@ -911,8 +947,10 @@ public class CompareUtilsTest {
                 "\t\t\"valueEqual\":true\n" +
                 "\t}\n" +
                 "]";
+        System.out.println(new CompareUtils());
         assertEquals(expected, list.toString(JSONWriter.Feature.PrettyFormat));
     }
+
     @Test
     public void buildJsonPathKey() {
         String[] keys = new String[]{"a", "a-b", "'ab'", "[ab]", "a.b"};
