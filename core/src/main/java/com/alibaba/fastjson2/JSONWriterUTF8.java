@@ -1555,12 +1555,9 @@ class JSONWriterUTF8
 
     @Override
     public final void writeRaw(byte[] bytes) {
-        {
-            // inline ensureCapacity
-            int minCapacity = off + bytes.length;
-            if (minCapacity >= this.bytes.length) {
-                ensureCapacity(minCapacity);
-            }
+        int minCapacity = off + bytes.length;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
         }
         System.arraycopy(bytes, 0, this.bytes, this.off, bytes.length);
         off += bytes.length;
@@ -1579,10 +1576,7 @@ class JSONWriterUTF8
             final byte[] bytes = this.bytes;
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
         System.arraycopy(name, 0, bytes, off, name.length);
@@ -1603,15 +1597,21 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
         this.off = off + 5;
+    }
+
+    private static int indent(byte[] bytes, int off, int indent) {
+        bytes[off++] = '\n';
+        int end = off + indent;
+        while (off < end) {
+            bytes[off++] = '\t';
+        }
+        return off;
     }
 
     @Override
@@ -1628,10 +1628,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1653,10 +1650,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1678,10 +1672,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1703,10 +1694,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1729,10 +1717,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1756,10 +1741,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1784,10 +1766,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1810,10 +1789,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1836,10 +1812,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1862,10 +1835,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1888,10 +1858,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1914,10 +1881,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1941,10 +1905,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
