@@ -832,22 +832,32 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    protected boolean isWriteAsString(long value, long features) {
-        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
-        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
-        return browserCompatible || nonStringAsString;
+    protected static boolean isWriteAsString(long value, long features) {
+        if ((features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
+            return true;
+        }
+
+        return (features & BrowserCompatible.mask) != 0
+                && !isJavaScriptSupport(value);
     }
 
-    protected boolean isWriteAsString(BigInteger value, long features) {
-        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
-        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask)) != 0;
-        return browserCompatible || nonStringAsString;
+    protected static boolean isWriteAsString(BigInteger value, long features) {
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            return true;
+        }
+
+        return (features & BrowserCompatible.mask) != 0
+                && !isJavaScriptSupport(value);
     }
 
-    protected boolean isWriteAsString(BigDecimal value, long features) {
-        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value) && value.precision() >= 16;
-        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask)) != 0;
-        return browserCompatible || nonStringAsString;
+    protected static boolean isWriteAsString(BigDecimal value, long features) {
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            return true;
+        }
+
+        return (features & BrowserCompatible.mask) != 0
+                && value.precision() >= 16
+                && !isJavaScriptSupport(value.unscaledValue());
     }
 
     public abstract void writeNameRaw(char[] chars);

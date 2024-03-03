@@ -4294,7 +4294,7 @@ public class TypeUtils {
     }
 
     public static boolean isJavaScriptSupport(BigDecimal i) {
-        return i.compareTo(DECIMAL_JAVASCRIPT_LOW) >= 0 && i.compareTo(DECIMAL_JAVASCRIPT_HIGH) <= 0;
+        return i.precision() >= 16 && isJavaScriptSupport(i.unscaledValue());
     }
 
     public static boolean isJavaScriptSupport(BigInteger i) {
