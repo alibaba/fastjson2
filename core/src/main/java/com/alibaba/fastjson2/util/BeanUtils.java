@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -2616,6 +2618,21 @@ public abstract class BeanUtils {
                     String[] fields = (String[]) result;
                     if (fields.length != 0) {
                         beanInfo.orders = fields;
+                    }
+                    break;
+                }
+                case "serializer": {
+                    Class serializerClass = (Class) result;
+                    if (ObjectWriter.class.isAssignableFrom(serializerClass)) {
+                        beanInfo.writeEnumAsJavaBean = true;
+                        beanInfo.serializer = serializerClass;
+                    }
+                    break;
+                }
+                case "deserializer": {
+                    Class deserializerClass = (Class) result;
+                    if (ObjectReader.class.isAssignableFrom(deserializerClass)) {
+                        beanInfo.deserializer = deserializerClass;
                     }
                     break;
                 }
