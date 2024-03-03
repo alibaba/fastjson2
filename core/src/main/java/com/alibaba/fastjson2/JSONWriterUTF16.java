@@ -1528,14 +1528,20 @@ class JSONWriterUTF16
             final char[] chars = this.chars;
             chars[off++] = ',';
             if (pretty) {
-                chars[off++] = (byte) '\n';
-                for (int i = 0; i < indent; ++i) {
-                    chars[off++] = (byte) '\t';
-                }
+                off = indent(chars, off, indent);
             }
         }
         System.arraycopy(name, 0, chars, off, name.length);
         this.off = off + name.length;
+    }
+
+    private static int indent(char[] chars, int off, int indent) {
+        chars[off++] = '\n';
+        int end = off + indent;
+        while (off < end) {
+            chars[off++] = '\t';
+        }
+        return off;
     }
 
     @Override
