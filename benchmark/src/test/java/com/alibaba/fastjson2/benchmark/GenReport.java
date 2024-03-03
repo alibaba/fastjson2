@@ -40,6 +40,8 @@ public class GenReport {
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         int h1 = 0;
         for (BenchmarkResult benchmarkResult : benchResults.values()) {
+            benchmarkResult.libraryResults.remove("jsonbValid"); // skip jsonbValid
+
             if (benchmarkResult.libraryResults.size() == 2) {
                 LibResult fury = benchmarkResult.libraryResults.get("fury");
                 LibResult jsonb = benchmarkResult.libraryResults.get("jsonb");
