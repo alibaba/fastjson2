@@ -35,11 +35,10 @@ public class Issue2269 {
             this.name = name;
             this.value = value;
         }
-
     }
 
-    static class DictSerializer implements ObjectWriter {
-
+    static class DictSerializer
+            implements ObjectWriter {
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             AlarmStatus status = (AlarmStatus) object;
@@ -64,11 +63,9 @@ public class Issue2269 {
                     return null;
             }
         }
-
     }
 
     public static class AppDto {
         public AlarmStatus alarmStatus;
     }
 }
-
