@@ -3241,10 +3241,6 @@ public class ObjectWriterCreatorASM
         } else if (format != null) {
             mw.visitLdcInsn(format);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(ILjava/lang/String;)V", false);
-        } else if (format != null) {
-            mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
-            mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_WRITER, "decimalFormat", "Ljava/text/DecimalFormat;");
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(ILjava/text/DecimalFormat;)V", false);
         } else {
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
         }
