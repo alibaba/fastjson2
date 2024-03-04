@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,6 +32,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * 262144	936
  * 524288	1831
  * 1048576	3482
+ * <p>
+ * 第三次测试
+ * 1024	4
+ * 2048	8
+ * 4096	15
+ * 8192	28
+ * 16384	58
+ * 32768	117
+ * 65536	244
+ * 131072	583
+ * 262144	955
+ * 524288	1930
+ * 1048576	3701
  */
 public class CompareUtilsPerfTest {
 
@@ -38,19 +52,19 @@ public class CompareUtilsPerfTest {
     public void testCompare() {
         JSONObject json1 = JSONObject.parseObject("{" +
                 "'number1':1," +
-                "'number2':1," +
-                "'number3':1," +
-                "'number4':1," +
-                "'number5':1," +
-                "'number1':1," +
+                "'number2':11," +
+                "'number3':12," +
+                "'number4':13," +
+                "'number5':14," +
+                "'number1':15," +
                 "'string1':'abc'," +
-                "'string2':'abc'," +
-                "'string3':'abc'," +
-                "'string4':'abc'," +
-                "'string5':'abc'," +
+                "'string2':'abc3'," +
+                "'string3':'abc2'," +
+                "'string4':'abc1'," +
+                "'string5':'abc0'," +
                 "}");
         JSONObject json2 = JSONObject.parseObject("{" +
-                "'number1':123," +
+                "'number1':1," +
                 "'number2':12," +
                 "'number3':10," +
                 "'number4':1," +
@@ -62,12 +76,21 @@ public class CompareUtilsPerfTest {
                 "'string4':'abc3'," +
                 "'string5':'abc'," +
                 "}");
+        System.out.println(json1.toJSONString(JSONWriter.Feature.PrettyFormat));
+        System.out.println(json2.toJSONString(JSONWriter.Feature.PrettyFormat));
+
+        //初始次数
         long times = 1024;
+
+        // 2^N
+//        int MAX_SCALE = 21;
+        int MAX_SCALE = 15;
 
         for (int j = 0; j < times * 10; j++) {
             CompareUtils.compareToArray(json1, json2);
         }
-        for (int i = 10; i < 21; i++) {
+
+        for (int i = 10; i < MAX_SCALE; i++) {
             long begine = System.currentTimeMillis();
 
             for (int j = 0; j < times; j++) {
