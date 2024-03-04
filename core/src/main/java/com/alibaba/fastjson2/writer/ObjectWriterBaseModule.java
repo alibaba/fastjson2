@@ -217,6 +217,7 @@ public class ObjectWriterBaseModule
                 Class<?> serializer = jsonType.serializer();
                 if (ObjectWriter.class.isAssignableFrom(serializer)) {
                     beanInfo.serializer = serializer;
+                    beanInfo.writeEnumAsJavaBean = true;
                 }
 
                 Class<? extends Filter>[] serializeFilters = jsonType.serializeFilters();
