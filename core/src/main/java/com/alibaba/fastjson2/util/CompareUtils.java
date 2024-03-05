@@ -3,7 +3,10 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 两个json比较
@@ -137,18 +140,22 @@ public class CompareUtils {
         JSONObject jsonPath1 = convertWithJsonPath(json1);
         JSONObject jsonPath2 = convertWithJsonPath(json2);
 
-        Set<String> jsonPathSet = new HashSet<>(jsonPath1.keySet());
-        jsonPathSet.addAll(jsonPath2.keySet());
+        JSONObject result = new JSONObject();
 
-        JSONObject result = new JSONObject(jsonPathSet.size());
+        List<String> jsonPathList = new ArrayList<>(jsonPath1.keySet());
+        for (String path : jsonPath2.keySet()) {
+            if (!jsonPathList.contains(path)) {
+                jsonPathList.add(path);
+            }
+        }
 
-        Set<String> ignorePathPrefixList = new HashSet<>();
+        List<String> ignorePathPrefixList = new ArrayList<>();
         outer:
-        for (String path : jsonPathSet) {
+        for (String path : jsonPathList) {
             boolean json1Contain = jsonPath1.containsKey(path);
             boolean json2Contain = jsonPath2.containsKey(path);
 
-            JSONObject pathResult = new JSONObject(8);
+            JSONObject pathResult = new JSONObject();
             pathResult.put("path", path);
 
             for (String ignorePathPrefix : ignorePathPrefixList) {
@@ -175,7 +182,6 @@ public class CompareUtils {
             } else if (json1Contain) {
                 Object value1 = json1.getByPath(path);
                 Object value2 = json2.getByPath(path);
-
                 if ((value1 instanceof JSONObject && value2 instanceof JSONObject) || (value2 instanceof JSONArray && value1 instanceof JSONArray)) {
                     continue;
                 }
@@ -208,10 +214,10 @@ public class CompareUtils {
      * @return 返回 json object
      */
     public static JSONObject convertWithJsonPath(JSONObject json) {
+        JSONObject newMap = new JSONObject();
         if (json == null) {
-            return new JSONObject(0);
+            return newMap;
         }
-        JSONObject newMap = new JSONObject(json.size() + 4);
         for (Map.Entry<String, Object> field : json.entrySet()) {
             Object value = field.getValue();
             String fieldName = buildJsonPathKey((field.getKey()));
@@ -246,7 +252,7 @@ public class CompareUtils {
                     index++;
                 }
             } else {
-                newMap.put(fieldName, value);
+                newMap.put((fieldName), value);
             }
         }
         return newMap;
@@ -260,7 +266,7 @@ public class CompareUtils {
      * @return result
      */
     private static JSONObject compareValue(Object value1, Object value2) {
-        JSONObject result = new JSONObject(4);
+        JSONObject result = new JSONObject();
 
         boolean equal = Objects.equals(value1, value2);
         result.put(FIELD_NAME_OF_VALUE_EQUAL, equal);
