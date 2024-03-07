@@ -118,7 +118,6 @@ final class JSONWriterJSONB
             ensureCapacity(off + 1);
         }
 
-        final byte[] bytes = this.bytes;
         boolean tinyInt = size <= ARRAY_FIX_LEN;
         bytes[off] = tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY;
         this.off = off + 1;
@@ -134,7 +133,6 @@ final class JSONWriterJSONB
             ensureCapacity(off + 1);
         }
 
-        final byte[] bytes = this.bytes;
         boolean tinyInt = size <= ARRAY_FIX_LEN;
         bytes[off] = tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY;
         this.off = off + 1;
@@ -1312,6 +1310,44 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeInt8(byte[] values) {
+        if (values == null) {
+            writeArrayNull();
+            return;
+        }
+
+        int size = values.length;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        if (size <= ARRAY_FIX_LEN) {
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
+        } else {
+            bytes[off++] = BC_ARRAY;
+            writeInt32(size);
+        }
+
+        int off = this.off;
+        int minCapacity = off + values.length * 2;
+        if (minCapacity - bytes.length > 0) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        for (int i = 0; i < values.length; i++) {
+            int val = values[i];
+            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) val;
+            } else {
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
+                bytes[off++] = (byte) (val);
+            }
+        }
+        this.off = off;
+    }
+
+    @Override
     public void writeInt8(byte val) {
         int off = this.off;
         int minCapacity = off + 2;
@@ -1916,10 +1952,12 @@ final class JSONWriterJSONB
 
     @Override
     public void writeBool(boolean value) {
+        int off = this.off;
         if (off == bytes.length) {
             ensureCapacity(off + 1);
         }
-        this.bytes[off++] = value ? BC_TRUE : BC_FALSE;
+        this.bytes[off] = value ? BC_TRUE : BC_FALSE;
+        this.off = off + 1;
     }
 
     @Override
@@ -1938,10 +1976,12 @@ final class JSONWriterJSONB
 
     @Override
     public void writeReference(String path) {
+        int off = this.off;
         if (off == bytes.length) {
             ensureCapacity(off + 1);
         }
-        bytes[off++] = BC_REFERENCE;
+        bytes[off] = BC_REFERENCE;
+        this.off = off + 1;
 
         if (path == this.lastReference) {
             writeString("#-1");
@@ -2063,6 +2103,194 @@ final class JSONWriterJSONB
     @Override
     public void writeNameRaw(byte[] bytes) {
         writeRaw(bytes);
+    }
+
+    @Override
+    public void writeName2Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 2;
+    }
+
+    @Override
+    public void writeName3Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 3;
+    }
+
+    @Override
+    public void writeName4Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 4;
+    }
+
+    @Override
+    public void writeName5Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 5;
+    }
+
+    @Override
+    public void writeName6Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 6;
+    }
+
+    @Override
+    public void writeName7Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 7;
+    }
+
+    @Override
+    public void writeName8Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 8;
+    }
+
+    @Override
+    public void writeName9Raw(long name0, int name1) {
+        int off = this.off;
+        int minCapacity = off + 12;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 9;
+    }
+
+    @Override
+    public void writeName10Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 10;
+    }
+
+    @Override
+    public void writeName11Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 11;
+    }
+
+    @Override
+    public void writeName12Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 12;
+    }
+
+    @Override
+    public void writeName13Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 13;
+    }
+
+    @Override
+    public void writeName14Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 14;
+    }
+
+    @Override
+    public void writeName15Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 15;
+    }
+
+    @Override
+    public void writeName16Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 16;
     }
 
     @Override

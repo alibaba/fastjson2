@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.lang.reflect.GenericArrayType;
@@ -120,10 +121,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(String name, Object object) {
-        if ((context.features & ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -146,10 +144,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(FieldWriter fieldWriter, Object object) {
-        if ((context.features & ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -184,10 +179,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(int index, Object object) {
-        if ((context.features & ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -772,61 +764,35 @@ public abstract class JSONWriter
 
     public abstract void writeNameRaw(byte[] bytes);
 
-    public void writeName2Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName2Raw(long name);
 
-    public void writeName3Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName3Raw(long name);
 
-    public void writeName4Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName4Raw(long name);
 
-    public void writeName5Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName5Raw(long name);
 
-    public void writeName6Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName6Raw(long name);
 
-    public void writeName7Raw(long name) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName7Raw(long name);
 
-    public void writeName8Raw(long name0) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName8Raw(long name0);
 
-    public void writeName9Raw(long name0, int name1) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName9Raw(long name0, int name1);
 
-    public void writeName10Raw(long name0, long name1) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName10Raw(long name0, long name1);
 
-    public void writeName11Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName11Raw(long name0, long name2);
 
-    public void writeName12Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName12Raw(long name0, long name2);
 
-    public void writeName13Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName13Raw(long name0, long name2);
 
-    public void writeName14Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName14Raw(long name0, long name2);
 
-    public void writeName15Raw(long name0, long name2) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeName15Raw(long name0, long name2);
+
+    public abstract void writeName16Raw(long name0, long name2);
 
     public void writeSymbol(int symbol) {
         throw new JSONException("UnsupportedOperation");
@@ -836,22 +802,32 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    protected boolean isWriteAsString(long value, long features) {
-        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
-        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
-        return browserCompatible || nonStringAsString;
+    protected static boolean isWriteAsString(long value, long features) {
+        if ((features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
+            return true;
+        }
+
+        return (features & BrowserCompatible.mask) != 0
+                && !isJavaScriptSupport(value);
     }
 
-    protected boolean isWriteAsString(BigInteger value, long features) {
-        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value);
-        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask)) != 0;
-        return browserCompatible || nonStringAsString;
+    protected static boolean isWriteAsString(BigInteger value, long features) {
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            return true;
+        }
+
+        return (features & BrowserCompatible.mask) != 0
+                && !isJavaScriptSupport(value);
     }
 
-    protected boolean isWriteAsString(BigDecimal value, long features) {
-        boolean browserCompatible = (features & BrowserCompatible.mask) != 0 && !isJavaScriptSupport(value) && value.precision() >= 16;
-        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask)) != 0;
-        return browserCompatible || nonStringAsString;
+    protected static boolean isWriteAsString(BigDecimal value, long features) {
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            return true;
+        }
+
+        return (features & BrowserCompatible.mask) != 0
+                && value.precision() >= 16
+                && !isJavaScriptSupport(value.unscaledValue());
     }
 
     public abstract void writeNameRaw(char[] chars);
@@ -944,6 +920,7 @@ public abstract class JSONWriter
     }
 
     public abstract void writeInt8(byte value);
+    public abstract void writeInt8(byte[] value);
 
     public abstract void writeInt16(short value);
 
@@ -1257,7 +1234,8 @@ public abstract class JSONWriter
 
     public abstract void writeLocalDate(LocalDate date);
 
-    protected final boolean writeLocalDateWithFormat(LocalDate date, Context context) {
+    protected final boolean writeLocalDateWithFormat(LocalDate date) {
+        Context context = this.context;
         if (context.dateFormatUnixTime || context.dateFormatMillis) {
             LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
             long millis = dateTime.atZone(context.getZoneId())
@@ -2268,5 +2246,10 @@ public abstract class JSONWriter
 
             return fullPath = new String(buf, 0, off, ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
         }
+    }
+
+    @NotNull
+    protected static IllegalArgumentException illegalYear(int year) {
+        return new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
     }
 }

@@ -438,6 +438,16 @@ public final class MethodWriter {
         }
     }
 
+    public void visitLdcInsn(final Number value) {
+        if (value instanceof Integer) {
+            visitLdcInsn(value.intValue());
+        } else if (value instanceof Long) {
+            visitLdcInsn(value.longValue());
+        } else {
+            throw new UnsupportedOperationException(value.getClass().getName());
+        }
+    }
+
     public void visitLdcInsn(final int value) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.

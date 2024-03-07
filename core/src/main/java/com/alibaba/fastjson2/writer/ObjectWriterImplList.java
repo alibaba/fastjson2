@@ -192,8 +192,6 @@ final class ObjectWriterImplList
             } else if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
             } else {
-                refDetect = jsonWriter.isRefDetect();
-
                 if (itemClass == JSONObject.class) {
                     itemObjectWriter = ObjectWriterImplMap.INSTANCE;
                 } else if (itemClass == CLASS_JSON_OBJECT_1x) {

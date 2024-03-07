@@ -19,8 +19,8 @@ public class ReadResult {
         files.put("aliyun_ecs.c8y.large", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_g8y.out");
 //        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.41_aws_c6g.out");
 //        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_2.0.41_aws_c7g.out");
-//        files.put("orangepi5p", "/Users/wenshao/Downloads/result_2.0.41_orangepi5.out");
-//        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_2.0.41_applem1pro.out");
+        files.put("orangepi5p", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_orangepi5.out");
+        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_applem1pro.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
