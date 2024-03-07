@@ -2207,7 +2207,12 @@ public abstract class JSONReader
                     val = readArray();
                     break;
                 case '{':
-                    val = readObject();
+                    if (isReference()) {
+                        addResolveTask(object, name, JSONPath.of(readReference()));
+                        val = null;
+                    } else {
+                        val = readObject();
+                    }
                     break;
                 case '"':
                 case '\'':
