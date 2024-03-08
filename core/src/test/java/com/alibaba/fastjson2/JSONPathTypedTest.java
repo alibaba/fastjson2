@@ -40,6 +40,8 @@ public class JSONPathTypedTest {
 
         jsonPath.remove(object);
         assertEquals(0, object.size());
+
+        assertSame(JSONPath.RootPath.INSTANCE, jsonPath.getParent());
     }
 
     @Test

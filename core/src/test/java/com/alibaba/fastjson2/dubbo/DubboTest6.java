@@ -53,18 +53,19 @@ public class DubboTest6 {
         byte[] jsonbBytes = JSONB.toBytes(proxy, writerFeatures);
 
         assertEquals("{\n" +
-                "\t\"@type\":\"org.apache.dubbo.springboot.demo.ParamsDTO#0\",\n" +
-                "\t\"@value\":{\n" +
-                "\t\t\"paramsItems#1\":{\n" +
-                "\t\t\t\"@type\":\"java.util.Arrays$ArrayList#2\",\n" +
-                "\t\t\t\"@value\":[\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"a#3\":\"aaa\"\n" +
-                "\t\t\t\t}\n" +
-                "\t\t\t]\n" +
-                "\t\t}\n" +
-                "\t}\n" +
-                "}",
+                        "\t\"@type\":\"org.apache.dubbo.springboot.demo.ParamsDTO#0\",\n" +
+                        "\t\"@value\":{\n" +
+                        "\t\t\"paramsItemSet#1\":null,\n" +
+                        "\t\t\"paramsItems#2\":{\n" +
+                        "\t\t\t\"@type\":\"java.util.Arrays$ArrayList#3\",\n" +
+                        "\t\t\t\"@value\":[\n" +
+                        "\t\t\t\t{\n" +
+                        "\t\t\t\t\t\"a#4\":\"aaa\"\n" +
+                        "\t\t\t\t}\n" +
+                        "\t\t\t]\n" +
+                        "\t\t}\n" +
+                        "\t}\n" +
+                        "}",
                 JSONB.toJSONString(jsonbBytes, true)
         );
 

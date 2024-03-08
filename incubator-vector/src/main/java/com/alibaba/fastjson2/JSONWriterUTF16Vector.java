@@ -15,6 +15,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 final class JSONWriterUTF16Vector
         extends JSONWriterUTF16 {
     static final Vector<Byte> V_BYTE_64_SPACE = ByteVector.SPECIES_64.broadcast(' ');
+    static final Vector<Byte> V_BYTE_64_ZERO = ByteVector.SPECIES_64.broadcast(0);
     static final Vector<Byte> V_BYTE_64_SLASH = ByteVector.SPECIES_64.broadcast('\\');
     static final Vector<Byte> V_BYTE_64_DOUBLE_QUOTE = ByteVector.SPECIES_64.broadcast('"');
     static final Vector<Byte> V_BYTE_64_SINGLE_QUOTE = ByteVector.SPECIES_64.broadcast('\'');
@@ -65,6 +66,7 @@ final class JSONWriterUTF16Vector
             ensureCapacity(minCapacity);
         }
 
+        char quote = this.quote;
         final char[] chars = this.chars;
         chars[off++] = quote;
 

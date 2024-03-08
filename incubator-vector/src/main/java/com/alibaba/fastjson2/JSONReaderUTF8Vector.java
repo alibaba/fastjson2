@@ -19,10 +19,11 @@ final class JSONReaderUTF8Vector
     @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
+            final byte[] bytes = this.bytes;
             char quote = this.ch;
             int valueLength;
             int offset = this.offset;
-            int start = offset;
+            final int start = offset, end = this.end;
             boolean ascii = true;
             valueEscape = false;
 
@@ -31,12 +32,11 @@ final class JSONReaderUTF8Vector
                 Vector<Byte> v_quote = quote == '"' ? V_BYTE_64_DOUBLE_QUOTE : V_BYTE_64_SINGLE_QUOTE;
                 for (; offset + 8 < end; offset += 8, i += 8) {
                     ByteVector v = (ByteVector) ByteVector.SPECIES_64.fromArray(bytes, offset);
-                    if (v.eq(V_BYTE_64_SLASH).or(v.eq(v_quote)).anyTrue()) {
+                    if (v.eq(V_BYTE_64_SLASH).or(v.eq(v_quote).or(v.lt(V_BYTE_64_ZERO))).anyTrue()) {
                         break;
                     }
                 }
 
-                _for:
                 for (; ; ++i) {
                     if (offset >= end) {
                         throw new JSONException("invalid escape character EOI");
@@ -45,41 +45,28 @@ final class JSONReaderUTF8Vector
                     int c = bytes[offset];
                     if (c == '\\') {
                         valueEscape = true;
-                        c = bytes[++offset];
-                        switch (c) {
-                            case 'u': {
-                                offset += 4;
-                                break;
-                            }
-                            case 'x': {
-                                offset += 2;
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                        offset++;
+                        c = bytes[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
                         continue;
                     }
 
                     if (c >= 0) {
                         if (c == quote) {
                             valueLength = i;
-                            break _for;
+                            break;
                         }
                         offset++;
                     } else {
+                        ascii = false;
                         switch ((c & 0xFF) >> 4) {
                             case 12:
                             case 13: {
                                 /* 110x xxxx   10xx xxxx*/
                                 offset += 2;
-                                ascii = false;
                                 break;
                             }
                             case 14: {
                                 offset += 3;
-                                ascii = false;
                                 break;
                             }
                             default: {
@@ -87,7 +74,6 @@ final class JSONReaderUTF8Vector
                                 if ((c >> 3) == -2) {
                                     offset += 4;
                                     i++;
-                                    ascii = false;
                                     break;
                                 }
 
@@ -103,93 +89,57 @@ final class JSONReaderUTF8Vector
                 char[] chars = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
-                    int c = bytes[offset];
-                    if (c == '\\') {
-                        c = bytes[++offset];
-                        switch (c) {
+                    int ch = bytes[offset];
+                    if (ch == '\\') {
+                        ch = bytes[++offset];
+                        switch (ch) {
                             case 'u': {
-                                int c1 = bytes[offset + 1];
-                                int c2 = bytes[offset + 2];
-                                int c3 = bytes[offset + 3];
-                                int c4 = bytes[offset + 4];
+                                ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
                                 offset += 4;
-                                c = char4(c1, c2, c3, c4);
                                 break;
                             }
                             case 'x': {
-                                int c1 = bytes[offset + 1];
-                                int c2 = bytes[offset + 2];
+                                ch = char2(bytes[offset + 1], bytes[offset + 2]);
                                 offset += 2;
-                                c = char2(c1, c2);
                                 break;
                             }
                             case '\\':
                             case '"':
                                 break;
                             default:
-                                c = char1(c);
+                                ch = char1(ch);
                                 break;
                         }
-                        chars[i] = (char) c;
+                        chars[i] = (char) ch;
                         offset++;
-                    } else if (c == '"') {
+                    } else if (ch == '"') {
                         break;
                     } else {
-                        if (c >= 0) {
-                            chars[i] = (char) c;
+                        if (ch >= 0) {
+                            chars[i] = (char) ch;
                             offset++;
                         } else {
-                            switch ((c & 0xFF) >> 4) {
+                            switch ((ch & 0xFF) >> 4) {
                                 case 12:
                                 case 13: {
                                     /* 110x xxxx   10xx xxxx*/
-                                    offset++;
-                                    int c2 = bytes[offset++];
-                                    chars[i] = (char) (
-                                            ((c & 0x1F) << 6) | (c2 & 0x3F));
+                                    chars[i] = (char) (((ch & 0x1F) << 6) | (bytes[offset + 1] & 0x3F));
+                                    offset += 2;
                                     break;
                                 }
                                 case 14: {
-                                    offset++;
-                                    int c2 = bytes[offset];
-                                    int c3 = bytes[offset + 1];
-                                    offset += 2;
                                     chars[i] = (char)
-                                            (((c & 0x0F) << 12) |
-                                                    ((c2 & 0x3F) << 6) |
-                                                    ((c3 & 0x3F) << 0));
+                                            (((ch & 0x0F) << 12) |
+                                                    ((bytes[offset + 1] & 0x3F) << 6) |
+                                                    ((bytes[offset + 2] & 0x3F) << 0));
+                                    offset += 3;
                                     break;
                                 }
                                 default: {
                                     /* 10xx xxxx,  1111 xxxx */
-                                    if ((c >> 3) == -2) {
-                                        offset++;
-                                        int c2 = bytes[offset];
-                                        int c3 = bytes[offset + 1];
-                                        int c4 = bytes[offset + 2];
-                                        offset += 3;
-                                        int uc = ((c << 18) ^
-                                                (c2 << 12) ^
-                                                (c3 << 6) ^
-                                                (c4 ^ (((byte) 0xF0 << 18) ^
-                                                        ((byte) 0x80 << 12) ^
-                                                        ((byte) 0x80 << 6) ^
-                                                        ((byte) 0x80 << 0))));
-
-                                        if (((c2 & 0xc0) != 0x80 || (c3 & 0xc0) != 0x80 || (c4 & 0xc0) != 0x80) // isMalformed4
-                                                ||
-                                                // shortest form check
-                                                !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
-                                        ) {
-                                            throw new JSONException("malformed input around byte " + offset);
-                                        } else {
-                                            chars[i++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
-                                            chars[i] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
-                                        }
-                                        break;
-                                    }
-
-                                    throw new JSONException("malformed input around byte " + offset);
+                                    char2_utf8(bytes, offset, ch, chars, i);
+                                    offset += 4;
+                                    i++;
                                 }
                             }
                         }
@@ -198,62 +148,42 @@ final class JSONReaderUTF8Vector
 
                 str = new String(chars);
             } else if (ascii) {
-                int strlen = offset - this.offset;
+                int strlen = offset - start;
                 if (strlen == 1) {
-                    str = TypeUtils.toString((char) (bytes[this.offset] & 0xff));
+                    str = TypeUtils.toString((char) (bytes[start] & 0xff));
                 } else if (strlen == 2) {
                     str = TypeUtils.toString(
-                            (char) (bytes[this.offset] & 0xff),
-                            (char) (bytes[this.offset + 1] & 0xff)
+                            (char) (bytes[start] & 0xff),
+                            (char) (bytes[start + 1] & 0xff)
                     );
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+                    str = STRING_CREATOR_JDK11.apply(
+                            Arrays.copyOfRange(this.bytes, this.offset, offset),
+                            LATIN1);
                 } else {
-                    str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
+                    str = new String(bytes, start, offset - start, StandardCharsets.US_ASCII);
                 }
             } else {
-                str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.UTF_8);
+                str = new String(bytes, start, offset - start, StandardCharsets.UTF_8);
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
             }
 
-            clear:
-            if (++offset != end) {
-                byte e = bytes[offset++];
-                while (e <= ' ' && (1L << e & SPACE) != 0) {
-                    if (offset == end) {
-                        break clear;
-                    } else {
-                        e = bytes[offset++];
-                    }
-                }
-
-                if (comma = e == ',') {
-                    if (offset == end) {
-                        e = EOI;
-                    } else {
-                        e = bytes[offset++];
-                        while (e <= ' ' && (1L << e & SPACE) != 0) {
-                            if (offset == end) {
-                                e = EOI;
-                                break;
-                            } else {
-                                e = bytes[offset++];
-                            }
-                        }
-                    }
-                }
-
-                this.ch = (char) e;
-                this.offset = offset;
-                return str;
+            int ch = ++offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
-            this.ch = EOI;
-            this.comma = false;
+            if (comma = ch == ',') {
+                ch = offset == end ? EOI : bytes[offset++];
+                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            this.ch = (char) ch;
             this.offset = offset;
             return str;
         }

@@ -18,15 +18,15 @@ final class JSONReaderUTF16Vector
 
     @Override
     public String readString() {
+        char[] chars = this.chars;
         if (ch == '"' || ch == '\'') {
             final char quote = ch;
 
             int offset = this.offset;
-            int start = offset;
+            final int start = offset, end = this.end;
             int valueLength;
             boolean valueEscape = false;
 
-            _for:
             {
                 int i = 0;
                 final Vector<Short> v_quote = quote == '"' ? V_SHORT_128_DOUBLE_QUOTE : V_SHORT_128_SINGLE_QUOTE;
@@ -44,27 +44,14 @@ final class JSONReaderUTF16Vector
                     char c = chars[offset];
                     if (c == '\\') {
                         valueEscape = true;
-                        c = chars[++offset];
-                        switch (c) {
-                            case 'u': {
-                                offset += 4;
-                                break;
-                            }
-                            case 'x': {
-                                offset += 2;
-                                break;
-                            }
-                            default:
-                                // skip
-                                break;
-                        }
-                        offset++;
+                        c = chars[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
                         continue;
                     }
 
                     if (c == quote) {
                         valueLength = i;
-                        break _for;
+                        break;
                     }
                     offset++;
                 }
@@ -72,27 +59,21 @@ final class JSONReaderUTF16Vector
 
             String str;
             if (valueEscape) {
-                char[] chars = new char[valueLength];
+                char[] buf = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
-                    char c = this.chars[offset];
+                    char c = chars[offset];
                     if (c == '\\') {
-                        c = this.chars[++offset];
+                        c = chars[++offset];
                         switch (c) {
                             case 'u': {
-                                char c1 = this.chars[1 + offset];
-                                char c2 = this.chars[2 + offset];
-                                char c3 = this.chars[3 + offset];
-                                char c4 = this.chars[4 + offset];
+                                c = char4(chars[offset + 1], chars[offset + 2], chars[offset + 3], chars[offset + 4]);
                                 offset += 4;
-                                c = char4(c1, c2, c3, c4);
                                 break;
                             }
                             case 'x': {
-                                char c1 = this.chars[1 + offset];
-                                char c2 = this.chars[2 + offset];
+                                c = char2(chars[offset + 1], chars[offset + 2]);
                                 offset += 2;
-                                c = char2(c1, c2);
                                 break;
                             }
                             case '\\':
@@ -105,23 +86,23 @@ final class JSONReaderUTF16Vector
                     } else if (c == quote) {
                         break;
                     }
-                    chars[i] = c;
+                    buf[i] = c;
                     offset++;
                 }
 
-                str = new String(chars);
+                str = new String(buf);
             } else {
                 char c0, c1;
-                int strlen = offset - this.offset;
-                if (strlen == 1 && (c0 = this.chars[this.offset]) < 128) {
+                int strlen = offset - start;
+                if (strlen == 1 && (c0 = chars[start]) < 128) {
                     str = TypeUtils.toString(c0);
                 } else if (strlen == 2
-                        && (c0 = this.chars[this.offset]) < 128
-                        && (c1 = this.chars[this.offset + 1]) < 128
+                        && (c0 = chars[start]) < 128
+                        && (c1 = chars[start + 1]) < 128
                 ) {
                     str = TypeUtils.toString(c0, c1);
                 } else {
-                    str = this.str.substring(this.offset, offset);
+                    str = this.str.substring(start, offset);
                 }
             }
 
@@ -129,77 +110,24 @@ final class JSONReaderUTF16Vector
                 str = str.trim();
             }
 
-            clear:
-            if (++offset != end) {
-                char e = chars[offset++];
-                while (e <= ' ' && (1L << e & SPACE) != 0) {
-                    if (offset == end) {
-                        break clear;
-                    } else {
-                        e = chars[offset++];
-                    }
-                }
-
-                if (comma = e == ',') {
-                    if (offset == end) {
-                        e = EOI;
-                    } else {
-                        e = chars[offset++];
-                        while (e <= ' ' && (1L << e & SPACE) != 0) {
-                            if (offset == end) {
-                                e = EOI;
-                                break;
-                            } else {
-                                e = chars[offset++];
-                            }
-                        }
-                    }
-                }
-
-                this.ch = e;
-                this.offset = offset;
-                return str;
+            int ch = ++offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
             }
 
-            this.ch = EOI;
-            this.comma = false;
+            if (comma = ch == ',') {
+                ch = offset == end ? EOI : chars[offset++];
+                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                    ch = offset == end ? EOI : chars[offset++];
+                }
+            }
+
+            this.ch = (char) ch;
             this.offset = offset;
             return str;
         }
 
-        switch (ch) {
-            case '[':
-                return toString(
-                        readArray());
-            case '{':
-                return toString(
-                        readObject());
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                readNumber0();
-                Number number = getNumber();
-                return number.toString();
-            case 't':
-            case 'f':
-                boolValue = readBoolValue();
-                return boolValue ? "true" : "false";
-            case 'n': {
-                readNull();
-                return null;
-            }
-            default:
-                throw new JSONException(info("illegal input : " + ch));
-        }
+        return readStringNotMatch();
     }
 
     public static class Factory

@@ -31,4 +31,14 @@ public class JSONReaderUTF8Test {
             assertEquals(localDate, JSONB.parseObject(bytes, LocalDate.class));
         }
     }
+
+    @Test
+    public void test() {
+        String str = "abcdef1234567890中国©®£\uD83D\uDE0D\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D";
+        String json = JSON.toJSONString(str);
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
+        String parsed = jsonReader.readString();
+        assertEquals(str, parsed);
+    }
 }

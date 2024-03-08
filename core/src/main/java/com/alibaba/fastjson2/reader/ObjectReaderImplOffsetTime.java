@@ -26,7 +26,7 @@ final class ObjectReaderImplOffsetTime
 
     @Override
     public Class getObjectClass() {
-        return OffsetDateTime.class;
+        return OffsetTime.class;
     }
 
     @Override
@@ -40,7 +40,7 @@ final class ObjectReaderImplOffsetTime
 
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
-            if (formatUnixTime) {
+            if (formatUnixTime || context.isFormatUnixTime()) {
                 millis *= 1000;
             }
 
@@ -67,23 +67,28 @@ final class ObjectReaderImplOffsetTime
             }
             Instant instant = Instant.ofEpochMilli(millis);
             LocalDateTime ldt = LocalDateTime.ofInstant(instant, zoneId);
-            return OffsetDateTime.of(ldt, zoneId.getRules().getOffset(instant));
+            return OffsetDateTime.of(ldt, zoneId.getRules().getOffset(instant))
+                    .toOffsetTime();
         }
 
         DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
         if (!formatHasHour) {
             LocalDateTime ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
-            return OffsetDateTime.of(ldt, zoneId.getRules().getOffset(ldt));
+            return OffsetDateTime.of(ldt, zoneId.getRules().getOffset(ldt))
+                    .toOffsetTime();
         }
 
         if (!formatHasDay) {
-            return ZonedDateTime.of(
+            ZonedDateTime zdt = ZonedDateTime.of(
                     LocalDate.of(1970, 1, 1),
                     LocalTime.parse(str, formatter),
                     zoneId
             );
+            return zdt.toOffsetDateTime()
+                    .toOffsetTime();
         }
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-        return OffsetDateTime.of(ldt, zoneId.getRules().getOffset(ldt));
+        OffsetDateTime odt = OffsetDateTime.of(ldt, zoneId.getRules().getOffset(ldt));
+        return odt.toOffsetTime();
     }
 }

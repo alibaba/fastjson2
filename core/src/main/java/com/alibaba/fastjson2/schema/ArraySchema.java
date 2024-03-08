@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.schema;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
@@ -31,6 +32,7 @@ public final class ArraySchema
     final AllOf allOf;
     final AnyOf anyOf;
     final OneOf oneOf;
+    final boolean encoded;
 
     public ArraySchema(JSONObject input, JSONSchema root) {
         super(input);
@@ -38,6 +40,7 @@ public final class ArraySchema
         this.typed = "array".equals(input.get("type"));
         this.definitions = new LinkedHashMap<>();
         this.defs = new LinkedHashMap<>();
+        this.encoded = input.getBooleanValue("encoded", false);
 
         JSONObject definitions = input.getJSONObject("definitions");
         if (definitions != null) {
@@ -145,6 +148,18 @@ public final class ArraySchema
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
+        if (encoded) {
+            if (value instanceof String) {
+                try {
+                    value = JSON.parseArray((String) value);
+                } catch (JSONException e) {
+                    return FAIL_INPUT_NOT_ENCODED;
+                }
+            } else {
+                return FAIL_INPUT_NOT_ENCODED;
+            }
+        }
+
         if (value instanceof Object[]) {
             final Object[] items = (Object[]) value;
             return validateItems(value, items.length, i -> items[i]);
@@ -152,7 +167,8 @@ public final class ArraySchema
 
         if (value.getClass().isArray()) {
             final int size = Array.getLength(value);
-            return validateItems(value, size, i -> Array.get(value, i));
+            final Object finalValue = value;
+            return validateItems(finalValue, size, i -> Array.get(finalValue, i));
         }
 
         if (value instanceof Collection) {

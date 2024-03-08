@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSONPathTest {
     @Test
@@ -81,5 +83,62 @@ public class JSONPathTest {
     }
 
     public static class Item {
+    }
+
+    @Test
+    public void test2() {
+        {
+            String key = "phone-Number";
+            String value = "1234567890";
+            JSONObject v = JSONObject.of(key, value);
+            Map<String, Object> paths = JSONPath.paths(v);
+            assertEquals(2, paths.size());
+            assertTrue(paths.containsKey("$"));
+            paths.remove("$");
+            Map.Entry<String, Object> entry = paths.entrySet().iterator().next();
+            assertEquals("$['" + key + "']", entry.getKey());
+            assertEquals(value, entry.getValue());
+            assertEquals(value, JSONPath.eval(v, entry.getKey()));
+        }
+        {
+            String key = "0123";
+            String value = "1234567890";
+            JSONObject v = JSONObject.of(key, value);
+            Map<String, Object> paths = JSONPath.paths(v);
+            assertEquals(2, paths.size());
+            assertTrue(paths.containsKey("$"));
+            paths.remove("$");
+            Map.Entry<String, Object> entry = paths.entrySet().iterator().next();
+            assertEquals("$['" + key + "']", entry.getKey());
+            assertEquals(value, entry.getValue());
+            assertEquals(value, JSONPath.eval(v, entry.getKey()));
+        }
+        {
+            String key = "a\tb";
+            String value = "1234567890";
+            JSONObject v = JSONObject.of(key, value);
+            Map<String, Object> paths = JSONPath.paths(v);
+            assertEquals(2, paths.size());
+            assertTrue(paths.containsKey("$"));
+            paths.remove("$");
+            Map.Entry<String, Object> entry = paths.entrySet().iterator().next();
+            assertEquals("$['a\\tb']", entry.getKey());
+            assertEquals(value, entry.getValue());
+            assertEquals(value, JSONPath.eval(v, entry.getKey()));
+        }
+    }
+
+    @Test
+    public void test3() throws Exception {
+        JSONArray array = JSONArray.of("a", "b", "c");
+        Map<String, Object> paths = JSONPath.paths(array);
+        assertEquals(4, paths.size());
+        assertTrue(paths.containsKey("$"));
+        paths.remove("$");
+        int i = 0;
+        for (Iterator<Map.Entry<String, Object>> it = paths.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, Object> entry = it.next();
+            assertEquals("$[" + (i++) + "]", entry.getKey());
+        }
     }
 }

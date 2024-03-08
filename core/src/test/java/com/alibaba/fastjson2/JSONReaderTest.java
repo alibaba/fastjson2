@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.ValueConsumer;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -136,16 +138,6 @@ public class JSONReaderTest {
         long valueHash = Fnv.hashCode64(value);
 
         {
-            JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfObjectStart());
-            assertEquals(hash, reader.readFieldNameHashCode());
-            assertEquals(hash, reader.getNameHashCodeLCase());
-            assertEquals(fieldName, reader.getFieldName());
-            assertEquals(valueHash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfObjectEnd());
-        }
-        {
             JSONReader reader = JSONReader.of(str.toCharArray());
             assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
@@ -157,6 +149,16 @@ public class JSONReaderTest {
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
+            assertTrue(reader.nextIfObjectStart());
+            assertEquals(hash, reader.readFieldNameHashCode());
+            assertEquals(hash, reader.getNameHashCodeLCase());
+            assertEquals(fieldName, reader.getFieldName());
+            assertEquals(valueHash, reader.readValueHashCode());
+            assertEquals(value, reader.getString());
+            assertTrue(reader.nextIfObjectEnd());
+        }
+        {
+            JSONReader reader = JSONReader.of(str);
             assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
@@ -310,6 +312,16 @@ public class JSONReaderTest {
             assertEquals(value, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
+        {
+            JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.ISO_8859_1);
+            assertTrue(reader.nextIfObjectStart());
+            assertEquals(hash, reader.readFieldNameHashCode());
+            assertEquals(hash, reader.getNameHashCodeLCase());
+            assertEquals(fieldName, reader.getFieldName());
+            assertEquals(hash, reader.readValueHashCode());
+            assertEquals(value, reader.getString());
+            assertTrue(reader.nextIfObjectEnd());
+        }
     }
 
     @Test
@@ -322,17 +334,27 @@ public class JSONReaderTest {
         String value = fieldName;
         long hash = Fnv.hashCode64(fieldName);
         {
-            JSONReader reader = JSONReader.of(str);
-            assertEquals(hash, reader.readFieldNameHashCodeUnquote());
-            assertEquals(fieldName, reader.getFieldName());
-        }
-        {
             JSONReader reader = JSONReader.of(strBytes);
             assertEquals(hash, reader.readFieldNameHashCodeUnquote());
             assertEquals(fieldName, reader.getFieldName());
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
+            assertEquals(hash, reader.readFieldNameHashCodeUnquote());
+            assertEquals(fieldName, reader.getFieldName());
+        }
+        {
+            JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.ISO_8859_1);
+            assertEquals(hash, reader.readFieldNameHashCodeUnquote());
+            assertEquals(fieldName, reader.getFieldName());
+        }
+        {
+            JSONReader reader = JSONReader.of(str.toCharArray());
+            assertEquals(hash, reader.readFieldNameHashCodeUnquote());
+            assertEquals(fieldName, reader.getFieldName());
+        }
+        {
+            JSONReader reader = JSONReader.of(str);
             assertEquals(hash, reader.readFieldNameHashCodeUnquote());
             assertEquals(fieldName, reader.getFieldName());
         }
@@ -698,6 +720,22 @@ public class JSONReaderTest {
             jsonReader.skipValue();
             assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
         }
+
+        String str5 = "true,true]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str5)) {
+            jsonReader.skipValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.skipValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str6 = "1,1]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str6)) {
+            jsonReader.skipValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.skipValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
     }
 
     @Test
@@ -981,6 +1019,9 @@ public class JSONReaderTest {
 
         Bean bean2 = JSON.parseObject(str.getBytes(), Bean.class);
         assertArrayEquals(bean.value, bean2.value);
+
+        Bean bean3 = JSON.parseObject(str.toCharArray(), Bean.class);
+        assertArrayEquals(bean.value, bean3.value);
     }
 
     public static class Bean {
@@ -991,11 +1032,20 @@ public class JSONReaderTest {
     @Test
     public void readLocalTime5() {
         String str = "\"12:34\"";
-        JSONReader jsonReader = JSONReader.of(str.getBytes());
-        LocalTime localTime = jsonReader.readLocalTime();
-        assertEquals(12, localTime.getHour());
-        assertEquals(34, localTime.getMinute());
-        assertEquals(0, localTime.getSecond());
+        {
+            JSONReader jsonReader = JSONReader.of(str.getBytes());
+            LocalTime localTime = jsonReader.readLocalTime();
+            assertEquals(12, localTime.getHour());
+            assertEquals(34, localTime.getMinute());
+            assertEquals(0, localTime.getSecond());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of(str.toCharArray());
+            LocalTime localTime = jsonReader.readLocalTime();
+            assertEquals(12, localTime.getHour());
+            assertEquals(34, localTime.getMinute());
+            assertEquals(0, localTime.getSecond());
+        }
     }
 
     @Test
@@ -1301,5 +1351,50 @@ public class JSONReaderTest {
             reader.next();
             assertEquals(ch, reader.current());
         }
+    }
+
+    @Test
+    public void readNumber() {
+        String str = "123";
+        JSONReader jsonReader = JSONReader.of(str.toCharArray());
+        final AtomicReference ref = new AtomicReference();
+        jsonReader.readNumber(
+                new ValueConsumer() {
+                    @Override
+                    public void accept(Number val) {
+                        ref.set(val);
+                    }
+                }, false);
+        assertEquals(123, ref.get());
+    }
+
+    @Test
+    public void readString() {
+        String str = "\"123\"";
+        JSONReader jsonReader = JSONReader.of(str.toCharArray());
+        final AtomicReference ref = new AtomicReference();
+        jsonReader.readString(
+                new ValueConsumer() {
+                    @Override
+                    public void accept(String val) {
+                        ref.set(val);
+                    }
+                }, true);
+        assertEquals("\"123\"", ref.get());
+    }
+
+    @Test
+    public void readString1() {
+        String str = "123";
+        JSONReader jsonReader = JSONReader.of(str.toCharArray());
+        final AtomicReference ref = new AtomicReference();
+        jsonReader.readString(
+                new ValueConsumer() {
+                    @Override
+                    public void accept(String val) {
+                        ref.set(val);
+                    }
+                }, false);
+        assertEquals("123", ref.get());
     }
 }

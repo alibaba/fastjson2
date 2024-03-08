@@ -120,24 +120,24 @@ public class FastJsonHttpMessageConverter
     protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         HttpHeaders headers = outputMessage.getHeaders();
 
-        try {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             int contentLength;
             if (object instanceof String && JSON.isValidObject((String) object)) {
                 byte[] strBytes = ((String) object).getBytes(config.getCharset());
                 contentLength = strBytes.length;
-                outputMessage.getBody().write(strBytes, 0, strBytes.length);
+                baos.write(strBytes, 0, strBytes.length);
             } else if (object instanceof byte[] && JSON.isValid((byte[]) object)) {
                 byte[] strBytes = (byte[]) object;
                 contentLength = strBytes.length;
-                outputMessage.getBody().write(strBytes, 0, strBytes.length);
+                baos.write(strBytes, 0, strBytes.length);
             } else {
                 if (object instanceof JSONPObject) {
                     headers.setContentType(APPLICATION_JAVASCRIPT);
                 }
 
                 contentLength = JSON.writeTo(
-                        outputMessage.getBody(),
-                        object, config.getDateFormat(),
+                        baos, object,
+                        config.getDateFormat(),
                         config.getWriterFilters(),
                         config.getWriterFeatures()
                 );
@@ -146,6 +146,8 @@ public class FastJsonHttpMessageConverter
             if (headers.getContentLength() < 0 && config.isWriteContentLength()) {
                 headers.setContentLength(contentLength);
             }
+
+            baos.writeTo(outputMessage.getBody());
         } catch (JSONException ex) {
             throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
         } catch (IOException ex) {

@@ -263,6 +263,27 @@ public interface JSONB {
         return 5;
     }
 
+    /**
+     * @since 2.0.46
+     * @param jsonbBytes
+     * @param context
+     * @return
+     */
+    static Object parse(byte[] jsonbBytes, JSONReader.Context context) {
+        try (JSONReaderJSONB reader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length)
+        ) {
+            Object object = reader.readAnyObject();
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
     static Object parse(byte[] jsonbBytes, JSONReader.Feature... features) {
         try (JSONReaderJSONB reader = new JSONReaderJSONB(
                 new JSONReader.Context(getDefaultObjectReaderProvider(), features),
@@ -271,6 +292,16 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             Object object = reader.readAnyObject();
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    static Object parse(InputStream in, JSONReader.Context context) {
+        try (JSONReaderJSONB reader = new JSONReaderJSONB(context, in)) {
+            Object object = reader.readAny();
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -323,6 +354,16 @@ public interface JSONB {
         }
     }
 
+    static JSONObject parseObject(InputStream in, JSONReader.Context context) {
+        try (JSONReaderJSONB reader = new JSONReaderJSONB(context, in)) {
+            JSONObject object = (JSONObject) reader.readObject();
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
     static JSONArray parseArray(byte[] jsonbBytes) {
         try (JSONReaderJSONB reader = new JSONReaderJSONB(
                 new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider()),
@@ -330,6 +371,16 @@ public interface JSONB {
                 0,
                 jsonbBytes.length)
         ) {
+            JSONArray array = (JSONArray) reader.readArray();
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
+            return array;
+        }
+    }
+
+    static JSONArray parseArray(InputStream in, JSONReader.Context context) {
+        try (JSONReaderJSONB reader = new JSONReaderJSONB(context, in)) {
             JSONArray array = (JSONArray) reader.readArray();
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);

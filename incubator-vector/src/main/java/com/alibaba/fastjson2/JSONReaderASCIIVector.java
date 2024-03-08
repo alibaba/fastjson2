@@ -23,8 +23,9 @@ final class JSONReaderASCIIVector
             final byte quote = (byte) ch;
             final byte slash = (byte) '\\';
 
+            final byte[] bytes = this.bytes;
             int offset = this.offset;
-            int start = offset;
+            final int start = offset, end = this.end;
             int valueLength;
             boolean valueEscape = false;
 
@@ -47,21 +48,8 @@ final class JSONReaderASCIIVector
                     byte c = bytes[offset];
                     if (c == slash) {
                         valueEscape = true;
-                        c = bytes[++offset];
-                        switch (c) {
-                            case 'u': {
-                                offset += 4;
-                                break;
-                            }
-                            case 'x': {
-                                offset += 2;
-                                break;
-                            }
-                            default:
-                                // skip
-                                break;
-                        }
-                        offset++;
+                        c = bytes[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
                         continue;
                     }
 
@@ -78,28 +66,37 @@ final class JSONReaderASCIIVector
                 char[] chars = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
-                    char c = (char) (bytes[offset] & 0xff);
+                    int c = bytes[offset] & 0xff;
                     if (c == '\\') {
-                        c = (char) (bytes[++offset] & 0xff);
+                        c = bytes[++offset] & 0xff;
                         switch (c) {
                             case 'u': {
-                                char c1 = (char) this.bytes[1 + offset];
-                                char c2 = (char) this.bytes[2 + offset];
-                                char c3 = (char) this.bytes[3 + offset];
-                                char c4 = (char) this.bytes[4 + offset];
+                                c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
                                 offset += 4;
-                                c = char4(c1, c2, c3, c4);
                                 break;
                             }
                             case 'x': {
-                                char c1 = (char) this.bytes[1 + offset];
-                                char c2 = (char) this.bytes[2 + offset];
+                                c = char2(bytes[offset + 1], bytes[offset + 2]);
                                 offset += 2;
-                                c = char2(c1, c2);
                                 break;
                             }
                             case '\\':
                             case '"':
+                                break;
+                            case 'b':
+                                c = '\b';
+                                break;
+                            case 't':
+                                c = '\t';
+                                break;
+                            case 'n':
+                                c = '\n';
+                                break;
+                            case 'f':
+                                c = '\f';
+                                break;
+                            case 'r':
+                                c = '\r';
                                 break;
                             default:
                                 c = char1(c);
@@ -108,27 +105,27 @@ final class JSONReaderASCIIVector
                     } else if (c == quote) {
                         break;
                     }
-                    chars[i] = c;
+                    chars[i] = (char) c;
                     offset++;
                 }
 
                 str = new String(chars);
             } else {
-                int strlen = offset - this.offset;
+                int strlen = offset - start;
                 if (strlen == 1) {
-                    str = TypeUtils.toString(bytes[this.offset]);
+                    str = TypeUtils.toString(bytes[start]);
                 } else if (strlen == 2) {
                     str = TypeUtils.toString(
-                            bytes[this.offset],
-                            bytes[this.offset + 1]
+                            bytes[start],
+                            bytes[start + 1]
                     );
                 } else if (this.str != null) {
-                    str = this.str.substring(this.offset, offset);
+                    str = this.str.substring(start, offset);
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+                    byte[] buf = Arrays.copyOfRange(bytes, start, offset);
+                    str = STRING_CREATOR_JDK11.apply(buf, LATIN1);
                 } else {
-                    str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.ISO_8859_1);
+                    str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
                 }
             }
 
@@ -136,77 +133,24 @@ final class JSONReaderASCIIVector
                 str = str.trim();
             }
 
-            clear:
-            if (++offset != end) {
-                byte e = bytes[offset++];
-                while (e <= ' ' && (1L << e & SPACE) != 0) {
-                    if (offset == end) {
-                        break clear;
-                    } else {
-                        e = bytes[offset++];
-                    }
-                }
-
-                if (comma = e == ',') {
-                    if (offset == end) {
-                        e = EOI;
-                    } else {
-                        e = bytes[offset++];
-                        while (e <= ' ' && (1L << e & SPACE) != 0) {
-                            if (offset == end) {
-                                e = EOI;
-                                break;
-                            } else {
-                                e = bytes[offset++];
-                            }
-                        }
-                    }
-                }
-
-                this.ch = (char) e;
-                this.offset = offset;
-                return str;
+            int ch = ++offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
-            this.ch = EOI;
-            this.comma = false;
+            if (comma = ch == ',') {
+                ch = offset == end ? EOI : bytes[offset++];
+                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            this.ch = (char) (ch & 0xFF);
             this.offset = offset;
             return str;
         }
 
-        switch (ch) {
-            case '[':
-                return toString(
-                        readArray());
-            case '{':
-                return toString(
-                        readObject());
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                readNumber0();
-                Number number = getNumber();
-                return number.toString();
-            case 't':
-            case 'f':
-                boolValue = readBoolValue();
-                return boolValue ? "true" : "false";
-            case 'n': {
-                readNull();
-                return null;
-            }
-            default:
-                throw new JSONException("TODO : " + ch);
-        }
+        return readStringNotMatch();
     }
 
     public static class Factory

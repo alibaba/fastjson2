@@ -435,6 +435,7 @@ class JSONWriterUTF8
         }
 
         boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + value.length * 4 + 2;
@@ -546,6 +547,22 @@ class JSONWriterUTF8
                         bytes[off + 4] = '1';
                         bytes[off + 5] = (byte) ('a' + (b0 - 26));
                         off += 6;
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            bytes[off] = '\\';
+                            bytes[off + 1] = 'u';
+                            bytes[off + 2] = '0';
+                            bytes[off + 3] = '0';
+                            bytes[off + 4] = (byte) DIGITS[(b0 >>> 4) & 15];
+                            bytes[off + 5] = (byte) DIGITS[b0 & 15];
+                            off += 6;
+                        } else {
+                            bytes[off++] = b0;
+                        }
                         break;
                     default:
                         if (b0 == quote) {
@@ -1471,34 +1488,36 @@ class JSONWriterUTF8
         final int off = this.off;
         buf[off] = '"';
 
+        final long base = ARRAY_BYTE_BASE_OFFSET + off;
+
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 1,
+                base + 1,
                 packDigits((int) (msb >> 56), (int) (msb >> 48), (int) (msb >> 40), (int) (msb >> 32))
         );
         buf[off + 9] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 10,
+                base + 10,
                 packDigits(((int) msb) >> 24, ((int) msb) >> 16));
         buf[off + 14] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 15,
+                base + 15,
                 packDigits(((int) msb) >> 8, (int) msb));
         buf[off + 19] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 20,
+                base + 20,
                 packDigits((int) (lsb >> 56), (int) (lsb >> 48)));
         buf[off + 24] = '-';
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 25,
+                base + 25,
                 packDigits(((int) (lsb >> 40)), (int) (lsb >> 32), ((int) lsb) >> 24, ((int) lsb) >> 16));
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + off + 33,
+                base + 33,
                 packDigits(((int) lsb) >> 8, (int) lsb));
         buf[off + 37] = '"';
         this.off += 38;
@@ -1536,12 +1555,9 @@ class JSONWriterUTF8
 
     @Override
     public final void writeRaw(byte[] bytes) {
-        {
-            // inline ensureCapacity
-            int minCapacity = off + bytes.length;
-            if (minCapacity >= this.bytes.length) {
-                ensureCapacity(minCapacity);
-            }
+        int minCapacity = off + bytes.length;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
         }
         System.arraycopy(bytes, 0, this.bytes, this.off, bytes.length);
         off += bytes.length;
@@ -1560,10 +1576,7 @@ class JSONWriterUTF8
             final byte[] bytes = this.bytes;
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
         System.arraycopy(name, 0, bytes, off, name.length);
@@ -1571,7 +1584,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName2Raw(long name) {
+    public final void writeName2Raw(long name) {
         int off = this.off;
         int minCapacity = off + 10 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1584,10 +1597,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1595,8 +1605,17 @@ class JSONWriterUTF8
         this.off = off + 5;
     }
 
+    private static int indent(byte[] bytes, int off, int indent) {
+        bytes[off++] = '\n';
+        int end = off + indent;
+        while (off < end) {
+            bytes[off++] = '\t';
+        }
+        return off;
+    }
+
     @Override
-    public void writeName3Raw(long name) {
+    public final void writeName3Raw(long name) {
         int off = this.off;
         int minCapacity = off + 10 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1609,10 +1628,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1621,7 +1637,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName4Raw(long name) {
+    public final void writeName4Raw(long name) {
         int off = this.off;
         int minCapacity = off + 10 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1634,10 +1650,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1646,7 +1659,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName5Raw(long name) {
+    public final void writeName5Raw(long name) {
         int off = this.off;
         int minCapacity = off + 10 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1659,10 +1672,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1671,7 +1681,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName6Raw(long name) {
+    public final void writeName6Raw(long name) {
         int off = this.off;
         int minCapacity = off + 11 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1684,10 +1694,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1697,7 +1704,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName7Raw(long name) {
+    public final void writeName7Raw(long name) {
         int off = this.off;
         int minCapacity = off + 12 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1710,10 +1717,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1724,7 +1728,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName8Raw(long name) {
+    public final void writeName8Raw(long name) {
         int off = this.off;
         int minCapacity = off + 13 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1737,10 +1741,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1752,7 +1753,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName9Raw(long name0, int name1) {
+    public final void writeName9Raw(long name0, int name1) {
         int off = this.off;
         int minCapacity = off + 14 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1765,10 +1766,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1778,7 +1776,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName10Raw(long name0, long name1) {
+    public final void writeName10Raw(long name0, long name1) {
         int off = this.off;
         int minCapacity = off + 18 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1791,10 +1789,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1804,7 +1799,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName11Raw(long name0, long name1) {
+    public final void writeName11Raw(long name0, long name1) {
         int off = this.off;
         int minCapacity = off + 18 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1817,10 +1812,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1830,7 +1822,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName12Raw(long name0, long name1) {
+    public final void writeName12Raw(long name0, long name1) {
         int off = this.off;
         int minCapacity = off + 18 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1843,10 +1835,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1856,7 +1845,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName13Raw(long name0, long name1) {
+    public final void writeName13Raw(long name0, long name1) {
         int off = this.off;
         int minCapacity = off + 18 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1869,10 +1858,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1882,7 +1868,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName14Raw(long name0, long name1) {
+    public final void writeName14Raw(long name0, long name1) {
         int off = this.off;
         int minCapacity = off + 19 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1895,10 +1881,7 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
@@ -1909,7 +1892,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeName15Raw(long name0, long name1) {
+    public final void writeName15Raw(long name0, long name1) {
         int off = this.off;
         int minCapacity = off + 20 + indent;
         if (minCapacity >= this.bytes.length) {
@@ -1922,13 +1905,36 @@ class JSONWriterUTF8
         } else {
             bytes[off++] = ',';
             if (pretty) {
-                bytes[off++] = '\n';
-                for (int i = 0; i < indent; ++i) {
-                    bytes[off++] = '\t';
-                }
+                off = indent(bytes, off, indent);
             }
         }
 
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        bytes[off + 16] = (byte) quote;
+        bytes[off + 17] = ':';
+        this.off = off + 18;
+    }
+
+    @Override
+    public final void writeName16Raw(long name0, long name1) {
+        int off = this.off;
+        int minCapacity = off + 21 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                off = indent(bytes, off, indent);
+            }
+        }
+
+        bytes[off++] = (byte) quote;
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
         bytes[off + 16] = (byte) quote;
@@ -2046,11 +2052,46 @@ class JSONWriterUTF8
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }
-        off = IOUtils.writeInt32(bytes, off, i);
+        off = IOUtils.writeInt8(bytes, off, i);
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }
         this.off = off;
+    }
+
+    @Override
+    public final void writeInt8(byte[] values) {
+        if (values == null) {
+            writeNull();
+            return;
+        }
+
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+
+        int off = this.off;
+        int minCapacity = off + values.length * 5 + 2;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        bytes[off++] = '[';
+
+        for (int i = 0; i < values.length; i++) {
+            if (i != 0) {
+                bytes[off++] = ',';
+            }
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
+            }
+            off = IOUtils.writeInt8(bytes, off, values[i]);
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
+            }
+        }
+
+        bytes[off] = ']';
+        this.off = off + 1;
     }
 
     @Override
@@ -2067,7 +2108,7 @@ class JSONWriterUTF8
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }
-        off = IOUtils.writeInt32(bytes, off, i);
+        off = IOUtils.writeInt16(bytes, off, i);
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         }
@@ -2299,8 +2340,7 @@ class JSONWriterUTF8
             bytes[off++] = '"';
         }
 
-        int len = DoubleToDecimal.toString(value, bytes, off, true);
-        off += len;
+        off += DoubleToDecimal.toString(value, bytes, off, true);
 
         if (writeAsString) {
             bytes[off++] = '"';
@@ -2401,17 +2441,18 @@ class JSONWriterUTF8
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
         if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+            throw illegalYear(year);
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[y01]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 3, PACKED_DIGITS[y23]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 5, PACKED_DIGITS[month]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[dayOfMonth]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, PACKED_DIGITS[hour]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 11, PACKED_DIGITS[minute]);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 13, PACKED_DIGITS[second]);
+        final long base = ARRAY_BYTE_BASE_OFFSET + off;
+        UNSAFE.putShort(bytes, base + 1, PACKED_DIGITS[y01]);
+        UNSAFE.putShort(bytes, base + 3, PACKED_DIGITS[y23]);
+        UNSAFE.putShort(bytes, base + 5, PACKED_DIGITS[month]);
+        UNSAFE.putShort(bytes, base + 7, PACKED_DIGITS[dayOfMonth]);
+        UNSAFE.putShort(bytes, base + 9, PACKED_DIGITS[hour]);
+        UNSAFE.putShort(bytes, base + 11, PACKED_DIGITS[minute]);
+        UNSAFE.putShort(bytes, base + 13, PACKED_DIGITS[second]);
         bytes[off + 15] = (byte) quote;
         this.off = off + 16;
     }
@@ -2446,11 +2487,9 @@ class JSONWriterUTF8
             return;
         }
 
-        final Context context = this.context;
-        if (context.dateFormat != null) {
-            if (writeLocalDateWithFormat(date, context)) {
-                return;
-            }
+        if (context.dateFormat != null
+                && writeLocalDateWithFormat(date)) {
+            return;
         }
 
         int off = this.off;
@@ -2494,7 +2533,7 @@ class JSONWriterUTF8
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
         if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+            throw illegalYear(year);
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
@@ -2579,11 +2618,11 @@ class JSONWriterUTF8
         }
 
         final byte[] bytes = this.bytes;
-        bytes[off++] = (byte) quote;
+        bytes[off] = (byte) quote;
         LocalDate localDate = dateTime.toLocalDate();
-        off = IOUtils.writeLocalDate(bytes, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-        bytes[off++] = 'T';
-        off = IOUtils.writeLocalTime(bytes, off, dateTime.toLocalTime());
+        off = IOUtils.writeLocalDate(bytes, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+        bytes[off] = 'T';
+        off = IOUtils.writeLocalTime(bytes, off + 1, dateTime.toLocalTime());
         if (zoneSize == 1) {
             bytes[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
@@ -2606,20 +2645,21 @@ class JSONWriterUTF8
             return;
         }
 
-        ZoneOffset offset = dateTime.getOffset();
+        int off = this.off;
         int minCapacity = off + 45;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
 
         final byte[] bytes = this.bytes;
-        int off = this.off;
-        bytes[off++] = (byte) quote;
+        bytes[off] = (byte) quote;
         LocalDateTime ldt = dateTime.toLocalDateTime();
         LocalDate date = ldt.toLocalDate();
-        off = IOUtils.writeLocalDate(bytes, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-        bytes[off++] = 'T';
-        off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
+        off = IOUtils.writeLocalDate(bytes, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        bytes[off] = 'T';
+        off = IOUtils.writeLocalTime(bytes, off + 1, ldt.toLocalTime());
+
+        ZoneOffset offset = dateTime.getOffset();
         if (offset.getTotalSeconds() == 0) {
             bytes[off++] = 'Z';
         } else {
@@ -2637,16 +2677,17 @@ class JSONWriterUTF8
             return;
         }
 
-        ZoneOffset offset = time.getOffset();
+        int off = this.off;
         int minCapacity = off + 45;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
 
         final byte[] bytes = this.bytes;
-        int off = this.off;
-        bytes[off++] = (byte) quote;
-        off = IOUtils.writeLocalTime(bytes, off, time.toLocalTime());
+        bytes[off] = (byte) quote;
+        off = IOUtils.writeLocalTime(bytes, off + 1, time.toLocalTime());
+
+        ZoneOffset offset = time.getOffset();
         if (offset.getTotalSeconds() == 0) {
             bytes[off++] = 'Z';
         } else {
@@ -2672,21 +2713,26 @@ class JSONWriterUTF8
 
         String str = value.toString(10);
 
-        if (isWriteAsString(value, context.features | features)) {
-            writeString(str);
-            return;
+        boolean writeAsString = isWriteAsString(value, context.features | features);
+
+        int off = this.off;
+        int strlen = str.length();
+
+        int minCapacity = off + strlen + (writeAsString ? 2 : 0);
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
         }
 
-        int strlen = str.length();
-        {
-            // inline ensureCapacity
-            int minCapacity = off + strlen;
-            if (minCapacity >= this.bytes.length) {
-                ensureCapacity(minCapacity);
-            }
+        final byte[] bytes = this.bytes;
+        if (writeAsString) {
+            bytes[off++] = '"';
         }
-        str.getBytes(0, strlen, this.bytes, off);
+        str.getBytes(0, strlen, bytes, off);
         off += strlen;
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+        this.off = off;
     }
 
     @Override
@@ -3035,16 +3081,37 @@ class JSONWriterUTF8
 
     @Override
     public final int flushTo(OutputStream out, Charset charset) throws IOException {
-        if (charset != null && charset != StandardCharsets.UTF_8) {
-            throw new JSONException("UnsupportedOperation");
-        }
         if (off == 0) {
             return 0;
         }
 
-        int len = off;
-        out.write(bytes, 0, off);
-        off = 0;
-        return len;
+        if (charset == null || charset == StandardCharsets.UTF_8 || charset == StandardCharsets.US_ASCII) {
+            int len = off;
+            out.write(bytes, 0, off);
+            off = 0;
+            return len;
+        }
+
+        if (charset == StandardCharsets.ISO_8859_1) {
+            boolean hasNegative = false;
+            if (METHOD_HANDLE_HAS_NEGATIVE != null) {
+                try {
+                    hasNegative = (Boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, 0, bytes.length);
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+            if (!hasNegative) {
+                int len = off;
+                out.write(bytes, 0, off);
+                off = 0;
+                return len;
+            }
+        }
+
+        String str = new String(bytes, 0, off);
+        byte[] encodedBytes = str.getBytes(charset);
+        out.write(encodedBytes);
+        return encodedBytes.length;
     }
 }

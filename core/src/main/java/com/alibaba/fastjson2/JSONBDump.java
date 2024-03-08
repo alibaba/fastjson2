@@ -266,7 +266,23 @@ final class JSONBDump {
             }
             case BC_DECIMAL: {
                 int scale = readInt32Value();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue;
+                int type = bytes[offset++]; // bigInt
+                switch (type) {
+                    case BC_BIGINT_LONG:
+                        unscaledValue = BigInteger.valueOf(
+                                readInt64Value()
+                        );
+                        break;
+                    default:
+                        int len = readInt32Value();
+                        byte[] bytes = new byte[len];
+                        System.arraycopy(this.bytes, offset, bytes, 0, len);
+                        offset += len;
+                        unscaledValue = new BigInteger(bytes);
+                        break;
+                }
+
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
@@ -510,14 +526,6 @@ final class JSONBDump {
                 case BC_OBJECT_END:
                     offset++;
                     break _for;
-                case BC_TRUE:
-                    offset++;
-                    jsonWriter.writeName("true");
-                    break;
-                case BC_FALSE:
-                    offset++;
-                    jsonWriter.writeName("false");
-                    break;
                 case BC_REFERENCE: {
                     dumpReference();
                     break;
@@ -529,11 +537,9 @@ final class JSONBDump {
                         if (raw) {
                             jsonWriter.writeName("#" + symbol);
                         } else {
-                            String name = symbols.get(symbol);
-                            if (name == null) {
-                                throw new JSONException("symbol not found " + symbol);
-                            }
-                            jsonWriter.writeName(name);
+                            jsonWriter.writeName(
+                                    getString(symbol)
+                            );
                         }
                     } else {
                         String name = readString();
@@ -548,10 +554,6 @@ final class JSONBDump {
                     }
                     break;
                 }
-                case BC_NULL:
-                    jsonWriter.writeNameRaw("null".toCharArray());
-                    offset++;
-                    break;
                 default:
                     if (isString()) {
                         jsonWriter.writeName(readString());
@@ -676,24 +678,6 @@ final class JSONBDump {
                                 (bytes[offset] << 8));
                 offset += 2;
                 return int16Value;
-            case BC_TIMESTAMP_MINUTES: {
-                long minutes =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
-                offset += 4;
-                return minutes * 60 * 1000;
-            }
-            case BC_TIMESTAMP_SECONDS: {
-                long seconds =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
-                offset += 4;
-                return seconds * 1000;
-            }
             case BC_INT32:
             case BC_INT64_INT:
                 int int32Value =
@@ -734,10 +718,6 @@ final class JSONBDump {
                     + (bytes[offset++] & 0xFF);
         }
 
-        if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
-            return INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
-        }
-
         if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
             return ((type - BC_INT32_BYTE_ZERO) << 8)
                     + (bytes[offset++] & 0xFF);
@@ -753,83 +733,6 @@ final class JSONBDump {
         throw new JSONException("not support length type : " + type);
     }
 
-    BigInteger readBigInteger() {
-        int type = bytes[offset++];
-        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
-            return BigInteger.valueOf(type);
-        }
-
-        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            int intValue = ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return BigInteger.valueOf(intValue);
-        }
-
-        if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            int intValue = ((type - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return BigInteger.valueOf(intValue);
-        }
-
-        switch (type) {
-            case BC_NULL:
-                return null;
-            case BC_FALSE:
-                return BigInteger.ZERO;
-            case BC_TRUE:
-                return BigInteger.ONE;
-            case BC_INT32:
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
-                offset += 4;
-                return BigInteger.valueOf(int32Value);
-            case BC_INT64: {
-                long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
-                offset += 8;
-                return BigInteger.valueOf(int64Value);
-            }
-            case BC_BIGINT:
-            case BC_BINARY: {
-                int len = readInt32Value();
-                byte[] bytes = new byte[len];
-                System.arraycopy(this.bytes, offset, bytes, 0, len);
-                offset += len;
-                return new BigInteger(bytes);
-            }
-            case BC_BIGINT_LONG: {
-                return BigInteger.valueOf(
-                        readInt64Value()
-                );
-            }
-            case BC_DECIMAL: {
-                int scale = readInt32Value();
-                BigInteger unscaledValue = readBigInteger();
-                BigDecimal decimal;
-                if (scale == 0) {
-                    decimal = new BigDecimal(unscaledValue);
-                } else {
-                    decimal = new BigDecimal(unscaledValue, scale);
-                }
-                return decimal.toBigInteger();
-            }
-            default:
-                break;
-        }
-        throw new JSONException("not support type :" + type);
-    }
-
     boolean isReference() {
         return offset < bytes.length && bytes[offset] == BC_REFERENCE;
     }
@@ -841,10 +744,6 @@ final class JSONBDump {
 
     String readString() {
         strtype = bytes[offset++];
-
-        if (strtype == BC_NULL) {
-            return null;
-        }
 
         strBegin = offset;
         Charset charset;
@@ -892,8 +791,6 @@ final class JSONBDump {
             }
 
             charset = StandardCharsets.UTF_16BE;
-        } else if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
-            return Byte.toString(strtype);
         } else {
             throw new JSONException("readString not support type " + typeName(strtype) + ", offset " + offset + "/" + bytes.length);
         }

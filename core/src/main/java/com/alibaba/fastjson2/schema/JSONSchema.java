@@ -907,6 +907,7 @@ public abstract class JSONSchema {
 
     static final ValidateResult SUCCESS = new ValidateResult(true, "success");
     static final ValidateResult FAIL_INPUT_NULL = new ValidateResult(false, "input null");
+    static final ValidateResult FAIL_INPUT_NOT_ENCODED = new ValidateResult(false, "input not encoded string");
     static final ValidateResult FAIL_ANY_OF = new ValidateResult(false, "anyOf fail");
     static final ValidateResult FAIL_ONE_OF = new ValidateResult(false, "oneOf fail");
     static final ValidateResult FAIL_NOT = new ValidateResult(false, "not fail");

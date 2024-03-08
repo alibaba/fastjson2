@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.benchmark;
 
+import com.alibaba.fastjson2.JSON;
+
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -7,8 +9,8 @@ import java.util.*;
 public class GenReport {
     public void gen() throws Exception {
         File dir = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/");
-        File file = new File(dir, "benchmark_2.0.45_raw.md");
-        File outFile = new File(dir, "benchmark_2.0.45.md");
+        File file = new File(dir, "benchmark_" + JSON.VERSION + "_raw.md");
+        File outFile = new File(dir, "benchmark_" + JSON.VERSION + ".md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -38,6 +40,8 @@ public class GenReport {
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         int h1 = 0;
         for (BenchmarkResult benchmarkResult : benchResults.values()) {
+            benchmarkResult.libraryResults.remove("jsonbValid"); // skip jsonbValid
+
             if (benchmarkResult.libraryResults.size() == 2) {
                 LibResult fury = benchmarkResult.libraryResults.get("fury");
                 LibResult jsonb = benchmarkResult.libraryResults.get("jsonb");

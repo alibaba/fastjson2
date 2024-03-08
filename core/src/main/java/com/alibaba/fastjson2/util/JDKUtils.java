@@ -47,7 +47,6 @@ public class JDKUtils {
     public static final Class CLASS_TRANSIENT;
     public static final boolean BIG_ENDIAN;
 
-    public static final boolean UNSAFE_SUPPORT = true;
     public static final boolean VECTOR_SUPPORT;
     public static final int VECTOR_BIT_LENGTH;
 
@@ -69,16 +68,25 @@ public class JDKUtils {
     static final AtomicInteger reflectErrorCount = new AtomicInteger();
 
     static {
-        Unsafe unsafe = null;
-        long offset = -1, charOffset = -1;
+        Unsafe unsafe;
+        long offset, charOffset;
         try {
-            Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            Field theUnsafeField = null;
+            for (Field field : Unsafe.class.getDeclaredFields()) {
+                String fieldName = field.getName();
+                if (fieldName.equals("theUnsafe")
+                        || fieldName.equals("THE_ONE") // android
+                ) {
+                    theUnsafeField = field;
+                    break;
+                }
+            }
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
             offset = unsafe.arrayBaseOffset(byte[].class);
             charOffset = unsafe.arrayBaseOffset(char[].class);
         } catch (Throwable e) {
-            initErrorLast = e;
+            throw new JSONException("init unsafe error");
         }
 
         UNSAFE = unsafe;
@@ -196,12 +204,16 @@ public class JDKUtils {
 
         {
             long fieldOffset = -1;
-            try {
-                Field field = BigDecimal.class.getDeclaredField("intCompact");
-                fieldOffset = UNSAFE.objectFieldOffset(field);
-            } catch (Throwable ignored) {
-                // ignored
+            for (Field field : BigDecimal.class.getDeclaredFields()) {
+                String fieldName = field.getName();
+                if (fieldName.equals("intCompact")
+                        || fieldName.equals("smallValue") // android
+                ) {
+                    fieldOffset = UNSAFE.objectFieldOffset(field);
+                    break;
+                }
             }
+
             FIELD_DECIMAL_INT_COMPACT_OFFSET = fieldOffset;
         }
 

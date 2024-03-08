@@ -45,6 +45,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 null,
                 seeAlso,
                 seeAlsoNames,
+                null,
                 concat(paramFieldReaders, setterFieldReaders)
         );
 
@@ -279,7 +280,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 }
                 continue;
             }
-
+            if (jsonReader.nextIfNull()) {
+                continue;
+            }
             FieldReader fieldReader = getFieldReader(hashCode);
             FieldReader paramReader = paramFieldReaderMap.get(hashCode);
             if (paramReader != null
@@ -321,6 +324,20 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 hash = fieldReader.fieldNameHash;
             }
             valueMap.put(hash, fieldValue);
+        }
+
+        if (hasDefaultValue) {
+            if (valueMap == null) {
+                valueMap = new LinkedHashMap<>();
+            }
+            for (FieldReader fieldReader : fieldReaders) {
+                if (fieldReader.defaultValue != null) {
+                    Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
+                    if (fieldValue == null) {
+                        valueMap.put(fieldReader.fieldNameHash, fieldReader.defaultValue);
+                    }
+                }
+            }
         }
 
         Map<Long, Object> argsMap = valueMap == null ? Collections.emptyMap() : valueMap;

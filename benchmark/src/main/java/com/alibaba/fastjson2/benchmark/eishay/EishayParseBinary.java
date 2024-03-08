@@ -98,6 +98,16 @@ public class EishayParseBinary {
         );
     }
 
+//    @Benchmark
+    public void jsonbValid(Blackhole bh) {
+        JSONReader jsonReader = JSONReader.ofJSONB(fastjson2JSONBBytes);
+        jsonReader.skipValue();
+        bh.consume(
+                jsonReader.isEnd()
+        );
+        jsonReader.close();
+    }
+
     @Benchmark
     public void javaSerialize(Blackhole bh) throws Exception {
         ByteArrayInputStream bytesIn = new ByteArrayInputStream(javaSerializeBytes);

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -195,6 +196,28 @@ abstract class JSONPathSegment {
 
             throw new JSONException("TODO");
         }
+
+        public void setCallback(JSONPath.Context context, BiFunction callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+
+                if (random == null) {
+                    random = new Random();
+                }
+
+                int randomIndex = Math.abs(random.nextInt()) % list.size();
+                Object item = list.get(randomIndex);
+                Object apply = callback.apply(list, item);
+                list.set(randomIndex, apply);
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation ");
+        }
     }
 
     static final class RangeIndexSegment
@@ -218,14 +241,8 @@ abstract class JSONPathSegment {
             if (object instanceof List) {
                 List list = (List) object;
                 for (int i = 0, size = list.size(); i < size; i++) {
-                    boolean match;
-                    if (begin >= 0) {
-                        match = i >= begin && i < end;
-                    } else {
-                        int ni = i - size;
-                        match = ni >= begin && ni < end;
-                    }
-                    if (match) {
+                    int index = begin >= 0 ? i : i - size;
+                    if (index >= begin && index < end) {
                         result.add(list.get(i));
                     }
                 }
@@ -375,18 +392,63 @@ abstract class JSONPathSegment {
             if (object instanceof List) {
                 List list = (List) object;
                 for (int i = 0, size = list.size(); i < size; i++) {
-                    boolean match;
-                    if (begin >= 0) {
-                        match = i >= begin && i < end;
-                    } else {
-                        int ni = i - size;
-                        match = ni >= begin && ni < end;
-                    }
-                    if (match) {
+                    int index = begin >= 0 ? i : i - size;
+                    if (index >= begin && index < end) {
                         list.set(i, value);
                     }
                 }
                 return;
+            }
+
+            if (object != null) {
+                Class objectClass = object.getClass();
+                if (objectClass.isArray()) {
+                    int size = Array.getLength(object);
+                    for (int i = 0; i < size; i++) {
+                        int index = begin >= 0 ? i : i - size;
+                        if (index >= begin && index < end) {
+                            Array.set(object, i, value);
+                        }
+                    }
+                    return;
+                }
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        public void setCallback(JSONPath.Context context, BiFunction callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0, size = list.size(); i < size; i++) {
+                    int index = begin >= 0 ? i : i - size;
+                    if (index >= begin && index < end) {
+                        Object item = list.get(i);
+                        item = callback.apply(list, item);
+                        list.set(index, item);
+                    }
+                }
+                return;
+            }
+
+            if (object != null) {
+                Class objectClass = object.getClass();
+                if (objectClass.isArray()) {
+                    int size = Array.getLength(object);
+                    for (int i = 0; i < size; i++) {
+                        int index = begin >= 0 ? i : i - size;
+                        if (index >= begin && index < end) {
+                            Object item = Array.get(object, i);
+                            item = callback.apply(object, item);
+                            Array.set(object, i, item);
+                        }
+                    }
+                    return;
+                }
             }
 
             throw new JSONException("UnsupportedOperation " + getClass());
@@ -402,14 +464,8 @@ abstract class JSONPathSegment {
                 List list = (List) object;
                 int removeCount = 0;
                 for (int size = list.size(), i = size - 1; i >= 0; i--) {
-                    boolean match;
-                    if (begin >= 0) {
-                        match = i >= begin && i < end;
-                    } else {
-                        int ni = i - size;
-                        match = ni >= begin && ni < end;
-                    }
-                    if (match) {
+                    int index = begin >= 0 ? i : i - size;
+                    if (index >= begin && index < end) {
                         list.remove(i);
                         removeCount++;
                     }
@@ -593,6 +649,80 @@ abstract class JSONPathSegment {
             }
             context.value = array;
         }
+
+        public void setCallback(JSONPath.Context context, BiFunction callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0, size = list.size(); i < size; i++) {
+                    for (int index : indexes) {
+                        if (index == i) {
+                            Object item = list.get(i);
+                            item = callback.apply(object, item);
+                            list.set(i, item);
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (object != null) {
+                Class objectClass = object.getClass();
+                if (objectClass.isArray()) {
+                    int size = Array.getLength(object);
+                    for (int i = 0; i < size; i++) {
+                        for (int index : indexes) {
+                            if (index == i) {
+                                Object item = Array.get(object, i);
+                                item = callback.apply(object, item);
+                                Array.set(object, i, item);
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        public void set(JSONPath.Context context, Object value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0, size = list.size(); i < size; i++) {
+                    for (int index : indexes) {
+                        if (index == i) {
+                            list.set(i, value);
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (object != null) {
+                Class objectClass = object.getClass();
+                if (objectClass.isArray()) {
+                    int size = Array.getLength(object);
+                    for (int i = 0; i < size; i++) {
+                        for (int index : indexes) {
+                            if (index == i) {
+                                Array.set(object, i, value);
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
     }
 
     static final class MultiNameSegment
@@ -695,19 +825,122 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            ObjectWriterProvider provider = context.path.getWriterContext().provider;
-            ObjectWriter objectWriter = provider.getObjectWriter(object.getClass());
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
 
-            JSONArray array = new JSONArray(names.length);
-            for (int i = 0; i < names.length; i++) {
-                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCodes[i]);
-                Object fieldValue = null;
-                if (fieldWriter != null) {
-                    fieldValue = fieldWriter.getFieldValue(object);
+        @Override
+        public void set(JSONPath.Context context, Object value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                for (String name : names) {
+                    map.put(name, value);
                 }
-                array.add(fieldValue);
+                return;
             }
-            context.value = array;
+
+            ObjectReaderProvider provider = context.path.getReaderContext().provider;
+            ObjectReader objectReader = provider.getObjectReader(object.getClass());
+
+            if (objectReader instanceof ObjectReaderBean) {
+                for (long nameHash : nameHashCodes) {
+                    FieldReader fieldReader = objectReader.getFieldReader(nameHash);
+                    if (fieldReader == null) {
+                        continue;
+                    }
+                    fieldReader.accept(object, value);
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        @Override
+        public void setCallback(JSONPath.Context context, BiFunction callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                for (String name : names) {
+                    Object value = map.get(name);
+                    Object apply = callback.apply(map, value);
+                    if (apply != value) {
+                        map.put(name, apply);
+                    }
+                }
+                return;
+            }
+
+            ObjectWriterProvider writerProvider = context.path.getWriterContext().provider;
+            ObjectWriter objectWriter = writerProvider.getObjectWriter(object.getClass());
+
+            if (objectWriter instanceof ObjectWriterAdapter) {
+                ObjectReaderProvider readerProvider = context.path.getReaderContext().provider;
+                ObjectReader objectReader = readerProvider.getObjectReader(object.getClass());
+
+                if (objectReader instanceof ObjectReaderBean) {
+                    for (long nameHash : nameHashCodes) {
+                        FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHash);
+                        if (fieldWriter == null) {
+                            continue;
+                        }
+                        FieldReader fieldReader = objectReader.getFieldReader(nameHash);
+                        if (fieldReader == null) {
+                            continue;
+                        }
+
+                        Object fieldValue = fieldWriter.getFieldValue(object);
+                        Object apply = callback.apply(object, fieldValue);
+                        if (apply != fieldValue) {
+                            fieldReader.accept(object, apply);
+                        }
+                    }
+                    return;
+                }
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        @Override
+        public boolean remove(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            int removeCount = 0;
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                for (String name : names) {
+                    if (map.remove(name) != null) {
+                        removeCount++;
+                    }
+                }
+                return removeCount > 0;
+            }
+
+            ObjectReaderProvider provider = context.path.getReaderContext().provider;
+            ObjectReader objectReader = provider.getObjectReader(object.getClass());
+
+            if (objectReader instanceof ObjectReaderBean) {
+                for (long nameHash : nameHashCodes) {
+                    FieldReader fieldReader = objectReader.getFieldReader(nameHash);
+                    if (fieldReader == null) {
+                        continue;
+                    }
+                    fieldReader.accept(object, null);
+                    removeCount++;
+                }
+                return removeCount > 0;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
         }
     }
 

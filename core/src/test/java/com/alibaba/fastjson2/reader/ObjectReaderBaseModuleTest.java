@@ -4,6 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -42,5 +45,17 @@ public class ObjectReaderBaseModuleTest {
     public static class Cat
             implements Animal {
         public int id;
+    }
+
+    @Test
+    public void test2() throws Exception {
+        ObjectReaderModule module = new ObjectReaderModule() {
+        };
+
+        BeanInfo beanInfo = new BeanInfo();
+        module.getBeanInfo(beanInfo, Animal.class);
+
+        FieldInfo fieldInfo = new FieldInfo();
+        module.getFieldInfo(fieldInfo, Cat.class, Cat.class.getField("id"));
     }
 }

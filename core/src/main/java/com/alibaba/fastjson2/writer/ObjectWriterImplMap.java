@@ -10,6 +10,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.temporal.Temporal;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
@@ -469,7 +470,11 @@ public final class ObjectWriterImplMap
             } else if (key instanceof String) {
                 jsonWriter.writeName(strKey = (String) key);
             } else {
-                if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
+                boolean writeAsString = (features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0 && ObjectWriterProvider.isPrimitiveOrEnum(key.getClass());
+                if (writeAsString && (key instanceof Temporal || key instanceof Date)) {
+                    writeAsString = false;
+                }
+                if (writeAsString) {
                     jsonWriter.writeName(strKey = key.toString());
                 } else {
                     if (key instanceof Integer) {

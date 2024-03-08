@@ -26,6 +26,9 @@ import java.util.function.ToIntFunction;
 import static com.alibaba.fastjson2.support.LambdaMiscCodec.*;
 
 public class JdbcSupport {
+    static Class CLASS_STRUCT;
+    static volatile boolean CLASS_STRUCT_ERROR;
+
     static Class CLASS_CLOB;
     static volatile boolean CLASS_CLOB_ERROR;
 
@@ -685,5 +688,17 @@ public class JdbcSupport {
                     instant.toEpochMilli()
             );
         }
+    }
+
+    public static boolean isStruct(Class objectClass) {
+        if (CLASS_STRUCT == null && !CLASS_STRUCT_ERROR) {
+            try {
+                CLASS_STRUCT = Class.forName("java.sql.Struct");
+            } catch (Throwable e) {
+                CLASS_STRUCT_ERROR = true;
+            }
+        }
+
+        return CLASS_STRUCT != null && CLASS_STRUCT.isAssignableFrom(objectClass);
     }
 }

@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.schema;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -41,6 +39,7 @@ public final class ObjectSchema
     final AllOf allOf;
     final AnyOf anyOf;
     final OneOf oneOf;
+    final boolean encoded;
 
     transient List<UnresolvedReference.ResolveTask> resolveTasks;
 
@@ -55,6 +54,7 @@ public final class ObjectSchema
         this.properties = new LinkedHashMap<>();
         this.definitions = new LinkedHashMap<>();
         this.defs = new LinkedHashMap<>();
+        this.encoded = input.getBooleanValue("encoded", false);
 
         JSONObject definitions = input.getJSONObject("definitions");
         if (definitions != null) {
@@ -392,6 +392,18 @@ public final class ObjectSchema
     public ValidateResult validate(Object value) {
         if (value == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
+        }
+
+        if (encoded) {
+            if (value instanceof String) {
+                try {
+                    value = JSON.parseObject((String) value);
+                } catch (JSONException e) {
+                    return FAIL_INPUT_NOT_ENCODED;
+                }
+            } else {
+                return FAIL_INPUT_NOT_ENCODED;
+            }
         }
 
         if (value instanceof Map) {

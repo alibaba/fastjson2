@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -738,7 +739,15 @@ abstract class JSONPathFilter
                 return false;
             }
 
-            int cmp = ((String) fieldValue).compareTo(this.value);
+            String fieldValueStr = ((String) fieldValue);
+            if (operator == Operator.STARTS_WITH) {
+                return fieldValueStr.startsWith(value);
+            }
+            if (operator == Operator.ENDS_WITH) {
+                return fieldValueStr.endsWith(value);
+            }
+
+            int cmp = fieldValueStr.compareTo(this.value);
 
             switch (operator) {
                 case LT:
@@ -1026,6 +1035,63 @@ abstract class JSONPathFilter
         @Override
         public String toString() {
             return '?' + name;
+        }
+
+        @Override
+        public boolean apply(JSONPath.Context context, Object object) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    static final class NamesExistsFilter
+            extends JSONPathFilter {
+        final String[] names;
+        final long[] nameHashCodes;
+
+        public NamesExistsFilter(List<String> names) {
+            this.names = names.toArray(new String[0]);
+            long[] nameHashCodes = new long[this.names.length];
+            for (int i = 0; i < nameHashCodes.length; i++) {
+                nameHashCodes[i] = Fnv.hashCode64(this.names[i]);
+            }
+            this.nameHashCodes = nameHashCodes;
+        }
+
+        @Override
+        public void eval(JSONPath.Context context) {
+            Object first = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            Object object = first;
+            for (int i = 0; i < names.length; i++) {
+                String name = names[i];
+                if (object instanceof Map) {
+                    Map map = (Map) object;
+                    Object value = map.get(name);
+                    if (i == names.length - 1 || value == null) {
+                        context.value = value != null ? first : null;
+                        return;
+                    }
+                    object = value;
+                }
+            }
+        }
+
+        @Override
+        public void accept(JSONReader jsonReader, JSONPath.Context context) {
+            eval(context);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder buf = new StringBuilder("exists(@");
+            for (int i = 0; i < names.length; i++) {
+                buf.append('.');
+                buf.append(names[i]);
+            }
+            buf.append(')');
+            return buf.toString();
         }
 
         @Override

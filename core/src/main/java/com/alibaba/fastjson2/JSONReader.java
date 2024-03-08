@@ -6,10 +6,7 @@ import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.*;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.invoke.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -147,101 +144,73 @@ public abstract class JSONReader
         return context.features | features;
     }
 
-    public int getRawInt() {
-        return 0;
-    }
+    public abstract int getRawInt();
 
-    public long getRawLong() {
-        return 0;
-    }
+    public abstract long getRawLong();
 
-    public boolean nextIfName4Match2() {
-        return false;
-    }
+    public abstract boolean nextIfName4Match2();
 
     public boolean nextIfValue4Match2() {
         return false;
     }
 
-    public boolean nextIfName4Match3() {
-        return false;
-    }
+    public abstract boolean nextIfName4Match3();
 
     public boolean nextIfValue4Match3() {
         return false;
     }
 
-    public boolean nextIfName4Match4(byte c4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match4(byte c4);
 
     public boolean nextIfValue4Match4(byte c4) {
         return false;
     }
 
-    public boolean nextIfName4Match5(int name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match5(int name1);
 
     public boolean nextIfValue4Match5(byte c4, byte c5) {
         return false;
     }
 
-    public boolean nextIfName4Match6(int name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match6(int name1);
 
     public boolean nextIfValue4Match6(int name1) {
         return false;
     }
 
-    public boolean nextIfName4Match7(int name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match7(int name1);
 
     public boolean nextIfValue4Match7(int name1) {
         return false;
     }
 
-    public boolean nextIfName4Match8(int name1, byte c8) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match8(int name1, byte c8);
 
     public boolean nextIfValue4Match8(int name1, byte c8) {
         return false;
     }
 
-    public boolean nextIfName4Match9(long name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match9(long name1);
 
     public boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
         return false;
     }
 
-    public boolean nextIfName4Match10(long name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match10(long name1);
 
     public boolean nextIfValue4Match10(long name1) {
         return false;
     }
 
-    public boolean nextIfName4Match11(long name1) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match11(long name1);
 
     public boolean nextIfValue4Match11(long name1) {
         return false;
     }
 
-    public boolean nextIfName4Match12(long name1, byte c12) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match12(long name1, byte name2);
 
-    public boolean nextIfName4Match13(long name1, int name2) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match13(long name1, int name2);
 
     public boolean nextIfName4Match14(long name1, int name2) {
         return false;
@@ -251,117 +220,65 @@ public abstract class JSONReader
         return false;
     }
 
-    public boolean nextIfName4Match16(long name1, int name2, byte c16) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match16(long name1, int name2, byte name3);
 
-    public boolean nextIfName4Match17(long name1, long name2) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match17(long name1, long name2);
 
-    public boolean nextIfName4Match18(long name1, long name2) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match18(long name1, long name2);
 
     public boolean nextIfName4Match19(long name1, long name2) {
         return false;
     }
 
-    public boolean nextIfName4Match20(long name1, long name2, byte c20) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match20(long name1, long name2, byte name3);
 
     public boolean nextIfName4Match21(long name1, long name2, int name3) {
         return false;
     }
 
-    public boolean nextIfName4Match22(long name1, long name2, int name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match22(long name1, long name2, int name3);
 
-    public boolean nextIfName4Match23(long name1, long name2, int name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match23(long name1, long name2, int name3);
 
-    public boolean nextIfName4Match24(long name1, long name2, int name3, byte c24) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match24(long name1, long name2, int name3, byte name4);
 
-    public boolean nextIfName4Match25(long name1, long name2, long name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match25(long name1, long name2, long name3);
 
-    public boolean nextIfName4Match26(long name1, long name2, long name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match26(long name1, long name2, long name3);
 
-    public boolean nextIfName4Match27(long name1, long name2, long name3) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match27(long name1, long name2, long name3);
 
-    public boolean nextIfName4Match28(long name1, long name2, long name3, byte c28) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match28(long name1, long name2, long name3, byte c28);
 
-    public boolean nextIfName4Match29(long name1, long name2, long name3, int name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match29(long name1, long name2, long name3, int name4);
 
-    public boolean nextIfName4Match30(long name1, long name2, long name3, int name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match30(long name1, long name2, long name3, int name4);
 
-    public boolean nextIfName4Match31(long name1, long name2, long name3, int name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match31(long name1, long name2, long name3, int name4);
 
-    public boolean nextIfName4Match32(long name1, long name2, long name3, int name4, byte c32) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match32(long name1, long name2, long name3, int name4, byte c32);
 
-    public boolean nextIfName4Match33(long name1, long name2, long name3, long name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match33(long name1, long name2, long name3, long name4);
 
-    public boolean nextIfName4Match34(long name1, long name2, long name3, long name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match34(long name1, long name2, long name3, long name4);
 
-    public boolean nextIfName4Match35(long name1, long name2, long name3, long name4) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match35(long name1, long name2, long name3, long name4);
 
-    public boolean nextIfName4Match36(long name1, long name2, long name3, long name4, byte c35) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match36(long name1, long name2, long name3, long name4, byte c35);
 
-    public boolean nextIfName4Match37(long name1, long name2, long name3, long name4, int name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match37(long name1, long name2, long name3, long name4, int name5);
 
-    public boolean nextIfName4Match38(long name1, long name2, long name3, long name4, int name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match38(long name1, long name2, long name3, long name4, int name5);
 
-    public boolean nextIfName4Match39(long name1, long name2, long name3, long name4, int name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match39(long name1, long name2, long name3, long name4, int name5);
 
-    public boolean nextIfName4Match40(long name1, long name2, long name3, long name4, int name5, byte c40) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match40(long name1, long name2, long name3, long name4, int name5, byte c40);
 
-    public boolean nextIfName4Match41(long name1, long name2, long name3, long name4, long name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match41(long name1, long name2, long name3, long name4, long name5);
 
-    public boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5);
 
-    public boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5) {
-        return false;
-    }
+    public abstract boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5);
 
     public boolean nextIfName8Match0() {
         return false;
@@ -873,6 +790,8 @@ public abstract class JSONReader
 
     public final int getInt32Value() {
         switch (valueType) {
+            case JSON_TYPE_INT8:
+            case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
@@ -884,6 +803,13 @@ public abstract class JSONReader
                         throw new JSONException(info("integer overflow " + longValue));
                     }
                     return (int) longValue;
+                }
+                if (number instanceof BigInteger) {
+                    try {
+                        return ((BigInteger) number).intValueExact();
+                    } catch (ArithmeticException e) {
+                        throw numberError();
+                    }
                 }
                 return number.intValue();
             case JSON_TYPE_DEC:
@@ -905,6 +831,17 @@ public abstract class JSONReader
                 }
                 return 0;
             }
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
+                return getNumber().intValue();
+            case JSON_TYPE_BIG_DEC:
+                try {
+                    return getBigDecimal()
+                            .intValueExact();
+                } catch (ArithmeticException e) {
+                    throw numberError();
+                }
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
@@ -915,11 +852,21 @@ public abstract class JSONReader
 
     public final long getInt64Value() {
         switch (valueType) {
+            case JSON_TYPE_INT8:
+            case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
                 }
-                return getNumber().longValue();
+                Number number = getNumber();
+                if (number instanceof BigInteger) {
+                    try {
+                        return ((BigInteger) number).longValueExact();
+                    } catch (ArithmeticException e) {
+                        throw numberError();
+                    }
+                }
+                return number.longValue();
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
@@ -938,60 +885,20 @@ public abstract class JSONReader
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
+                return getNumber()
+                        .longValue();
+            case JSON_TYPE_BIG_DEC:
+                try {
+                    return getBigDecimal()
+                            .longValueExact();
+                } catch (ArithmeticException e) {
+                    throw numberError();
+                }
             default:
-                throw new JSONException("TODO");
-        }
-    }
-
-    protected final Long getInt64() {
-        switch (valueType) {
-            case JSON_TYPE_INT:
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return (long) (negative ? -mag3 : mag3);
-                }
-                int[] mag;
-                if (mag0 == 0) {
-                    if (mag1 == 0) {
-                        if (mag2 == Integer.MIN_VALUE && mag3 == 0 && !negative) {
-                            return Long.MIN_VALUE;
-                        }
-
-                        long v3 = mag3 & 0XFFFFFFFFL;
-                        long v2 = mag2 & 0XFFFFFFFFL;
-
-                        if (v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
-                            return negative ? -v23 : v23;
-                        }
-                        mag = new int[]{mag2, mag3};
-                    } else {
-                        mag = new int[]{mag1, mag2, mag3};
-                    }
-                } else {
-                    mag = new int[]{mag0, mag1, mag2, mag3};
-                }
-
-                int signum = negative ? -1 : 1;
-                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                return bigInt.longValue();
-            case JSON_TYPE_DEC:
-                return getNumber().longValue();
-            case JSON_TYPE_BOOL:
-                return (long) (boolValue ? 1 : 0);
-            case JSON_TYPE_NULL:
-                return null;
-            case JSON_TYPE_STRING: {
-                return toInt64(stringValue);
-            }
-            case JSON_TYPE_OBJECT: {
-                Number num = toNumber((Map) complex);
-                if (num != null) {
-                    return num.longValue();
-                }
-                return null;
-            }
-            default:
-                throw new JSONException("TODO");
+                throw new JSONException("TODO : " + valueType);
         }
     }
 
@@ -1085,33 +992,6 @@ public abstract class JSONReader
 
     public abstract UUID readUUID();
 
-    public final boolean isLocalDate() {
-        if (!isString()) {
-            return false;
-        }
-
-        LocalDate localDate;
-        int len = getStringLength();
-        switch (len) {
-            case 8:
-                localDate = readLocalDate8();
-                break;
-            case 9:
-                localDate = readLocalDate9();
-                break;
-            case 10:
-                localDate = readLocalDate10();
-                break;
-            case 11:
-                localDate = readLocalDate11();
-                break;
-            default:
-                return false;
-        }
-
-        return localDate != null;
-    }
-
     public LocalDate readLocalDate() {
         if (nextIfNull()) {
             return null;
@@ -1192,39 +1072,6 @@ public abstract class JSONReader
         }
 
         throw new JSONException("not support input : " + str);
-    }
-
-    public final boolean isLocalDateTime() {
-        if (!isString()) {
-            return false;
-        }
-
-        int len = getStringLength();
-        switch (len) {
-            case 16:
-                return readLocalDateTime16() != null;
-            case 17:
-                return readLocalDateTime17() != null;
-            case 18:
-                return readLocalDateTime18() != null;
-            case 19:
-                return readLocalDateTime19() != null;
-            case 20:
-                return readLocalDateTime20() != null;
-            case 21:
-            case 22:
-            case 23:
-            case 24:
-            case 25:
-            case 26:
-            case 27:
-            case 28:
-            case 29:
-                return readLocalDateTimeX(len) != null;
-            default:
-                break;
-        }
-        return false;
     }
 
     public LocalDateTime readLocalDateTime() {
@@ -1470,9 +1317,7 @@ public abstract class JSONReader
         throw new JSONException("TODO : " + ch);
     }
 
-    public OffsetTime readOffsetTime() {
-        throw new JSONException("TODO");
-    }
+    public abstract OffsetTime readOffsetTime();
 
     public Calendar readCalendar() {
         if (isString()) {
@@ -3504,6 +3349,10 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(InputStream is, Charset charset, Context context) {
+        if (is == null) {
+            throw new JSONException("inputStream is null");
+        }
+
         if (charset == StandardCharsets.UTF_8 || charset == null) {
             return new JSONReaderUTF8(context, is);
         }
@@ -3512,7 +3361,11 @@ public abstract class JSONReader
             return new JSONReaderUTF16(context, is);
         }
 
-        throw new JSONException("not support charset " + charset);
+        if (charset == StandardCharsets.US_ASCII) {
+            return new JSONReaderASCII(context, is);
+        }
+
+        return JSONReader.of(new InputStreamReader(is, charset), context);
     }
 
     public static JSONReader of(java.io.Reader is) {
@@ -4607,6 +4460,34 @@ public abstract class JSONReader
         this.ch = (char) savePoint.current;
     }
 
+    final JSONException notSupportName() {
+        return new JSONException(info("not support unquoted name"));
+    }
+
+    final JSONException valueError() {
+        return new JSONException(info("illegal value"));
+    }
+
+    final JSONException error(int offset, int ch) {
+        throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
+    }
+
+    static JSONException syntaxError(int ch) {
+        return new JSONException("syntax error, expect ',', but '" + (char) ch + "'");
+    }
+
+    static JSONException syntaxError(int offset, int ch) {
+        return new JSONException("syntax error, offset " + offset + ", char " + (char) ch);
+    }
+
+    static JSONException numberError(int offset, int ch) {
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+    }
+
+    JSONException numberError() {
+        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+    }
+
     public final String info() {
         return info(null);
     }
@@ -4618,7 +4499,7 @@ public abstract class JSONReader
         return message + ", offset " + offset;
     }
 
-    static boolean isFirstIdentifier(char ch) {
+    static boolean isFirstIdentifier(int ch) {
         return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '$' || (ch >= '0' && ch <= '9') || ch > 0x7F;
     }
 
@@ -4746,5 +4627,41 @@ public abstract class JSONReader
         }
 
         return context.provider.getObjectReader(typeName, expectClass, context.features | features);
+    }
+
+    protected final String readStringNotMatch() {
+        switch (ch) {
+            case '[':
+                return toString(
+                        readArray());
+            case '{':
+                return toString(
+                        readObject());
+            case '-':
+            case '+':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                readNumber0();
+                Number number = getNumber();
+                return number.toString();
+            case 't':
+            case 'f':
+                boolValue = readBoolValue();
+                return boolValue ? "true" : "false";
+            case 'n': {
+                readNull();
+                return null;
+            }
+            default:
+                throw new JSONException(info("illegal input : " + ch));
+        }
     }
 }

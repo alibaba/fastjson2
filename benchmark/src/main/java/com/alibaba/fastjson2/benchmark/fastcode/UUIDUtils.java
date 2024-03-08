@@ -249,7 +249,7 @@ public class UUIDUtils {
 
     static void putChar(byte[] val, int index, int c) {
         index <<= 1;
-        val[index++] = (byte) (c >> HI_BYTE_SHIFT);
-        val[index] = (byte) (c >> LO_BYTE_SHIFT);
+        val[index] = (byte) (c >> HI_BYTE_SHIFT);
+        val[index + 1] = (byte) (c >> LO_BYTE_SHIFT);
     }
 }

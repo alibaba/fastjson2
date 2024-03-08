@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NameLengthTest {
     @Test
@@ -233,6 +233,47 @@ public class NameLengthTest {
             Bean9 bean1 = JSON.parseObject(str.toCharArray(), Bean9.class);
             assertEquals(str, JSON.toJSONString(bean1));
         }
+    }
+
+    @Test
+    public void test9_write() {
+        Bean9 bean = new Bean9();
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(bean);
+        assertEquals(
+                jsonObject.toJSONString(),
+                JSON.toJSONString(bean));
+        assertEquals(
+                jsonObject.toJSONString(JSONWriter.Feature.UseSingleQuotes),
+                JSON.toJSONString(bean, JSONWriter.Feature.UseSingleQuotes));
+        assertFalse(
+                JSON.toJSONString(bean, JSONWriter.Feature.UnquoteFieldName)
+                        .contains("\""));
+        assertFalse(
+                JSON.toJSONString(bean, JSONWriter.Feature.UnquoteFieldName)
+                        .contains("'"));
+        assertEquals(
+                jsonObject.toJSONString(JSONWriter.Feature.PrettyFormat),
+                JSON.toJSONString(bean, JSONWriter.Feature.PrettyFormat));
+
+        assertArrayEquals(
+                JSON.toJSONBytes(jsonObject),
+                JSON.toJSONBytes(bean));
+        assertArrayEquals(
+                JSON.toJSONBytes(jsonObject, JSONWriter.Feature.UseSingleQuotes),
+                JSON.toJSONBytes(bean, JSONWriter.Feature.UseSingleQuotes));
+        assertArrayEquals(
+                JSON.toJSONBytes(jsonObject, JSONWriter.Feature.UnquoteFieldName),
+                JSON.toJSONBytes(bean, JSONWriter.Feature.UnquoteFieldName));
+        assertArrayEquals(
+                JSON.toJSONBytes(jsonObject, JSONWriter.Feature.PrettyFormat),
+                JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat));
+
+        assertFalse(
+                new String(JSON.toJSONBytes(bean, JSONWriter.Feature.UnquoteFieldName))
+                        .contains("\""));
+        assertFalse(
+                new String(JSON.toJSONBytes(bean, JSONWriter.Feature.UnquoteFieldName))
+                        .contains("'"));
     }
 
     public static class Bean9 {

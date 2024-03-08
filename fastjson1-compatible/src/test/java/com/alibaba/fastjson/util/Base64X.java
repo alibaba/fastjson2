@@ -101,15 +101,17 @@ public class Base64X {
             int i = (bytes[s++] & 0xff) << 16 | (bytes[s++] & 0xff) << 8 | (bytes[s++] & 0xff);
 
             // Encode the int into four chars
-            chars[d++] = CA[(i >>> 18) & 0x3f];
-            chars[d++] = CA[(i >>> 12) & 0x3f];
-            chars[d++] = CA[(i >>> 6) & 0x3f];
-            chars[d++] = CA[i & 0x3f];
+            chars[d] = CA[(i >>> 18) & 0x3f];
+            chars[d + 1] = CA[(i >>> 12) & 0x3f];
+            chars[d + 2] = CA[(i >>> 6) & 0x3f];
+            chars[d + 3] = CA[i & 0x3f];
+            d += 4;
 
             // Add optional line separator
             if (lineSep && ++cc == 19 && d < chars_len - 2) {
-                chars[d++] = '\r';
-                chars[d++] = '\n';
+                chars[d] = '\r';
+                chars[d + 1] = '\n';
+                d += 2;
                 cc = 0;
             }
         }
@@ -237,9 +239,10 @@ public class Base64X {
             int i = IA[sArr[sIx++]] << 18 | IA[sArr[sIx++]] << 12 | IA[sArr[sIx++]] << 6 | IA[sArr[sIx++]];
 
             // Add the bytes
-            dArr[d++] = (byte) (i >> 16);
-            dArr[d++] = (byte) (i >> 8);
-            dArr[d++] = (byte) i;
+            dArr[d] = (byte) (i >> 16);
+            dArr[d + 1] = (byte) (i >> 8);
+            dArr[d + 2] = (byte) i;
+            d += 3;
 
             // If line separator, jump over it.
             if (sepCnt > 0 && ++cc == 19) {
@@ -294,15 +297,17 @@ public class Base64X {
             int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
 
             // Encode the int into four chars
-            dArr[d++] = (byte) CA[(i >>> 18) & 0x3f];
-            dArr[d++] = (byte) CA[(i >>> 12) & 0x3f];
-            dArr[d++] = (byte) CA[(i >>> 6) & 0x3f];
-            dArr[d++] = (byte) CA[i & 0x3f];
+            dArr[d] = (byte) CA[(i >>> 18) & 0x3f];
+            dArr[d + 1] = (byte) CA[(i >>> 12) & 0x3f];
+            dArr[d + 2] = (byte) CA[(i >>> 6) & 0x3f];
+            dArr[d + 3] = (byte) CA[i & 0x3f];
+            d += 4;
 
             // Add optional line separator
             if (lineSep && ++cc == 19 && d < dLen - 2) {
-                dArr[d++] = '\r';
-                dArr[d++] = '\n';
+                dArr[d] = '\r';
+                dArr[d + 1] = '\n';
+                d += 2;
                 cc = 0;
             }
         }
@@ -429,9 +434,10 @@ public class Base64X {
             int i = IA[sArr[sIx++]] << 18 | IA[sArr[sIx++]] << 12 | IA[sArr[sIx++]] << 6 | IA[sArr[sIx++]];
 
             // Add the bytes
-            dArr[d++] = (byte) (i >> 16);
-            dArr[d++] = (byte) (i >> 8);
-            dArr[d++] = (byte) i;
+            dArr[d] = (byte) (i >> 16);
+            dArr[d + 1] = (byte) (i >> 8);
+            dArr[d + 2] = (byte) i;
+            d += 3;
 
             // If line separator, jump over it.
             if (sepCnt > 0 && ++cc == 19) {
@@ -584,9 +590,10 @@ public class Base64X {
             int i = IA[s.charAt(sIx++)] << 18 | IA[s.charAt(sIx++)] << 12 | IA[s.charAt(sIx++)] << 6 | IA[s.charAt(sIx++)];
 
             // Add the bytes
-            dArr[d++] = (byte) (i >> 16);
-            dArr[d++] = (byte) (i >> 8);
-            dArr[d++] = (byte) i;
+            dArr[d] = (byte) (i >> 16);
+            dArr[d + 1] = (byte) (i >> 8);
+            dArr[d + 2] = (byte) i;
+            d += 3;
 
             // If line separator, jump over it.
             if (sepCnt > 0 && ++cc == 19) {

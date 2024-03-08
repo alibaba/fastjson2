@@ -20,6 +20,7 @@ public abstract class DateTimeCodec {
     protected final boolean yyyyMMddhhmmss14;
     protected final boolean yyyyMMdd10;
     protected final boolean yyyyMMdd8;
+    protected final boolean useSimpleDateFormat;
 
     DateTimeFormatter dateFormatter;
 
@@ -39,6 +40,7 @@ public abstract class DateTimeCodec {
         this.yyyyMMddhhmm16 = "yyyy-MM-dd HH:mm".equals(format);
         this.yyyyMMdd10 = "yyyy-MM-dd".equals(format);
         this.yyyyMMdd8 = "yyyyMMdd".equals(format);
+        this.useSimpleDateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX".equals(format);
 
         boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
         if (format != null) {

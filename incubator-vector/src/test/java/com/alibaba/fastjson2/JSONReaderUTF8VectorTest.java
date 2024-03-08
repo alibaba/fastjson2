@@ -10,7 +10,7 @@ public class JSONReaderUTF8VectorTest {
     @Test
     public void test() {
         JSONReader.Context ctx = JSONFactory.createReadContext();
-        String str = "abcdef1234567890中国";
+        String str = "abcdef1234567890中国©®£\uD83D\uDE0D\uD83D\uDC81\uD83D\uDC4C\uD83C\uDF8D\uD83D\uDE0D";
         String json = JSON.toJSONString(str);
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
         JSONReaderUTF8Vector jsonReader = new JSONReaderUTF8Vector(ctx, json, bytes, 0, bytes.length);

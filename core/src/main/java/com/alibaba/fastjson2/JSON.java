@@ -37,7 +37,7 @@ public interface JSON {
     /**
      * fastjson2 version name
      */
-    String VERSION = "2.0.46";
+    String VERSION = "2.0.48";
 
     /**
      * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
@@ -214,6 +214,32 @@ public interface JSON {
         ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
 
         try (JSONReader reader = JSONReader.of(chars, context)) {
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param in the specified stream to be parsed
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     * @since 2.0.47
+     */
+    static Object parse(InputStream in, JSONReader.Context context) {
+        if (in == null) {
+            return null;
+        }
+
+        ObjectReader<?> objectReader = context.getObjectReader(Object.class);
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, in)) {
             Object object = objectReader.readObject(reader, null, null, 0);
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -525,6 +551,40 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext();
         try (JSONReader reader = JSONReader.of(in, charset, context)) {
             if (reader.nextIfNull()) {
+                return null;
+            }
+
+            JSONObject object = new JSONObject();
+            reader.read(object, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONObject}. Returns {@code null} if
+     * received {@link InputStream} is {@code null} or closed or its content is null.
+     *
+     * @param input the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @param context the specified custom context
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     *
+     * @since 2.0.47
+     */
+    static JSONObject parseObject(InputStream input, Charset charset, JSONReader.Context context) {
+        if (input == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(input, charset, context)) {
+            if (reader.isEnd()) {
                 return null;
             }
 
@@ -1787,6 +1847,76 @@ public interface JSON {
     }
 
     /**
+     * Parses the json stream as a {@link T}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
+     *
+     * @param input the specified stream to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Context context) {
+        if (input == null) {
+            return null;
+        }
+
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+
+        try (JSONReader reader = JSONReader.of(input, charset, context)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json stream as a {@link T}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
+     *
+     * @param input the specified stream to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(InputStream input, Charset charset, Class<T> type, JSONReader.Context context) {
+        if (input == null) {
+            return null;
+        }
+
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+
+        try (JSONReader reader = JSONReader.of(input, charset, context)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parses the json stream of the url as {@link T}.
      * Returns {@code null} if received {@link URL} is {@code null}.
      *
@@ -2421,6 +2551,37 @@ public interface JSON {
     }
 
     /**
+     * Parses the json stream as a {@link JSONArray}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
+     *
+     * @param in the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @param context the specified custom context
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     */
+    static JSONArray parseArray(InputStream in, Charset charset, JSONReader.Context context) {
+        if (in == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(in, charset, context)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            JSONArray array = new JSONArray();
+            reader.read(array);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return array;
+        }
+    }
+
+    /**
      * Parses the json string as a list of {@link T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
@@ -2976,6 +3137,76 @@ public interface JSON {
      * Serializes the specified object to the json byte array
      *
      * @param object the specified object will be serialized
+     * @param charset the specified charset of the bytes
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
+     * @since 2.0.47
+     */
+    static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Feature... features) {
+        final ObjectWriterProvider provider = defaultObjectWriterProvider;
+        final JSONWriter.Context context = new JSONWriter.Context(provider, features);
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                Class<?> valueClass = object.getClass();
+                if (valueClass == JSONObject.class && writer.context.features == 0) {
+                    writer.write((JSONObject) object);
+                } else {
+                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
+                            valueClass,
+                            valueClass,
+                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                    );
+                    objectWriter.write(writer, object, null, null, 0);
+                }
+            }
+            return writer.getBytes(charset);
+        }
+    }
+
+    /**
+     * Serializes the specified object to the json byte array
+     *
+     * @param object the specified object will be serialized
+     * @param charset the specified charset of the bytes
+     * @param context the specified custom context
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
+     * @since 2.0.47
+     */
+    static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Context context) {
+        final ObjectWriterProvider provider = context.provider;
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                Class<?> valueClass = object.getClass();
+                if (valueClass == JSONObject.class && writer.context.features == 0) {
+                    writer.write((JSONObject) object);
+                } else {
+                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
+                            valueClass,
+                            valueClass,
+                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                    );
+                    objectWriter.write(writer, object, null, null, 0);
+                }
+            }
+            return writer.getBytes(charset);
+        }
+    }
+
+    /**
+     * Serializes the specified object to the json byte array
+     *
+     * @param object the specified object will be serialized
      * @param format the specified date format
      * @param features the specified features is applied to serialization
      * @return {@code byte[]} that is not null
@@ -3270,7 +3501,7 @@ public interface JSON {
         try (JSONReader jsonReader = JSONReader.of(text)) {
             jsonReader.skipValue();
             return jsonReader.isEnd() && !jsonReader.comma;
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3290,7 +3521,7 @@ public interface JSON {
         try (JSONReader jsonReader = JSONReader.of(text, JSONFactory.createReadContext(features))) {
             jsonReader.skipValue();
             return jsonReader.isEnd() && !jsonReader.comma;
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3308,8 +3539,8 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(chars)) {
             jsonReader.skipValue();
-            return jsonReader.isEnd();
-        } catch (JSONException error) {
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3330,8 +3561,8 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
-        } catch (JSONException error) {
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3352,8 +3583,8 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
-        } catch (JSONException error) {
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3374,8 +3605,8 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
-        } catch (JSONException error) {
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3393,8 +3624,8 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(bytes)) {
             jsonReader.skipValue();
-            return jsonReader.isEnd();
-        } catch (JSONException error) {
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3430,8 +3661,8 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
-            return jsonReader.isEnd();
-        } catch (JSONException error) {
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }
@@ -3452,8 +3683,8 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(bytes, offset, length, charset)) {
             jsonReader.skipValue();
-            return jsonReader.isEnd();
-        } catch (JSONException error) {
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return false;
         }
     }

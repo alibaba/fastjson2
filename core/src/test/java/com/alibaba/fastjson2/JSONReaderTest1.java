@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
+import com.alibaba.fastjson2.reader.ObjectReaderImplFromString;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
@@ -1191,7 +1192,6 @@ public class JSONReaderTest1 {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
             assertNull(jsonReader.readInt32());
             assertTrue(jsonReader.isEnd());
-            assertTrue(jsonReader.comma);
         }
     }
 
@@ -1242,7 +1242,26 @@ public class JSONReaderTest1 {
             assertTrue(jsonReader.isEnd());
             assertFalse(jsonReader.comma);
         }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\",")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\" ,")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("''  ,")) {
             assertEquals(0, jsonReader.readInt32Value());
             assertTrue(jsonReader.wasNull);
             assertTrue(jsonReader.isEnd());
@@ -1352,7 +1371,6 @@ public class JSONReaderTest1 {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
             assertNull(jsonReader.readInt64());
             assertTrue(jsonReader.isEnd());
-            assertTrue(jsonReader.comma);
         }
     }
 
@@ -2259,5 +2277,272 @@ public class JSONReaderTest1 {
             reader.skipValue();
             assertTrue(reader.isEnd());
         }
+    }
+
+    @Test
+    public void test2() {
+        {
+            JSONReader jsonReader = JSONReader.of("{\"a123456\":1}".getBytes(StandardCharsets.UTF_8));
+            assertTrue(jsonReader.nextIfObjectStart());
+            assertTrue(
+                    jsonReader.nextIfName8Match2());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of("{\"a123456\" :1}".getBytes(StandardCharsets.UTF_8));
+            assertTrue(jsonReader.nextIfObjectStart());
+            assertFalse(
+                    jsonReader.nextIfName8Match2());
+        }
+        {
+            JSONReader jsonReader = JSONReader.of("{\"a1234567\":1}".getBytes(StandardCharsets.UTF_8));
+            assertTrue(jsonReader.nextIfObjectStart());
+            assertFalse(
+                    jsonReader.nextIfName8Match2());
+        }
+    }
+
+    @Test
+    public void test3() {
+        JSONReaderUTF8 jsonReader = (JSONReaderUTF8) JSONReader.of("{\"a123456\":1}".getBytes(StandardCharsets.ISO_8859_1));
+        assertEquals("a123456", jsonReader.getLatin1String(2, 7));
+    }
+
+    @Test
+    public void readLocalTime9() {
+        String str = "\"12:13:14Z\"";
+        String expected = "12:13:14";
+        assertEquals(
+                expected,
+                JSONReader.of(str).readLocalTime().toString());
+        assertEquals(
+                expected,
+                JSONReader.of(str.toCharArray()).readLocalTime().toString());
+        assertEquals(
+                expected,
+                JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readLocalTime().toString());
+    }
+
+    @Test
+    public void readLocalTime9_1() {
+        String str = "'12:13:14Z'";
+        String expected = "12:13:14";
+        assertEquals(
+                expected,
+                JSONReader.of(str).readLocalTime().toString());
+        assertEquals(
+                expected,
+                JSONReader.of(str.toCharArray()).readLocalTime().toString());
+        assertEquals(
+                expected,
+                JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readLocalTime().toString());
+    }
+
+    @Test
+    public void nextIfValue4Match8() {
+        ValueType8[] values = ValueType8.values();
+        for (ValueType8 value : values) {
+            Bean8 bean = new Bean8();
+            bean.type = value;
+            String str = JSON.toJSONString(bean);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.getBytes(StandardCharsets.UTF_8),
+                            Bean8.class
+                    ).type);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.toCharArray(),
+                            Bean8.class
+                    ).type);
+        }
+    }
+
+    public static class Bean8 {
+        public ValueType8 type;
+    }
+
+    public enum ValueType8 {
+        A1234567,
+        B1234567,
+        N1234567,
+    }
+
+    @Test
+    public void nextIfValue4Match9() {
+        ValueType9[] values = ValueType9.values();
+        for (ValueType9 value : values) {
+            Bean9 bean = new Bean9();
+            bean.type = value;
+            String str = JSON.toJSONString(bean);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.getBytes(StandardCharsets.UTF_8),
+                            Bean9.class
+                    ).type);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.toCharArray(),
+                            Bean9.class
+                    ).type);
+        }
+    }
+
+    public static class Bean9 {
+        public ValueType9 type;
+    }
+
+    public enum ValueType9 {
+        A12345678,
+        B12345678,
+        N12345678,
+    }
+
+    @Test
+    public void nextIfValue4Match10() {
+        ValueType10[] values = ValueType10.values();
+        for (ValueType10 value : values) {
+            Bean10 bean = new Bean10();
+            bean.type = value;
+            String str = JSON.toJSONString(bean);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.getBytes(StandardCharsets.UTF_8),
+                            Bean10.class
+                    ).type);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.toCharArray(),
+                            Bean10.class
+                    ).type);
+        }
+    }
+
+    public static class Bean10 {
+        public ValueType10 type;
+    }
+
+    public enum ValueType10 {
+        A123456789,
+        B123456789,
+        N123456789,
+    }
+
+    @Test
+    public void nextIfValue4Match11() {
+        ValueType11[] values = ValueType11.values();
+        for (ValueType11 value : values) {
+            Bean11 bean = new Bean11();
+            bean.type = value;
+            String str = JSON.toJSONString(bean);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.getBytes(StandardCharsets.UTF_8),
+                            Bean11.class
+                    ).type);
+
+            assertEquals(
+                    value,
+                    JSON.parseObject(
+                            str.toCharArray(),
+                            Bean11.class
+                    ).type);
+        }
+    }
+
+    public static class Bean11 {
+        public ValueType11 type;
+    }
+
+    public enum ValueType11 {
+        A123456789X,
+        B123456789X,
+        N123456789X,
+    }
+
+    @Test
+    public void test12() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+        String str = "{\"id\":123}";
+        JSONReaderUTF16 reader = new JSONReaderUTF16(context, str, 0, str.length());
+        assertEquals(123, reader.readJSONObject().getIntValue("id"));
+    }
+
+    @Test
+    public void test13() {
+        Map object = JSON.parseObject("{\"123\":123}", TypeReference.mapType(Long.class, String.class));
+        assertEquals(1, object.size());
+        Map.Entry entry = (Map.Entry) object.entrySet().iterator().next();
+        assertEquals(Long.class, entry.getKey().getClass());
+        assertEquals(String.class, entry.getValue().getClass());
+    }
+
+    @Test
+    public void test14() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+        context.setBufferSize(1000);
+        assertEquals(1000, context.getBufferSize());
+
+        context.config((Filter) null, JSONReader.Feature.AllowUnQuotedFieldNames);
+        context.config(new Filter[0], JSONReader.Feature.AllowUnQuotedFieldNames);
+
+        assertFalse(JSONReader.of("1").isJSONB());
+        assertThrows(JSONException.class, () -> JSONReader.of("1").nextIfMatchTypedAny());
+        assertEquals('a', JSONReader.of("\"a\"").readCharacter());
+
+        int[] ints = JSONReader.of("[1,2,3]").readInt32ValueArray();
+        assertEquals(3, ints.length);
+        assertEquals(1, ints[0]);
+        assertEquals(2, ints[1]);
+        assertEquals(3, ints[2]);
+    }
+
+    @Test
+    public void test15() {
+        JSONReader jsonReader = JSONReader.of("{\"v\":\"123\"}");
+        Map map = new HashMap();
+        jsonReader.read(map, new ObjectReaderImplFromString<>(Long.class, s -> Long.parseLong(s)), 0);
+        assertEquals(123L, map.get("v"));
+    }
+
+    @Test
+    public void test16() {
+        assertTrue(JSONReader.ofJSONB(JSONB.toBytes(1)).isNumber());
+        assertTrue(JSONReader.ofJSONB(JSONB.toBytes(1L)).isNumber());
+        assertTrue(JSONReader.ofJSONB(JSONB.toBytes(Long.MIN_VALUE)).isNumber());
+        assertTrue(JSONReader.ofJSONB(JSONB.toBytes(Long.MAX_VALUE)).isNumber());
+        assertTrue(JSONReader.ofJSONB(JSONB.toBytes(new BigDecimal("12.34"))).isNumber());
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes("1")).isNumber());
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes(true)).isNumber());
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes(JSONObject.of())).isNumber());
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes(JSONArray.of())).isNumber());
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes(JSONArray.of())).isNull());
+        assertTrue(JSONReader.ofJSONB(JSONB.toBytes(null)).isNull());
+        JSONReader.ofJSONB(JSONB.toBytes(null)).readNull();
+
+        assertThrows(JSONException.class, () -> JSONReader.ofJSONB(JSONB.toBytes(1)).nextIfArrayStart());
+        assertThrows(JSONException.class, () -> JSONReader.ofJSONB(JSONB.toBytes(1)).nextIfComma());
+        assertThrows(JSONException.class, () -> JSONReader.ofJSONB(JSONB.toBytes(1)).nextIfArrayEnd());
+        assertThrows(JSONException.class, () -> JSONReader.ofJSONB(JSONB.toBytes(1)).readFieldNameHashCode());
+        assertThrows(JSONException.class, () -> JSONReader.ofJSONB(JSONB.toBytes(1)).readNull());
+    }
+
+    @Test
+    public void test18() {
+        JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(JSONB.toBytes("12:13:14Z"));
+        assertEquals("12:13:14", jsonReader.readLocalTime().toString());
     }
 }

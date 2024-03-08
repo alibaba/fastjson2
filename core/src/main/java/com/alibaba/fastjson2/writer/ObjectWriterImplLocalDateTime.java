@@ -4,8 +4,11 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
 
 final class ObjectWriterImplLocalDateTime
@@ -118,7 +121,14 @@ final class ObjectWriterImplLocalDateTime
             return;
         }
 
-        String str = formatter.format(ldt);
+        String str;
+        if (useSimpleDateFormat) {
+            Instant instant = ldt.toInstant(jsonWriter.context.getZoneId().getRules().getOffset(ldt));
+            Date date = new Date(instant.toEpochMilli());
+            str = new SimpleDateFormat(this.format).format(date);
+        } else {
+            str = formatter.format(ldt);
+        }
         jsonWriter.writeString(str);
     }
 }

@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class Issue2086 {
     @Test
     public void test() {
@@ -18,8 +20,8 @@ public class Issue2086 {
         map.put("age", 21);
         RedisFastJsonWraper<Map> wraperSet = new RedisFastJsonWraper<>(map);
         String msg = JSON.toJSONString(wraperSet, SerializerFeature.WriteClassName);
-        System.out.println(msg);
-        JSONObject.parseObject(msg);
+        RedisFastJsonWraper wraper = JSONObject.parseObject(msg, RedisFastJsonWraper.class);
+        assertTrue(((Map<String, Object>) wraper.value).get("mydate") instanceof Date);
     }
 
     public static class RedisFastJsonWraper<T> {

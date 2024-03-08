@@ -60,4 +60,9 @@ final class FieldWriterOffsetDateTimeFunc<T>
         }
         return true;
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

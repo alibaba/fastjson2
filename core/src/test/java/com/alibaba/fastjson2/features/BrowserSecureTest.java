@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.features;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
@@ -88,5 +89,14 @@ public class BrowserSecureTest {
         JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("abcd<>()");
         assertEquals("\"abcd\\u003c\\u003e\\u0028\\u0029\"", jsonWriter.toString());
+    }
+
+    @Test
+    public void testUTF16_9() {
+        assertEquals("\"<script>alert('XSS');</script>\"",
+                JSON.toJSONString("<script>alert('XSS');</script>"));
+
+        assertEquals("\"\\u003cscript\\u003ealert\\u0028'XSS'\\u0029;\\u003c/script\\u003e\"",
+                JSON.toJSONString("<script>alert('XSS');</script>", JSONWriter.Feature.BrowserSecure));
     }
 }

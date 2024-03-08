@@ -4,28 +4,13 @@ import java.util.Arrays;
 
 public final class FDBigInteger {
     private static final int[] SMALL_5_POW = {
-            1,
-            5,
-            5 * 5,
-            5 * 5 * 5,
-            5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-            5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5
+            1, 5, 25, 125, 625, 3125, 15625, 78125, 390625, 1953125, 9765625, 48828125, 244140625, 1220703125
     };
-
-    private static final int MAX_FIVE_POW = 340;
 
     private static final FDBigInteger[] POW_5_CACHE;
 
     static {
-        POW_5_CACHE = new FDBigInteger[MAX_FIVE_POW];
+        POW_5_CACHE = new FDBigInteger[340];
         int i = 0;
         while (i < SMALL_5_POW.length) {
             FDBigInteger pow5 = new FDBigInteger(new int[]{SMALL_5_POW[i]}, 0);
@@ -34,7 +19,7 @@ public final class FDBigInteger {
             i++;
         }
         FDBigInteger prev = POW_5_CACHE[i - 1];
-        while (i < MAX_FIVE_POW) {
+        while (i < 340) {
             POW_5_CACHE[i] = prev = prev.mult(5);
             prev.makeImmutable();
             i++;
@@ -44,7 +29,7 @@ public final class FDBigInteger {
     private int[] data;  // value: data[0] is least significant
     private int offset;  // number of least significant zero padding ints
     private int nWords;  // data[nWords-1]!=0, all values above are zero
-    private boolean isImmutable;
+    private boolean immutable;
 
     private FDBigInteger(int[] data, int offset) {
         this.data = data;
@@ -84,7 +69,7 @@ public final class FDBigInteger {
     }
 
     public void makeImmutable() {
-        this.isImmutable = true;
+        this.immutable = true;
     }
 
     private void multAddMe(int iv, int addend) {
@@ -145,7 +130,7 @@ public final class FDBigInteger {
 
     private static FDBigInteger big5pow(int p) {
         assert p >= 0 : p; // negative power of 5
-        if (p < MAX_FIVE_POW) {
+        if (p < 340) {
             return POW_5_CACHE[p];
         }
         return big5powRec(p);
@@ -233,12 +218,15 @@ public final class FDBigInteger {
     }
 
     public FDBigInteger leftShift(int shift) {
+        final int[] data = this.data;
+        int nWords = this.nWords;
+        int offset = this.offset;
         if (shift == 0 || nWords == 0) {
             return this;
         }
         int wordcount = shift >> 5;
         int bitcount = shift & 0x1f;
-        if (this.isImmutable) {
+        if (this.immutable) {
             if (bitcount == 0) {
                 return new FDBigInteger(Arrays.copyOf(data, nWords), offset + wordcount);
             } else {
@@ -282,20 +270,21 @@ public final class FDBigInteger {
                     int[] src = data;
                     if (hi != 0) {
                         if (nWords == data.length) {
-                            data = result = new int[nWords + 1];
+                            this.data = result = new int[nWords + 1];
                         }
                         result[nWords++] = hi;
                     }
                     leftShift(src, idx, result, bitcount, anticount, prev);
                 }
             }
-            offset += wordcount;
+            this.nWords = nWords;
+            this.offset = offset + wordcount;
             return this;
         }
     }
 
     private static FDBigInteger big5powRec(int p) {
-        if (p < MAX_FIVE_POW) {
+        if (p < 340) {
             return POW_5_CACHE[p];
         }
         // construct the value.
@@ -405,7 +394,7 @@ public final class FDBigInteger {
     public FDBigInteger leftInplaceSub(FDBigInteger subtrahend) {
         assert this.size() >= subtrahend.size() : "result should be positive";
         FDBigInteger minuend;
-        if (this.isImmutable) {
+        if (this.immutable) {
             minuend = new FDBigInteger(this.data.clone(), this.offset);
         } else {
             minuend = this;
@@ -451,7 +440,7 @@ public final class FDBigInteger {
     public FDBigInteger rightInplaceSub(FDBigInteger subtrahend) {
         assert this.size() >= subtrahend.size() : "result should be positive";
         FDBigInteger minuend = this;
-        if (subtrahend.isImmutable) {
+        if (subtrahend.immutable) {
             subtrahend = new FDBigInteger(subtrahend.data.clone(), subtrahend.offset);
         }
         int offsetDiff = minuend.offset - subtrahend.offset;

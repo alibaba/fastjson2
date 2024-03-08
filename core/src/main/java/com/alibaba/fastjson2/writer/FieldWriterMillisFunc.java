@@ -31,6 +31,17 @@ final class FieldWriterMillisFunc<T>
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         long millis = function.applyAsLong(object);
+        if (millis == 0) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+                writeFieldName(jsonWriter);
+                jsonWriter.writeNull();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         writeDate(jsonWriter, millis);
         return true;
     }

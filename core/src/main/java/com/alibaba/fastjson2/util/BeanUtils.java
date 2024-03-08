@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -56,6 +58,7 @@ public abstract class BeanUtils {
             1616814008855344660L,
             2164749833121980361L,
             3724195282986200606L,
+            3742915795806478647L,
             3977020351318456359L,
             4882459834864833642L,
             7981148566008458638L,
@@ -222,7 +225,7 @@ public abstract class BeanUtils {
             return;
         }
 
-        if (ignore(objectClass) || objectClass.getName().contains("$$Lambda")) {
+        if (ignore(objectClass) || objectClass.getName().contains("$$Lambda") || JdbcSupport.isStruct(objectClass)) {
             return;
         }
 
@@ -419,10 +422,14 @@ public abstract class BeanUtils {
     }
 
     public static void setters(Class objectClass, Consumer<Method> methodConsumer) {
-        setters(objectClass, null, methodConsumer);
+        setters(objectClass, null, null, methodConsumer);
     }
 
     public static void setters(Class objectClass, Class mixin, Consumer<Method> methodConsumer) {
+        setters(objectClass, null, mixin, methodConsumer);
+    }
+
+    public static void setters(Class objectClass, BeanInfo beanInfo, Class mixin, Consumer<Method> methodConsumer) {
         if (ignore(objectClass)) {
             return;
         }
@@ -451,6 +458,11 @@ public abstract class BeanUtils {
                 case "hashCode":
                 case "toString":
                     methodSkip = true;
+                    break;
+                case "copy":
+                    if (beanInfo != null && beanInfo.kotlin) {
+                        methodSkip = true;
+                    }
                     break;
                 default:
                     break;
@@ -843,6 +855,7 @@ public abstract class BeanUtils {
         }
 
         boolean record = isRecord(objectClass);
+        boolean jdbcStruct = JdbcSupport.isStruct(objectClass);
 
         String[] recordFieldNames = null;
         if (record) {
@@ -869,7 +882,7 @@ public abstract class BeanUtils {
             }
 
             Class<?> returnClass = method.getReturnType();
-            if (returnClass == Void.class) {
+            if (returnClass == Void.class || ignore(returnClass)) {
                 continue;
             }
 
@@ -879,6 +892,11 @@ public abstract class BeanUtils {
             }
 
             String methodName = method.getName();
+            if (jdbcStruct) {
+                if (!"getSQLTypeName".equals(methodName) && !"getAttributes".equals(methodName)) {
+                    continue;
+                }
+            }
 
             boolean methodSkip = false;
             switch (methodName) {
@@ -1150,10 +1168,14 @@ public abstract class BeanUtils {
     }
 
     public static String getterName(Method method, String namingStrategy) {
+        return getterName(method, false, namingStrategy);
+    }
+
+    public static String getterName(Method method, boolean kotlin, String namingStrategy) {
         String methodName = method.getName();
         if (methodName.startsWith("is")) {
             Class<?> returnType = method.getReturnType();
-            if (returnType != Boolean.class && returnType != boolean.class) {
+            if ((returnType != Boolean.class && returnType != boolean.class) || kotlin) {
                 return methodName;
             }
         }
@@ -1309,14 +1331,12 @@ public abstract class BeanUtils {
                 for (int i = firstIndex; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char u = (char) (ch + 32);
+                        ch = (char) (ch + 32);
                         if (i > firstIndex) {
                             buf.append('-');
                         }
-                        buf.append(u);
-                    } else {
-                        buf.append(ch);
                     }
+                    buf.append(ch);
                 }
                 return buf.toString();
             }
@@ -1423,14 +1443,12 @@ public abstract class BeanUtils {
                 for (int i = 0; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char u = (char) (ch + 32);
+                        ch = (char) (ch + 32);
                         if (i > 0) {
                             buf.append('-');
                         }
-                        buf.append(u);
-                    } else {
-                        buf.append(ch);
                     }
+                    buf.append(ch);
                 }
                 return buf.toString();
             }
@@ -1451,14 +1469,12 @@ public abstract class BeanUtils {
             for (int i = prefixLength; i < methodNameLength; ++i) {
                 char ch = methodName.charAt(i);
                 if (ch >= 'A' && ch <= 'Z') {
-                    char u = (char) (ch + 32);
+                    ch = (char) (ch + 32);
                     if (i > prefixLength) {
                         buf[off++] = '_';
                     }
-                    buf[off++] = u;
-                } else {
-                    buf[off++] = ch;
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1483,16 +1499,13 @@ public abstract class BeanUtils {
                             && i + 1 < methodNameLength
                             && (c1 = methodName.charAt(i + 1)) >= 'a'
                             && c1 <= 'z') {
-                        buf[off++] = (char) (ch - 32);
+                        ch = (char) (ch - 32);
                     } else if (ch == '_' && i + 1 < methodNameLength
                             && (c1 = methodName.charAt(i + 1)) >= 'a'
                             && c1 <= 'z') {
-                        buf[off] = ch;
-                        buf[off + 1] = (char) (c1 - 32);
-                        off += 2;
-                        ++i;
-                    } else {
                         buf[off++] = ch;
+                        ch = (char) (c1 - 32);
+                        ++i;
                     }
                 } else if (ch >= 'A' && ch <= 'Z'
                         && i + 1 < methodNameLength
@@ -1500,7 +1513,6 @@ public abstract class BeanUtils {
                     if (i > prefixLength) {
                         buf[off++] = separator;
                     }
-                    buf[off++] = ch;
                 } else if (ch >= 'A' && ch <= 'Z'
                         && i > prefixLength
                         && i + 1 < methodNameLength
@@ -1509,10 +1521,8 @@ public abstract class BeanUtils {
                         && (c1 = methodName.charAt(i - 1)) >= 'a'
                         && c1 <= 'z') {
                     buf[off++] = separator;
-                    buf[off++] = ch;
-                } else {
-                    buf[off++] = ch;
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1541,17 +1551,15 @@ public abstract class BeanUtils {
                             buf[off++] = '_';
                         }
                     }
-                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
                             buf[off++] = '_';
                         }
-                        buf[off++] = (char) (ch + 32);
-                    } else {
-                        buf[off++] = ch;
+                        ch = (char) (ch + 32);
                     }
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1580,17 +1588,15 @@ public abstract class BeanUtils {
                             ch -= 32;
                         }
                     }
-                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
                             buf[off++] = '-';
                         }
-                        buf[off++] = (char) (ch + 32);
-                    } else {
-                        buf[off++] = ch;
+                        ch = (char) (ch + 32);
                     }
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1619,17 +1625,15 @@ public abstract class BeanUtils {
                             ch -= 32;
                         }
                     }
-                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
                             buf[off++] = '.';
                         }
-                        buf[off++] = (char) (ch + 32);
-                    } else {
-                        buf[off++] = ch;
+                        ch = (char) (ch + 32);
                     }
                 }
+                buf[off++] = ch;
             }
             return new String(buf, 0, off);
         } finally {
@@ -1638,12 +1642,7 @@ public abstract class BeanUtils {
     }
 
     public static Type getFieldType(TypeReference typeReference, Class<?> raw, Member field, Type fieldType) {
-        Class<?> declaringClass;
-        if (field == null) {
-            declaringClass = null;
-        } else {
-            declaringClass = field.getDeclaringClass();
-        }
+        final Class<?> declaringClass = field == null ? null : field.getDeclaringClass();
 
         while (raw != Object.class) {
             Type type = typeReference == null ? null : typeReference.getType();
@@ -1706,13 +1705,11 @@ public abstract class BeanUtils {
      * this returns {@code ?}, which is shorthand for {@code ? extends Object}.
      */
     public static WildcardType subtypeOf(Type bound) {
-        Type[] upperBounds;
-        if (bound instanceof WildcardType) {
-            upperBounds = ((WildcardType) bound).getUpperBounds();
-        } else {
-            upperBounds = new Type[]{bound};
-        }
-        return new WildcardTypeImpl(upperBounds, EMPTY_TYPE_ARRAY);
+        return new WildcardTypeImpl(
+                bound instanceof WildcardType
+                        ? ((WildcardType) bound).getUpperBounds()
+                        : new Type[]{bound},
+                EMPTY_TYPE_ARRAY);
     }
 
     /**
@@ -1721,13 +1718,12 @@ public abstract class BeanUtils {
      * super String}.
      */
     public static WildcardType supertypeOf(Type bound) {
-        Type[] lowerBounds;
-        if (bound instanceof WildcardType) {
-            lowerBounds = ((WildcardType) bound).getLowerBounds();
-        } else {
-            lowerBounds = new Type[]{bound};
-        }
-        return new WildcardTypeImpl(new Type[]{Object.class}, lowerBounds);
+        return new WildcardTypeImpl(
+                new Type[]{Object.class},
+                bound instanceof WildcardType
+                        ? ((WildcardType) bound).getLowerBounds()
+                        : new Type[]{bound}
+        );
     }
 
     /**
@@ -1937,14 +1933,18 @@ public abstract class BeanUtils {
                 boolean changed = !equal(newOwnerType, ownerType);
 
                 Type[] args = original.getActualTypeArguments();
-                for (int t = 0, length = args.length; t < length; t++) {
-                    Type resolvedTypeArgument = resolve(context, contextRawType, args[t], visitedTypeVariables);
-                    if (!equal(resolvedTypeArgument, args[t])) {
+                for (int i = 0, length = args.length; i < length; i++) {
+                    Type arg = args[i];
+                    if (arg == String.class) {
+                        continue;
+                    }
+                    Type resolvedTypeArgument = resolve(context, contextRawType, arg, visitedTypeVariables);
+                    if (!equal(resolvedTypeArgument, arg)) {
                         if (!changed) {
                             args = args.clone();
                             changed = true;
                         }
-                        args[t] = resolvedTypeArgument;
+                        args[i] = resolvedTypeArgument;
                     }
                 }
 
@@ -2618,6 +2618,21 @@ public abstract class BeanUtils {
                     String[] fields = (String[]) result;
                     if (fields.length != 0) {
                         beanInfo.orders = fields;
+                    }
+                    break;
+                }
+                case "serializer": {
+                    Class serializerClass = (Class) result;
+                    if (ObjectWriter.class.isAssignableFrom(serializerClass)) {
+                        beanInfo.writeEnumAsJavaBean = true;
+                        beanInfo.serializer = serializerClass;
+                    }
+                    break;
+                }
+                case "deserializer": {
+                    Class deserializerClass = (Class) result;
+                    if (ObjectReader.class.isAssignableFrom(deserializerClass)) {
+                        beanInfo.deserializer = deserializerClass;
                     }
                     break;
                 }

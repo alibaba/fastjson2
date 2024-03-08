@@ -217,6 +217,7 @@ public class ObjectWriterBaseModule
                 Class<?> serializer = jsonType.serializer();
                 if (ObjectWriter.class.isAssignableFrom(serializer)) {
                     beanInfo.serializer = serializer;
+                    beanInfo.writeEnumAsJavaBean = true;
                 }
 
                 Class<? extends Filter>[] serializeFilters = jsonType.serializeFilters();
@@ -774,7 +775,7 @@ public class ObjectWriterBaseModule
                     && beanInfo.creatorConstructor != null
                     && beanInfo.createParameterNames != null
             ) {
-                String fieldName = BeanUtils.getterName(method, null);
+                String fieldName = BeanUtils.getterName(method, beanInfo.kotlin, null);
                 for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
                     if (fieldName.equals(beanInfo.createParameterNames[i])) {
                         Annotation[][] creatorConsParamAnnotations

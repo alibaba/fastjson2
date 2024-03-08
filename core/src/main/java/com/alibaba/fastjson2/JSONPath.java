@@ -124,7 +124,7 @@ public abstract class JSONPath {
 
     public static Map<String, Object> paths(Object javaObject) {
         Map<Object, String> values = new IdentityHashMap<>();
-        Map<String, Object> paths = new HashMap<>();
+        Map<String, Object> paths = new LinkedHashMap<>();
 
         RootPath.INSTANCE.paths(values, paths, "$", javaObject);
         return paths;
@@ -160,8 +160,31 @@ public abstract class JSONPath {
                 Map.Entry entry = (Map.Entry) entryObj;
                 Object key = entry.getKey();
 
+                String path;
                 if (key instanceof String) {
-                    String path = parent + "." + key;
+                    String strKey = (String) key;
+                    boolean escape = strKey.isEmpty();
+                    if (!escape) {
+                        char c0 = strKey.charAt(0);
+                        escape = !((c0 >= 'a' && c0 <= 'z') || (c0 >= 'A' && c0 <= 'Z') || c0 == '_');
+                        if (!escape) {
+                            for (int i = 1; i < strKey.length(); i++) {
+                                char ch = strKey.charAt(i);
+                                escape = !((ch >= 'a' && ch <= 'z')
+                                        || (ch >= 'A' && ch <= 'Z')
+                                        || (ch >= '0' && ch <= '9')
+                                        || ch == '_');
+                                if (escape) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (escape) {
+                        path = parent + '[' + JSON.toJSONString(strKey, JSONWriter.Feature.UseSingleQuotes) + ']';
+                    } else {
+                        path = parent + "." + strKey;
+                    }
                     paths(values, paths, path, entry.getValue());
                 }
             }
@@ -928,6 +951,8 @@ public abstract class JSONPath {
                 String fieldName = jsonReader.getFieldName();
                 if ("in".equalsIgnoreCase(fieldName)) {
                     operator = JSONPathFilter.Operator.IN;
+                } else if ("is".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.EQ;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
                 }
@@ -959,15 +984,16 @@ public abstract class JSONPath {
             case 'S': {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (!"starts".equalsIgnoreCase(fieldName)) {
+                if ("starts".equalsIgnoreCase(fieldName)) {
+                    jsonReader.readFieldNameHashCodeUnquote();
+                    fieldName = jsonReader.getFieldName();
+                    if (!"with".equalsIgnoreCase(fieldName)) {
+                        throw new JSONException("not support operator : " + fieldName);
+                    }
+                } else if (!"startsWith".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
 
-                jsonReader.readFieldNameHashCodeUnquote();
-                fieldName = jsonReader.getFieldName();
-                if (!"with".equalsIgnoreCase(fieldName)) {
-                    throw new JSONException("not support operator : " + fieldName);
-                }
                 operator = JSONPathFilter.Operator.STARTS_WITH;
                 break;
             }
@@ -975,15 +1001,16 @@ public abstract class JSONPath {
             case 'E':
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (!"ends".equalsIgnoreCase(fieldName)) {
+                if ("ends".equalsIgnoreCase(fieldName)) {
+                    jsonReader.readFieldNameHashCodeUnquote();
+                    fieldName = jsonReader.getFieldName();
+                    if (!"with".equalsIgnoreCase(fieldName)) {
+                        throw new JSONException("not support operator : " + fieldName);
+                    }
+                } else if (!"endsWith".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
 
-                jsonReader.readFieldNameHashCodeUnquote();
-                fieldName = jsonReader.getFieldName();
-                if (!"with".equalsIgnoreCase(fieldName)) {
-                    throw new JSONException("not support operator : " + fieldName);
-                }
                 operator = JSONPathFilter.Operator.ENDS_WITH;
                 break;
             default: {
