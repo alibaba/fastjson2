@@ -522,6 +522,10 @@ public abstract class JSONReader
     public abstract String readReference();
 
     public boolean readReference(List list, int i) {
+        return readReference((Collection) list, i);
+    }
+
+    public boolean readReference(Collection list, int i) {
         if (!isReference()) {
             return false;
         }
