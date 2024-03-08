@@ -97,7 +97,7 @@ public class FieldReaderList<T, V>
                     break;
                 }
 
-                if (jsonReader.readReference((List) list, i)) {
+                if (jsonReader.readReference(list, i)) {
                     continue;
                 }
 
