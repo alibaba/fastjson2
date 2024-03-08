@@ -1227,7 +1227,7 @@ final class JSONReaderJSONB
         throw new JSONException("reference not support input " + error(type));
     }
 
-    public boolean readReference(List list, int i) {
+    public boolean readReference(Collection list, int i) {
         if (bytes[offset] != BC_REFERENCE) {
             return false;
         }
