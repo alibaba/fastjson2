@@ -53,7 +53,7 @@ public class EmptyStringToNullTest {
         Assertions.assertNull(map.get("emptyValue"));
 
         //test list field
-        //是否需要过滤空值
+        //todo collection 是否需要过滤空值
         beanJson = "{\"list\":[\"emptyValue\",\"\"]}";
         bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringToNull);
         Assertions.assertNotNull(bean);
