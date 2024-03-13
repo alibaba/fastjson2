@@ -4872,26 +4872,73 @@ final class JSONReaderJSONB
         }
 
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
+            LocalTime localTime = null;
             int len = getStringLength();
-            switch (len) {
-                case 5:
-                    return readLocalTime5();
-                case 8:
-                    return readLocalTime8();
-                case 9:
-                    return readLocalTime9();
-                case 10:
-                    return readLocalTime10();
-                case 11:
-                    return readLocalTime11();
-                case 12:
-                    return readLocalTime12();
-                case 18:
-                    return readLocalTime18();
-                default:
-                    break;
+            try {
+                switch (len) {
+                    case 5:
+                        localTime = readLocalTime5();
+                        break;
+                    case 8:
+                        localTime = readLocalTime8();
+                        break;
+                    case 9:
+                        localTime = readLocalTime9();
+                        break;
+                    case 10:
+                        localTime = readLocalTime10();
+                        break;
+                    case 11:
+                        localTime = readLocalTime11();
+                        break;
+                    case 12:
+                        localTime = readLocalTime12();
+                        break;
+                    case 18:
+                        localTime = readLocalTime18();
+                        break;
+                    default:
+                        break;
+                }
+                if (localTime != null) {
+                    return localTime;
+                } else {
+                    throw new JSONException("not support len : " + len);
+                }
+            } catch (JSONException e) {
+                String str = readString();
+                if (str == null || str.isEmpty() || "null".equals(str)) {
+                    return null;
+                }
+
+                int firstIdx = str.indexOf(":");
+                if (firstIdx == -1) {
+                    return null;
+                }
+                int secondIdx = str.lastIndexOf(":");
+                int thirdIdx = str.indexOf(".");
+                if (firstIdx == secondIdx) {
+                    if (thirdIdx == -1) {
+                        return LocalTime.of(Integer.parseInt(str.substring(0, firstIdx)),
+                                Integer.parseInt(str.substring(firstIdx + 1)));
+                    } else {
+                        return LocalTime.of(Integer.parseInt(str.substring(0, firstIdx)),
+                                Integer.parseInt(str.substring(firstIdx + 1, thirdIdx)),
+                                Integer.parseInt(str.substring(thirdIdx + 1)));
+                    }
+                } else {
+                    if (thirdIdx == -1) {
+                        return LocalTime.of(Integer.parseInt(str.substring(0, firstIdx)),
+                                Integer.parseInt(str.substring(firstIdx + 1, secondIdx)),
+                                Integer.parseInt(str.substring(secondIdx + 1)));
+                    } else {
+                        return LocalTime.of(Integer.parseInt(str.substring(0, firstIdx)),
+                                Integer.parseInt(str.substring(firstIdx + 1, secondIdx)),
+                                Integer.parseInt(str.substring(secondIdx + 1, thirdIdx)),
+                                Integer.parseInt(str.substring(thirdIdx + 1)));
+                    }
+                }
             }
-            throw new JSONException("not support len : " + len);
         }
 
         throw new UnsupportedOperationException();
