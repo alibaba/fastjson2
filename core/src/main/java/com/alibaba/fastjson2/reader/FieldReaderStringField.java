@@ -10,10 +10,12 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 class FieldReaderStringField<T>
         extends FieldReaderObjectField<T> {
     final boolean trim;
+    final boolean emptyToNull;
 
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
+        emptyToNull = (features & JSONReader.Feature.EmptyStringToNull.mask) != 0;
     }
 
     @Override
@@ -69,7 +71,10 @@ class FieldReaderStringField<T>
         if (trim && fieldValue != null) {
             fieldValue = fieldValue.trim();
         }
-
+        // empty string to null
+        if (emptyToNull && fieldValue != null && fieldValue.isEmpty()) {
+            fieldValue = null;
+        }
         if (schema != null) {
             schema.assertValidate(fieldValue);
         }

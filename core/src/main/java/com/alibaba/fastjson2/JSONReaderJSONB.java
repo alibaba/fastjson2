@@ -1011,6 +1011,10 @@ final class JSONReaderJSONB
                         if ((context.features & Feature.TrimString.mask) != 0) {
                             str = str.trim();
                         }
+                        // empty string to null
+                        if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                            str = null;
+                        }
                         return str;
                     } else if (STRING_CREATOR_JDK11 != null) {
                         byte[] chars = new byte[strlen];
@@ -1021,6 +1025,10 @@ final class JSONReaderJSONB
                         if ((context.features & Feature.TrimString.mask) != 0) {
                             str = str.trim();
                         }
+                        // empty string to null
+                        if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                            str = null;
+                        }
                         return str;
                     }
 
@@ -1029,6 +1037,10 @@ final class JSONReaderJSONB
 
                     if ((context.features & Feature.TrimString.mask) != 0) {
                         str = str.trim();
+                    }
+                    // empty string to null
+                    if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                        str = null;
                     }
                     return str;
                 }
@@ -2993,6 +3005,10 @@ final class JSONReaderJSONB
                 if ((context.features & Feature.TrimString.mask) != 0) {
                     str = str.trim();
                 }
+                // empty string to null
+                if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                    str = null;
+                }
                 return str;
             }
         }
@@ -3033,6 +3049,10 @@ final class JSONReaderJSONB
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
             }
+            // empty string to null
+            if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                str = null;
+            }
             return str;
         }
 
@@ -3068,6 +3088,10 @@ final class JSONReaderJSONB
         if ((context.features & Feature.TrimString.mask) != 0) {
             str = str.trim();
         }
+        // empty string to null
+        if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+            str = null;
+        }
 
         return str;
     }
@@ -3093,6 +3117,10 @@ final class JSONReaderJSONB
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
+            }
+            // empty string to null
+            if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                str = null;
             }
 
             return str;
@@ -3127,6 +3155,10 @@ final class JSONReaderJSONB
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
+            }
+            // empty string to null
+            if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                str = null;
             }
             return str;
         }
@@ -3169,6 +3201,10 @@ final class JSONReaderJSONB
 
                 if ((context.features & Feature.TrimString.mask) != 0) {
                     str = str.trim();
+                }
+                // empty string to null
+                if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                    str = null;
                 }
 
                 return str;

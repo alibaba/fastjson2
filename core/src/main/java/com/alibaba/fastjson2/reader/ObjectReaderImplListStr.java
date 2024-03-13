@@ -182,12 +182,15 @@ public final class ObjectReaderImplListStr
         if (ch == '[') {
             jsonReader.next();
             while (!jsonReader.nextIfArrayEnd()) {
-                list.add(
-                        jsonReader.readString());
+                String str = jsonReader.readString();
+                if (str == null) {
+                    continue;
+                }
+                list.add(str);
             }
         } else if (ch == '"' || ch == '\'' || ch == '{') {
             String str = jsonReader.readString();
-            if (!str.isEmpty()) {
+            if (str != null && !str.isEmpty()) {
                 list.add(str);
             }
         } else {

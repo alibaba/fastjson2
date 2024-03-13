@@ -3513,6 +3513,10 @@ class JSONReaderUTF16
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
             }
+            // empty string to null
+            if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+                str = null;
+            }
 
             int ch = ++offset == end ? EOI : chars[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
