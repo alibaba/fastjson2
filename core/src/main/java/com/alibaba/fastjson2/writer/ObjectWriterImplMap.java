@@ -420,7 +420,7 @@ public final class ObjectWriterImplMap
 
         features |= jsonWriter.getFeatures();
         if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
-            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+            if (!(map instanceof SortedMap)) {
                 map = new TreeMap<>(map);
             }
         }
@@ -584,7 +584,7 @@ public final class ObjectWriterImplMap
 
         features |= jsonWriter.getFeatures();
         if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
-            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+            if (!(map instanceof SortedMap)) {
                 map = new TreeMap<>(map);
             }
         }
