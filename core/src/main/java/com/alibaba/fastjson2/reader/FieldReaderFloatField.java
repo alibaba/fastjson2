@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
 final class FieldReaderFloatField<T>
         extends FieldReaderObjectField<T> {
     FieldReaderFloatField(String fieldName, Class fieldType, int ordinal, long features, String format, Float defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
     }
 
     @Override

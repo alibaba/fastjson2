@@ -14,7 +14,7 @@ final class FieldWriterStringField<T>
             String label,
             Field field
     ) {
-        super(fieldName, ordinal, features, format, label, String.class, String.class, field, null);
+        super(fieldName, ordinal, features, format, null, label, String.class, String.class, field, null);
     }
 
     @Override

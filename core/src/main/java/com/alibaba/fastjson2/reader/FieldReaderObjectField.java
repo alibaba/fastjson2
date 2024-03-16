@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
@@ -25,6 +26,7 @@ class FieldReaderObjectField<T>
             int ordinal,
             long features,
             String format,
+            Locale locale,
             Object defaultValue,
             JSONSchema schema,
             Field field
@@ -35,7 +37,7 @@ class FieldReaderObjectField<T>
                 ordinal,
                 features,
                 format,
-                null,
+                locale,
                 defaultValue,
                 schema,
                 null,

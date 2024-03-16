@@ -3461,6 +3461,7 @@ public class ObjectWriterCreatorASM
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Field field,
             ObjectWriter initObjectWriter
@@ -3469,7 +3470,7 @@ public class ObjectWriterCreatorASM
         if (Throwable.class.isAssignableFrom(declaringClass)
                 || declaringClass.getName().startsWith("java.lang")
         ) {
-            return super.createFieldWriter(provider, fieldName, ordinal, features, format, label, field, initObjectWriter);
+            return super.createFieldWriter(provider, fieldName, ordinal, features, format, locale, label, field, initObjectWriter);
         }
 
         Class<?> fieldClass = field.getType();
@@ -3493,6 +3494,7 @@ public class ObjectWriterCreatorASM
                     ordinal,
                     features,
                     format,
+                    locale,
                     label,
                     fieldType,
                     fieldClass,
@@ -3636,7 +3638,7 @@ public class ObjectWriterCreatorASM
             return null;
         }
 
-        return new FieldWriterObject(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field, null);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null);
     }
 
     void genGetObject(MethodWriterContext mwc, FieldWriter fieldWriter, int i, int OBJECT) {

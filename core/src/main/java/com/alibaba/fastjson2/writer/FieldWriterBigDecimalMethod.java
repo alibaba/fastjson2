@@ -19,7 +19,7 @@ final class FieldWriterBigDecimalMethod<T>
             Field field,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, null, method);
+        super(fieldName, ordinal, features, format, null, label, BigDecimal.class, BigDecimal.class, null, method);
     }
 
     @Override

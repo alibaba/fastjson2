@@ -23,7 +23,7 @@ abstract class FieldWriterInt32<T>
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
         toString = (features & WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
     }

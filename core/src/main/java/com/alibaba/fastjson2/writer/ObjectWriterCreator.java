@@ -255,7 +255,7 @@ public class ObjectWriterCreator {
             format = beanInfo.format;
         }
 
-        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.label, field, writeUsingWriter);
+        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.locale, fieldInfo.label, field, writeUsingWriter);
     }
 
     public ObjectWriter createObjectWriter(
@@ -678,12 +678,36 @@ public class ObjectWriterCreator {
         return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, ordinal, features, format, label, field, initObjectWriter);
     }
 
+    public final <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field,
+            ObjectWriter initObjectWriter
+    ) {
+        return createFieldWriter(
+                provider,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                label,
+                field,
+                initObjectWriter
+        );
+    }
+
     public <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             String fieldName,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Field field,
             ObjectWriter initObjectWriter
@@ -721,7 +745,7 @@ public class ObjectWriterCreator {
 //                fieldType = fieldClass = Boolean.class;
 //            }
 
-            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
+            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null);
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
@@ -822,7 +846,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
         }
 
-        return new FieldWriterObject(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field, null);
+        return new FieldWriterObject(fieldName, ordinal, features, format, null, label, field.getGenericType(), fieldClass, field, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(Class<T> objectType,

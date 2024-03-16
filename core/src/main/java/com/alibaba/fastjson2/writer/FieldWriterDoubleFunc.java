@@ -20,7 +20,7 @@ final class FieldWriterDoubleFunc<T>
             Method method,
             Function<T, Double> function
     ) {
-        super(fieldName, ordinal, features, format, label, Double.class, Double.class, field, method);
+        super(fieldName, ordinal, features, format, null, label, Double.class, Double.class, field, method);
         this.function = function;
     }
 

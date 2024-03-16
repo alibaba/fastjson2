@@ -20,7 +20,7 @@ final class FieldWriterFloatFunc<T>
             Method method,
             Function<T, Float> function
     ) {
-        super(fieldName, ordinal, features, format, label, Float.class, Float.class, field, method);
+        super(fieldName, ordinal, features, format, null, label, Float.class, Float.class, field, method);
         this.function = function;
     }
 

@@ -36,7 +36,7 @@ class FieldWriterEnum
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, enumClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, enumClass, field, method);
 
         this.enumType = enumClass;
         this.enumConstants = enumClass.getEnumConstants();

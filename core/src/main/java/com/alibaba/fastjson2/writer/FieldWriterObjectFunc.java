@@ -25,7 +25,7 @@ final class FieldWriterObjectFunc<T>
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
         this.function = function;
         isArray = fieldClass == AtomicIntegerArray.class
                 || fieldClass == AtomicLongArray.class

@@ -13,7 +13,7 @@ class FieldReaderStringField<T>
     final boolean emptyToNull;
 
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
         emptyToNull = (features & JSONReader.Feature.EmptyStringAsNull.mask) != 0;
     }

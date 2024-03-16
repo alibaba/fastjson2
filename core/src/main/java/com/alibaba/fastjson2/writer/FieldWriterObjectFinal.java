@@ -26,7 +26,7 @@ abstract class FieldWriterObjectFinal<T>
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
         this.refDetect = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);

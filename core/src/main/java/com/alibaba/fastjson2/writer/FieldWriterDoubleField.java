@@ -17,7 +17,7 @@ class FieldWriterDoubleField<T>
             String label,
             Field field
     ) {
-        super(name, ordinal, features, format, label, Double.class, Double.class, field, null);
+        super(name, ordinal, features, format, null, label, Double.class, Double.class, field, null);
     }
 
     @Override

@@ -37,13 +37,14 @@ public class FieldWriterObject<T>
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
         this.unwrapped = (features & FieldInfo.UNWRAPPED_MASK) != 0;
 
         if (fieldClass == Currency.class) {
@@ -144,7 +145,7 @@ public class FieldWriterObject<T>
         }
 
         if (formattedWriter == null) {
-            formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+            formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, locale, valueClass);
         }
 
         if (formattedWriter == null) {

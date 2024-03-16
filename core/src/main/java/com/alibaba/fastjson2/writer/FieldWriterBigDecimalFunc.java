@@ -21,7 +21,7 @@ final class FieldWriterBigDecimalFunc<T>
             Method method,
             Function<T, BigDecimal> function
     ) {
-        super(fieldName, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, null, method);
+        super(fieldName, ordinal, features, format, null, label, BigDecimal.class, BigDecimal.class, null, method);
         this.function = function;
     }
 

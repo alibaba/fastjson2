@@ -19,7 +19,7 @@ final class FieldReaderDoubleField<T>
             JSONSchema schema,
             Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
     }
 
     @Override

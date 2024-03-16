@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
@@ -127,7 +128,12 @@ final class ObjectWriterImplLocalDateTime
             Date date = new Date(instant.toEpochMilli());
             str = new SimpleDateFormat(this.format).format(date);
         } else {
-            str = formatter.format(ldt);
+            if (locale != null) {
+                ZonedDateTime zdt = ZonedDateTime.of(ldt, jsonWriter.context.getZoneId());
+                str = formatter.format(zdt);
+            } else {
+                str = formatter.format(ldt);
+            }
         }
         jsonWriter.writeString(str);
     }
