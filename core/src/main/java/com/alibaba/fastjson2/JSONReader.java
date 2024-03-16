@@ -4418,7 +4418,13 @@ public abstract class JSONReader
         /**
          * @since 2.0.42
          */
-        ErrorOnUnknownProperties(1 << 26);
+        ErrorOnUnknownProperties(1 << 26),
+
+        /**
+         *  empty string "" convert to null
+         * since 2.0.48
+         */
+        EmptyStringAsNull(1 << 27);
 
         public final long mask;
 
