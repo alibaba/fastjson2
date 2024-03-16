@@ -12,7 +12,7 @@ import java.util.*;
  * @author 张治保
  * @since 2024/3/13
  */
-public class EmptyStringToNullTest {
+public class EmptyStringAsNullTest {
     @Test
     void testString() {
         String json = "\"\"";
@@ -20,7 +20,7 @@ public class EmptyStringToNullTest {
         String value = JSON.parseObject(json, String.class);
         Assertions.assertEquals("", value);
         //null
-        value = JSON.parseObject(json, String.class, JSONReader.Feature.EmptyStringToNull);
+        value = JSON.parseObject(json, String.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNull(value);
 
         //reset json
@@ -29,7 +29,7 @@ public class EmptyStringToNullTest {
         value = JSON.parseObject(json, String.class);
         Assertions.assertEquals("  ", value);
         //"  "
-        value = JSON.parseObject(json, String.class, JSONReader.Feature.EmptyStringToNull);
+        value = JSON.parseObject(json, String.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertEquals("  ", value);
 
         //""
@@ -37,7 +37,7 @@ public class EmptyStringToNullTest {
         Assertions.assertEquals("", value);
 
         //null
-        value = JSON.parseObject(json, String.class, JSONReader.Feature.TrimString, JSONReader.Feature.EmptyStringToNull);
+        value = JSON.parseObject(json, String.class, JSONReader.Feature.TrimString, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNull(value);
     }
 
@@ -45,7 +45,7 @@ public class EmptyStringToNullTest {
     void testBean() {
         //test String field& map field
         String beanJson = "{\"name\":\"\",\"map\":{\"emptyValue\":\"\"}}";
-        StringBean bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringToNull);
+        StringBean bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNotNull(bean);
         Assertions.assertNull(bean.getName());
         Map<String, String> map = bean.getMap();
@@ -55,7 +55,7 @@ public class EmptyStringToNullTest {
         //test list field
         //todo collection 是否需要过滤空值
         beanJson = "{\"list\":[\"emptyValue\",\"\"]}";
-        bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringToNull);
+        bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNotNull(bean);
         List<String> list = bean.getList();
         Assertions.assertFalse(list == null || list.size() != 2);
@@ -64,7 +64,7 @@ public class EmptyStringToNullTest {
 
         //test set field
         beanJson = "{\"set\":[\"emptyValue\",\"\"]}";
-        bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringToNull);
+        bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNotNull(bean);
         Set<String> set = bean.getSet();
         Assertions.assertFalse(set == null || set.size() != 1);
@@ -72,7 +72,7 @@ public class EmptyStringToNullTest {
         System.out.println(1);
 
         beanJson = "{\"treeSet\":[\"emptyValue\",\"\"]}";
-        bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringToNull);
+        bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringAsNull);
 
         Assertions.assertNotNull(bean);
         Set<String> treeSet = bean.getTreeSet();
@@ -86,7 +86,7 @@ public class EmptyStringToNullTest {
         Assertions.assertNull(
                 JSONB.parseObject(
                         new ByteArrayInputStream(jsonbBytes),
-                        new JSONReader.Context(JSONReader.Feature.TrimString, JSONReader.Feature.EmptyStringToNull)
+                        new JSONReader.Context(JSONReader.Feature.TrimString, JSONReader.Feature.EmptyStringAsNull)
                 ).getString("value")
         );
 
@@ -94,7 +94,7 @@ public class EmptyStringToNullTest {
         Assertions.assertNull(
                 JSONB.parseObject(
                         new ByteArrayInputStream(jsonbBytes),
-                        new JSONReader.Context(JSONReader.Feature.EmptyStringToNull)
+                        new JSONReader.Context(JSONReader.Feature.EmptyStringAsNull)
                 ).getString("value")
         );
     }

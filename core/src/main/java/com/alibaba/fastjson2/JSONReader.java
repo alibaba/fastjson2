@@ -4424,7 +4424,7 @@ public abstract class JSONReader
          *  empty string "" convert to null
          * since 2.0.48
          */
-        EmptyStringToNull(1 << 27);
+        EmptyStringAsNull(1 << 27);
 
         public final long mask;
 

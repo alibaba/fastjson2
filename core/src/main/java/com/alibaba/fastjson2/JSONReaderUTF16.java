@@ -3514,7 +3514,7 @@ class JSONReaderUTF16
                 str = str.trim();
             }
             // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringToNull.mask) != 0) {
+            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
                 str = null;
             }
 
