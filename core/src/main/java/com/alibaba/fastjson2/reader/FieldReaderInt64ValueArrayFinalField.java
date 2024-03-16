@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 final class FieldReaderInt64ValueArrayFinalField<T>
         extends FieldReaderObjectField<T> {
     FieldReaderInt64ValueArrayFinalField(String fieldName, Class fieldType, int ordinal, long features, String format, long[] defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
     }
 
     @Override

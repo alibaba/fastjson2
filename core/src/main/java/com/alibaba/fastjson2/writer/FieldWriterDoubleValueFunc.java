@@ -20,7 +20,7 @@ final class FieldWriterDoubleValueFunc
             Method method,
             ToDoubleFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, double.class, double.class, field, method);
+        super(fieldName, ordinal, features, format, null, label, double.class, double.class, field, method);
         this.function = function;
     }
 

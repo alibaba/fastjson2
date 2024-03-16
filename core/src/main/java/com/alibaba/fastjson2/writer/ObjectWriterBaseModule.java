@@ -889,6 +889,14 @@ public class ObjectWriterBaseModule
                 fieldInfo.label = label;
             }
 
+            String locale = jsonField.locale();
+            if (!locale.isEmpty()) {
+                String[] parts = locale.split("_");
+                if (parts.length == 2) {
+                    fieldInfo.locale = new Locale(parts[0], parts[1]);
+                }
+            }
+
             if (!fieldInfo.ignore) {
                 fieldInfo.ignore = !jsonField.serialize();
             }

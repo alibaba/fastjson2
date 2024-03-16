@@ -20,7 +20,7 @@ final class FieldWriterCharValFunc
             Method method,
             ToCharFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, char.class, char.class, field, method);
+        super(fieldName, ordinal, features, format, null, label, char.class, char.class, field, method);
         this.function = function;
     }
 

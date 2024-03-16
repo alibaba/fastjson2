@@ -20,7 +20,7 @@ final class FieldWriterFloatValueFunc
             Method method,
             ToFloatFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, float.class, float.class, field, method);
+        super(fieldName, ordinal, features, format, null, label, float.class, float.class, field, method);
         this.function = function;
     }
 

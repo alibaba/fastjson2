@@ -26,7 +26,7 @@ final class FieldWriterObjectArrayField<T>
             Class fieldClass,
             Field field
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
+        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null);
         this.itemType = itemType;
         if (itemType instanceof Class) {
             itemClass = (Class) itemType;

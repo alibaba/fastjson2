@@ -17,7 +17,7 @@ abstract class FieldWriterInt16<T>
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldClass, fieldClass, field, method);
     }
 
     protected final void writeInt16(JSONWriter jsonWriter, short value) {

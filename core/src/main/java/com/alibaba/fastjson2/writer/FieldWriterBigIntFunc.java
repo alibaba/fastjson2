@@ -21,7 +21,7 @@ final class FieldWriterBigIntFunc<T>
             Method method,
             Function<T, BigInteger> function
     ) {
-        super(fieldName, ordinal, features, format, label, BigInteger.class, BigInteger.class, null, method);
+        super(fieldName, ordinal, features, format, null, label, BigInteger.class, BigInteger.class, null, method);
         this.function = function;
     }
 

@@ -12,7 +12,7 @@ import java.util.Map;
 class FieldReaderMapFieldReadOnly<T>
         extends FieldReaderObjectField<T> {
     FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, field);
     }
 
     @Override

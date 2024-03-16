@@ -15,7 +15,7 @@ final class FieldWriterBigDecimalField<T>
             String label,
             Field field
     ) {
-        super(name, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, field, null);
+        super(name, ordinal, features, format, null, label, BigDecimal.class, BigDecimal.class, field, null);
     }
 
     @Override

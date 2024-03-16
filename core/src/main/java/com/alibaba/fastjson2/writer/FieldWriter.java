@@ -30,6 +30,7 @@ public abstract class FieldWriter<T>
     public final long features;
     public final int ordinal;
     public final String format;
+    public final Locale locale;
     public final DecimalFormat decimalFormat;
     public final String label;
     public final Field field;
@@ -66,6 +67,7 @@ public abstract class FieldWriter<T>
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
@@ -79,6 +81,7 @@ public abstract class FieldWriter<T>
         this.fieldName = name;
         this.ordinal = ordinal;
         this.format = format;
+        this.locale = locale;
         this.label = label;
         this.hashCode = Fnv.hashCode64(name);
         this.features = features;

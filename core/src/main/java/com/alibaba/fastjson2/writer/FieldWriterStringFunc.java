@@ -24,7 +24,7 @@ final class FieldWriterStringFunc<T>
             Method method,
             Function<T, String> function
     ) {
-        super(fieldName, ordinal, features, format, label, String.class, String.class, field, method);
+        super(fieldName, ordinal, features, format, null, label, String.class, String.class, field, method);
         this.function = function;
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);

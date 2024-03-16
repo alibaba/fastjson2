@@ -2613,7 +2613,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, defaultValue, jsonSchema, field);
+            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, locale, defaultValue, jsonSchema, field);
             fieldReader.initReader = initReader;
             return fieldReader;
         }
@@ -2832,6 +2832,7 @@ public class ObjectReaderCreator {
                     ordinal,
                     features,
                     format,
+                    locale,
                     defaultValue,
                     jsonSchema,
                     field);
@@ -2849,7 +2850,7 @@ public class ObjectReaderCreator {
             return new FieldReaderInstant(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
         }
 
-        return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
+        return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field);
     }
 
     public <T, V> FieldReader createFieldReader(

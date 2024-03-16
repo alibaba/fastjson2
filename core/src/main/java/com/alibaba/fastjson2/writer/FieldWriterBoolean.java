@@ -29,7 +29,7 @@ abstract class FieldWriterBoolean
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
         {
             byte[] bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + 4);
             bytes[nameWithColonUTF8.length] = 't';
