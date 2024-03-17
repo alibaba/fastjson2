@@ -854,6 +854,11 @@ public abstract class JSONWriter
         writeString(name);
     }
 
+    public final void writeNameValue(String name, Object value) {
+        writeName(name);
+        writeAny(value);
+    }
+
     public final void writeName(long name) {
         if (startObject) {
             startObject = false;
