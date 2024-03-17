@@ -260,12 +260,11 @@ class JSONWriterUTF16
     }
 
     public void writeStringLatin1(byte[] value) {
-        if (value == null) {
-            writeStringNull();
+        if ((context.features & BrowserSecure.mask) != 0) {
+            writeStringLatin1BrowserSecure(value);
             return;
         }
 
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
         int off = this.off;
         int minCapacity = off + value.length + 2;
@@ -283,7 +282,33 @@ class JSONWriterUTF16
                 break;
             }
 
-            if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
+            chars[off++] = (char) c;
+        }
+
+        if (!escape) {
+            chars[off] = quote;
+            this.off = off + 1;
+            return;
+        }
+
+        this.off = start;
+        writeStringEscape(value);
+    }
+
+    protected final void writeStringLatin1BrowserSecure(byte[] value) {
+        boolean escape = false;
+        int off = this.off;
+        int minCapacity = off + value.length + 2;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final int start = off;
+        final char[] chars = this.chars;
+        chars[off++] = quote;
+
+        for (byte c : value) {
+            if (c == '\\' || c == quote || c < ' ' || c == '<' || c == '>' || c == '(' || c == ')') {
                 escape = true;
                 break;
             }

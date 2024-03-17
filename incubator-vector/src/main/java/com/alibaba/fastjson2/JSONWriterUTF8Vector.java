@@ -89,14 +89,12 @@ final class JSONWriterUTF8Vector
 
     @Override
     public void writeStringLatin1(byte[] value) {
-        if (value == null) {
-            writeStringNull();
+        if ((context.features & BrowserSecure.mask) != 0) {
+            writeStringLatin1BrowserSecure(value);
             return;
         }
 
-        final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
-
         int i = 0;
         // vector optimize 8
         final int upperBound = (value.length - i) & ~7;
@@ -105,14 +103,7 @@ final class JSONWriterUTF8Vector
             if (v.eq(V_BYTE_64_DOUBLE_QUOTE)
                     .or(v.eq(V_BYTE_64_SLASH))
                     .or(v.lt(V_BYTE_64_SPACE))
-                    .anyTrue()
-                    || (browserSecure
-                    && v.eq(V_BYTE_64_LT)
-                    .or(v.eq(V_BYTE_64_GT))
-                    .or(v.eq(V_BYTE_64_LB))
-                    .or(v.eq(V_BYTE_64_RB))
-                    .anyTrue())
-            ) {
+                    .anyTrue()) {
                 escape = true;
                 break;
             }
@@ -121,10 +112,7 @@ final class JSONWriterUTF8Vector
         if (!escape) {
             for (; i < value.length; ++i) {
                 byte c = value[i];
-                if (c == quote || c == '\\' || c < ' '
-                        || (browserSecure && (c == '<' || c == '>' || c == '('
-                        || c == ')'))
-                ) {
+                if (c == quote || c == '\\' || c < ' ') {
                     escape = true;
                     break;
                 }

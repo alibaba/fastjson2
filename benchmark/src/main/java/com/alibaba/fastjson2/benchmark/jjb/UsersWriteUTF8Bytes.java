@@ -46,6 +46,11 @@ public class UsersWriteUTF8Bytes {
         bh.consume(JSON.toJSONBytes(users));
     }
 
+    @Benchmark
+    public void fastjson2_str(Blackhole bh) {
+        bh.consume(JSON.toJSONString(users));
+    }
+
     public void jsonb(Blackhole bh) {
         bh.consume(JSONB.toBytes(users));
     }
