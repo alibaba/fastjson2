@@ -63,4 +63,22 @@ public class Issue2328 {
         @JSONField(format = "E MMM dd HH:mm:ss Z yyyy", locale = "zh_CN")
         public OffsetDateTime createdAt;
     }
+
+    @Test
+    public void test3() throws Exception {
+        LocalDate ldt = LocalDate.of(2018, 2, 3);
+        Bean3 bean = new Bean3();
+        bean.createdAt = ldt;
+        String str = JSON.toJSONString(bean);
+        assertTrue(str.equals("{\"createdAt\":\"星期六 二月 03 2018\"}")
+                || str.equals("{\"createdAt\":\"周六 2月 03 2018\"}"));
+
+        Bean3 bean1 = JSON.parseObject(str, Bean3.class);
+        assertEquals(bean.createdAt, bean1.createdAt);
+    }
+
+    public static class Bean3 {
+        @JSONField(format = "E MMM dd yyyy", locale = "zh_CN")
+        public LocalDate createdAt;
+    }
 }
