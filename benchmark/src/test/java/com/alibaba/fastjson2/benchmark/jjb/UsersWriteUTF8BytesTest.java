@@ -31,7 +31,7 @@ public class UsersWriteUTF8BytesTest {
             // zulu17.40.19 : 1262
             // oracle-jdk-17.0.6 :
             // oracle-jdk-17.0.6_vec :
-            // zulu17-jdk-17.40.19_vec :
+            // zulu17-jdk-17.40.19_vec : 1087
         }
     }
 

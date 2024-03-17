@@ -27,7 +27,11 @@ final class JSONWriterUTF8Vector
         byte[] value = STRING_VALUE.apply(str);
 
         if (coder == 0) {
-            final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+            if ((context.features & BrowserSecure.mask) != 0) {
+                writeStringLatin1BrowserSecure(value);
+                return;
+            }
+
             boolean escape = false;
 
             int i = 0;
@@ -39,12 +43,6 @@ final class JSONWriterUTF8Vector
                         .or(v.eq(V_BYTE_64_SLASH))
                         .or(v.lt(V_BYTE_64_SPACE))
                         .anyTrue()
-                        || (browserSecure
-                        && v.eq(V_BYTE_64_LT)
-                        .or(v.eq(V_BYTE_64_GT))
-                        .or(v.eq(V_BYTE_64_LB))
-                        .or(v.eq(V_BYTE_64_RB))
-                        .anyTrue())
                 ) {
                     escape = true;
                     break;
@@ -54,10 +52,7 @@ final class JSONWriterUTF8Vector
             if (!escape) {
                 for (; i < value.length; ++i) {
                     byte c = value[i];
-                    if (c == quote || c == '\\' || c < ' '
-                            || (browserSecure && (c == '<' || c == '>' || c == '('
-                            || c == ')'))
-                    ) {
+                    if (c == quote || c == '\\' || c < ' ') {
                         escape = true;
                         break;
                     }
