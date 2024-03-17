@@ -1970,7 +1970,7 @@ class JSONWriterUTF16
                 newCapacity = minCapacity;
             }
             if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
             }
 
             // minCapacity is usually close to size, so this is a win:
