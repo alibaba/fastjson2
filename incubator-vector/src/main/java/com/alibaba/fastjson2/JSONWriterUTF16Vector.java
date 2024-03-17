@@ -93,27 +93,6 @@ final class JSONWriterUTF16Vector
         }
 
         if (!escape) {
-            for (; i + 4 <= value.length; i += 4) {
-                byte c0 = value[i];
-                byte c1 = value[i + 1];
-                byte c2 = value[i + 2];
-                byte c3 = value[i + 3];
-
-                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
-                        || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
-                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ') {
-                    escape = true;
-                    break;
-                }
-                chars[off] = (char) c0;
-                chars[off + 1] = (char) c1;
-                chars[off + 2] = (char) c2;
-                chars[off + 3] = (char) c3;
-                off += 4;
-            }
-        }
-
-        if (!escape) {
             for (; i < value.length; i++) {
                 byte c = value[i];
                 if (c == '\\'
@@ -122,21 +101,6 @@ final class JSONWriterUTF16Vector
                     escape = true;
                     break;
                 }
-                chars[off++] = (char) c;
-            }
-        }
-
-        if (!escape) {
-            for (; i < value.length; i++) {
-                byte c = value[i];
-                if (c == '\\'
-                        || c == quote
-                        || c < ' '
-                ) {
-                    escape = true;
-                    break;
-                }
-
                 chars[off++] = (char) c;
             }
         }
