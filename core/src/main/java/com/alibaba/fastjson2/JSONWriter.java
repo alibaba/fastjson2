@@ -1810,6 +1810,14 @@ public abstract class JSONWriter
         WriteNameAsSymbol(1 << 18),
         WriteBigDecimalAsPlain(1 << 19),
         UseSingleQuotes(1 << 20),
+
+        /**
+         * The serialized Map will first be sorted according to Key,
+         * and is used in some scenarios where serialized content needs to be signed.
+         * SortedMap and derived classes do not need to do this.
+         * This Feature does not work for LinkedHashMap.
+         * @deprecated Use {@link Feature#SortMapEntriesByKeys} instead.
+         */
         MapSortField(1 << 21),
         WriteNullListAsEmpty(1 << 22),
         /**
@@ -1891,7 +1899,15 @@ public abstract class JSONWriter
         /**
          * @since 2.0.34
          */
-        NotWriteNumberClassName(1L << 40);
+        NotWriteNumberClassName(1L << 40),
+
+        /**
+         * The serialized Map will first be sorted according to Key,
+         * and is used in some scenarios where serialized content needs to be signed.
+         * SortedMap and derived classes do not need to do this.
+         * @since 2.0.48
+         */
+        SortMapEntriesByKeys(1L << 41);
 
         public final long mask;
 
