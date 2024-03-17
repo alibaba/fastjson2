@@ -13,8 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.temporal.Temporal;
 import java.util.*;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringKeyAsString;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
@@ -419,8 +418,9 @@ public final class ObjectWriterImplMap
         Map map = (Map) object;
 
         features |= jsonWriter.getFeatures();
-        if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
-            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+        if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
+            if (!(map instanceof SortedMap)
+                    && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
                 map = new TreeMap<>(map);
             }
         }
