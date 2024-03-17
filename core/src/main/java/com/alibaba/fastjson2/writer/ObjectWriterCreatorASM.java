@@ -331,6 +331,7 @@ public class ObjectWriterCreatorASM
                                 fieldInfo.ordinal,
                                 fieldInfo.features,
                                 fieldInfo.format,
+                                fieldInfo.locale,
                                 fieldInfo.label,
                                 method,
                                 writeUsingWriter

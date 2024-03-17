@@ -81,4 +81,30 @@ public class Issue2328 {
         @JSONField(format = "E MMM dd yyyy", locale = "zh_CN")
         public LocalDate createdAt;
     }
+
+    @Test
+    public void test4() throws Exception {
+        LocalDateTime ldt = LocalDateTime.of(2018, 2, 3, 12, 13, 14);
+        Bean4 bean = new Bean4();
+        bean.createdAt = ZonedDateTime.of(ldt, ZoneId.of("Asia/Shanghai"));
+        String str = JSON.toJSONString(bean);
+        assertTrue(str.equals("{\"createdAt\":\"星期六 二月 03 12:13:14 +0800 2018\"}")
+                || str.equals("{\"createdAt\":\"周六 2月 03 12:13:14 +0800 2018\"}"));
+
+        Bean4 bean1 = JSON.parseObject(str, Bean4.class);
+        assertEquals(bean.createdAt, bean1.createdAt);
+    }
+
+    public static class Bean4 {
+        @JSONField(format = "E MMM dd HH:mm:ss Z yyyy", locale = "zh_CN")
+        private ZonedDateTime createdAt;
+
+        public ZonedDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(ZonedDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+    }
 }

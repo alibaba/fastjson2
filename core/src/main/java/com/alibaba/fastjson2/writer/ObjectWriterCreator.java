@@ -877,6 +877,31 @@ public class ObjectWriterCreator {
             Method method,
             ObjectWriter initObjectWriter
     ) {
+        return createFieldWriter(
+                provider,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                label,
+                method, initObjectWriter
+        );
+    }
+
+    public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            Class<T> objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Method method,
+            ObjectWriter initObjectWriter
+    ) {
         method.setAccessible(true);
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
@@ -886,7 +911,7 @@ public class ObjectWriterCreator {
         }
 
         if (initObjectWriter != null) {
-            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
+            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
             objMethod.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
@@ -980,7 +1005,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectArrayMethod(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method);
         }
 
-        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
+        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
     }
 
     public <T> FieldWriter createFieldWriter(String fieldName, ToLongFunction<T> function) {
@@ -1065,7 +1090,8 @@ public class ObjectWriterCreator {
             Method method,
             Function<T, V> function
     ) {
-        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method, function);
+        return createFieldWriter(
+                provider, objectClass, fieldName, ordinal, features, format, null, label, fieldType, fieldClass, null, method, function);
     }
 
     public <T, V> FieldWriter<T> createFieldWriter(
@@ -1075,6 +1101,38 @@ public class ObjectWriterCreator {
             int ordinal,
             long features,
             String format,
+            String label,
+            Type fieldType,
+            Class<V> fieldClass,
+            Field field,
+            Method method,
+            Function<T, V> function
+    ) {
+        return createFieldWriter(
+                provider,
+                objectClass,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                label,
+                fieldType,
+                fieldClass,
+                field,
+                method,
+                function
+        );
+    }
+
+    public <T, V> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class<V> fieldClass,
@@ -1173,7 +1231,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     static class LambdaInfo {
