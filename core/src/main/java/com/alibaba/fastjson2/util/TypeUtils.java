@@ -1498,7 +1498,7 @@ public class TypeUtils {
             ObjectReader objectReader = JSONFactory
                     .getDefaultObjectReaderProvider()
                     .getObjectReader(targetClass);
-            return (T) objectReader.readObject(jsonReader, null, null, 0);
+            return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
         }
 
         if (obj instanceof Collection) {
