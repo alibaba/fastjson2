@@ -2802,6 +2802,12 @@ class JSONReaderUTF16
                 doubleValue = 0;
                 value = true;
                 ch = offset == end ? EOI : chars[offset++];
+            } else if (ch == 'N' && chars[offset] == 'a' && chars[offset + 1] == 'N') {
+                valid = true;
+                offset += 2;
+                doubleValue = Double.NaN;
+                value = true;
+                ch = offset == end ? EOI : chars[offset++];
             } else if (ch == '{' && quote == 0) {
                 valid = true;
                 this.ch = ch;
@@ -3067,6 +3073,12 @@ class JSONReaderUTF16
                 valid = true;
                 floatValue = 0;
                 value = true;
+                ch = offset == end ? EOI : chars[offset++];
+            } else if (ch == 'N' && chars[offset] == 'a' && chars[offset + 1] == 'N') {
+                offset += 2;
+                valid = true;
+                value = true;
+                floatValue = Float.NaN;
                 ch = offset == end ? EOI : chars[offset++];
             } else if (ch == '{' && quote == 0) {
                 valid = true;
