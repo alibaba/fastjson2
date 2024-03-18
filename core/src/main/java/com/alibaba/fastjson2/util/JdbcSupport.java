@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -525,6 +526,15 @@ public class JdbcSupport {
 
             if (jsonReader.readIfNull()) {
                 return null;
+            }
+
+            byte type = jsonReader.getType();
+            if (type == JSONB.Constants.BC_LOCAL_DATETIME) {
+                LocalDateTime ldt = jsonReader.readLocalDateTime();
+                Instant instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+                return createTimestamp(
+                        instant.toEpochMilli(),
+                        instant.getNano());
             }
 
             return readObject(jsonReader, fieldType, fieldName, features);
