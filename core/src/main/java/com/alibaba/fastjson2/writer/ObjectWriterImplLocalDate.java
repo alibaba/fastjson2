@@ -28,6 +28,10 @@ final class ObjectWriterImplLocalDate
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (format != null) {
+            write(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
         jsonWriter.writeLocalDate((LocalDate) object);
     }
 

@@ -2077,7 +2077,7 @@ final class JSONWriterJSONB
 
     @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        throw new JSONException("unsupported operation");
+        writeDateYYYMMDD8(year, month, dayOfMonth);
     }
 
     @Override
