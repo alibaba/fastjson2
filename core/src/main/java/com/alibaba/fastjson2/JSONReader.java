@@ -1913,6 +1913,19 @@ public abstract class JSONReader
     }
 
     public void read(Map object, long features) {
+        if ((ch == '"' || ch == '\'') && !typeRedirect) {
+            String str = readString();
+            if (str.isEmpty()) {
+                return;
+            }
+            if (str.charAt(0) == '{') {
+                try (JSONReader jsonReader = JSONReader.of(str, context)) {
+                    jsonReader.readObject(object, features);
+                    return;
+                }
+            }
+        }
+
         boolean match = nextIfObjectStart();
         boolean typeRedirect = false;
         if (!match) {
