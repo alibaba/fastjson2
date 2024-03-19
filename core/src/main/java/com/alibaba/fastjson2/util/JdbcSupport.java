@@ -396,6 +396,11 @@ public class JdbcSupport {
 
             Date date = (Date) object;
 
+            if (format != null) {
+                write(jsonWriter, object, fieldName, fieldType, features);
+                return;
+            }
+
             int nanos;
             nanos = functionGetNano.applyAsInt(object);
 
