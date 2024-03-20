@@ -1179,7 +1179,7 @@ public class JSONObject
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Type type, JSONReader.Feature... features) {
-        long featuresValue = 0L;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         boolean fieldBased = false;
         for (JSONReader.Feature feature : features) {
             if (feature == JSONReader.Feature.FieldBased) {
@@ -1227,7 +1227,7 @@ public class JSONObject
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Class<T> clazz, JSONReader.Feature... features) {
-        long featuresValue = 0L;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         boolean fieldBased = false;
         for (JSONReader.Feature feature : features) {
             if (feature == JSONReader.Feature.FieldBased) {
