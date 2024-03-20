@@ -28,11 +28,13 @@ final class FieldWriterStringField<T>
                 return false;
             }
 
+            writeFieldName(jsonWriter);
             if ((features & (JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) != 0) {
-                writeFieldName(jsonWriter);
                 jsonWriter.writeString("");
-                return true;
+            } else {
+                jsonWriter.writeNull();
             }
+            return true;
         }
 
         if (trim && value != null) {
