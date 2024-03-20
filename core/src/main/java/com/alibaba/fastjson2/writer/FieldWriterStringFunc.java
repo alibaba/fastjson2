@@ -56,8 +56,12 @@ final class FieldWriterStringFunc<T>
         }
         writeFieldName(jsonWriter);
 
-        if (value == null && (features & (JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) != 0) {
-            jsonWriter.writeString("");
+        if (value == null) {
+            if ((features & (JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) != 0) {
+                jsonWriter.writeString("");
+            } else {
+                jsonWriter.writeNull();
+            }
             return true;
         }
 
