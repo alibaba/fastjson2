@@ -4060,7 +4060,7 @@ public interface JSON {
         }
 
         boolean fieldBased = false, beanToArray = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (int i = 0; i < features.length; i++) {
             JSONWriter.Feature feature = features[i];
             featuresValue |= feature.mask;
@@ -4137,7 +4137,7 @@ public interface JSON {
         Class<?> objectClass = object.getClass();
 
         boolean fieldBased = false, beanToArray = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (int i = 0; i < features.length; i++) {
             JSONWriter.Feature feature = features[i];
             featuresValue |= feature.mask;

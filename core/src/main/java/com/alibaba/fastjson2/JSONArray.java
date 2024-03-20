@@ -1020,7 +1020,7 @@ public class JSONArray
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> List<T> toList(Class<T> itemClass, JSONReader.Feature... features) {
         boolean fieldBased = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (JSONReader.Feature feature : features) {
             featuresValue |= feature.mask;
             if (feature == JSONReader.Feature.FieldBased) {
@@ -1077,7 +1077,7 @@ public class JSONArray
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T[] toArray(Class<T> itemClass, JSONReader.Feature... features) {
         boolean fieldBased = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (JSONReader.Feature feature : features) {
             featuresValue |= feature.mask;
             if (feature == JSONReader.Feature.FieldBased) {
@@ -1160,7 +1160,7 @@ public class JSONArray
         }
 
         boolean fieldBased = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (JSONReader.Feature feature : features) {
             featuresValue |= feature.mask;
             if (feature == JSONReader.Feature.FieldBased) {
@@ -1219,7 +1219,7 @@ public class JSONArray
         }
 
         boolean fieldBased = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (JSONReader.Feature feature : features) {
             featuresValue |= feature.mask;
             if (feature == JSONReader.Feature.FieldBased) {
