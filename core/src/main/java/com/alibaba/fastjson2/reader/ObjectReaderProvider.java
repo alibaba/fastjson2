@@ -666,13 +666,15 @@ public class ObjectReaderProvider
     }
 
     public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
-        for (ObjectReaderModule module : modules) {
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectReaderModule module = modules.get(i);
             module.getBeanInfo(beanInfo, objectClass);
         }
     }
 
     public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
-        for (ObjectReaderModule module : modules) {
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectReaderModule module = modules.get(i);
             module.getFieldInfo(fieldInfo, objectClass, field);
         }
     }
