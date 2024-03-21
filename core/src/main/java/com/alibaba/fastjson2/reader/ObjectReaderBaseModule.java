@@ -1194,13 +1194,14 @@ public class ObjectReaderBaseModule
                 }
             }
 
+            boolean ignore = !jsonField.deserialize();
             if (!fieldInfo.ignore) {
-                fieldInfo.ignore = !jsonField.deserialize();
+                fieldInfo.ignore = ignore;
             }
 
             for (JSONReader.Feature feature : jsonField.deserializeFeatures()) {
                 fieldInfo.features |= feature.mask;
-                if (fieldInfo.ignore && feature == JSONReader.Feature.FieldBased) {
+                if (fieldInfo.ignore && !ignore && feature == JSONReader.Feature.FieldBased) {
                     fieldInfo.ignore = false;
                 }
             }

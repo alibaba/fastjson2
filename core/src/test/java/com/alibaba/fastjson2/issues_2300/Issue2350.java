@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_2300;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -15,19 +16,19 @@ public class Issue2350 {
                 "\t\"testField\": \"My Test\",\n" +
                 "\t\"testField2\": \"My Test2\"\n" +
                 "}";
-        TestClass testClass = JSON.parseObject(json, TestClass.class);
-        assertEquals("My Test", testClass.getTestField());
-        assertNull(testClass.getTestField2());
+        Bean bean = JSON.parseObject(json, Bean.class);
+        assertEquals("My Test", bean.testField);
+        assertNull(bean.getTestField2());
+
+        String str = JSON.toJSONString(bean);
+        System.out.println(str);
     }
 
-    public static class TestClass {
-        @JSONField(deserializeFeatures = JSONReader.Feature.FieldBased)
+    public static class Bean {
+        @JSONField(deserializeFeatures = JSONReader.Feature.FieldBased, serializeFeatures = JSONWriter.Feature.FieldBased)
         private String testField;
         private String testField2;
 
-        public String getTestField() {
-            return testField;
-        }
         public String getTestField2() {
             return testField2;
         }
