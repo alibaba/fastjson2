@@ -32,6 +32,7 @@ public final class JSONFactory {
     public static final String PROPERTY_AUTO_TYPE_BEFORE_HANDLER = "fastjson2.autoTypeBeforeHandler";
 
     static boolean useJacksonAnnotation;
+    static boolean useGsonAnnotation;
 
     public static String getProperty(String key) {
         return DEFAULT_PROPERTIES.getProperty(key);
@@ -181,6 +182,22 @@ public final class JSONFactory {
             useJacksonAnnotation = !"false".equals(property);
         }
 
+        {
+            String property = System.getProperty("fastjson2.useGsonAnnotation");
+            if (property != null) {
+                property = property.trim();
+            }
+
+            if (property == null || property.isEmpty()) {
+                property = properties.getProperty("fastjson2.useGsonAnnotation");
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+
+            useGsonAnnotation = !"false".equals(property);
+        }
+
         boolean readerVector = false;
         {
             String property = System.getProperty("fastjson2.readerVector");
@@ -252,6 +269,10 @@ public final class JSONFactory {
 
     public static boolean isUseJacksonAnnotation() {
         return useJacksonAnnotation;
+    }
+
+    public static boolean isUseGsonAnnotation() {
+        return useGsonAnnotation;
     }
 
     public static void setUseJacksonAnnotation(boolean useJacksonAnnotation) {

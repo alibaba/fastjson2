@@ -353,7 +353,9 @@ public class ObjectWriterBaseModule
                         }
                         break;
                     case "com.google.gson.annotations.SerializedName":
-                        processGsonSerializedName(fieldInfo, annotation);
+                        if (JSONFactory.isUseGsonAnnotation()) {
+                            processGsonSerializedName(fieldInfo, annotation);
+                        }
                         break;
                     default:
                         break;
