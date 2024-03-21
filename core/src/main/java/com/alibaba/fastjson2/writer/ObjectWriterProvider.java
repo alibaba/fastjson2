@@ -356,6 +356,7 @@ public class ObjectWriterProvider
             switch (className) {
                 case "springfox.documentation.spring.web.json.Json":
                 case "cn.hutool.json.JSONArray":
+                case "cn.hutool.json.JSONObject":
                     fieldBased = false;
                     break;
                 default:
