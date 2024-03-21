@@ -352,15 +352,16 @@ public class ObjectWriterProvider
                     && superclass != Object.class
                     && "com.google.protobuf.GeneratedMessageV3".equals(superclass.getName())) {
                 fieldBased = false;
-            }
-            switch (className) {
-                case "springfox.documentation.spring.web.json.Json":
-                case "cn.hutool.json.JSONArray":
-                case "cn.hutool.json.JSONObject":
-                    fieldBased = false;
-                    break;
-                default:
-                    break;
+            } else {
+                switch (className) {
+                    case "springfox.documentation.spring.web.json.Json":
+                    case "cn.hutool.json.JSONArray":
+                    case "cn.hutool.json.JSONObject":
+                        fieldBased = false;
+                        break;
+                    default:
+                        break;
+                }
             }
         } else {
             switch (className) {
