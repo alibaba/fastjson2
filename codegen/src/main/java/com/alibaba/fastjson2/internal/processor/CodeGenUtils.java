@@ -326,6 +326,9 @@ public class CodeGenUtils {
 
         for (JSONReader.Feature feature : jsonField.deserializeFeatures()) {
             fieldInfo.features |= feature.mask;
+            if (fieldInfo.ignore && feature == JSONReader.Feature.FieldBased) {
+                fieldInfo.ignore = false;
+            }
         }
 
         int ordinal = jsonField.ordinal();
