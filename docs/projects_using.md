@@ -84,4 +84,11 @@
   https://github.com/zfoo-project/zfoo
 * https://github.com/TongchengOpenSource/ckibana
 * https://github.com/geekidea/spring-boot-plus
-* 
+* https://github.com/02cx/dong-rpc
+* https://github.com/smart-doc-group/smart-doc-example-cn
+* https://github.com/shuanx/BurpFingerPrint
+* https://github.com/sagframe/sagacity-sqltoy
+* https://github.com/X1r0z/JNDIMap
+* https://github.com/apache/rocketmq
+* https://github.com/kerwincui/wumei-smart
+* https://github.com/kerwincui/FastBee
