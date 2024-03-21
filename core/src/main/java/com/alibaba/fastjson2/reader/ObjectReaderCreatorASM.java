@@ -253,6 +253,10 @@ public class ObjectReaderCreatorASM
             return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         }
 
+        if (objectClass == Class.class) {
+            return ObjectReaderImplClass.INSTANCE;
+        }
+
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, provider);
         boolean match = true;
 
