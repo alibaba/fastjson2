@@ -21,7 +21,7 @@ public class Issue2350 {
     }
 
     public static class TestClass {
-        @JSONField(deserializeFeatures = { JSONReader.Feature.FieldBased })
+        @JSONField(deserializeFeatures = JSONReader.Feature.FieldBased)
         private String testField;
         private String testField2;
 
