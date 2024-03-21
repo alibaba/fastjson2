@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONPObject;
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -897,8 +894,9 @@ public class ObjectWriterBaseModule
                 }
             }
 
+            boolean ignore = !jsonField.serialize();
             if (!fieldInfo.ignore) {
-                fieldInfo.ignore = !jsonField.serialize();
+                fieldInfo.ignore = ignore;
             }
 
             if (jsonField.unwrapped()) {
@@ -907,6 +905,9 @@ public class ObjectWriterBaseModule
 
             for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {
                 fieldInfo.features |= feature.mask;
+                if (fieldInfo.ignore && !ignore && feature == JSONWriter.Feature.FieldBased) {
+                    fieldInfo.ignore = false;
+                }
             }
 
             int ordinal = jsonField.ordinal();
