@@ -860,7 +860,7 @@
             </activation>
             <properties>
                 <javadoc.default.exclude.packages>
-                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*:*.internal.*.*.*.*
+                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*:*.internal.*.*.*.*:com/alibaba/fastjson2/benchmark
                 </javadoc.default.exclude.packages>
             </properties>
             <build>
