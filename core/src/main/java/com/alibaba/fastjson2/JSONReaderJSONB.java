@@ -4912,6 +4912,10 @@ final class JSONReaderJSONB
             switch (len) {
                 case 5:
                     return readLocalTime5();
+                case 6:
+                    return readLocalTime6();
+                case 7:
+                    return readLocalTime7();
                 case 8:
                     return readLocalTime8();
                 case 9:
@@ -5426,6 +5430,30 @@ final class JSONReaderJSONB
             throw new JSONException("date only support string input");
         }
         offset += 6;
+        return time;
+    }
+
+    @Override
+    protected LocalTime readLocalTime6() {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 6
+                || (time = DateUtils.parseLocalTime6(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 7;
+        return time;
+    }
+
+    @Override
+    protected LocalTime readLocalTime7() {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 7
+                || (time = DateUtils.parseLocalTime7(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 8;
         return time;
     }
 

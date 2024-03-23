@@ -1404,6 +1404,10 @@ public abstract class JSONReader
         switch (len) {
             case 5:
                 return readLocalTime5();
+            case 6:
+                return readLocalTime6();
+            case 7:
+                return readLocalTime7();
             case 8:
                 return readLocalTime8();
             case 9:
@@ -1661,6 +1665,10 @@ public abstract class JSONReader
     protected abstract LocalDateTime readLocalDateTimeX(int len);
 
     protected abstract LocalTime readLocalTime5();
+
+    protected abstract LocalTime readLocalTime6();
+
+    protected abstract LocalTime readLocalTime7();
 
     protected abstract LocalTime readLocalTime8();
 
