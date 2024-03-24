@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringKeyAsString;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.SortMapEntriesByKeys;
 
 public final class ObjectWriterImplMap
         extends ObjectWriterPrimitiveImpl {
@@ -409,8 +409,9 @@ public final class ObjectWriterImplMap
         Map map = (Map) object;
 
         features |= jsonWriter.getFeatures();
-        if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
-            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+        if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
+            if (!(map instanceof SortedMap)
+                    && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
                 map = new TreeMap<>(map);
             }
         }
@@ -568,8 +569,9 @@ public final class ObjectWriterImplMap
         Map map = (Map) object;
 
         features |= jsonWriter.getFeatures();
-        if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
-            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+        if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
+            if (!(map instanceof SortedMap)
+                    && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
                 map = new TreeMap<>(map);
             }
         }

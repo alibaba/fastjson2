@@ -806,6 +806,10 @@ public class ObjectReaderCreator {
             beanInfo.readerFeatures |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }
 
+        if (objectClass == Class.class) {
+            return ObjectReaderImplClass.INSTANCE;
+        }
+
         if (fieldBased && objectClass.isInterface()) {
             fieldBased = false;
         }

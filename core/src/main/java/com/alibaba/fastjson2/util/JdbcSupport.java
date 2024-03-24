@@ -212,6 +212,11 @@ public class JdbcSupport {
                 return;
             }
 
+            if (format != null) {
+                write(jsonWriter, object, fieldName, fieldType, features);
+                return;
+            }
+
             Timestamp ts = (Timestamp) object;
             long millis = ts.getTime();
 

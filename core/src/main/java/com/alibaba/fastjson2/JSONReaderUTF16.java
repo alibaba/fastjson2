@@ -2830,6 +2830,12 @@ final class JSONReaderUTF16
                 doubleValue = 0;
                 value = true;
                 ch = offset == end ? EOI : chars[offset++];
+            } else if (ch == 'N' && chars[offset] == 'a' && chars[offset + 1] == 'N') {
+                valid = true;
+                offset += 2;
+                doubleValue = Double.NaN;
+                value = true;
+                ch = offset == end ? EOI : chars[offset++];
             } else if (ch == '{' && quote == 0) {
                 valid = true;
                 this.ch = ch;
@@ -3094,6 +3100,12 @@ final class JSONReaderUTF16
                 offset += 4;
                 valid = true;
                 floatValue = 0;
+                value = true;
+                ch = offset == end ? EOI : chars[offset++];
+            } else if (ch == 'N' && chars[offset] == 'a' && chars[offset + 1] == 'N') {
+                valid = true;
+                offset += 2;
+                floatValue = Float.NaN;
                 value = true;
                 ch = offset == end ? EOI : chars[offset++];
             } else if (ch == '{' && quote == 0) {
@@ -3537,6 +3549,11 @@ final class JSONReaderUTF16
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
+            }
+
+            // empty string to null
+            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                str = null;
             }
 
             clear:

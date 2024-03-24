@@ -1488,6 +1488,11 @@ final class JSONReaderASCII
                 str = str.trim();
             }
 
+            // empty string to null
+            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                str = null;
+            }
+
             int ch = ++offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
                 ch = offset == end ? EOI : bytes[offset++];
