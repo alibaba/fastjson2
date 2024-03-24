@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * @author 张治保
  * @since 2024/3/13
@@ -18,7 +20,7 @@ public class EmptyStringAsNullTest {
         String json = "\"\"";
         //""
         String value = JSON.parseObject(json, String.class);
-        Assertions.assertEquals("", value);
+        assertEquals("", value);
         //null
         value = JSON.parseObject(json, String.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNull(value);
@@ -27,14 +29,14 @@ public class EmptyStringAsNullTest {
         json = "\"  \"";
         //"  "
         value = JSON.parseObject(json, String.class);
-        Assertions.assertEquals("  ", value);
+        assertEquals("  ", value);
         //"  "
         value = JSON.parseObject(json, String.class, JSONReader.Feature.EmptyStringAsNull);
-        Assertions.assertEquals("  ", value);
+        assertEquals("  ", value);
 
         //""
         value = JSON.parseObject(json, String.class, JSONReader.Feature.TrimString);
-        Assertions.assertEquals("", value);
+        assertEquals("", value);
 
         //null
         value = JSON.parseObject(json, String.class, JSONReader.Feature.TrimString, JSONReader.Feature.EmptyStringAsNull);
@@ -58,8 +60,8 @@ public class EmptyStringAsNullTest {
         bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNotNull(bean);
         List<String> list = bean.getList();
-        Assertions.assertFalse(list == null || list.size() != 2);
-        Assertions.assertEquals("emptyValue", list.get(0));
+        assertEquals("[\"emptyValue\",null]", JSON.toJSONString(list));
+        assertEquals("emptyValue", list.get(0));
         Assertions.assertNull(list.get(1));
 
         //test set field
@@ -67,7 +69,7 @@ public class EmptyStringAsNullTest {
         bean = JSON.parseObject(beanJson, StringBean.class, JSONReader.Feature.EmptyStringAsNull);
         Assertions.assertNotNull(bean);
         Set<String> set = bean.getSet();
-        Assertions.assertFalse(set == null || set.size() != 1);
+        assertEquals("[\"emptyValue\",null]", JSON.toJSONString(set));
         Assertions.assertTrue(set.contains("emptyValue"));
         System.out.println(1);
 
@@ -104,7 +106,7 @@ public class EmptyStringAsNullTest {
         private String name;
         private Map<String, String> map;
         private List<String> list;
-        private Set<String> set;
+        private LinkedHashSet<String> set;
         private TreeSet<String> treeSet;
     }
 }
