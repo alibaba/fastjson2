@@ -182,11 +182,11 @@ public final class ObjectReaderImplListStr
         if (ch == '[') {
             jsonReader.next();
             while (!jsonReader.nextIfArrayEnd()) {
-                String str = jsonReader.readString();
-                if (str == null) {
+                String item = jsonReader.readString();
+                if (item == null && list instanceof SortedSet) {
                     continue;
                 }
-                list.add(str);
+                list.add(item);
             }
         } else if (ch == '"' || ch == '\'' || ch == '{') {
             String str = jsonReader.readString();
