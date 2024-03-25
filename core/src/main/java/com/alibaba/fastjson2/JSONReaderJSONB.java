@@ -588,24 +588,40 @@ final class JSONReaderJSONB
             case BC_STR_UTF8: {
                 int strlen = readLength();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                // empty string to null
+                if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                    str = null;
+                }
                 offset += strlen;
                 return str;
             }
             case BC_STR_UTF16: {
                 int strlen = readLength();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16);
+                // empty string to null
+                if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                    str = null;
+                }
                 offset += strlen;
                 return str;
             }
             case BC_STR_UTF16LE: {
                 int strlen = readLength();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                // empty string to null
+                if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                    str = null;
+                }
                 offset += strlen;
                 return str;
             }
             case BC_STR_UTF16BE: {
                 int strlen = readLength();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
+                // empty string to null
+                if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                    str = null;
+                }
                 offset += strlen;
                 return str;
             }
@@ -615,6 +631,10 @@ final class JSONReaderJSONB
                 }
                 int strlen = readLength();
                 String str = new String(bytes, offset, strlen, GB18030);
+                // empty string to null
+                if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                    str = null;
+                }
                 offset += strlen;
                 return str;
             }
@@ -953,6 +973,10 @@ final class JSONReaderJSONB
 
                     if ((context.features & Feature.TrimString.mask) != 0) {
                         str = str.trim();
+                    }
+
+                    if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                        str = null;
                     }
                     return str;
                 }
@@ -2985,6 +3009,10 @@ final class JSONReaderJSONB
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
             }
+
+            if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                str = null;
+            }
             return str;
         }
 
@@ -3043,6 +3071,10 @@ final class JSONReaderJSONB
 
         if ((context.features & Feature.TrimString.mask) != 0) {
             str = str.trim();
+        }
+
+        if (strlen == 0 && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+            str = null;
         }
 
         return str;

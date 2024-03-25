@@ -700,7 +700,7 @@ final class JSONWriterJSONB
                 newCapacity = minCapacity;
             }
             if (newCapacity > maxArraySize) {
-                throw new OutOfMemoryError();
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
             }
 
             // minCapacity is usually close to size, so this is a win:

@@ -160,8 +160,11 @@ public final class ObjectReaderImplListStr
                     break;
                 }
 
-                list.add(
-                        jsonReader.readString());
+                String item = jsonReader.readString();
+                if (item == null && list instanceof SortedSet) {
+                    continue;
+                }
+                list.add(item);
             }
         } else if (ch == '"' || ch == '\'' || ch == '{') {
             String str = jsonReader.readString();

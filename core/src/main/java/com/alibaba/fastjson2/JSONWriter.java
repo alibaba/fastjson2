@@ -118,10 +118,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(String name, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -144,10 +141,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(FieldWriter fieldWriter, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -172,10 +166,7 @@ public abstract class JSONWriter
     }
 
     public final String setPath(int index, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
-        ) {
+        if (!isRefDetect(object)) {
             return null;
         }
 
@@ -230,7 +221,7 @@ public abstract class JSONWriter
     }
 
     public final boolean isRefDetect() {
-        return (context.features & Feature.ReferenceDetection.mask) != 0;
+        return (context.features & ReferenceDetection.mask) != 0;
     }
 
     public final boolean isUseSingleQuotes() {
@@ -681,6 +672,11 @@ public abstract class JSONWriter
         }
 
         writeString(name);
+    }
+
+    public final void writeNameValue(String name, Object value) {
+        writeName(name);
+        writeAny(value);
     }
 
     public final void writeName(long name) {
@@ -1812,7 +1808,15 @@ public abstract class JSONWriter
         /**
          * @since 2.0.34
          */
-        NotWriteNumberClassName(1L << 40);
+        NotWriteNumberClassName(1L << 40),
+
+        /**
+         * The serialized Map will first be sorted according to Key,
+         * and is used in some scenarios where serialized content needs to be signed.
+         * SortedMap and derived classes do not need to do this.
+         * @since 2.0.48
+         */
+        SortMapEntriesByKeys(1L << 41);
 
         public final long mask;
 

@@ -561,8 +561,12 @@ public abstract class JSONReader
                     return (int) longValue;
                 }
                 if (number instanceof BigInteger) {
+                    BigInteger bigInt = (BigInteger) number;
+                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
+                        return bigInt.intValue();
+                    }
                     try {
-                        return ((BigInteger) number).intValueExact();
+                        return bigInt.intValueExact();
                     } catch (ArithmeticException e) {
                         throw numberError();
                     }
@@ -616,8 +620,12 @@ public abstract class JSONReader
                 }
                 Number number = getNumber();
                 if (number instanceof BigInteger) {
+                    BigInteger bigInt = (BigInteger) number;
+                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
+                        return bigInt.longValue();
+                    }
                     try {
-                        return ((BigInteger) number).longValueExact();
+                        return bigInt.longValueExact();
                     } catch (ArithmeticException e) {
                         throw numberError();
                     }
@@ -1852,7 +1860,12 @@ public abstract class JSONReader
                     val = readArray();
                     break;
                 case '{':
-                    val = readObject();
+                    if (isReference()) {
+                        addResolveTask(object, name, JSONPath.of(readReference()));
+                        val = null;
+                    } else {
+                        val = readObject();
+                    }
                     break;
                 case '"':
                 case '\'':
@@ -3744,7 +3757,18 @@ public abstract class JSONReader
         /**
          * @since 2.0.42
          */
-        ErrorOnUnknownProperties(1 << 26);
+        ErrorOnUnknownProperties(1 << 26),
+
+        /**
+         *  empty string "" convert to null
+         * since 2.0.48
+         */
+        EmptyStringAsNull(1 << 27),
+
+        /**
+         * @since 2.0.48
+         */
+        NonErrorOnNumberOverflow(1 << 28);
 
         public final long mask;
 

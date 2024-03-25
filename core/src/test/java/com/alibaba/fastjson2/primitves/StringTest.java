@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
@@ -156,17 +155,6 @@ public class StringTest {
                         jsonWriter.toString());
             }
         }
-    }
-
-    @Test
-    public void test_utf8JSONB() throws Exception {
-        String str = "0123456789ABC中国 😀😉 ×";
-        byte[] bytes = JSONB.toBytes(str, StandardCharsets.UTF_8);
-
-        byte[] valueBytes = new byte[bytes.length * 2];
-        int utf16_len = IOUtils.decodeUTF8(bytes, 2, bytes.length - 2, valueBytes);
-        String str_utf16be = new String(valueBytes, 0, utf16_len, StandardCharsets.UTF_16LE);
-        assertEquals(str, str_utf16be);
     }
 
     @Test

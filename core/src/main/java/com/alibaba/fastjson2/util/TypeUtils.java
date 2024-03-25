@@ -1547,7 +1547,7 @@ public class TypeUtils {
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
                 } else {
                     JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
-                    return (T) objectReader.readObject(jsonReader, null, null, 0);
+                    return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
                 }
             }
         }
@@ -1570,7 +1570,7 @@ public class TypeUtils {
             ObjectReader objectReader = JSONFactory
                     .getDefaultObjectReaderProvider()
                     .getObjectReader(targetClass);
-            return (T) objectReader.readObject(jsonReader, null, null, 0);
+            return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
         }
 
         if (targetClass.isEnum()) {
