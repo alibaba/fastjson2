@@ -983,7 +983,7 @@ public class ObjectReaderCreator {
                 constructor.setAccessible(true);
                 return (ObjectReader<T>) constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                     InvocationTargetException e) {
+                    InvocationTargetException e) {
                 throw new JSONException("create deserializer error", e);
             }
         }
@@ -2611,7 +2611,7 @@ public class ObjectReaderCreator {
 
         if (field != null) {
             String objectClassName = objectClass.getName();
-            if (!objectClassName.startsWith("java.lang") && !objectClassName.startsWith("java.time")) {
+            if (!objectClassName.startsWith("java.lang") && !objectClassName.startsWith("java.time") && !field.getDeclaringClass().getName().startsWith("java.lang") && !field.getDeclaringClass().getName().startsWith("java.time")) {
                 field.setAccessible(true);
             }
         }
