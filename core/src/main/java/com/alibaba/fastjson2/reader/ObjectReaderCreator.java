@@ -1637,7 +1637,7 @@ public class ObjectReaderCreator {
             if (!record) {
                 BeanUtils.declaredFields(objectClass, field -> {
                     fieldInfo.init();
-                    fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                    fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0 && ((beanFeatures & JSONReader.Feature.FieldBased.mask) == 0);
                     fieldInfo.features |= beanFeatures;
                     fieldInfo.format = beanFormat;
 
