@@ -2038,7 +2038,9 @@ public abstract class JSON
                 text,
                 createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE))
         ) {
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            reader.handleResolveTasks(list);
+            return list;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -2063,7 +2065,9 @@ public abstract class JSON
                 text,
                 createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE))
         ) {
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            reader.handleResolveTasks(list);
+            return list;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -2083,7 +2087,9 @@ public abstract class JSON
                 text,
                 createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE, features))
         ) {
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            reader.handleResolveTasks(list);
+            return list;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
