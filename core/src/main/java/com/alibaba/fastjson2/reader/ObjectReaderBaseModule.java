@@ -2069,6 +2069,8 @@ public class ObjectReaderBaseModule
                     case "com.google.common.collect.ImmutableSet":
                     case "com.google.common.collect.SingletonImmutableSet":
                         return ObjectReaderImplList.of(type, null, 0);
+                    case "cn.hutool.core.lang.tree.Tree":
+                        return ObjectReaderImplMap.of(null, (Class<?>) rawType, 0L);
                 }
 
                 if (rawType == Optional.class) {
