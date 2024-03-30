@@ -345,7 +345,7 @@ class ObjectReaderImplMapTyped
                 }
             } else {
                 if (index == 0
-                        && jsonReader.isEnabled(JSONReader.Feature.SupportAutoType)
+                        && (jsonReader.isEnabled(JSONReader.Feature.SupportAutoType) || jsonReader.getContext().getContextAutoTypeBeforeHandler() != null)
                         && jsonReader.current() == '"'
                         && !(keyType instanceof Class && Enum.class.isAssignableFrom((Class) keyType))
                 ) {
