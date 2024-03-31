@@ -3305,8 +3305,12 @@ public class ObjectReaderCreator {
     }
 
     private void putIfAbsent(Map<String, List<FieldReader>> fieldReaders, String fieldName, FieldReader fieldReader, Class objectClass) {
-        List<FieldReader> origin = fieldReaders.putIfAbsent(fieldName, listOf(fieldReader));
-        if (origin != null && !fieldReader.isReadOnly()) {
+        if (!fieldReaders.containsKey(fieldName)) {
+            fieldReaders.put(fieldName, listOf(fieldReader));
+            return;
+        }
+        List<FieldReader> origin = fieldReaders.get(fieldName);
+        if (!fieldReader.isReadOnly()) {
             FieldReader finalReader = fieldReader;
             FieldReader sameReader = origin.stream().filter(o -> o.sameTo(finalReader)).findAny().orElse(null);
             if (sameReader != null) {
