@@ -4,6 +4,7 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONReader;
 
+
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -50,6 +51,11 @@ public class JSONPath {
     public static Object eval(Object rootObject, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         return jsonPath.eval(rootObject);
+    }
+
+    public static Object eval(String rootObject, String path) {
+        com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
+        return jsonPath.extract(rootObject);
     }
 
     public static boolean set(Object rootObject, String path, Object value) {
