@@ -92,3 +92,6 @@
 * https://github.com/apache/rocketmq
 * https://github.com/kerwincui/wumei-smart
 * https://github.com/kerwincui/FastBee
+* https://github.com/luguosong/programming-notes
+* https://github.com/niumoo/JavaNotes
+* https://github.com/OpenFeign/feign
