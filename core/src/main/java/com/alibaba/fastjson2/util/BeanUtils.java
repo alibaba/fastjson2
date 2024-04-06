@@ -269,10 +269,10 @@ public abstract class BeanUtils {
             if (allMatch) {
                 fields = declaredFields;
             } else {
+                boolean isEnum = Enum.class.isAssignableFrom(objectClass);
                 List<Field> list = new ArrayList<>(declaredFields.length);
                 for (Field field : declaredFields) {
-                    int modifiers = field.getModifiers();
-                    if (Modifier.isStatic(modifiers)) {
+                    if (!isEnum && Modifier.isStatic(field.getModifiers())) {
                         continue;
                     }
                     list.add(field);
