@@ -612,4 +612,18 @@ final class JSONPathFunction
             return null;
         }
     }
+
+    static final class FilterFunction
+            implements Function {
+        final JSONPathFilter filter;
+
+        FilterFunction(JSONPathFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            return null;
+        }
+    }
 }
