@@ -707,6 +707,15 @@ class JSONPathParser {
             }
         }
 
+        if (function == null && jsonReader.ch == '[') {
+            jsonReader.next();
+            int index = jsonReader.readInt32Value();
+            function = new JSONPathFunction.IndexValue(index);
+            if (!jsonReader.nextIfMatch(']')) {
+                throw new JSONException("syntax error, [" + index);
+            }
+        }
+
         if (operator == null) {
             operator = JSONPath.parseOperator(jsonReader);
         }

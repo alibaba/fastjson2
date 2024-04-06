@@ -583,4 +583,33 @@ final class JSONPathFunction
             return value.equals(item.toString());
         }
     }
+
+    static final class IndexValue
+            implements Function {
+        final int index;
+
+        public IndexValue(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return null;
+            }
+
+            if (o instanceof List) {
+                return ((List) o).get(index);
+            }
+
+            if (o.getClass().isArray()) {
+                int len = Array.getLength(o);
+                for (int i = 0; i < len; i++) {
+                    return Array.get(o, i);
+                }
+            }
+
+            return null;
+        }
+    }
 }
