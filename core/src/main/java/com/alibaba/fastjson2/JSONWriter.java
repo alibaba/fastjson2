@@ -29,7 +29,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
 public abstract class JSONWriter
         implements Closeable {
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
-    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     public final Context context;
     public final boolean utf8;

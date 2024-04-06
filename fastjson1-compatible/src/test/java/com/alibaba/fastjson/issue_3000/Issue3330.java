@@ -33,6 +33,6 @@ public class Issue3330 {
     @Test
     public void test_for_issue() throws Exception {
         String str = JSON.toJSONString("中国", SerializerFeature.BrowserCompatible);
-        assertEquals("\"中国\"", str);
+        assertEquals("\"\\u4E2D\\u56FD\"", str);
     }
 }

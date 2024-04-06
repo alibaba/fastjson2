@@ -11,7 +11,7 @@ public class Issue1974 {
     public void test() {
         JSONObject jsonObject = JSONObject.of("username", "<script>test666");
         assertEquals(
-                "{\"username\":\"\\u003cscript\\u003etest666\"}",
+                "{\"username\":\"\\u003Cscript\\u003Etest666\"}",
                 jsonObject.toJSONString(JSONWriter.Feature.BrowserSecure));
     }
 }

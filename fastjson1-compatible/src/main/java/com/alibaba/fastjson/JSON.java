@@ -1151,6 +1151,7 @@ public abstract class JSON
 
         if ((featuresValue & SerializerFeature.BrowserCompatible.mask) != 0) {
             context.config(JSONWriter.Feature.BrowserCompatible);
+            context.config(JSONWriter.Feature.EscapeNoneAscii);
         }
 
         if ((featuresValue & SerializerFeature.BrowserSecure.mask) != 0) {
