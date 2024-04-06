@@ -354,6 +354,8 @@ public class ObjectReaderBaseModule
                         if (using != null) {
                             beanInfo.deserializer = using;
                         }
+                    } else if ("builder".equals(name)) {
+                        processBuilder(beanInfo, (Class) result);
                     }
                 } catch (Throwable ignored) {
                     // ignored
@@ -512,37 +514,7 @@ public class ObjectReaderBaseModule
                             break;
                         }
                         case "builder": {
-                            Class<?> builderClass = (Class) result;
-                            if (builderClass != void.class && builderClass != Void.class) {
-                                beanInfo.builder = builderClass;
-
-                                for (Annotation builderAnnotation : getAnnotations(builderClass)) {
-                                    Class<? extends Annotation> builderAnnotationClass = builderAnnotation.annotationType();
-                                    String builderAnnotationName = builderAnnotationClass.getName();
-
-                                    if ("com.alibaba.fastjson.annotation.JSONPOJOBuilder".equals(builderAnnotationName)) {
-                                        getBeanInfo1xJSONPOJOBuilder(beanInfo, builderClass, builderAnnotation, builderAnnotationClass);
-                                    } else {
-                                        JSONBuilder jsonBuilder = findAnnotation(builderClass, JSONBuilder.class);
-                                        if (jsonBuilder != null) {
-                                            String buildMethodName = jsonBuilder.buildMethod();
-                                            beanInfo.buildMethod = buildMethod(builderClass, buildMethodName);
-                                            String withPrefix = jsonBuilder.withPrefix();
-                                            if (!withPrefix.isEmpty()) {
-                                                beanInfo.builderWithPrefix = withPrefix;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (beanInfo.buildMethod == null) {
-                                    beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, "build");
-                                }
-
-                                if (beanInfo.buildMethod == null) {
-                                    beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, "create");
-                                }
-                            }
+                            processBuilder(beanInfo, (Class) result);
                             break;
                         }
                         case "deserializeUsing": {
@@ -566,6 +538,41 @@ public class ObjectReaderBaseModule
                 } catch (Throwable ignored) {
                 }
             });
+        }
+
+        private void processBuilder(BeanInfo beanInfo, Class result) {
+            Class<?> builderClass = result;
+            if (builderClass != void.class && builderClass != Void.class) {
+                beanInfo.builder = builderClass;
+
+                for (Annotation builderAnnotation : getAnnotations(builderClass)) {
+                    Class<? extends Annotation> builderAnnotationClass = builderAnnotation.annotationType();
+                    String builderAnnotationName = builderAnnotationClass.getName();
+
+                    if ("com.alibaba.fastjson.annotation.JSONPOJOBuilder".equals(builderAnnotationName)
+                            || "com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder".equals(builderAnnotationName)) {
+                        getBeanInfo1xJSONPOJOBuilder(beanInfo, builderClass, builderAnnotation, builderAnnotationClass);
+                    } else {
+                        JSONBuilder jsonBuilder = findAnnotation(builderClass, JSONBuilder.class);
+                        if (jsonBuilder != null) {
+                            String buildMethodName = jsonBuilder.buildMethod();
+                            beanInfo.buildMethod = buildMethod(builderClass, buildMethodName);
+                            String withPrefix = jsonBuilder.withPrefix();
+                            if (!withPrefix.isEmpty()) {
+                                beanInfo.builderWithPrefix = withPrefix;
+                            }
+                        }
+                    }
+                }
+
+                if (beanInfo.buildMethod == null) {
+                    beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, "build");
+                }
+
+                if (beanInfo.buildMethod == null) {
+                    beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, "create");
+                }
+            }
         }
 
         private void processSeeAlsoAnnotation(BeanInfo beanInfo, Class<?> objectClass) {
@@ -1240,14 +1247,17 @@ public class ObjectReaderBaseModule
         }
     }
 
-    private void getBeanInfo1xJSONPOJOBuilder(BeanInfo beanInfo,
-                                              Class<?> builderClass,
-                                              Annotation builderAnnatation,
-                                              Class<? extends Annotation> builderAnnatationClass) {
+    private void getBeanInfo1xJSONPOJOBuilder(
+            BeanInfo beanInfo,
+            Class<?> builderClass,
+            Annotation builderAnnatation,
+            Class<? extends Annotation> builderAnnatationClass
+    ) {
         BeanUtils.annotationMethods(builderAnnatationClass, method -> {
             try {
                 String methodName = method.getName();
                 switch (methodName) {
+                    case "buildMethodName":
                     case "buildMethod": {
                         String buildMethodName = (String) method.invoke(builderAnnatation);
                         beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
