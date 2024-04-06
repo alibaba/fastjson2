@@ -10,7 +10,7 @@ public class Issue678 {
     @Test
     public void test() {
         String STR = "中国";
-        String JSON_STR = "\"\\u4e2d\\u56fd\"";
+        String JSON_STR = "\"\\u4E2D\\u56FD\"";
         String json = JSON.toJSONString(STR, JSONWriter.Feature.EscapeNoneAscii);
         assertEquals(JSON_STR, json);
         assertEquals(STR, JSON.parse(json));
