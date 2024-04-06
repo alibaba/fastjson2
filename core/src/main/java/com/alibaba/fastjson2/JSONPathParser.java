@@ -709,14 +709,22 @@ class JSONPathParser {
 
         if (function == null && jsonReader.ch == '[') {
             jsonReader.next();
-            int index = jsonReader.readInt32Value();
-            function = new JSONPathFunction.IndexValue(index);
+            if (jsonReader.ch == '?') {
+                jsonReader.next();
+                JSONPathFilter subFilter = (JSONPathFilter) parseFilter();
+                function = new JSONPathFunction.FilterFunction(subFilter);
+            } else {
+                int index = jsonReader.readInt32Value();
+                function = new JSONPathFunction.IndexValue(index);
+            }
             if (!jsonReader.nextIfMatch(']')) {
-                throw new JSONException("syntax error, [" + index);
+                throw new JSONException("syntax error");
             }
         }
-
         if (operator == null) {
+            if (parentheses && jsonReader.nextIfMatch(')')) {
+                return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
+            }
             operator = JSONPath.parseOperator(jsonReader);
         }
 
