@@ -71,22 +71,13 @@ public class JDKUtils {
         Unsafe unsafe;
         long offset, charOffset;
         try {
-            Field theUnsafeField = null;
-            for (Field field : Unsafe.class.getDeclaredFields()) {
-                String fieldName = field.getName();
-                if (fieldName.equals("theUnsafe")
-                        || fieldName.equals("THE_ONE") // android
-                ) {
-                    theUnsafeField = field;
-                    break;
-                }
-            }
+            Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
             offset = unsafe.arrayBaseOffset(byte[].class);
             charOffset = unsafe.arrayBaseOffset(char[].class);
         } catch (Throwable e) {
-            throw new JSONException("init unsafe error");
+            throw new JSONException("init unsafe error", e);
         }
 
         UNSAFE = unsafe;
