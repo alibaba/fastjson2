@@ -1447,6 +1447,10 @@ public abstract class JSONReader
 
     protected abstract int getStringLength();
 
+    public boolean isDate() {
+        return false;
+    }
+
     public Instant readInstant() {
         if (nextIfNull()) {
             return null;
