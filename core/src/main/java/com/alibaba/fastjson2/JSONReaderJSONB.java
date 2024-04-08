@@ -731,39 +731,7 @@ final class JSONReaderJSONB
                 return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
             }
             case BC_TIMESTAMP_WITH_TIMEZONE: {
-                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
-                byte month = bytes[offset++];
-                byte dayOfMonth = bytes[offset++];
-                byte hour = bytes[offset++];
-                byte minute = bytes[offset++];
-                byte second = bytes[offset++];
-                int nano = readInt32Value();
-                // SHANGHAI_ZONE_ID_NAME_BYTES
-                ZoneId zoneId;
-                {
-                    boolean shanghai;
-                    byte[] shanghaiZoneIdNameBytes = SHANGHAI_ZONE_ID_NAME_BYTES;
-                    if (offset + shanghaiZoneIdNameBytes.length < bytes.length) {
-                        shanghai = true;
-                        for (int i = 0; i < shanghaiZoneIdNameBytes.length; ++i) {
-                            if (bytes[offset + i] != shanghaiZoneIdNameBytes[i]) {
-                                shanghai = false;
-                                break;
-                            }
-                        }
-                    } else {
-                        shanghai = false;
-                    }
-                    if (shanghai) {
-                        offset += shanghaiZoneIdNameBytes.length;
-                        zoneId = SHANGHAI_ZONE_ID;
-                    } else {
-                        String zoneIdStr = readString();
-                        zoneId = DateUtils.getZoneId(zoneIdStr, SHANGHAI_ZONE_ID);
-                    }
-                }
-                LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
-                return ZonedDateTime.of(ldt, zoneId);
+                return readTimestampWithTimeZone();
             }
             case BC_TIMESTAMP: {
                 long epochSeconds = readInt64Value();
@@ -1057,6 +1025,43 @@ final class JSONReaderJSONB
 
                 throw new JSONException("not support type : " + error(type));
         }
+    }
+
+    private ZonedDateTime readTimestampWithTimeZone() {
+        byte[] bytes = this.bytes;
+        int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+        byte month = bytes[offset++];
+        byte dayOfMonth = bytes[offset++];
+        byte hour = bytes[offset++];
+        byte minute = bytes[offset++];
+        byte second = bytes[offset++];
+        int nano = readInt32Value();
+        // SHANGHAI_ZONE_ID_NAME_BYTES
+        ZoneId zoneId;
+        {
+            boolean shanghai;
+            byte[] shanghaiZoneIdNameBytes = SHANGHAI_ZONE_ID_NAME_BYTES;
+            if (offset + shanghaiZoneIdNameBytes.length < bytes.length) {
+                shanghai = true;
+                for (int i = 0; i < shanghaiZoneIdNameBytes.length; ++i) {
+                    if (bytes[offset + i] != shanghaiZoneIdNameBytes[i]) {
+                        shanghai = false;
+                        break;
+                    }
+                }
+            } else {
+                shanghai = false;
+            }
+            if (shanghai) {
+                offset += shanghaiZoneIdNameBytes.length;
+                zoneId = SHANGHAI_ZONE_ID;
+            } else {
+                String zoneIdStr = readString();
+                zoneId = DateUtils.getZoneId(zoneIdStr, SHANGHAI_ZONE_ID);
+            }
+        }
+        LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+        return ZonedDateTime.of(ldt, zoneId);
     }
 
     @Override
@@ -5363,6 +5368,82 @@ final class JSONReaderJSONB
             return type - BC_STR_ASCII_FIX_MIN;
         }
         throw new UnsupportedOperationException();
+    }
+
+    public boolean isDate() {
+        byte type = bytes[offset];
+        return type >= BC_LOCAL_TIME && type <= BC_TIMESTAMP;
+    }
+
+    public Date readDate() {
+        ZonedDateTime zdt = null;
+        int offset = this.offset;
+        byte[] bytes = this.bytes;
+        byte type = bytes[offset];
+        switch (type) {
+            case BC_LOCAL_TIME: {
+                LocalTime localTime = readLocalTime();
+                LocalDateTime ldt = LocalDateTime.of(LocalDate.of(1970, 1, 1), localTime);
+                zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
+                break;
+            }
+            case BC_LOCAL_DATETIME:
+                LocalDateTime ldt = readLocalDateTime();
+                zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
+                break;
+            case BC_LOCAL_DATE:
+                LocalDate localDate = readLocalDate();
+                zdt = ZonedDateTime.ofLocal(
+                        LocalDateTime.of(localDate, LocalTime.MIN),
+                        context.getZoneId(),
+                        null);
+                break;
+            case BC_TIMESTAMP_MILLIS: {
+                long millis = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
+                this.offset += 9;
+                return new Date(BIG_ENDIAN ? millis : Long.reverseBytes(millis));
+            }
+            case BC_TIMESTAMP_MINUTES: {
+                long minutes = getInt(bytes, offset + 1);
+                this.offset += 5;
+                return new Date(minutes * 60L * 1000L);
+            }
+            case BC_TIMESTAMP_SECONDS: {
+                long seconds = getInt(bytes, offset + 1);
+                this.offset += 5;
+                return new Date(seconds * 1000);
+            }
+            case BC_TIMESTAMP_WITH_TIMEZONE: {
+                this.offset = offset + 1;
+                zdt = readTimestampWithTimeZone();
+                break;
+            }
+            case BC_TIMESTAMP: {
+                this.offset = offset + 1;
+                long epochSeconds = readInt64Value();
+                int nano = readInt32Value();
+                return Date.from(
+                        Instant.ofEpochSecond(epochSeconds, nano));
+            }
+            default:
+                break;
+        }
+
+        if (zdt != null) {
+            long seconds = zdt.toEpochSecond();
+            int nanos = zdt.toLocalTime().getNano();
+            long millis;
+            if (seconds < 0 && nanos > 0) {
+                millis = (seconds + 1) * 1000;
+                long adjustment = nanos / 1000_000 - 1000;
+                millis += adjustment;
+            } else {
+                millis = seconds * 1000L;
+                millis += nanos / 1000_000;
+            }
+            return new Date(millis);
+        }
+        return super.readDate();
     }
 
     @Override
