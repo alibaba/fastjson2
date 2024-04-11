@@ -304,6 +304,8 @@ class ObjectReaderImplMapTyped
             } else {
                 object = new HashMap<>();
             }
+        } else if (instanceType == EnumMap.class && keyType instanceof Class) {
+            object = new EnumMap((Class) keyType);
         } else {
             object = (Map) createInstance(contextFeatures);
         }
