@@ -95,7 +95,15 @@ public final class ObjectReaderImplList
             instanceClass = HashSet.class;
         } else if (listClass == EnumSet.class) {
             instanceClass = HashSet.class;
-            builder = (o) -> EnumSet.copyOf((Collection) o);
+            Type finalItemType = itemType;
+            builder = (o) -> {
+                Collection collection = (Collection) o;
+                if (collection.isEmpty() && finalItemType instanceof Class) {
+                    return EnumSet.noneOf((Class) finalItemType);
+                } else {
+                    return EnumSet.copyOf(collection);
+                }
+            };
         } else if (listClass == NavigableSet.class || listClass == SortedSet.class) {
             instanceClass = TreeSet.class;
         } else if (listClass == CLASS_SINGLETON) {
@@ -473,7 +481,14 @@ public final class ObjectReaderImplList
         } else if (listType != null && EnumSet.class.isAssignableFrom(listType)) {
             // maybe listType is java.util.RegularEnumSet or java.util.JumboEnumSet
             list = new HashSet();
-            builder = (o) -> EnumSet.copyOf((Collection) o);
+            builder = (o) -> {
+                Collection collection = (Collection) o;
+                if (collection.isEmpty() && itemType instanceof Class) {
+                    return EnumSet.noneOf((Class) itemType);
+                } else {
+                    return EnumSet.copyOf(collection);
+                }
+            };
         } else if (listType != null && listType != this.listType) {
             try {
                 list = (Collection) listType.newInstance();
