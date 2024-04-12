@@ -44,7 +44,8 @@ final class ObjectWriterImplMapEntry
             jsonWriter.writeAny(entry.getKey().toString());
         } else {
             jsonWriter.writeAny(entry.getKey());
-        }        jsonWriter.writeColon();
+        }
+        jsonWriter.writeColon();
         jsonWriter.writeAny(entry.getValue());
         jsonWriter.endObject();
     }
