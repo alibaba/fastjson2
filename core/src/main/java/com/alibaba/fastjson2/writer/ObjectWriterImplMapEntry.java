@@ -24,7 +24,7 @@ final class ObjectWriterImplMapEntry
         Object key = entry.getKey();
         long contextFeatures = jsonWriter.context.getFeatures();
         if ((contextFeatures & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-            jsonWriter.writeAny(key.toString());
+            jsonWriter.writeAny(key == null ? "null" : key.toString());
         } else {
             jsonWriter.writeAny(key);
         }
@@ -43,7 +43,7 @@ final class ObjectWriterImplMapEntry
         Object key = entry.getKey();
         long contextFeatures = jsonWriter.context.getFeatures();
         if ((contextFeatures & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-            jsonWriter.writeAny(key.toString());
+            jsonWriter.writeAny(key == null ? "null" : key.toString());
         } else {
             jsonWriter.writeAny(key);
         }
