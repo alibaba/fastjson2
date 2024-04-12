@@ -15,10 +15,10 @@ public class Issue2431 {
     @Test
     public void test() {
         Bean bean = new Bean();
-        bean.setB((byte)1);
-        bean.setBs(Arrays.asList((byte)1));
-        bean.setS((short)1);
-        bean.setSs(Arrays.asList((short)1));
+        bean.setB((byte) 1);
+        bean.setBs(Arrays.asList((byte) 1));
+        bean.setS((short) 1);
+        bean.setSs(Arrays.asList((short) 1));
         bean.setI(1);
         bean.setIs(Arrays.asList(1));
         bean.setL(1L);
