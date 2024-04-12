@@ -21,11 +21,12 @@ final class ObjectWriterImplMapEntry
         }
 
         jsonWriter.startArray(2);
+        Object key = entry.getKey();
         long contextFeatures = jsonWriter.context.getFeatures();
         if ((contextFeatures & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-            jsonWriter.writeAny(entry.getKey().toString());
+            jsonWriter.writeAny(key.toString());
         } else {
-            jsonWriter.writeAny(entry.getKey());
+            jsonWriter.writeAny(key);
         }
         jsonWriter.writeAny(entry.getValue());
     }
@@ -39,11 +40,12 @@ final class ObjectWriterImplMapEntry
         }
 
         jsonWriter.startObject();
+        Object key = entry.getKey();
         long contextFeatures = jsonWriter.context.getFeatures();
         if ((contextFeatures & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-            jsonWriter.writeAny(entry.getKey().toString());
+            jsonWriter.writeAny(key.toString());
         } else {
-            jsonWriter.writeAny(entry.getKey());
+            jsonWriter.writeAny(key);
         }
         jsonWriter.writeColon();
         jsonWriter.writeAny(entry.getValue());
