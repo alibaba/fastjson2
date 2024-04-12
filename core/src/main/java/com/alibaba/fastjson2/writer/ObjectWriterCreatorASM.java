@@ -3791,6 +3791,14 @@ public class ObjectWriterCreatorASM
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "getFeatures", "()J", false);
             mw.visitVarInsn(Opcodes.LSTORE, var2(CONTEXT_FEATURES));
 
+            mw.visitVarInsn(Opcodes.ALOAD, 1);
+            mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_JSON_WRITER, "context", "L" + JSONWriter.Context.class.getName().replace('.', '/') + ";");
+            mw.visitVarInsn(Opcodes.ALOAD, 1);
+            mw.visitVarInsn(Opcodes.ALOAD, 0);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "getFeatures", "()J", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "getFeaturesByMask", "(J)[L" + JSONWriter.Feature.class.getName().replace('.', '/') + ";", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, JSONWriter.Context.class.getName().replace('.', '/'), "config", "([L" + JSONWriter.Feature.class.getName().replace('.', '/') + ";)V", false);
+
             if (!jsonb) {
                 Label l1 = new Label(), l2 = new Label();
 

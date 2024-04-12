@@ -1921,6 +1921,16 @@ public abstract class JSONWriter
         }
     }
 
+    public Feature[] getFeaturesByMask(long mask) {
+        List<Feature> list = new ArrayList<>();
+        for (Feature feature : values()) {
+            if ((feature.mask & mask) != 0) {
+                list.add(feature);
+            }
+        }
+        return list.toArray(new Feature[]{});
+    }
+
     public static final class Path {
         public static final Path ROOT = new Path(null, "$");
 
