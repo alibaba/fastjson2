@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import static com.alibaba.fastjson2.util.JDKUtils.ANDROID_SDK_INT;
@@ -42,6 +44,7 @@ public abstract class BeanUtils {
 
     public static final String SUPER = "$super$";
 
+    // com.alibaba.fastjson2.util.BeanUtilsTest.buildIgnores
     static final long[] IGNORE_CLASS_HASH_CODES = {
             -9214723784238596577L,
             -9030616758866828325L,
@@ -61,6 +64,7 @@ public abstract class BeanUtils {
             3742915795806478647L,
             3977020351318456359L,
             4882459834864833642L,
+            6033839080488254886L,
             7981148566008458638L,
             8344106065386396833L
     };
@@ -285,13 +289,18 @@ public abstract class BeanUtils {
 
         for (Field field : fields) {
             int modifiers = field.getModifiers();
+            Class<?> fieldClass = field.getType();
             if ((modifiers & Modifier.STATIC) != 0) {
+                continue;
+            }
+
+            if (fieldClass == Lock.class
+                    || fieldClass == ReentrantLock.class) {
                 continue;
             }
 
             if (protobufMessageV3) {
                 String fieldName = field.getName();
-                Class<?> fieldClass = field.getType();
                 if ("cardsmap_".equals(fieldName)
                         && "com.google.protobuf.MapField".equals(fieldClass.getName())) {
                     return;
