@@ -1651,7 +1651,7 @@ class JSONWriterUTF16
     @Override
     public final void writeName6Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 10 + indent;
+        int minCapacity = off + 11 + indent;
         if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1674,7 +1674,7 @@ class JSONWriterUTF16
     @Override
     public final void writeName7Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 10 + indent;
+        int minCapacity = off + 12 + indent;
         if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1698,7 +1698,7 @@ class JSONWriterUTF16
     @Override
     public final void writeName8Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 10 + indent;
+        int minCapacity = off + 13 + indent;
         if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
