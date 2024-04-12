@@ -15,9 +15,9 @@ public class Issue2430 {
     void test() {
         Map.Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<>(1, 2);
         String jsonString = JSON.toJSONString(entry, JSONWriter.Feature.WriteNonStringKeyAsString);
-        assertEquals("{\"1\": 2}", jsonString);
+        assertEquals("{\"1\":2}", jsonString);
         jsonString = JSON.toJSONString(entry, JSONWriter.Feature.BrowserCompatible);
-        assertEquals("{\"1\": 2}", jsonString);
+        assertEquals("{\"1\":2}", jsonString);
         jsonString = JSONB.toJSONString(JSONB.toBytes(entry, JSONWriter.Feature.WriteNonStringKeyAsString));
         assertEquals("[\n" +
                 "\t\"1\",\n" +
