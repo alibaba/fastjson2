@@ -576,4 +576,68 @@ public class JSONWriterUTF16Test {
         );
         assertEquals("abcd", new String(buf));
     }
+
+    @Test
+    public void writeName8() {
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+
+        char[] name = "a123".toCharArray();
+        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName6Raw(nameValue);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName7Raw(nameValue);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName8Raw(nameValue);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName9Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName10Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName11Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName12Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName13Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName14Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName15Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName16Raw(nameValue, 1);
+        }
+    }
 }
