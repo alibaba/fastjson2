@@ -1157,11 +1157,15 @@ public class ObjectReaderCreatorASM
 
                 int hashCode32 = hashCode32Keys[i];
                 List<Long> hashCode64Array = map.get(hashCode32);
-                for (long hashCode64 : hashCode64Array) {
+                for (int j = 0, size = hashCode64Array.size(); j < size; j++) {
+                    long hashCode64 = hashCode64Array.get(j);
+
+                    Label next = size > 1 ? new Label() : dflt;
+
                     mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
                     mw.visitLdcInsn(hashCode64);
                     mw.visitInsn(Opcodes.LCMP);
-                    mw.visitJumpInsn(Opcodes.IFNE, dflt);
+                    mw.visitJumpInsn(Opcodes.IFNE, next);
 
                     int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
                     int index = objectReaderAdapter.mapping[m];
@@ -1188,6 +1192,10 @@ public class ObjectReaderCreatorASM
                             TYPE_OBJECT
                     );
                     mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
+
+                    if (next != dflt) {
+                        mw.visitLabel(next);
+                    }
                 }
 
                 mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
@@ -1730,11 +1738,14 @@ public class ObjectReaderCreatorASM
 
                 int hashCode32 = hashCode32Keys[i];
                 List<Long> hashCode64Array = map.get(hashCode32);
-                for (long hashCode64 : hashCode64Array) {
+                for (int j = 0, size = hashCode64Array.size(); j < size; j++) {
+                    long hashCode64 = hashCode64Array.get(j);
+
+                    Label next = size > 1 ? new Label() : dflt;
                     mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
                     mw.visitLdcInsn(hashCode64);
                     mw.visitInsn(Opcodes.LCMP);
-                    mw.visitJumpInsn(Opcodes.IFNE, dflt);
+                    mw.visitJumpInsn(Opcodes.IFNE, next);
 
                     int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
                     int index = objectReaderAdapter.mapping[m];
@@ -1761,6 +1772,10 @@ public class ObjectReaderCreatorASM
                             TYPE_OBJECT
                     );
                     mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
+
+                    if (next != dflt) {
+                        mw.visitLabel(next);
+                    }
                 }
 
                 mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
