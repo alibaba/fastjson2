@@ -9,8 +9,7 @@ import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteEmptyArray;
-import static com.alibaba.fastjson2.JSONWriter.Feature.ReferenceDetection;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 abstract class FieldWriterList<T>
         extends FieldWriter<T> {
@@ -19,6 +18,7 @@ abstract class FieldWriterList<T>
     final boolean itemClassNotReferenceDetect;
     ObjectWriter listWriter;
     ObjectWriter itemObjectWriter;
+    final boolean writeAsString;
 
     FieldWriterList(
             String name,
@@ -33,6 +33,8 @@ abstract class FieldWriterList<T>
             Method method
     ) {
         super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+
+        writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
 
         this.itemType = itemType == null ? Object.class : itemType;
         if (this.itemType instanceof Class) {
@@ -192,6 +194,9 @@ abstract class FieldWriterList<T>
             Class<?> itemClass = item.getClass();
             if (itemClass == String.class) {
                 jsonWriter.writeString((String) item);
+                continue;
+            } else if (writeAsString) {
+                jsonWriter.writeString(item.toString());
                 continue;
             }
 

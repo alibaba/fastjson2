@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 final class ObjectWriterImplInt32
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt32 INSTANCE = new ObjectWriterImplInt32();
@@ -14,7 +16,14 @@ final class ObjectWriterImplInt32
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32((Integer) object);
+
+        int value = (Integer) object;
+
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+            return;
+        }
+        jsonWriter.writeInt32(value);
     }
 
     @Override
@@ -23,6 +32,13 @@ final class ObjectWriterImplInt32
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32((Integer) object);
+
+        int value = (Integer) object;
+
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+            return;
+        }
+        jsonWriter.writeInt32(value);
     }
 }

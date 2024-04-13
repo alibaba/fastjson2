@@ -54,7 +54,11 @@ class FieldWriterDoubleMethod<T>
             if (decimalFormat != null) {
                 jsonWriter.writeDouble(doubleValue, decimalFormat);
             } else {
-                jsonWriter.writeDouble(doubleValue);
+                if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+                    jsonWriter.writeString(doubleValue);
+                } else {
+                    jsonWriter.writeDouble(doubleValue);
+                }
             }
         }
 

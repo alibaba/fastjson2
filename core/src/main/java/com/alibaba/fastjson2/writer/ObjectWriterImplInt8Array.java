@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 final class ObjectWriterImplInt8Array
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt8Array INSTANCE = new ObjectWriterImplInt8Array();
@@ -19,6 +21,8 @@ final class ObjectWriterImplInt8Array
             return;
         }
 
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+
         Byte[] array = (Byte[]) object;
         jsonWriter.startArray();
         for (int i = 0; i < array.length; i++) {
@@ -30,7 +34,12 @@ final class ObjectWriterImplInt8Array
             if (value == null) {
                 jsonWriter.writeNull();
             } else {
-                jsonWriter.writeInt32(value);
+                byte byteValue = value.byteValue();
+                if (writeAsString) {
+                    jsonWriter.writeString(byteValue);
+                } else {
+                    jsonWriter.writeInt8(byteValue);
+                }
             }
         }
         jsonWriter.endArray();
@@ -47,6 +56,8 @@ final class ObjectWriterImplInt8Array
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
 
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+
         Byte[] array = (Byte[]) object;
         jsonWriter.startArray(array.length);
         for (int i = 0; i < array.length; i++) {
@@ -54,7 +65,12 @@ final class ObjectWriterImplInt8Array
             if (value == null) {
                 jsonWriter.writeNull();
             } else {
-                jsonWriter.writeInt32(value);
+                byte byteValue = value.byteValue();
+                if (writeAsString) {
+                    jsonWriter.writeString(byteValue);
+                } else {
+                    jsonWriter.writeInt8(byteValue);
+                }
             }
         }
     }

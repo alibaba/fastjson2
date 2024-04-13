@@ -21,7 +21,7 @@ abstract class FieldWriterInt8<T>
     }
 
     protected final void writeInt8(JSONWriter jsonWriter, byte value) {
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
         if (writeNonStringValueAsString) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(Byte.toString(value));
