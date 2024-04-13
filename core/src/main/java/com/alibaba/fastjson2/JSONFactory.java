@@ -522,4 +522,8 @@ public final class JSONFactory {
     public interface JSONPathCompiler {
         JSONPath compile(Class objectClass, JSONPath path);
     }
+
+    public static String getDefaultWriterFormat() {
+        return defaultWriterFormat;
+    }
 }
