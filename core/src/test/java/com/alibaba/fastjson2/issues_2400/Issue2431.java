@@ -27,6 +27,10 @@ public class Issue2431 {
                 "{\"b\":\"1\",\"d\":\"1.0\",\"f\":\"1.0\",\"i\":\"1\",\"l\":\"1\",\"s\":\"1\",\"z\":\"false\"}",
                 JSON.toJSONString(bean));
 
+        assertEquals(
+                "{\"b\":\"1\",\"d\":\"1.0\",\"f\":\"1.0\",\"i\":\"1\",\"l\":\"1\",\"s\":\"1\",\"z\":\"false\"}",
+                new String(JSON.toJSONBytes(bean)));
+
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
@@ -65,6 +69,10 @@ public class Issue2431 {
         assertEquals(
                 "{\"b\":\"1\",\"d\":\"1.0\",\"f\":\"1.0\",\"i\":\"1\",\"l\":\"1\",\"s\":\"1\",\"z\":\"false\"}",
                 JSON.toJSONString(bean));
+
+        assertEquals(
+                "{\"b\":\"1\",\"d\":\"1.0\",\"f\":\"1.0\",\"i\":\"1\",\"l\":\"1\",\"s\":\"1\",\"z\":\"false\"}",
+                new String(JSON.toJSONBytes(bean)));
 
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
@@ -106,6 +114,14 @@ public class Issue2431 {
                 "{\"bs\":[\"1\"],\"ds\":[\"1.0\"],\"fs\":[\"1.0\"],\"is\":[\"1\"],\"ls\":[\"1\"],\"ss\":[\"1\"],\"zs\":[\"false\"]}",
                 JSON.toJSONString(bean));
 
+        assertEquals(
+                "{\"bs\":[\"1\"],\"ds\":[\"1.0\"],\"fs\":[\"1.0\"],\"is\":[\"1\"],\"ls\":[\"1\"],\"ss\":[\"1\"],\"zs\":[\"false\"]}",
+                new String(JSON.toJSONBytes(bean)));
+
+        assertEquals(
+                "{\"bs\":[\"1\"],\"ds\":[\"1.0\"],\"fs\":[\"1.0\"],\"is\":[\"1\"],\"ls\":[\"1\"],\"ss\":[\"1\"],\"zs\":[\"false\"]}",
+                new String(JSON.toJSONBytes(bean)));
+
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
@@ -146,6 +162,10 @@ public class Issue2431 {
                 "{\"bs\":[\"1\"],\"ds\":[\"1.0\"],\"fs\":[\"1.0\"],\"is\":[\"1\"],\"ls\":[\"1\"],\"ss\":[\"1\"],\"zs\":[\"false\"]}",
                 JSON.toJSONString(bean));
 
+        assertEquals(
+                "{\"bs\":[\"1\"],\"ds\":[\"1.0\"],\"fs\":[\"1.0\"],\"is\":[\"1\"],\"ls\":[\"1\"],\"ss\":[\"1\"],\"zs\":[\"false\"]}",
+                new String(JSON.toJSONBytes(bean)));
+
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
@@ -185,6 +205,10 @@ public class Issue2431 {
         assertEquals(
                 "{\"bs\":[\"1\"],\"ds\":[\"1.0\"],\"fs\":[\"1.0\"],\"is\":[\"1\"],\"ls\":[\"1\"],\"ss\":[\"1\"],\"zs\":[\"false\"]}",
                 JSON.toJSONString(bean));
+
+        assertEquals(
+                "{\"bs\":[\"1\"],\"ds\":[\"1.0\"],\"fs\":[\"1.0\"],\"is\":[\"1\"],\"ls\":[\"1\"],\"ss\":[\"1\"],\"zs\":[\"false\"]}",
+                new String(JSON.toJSONBytes(bean)));
 
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
