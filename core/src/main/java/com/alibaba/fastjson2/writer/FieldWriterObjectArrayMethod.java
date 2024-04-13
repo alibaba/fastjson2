@@ -223,7 +223,7 @@ final class FieldWriterObjectArrayMethod<T>
                 previousObjectWriter = itemObjectWriter;
             }
 
-            itemObjectWriter.write(jsonWriter, item);
+            itemObjectWriter.write(jsonWriter, item, null, null, features);
         }
         jsonWriter.endArray();
     }

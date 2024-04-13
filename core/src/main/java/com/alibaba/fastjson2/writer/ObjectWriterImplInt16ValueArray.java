@@ -32,9 +32,10 @@ final class ObjectWriterImplInt16ValueArray
             shorts = (short[]) object;
         }
 
-        jsonWriter.startArray(shorts.length);
-        for (int i = 0; i < shorts.length; i++) {
-            jsonWriter.writeInt32(shorts[i]);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(shorts);
+        } else {
+            jsonWriter.writeInt16(shorts);
         }
     }
 
@@ -52,13 +53,10 @@ final class ObjectWriterImplInt16ValueArray
             shorts = (short[]) object;
         }
 
-        jsonWriter.startArray();
-        for (int i = 0; i < shorts.length; i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-            jsonWriter.writeInt32(shorts[i]);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(shorts);
+        } else {
+            jsonWriter.writeInt16(shorts);
         }
-        jsonWriter.endArray();
     }
 }

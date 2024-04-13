@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 
 class FieldWriterFloatMethod<T>
         extends FieldWriter<T> {
+    final boolean writeNonStringValueAsString;
     protected FieldWriterFloatMethod(
             String name,
             int ordinal,
@@ -20,6 +21,7 @@ class FieldWriterFloatMethod<T>
             Method method
     ) {
         super(name, ordinal, features, format, label, fieldType, fieldClass, null, method);
+        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     @Override
@@ -61,7 +63,11 @@ class FieldWriterFloatMethod<T>
         if (decimalFormat != null) {
             jsonWriter.writeFloat(floatValue, decimalFormat);
         } else {
-            jsonWriter.writeFloat(floatValue);
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(floatValue);
+            } else {
+                jsonWriter.writeFloat(floatValue);
+            }
         }
 
         return true;

@@ -2187,7 +2187,7 @@ public class ObjectReaderProvider {
                     return typedMap((Class) rawType, ConcurrentSkipListMap.class, actualTypeParam0, actualTypeParam1);
                 }
 
-                if (rawType == LinkedHashMap.class || rawType == TreeMap.class) {
+                if (rawType == LinkedHashMap.class || rawType == TreeMap.class || rawType == EnumMap.class) {
                     return typedMap((Class) rawType, (Class) rawType, actualTypeParam0, actualTypeParam1);
                 }
 

@@ -16,6 +16,12 @@ final class ObjectWriterImplInt8
         }
 
         byte byteValue = ((Byte) object).byteValue();
+
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(byteValue);
+            return;
+        }
+
         jsonWriter.writeInt8(byteValue);
     }
 
@@ -25,7 +31,16 @@ final class ObjectWriterImplInt8
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(((Number) object).intValue());
+
+        byte byteValue = ((Byte) object).byteValue();
+
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(byteValue);
+            return;
+        }
+
+        jsonWriter.writeInt8(byteValue);
+
         if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
                 && fieldType != Byte.class && fieldType != byte.class) {
             jsonWriter.writeRaw('B');

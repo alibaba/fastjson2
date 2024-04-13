@@ -2711,6 +2711,13 @@ public abstract class JSONReader
                 jsonbBytes.length);
     }
 
+    /**
+     * @since 2.0.49
+     */
+    public static JSONReader ofJSONB(InputStream in, JSONReader.Context context) {
+        return new JSONReaderJSONB(context, in);
+    }
+
     @Deprecated
     public static JSONReader ofJSONB(JSONReader.Context context, byte[] jsonbBytes) {
         return new JSONReaderJSONB(

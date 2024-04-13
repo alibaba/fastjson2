@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 
 abstract class FieldWriterInt8<T>
         extends FieldWriter<T> {
+    final boolean writeNonStringValueAsString;
     FieldWriterInt8(
             String name,
             int ordinal,
@@ -18,17 +19,16 @@ abstract class FieldWriterInt8<T>
             Method method
     ) {
         super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     protected final void writeInt8(JSONWriter jsonWriter, byte value) {
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
-        if (writeNonStringValueAsString) {
-            writeFieldName(jsonWriter);
-            jsonWriter.writeString(Byte.toString(value));
-            return;
-        }
         writeFieldName(jsonWriter);
-        jsonWriter.writeInt8(value);
+        if (writeNonStringValueAsString) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeInt8(value);
+        }
     }
 
     @Override

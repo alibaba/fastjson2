@@ -21,7 +21,12 @@ final class ObjectWriterImplFloat
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeFloat(((Float) object).floatValue());
+        float value = ((Float) object).floatValue();
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 
     @Override
@@ -37,7 +42,13 @@ final class ObjectWriterImplFloat
             return;
         }
 
-        jsonWriter.writeFloat(((Float) object).floatValue());
+        float floatValue = ((Float) object).floatValue();
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(floatValue);
+            return;
+        }
+        jsonWriter.writeFloat(floatValue);
+
         if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
                 && fieldType != Float.class && fieldType != float.class) {
             jsonWriter.writeRaw('F');

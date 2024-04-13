@@ -296,6 +296,8 @@ class ObjectReaderImplMapTyped
             } else {
                 object = new HashMap<>();
             }
+        } else if (instanceType == EnumMap.class && keyType instanceof Class) {
+            object = new EnumMap((Class) keyType);
         } else {
             object = (Map) createInstance(contextFeatures);
         }
@@ -337,7 +339,7 @@ class ObjectReaderImplMapTyped
                 }
             } else {
                 if (index == 0
-                        && jsonReader.isEnabled(JSONReader.Feature.SupportAutoType)
+                        && ((contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0 || context.getContextAutoTypeBeforeHandler() != null)
                         && jsonReader.current() == '"'
                         && !(keyType instanceof Class && Enum.class.isAssignableFrom((Class) keyType))
                 ) {

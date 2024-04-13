@@ -65,7 +65,9 @@ final class ObjectWriterImplInt8ValueArray
             format = null;
         }
 
-        if ("gzip".equals(format) || "gzip,base64".equals(format)) {
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(bytes);
+        } else if ("gzip".equals(format) || "gzip,base64".equals(format)) {
             GZIPOutputStream gzipOut = null;
             try {
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

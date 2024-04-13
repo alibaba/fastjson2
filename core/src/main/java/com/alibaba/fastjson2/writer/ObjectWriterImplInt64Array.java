@@ -29,6 +29,8 @@ final class ObjectWriterImplInt64Array
 
         Long[] array = (Long[]) object;
 
+        boolean writeAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
         jsonWriter.startArray();
         for (int i = 0; i < array.length; i++) {
             if (i != 0) {
@@ -40,7 +42,12 @@ final class ObjectWriterImplInt64Array
                 jsonWriter.writeNull();
                 continue;
             }
-            jsonWriter.writeInt64(item.longValue());
+            long value = item.longValue();
+            if (writeAsString) {
+                jsonWriter.writeString(value);
+            } else {
+                jsonWriter.writeInt64(value);
+            }
         }
         jsonWriter.endArray();
     }
@@ -58,6 +65,8 @@ final class ObjectWriterImplInt64Array
 
         Long[] array = (Long[]) object;
 
+        boolean writeAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
         jsonWriter.startArray(array.length);
         for (int i = 0; i < array.length; i++) {
             Long item = array[i];
@@ -65,7 +74,12 @@ final class ObjectWriterImplInt64Array
                 jsonWriter.writeNull();
                 continue;
             }
-            jsonWriter.writeInt64(item);
+            long value = item.longValue();
+            if (writeAsString) {
+                jsonWriter.writeString(value);
+            } else {
+                jsonWriter.writeInt64(value);
+            }
         }
     }
 }

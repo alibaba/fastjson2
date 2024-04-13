@@ -40,7 +40,11 @@ final class ObjectWriterImplInt64ValueArray
             array = (long[]) object;
         }
 
-        jsonWriter.writeInt64(array);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeInt64(array);
+        }
     }
 
     @Override
@@ -64,17 +68,18 @@ final class ObjectWriterImplInt64ValueArray
         }
 
         if (objectWriter == null || objectWriter == ObjectWriterImplInt32.INSTANCE) {
-            jsonWriter.writeInt64(array);
+            if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(array);
+            } else {
+                jsonWriter.writeInt64(array);
+            }
             return;
         }
 
-        jsonWriter.startArray();
-        for (int i = 0; i < array.length; i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-            objectWriter.write(jsonWriter, array[i], i, long.class, features);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeInt64(array);
         }
-        jsonWriter.endArray();
     }
 }
