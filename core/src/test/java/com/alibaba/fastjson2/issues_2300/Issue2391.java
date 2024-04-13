@@ -14,8 +14,6 @@ public class Issue2391 {
         com.alibaba.fastjson.JSONObject object = com.alibaba.fastjson.JSON.parseObject(str);
         String str1 = object.toJSONString(object, SerializerFeature.BrowserCompatible);
         String str2 = JSON.toJSONString(object, JSONWriter.Feature.EscapeNoneAscii);
-        System.out.println(str1);
-        System.out.println(str2);
         assertEquals(str1, str2);
     }
 }
