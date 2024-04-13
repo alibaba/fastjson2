@@ -135,6 +135,12 @@
             <artifactId>arrow-vector</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.28.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- test libs -->
         <dependency>
