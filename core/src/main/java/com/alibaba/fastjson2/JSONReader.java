@@ -3229,6 +3229,10 @@ public abstract class JSONReader
                 jsonbBytes.length);
     }
 
+    public static JSONReader ofJSONB(InputStream in, JSONReader.Context context) {
+        return new JSONReaderJSONB(context, in);
+    }
+
     public static JSONReader ofJSONB(byte[] jsonbBytes, JSONReader.Feature... features) {
         Context context = JSONFactory.createReadContext();
         context.config(features);
