@@ -82,7 +82,7 @@ public class FilterTest {
     public void test_6() {
         SimplePropertyPreFilter filter = new SimplePropertyPreFilter(JSONArray.class);
         assertNotNull(filter.getClazz());
-        assertEquals("{}",
+        assertEquals("{\"value\":{\"id\":123,\"name\":\"DataWorks\"}}",
                 JSON.toJSONString(
                         new JSONObject()
                                 .fluentPut("value",
