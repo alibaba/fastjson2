@@ -3179,7 +3179,7 @@ class JSONWriterUTF16
 
     @Override
     public final void writeString(long value) {
-        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
+        boolean writeAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) == 0;
         if (writeAsString) {
             writeQuote();
         }
