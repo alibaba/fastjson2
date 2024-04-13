@@ -26,7 +26,7 @@ public class Issue1054 {
             deserializeFeatures = {JSONReader.Feature.UseDefaultConstructorAsPossible, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean},
             ignores = {"dataTime", "id", "sensorId"}
     )
-    public class SensorSoilTemperature
+    public static class SensorSoilTemperature
             extends SensorModel {
         @JSONField(name = "value")
         private BigDecimal value;

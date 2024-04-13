@@ -1140,6 +1140,10 @@ public abstract class JSONReader
 
     protected abstract int getStringLength();
 
+    public boolean isDate() {
+        return false;
+    }
+
     public Instant readInstant() {
         if (nextIfNull()) {
             return null;
@@ -2743,6 +2747,13 @@ public abstract class JSONReader
                 jsonbBytes,
                 0,
                 jsonbBytes.length);
+    }
+
+    /**
+     * @since 2.0.49
+     */
+    public static JSONReader ofJSONB(InputStream in, JSONReader.Context context) {
+        return new JSONReaderJSONB(context, in);
     }
 
     @Deprecated

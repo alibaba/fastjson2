@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 
 abstract class FieldWriterInt16<T>
         extends FieldWriter<T> {
+    final boolean writeNonStringValueAsString;
     FieldWriterInt16(
             String name,
             int ordinal,
@@ -18,18 +19,16 @@ abstract class FieldWriterInt16<T>
             Method method
     ) {
         super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     protected final void writeInt16(JSONWriter jsonWriter, short value) {
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
-        if (writeNonStringValueAsString) {
-            writeFieldName(jsonWriter);
-            jsonWriter.writeString(Short.toString(value));
-            return;
-        }
-
         writeFieldName(jsonWriter);
-        jsonWriter.writeInt16(value);
+        if (writeNonStringValueAsString) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeInt16(value);
+        }
     }
 
     @Override
@@ -65,7 +64,13 @@ abstract class FieldWriterInt16<T>
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(value.shortValue());
+
+        short shortValue = value;
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(shortValue);
+        } else {
+            jsonWriter.writeInt16(shortValue);
+        }
     }
 
     @Override

@@ -60,7 +60,7 @@ public class SimplePropertyPreFilter
         }
 
         if (clazz != null && !clazz.isInstance(source)) {
-            return excludes.size() != 0 && includes.isEmpty() && maxLevel == 0;
+            return true;
         }
 
         if (this.excludes.contains(name)) {

@@ -10,7 +10,7 @@ public class EscapeNoneAsciiTest {
     };
 
     static final String[] JSON_STRINGS = new String[] {
-            "\"\\u4e2d\\u56fd\"", "\"\\u4e2d\"", "\"01234567\\u4e2d\"", "\"0123\\u4e2d\"", "\"01\\u4e2d\""
+            "\"\\u4E2D\\u56FD\"", "\"\\u4E2D\"", "\"01234567\\u4E2D\"", "\"0123\\u4E2D\"", "\"01\\u4E2D\""
     };
 
     @Test

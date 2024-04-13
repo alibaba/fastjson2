@@ -19,6 +19,8 @@ final class ObjectWriterImplInt8Array
             return;
         }
 
+        boolean writeAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
         Byte[] array = (Byte[]) object;
         jsonWriter.startArray();
         for (int i = 0; i < array.length; i++) {
@@ -30,7 +32,11 @@ final class ObjectWriterImplInt8Array
             if (value == null) {
                 jsonWriter.writeNull();
             } else {
-                jsonWriter.writeInt32(value);
+                if (writeAsString) {
+                    jsonWriter.writeString(value);
+                } else {
+                    jsonWriter.writeInt8(value);
+                }
             }
         }
         jsonWriter.endArray();
@@ -47,6 +53,8 @@ final class ObjectWriterImplInt8Array
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
 
+        boolean writeAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
         Byte[] array = (Byte[]) object;
         jsonWriter.startArray(array.length);
         for (int i = 0; i < array.length; i++) {
@@ -54,7 +62,11 @@ final class ObjectWriterImplInt8Array
             if (value == null) {
                 jsonWriter.writeNull();
             } else {
-                jsonWriter.writeInt32(value);
+                if (writeAsString) {
+                    jsonWriter.writeString(value);
+                } else {
+                    jsonWriter.writeInt8(value);
+                }
             }
         }
     }

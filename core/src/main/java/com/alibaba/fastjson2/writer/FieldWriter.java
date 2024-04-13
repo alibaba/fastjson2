@@ -388,7 +388,9 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        if ("base64".equals(format)
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else if ("base64".equals(format)
                 || (format == null && (jsonWriter.getFeatures(this.features) & WriteByteArrayAsBase64.mask) != 0)
         ) {
             jsonWriter.writeBase64(value);

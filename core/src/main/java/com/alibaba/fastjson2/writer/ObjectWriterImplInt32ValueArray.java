@@ -37,7 +37,11 @@ final class ObjectWriterImplInt32ValueArray
             array = (int[]) object;
         }
 
-        jsonWriter.writeInt32(array);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeInt32(array);
+        }
     }
 
     @Override
@@ -54,6 +58,10 @@ final class ObjectWriterImplInt32ValueArray
             array = (int[]) object;
         }
 
-        jsonWriter.writeInt32(array);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeInt32(array);
+        }
     }
 }

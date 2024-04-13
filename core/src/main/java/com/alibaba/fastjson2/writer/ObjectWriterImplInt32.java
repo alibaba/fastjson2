@@ -14,7 +14,12 @@ final class ObjectWriterImplInt32
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(((Integer) object).intValue());
+        int value = ((Integer) object).intValue();
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeInt32(value);
+        }
     }
 
     @Override
@@ -23,6 +28,11 @@ final class ObjectWriterImplInt32
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(((Integer) object).intValue());
+        int value = ((Integer) object).intValue();
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeInt32(value);
+        }
     }
 }

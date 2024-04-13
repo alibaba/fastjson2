@@ -26,7 +26,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 public abstract class JSONWriter
         implements Closeable {
-    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     public final Context context;
     public final boolean utf8;
@@ -1064,6 +1064,199 @@ public abstract class JSONWriter
     }
 
     public abstract void writeString(String str);
+
+    /**
+     * write short value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(boolean value);
+
+    /**
+     * write short value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(byte value);
+
+    /**
+     * write short value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(short value);
+
+    /**
+     * write boolean array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(boolean[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write byte array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(byte[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write short array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(short[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write int array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(int[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write long array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(long[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write float array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(float[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write double array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(double[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write int value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(int value);
+
+    /**
+     * write float value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(float value) {
+        writeString(Float.toString(value));
+    }
+
+    /**
+     * write double value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(double value) {
+        writeString(Double.toString(value));
+    }
+
+    /**
+     * write long value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(long value);
 
     public abstract void writeStringLatin1(byte[] value);
 

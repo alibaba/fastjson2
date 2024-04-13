@@ -24,7 +24,11 @@ final class ObjectWriterImplInt64
         }
 
         long longValue = ((Long) object).longValue();
-        jsonWriter.writeInt64(longValue);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(longValue);
+        } else {
+            jsonWriter.writeInt64(longValue);
+        }
     }
 
     @Override
@@ -33,11 +37,17 @@ final class ObjectWriterImplInt64
             jsonWriter.writeNumberNull();
             return;
         }
-        long i = ((Number) object).longValue();
-        jsonWriter.writeInt64(i);
+        long longValue = ((Number) object).longValue();
 
-        if (i >= Integer.MIN_VALUE
-                && i <= Integer.MAX_VALUE
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(longValue);
+            return;
+        }
+
+        jsonWriter.writeInt64(longValue);
+
+        if (longValue >= Integer.MIN_VALUE
+                && longValue <= Integer.MAX_VALUE
                 && (features & WriteClassName.mask) != 0
         ) {
             long contextFeatures = jsonWriter.getFeatures();

@@ -169,6 +169,10 @@ public class ObjectReaderImplDate
                 millis += nanos / 1000_000;
             }
         } else {
+            if (jsonReader.isDate()) {
+                return jsonReader.readDate();
+            }
+
             if (jsonReader.isTypeRedirect() && jsonReader.nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
                 jsonReader.nextIfMatch(':');
                 millis = jsonReader.readInt64Value();

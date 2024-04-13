@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 
 class FieldWriterDoubleMethod<T>
         extends FieldWriter<T> {
+    final boolean writeNonStringValueAsString;
     protected FieldWriterDoubleMethod(
             String name,
             int ordinal,
@@ -20,6 +21,7 @@ class FieldWriterDoubleMethod<T>
             Method method
     ) {
         super(name, ordinal, features, format, label, fieldType, fieldClass, null, method);
+        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     @Override
@@ -52,7 +54,11 @@ class FieldWriterDoubleMethod<T>
             if (decimalFormat != null) {
                 jsonWriter.writeDouble(doubleValue, decimalFormat);
             } else {
-                jsonWriter.writeDouble(doubleValue);
+                if (writeNonStringValueAsString) {
+                    jsonWriter.writeString(doubleValue);
+                } else {
+                    jsonWriter.writeDouble(doubleValue);
+                }
             }
         }
 

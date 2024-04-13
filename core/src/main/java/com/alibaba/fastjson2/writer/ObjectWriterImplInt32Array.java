@@ -29,6 +29,8 @@ final class ObjectWriterImplInt32Array
 
         Integer[] array = (Integer[]) object;
 
+        boolean writeAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
         jsonWriter.startArray();
         for (int i = 0; i < array.length; i++) {
             if (i != 0) {
@@ -40,7 +42,13 @@ final class ObjectWriterImplInt32Array
                 jsonWriter.writeNull();
                 continue;
             }
-            jsonWriter.writeInt32(item);
+
+            int value = item.intValue();
+            if (writeAsString) {
+                jsonWriter.writeString(value);
+            } else {
+                jsonWriter.writeInt32(value);
+            }
         }
         jsonWriter.endArray();
     }
@@ -58,6 +66,8 @@ final class ObjectWriterImplInt32Array
 
         Integer[] array = (Integer[]) object;
 
+        boolean writeAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
         jsonWriter.startArray(array.length);
         for (int i = 0; i < array.length; i++) {
             Integer item = array[i];
@@ -65,7 +75,13 @@ final class ObjectWriterImplInt32Array
                 jsonWriter.writeNull();
                 continue;
             }
-            jsonWriter.writeInt32(item);
+
+            int value = item.intValue();
+            if (writeAsString) {
+                jsonWriter.writeString(value);
+            } else {
+                jsonWriter.writeInt32(value);
+            }
         }
     }
 }

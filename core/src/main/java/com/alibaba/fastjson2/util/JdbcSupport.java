@@ -245,7 +245,8 @@ public class JdbcSupport {
                 return;
             }
 
-            jsonWriter.writeInstant(millis, nanos);
+            ts.toLocalDateTime();
+            jsonWriter.writeInstant(millis / 1000, nanos);
         }
 
         @Override

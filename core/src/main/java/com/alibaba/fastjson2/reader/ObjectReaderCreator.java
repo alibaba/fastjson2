@@ -785,6 +785,10 @@ public class ObjectReaderCreator {
 
         provider.getBeanInfo(beanInfo, objectClass);
 
+        if ((beanInfo.readerFeatures & JSONReader.Feature.FieldBased.mask) != 0) {
+            fieldBased = true;
+        }
+
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
             try {
                 Constructor constructor = beanInfo.deserializer.getDeclaredConstructor();

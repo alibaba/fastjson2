@@ -14,7 +14,12 @@ class ObjectWriterImplBoolean
             jsonWriter.writeBooleanNull();
             return;
         }
-        jsonWriter.writeBool(((Boolean) object).booleanValue());
+        boolean value = ((Boolean) object).booleanValue();
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeBool(value);
+        }
     }
 
     @Override
@@ -23,6 +28,11 @@ class ObjectWriterImplBoolean
             jsonWriter.writeBooleanNull();
             return;
         }
-        jsonWriter.writeBool(((Boolean) object).booleanValue());
+        boolean value = ((Boolean) object).booleanValue();
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeBool(value);
+        }
     }
 }

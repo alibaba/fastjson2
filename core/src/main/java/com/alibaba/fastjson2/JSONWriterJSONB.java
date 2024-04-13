@@ -677,6 +677,115 @@ final class JSONWriterJSONB
         );
     }
 
+    @Override
+    public void writeString(boolean value) {
+        writeString(Boolean.toString(value));
+    }
+
+    @Override
+    public void writeString(byte value) {
+        writeString(Integer.toString(value));
+    }
+
+    @Override
+    public void writeString(short value) {
+        writeString(Integer.toString(value));
+    }
+
+    @Override
+    public void writeString(int value) {
+        writeString(Integer.toString(value));
+    }
+
+    @Override
+    public void writeString(long value) {
+        writeString(Long.toString(value));
+    }
+
+    @Override
+    public void writeString(boolean[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(byte[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(short[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(int[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(long[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(float[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(double[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
     public void writeStringUTF16(byte[] value) {
         int off = this.off;
         final int strlen = value.length;

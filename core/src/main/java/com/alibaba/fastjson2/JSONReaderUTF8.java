@@ -1809,7 +1809,7 @@ class JSONReaderUTF8
                                 + (((long) bytes[nameBegin + 10]) << 32)
                                 + (((long) bytes[nameBegin + 9]) << 24)
                                 + (((long) bytes[nameBegin + 8]) << 16)
-                                + (((long) bytes[nameBegin + 8]) << 8)
+                                + (((long) bytes[nameBegin + 7]) << 8)
                                 + ((long) bytes[nameBegin + 6]);
                         break;
                     case 15:
