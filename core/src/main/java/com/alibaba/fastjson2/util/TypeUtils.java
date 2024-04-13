@@ -2727,7 +2727,7 @@ public class TypeUtils {
             }
 
             if (str.indexOf('.') != -1) {
-                return new BigDecimal(str).intValueExact();
+                return new BigDecimal(str).intValue();
             }
 
             return Integer.parseInt(str);

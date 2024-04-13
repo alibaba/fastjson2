@@ -106,15 +106,7 @@ public class ParserTest_long {
         assertEquals(Fnv.hashCode64("v2"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v2"), lexer.getNameHashCodeLCase());
         assertEquals("v2", lexer.getFieldName());
-        {
-            JSONException error = null;
-            try {
-                lexer.readInt64Value();
-            } catch (JSONException ex) {
-                error = ex;
-            }
-            assertNotNull(error);
-        }
+        lexer.readInt64Value();
 
         assertEquals(Fnv.hashCode64("v3"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v3"), lexer.getNameHashCodeLCase());

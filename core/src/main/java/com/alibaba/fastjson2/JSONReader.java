@@ -561,14 +561,7 @@ public abstract class JSONReader
                 }
                 if (number instanceof BigInteger) {
                     BigInteger bigInt = (BigInteger) number;
-                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
-                        return bigInt.intValue();
-                    }
-                    try {
-                        return bigInt.intValueExact();
-                    } catch (ArithmeticException e) {
-                        throw numberError();
-                    }
+                    return bigInt.intValue();
                 }
                 return number.intValue();
             case JSON_TYPE_DEC:
@@ -595,12 +588,8 @@ public abstract class JSONReader
             case JSON_TYPE_DOUBLE:
                 return getNumber().intValue();
             case JSON_TYPE_BIG_DEC:
-                try {
-                    return getBigDecimal()
-                            .intValueExact();
-                } catch (ArithmeticException e) {
-                    throw numberError();
-                }
+                return getBigDecimal()
+                        .intValue();
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
@@ -620,14 +609,7 @@ public abstract class JSONReader
                 Number number = getNumber();
                 if (number instanceof BigInteger) {
                     BigInteger bigInt = (BigInteger) number;
-                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
-                        return bigInt.longValue();
-                    }
-                    try {
-                        return bigInt.longValueExact();
-                    } catch (ArithmeticException e) {
-                        throw numberError();
-                    }
+                    return bigInt.longValue();
                 }
                 return number.longValue();
             case JSON_TYPE_DEC:
@@ -654,12 +636,7 @@ public abstract class JSONReader
                 return getNumber()
                         .longValue();
             case JSON_TYPE_BIG_DEC:
-                try {
-                    return getBigDecimal()
-                            .longValueExact();
-                } catch (ArithmeticException e) {
-                    throw numberError();
-                }
+                return getBigDecimal().longValue();
             default:
                 throw new JSONException("TODO : " + valueType);
         }
