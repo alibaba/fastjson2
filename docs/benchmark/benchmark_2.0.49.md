@@ -1,4 +1,5 @@
 ## 1. [EishayFuryCompatibleParse](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayFuryCompatibleParse.java)
+这个场景是JSONB格式和Fury CompatibleMode反序列化性能比较。基于KeyValue的映射，对增加和删除字段的序列化结构都能有很好的兼容性。
 
 | aliyun ecs spec | jdk version 	|	jsonb	|	fury |
 |-----|-----|----------|-----|
@@ -34,6 +35,7 @@
 |  | graalvm_21+35.1	|	35737.44	|	16675.891 (46.66%) |
 
 ## 2. [EishayFuryCompatibleWrite](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayFuryCompatibleWrite.java)
+这个场景是JSONB格式和Fury CompatibleMode序列化性能比较。基于KeyValue的映射，对增加和删除字段的序列化结构都能有很好的兼容性。
 
 | aliyun ecs spec | jdk version 	|	jsonb	|	fury |
 |-----|-----|----------|-----|
@@ -69,6 +71,7 @@
 |  | graalvm_21+35.1	|	35882.38	|	16499.303 (45.98%) |
 
 ## 3. [EishayParseBinary](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseBinary.java)
+这个场景是二进制反序列化比较，JSONB格式、JSON UTF8编码(fastjson2UTF8Bytes)、hessian、javaSerialize的比较，用于[Apache dubbo](https://github.com/apache/dubbo)的用户选择二进制协议比较
 
 | aliyun ecs spec | jdk version 	|	jsonb	|	fastjson2UTF8Bytes	|	hessian	|	javaSerialize |
 |-----|-----|----------|----------|----------|-----|
@@ -104,6 +107,7 @@
 |  | graalvm_21+35.1	|	53926.657	|	23050.451 (42.74%)	|	1126.677 (2.09%)	|	516.984 (0.96%) |
 
 ## 4. [EishayParseBinaryArrayMapping](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseBinaryArrayMapping.java)
+这个场景是二进制反序列化比较，JSONB格式（基于字段顺序映射）、kryo、protobuf的比较
 
 | aliyun ecs spec | jdk version 	|	jsonb	|	kryo	|	protobuf |
 |-----|-----|----------|----------|-----|
@@ -139,6 +143,7 @@
 |  | graalvm_21+35.1	|	76647.898	|	17001.292 (22.18%)	|	32474.445 (42.37%) |
 
 ## 5. [EishayParseBinaryAutoType](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseBinaryAutoType.java)
+这个场景是带类型信息二进制反序列化比较，JSONB格式、JSON UTF8编码(fastjson2UTF8Bytes)、hessian、javaSerialize的比较，用于[Apache dubbo](https://github.com/apache/dubbo)的用户选择二进制协议比较
 
 | aliyun ecs spec | jdk version 	|	fastjson2JSONB	|	hessian	|	javaSerialize |
 |-----|-----|----------|----------|-----|
@@ -174,6 +179,7 @@
 |  | graalvm_21+35.1	|	27497.393	|	1066.45 (3.88%)	|	508.175 (1.85%) |
 
 ## 6. [EishayParseString](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseString.java)
+这个场景是将没有格式化的JSON字符串反序列化为JavaBean对象，是最常用的场景，这个是fastjson1的强项。
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -209,6 +215,7 @@
 |  | graalvm_21+35.1	|	21400.363	|	15729.448 (73.5%)	|	2897.409 (13.54%)	|	4884.852 (22.83%) |
 
 ## 7. [EishayParseStringPretty](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseStringPretty.java)
+这个场景是将格式化过的JSON字符串反序列化为JavaBean对象
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -244,6 +251,7 @@
 |  | graalvm_21+35.1	|	11965.773	|	4393.476 (36.72%)	|	2447.579 (20.45%)	|	4773.451 (39.89%) |
 
 ## 8. [EishayParseTreeString](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseTreeString.java)
+这个场景是将没有格式化的JSON字符串解析为JSONObject或者HashMap，不涉及绑定JavaBean对象。
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -279,6 +287,7 @@
 |  | graalvm_21+35.1	|	11928.752	|	8620.995 (72.27%)	|	2897.166 (24.29%)	|	4482.318 (37.58%) |
 
 ## 9. [EishayParseTreeStringPretty](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseTreeStringPretty.java)
+这个场景是将格式化过的字符串解析为JSONObject或者HashMap，不涉及绑定JavaBean对象。
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -314,6 +323,7 @@
 |  | graalvm_21+35.1	|	10205.686	|	6934.866 (67.95%)	|	2874.399 (28.16%)	|	4406.174 (43.17%) |
 
 ## 10. [EishayParseTreeUTF8Bytes](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseTreeUTF8Bytes.java)
+这个场景是将没有格式化的JSON字符串UTF8编码的byte[]数组反序列化解析为JSONObject或者HashMap，不涉及绑定JavaBean对象。
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -349,6 +359,7 @@
 |  | graalvm_21+35.1	|	11977.2	|	6271.37 (52.36%)	|	2677.536 (22.36%)	|	4534.456 (37.86%) |
 
 ## 11. [EishayParseTreeUTF8BytesPretty](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseTreeUTF8BytesPretty.java)
+这个场景是将格式化过的字符串UTF8编码的byte[]数组反序列化解析为JSONObject或者HashMap，不涉及绑定JavaBean对象。
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -384,6 +395,7 @@
 |  | graalvm_21+35.1	|	10517.908	|	4416.262 (41.99%)	|	4453.675 (42.34%)	|	4781.016 (45.46%) |
 
 ## 12. [EishayParseUTF8Bytes](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseUTF8Bytes.java)
+这个场景是将没有格式化的JSON字符串UTF8编码的byte[]数组反序列化为JavaBean对象，是最常用的场景，这个是fastjson1的强项。
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -419,6 +431,7 @@
 |  | graalvm_21+35.1	|	16253.952	|	11060.739 (68.05%)	|	2933.55 (18.05%)	|	4512.657 (27.76%) |
 
 ## 13. [EishayParseUTF8BytesPretty](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayParseUTF8BytesPretty.java)
+这个场景是将格式化过的JSON字符串UTF8编码的byte[]数组反序列化为JavaBean对象
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -454,6 +467,7 @@
 |  | graalvm_21+35.1	|	12882.174	|	3970.899 (30.82%)	|	4274.177 (33.18%)	|	4770.977 (37.04%) |
 
 ## 14. [EishayWriteBinary](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayWriteBinary.java)
+这个场景是二进制序列化比较，JSONB格式、JSON UTF8编码(fastjson2UTF8Bytes)、hessian、javaSerialize的比较，用于[Apache dubbo](https://github.com/apache/dubbo)的用户选择二进制协议比较
 
 | aliyun ecs spec | jdk version 	|	jsonb	|	msgpack	|	protobuf |
 |-----|-----|----------|----------|-----|
@@ -489,6 +503,7 @@
 |  | graalvm_21+35.1	|	58490.125	|	4528.233 (7.74%)	|	37438.619 (64.01%) |
 
 ## 15. [EishayWriteBinaryArrayMapping](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayWriteBinaryArrayMapping.java)
+这个场景是二进制序列化比较，JSONB格式（基于字段顺序映射）、kryo、protobuf的比较
 
 | aliyun ecs spec | jdk version 	|	jsonb	|	kryo	|	protobuf |
 |-----|-----|----------|----------|-----|
@@ -524,6 +539,7 @@
 |  | graalvm_21+35.1	|	42953.659	|	16792.663 (39.09%)	|	38154.145 (88.83%) |
 
 ## 16. [EishayWriteBinaryAutoType](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayWriteBinaryAutoType.java)
+这个场景是带类型信息二进制序列化比较，JSONB格式、JSON UTF8编码(fastjson2UTF8Bytes)、hessian、javaSerialize的比较，用于[Apache dubbo](https://github.com/apache/dubbo)的用户选择二进制协议比较
 
 | aliyun ecs spec | jdk version 	|	fastjson2JSONB	|	hessian	|	javaSerialize |
 |-----|-----|----------|----------|-----|
@@ -559,6 +575,7 @@
 |  | graalvm_21+35.1	|	20754.996	|	2627.823 (12.66%)	|	3551.157 (17.11%) |
 
 ## 17. [EishayWriteString](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayWriteString.java)
+这个场景是将JavaBean对象序列化为字符串
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -594,6 +611,7 @@
 |  | graalvm_21+35.1	|	23105.575	|	8173.993 (35.38%)	|	3880.422 (16.79%)	|	3337.725 (14.45%) |
 
 ## 18. [EishayWriteStringTree](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayWriteStringTree.java)
+这个场景是将JSONObject或者Map序列化为字符串
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -629,6 +647,7 @@
 |  | graalvm_21+35.1	|	11679.463	|	9116.302 (78.05%)	|	4708.766 (40.32%)	|	3447.532 (29.52%) |
 
 ## 19. [EishayWriteUTF8Bytes](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayWriteUTF8Bytes.java)
+这个场景是将JavaBean对象序列化为UTF8编码的Bytes
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
 |-----|-----|----------|----------|----------|-----|
@@ -664,6 +683,7 @@
 |  | graalvm_21+35.1	|	24487.932	|	8392.622 (34.27%)	|	4417.049 (18.04%)	|	3339.369 (13.64%) |
 
 ## 20. [EishayWriteUTF8BytesTree](https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/EishayWriteUTF8BytesTree.java)
+这个场景是将JSONObject或者Map序列化为UTF8编码的Bytes
 
 | aliyun ecs spec | jdk version 	|	fastjson2	|	jackson |
 |-----|-----|----------|-----|
