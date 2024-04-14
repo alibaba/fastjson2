@@ -41,7 +41,7 @@ public class JSONCodec
         this(new JSONEncoder(writerContext, charset), new JSONDecoder(valueType, charset, readerContext));
     }
 
-    public JSONCodec(JSONEncoder encoder, JSONDecoder decoder) {
+    JSONCodec(JSONEncoder encoder, JSONDecoder decoder) {
         this.encoder = encoder;
         this.decoder = decoder;
     }
@@ -56,7 +56,7 @@ public class JSONCodec
         return encoder;
     }
 
-    public static class JSONEncoder
+    static final class JSONEncoder
             implements Encoder {
         final JSONWriter.Context context;
         final Charset charset;
@@ -105,7 +105,7 @@ public class JSONCodec
         }
     }
 
-    public static class JSONDecoder
+    static final class JSONDecoder
             implements Decoder<Object> {
         final Type valueType;
         final Charset charset;
