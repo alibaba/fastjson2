@@ -15,6 +15,7 @@ public class GenReport {
         specs.put("aliyun_ecs.c8i.large", "https://help.aliyun.com/zh/ecs/user-guide/compute-optimized-instance-families#c8i");
         specs.put("aws_ecs.c7g.large", "https://aws.amazon.com/ec2/instance-types/c7g/");
     }
+
     public void gen() throws Exception {
         File dir = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/");
         File file = new File(dir, "benchmark_" + JSON.VERSION + "_raw.md");
@@ -140,7 +141,9 @@ public class GenReport {
                 }
             }
 
-            out.println("## " + (++h1) + " " + benchmarkResult.benchmarkCase);
+            String code = "https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay/" + benchmarkResult.benchmarkCase + ".java";
+            out.println("## " + (++h1) + ". [" + benchmarkResult.benchmarkCase + "](" + code + ")");
+            out.println();
 
             LibResult firLib = benchmarkResult.libraryResults.values().iterator().next();
             Set<String> jdks = firLib.scores.keySet();
