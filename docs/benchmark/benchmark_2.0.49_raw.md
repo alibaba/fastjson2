@@ -363,7 +363,7 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   2424.363 ±  31.440  ops/
 EishayWriteUTF8BytesTree.fastjson2        thrpt    5   4198.647 ±  90.009  ops/ms
 EishayWriteUTF8BytesTree.jackson          thrpt    5   2206.611 ± 117.532  ops/ms
 ```
-# aliyun_ecs.c8y.large-jdk1.8.0_381
+# aliyun_ecs.g8y.large-jdk1.8.0_381
 ```java
 Benchmark                                  Mode  Cnt      Score     Error   Units
 EishayFuryCompatibleParse.fury            thrpt    5   6888.329 ?  88.895  ops/ms
@@ -436,7 +436,7 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   2383.542 ?  96.144  ops/m
 EishayWriteUTF8BytesTree.fastjson2        thrpt    5   4690.186 ?  35.026  ops/ms
 EishayWriteUTF8BytesTree.jackson          thrpt    5   2507.413 ? 132.897  ops/ms
 ```
-# aliyun_ecs.c8y.large-jdk-11.0.20
+# aliyun_ecs.g8y.large-jdk-11.0.20
 ```java
 Benchmark                                  Mode  Cnt      Score     Error   Units
 EishayFuryCompatibleParse.fury            thrpt    5   6524.409 ?  52.688  ops/ms
@@ -509,7 +509,7 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   2506.326 ?  12.084  ops/m
 EishayWriteUTF8BytesTree.fastjson2        thrpt    5   4713.922 ?  43.050  ops/ms
 EishayWriteUTF8BytesTree.jackson          thrpt    5   2056.320 ?  19.564  ops/ms
 ```
-# aliyun_ecs.c8y.large-jdk-17.0.8
+# aliyun_ecs.g8y.large-jdk-17.0.8
 ```java
 Benchmark                                  Mode  Cnt      Score     Error   Units
 EishayFuryCompatibleParse.fury            thrpt    5   7486.026 ? 203.482  ops/ms
@@ -582,7 +582,7 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   2643.873 ?   9.891  ops/m
 EishayWriteUTF8BytesTree.fastjson2        thrpt    5   5051.455 ?  30.495  ops/ms
 EishayWriteUTF8BytesTree.jackson          thrpt    5   2596.943 ?  23.483  ops/ms
 ```
-# aliyun_ecs.c8y.large-jdk-21
+# aliyun_ecs.g8y.large-jdk-21
 ```java
 Benchmark                                  Mode  Cnt      Score      Error   Units
 EishayFuryCompatibleParse.fury            thrpt    5   7645.533 ±   29.638  ops/ms
@@ -655,7 +655,7 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   2579.265 ±    7.105  ops
 EishayWriteUTF8BytesTree.fastjson2        thrpt    5   4412.359 ±   37.118  ops/ms
 EishayWriteUTF8BytesTree.jackson          thrpt    5   2745.372 ±   13.000  ops/ms
 ```
-# aliyun_ecs.c8y.large-graalvm-jdk-21+35.1
+# aliyun_ecs.g8y.large-graalvm-jdk-21+35.1
 ```java
 Benchmark                                  Mode  Cnt      Score     Error   Units
 EishayFuryCompatibleParse.fury            thrpt    5   7572.332 ± 138.186  ops/ms
