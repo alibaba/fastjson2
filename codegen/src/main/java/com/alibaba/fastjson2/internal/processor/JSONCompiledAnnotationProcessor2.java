@@ -292,7 +292,7 @@ public class JSONCompiledAnnotationProcessor2
 
             JCTree.JCLabeledStatement switchLabel = label("_switch", null);
             ListBuffer<JCTree.JCCase> cases = new ListBuffer<>();
-            for (int i = 0; i < fieldsSize; ++i) {
+            for (int i = 0; i < hashCode32Keys.length; ++i) {
                 java.util.List<Long> hashCode64Array = map.get(hashCode32Keys[i]);
                 List<JCTree.JCStatement> stmts = List.nil();
                 Long fieldNameHash = null;
@@ -457,6 +457,7 @@ public class JSONCompiledAnnotationProcessor2
         for (int i = 0; i < labels.length; i++) {
             int name0 = switchKeys[i];
             java.util.List<AttributeInfo> fieldReaders = name0Map.get(name0);
+            ListBuffer<JCTree.JCStatement> caseStmts = new ListBuffer<>();
             for (int j = 0; j < fieldReaders.size(); j++) {
                 AttributeInfo fieldReader = fieldReaders.get(j);
                 int fieldReaderIndex = readerIndexMap.get(fieldReader);
@@ -834,8 +835,10 @@ public class JSONCompiledAnnotationProcessor2
                         throw new IllegalStateException("fieldNameLength " + fieldNameLength);
                 }
                 List<JCTree.JCStatement> readFieldValueStmts = genReadFieldValue(fieldReader, jsonReaderIdent, fieldReaderIndex, structInfo, loopLabel, objectIdent, isJsonb);
-                cases.append(defCase(literal(name0), List.of(defIf(nextIfMethod, block(readFieldValueStmts), null), defBreak(switchLabel))));
+                caseStmts.append(defIf(nextIfMethod, block(readFieldValueStmts), null));
             }
+            caseStmts.append(defBreak(switchLabel));
+            cases.append(defCase(literal(name0), caseStmts.toList()));
         }
         switchLabel.body = defSwitch(method(field(jsonReaderIdent, "getRawInt")), cases.toList());
         stmts = stmts.append(switchLabel);
