@@ -823,8 +823,8 @@ public class JSONCompiledAnnotationProcessor
                 Block.IfStmt nextIfMatchStmt = label.ifStmt(nextIfMatch);
                 genReadFieldValue(nextIfMatchStmt, fieldReaderIndex, info, fieldReader, jsonReader, object, forLabel, false);
                 nextIfMatchStmt.continueStmt(forLabel);
-                label.breakStmt();
             }
+            label.breakStmt();
         }
     }
 
