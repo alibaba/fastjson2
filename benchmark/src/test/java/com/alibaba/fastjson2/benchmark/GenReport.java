@@ -172,6 +172,10 @@ public class GenReport {
                     String jdkinfo = jdk.substring(p + 1);
                     if (jdkinfo.startsWith("graalvm-jdk-")) {
                         jdkinfo = "graalvm_" + jdkinfo.substring("graalvm-jdk-".length());
+                    } else if (jdkinfo.startsWith("zulu21.0.57")) {
+                        jdkinfo = "zulu21.0.57";
+                    } else if (jdkinfo.startsWith("zulu21.32.17")) {
+                        jdkinfo = "zulu21.32.17";
                     }
                     out.print(jdkinfo);
                 }
@@ -192,49 +196,6 @@ public class GenReport {
             }
 
             out.println();
-
-            LinkedHashMap<String, String[]> graalvm17_jdks = new LinkedHashMap<>();
-            String jdk17 = null, graalvm17 = null;
-            String jdk17_info = null, graalvm17_info = null;
-            for (String jdk : jdks) {
-                int p = jdk.indexOf('-');
-                if (p == -1) {
-                    continue;
-                }
-
-                String ecs = jdk.substring(0, p);
-                String[] ecs_jdk17s = graalvm17_jdks.get(ecs);
-                if (ecs_jdk17s == null) {
-                    ecs_jdk17s = new String[2];
-                    graalvm17_jdks.put(ecs, ecs_jdk17s);
-                }
-
-                String jdkinfo = jdk.substring(p + 1);
-                if (jdkinfo.startsWith("jdk-17.")) {
-                    jdk17 = jdk;
-                    jdk17_info = jdkinfo;
-                    ecs_jdk17s[0] = jdk;
-                } else if (jdkinfo.startsWith("graalvm-jdk-17.")) {
-                    graalvm17 = jdk;
-                    graalvm17_info = jdkinfo;
-                    ecs_jdk17s[1] = jdk;
-                }
-            }
-
-            if (jdk17 != null && graalvm17 != null) {
-                out.println();
-                out.println("### " + h1 + ".1 jdk17 vs graalvm17");
-                out.println("|  ecs | library | " + jdk17_info + " | " + graalvm17_info + " | delta |");
-                out.println("|-----|-----|-----|-----|-----|");
-                for (LibResult libResult : benchmarkResult.libraryResults.values()) {
-                    for (Map.Entry<String, String[]> entry : graalvm17_jdks.entrySet()) {
-                        Double score_jdk17 = libResult.scores.get(entry.getValue()[0]);
-                        Double score_graalvm17 = libResult.scores.get(entry.getValue()[1]);
-                        double percent = (score_graalvm17 - score_jdk17) / score_jdk17;
-                        out.println("|  " + entry.getKey() + " |  " + libResult.library + " | " + score_jdk17 + " | " + score_graalvm17 + " | " + new DecimalFormat("#,##0.##%").format(percent) + " |");
-                    }
-                }
-            }
         }
         out.close();
     }
