@@ -21,7 +21,7 @@ public class ReadResult {
         files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_aws_c7g.out");
         files.put("orangepi5p", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_orangepi5.out");
         files.put("orangepi_aipro", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_orangepi_aipro.out");
-//        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_applem1pro.out");
+        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_applem1pro.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
