@@ -27,9 +27,12 @@ public class JSONCodecTest {
 
     @Test
     public void jsonAutoType() throws Exception {
+        JSONWriter.Feature[] writerFeatures = {JSONWriter.Feature.WriteClassName};
+        JSONReader.Feature[] readerFeatures = {};
+        JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(Bean.class.getName()); // 配置反序列化支持的类，支持前缀配置
         JSONCodec codec = new JSONCodec(
-                JSONFactory.createWriteContext(JSONWriter.Feature.WriteClassName),
-                JSONFactory.createReadContext(JSONReader.autoTypeFilter(Bean.class))
+                JSONFactory.createWriteContext(writerFeatures),
+                JSONFactory.createReadContext(autoTypeFilter, readerFeatures)
         );
 
         Bean bean = new Bean();
@@ -58,9 +61,12 @@ public class JSONCodecTest {
 
     @Test
     public void jsonbAutoType() throws Exception {
+        JSONWriter.Feature[] writerFeatures = {JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased};
+        JSONReader.Feature[] readerFeatures = {JSONReader.Feature.FieldBased};
+        JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(Bean.class.getName()); // 配置反序列化支持的类，支持前缀配置
         JSONBCodec codec = new JSONBCodec(
-                JSONFactory.createWriteContext(JSONWriter.Feature.WriteClassName),
-                JSONFactory.createReadContext(JSONReader.autoTypeFilter(Bean.class))
+                JSONFactory.createWriteContext(writerFeatures),
+                JSONFactory.createReadContext(autoTypeFilter, readerFeatures)
         );
 
         Bean bean = new Bean();
