@@ -95,3 +95,5 @@
 * https://github.com/luguosong/programming-notes
 * https://github.com/niumoo/JavaNotes
 * https://github.com/OpenFeign/feign
+* https://github.com/yl-yue/yue-library
+* https://github.com/dromara/forest
