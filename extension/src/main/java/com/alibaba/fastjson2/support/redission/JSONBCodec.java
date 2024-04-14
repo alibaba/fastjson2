@@ -16,11 +16,28 @@ import java.lang.reflect.Type;
 
 public class JSONBCodec
         extends BaseCodec {
-    final JSONEncoder encoder;
-    final JSONDecoder decoder;
+    final JSONBEncoder encoder;
+    final JSONBDecoder decoder;
 
     public JSONBCodec(Type valueType) {
-        this(JSONFactory.createWriteContext(), JSONFactory.createReadContext(), valueType);
+        this(
+                JSONFactory.createWriteContext(JSONWriter.Feature.FieldBased),
+                JSONFactory.createReadContext(JSONReader.Feature.FieldBased),
+                valueType);
+    }
+
+    /**
+     *
+     * @param autoTypes Support for automatically typed class name prefixes
+     * @since 2.0.50
+     */
+    public JSONBCodec(String... autoTypes) {
+        this(
+                JSONFactory.createWriteContext(JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteClassName),
+                JSONFactory.createReadContext(
+                        JSONReader.autoTypeFilter(autoTypes),
+                        JSONReader.Feature.FieldBased),
+                null);
     }
 
     public JSONBCodec(JSONWriter.Context writerContext, JSONReader.Context readerContext) {
@@ -28,10 +45,10 @@ public class JSONBCodec
     }
 
     public JSONBCodec(JSONWriter.Context writerContext, JSONReader.Context readerContext, Type valueType) {
-        this(new JSONEncoder(writerContext), new JSONDecoder(readerContext, valueType));
+        this(new JSONBEncoder(writerContext), new JSONBDecoder(readerContext, valueType));
     }
 
-    public JSONBCodec(JSONEncoder encoder, JSONDecoder decoder) {
+    protected JSONBCodec(JSONBEncoder encoder, JSONBDecoder decoder) {
         this.encoder = encoder;
         this.decoder = decoder;
     }
@@ -46,11 +63,11 @@ public class JSONBCodec
         return encoder;
     }
 
-    public static class JSONEncoder
+    static final class JSONBEncoder
             implements Encoder {
         final JSONWriter.Context context;
 
-        public JSONEncoder(JSONWriter.Context context) {
+        public JSONBEncoder(JSONWriter.Context context) {
             this.context = context;
         }
 
@@ -82,12 +99,12 @@ public class JSONBCodec
         }
     }
 
-    public static class JSONDecoder
+    static final class JSONBDecoder
             implements Decoder<Object> {
         final JSONReader.Context context;
         final Type valueType;
 
-        public JSONDecoder(JSONReader.Context context, Type valueType) {
+        public JSONBDecoder(JSONReader.Context context, Type valueType) {
             this.context = context;
             this.valueType = valueType;
         }

@@ -80,6 +80,21 @@ public class JSONCodecTest {
         assertEquals(bean.name, decoded.name);
     }
 
+    @Test
+    public void jsonb1() throws Exception {
+        JSONBCodec codec = new JSONBCodec(Bean.class.getName()); // 配置反序列化支持的类，支持前缀配置
+
+        Bean bean = new Bean();
+        bean.name = "abc";
+
+        ByteBuf encoded = codec.getValueEncoder()
+                .encode(bean);
+
+        Bean decoded = (Bean) codec.getValueDecoder()
+                .decode(encoded, null);
+        assertEquals(bean.name, decoded.name);
+    }
+
     public static class Bean {
         public String name;
     }
