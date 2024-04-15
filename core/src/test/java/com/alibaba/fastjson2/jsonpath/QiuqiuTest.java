@@ -17,7 +17,7 @@ public class QiuqiuTest {
     public void test() {
         CsiObject csiObject = new CsiObject();
         JSONPath.set(csiObject, "$.csiLive[0].id", "123");
-        assertEquals("{\"csiLive\":[{\"id\":\"123\"}]}", JSON.toJSONString(csiObject));
+        assertEquals("{\"csiLive\":[{\"id\":123}]}", JSON.toJSONString(csiObject));
     }
 
     @Data

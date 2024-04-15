@@ -130,7 +130,7 @@ public abstract class JSONPath {
         return paths;
     }
 
-    void paths(Map<Object, String> values, Map<String, Object> paths, String parent, Object javaObject) {
+    void paths(Map<Object, String> values, Map paths, String parent, Object javaObject) {
         if (javaObject == null) {
             return;
         }

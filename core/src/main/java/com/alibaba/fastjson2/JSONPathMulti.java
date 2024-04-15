@@ -235,7 +235,32 @@ final class JSONPathMulti
                 if (nextSegment instanceof JSONPathSegmentIndex) {
                     emptyValue = new JSONArray();
                 } else if (nextSegment instanceof JSONPathSegmentName) {
-                    emptyValue = new JSONObject();
+                    Context parentContext = context.parent;
+                    if (parentContext == null) {
+                        parentContext = context;
+                    }
+                    Object bean;
+                    if (parentContext.parent == null) {
+                        bean = parentContext.root;
+                    } else {
+                        bean = parentContext.parent.value;
+                    }
+                    Class itemClass = null;
+                    if (bean != null && parentContext.current instanceof JSONPathSegmentName) {
+                        String name = ((JSONPathSegmentName) parentContext.current).name;
+                        JSONReader.Context readerContext = getReaderContext();
+                        ObjectReader<?> objectReader = readerContext.getObjectReader(bean.getClass());
+                        FieldReader fieldReader = objectReader.getFieldReader(name);
+                        if (fieldReader != null) {
+                            itemClass = fieldReader.getItemClass();
+                        }
+                    }
+                    if (itemClass != null) {
+                        ObjectReader<?> itemReader = readerContext.getObjectReader(itemClass);
+                        emptyValue = itemReader.createInstance(0L);
+                    } else {
+                        emptyValue = new JSONObject();
+                    }
                 } else {
                     return;
                 }
@@ -246,7 +271,11 @@ final class JSONPathMulti
                 } else if (parentObject instanceof List && segment instanceof JSONPathSegmentIndex) {
                     List list = (List) parentObject;
                     int index = ((JSONPathSegmentIndex) segment).index;
-                    if (index == list.size()) {
+                    if (index >= list.size()) {
+                        int delta = index - list.size();
+                        for (int j = 0; j < delta; j++) {
+                            list.add(null);
+                        }
                         list.add(emptyValue);
                     } else {
                         list.set(index, emptyValue);
