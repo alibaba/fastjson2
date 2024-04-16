@@ -2507,4 +2507,8 @@ final class JSONWriterJSONB
             return JSONB.typeName(bytes[0]) + ", bytes length " + off;
         }
     }
+
+    @Override
+    public void println() {
+    }
 }
