@@ -247,4 +247,8 @@ public class SerializeWriter
         raw.writeRaw(c);
         return this;
     }
+
+    public JSONWriter getJSONWriter() {
+        return raw;
+    }
 }
