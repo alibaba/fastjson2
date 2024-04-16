@@ -1522,6 +1522,10 @@ public class ObjectReaderBaseModule
             return new ObjectReaderImplFromString(Duration.class, (Function<String, Duration>) Duration::parse);
         }
 
+        if (type == Duration.class || type == Period.class) {
+            return new ObjectReaderImplFromString(Period.class, (Function<String, Period>) Period::parse);
+        }
+
         if (type == AtomicBoolean.class) {
             return new ObjectReaderImplFromBoolean(
                     AtomicBoolean.class,
