@@ -45,6 +45,7 @@ public final class JSONFactory {
     static long defaultWriterFeatures;
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
+    static boolean defaultWriterAlphabetic;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
@@ -166,52 +167,11 @@ public final class JSONFactory {
             CREATOR = property == null ? "asm" : property;
         }
 
-        {
-            String property = System.getProperty("fastjson2.useJacksonAnnotation");
-            if (property != null) {
-                property = property.trim();
-            }
+        useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
+        useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
+        defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
 
-            if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.useJacksonAnnotation");
-                if (property != null) {
-                    property = property.trim();
-                }
-            }
-
-            useJacksonAnnotation = !"false".equals(property);
-        }
-
-        {
-            String property = System.getProperty("fastjson2.useGsonAnnotation");
-            if (property != null) {
-                property = property.trim();
-            }
-
-            if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.useGsonAnnotation");
-                if (property != null) {
-                    property = property.trim();
-                }
-            }
-
-            useGsonAnnotation = !"false".equals(property);
-        }
-
-        boolean readerVector = false;
-        {
-            String property = System.getProperty("fastjson2.readerVector");
-            if (property != null) {
-                property = property.trim();
-                if (property.isEmpty()) {
-                    property = properties.getProperty("fastjson2.readerVector");
-                    if (property != null) {
-                        property = property.trim();
-                    }
-                }
-                readerVector = !"false".equals(property);
-            }
-        }
+        boolean readerVector = getPropertyBool(properties, "fastjson2.readerVector", false);
 
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF8 = null;
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF16 = null;
@@ -265,6 +225,32 @@ public final class JSONFactory {
         INCUBATOR_VECTOR_READER_CREATOR_ASCII = readerCreatorASCII;
         INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;
         INCUBATOR_VECTOR_READER_CREATOR_UTF16 = readerCreatorUTF16;
+    }
+
+    private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
+        boolean propertyValue = defaultValue;
+
+        String property = System.getProperty(name);
+        if (property != null) {
+            property = property.trim();
+            if (property.isEmpty()) {
+                property = properties.getProperty(name);
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+            if (defaultValue) {
+                if ("false".equals(property)) {
+                    propertyValue = false;
+                }
+            } else {
+                if ("true".equals(property)) {
+                    propertyValue = true;
+                }
+            }
+        }
+
+        return propertyValue;
     }
 
     public static boolean isUseJacksonAnnotation() {
@@ -525,5 +511,13 @@ public final class JSONFactory {
 
     public static String getDefaultWriterFormat() {
         return defaultWriterFormat;
+    }
+
+    public static boolean isDefaultWriterAlphabetic() {
+        return defaultWriterAlphabetic;
+    }
+
+    public static void setDefaultWriterAlphabetic(boolean defaultWriterAlphabetic) {
+        JSONFactory.defaultWriterAlphabetic = defaultWriterAlphabetic;
     }
 }
