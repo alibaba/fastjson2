@@ -43,6 +43,7 @@ public class ObjectWriterProvider
     PropertyNamingStrategy namingStrategy;
 
     volatile long userDefineMask;
+    boolean alphabetic = JSONFactory.isDefaultWriterAlphabetic();
 
     public ObjectWriterProvider() {
         this((PropertyNamingStrategy) null);
@@ -605,5 +606,11 @@ public class ObjectWriterProvider
         );
 
         BeanUtils.cleanupCache(classLoader);
+    }
+
+    protected BeanInfo createBeanInfo() {
+        BeanInfo beanInfo = new BeanInfo();
+        beanInfo.alphabetic = alphabetic;
+        return beanInfo;
     }
 }

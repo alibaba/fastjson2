@@ -304,7 +304,7 @@ public class ObjectWriterCreator {
             final long features,
             final ObjectWriterProvider provider
     ) {
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = provider.createBeanInfo();
         beanInfo.readerFeatures |= FieldInfo.JIT;
 
         provider.getBeanInfo(beanInfo, objectClass);
@@ -813,7 +813,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass.isEnum()) {
-            BeanInfo beanInfo = new BeanInfo();
+            BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
 
             boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;
@@ -1189,10 +1189,10 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass.isEnum()) {
-            BeanInfo beanInfo = new BeanInfo();
             if (provider == null) {
                 provider = JSONFactory.getDefaultObjectWriterProvider();
             }
+            BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
 
             boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;

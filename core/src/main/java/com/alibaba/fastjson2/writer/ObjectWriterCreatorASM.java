@@ -145,8 +145,9 @@ public class ObjectWriterCreatorASM
             return super.createObjectWriter(fieldWriters);
         }
 
-        BeanInfo beanInfo = new BeanInfo();
-        return jitWriter(null, JSONFactory.getDefaultObjectWriterProvider(), beanInfo, fieldWriters, 0);
+        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
+        BeanInfo beanInfo = provider.createBeanInfo();
+        return jitWriter(null, provider, beanInfo, fieldWriters, 0);
     }
 
     @Override
@@ -159,7 +160,7 @@ public class ObjectWriterCreatorASM
         boolean externalClass = classLoader.isExternalClass(objectClass);
         boolean publicClass = Modifier.isPublic(modifiers);
 
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = provider.createBeanInfo();
         provider.getBeanInfo(beanInfo, objectClass);
 
         if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
@@ -3598,7 +3599,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass.isEnum()) {
-            BeanInfo beanInfo = new BeanInfo();
+            BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
 
             boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;

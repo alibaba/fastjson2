@@ -1313,7 +1313,7 @@ public class ObjectWriterBaseModule
                 return externalObjectWriter;
             }
 
-            BeanInfo beanInfo = new BeanInfo();
+            BeanInfo beanInfo = provider.createBeanInfo();
             Class mixIn = provider.getMixIn(clazz);
             if (mixIn != null) {
                 annotationProcessor.getBeanInfo(beanInfo, mixIn);
@@ -1499,7 +1499,7 @@ public class ObjectWriterBaseModule
             }
         }
 
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = provider.createBeanInfo();
 
         Class[] interfaces = enumClass.getInterfaces();
         for (int i = 0; i < interfaces.length; i++) {
