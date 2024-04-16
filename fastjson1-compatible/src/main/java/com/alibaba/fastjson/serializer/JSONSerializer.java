@@ -171,4 +171,23 @@ public class JSONSerializer {
     public void setContext(SerialContext context) {
         this.context = context;
     }
+
+    public final boolean containsReference(Object value) {
+        return out.raw.containsReference(value);
+    }
+
+    public final void writeReference(Object object) {
+        out.raw.writeReference(object);
+    }
+
+    public final void incrementIndent() {
+        out.raw.incrementIndent();
+    }
+
+    public final void decrementIdent() {
+        out.raw.decrementIdent();
+    }
+
+    public void println() {
+    }
 }

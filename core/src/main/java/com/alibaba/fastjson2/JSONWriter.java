@@ -2466,4 +2466,43 @@ public abstract class JSONWriter
     protected static IllegalArgumentException illegalYear(int year) {
         return new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
     }
+
+    /**
+     * @deprecated
+     */
+    public final void incrementIndent() {
+        indent++;
+    }
+
+    /**
+     * @deprecated
+     */
+    public final void decrementIdent() {
+        indent--;
+    }
+
+    /**
+     * @deprecated
+     */
+    public void println() {
+        writeChar('\n');
+        for (int i = 0; i < indent; ++i) {
+            writeChar('\t');
+        }
+    }
+
+    /**
+     * @deprecated
+     * @param object
+     */
+    public final void writeReference(Object object) {
+        if (refs == null) {
+            return;
+        }
+
+        Path path = refs.get(object);
+        if (path != null) {
+            writeReference(path.toString());
+        }
+    }
 }
