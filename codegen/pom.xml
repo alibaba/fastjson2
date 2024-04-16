@@ -77,6 +77,31 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>com/alibaba/fastjson2/**/*.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <user.timezone>Asia/Shanghai</user.timezone>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -107,7 +132,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -155,7 +180,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -226,7 +251,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -297,7 +322,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -368,7 +393,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -439,7 +464,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -510,7 +535,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -581,7 +606,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -652,7 +677,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -723,7 +748,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -794,7 +819,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -865,7 +890,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -936,7 +961,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -1007,7 +1032,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.source}</target>
+                            <target>${maven.compiler.target}</target>
                             <fork>true</fork>
                             <compilerArgs>
                                 <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
