@@ -2135,12 +2135,22 @@ public abstract class JSON
             return javaObject;
         }
 
-        String str = JSON.toJSONString(javaObject);
-        Object object = JSON.parse(str);
-        if (object instanceof List) {
-            return new JSONArray((List) object);
+        Object json;
+        try {
+            json = com.alibaba.fastjson2.JSON.toJSON(javaObject);
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            throw new JSONException(e.getMessage(), e);
         }
-        return object;
+
+        if (json instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) json);
+        }
+
+        if (json instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) json);
+        }
+
+        return json;
     }
 
     public static Object toJSON(Object javaObject, SerializeConfig config) {
