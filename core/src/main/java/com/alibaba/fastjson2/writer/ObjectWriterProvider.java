@@ -358,6 +358,8 @@ public class ObjectWriterProvider
                     case "springfox.documentation.spring.web.json.Json":
                     case "cn.hutool.json.JSONArray":
                     case "cn.hutool.json.JSONObject":
+                    case "cn.hutool.core.map.CaseInsensitiveMap":
+                    case "cn.hutool.core.map.CaseInsensitiveLinkedMap":
                         fieldBased = false;
                         break;
                     default:
