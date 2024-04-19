@@ -1349,6 +1349,20 @@ public abstract class BeanUtils {
                 }
                 return buf.toString();
             }
+            case "UpperCamelCaseWithUnderScores":
+                return upperCamelWith(methodName, prefixLength, '_');
+            case "UpperCamelCaseWithDashes":
+                return upperCamelWith(methodName, prefixLength, '-');
+            case "UpperCamelCaseWithDots":
+                return upperCamelWith(methodName, prefixLength, '.');
+            case "LowerCase":
+                return methodName.substring(prefixLength).toLowerCase();
+            case "LowerCaseWithUnderScores":
+                return underScores(methodName, prefixLength, false);
+            case "LowerCaseWithDashes":
+                return dashes(methodName, prefixLength, false);
+            case "LowerCaseWithDots":
+                return dots(methodName, prefixLength, false);
             default:
                 throw new JSONException("TODO : " + namingStrategy);
         }
