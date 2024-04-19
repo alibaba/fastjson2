@@ -307,13 +307,6 @@ public class JdbcSupport {
                 return;
             }
 
-            int nanos = date.getNanos();
-
-            if (nanos == 0) {
-                jsonWriter.writeMillis(date.getTime());
-                return;
-            }
-
             LocalDateTime localDateTime = date.toLocalDateTime();
             jsonWriter.writeLocalDateTime(localDateTime);
         }
@@ -366,11 +359,6 @@ public class JdbcSupport {
                 }
 
                 int nanos = date.getNanos();
-
-                if (nanos == 0) {
-                    jsonWriter.writeInt64(date.getTime());
-                    return;
-                }
 
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
