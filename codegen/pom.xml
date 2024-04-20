@@ -119,7 +119,7 @@
                             <encoding>UTF-8</encoding>
                             <docencoding>UTF-8</docencoding>
                             <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/examples/exclude-package-names.html -->
-                            <excludePackageNames>jdk.incubator.vector</excludePackageNames>
+                            <excludePackageNames>jdk.incubator.vector,com.sun.tools.javac.code,com.sun.tools.javac.processing,com.sun.tools.javac.tree,com.sun.tools.javac.util,com.sun.tools.javac.api</excludePackageNames>
                             <doclint>all,-missing</doclint>
                             <links>
                                 <link>https://docs.oracle.com/javase/8/docs/api</link>
