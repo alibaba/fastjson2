@@ -190,4 +190,12 @@ public class JSONSerializer {
 
     public void println() {
     }
+
+    public void setContext(SerialContext parent, Object object, Object fieldName, int features) {
+        this.setContext(parent, object, fieldName, features, 0);
+    }
+
+    public void setContext(SerialContext parent, Object object, Object fieldName, int features, int fieldFeatures) {
+        this.setContext(new SerialContext(parent, object, fieldName, features, fieldFeatures));
+    }
 }
