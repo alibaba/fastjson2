@@ -431,6 +431,31 @@ public class ObjectReaderAdapter<T>
         return m < 0 ? -1 : this.mapping[m];
     }
 
+    protected final FieldReader getFieldReaderUL(long hashCode, JSONReader jsonReader, long features) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);
+        }
+        return fieldReader;
+    }
+
+    protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);
+        }
+
+        if (fieldReader != null) {
+            fieldReader.readFieldValue(jsonReader, object);
+        } else {
+            processExtra(jsonReader, object);
+        }
+    }
+
     @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
         int m = Arrays.binarySearch(hashCodesLCase, hashCode);
