@@ -151,7 +151,7 @@ public class JSONCompiledAnnotationProcessor2
     }
 
     private JCTree.JCClassDecl genInnerClass(String className, Class superClass) {
-        JCTree.JCClassDecl innerClass = defClass(Flags.PRIVATE | Flags.STATIC,
+        JCTree.JCClassDecl innerClass = defClass(Flags.PUBLIC | Flags.STATIC,
                 className,
                 null,
                 qualIdent(superClass.getName()),
@@ -975,10 +975,10 @@ public class JSONCompiledAnnotationProcessor2
             isReferenceStmts.append(refVar);
             JCTree.JCMethodInvocation addResolveTaskMethod = method(field(jsonReaderIdent, "addResolveTask"), List.of(ident(fieldValueVar.name), ident(mapKey.name), method(field(qualIdent("com.alibaba.fastjson2.JSONPath"), "of"), List.of(ident(refVar.name)))));
             isReferenceStmts.append(exec(addResolveTaskMethod));
-            isReferenceStmts.append(defContinue(loopLabel));
-            whileStmts.append(defIf(method(field(jsonReaderIdent, "isReference")), block(isReferenceStmts.toList()), null));
+            whileStmts.append(defIf(method(field(jsonReaderIdent, "isReference")), block(isReferenceStmts.toList()), exec(method(field(ident(fieldValueVar.name), "put"), List.of(mapEntryKeyExpr, mapEntryValueExpr)))));
+        } else {
+            whileStmts.append(exec(method(field(ident(fieldValueVar.name), "put"), List.of(mapEntryKeyExpr, mapEntryValueExpr))));
         }
-        whileStmts.append(exec(method(field(ident(fieldValueVar.name), "put"), List.of(mapEntryKeyExpr, mapEntryValueExpr))));
 
         elseStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfObjectEndMethod), block(whileStmts.toList())));
 
@@ -1001,7 +1001,7 @@ public class JSONCompiledAnnotationProcessor2
                     writer.write("package " + pkgPath + ";");
                     writer.write(System.lineSeparator());
                 }
-                String str = innerClass.toString().replaceFirst("private static class ", "public class ");
+                String str = innerClass.toString().replaceFirst("public static class ", "public class ");
                 writer.write(str);
             } catch (IOException e) {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Failed saving compiled json serialization file " + fullQualifiedName);
@@ -1025,9 +1025,9 @@ public class JSONCompiledAnnotationProcessor2
         int dotIndex = structInfo.binaryName.lastIndexOf('.');
         String className = structInfo.binaryName.substring(dotIndex + 1);
         if (dotIndex == -1) {
-            return className + "_FASTJOSNReader2";
+            return className + "_FASTJSONReader2";
         }
         String packageName = structInfo.binaryName.substring(0, dotIndex);
-        return packageName + '.' + className + "_FASTJOSNReader2";
+        return packageName + '.' + className + "_FASTJSONReader2";
     }
 }

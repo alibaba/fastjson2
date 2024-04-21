@@ -93,10 +93,10 @@ public class JSONCompiledAnnotationProcessor
         int dotIndex = structInfo.binaryName.lastIndexOf('.');
         String className = structInfo.binaryName.substring(dotIndex + 1);
         if (dotIndex == -1) {
-            return className + "_FASTJOSNReader";
+            return className + "_FASTJSONReader";
         }
         String packageName = structInfo.binaryName.substring(0, dotIndex);
-        return packageName + '.' + className + "_FASTJOSNReader";
+        return packageName + '.' + className + "_FASTJSONReader";
     }
 
     private static void buildCode(

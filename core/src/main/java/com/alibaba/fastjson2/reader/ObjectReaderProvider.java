@@ -829,7 +829,9 @@ public class ObjectReaderProvider
                 jsonCompiled = "com.alibaba.fastjson2.annotation.JSONCompiled".equals(annotationType.getName());
             }
             if (jsonCompiled) {
-                String codeGenClassName = objectClass.getName() + "_FASTJOSNReader";
+                String objectClassName = objectClass.getName();
+                String codeGenClassName = objectClassName + "_FASTJSONReader";
+                String codeGenClassName2 = objectClassName + "$" + objectClassName.substring(objectClassName.lastIndexOf(".") + 1) + "_FASTJSONReader2";
                 ClassLoader classLoader = objectClass.getClassLoader();
                 if (classLoader == null) {
                     classLoader = Thread.currentThread().getContextClassLoader();
@@ -843,7 +845,14 @@ public class ObjectReaderProvider
                     if (ObjectReader.class.isAssignableFrom(loadedClass)) {
                         objectReader = (ObjectReader) loadedClass.newInstance();
                     }
+                    if (objectReader == null) {
+                        loadedClass = classLoader.loadClass(codeGenClassName2);
+                        if (ObjectReader.class.isAssignableFrom(loadedClass)) {
+                            objectReader = (ObjectReader) loadedClass.newInstance();
+                        }
+                    }
                 } catch (Exception ignored) {
+                    ignored.printStackTrace();
                     // ignored
                 }
             }
