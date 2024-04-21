@@ -852,7 +852,6 @@ public class ObjectReaderProvider
                         }
                     }
                 } catch (Exception ignored) {
-                    ignored.printStackTrace();
                     // ignored
                 }
             }
