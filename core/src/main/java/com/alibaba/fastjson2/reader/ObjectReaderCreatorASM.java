@@ -44,6 +44,8 @@ public class ObjectReaderCreatorASM
     static final String METHOD_DESC_READ_OBJECT = "(" + DESC_JSON_READER + "Ljava/lang/reflect/Type;Ljava/lang/Object;J)Ljava/lang/Object;";
     static final String METHOD_DESC_GET_FIELD_READER = "(J)" + DESC_FIELD_READER;
     static final String METHOD_DESC_READ_FIELD_VALUE = "(" + DESC_JSON_READER + "Ljava/lang/Object;)V";
+    static final String GET_FIELD_READER_UL = "(J" + DESC_JSON_READER + "J)" + DESC_FIELD_READER;
+    static final String READ_FIELD_READER_UL = "(J" + DESC_JSON_READER + "JLjava/lang/Object;)V";
     static final String METHOD_DESC_ADD_RESOLVE_TASK = "(" + DESC_JSON_READER + "Ljava/lang/Object;Ljava/lang/String;)V";
     static final String METHOD_DESC_ADD_RESOLVE_TASK_2 = "(" + DESC_JSON_READER + "Ljava/util/List;ILjava/lang/String;)V";
     static final String METHOD_DESC_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
@@ -1616,6 +1618,7 @@ public class ObjectReaderCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectEnd", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFNE, for_end_i_);
 
+        boolean switchGen = false;
         if (fieldNameLengthMin >= 5 && fieldNameLengthMax <= 7) {
             varIndex = genRead57(
                     context,
@@ -1634,6 +1637,7 @@ public class ObjectReaderCreatorASM
                     for_inc_i_,
                     hashCode64Start
             );
+            switchGen = true;
         } else if (fieldNameLengthMin >= 2 && fieldNameLengthMax <= 43) {
             varIndex = genRead243(
                     context,
@@ -1653,6 +1657,7 @@ public class ObjectReaderCreatorASM
                     hashCode64Start,
                     false
             );
+            switchGen = true;
         }
 
         mw.visitLabel(hashCode64Start);
@@ -1696,7 +1701,15 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(noneAutoType_);
 
         // continue
-        if (fieldReaderArray.length > 6) {
+        if (switchGen) {
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+            mw.visitVarInsn(ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "readFieldValue", READ_FIELD_READER_UL, false);
+            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
+        } else if (fieldReaderArray.length > 6) {
             // use switch
             Map<Integer, List<Long>> map = new TreeMap();
 
@@ -1912,11 +1925,13 @@ public class ObjectReaderCreatorASM
 
             mw.visitLabel(processExtra_);
         }
-        mw.visitVarInsn(Opcodes.ALOAD, THIS);
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
-        mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
+        if (!switchGen) {
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
+            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
+        }
 
         mw.visitLabel(for_inc_i_);
         mw.visitIincInsn(I, 1);

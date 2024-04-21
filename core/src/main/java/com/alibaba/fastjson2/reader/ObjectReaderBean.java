@@ -93,11 +93,6 @@ public abstract class ObjectReaderBean<T>
     }
 
     protected void processExtra(JSONReader jsonReader, Object object) {
-        if (extraFieldReader != null && object != null) {
-            extraFieldReader.processExtra(jsonReader, object);
-            return;
-        }
-
         if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
             String fieldName = jsonReader.getFieldName();
             if (fieldName.startsWith("is")) {
@@ -112,6 +107,11 @@ public abstract class ObjectReaderBean<T>
                     }
                 }
             }
+        }
+
+        if (extraFieldReader != null && object != null) {
+            extraFieldReader.processExtra(jsonReader, object);
+            return;
         }
 
         ExtraProcessor extraProcessor = jsonReader.getContext().getExtraProcessor();
