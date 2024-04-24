@@ -1371,6 +1371,10 @@ public abstract class JSONReader
             return null;
         }
 
+        if (current() == 'n') {
+            return readNullOrNewDate();
+        }
+
         long millis;
         if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
             nextIfMatch(':');
