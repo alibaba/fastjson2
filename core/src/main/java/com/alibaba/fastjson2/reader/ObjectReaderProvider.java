@@ -830,8 +830,7 @@ public class ObjectReaderProvider
             }
             if (jsonCompiled) {
                 String objectClassName = objectClass.getName();
-                String codeGenClassName = objectClassName + "_FASTJSONReader";
-                String codeGenClassName2 = objectClassName + "$" + objectClassName.substring(objectClassName.lastIndexOf(".") + 1) + "_FASTJSONReader2";
+                String codeGenClassName = objectClassName + "$" + objectClassName.substring(objectClassName.lastIndexOf(".") + 1) + "_FASTJSONReader";
                 ClassLoader classLoader = objectClass.getClassLoader();
                 if (classLoader == null) {
                     classLoader = Thread.currentThread().getContextClassLoader();
@@ -844,12 +843,6 @@ public class ObjectReaderProvider
                     Class<?> loadedClass = classLoader.loadClass(codeGenClassName);
                     if (ObjectReader.class.isAssignableFrom(loadedClass)) {
                         objectReader = (ObjectReader) loadedClass.newInstance();
-                    }
-                    if (objectReader == null) {
-                        loadedClass = classLoader.loadClass(codeGenClassName2);
-                        if (ObjectReader.class.isAssignableFrom(loadedClass)) {
-                            objectReader = (ObjectReader) loadedClass.newInstance();
-                        }
                     }
                 } catch (Exception ignored) {
                     // ignored
