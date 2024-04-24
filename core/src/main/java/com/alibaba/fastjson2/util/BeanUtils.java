@@ -1159,6 +1159,51 @@ public abstract class BeanUtils {
                 }
                 return new String(chars);
             }
+            case "CamelCase1x": {
+                char[] chars = new char[methodNameLength - prefixLength];
+                methodName.getChars(prefixLength, methodNameLength, chars, 0);
+                char c0 = chars[0];
+                if (c0 >= 'A' && c0 <= 'Z') {
+                    chars[0] = (char) (c0 + 32);
+                }
+                return new String(chars);
+            }
+            case "UpperCamelCaseWithSpaces":
+                return upperCamelWith(methodName, prefixLength, ' ');
+            case "UpperCamelCaseWithUnderScores":
+                return upperCamelWith(methodName, prefixLength, '_');
+            case "UpperCamelCaseWithDashes":
+                return upperCamelWith(methodName, prefixLength, '-');
+            case "UpperCamelCaseWithDots":
+                return upperCamelWith(methodName, prefixLength, '.');
+            case "KebabCase": {
+                StringBuilder buf = new StringBuilder();
+                final int firstIndex = prefixLength;
+
+                for (int i = prefixLength; i < methodName.length(); ++i) {
+                    char ch = methodName.charAt(i);
+                    if (ch >= 'A' && ch <= 'Z') {
+                        ch = (char) (ch + 32);
+                        if (i > firstIndex) {
+                            buf.append('-');
+                        }
+                    }
+                    buf.append(ch);
+                }
+                return buf.toString();
+            }
+            case "UpperCaseWithDashes":
+                return dashes(methodName, prefixLength, true);
+            case "UpperCaseWithDots":
+                return dots(methodName, prefixLength, true);
+            case "LowerCase":
+                return methodName.substring(prefixLength).toLowerCase();
+            case "LowerCaseWithUnderScores":
+                return underScores(methodName, prefixLength, false);
+            case "LowerCaseWithDashes":
+                return dashes(methodName, prefixLength, false);
+            case "LowerCaseWithDots":
+                return dots(methodName, prefixLength, false);
             default:
                 throw new JSONException("TODO : " + namingStrategy);
         }
