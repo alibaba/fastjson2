@@ -426,6 +426,13 @@ final class JavacTreeUtils {
         return treeMaker.ClassDef(modifiers(flag), name(name), typeArgs, extendExpr, implementExprs, defs);
     }
 
+    static JCTree.JCAnnotation annotation(JCTree type, List<JCTree.JCExpression> args) {
+        if (args == null) {
+            args = List.nil();
+        }
+        return treeMaker.Annotation(type, args);
+    }
+
     static void pos(int pos) {
         treeMaker.pos = pos;
     }
