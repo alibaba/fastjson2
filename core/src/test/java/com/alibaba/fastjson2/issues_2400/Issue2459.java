@@ -20,8 +20,13 @@ public class Issue2459 {
         User user = new User();
         user.setFirstName("first");
         user.setLastName("last");
-        List<String> methodNames = Arrays.stream(User.class.getDeclaredMethods()).sequential().filter(m -> m.getName().startsWith("get")).map(s2 -> s2.getName()).collect(Collectors.toList());
-        Arrays.stream(PropertyNamingStrategy.values()).sequential().forEach(s -> assertEquals(getExpected(user, s), getTest(methodNames, s)));
+        List<String> getMethodNames = Arrays.stream(User.class.getDeclaredMethods()).sequential().filter(m -> m.getName().startsWith("get")).map(s2 -> s2.getName()).collect(Collectors.toList());
+        List<String> setMethodNames = Arrays.stream(User.class.getDeclaredMethods()).sequential().filter(m -> m.getName().startsWith("set")).map(s2 -> s2.getName()).collect(Collectors.toList());
+        Arrays.stream(PropertyNamingStrategy.values()).sequential().forEach(s -> {
+            String expected = getExpected(user, s);
+            assertEquals(expected, getterTest(getMethodNames, s));
+            assertEquals(expected, setterTest(setMethodNames, s));
+        });
     }
 
     private static String getExpected(User user, PropertyNamingStrategy strategy) {
@@ -29,8 +34,12 @@ public class Issue2459 {
         return (String) JSON.parseObject(jsonString, Map.class).keySet().stream().sorted().collect(Collectors.joining(","));
     }
 
-    private static String getTest(List<String> methodNames, PropertyNamingStrategy strategy) {
+    private static String getterTest(List<String> methodNames, PropertyNamingStrategy strategy) {
         return methodNames.stream().map(m -> BeanUtils.getterName(m, strategy.name())).collect(Collectors.toSet()).stream().sorted().collect(Collectors.joining(","));
+    }
+
+    private static String setterTest(List<String> methodNames, PropertyNamingStrategy strategy) {
+        return methodNames.stream().map(m -> BeanUtils.setterName(m, strategy.name())).collect(Collectors.toSet()).stream().sorted().collect(Collectors.joining(","));
     }
 
     @Data
