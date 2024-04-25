@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.reader.ObjectReaders;
+import com.google.googlejavaformat.java.Formatter;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.TypeTag;
@@ -31,7 +32,6 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.*;
@@ -85,17 +85,18 @@ public class JSONCompiledAnnotationProcessor
                 @Override
                 public void visitClassDef(JCTree.JCClassDecl beanClassDecl) {
                     super.visitClassDef(beanClassDecl);
-                    String beanFQN = beanClassDecl.sym.toString();
-                    if (element.toString().equals(beanFQN)) {
+                    String beanClassFQN = beanClassDecl.sym.toString();
+                    if (element.toString().equals(beanClassFQN)) {
                         // initialization
                         String innerClassFQN = findConverterName(structInfo);
                         int dotIdx = innerClassFQN.lastIndexOf('.');
                         String innerClassName = innerClassFQN.substring(dotIdx + 1);
-                        JCTree.JCExpression beanType = dotIdx == -1 ? ident(beanFQN) : qualIdent(beanFQN);
+                        JCTree.JCExpression beanType = dotIdx == -1 ? ident(beanClassFQN) : qualIdent(beanClassFQN);
                         JCTree.JCNewClass beanNew = newClass(null, null, beanType, null, null);
                         JCTree.JCIdent objectType = ident("Object");
-                        // add annotation
-                        addAnnotation(beanClassDecl);
+
+                        // add deserializer class
+                        addDeserializerClassIfAbsent(beanClassDecl, beanClassFQN, innerClassName);
 
                         // generate inner class
                         JCTree.JCClassDecl innerClass = genInnerClass(innerClassName, superClass);
@@ -127,13 +128,22 @@ public class JSONCompiledAnnotationProcessor
         return true;
     }
 
-    private void addAnnotation(JCTree.JCClassDecl beanClassDecl) {
-        List<JCTree.JCAnnotation> annotations = beanClassDecl.mods.annotations;
-        Set<String> annotationTypes = annotations.stream().map(a -> a.getAnnotationType().type.tsym.toString()).collect(Collectors.toSet());
+    private void addDeserializerClassIfAbsent(JCTree.JCClassDecl beanClassDecl, String beanClassFQN, String innerClassName) {
         JCTree.JCExpression jsonTypeIdent = qualIdent("com.alibaba.fastjson2.annotation.JSONType");
-        if (!annotationTypes.contains(jsonTypeIdent.type.tsym.toString())) {
-            JCTree.JCAnnotation annotation = annotation(jsonTypeIdent, null);
-            beanClassDecl.mods.annotations = annotations.prepend(annotation);
+        List<JCTree.JCAnnotation> annotations = beanClassDecl.mods.annotations;
+        JCTree.JCAnnotation jsonTypeAnno = annotations.stream()
+                .filter(a -> a.getAnnotationType().type.tsym.toString().equals(jsonTypeIdent.type.tsym.toString()))
+                .findAny()
+                .orElseGet(() -> annotation(jsonTypeIdent, null));
+        JCTree.JCAssign deserializerAssign = jsonTypeAnno.args.stream()
+                .map(a -> (JCTree.JCAssign) a)
+                .filter(a2 -> "deserializer".equals(a2.lhs.toString()))
+                .findAny()
+                .orElseGet(() -> assign(ident("deserializer"), field(ident("Void"), names._class)));
+        if ("Void.class".equals(deserializerAssign.rhs.toString())) {
+            int dotIdx = beanClassFQN.lastIndexOf('.');
+            String beanClassName = beanClassFQN.substring(dotIdx + 1);
+            deserializerAssign.rhs = field(field(ident(beanClassName), innerClassName), names._class);
         }
     }
 
@@ -172,10 +182,15 @@ public class JSONCompiledAnnotationProcessor
         return stmts.toList();
     }
 
-    private JCTree.JCMethodDecl genConstructor(JCTree.JCExpression beanType, JCTree.JCNewClass beanNew, java.util.List<AttributeInfo> fields, Class superClass, boolean generatedFields) {
+    private JCTree.JCMethodDecl genConstructor(
+            JCTree.JCExpression beanType,
+            JCTree.JCNewClass beanNew,
+            java.util.List<AttributeInfo> fields,
+            Class superClass,
+            boolean generatedFields) {
         JCTree.JCLambda lambda = lambda(List.nil(), beanNew);
         JCTree.JCExpression fieldReaderType = qualIdent(FieldReader.class.getName());
-        ListBuffer fieldReaders = new ListBuffer<>();
+        ListBuffer<JCTree.JCMethodInvocation> fieldReaders = new ListBuffer<>();
         JCTree.JCExpression objectReadersType = qualIdent(ObjectReaders.class.getName());
         int fieldsSize = fields.size();
         for (int i = 0; i < fieldsSize; ++i) {
@@ -222,7 +237,13 @@ public class JSONCompiledAnnotationProcessor
         return defMethod(Flags.PUBLIC, "createInstance", objectType, null, List.of(featuresVar), null, block(defReturn(beanNew)), null);
     }
 
-    private JCTree.JCMethodDecl genReadObject(JCTree.JCIdent objectType, JCTree.JCExpression beanType, JCTree.JCNewClass beanNew, java.util.List<AttributeInfo> attributeInfos, StructInfo structInfo, boolean isJsonb) {
+    private JCTree.JCMethodDecl genReadObject(
+            JCTree.JCIdent objectType,
+            JCTree.JCExpression beanType,
+            JCTree.JCNewClass beanNew,
+            java.util.List<AttributeInfo> attributeInfos,
+            StructInfo structInfo,
+            boolean isJsonb) {
         int fieldNameLengthMin = 0, fieldNameLengthMax = 0;
         for (int i = 0; i < attributeInfos.size(); ++i) {
             String fieldName = attributeInfos.get(i).name;
@@ -280,9 +301,9 @@ public class JSONCompiledAnnotationProcessor
                 loopBody.appendList(List.of(defIf(binary(JCTree.Tag.EQ, literal(TypeTag.LONG, attributeInfo.nameHashCode), hashCode64), block(readFieldValueStmts), null)));
             }
         } else {
-            Map<Integer, java.util.List<Long>> map = new TreeMap();
-            Map<Long, AttributeInfo> mapping = new TreeMap();
-            Map<Long, Integer> mappingIndex = new TreeMap();
+            Map<Integer, java.util.List<Long>> map = new TreeMap<>();
+            Map<Long, AttributeInfo> mapping = new TreeMap<>();
+            Map<Long, Integer> mappingIndex = new TreeMap<>();
             for (int i = 0; i < fieldsSize; ++i) {
                 AttributeInfo attr = attributeInfos.get(i);
                 long fieldNameHash = attr.nameHashCode;
@@ -454,10 +475,10 @@ public class JSONCompiledAnnotationProcessor
         int[] switchKeys = new int[name0Map.size()];
         Label[] labels = new Label[name0Map.size()];
         {
-            Iterator it = name0Map.keySet().iterator();
+            Iterator<Integer> it = name0Map.keySet().iterator();
             for (int i = 0; i < labels.length; i++) {
                 labels[i] = new Label();
-                switchKeys[i] = (Integer) it.next();
+                switchKeys[i] = it.next();
             }
         }
 
@@ -465,7 +486,6 @@ public class JSONCompiledAnnotationProcessor
         ListBuffer<JCTree.JCCase> cases = new ListBuffer<>();
 
         JCTree.JCLabeledStatement switchLabel = label("_switch2", null);
-        ListBuffer<JCTree.JCStatement> switchBody = new ListBuffer<>();
         for (int i = 0; i < labels.length; i++) {
             int name0 = switchKeys[i];
             java.util.List<AttributeInfo> fieldReaders = name0Map.get(name0);
@@ -857,15 +877,16 @@ public class JSONCompiledAnnotationProcessor
         return stmts;
     }
 
-    private JCTree.JCExpression genFieldValueList(String type,
-                                                  AttributeInfo attributeInfo,
-                                                  JCTree.JCIdent jsonReaderIdent,
-                                                  JCTree.JCVariableDecl fieldValueVar,
-                                                  JCTree.JCLabeledStatement loopLabel,
-                                                  ListBuffer<JCTree.JCStatement> stmts,
-                                                  int i,
-                                                  boolean referenceDetect,
-                                                  JCTree.JCFieldAccess fieldReaderField) {
+    private JCTree.JCExpression genFieldValueList(
+            String type,
+            AttributeInfo attributeInfo,
+            JCTree.JCIdent jsonReaderIdent,
+            JCTree.JCVariableDecl fieldValueVar,
+            JCTree.JCLabeledStatement loopLabel,
+            ListBuffer<JCTree.JCStatement> stmts,
+            int i,
+            boolean referenceDetect,
+            JCTree.JCFieldAccess fieldReaderField) {
         String itemType = type.substring(15, type.length() - 1);
         boolean itemTypeIsClass = itemType.indexOf('<') == -1;
         if (itemTypeIsClass) {
@@ -932,16 +953,16 @@ public class JSONCompiledAnnotationProcessor
         return null;
     }
 
-    private JCTree.JCExpression genFieldValueMap(String type,
-                                                 AttributeInfo attributeInfo,
-                                                 JCTree.JCIdent jsonReaderIdent,
-                                                 JCTree.JCVariableDecl fieldValueVar,
-                                                 JCTree.JCLabeledStatement loopLabel,
-                                                 ListBuffer<JCTree.JCStatement> stmts,
-                                                 int i,
-                                                 boolean referenceDetect) {
+    private JCTree.JCExpression genFieldValueMap(
+            String type,
+            AttributeInfo attributeInfo,
+            JCTree.JCIdent jsonReaderIdent,
+            JCTree.JCVariableDecl fieldValueVar,
+            JCTree.JCLabeledStatement loopLabel,
+            ListBuffer<JCTree.JCStatement> stmts,
+            int i,
+            boolean referenceDetect) {
         String itemType = type.substring(31, type.length() - 1);
-        boolean itemTypeIsClass = itemType.indexOf('<') == -1;
         JCTree.JCMethodInvocation nextIfNullMethod = method(field(jsonReaderIdent, "nextIfNull"));
 
         boolean readDirect = supportReadDirect(itemType);
@@ -1014,8 +1035,9 @@ public class JSONCompiledAnnotationProcessor
                     writer.write(System.lineSeparator());
                 }
                 String str = innerClass.toString().replaceFirst("public static class ", "public class ");
-                writer.write(str);
-            } catch (IOException e) {
+                Formatter formatter = new Formatter();
+                writer.write(formatter.formatSource(str));
+            } catch (Exception e) {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Failed saving compiled json serialization file " + fullQualifiedName);
             }
         } catch (IOException e) {
