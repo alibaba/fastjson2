@@ -131,30 +131,40 @@ public class JSONCompiledAnnotationProcessor
     private void addDeserializerClassIfAbsent(JCTree.JCClassDecl beanClassDecl, String beanClassFQN, String innerClassName) {
         JCTree.JCExpression jsonTypeIdent = qualIdent("com.alibaba.fastjson2.annotation.JSONType");
         List<JCTree.JCAnnotation> annotations = beanClassDecl.mods.annotations;
-        JCTree.JCAnnotation jsonTypeAnno = annotations.stream()
+        Optional<JCTree.JCAnnotation> jsonTypeAnnoOpt = annotations.stream()
                 .filter(a -> a.getAnnotationType().type.tsym.toString().equals(jsonTypeIdent.type.tsym.toString()))
-                .findAny()
-                .orElseGet(() -> annotation(jsonTypeIdent, null));
-        JCTree.JCAssign deserializerAssign = jsonTypeAnno.args.stream()
-                .map(a -> (JCTree.JCAssign) a)
-                .filter(a2 -> "deserializer".equals(a2.lhs.toString()))
-                .findAny()
-                .orElseGet(() -> assign(ident("deserializer"), field(ident("Void"), names._class)));
-        if ("Void.class".equals(deserializerAssign.rhs.toString())) {
-            int dotIdx = beanClassFQN.lastIndexOf('.');
-            String beanClassName = beanClassFQN.substring(dotIdx + 1);
-            deserializerAssign.rhs = field(field(ident(beanClassName), innerClassName), names._class);
+                .findAny();
+        int dotIdx = beanClassFQN.lastIndexOf('.');
+        String beanClassName = beanClassFQN.substring(dotIdx + 1);
+        JCTree.JCIdent lhs = ident("deserializer");
+        JCTree.JCFieldAccess rhs = field(field(ident(beanClassName), innerClassName), names._class);
+        if (jsonTypeAnnoOpt.isPresent()) {
+            JCTree.JCAnnotation jsonTypeAnno = jsonTypeAnnoOpt.get();
+            Optional<JCTree.JCAssign> jsonTypeAsgOpt = jsonTypeAnno.args.stream()
+                    .map(a -> (JCTree.JCAssign) a)
+                    .filter(a2 -> "deserializer".equals(a2.lhs.toString()))
+                    .findAny();
+            if (jsonTypeAsgOpt.isPresent()) {
+                JCTree.JCAssign deserializerAssign = jsonTypeAsgOpt.get();
+                if ("Void.class".equals(deserializerAssign.rhs.toString())) {
+                    deserializerAssign.rhs = rhs;
+                }
+            } else {
+                jsonTypeAnno.args = jsonTypeAnno.args.prepend(assign(lhs, rhs));
+            }
+        } else {
+            JCTree.JCAnnotation jsonTypeAnno = annotation(jsonTypeIdent, List.of(assign(lhs, rhs)));
+            beanClassDecl.mods.annotations = annotations.prepend(jsonTypeAnno);
         }
     }
 
     private JCTree.JCClassDecl genInnerClass(String className, Class superClass) {
-        JCTree.JCClassDecl innerClass = defClass(Flags.PUBLIC | Flags.STATIC,
+        return defClass(Flags.PUBLIC | Flags.STATIC,
                 className,
                 null,
                 qualIdent(superClass.getName()),
                 null,
                 null);
-        return innerClass;
     }
 
     private List<JCTree> genFields(java.util.List<AttributeInfo> attributeInfos, Class superClass) {
