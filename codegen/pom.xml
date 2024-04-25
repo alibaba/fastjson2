@@ -55,6 +55,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- do not upgrade which is compatible with java8 -->
+        <dependency>
+            <groupId>com.google.googlejavaformat</groupId>
+            <artifactId>google-java-format</artifactId>
+            <version>1.7</version>
+        </dependency>
+
         <!-- test libs -->
         <dependency>
             <groupId>commons-io</groupId>
