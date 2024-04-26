@@ -640,4 +640,106 @@ public class JSONWriterUTF16Test {
             jsonWriter.writeName16Raw(nameValue, 1);
         }
     }
+
+    @Test
+    public void writeName8Pretty() {
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext(PrettyFormat));
+        jsonWriter.indent += 2;
+
+        char[] name = "a123".toCharArray();
+        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName6Raw(nameValue);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName7Raw(nameValue);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName8Raw(nameValue);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName9Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName10Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName11Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName12Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName13Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName14Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName15Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.chars = new char[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName16Raw(nameValue, 1);
+        }
+    }
+
+    @Test
+    public void issue_2484() {
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+
+        char[] name = "a123".toCharArray();
+        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+
+        final int initOffset = 8183;
+        for (int i = 0; i < 16; i++) {
+            int initSize = 8196 - i;
+            {
+                jsonWriter.startObject = true;
+                jsonWriter.pretty = false;
+
+                jsonWriter.chars = new char[initSize];
+                jsonWriter.off = initOffset;
+                jsonWriter.writeName7Raw(nameValue);
+            }
+            {
+                jsonWriter.startObject = false;
+                jsonWriter.pretty = false;
+
+                jsonWriter.chars = new char[initSize];
+                jsonWriter.off = initOffset;
+                jsonWriter.writeName7Raw(nameValue);
+            }
+            {
+                jsonWriter.startObject = false;
+                jsonWriter.pretty = true;
+
+                jsonWriter.chars = new char[initSize];
+                jsonWriter.off = initOffset;
+                jsonWriter.writeName7Raw(nameValue);
+            }
+        }
+    }
 }
