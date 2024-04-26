@@ -31,4 +31,3 @@ public class Issue2478 {
         private String lastName;
     }
 }
-
