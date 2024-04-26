@@ -775,7 +775,7 @@ public class ObjectReaderProvider
                 ? cacheFieldBasedFilter.getOrDefault(objectType, new HashSet<>())
                 : cacheFilter.getOrDefault(objectType, new HashSet<>());
         if (!filters.isEmpty()) {
-            cleanup((Class)objectType);
+            cleanup((Class) objectType);
         }
         filters.add(filter);
         if (fieldBased) {
