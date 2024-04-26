@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.function.ObjBoolConsumer;
 import com.alibaba.fastjson2.function.ObjByteConsumer;
 import com.alibaba.fastjson2.function.ObjCharConsumer;
@@ -1094,6 +1095,14 @@ public class ObjectReaderCreator {
                         parameterNames[i] = fieldInfo.fieldName;
                     }
                 }
+            }
+
+            if (provider.getNameFilter() != null) {
+                NameFilter nameFilter = provider.getNameFilter();
+                for (int i = 0; i < parameterNames.length; i++) {
+                    parameterNames[i] = nameFilter.process(null, parameterNames[i], null);
+                }
+                provider.setNameFilter(null);
             }
 
             int matchCount = 0;

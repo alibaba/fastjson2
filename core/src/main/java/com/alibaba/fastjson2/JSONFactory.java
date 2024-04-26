@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -399,9 +400,8 @@ public final class JSONFactory {
     }
 
     public static JSONReader.Context createReadContext(Filter filter, JSONReader.Feature... features) {
-        JSONReader.Context context = new JSONReader.Context(
-                JSONFactory.getDefaultObjectReaderProvider()
-        );
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider);
 
         if (filter instanceof JSONReader.AutoTypeBeforeHandler) {
             context.autoTypeBeforeHandler = (JSONReader.AutoTypeBeforeHandler) filter;
@@ -409,6 +409,10 @@ public final class JSONFactory {
 
         if (filter instanceof ExtraProcessor) {
             context.extraProcessor = (ExtraProcessor) filter;
+        }
+
+        if (filter instanceof NameFilter) {
+            provider.setNameFilter((NameFilter) filter);
         }
 
         for (int i = 0; i < features.length; i++) {
