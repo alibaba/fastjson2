@@ -97,3 +97,6 @@
 * https://github.com/OpenFeign/feign
 * https://github.com/yl-yue/yue-library
 * https://github.com/dromara/forest
+* https://github.com/xunlu129/teriteri-backend
+* https://github.com/moshowgame/SpringBootCodeGenerator
+* https://github.com/4379711/lol-helper
