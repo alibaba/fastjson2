@@ -25,6 +25,7 @@ class ObjectReaderImplMapTyped
     final Class valueClass;
     final long features;
     final Function builder;
+    final boolean multiValue;
 
     final Constructor defaultConstructor;
 
@@ -43,6 +44,7 @@ class ObjectReaderImplMapTyped
         this.valueClass = TypeUtils.getClass(valueType);
         this.features = features;
         this.builder = builder;
+        this.multiValue = instanceType != null && "org.springframework.util.LinkedMultiValueMap".equals(instanceType.getName());
 
         Constructor defaultConstructor = null;
         Constructor[] constructors = this.instanceType.getDeclaredConstructors();
@@ -394,7 +396,21 @@ class ObjectReaderImplMapTyped
                     continue;
                 }
             } else {
-                value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                if (multiValue && jsonReader.nextIfArrayStart()) {
+                    List list = new JSONArray();
+                    while (!jsonReader.nextIfArrayEnd()) {
+                        value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                        list.add(value);
+                    }
+                    if (innerMap != null) {
+                        innerMap.put(name, list);
+                    } else {
+                        object.put(name, list);
+                    }
+                    continue;
+                } else {
+                    value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                }
             }
 
             if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
