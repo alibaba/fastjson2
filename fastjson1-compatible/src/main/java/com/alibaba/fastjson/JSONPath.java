@@ -37,7 +37,9 @@ public class JSONPath {
 
     public static <T> T read(String json, String path, Type clazz, ParserConfig parserConfig) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        Object r = jsonPath.extract(JSONReader.of(json));
+        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader jsonReader = JSONReader.of(json, context);
+        Object r = jsonPath.extract(jsonReader);
         return TypeUtils.cast(r, clazz, parserConfig);
     }
 
@@ -70,7 +72,8 @@ public class JSONPath {
 
     public static Object extract(String json, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        JSONReader jsonReader = JSONReader.of(json);
+        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader jsonReader = JSONReader.of(json, context);
         return jsonPath.extract(jsonReader);
     }
 
@@ -86,6 +89,9 @@ public class JSONPath {
     }
 
     public static Object read(String json, String path) {
-        return com.alibaba.fastjson2.JSONPath.extract(json, path);
+        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader jsonReader = JSONReader.of(json, context);
+        com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
+        return jsonPath.extract(jsonReader);
     }
 }
