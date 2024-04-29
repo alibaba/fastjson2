@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import com.alibaba.fastjson2.internal.asm.Label;
+import com.alibaba.fastjson2.internal.codegen.Label;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
@@ -224,7 +224,7 @@ public class JSONCompiledAnnotationProcessor
             }
         }
         JCTree.JCNewArray fieldReadersArray = newArray(fieldReaderType, null, List.from(fieldReaders));
-        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, 0L), defNull(), lambda, defNull(), fieldReadersArray));
+        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, 0L), lambda, defNull(), fieldReadersArray));
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
         stmts.append(exec(superMethod));
         // initialize fields if necessary
@@ -365,7 +365,7 @@ public class JSONCompiledAnnotationProcessor
             loopBody.append(defIf(method(field(ident(names._this), "readFieldValueWithLCase"), List.of(jsonReaderIdent, objectIdent, ident(hashCode64Var.name), ident(features2Var.name))), block(defContinue(loopLabel)), null));
         }
         JCTree.JCFieldAccess processExtraField = field(ident(names._this), "processExtra");
-        loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent))));
+        loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent, ident(features2Var.name)))));
         loopHead.body = block(loopBody.toList());
         loopLabel.body = loopHead;
         readObjectBody.append(loopLabel);

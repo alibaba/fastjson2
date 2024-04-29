@@ -93,7 +93,11 @@ public abstract class ObjectReaderBean<T>
     }
 
     protected void processExtra(JSONReader jsonReader, Object object) {
-        if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+        processExtra(jsonReader, object, 0);
+    }
+
+    protected void processExtra(JSONReader jsonReader, Object object, long features) {
+        if ((jsonReader.features(this.features | features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
             String fieldName = jsonReader.getFieldName();
             if (fieldName.startsWith("is")) {
                 String fieldName1 = fieldName.substring(2);
