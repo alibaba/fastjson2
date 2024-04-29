@@ -5453,6 +5453,13 @@ class JSONReaderUTF16
                 }
                 throw new JSONException("can not convert to boolean : " + str);
             }
+        } else if (ch == '[') {
+            next();
+            val = readBoolValue();
+            if (!nextIfMatch(']')) {
+                throw new JSONException("not closed square brackets, expect ] but found : " + ch);
+            }
+            return val;
         } else {
             throw new JSONException("syntax error : " + ch);
         }
