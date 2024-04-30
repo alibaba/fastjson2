@@ -104,6 +104,10 @@ public abstract class ObjectReaderBean<T>
         throw new JSONException(info);
     }
 
+    protected void processExtra(JSONReader jsonReader, Object object) {
+        processExtra(jsonReader, object, 0);
+    }
+
     protected void processExtra(JSONReader jsonReader, Object object, long features) {
         if (extraFieldReader != null && object != null) {
             extraFieldReader.processExtra(jsonReader, object);

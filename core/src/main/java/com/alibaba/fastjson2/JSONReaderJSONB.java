@@ -5429,4 +5429,654 @@ final class JSONReaderJSONB
     public boolean isEnd() {
         return offset >= end;
     }
+
+    @Override
+    public int getRawInt() {
+        return offset + 3 < end
+                ? UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset)
+                : 0;
+    }
+
+    @Override
+    public long getRawLong() {
+        return offset + 7 < end
+                ? UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset)
+                : 0;
+    }
+
+    @Override
+    public boolean nextIfName4Match2() {
+        return false;
+    }
+
+    @Override
+    public boolean nextIfName4Match3() {
+        int offset = this.offset + 4;
+        if (offset > end) {
+            return false;
+        }
+        this.offset = offset;
+        return true;
+    }
+
+    public boolean nextIfName4Match4(byte name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 5;
+        if (offset > end || bytes[offset - 1] != name1) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match5(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 6;
+        if (offset > end || UNSAFE.getShort(bytes, BASE + offset - 2) != name1) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match6(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 7;
+        if (offset > end
+                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name1) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match7(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 8;
+        if (offset > end || UNSAFE.getInt(bytes, BASE + offset - 4) != name1) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match8(int name1, byte name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 9;
+        if (offset >= end || UNSAFE.getInt(bytes, BASE + offset - 5) != name1 || bytes[offset - 1] != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match9(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 10;
+        if (offset + 1 >= end || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFFFFFFFFFFL) != name1) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    public boolean nextIfName4Match10(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 11;
+        if (offset >= end || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFFFFFFFFFFFFL) != name1) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    public boolean nextIfName4Match11(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 12;
+        if (offset >= end || UNSAFE.getLong(bytes, BASE + offset - 8) != name1) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    public boolean nextIfName4Match12(long name1, byte name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 13;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 9) != name1
+                || bytes[offset - 1] != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match13(long name1, int name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 14;
+        if (offset + 1 >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 10) != name1
+                || UNSAFE.getShort(bytes, BASE + offset - 2) != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match14(long name1, int name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 15;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 11) != name1
+                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match15(long name1, int name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 16;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 12) != name1
+                || UNSAFE.getInt(bytes, BASE + offset - 4) != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match16(long name1, int name2, byte name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 17;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 13) != name1
+                || UNSAFE.getInt(bytes, BASE + offset - 5) != name2
+                || bytes[offset - 1] != name3) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match17(long name1, long name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 18;
+        if (offset + 1 >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 14) != name1
+                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFFFFFFFFFFL) != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match18(long name1, long name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 19;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 15) != name1
+                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match19(long name1, long name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 20;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 16) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 8) != name2) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match20(long name1, long name2, byte name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 21;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 17) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 9) != name2
+                || bytes[offset - 1] != name3
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match21(long name1, long name2, int name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 22;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 18) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 10) != name2
+                || UNSAFE.getShort(bytes, BASE + offset - 2) != name3
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match22(long name1, long name2, int name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 23;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 19) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 11) != name2
+                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name3
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match23(long name1, long name2, int name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 24;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 20) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 12) != name2
+                || UNSAFE.getInt(bytes, BASE + offset - 4) != name3
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    public boolean nextIfName4Match24(long name1, long name2, int name3, byte name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 25;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 21) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 13) != name2
+                || UNSAFE.getInt(bytes, BASE + offset - 5) != name3
+                || bytes[offset - 1] != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match25(long name1, long name2, long name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 26;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 22) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 14) != name2
+                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFF_FFFF_FFFFL) != name3
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match26(long name1, long name2, long name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 27;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 23) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 15) != name2
+                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name3
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match27(long name1, long name2, long name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 28;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 24) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 16) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 8) != name3
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match28(long name1, long name2, long name3, byte name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 29;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 25) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 17) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 9) != name3
+                || bytes[offset - 1] != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match29(long name1, long name2, long name3, int name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 30;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 26) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 18) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 10) != name3
+                || UNSAFE.getShort(bytes, BASE + offset - 2) != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match30(long name1, long name2, long name3, int name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 31;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 27) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 19) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 11) != name3
+                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match31(long name1, long name2, long name3, int name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 32;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 28) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 20) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 12) != name3
+                || UNSAFE.getInt(bytes, BASE + offset - 4) != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match32(long name1, long name2, long name3, int name4, byte name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 33;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 29) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 21) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 13) != name3
+                || UNSAFE.getInt(bytes, BASE + offset - 5) != name4
+                || bytes[offset - 1] != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match33(long name1, long name2, long name3, long name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 34;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 30) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 22) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 14) != name3
+                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFF_FFFF_FFFFL) != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match34(long name1, long name2, long name3, long name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 35;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 31) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 23) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 15) != name3
+                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match35(long name1, long name2, long name3, long name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 36;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 32) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 24) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 16) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 8) != name4
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match36(long name1, long name2, long name3, long name4, byte name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 37;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 33) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 25) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 17) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 9) != name4
+                || bytes[offset - 1] != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match37(long name1, long name2, long name3, long name4, int name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 38;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 34) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 26) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 18) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 10) != name4
+                || UNSAFE.getShort(bytes, BASE + offset - 2) != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match38(long name1, long name2, long name3, long name4, int name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 39;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 35) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 27) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 19) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 11) != name4
+                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match39(long name1, long name2, long name3, long name4, int name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 40;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 36) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 28) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 20) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 12) != name4
+                || UNSAFE.getInt(bytes, BASE + offset - 4) != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match40(long name1, long name2, long name3, long name4, int name5, byte name6) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 41;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 37) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 29) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 21) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 13) != name4
+                || UNSAFE.getInt(bytes, BASE + offset - 5) != name5
+                || bytes[offset - 1] != name6
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match41(long name1, long name2, long name3, long name4, long name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 42;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 38) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 30) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 22) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 14) != name4
+                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFF_FFFF_FFFFL) != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 43;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 39) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 31) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 23) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 15) != name4
+                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    @Override
+    public boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset + 44;
+        if (offset >= end
+                || UNSAFE.getLong(bytes, BASE + offset - 40) != name1
+                || UNSAFE.getLong(bytes, BASE + offset - 32) != name2
+                || UNSAFE.getLong(bytes, BASE + offset - 24) != name3
+                || UNSAFE.getLong(bytes, BASE + offset - 16) != name4
+                || UNSAFE.getLong(bytes, BASE + offset - 8) != name5
+        ) {
+            return false;
+        }
+
+        this.offset = offset;
+        return true;
+    }
+
+    static int getInt(byte[] bytes, int offset) {
+        int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
+    }
 }
