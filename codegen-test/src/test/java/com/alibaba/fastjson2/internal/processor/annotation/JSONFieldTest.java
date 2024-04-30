@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +25,8 @@ public class JSONFieldTest {
         assertEquals(0, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
     }
 
-    @JSONCompiled(smartMatch = false)
+    @JSONCompiled
+    @JSONType(disableSmartMatch = true)
     public static class Bean {
         @JSONField(name = "userId")
         public int id;

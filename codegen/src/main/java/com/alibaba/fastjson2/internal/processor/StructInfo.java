@@ -19,7 +19,6 @@ public class StructInfo {
     int readerFeatures;
     int writerFeatures;
     final TypeElement element;
-    final DeclaredType discoveredBy;
     final String name;
     final String binaryName;
     final Map<String, AttributeInfo> attributes = new LinkedHashMap<>();
@@ -27,41 +26,43 @@ public class StructInfo {
     public StructInfo(
             Types types,
             TypeElement element,
-            DeclaredType discoveredBy,
+            DeclaredType jsonCompiledDeclaredType,
+            DeclaredType jsonTypeDeclaredType,
             String name,
             String binaryName
     ) {
         this.element = element;
-        this.discoveredBy = discoveredBy;
         this.name = name;
         this.binaryName = binaryName;
 
         this.modifiers = Analysis.getModifiers(element.getModifiers());
 
-        AnnotationMirror anntation = null;
+        AnnotationMirror jsonType = null;
         for (AnnotationMirror mirror : element.getAnnotationMirrors()) {
-            if (types.isSameType(mirror.getAnnotationType(), discoveredBy)) {
-                anntation = mirror;
+            DeclaredType annotationType = mirror.getAnnotationType();
+            if (types.isSameType(annotationType, jsonTypeDeclaredType)) {
+                jsonType = mirror;
             }
         }
 
         boolean referenceDetect = true, smartMatch = true;
-        if (anntation != null) {
-            for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : anntation.getElementValues().entrySet()) {
+        if (jsonType != null) {
+            for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : jsonType.getElementValues().entrySet()) {
                 String annFieldName = entry.getKey().getSimpleName().toString();
                 AnnotationValue value = entry.getValue();
                 switch (annFieldName) {
-                    case "referenceDetect":
-                        referenceDetect = (Boolean) value.getValue();
+                    case "disableReferenceDetect":
+                        referenceDetect = !(Boolean) value.getValue();
                         break;
-                    case "smartMatch":
-                        smartMatch = (Boolean) value.getValue();
+                    case "disableSmartMatch":
+                        smartMatch = !(Boolean) value.getValue();
                         break;
                     default:
                         break;
                 }
             }
         }
+
         this.referenceDetect = referenceDetect;
         this.smartMatch = smartMatch;
     }

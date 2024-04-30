@@ -5,6 +5,4 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JSONCompiled {
-    boolean referenceDetect() default true;
-    boolean smartMatch() default true;
 }

@@ -17,7 +17,6 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -857,37 +856,6 @@ public class ObjectReaderProvider
             if ("com.google.common.collect.ArrayListMultimap".equals(className)) {
                 objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
             }
-        }
-
-        if (objectReader == null) {
-            boolean jsonCompiled = false;
-            Annotation[] annotations = objectClass.getAnnotations();
-            for (Annotation annotation : annotations) {
-                Class<? extends Annotation> annotationType = annotation.annotationType();
-                jsonCompiled = "com.alibaba.fastjson2.annotation.JSONCompiled".equals(annotationType.getName());
-            }
-            if (jsonCompiled) {
-                String objectClassName = objectClass.getName();
-                String codeGenClassName = objectClassName + "$" + objectClassName.substring(objectClassName.lastIndexOf(".") + 1) + "_FASTJSONReader";
-                ClassLoader classLoader = objectClass.getClassLoader();
-                if (classLoader == null) {
-                    classLoader = Thread.currentThread().getContextClassLoader();
-                }
-                if (classLoader == null) {
-                    classLoader = this.getClass().getClassLoader();
-                }
-
-                try {
-                    Class<?> loadedClass = classLoader.loadClass(codeGenClassName);
-                    if (ObjectReader.class.isAssignableFrom(loadedClass)) {
-                        objectReader = (ObjectReader) loadedClass.newInstance();
-                    }
-                } catch (Exception ignored) {
-                    // ignored
-                }
-            }
-
-            // objectClass.getResource(objectClass.)
         }
 
         if (objectReader == null) {
