@@ -77,4 +77,14 @@ public @interface JSONType {
      * @since 2.0.25
      */
     Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler() default JSONReader.AutoTypeBeforeHandler.class;
+
+    /**
+     * @since 2.0.50
+     */
+    boolean disableSmartMatch() default false;
+
+    /**
+     * @since 2.0.50
+     */
+    boolean disableReferenceDetect() default false;
 }

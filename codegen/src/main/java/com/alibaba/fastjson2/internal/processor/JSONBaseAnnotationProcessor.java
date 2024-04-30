@@ -7,8 +7,8 @@ import javax.lang.model.element.TypeElement;
 import java.lang.reflect.Method;
 import java.util.Set;
 
+import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.unwrapProcessingEnv;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)

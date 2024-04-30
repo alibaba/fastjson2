@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.internal.processor;
 
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
@@ -16,6 +15,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
 import java.lang.reflect.*;
+
+import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.JVM_VERSION;
 
 final class JavacTreeUtils {
     private static TreeMaker treeMaker;
@@ -341,7 +342,7 @@ final class JavacTreeUtils {
                 Class<?> caseKind = Class.forName("com.sun.source.tree.CaseTree$CaseKind");
                 Field statement = Class.forName("com.sun.tools.javac.tree.JCTree$JCCase").getDeclaredField("STATEMENT");
                 Method method = clazz.getDeclaredMethod("Case", caseKind, List.class, List.class, JCTree.class);
-                if (JDKUtils.JVM_VERSION >= 19 && (matchExpr instanceof JCTree.JCLiteral || matchExpr instanceof JCTree.JCTypeCast)) {
+                if (JVM_VERSION >= 19 && (matchExpr instanceof JCTree.JCLiteral || matchExpr instanceof JCTree.JCTypeCast)) {
                     Class<?> constantCaseLabel = Class.forName("com.sun.tools.javac.tree.JCTree$JCConstantCaseLabel");
                     Constructor<?> constructor = constantCaseLabel.getDeclaredConstructor(JCTree.JCExpression.class);
                     constructor.setAccessible(true);

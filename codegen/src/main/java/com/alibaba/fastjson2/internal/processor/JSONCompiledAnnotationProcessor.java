@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import com.alibaba.fastjson2.internal.asm.Label;
+import com.alibaba.fastjson2.internal.codegen.Label;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
@@ -68,7 +68,7 @@ public class JSONCompiledAnnotationProcessor
         Analysis analysis = new Analysis(processingEnv);
         Set<? extends Element> compiledJsons = roundEnv.getElementsAnnotatedWith(analysis.jsonCompiledElement);
         if (!compiledJsons.isEmpty()) {
-            analysis.processAnnotation(analysis.compiledJsonType, compiledJsons);
+            analysis.processAnnotation(analysis.jsonCompiledDeclaredType, compiledJsons);
         }
 
         Map<String, StructInfo> structs = analysis.analyze();
@@ -224,7 +224,7 @@ public class JSONCompiledAnnotationProcessor
             }
         }
         JCTree.JCNewArray fieldReadersArray = newArray(fieldReaderType, null, List.from(fieldReaders));
-        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, 0L), defNull(), lambda, defNull(), fieldReadersArray));
+        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, 0L), lambda, defNull(), fieldReadersArray));
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
         stmts.append(exec(superMethod));
         // initialize fields if necessary
@@ -296,80 +296,98 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCWhileLoop loopHead = whileLoop(unary(JCTree.Tag.NOT, method(field(jsonReaderIdent, "nextIfObjectEnd"))), null);
         ListBuffer<JCTree.JCStatement> loopBody = new ListBuffer<>();
 
+        boolean switchGen = false;
         if (fieldNameLengthMin >= 2 && fieldNameLengthMax <= 43) {
             loopBody.appendList(genRead243(attributeInfos, jsonReaderIdent, structInfo, loopLabel, objectIdent, false));
+            switchGen = true;
         }
 
         JCTree.JCFieldAccess readFieldNameHashCode = field(jsonReaderIdent, "readFieldNameHashCode");
-        JCTree.JCVariableDecl hashCode64Var = defVar(Flags.PARAMETER, "hashCode64", type(TypeTag.LONG), cast(type(TypeTag.LONG), method(readFieldNameHashCode)));
+        JCTree.JCVariableDecl hashCode64Var = defVar(Flags.PARAMETER, "hashCode64", type(TypeTag.LONG), method(readFieldNameHashCode));
         JCTree.JCExpression hashCode64 = ident(hashCode64Var.name);
         loopBody.append(hashCode64Var);
-        if (fieldsSize <= 6) {
-            for (int i = 0; i < fieldsSize; ++i) {
-                AttributeInfo attributeInfo = attributeInfos.get(i);
-                List<JCTree.JCStatement> readFieldValueStmts = genReadFieldValue(attributeInfo, jsonReaderIdent, i, structInfo, loopLabel, objectIdent, isJsonb);
-                loopBody.appendList(List.of(defIf(binary(JCTree.Tag.EQ, literal(TypeTag.LONG, attributeInfo.nameHashCode), hashCode64), block(readFieldValueStmts), null)));
+
+        if (switchGen) {
+            // processExtra(jsonReader, object);
+            if (structInfo.smartMatch) {
+                loopBody.append(
+                        exec(method(
+                                field(ident(names._this), "readFieldValue"),
+                                List.of(hashCode64, jsonReaderIdent, ident(features2Var.name), ident(objectVar.name))
+                        )));
+            } else {
+                JCTree.JCFieldAccess processExtraField = field(ident(names._this), "processExtra");
+                loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent, ident(features2Var.name)))));
             }
         } else {
-            Map<Integer, java.util.List<Long>> map = new TreeMap<>();
-            Map<Long, AttributeInfo> mapping = new TreeMap<>();
-            Map<Long, Integer> mappingIndex = new TreeMap<>();
-            for (int i = 0; i < fieldsSize; ++i) {
-                AttributeInfo attr = attributeInfos.get(i);
-                long fieldNameHash = attr.nameHashCode;
-                int hashCode32 = (int) (fieldNameHash ^ (fieldNameHash >>> 32));
-                java.util.List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
-                hashCode64List.add(fieldNameHash);
-                mapping.put(fieldNameHash, attr);
-                mappingIndex.put(fieldNameHash, i);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            int off = 0;
-            for (Integer key : map.keySet()) {
-                hashCode32Keys[off++] = key;
-            }
-            Arrays.sort(hashCode32Keys);
-            JCTree.JCVariableDecl hashCode32Var = getHashCode32Var(hashCode64);
-            loopBody.append(hashCode32Var);
-            JCTree.JCExpression hashCode32 = ident(hashCode32Var.name);
-
-            JCTree.JCLabeledStatement switchLabel = label("_switch", null);
-            ListBuffer<JCTree.JCCase> cases = new ListBuffer<>();
-            for (int i = 0; i < hashCode32Keys.length; ++i) {
-                java.util.List<Long> hashCode64Array = map.get(hashCode32Keys[i]);
-                List<JCTree.JCStatement> stmts = List.nil();
-                Long fieldNameHash = null;
-                if (hashCode64Array.size() == 1 && hashCode64Array.get(0) == hashCode32Keys[i]) {
-                    fieldNameHash = hashCode64Array.get(0);
-                    int index = mappingIndex.get(fieldNameHash);
-                    AttributeInfo attributeInfo = mapping.get(fieldNameHash);
-                    stmts = stmts.appendList(genReadFieldValue(attributeInfo, jsonReaderIdent, index, structInfo, loopLabel, objectIdent, isJsonb));
-                    stmts.append(defContinue(loopLabel));
-                } else {
-                    for (int j = 0; j < hashCode64Array.size(); ++j) {
-                        fieldNameHash = hashCode64Array.get(j);
-                        int index = mappingIndex.get(fieldNameHash);
-                        AttributeInfo field = mapping.get(fieldNameHash);
-                        List<JCTree.JCStatement> stmtsIf = genReadFieldValue(field, jsonReaderIdent, index, structInfo, loopLabel, objectIdent, isJsonb);
-                        stmts = stmts.append(defIf(binary(JCTree.Tag.EQ, hashCode64, literal(fieldNameHash)), block(stmtsIf), null));
-                        stmts.append(defContinue(loopLabel));
-                    }
-                    stmts.append(defBreak(switchLabel));
+            if (fieldsSize <= 6) {
+                for (int i = 0; i < fieldsSize; ++i) {
+                    AttributeInfo attributeInfo = attributeInfos.get(i);
+                    List<JCTree.JCStatement> readFieldValueStmts = genReadFieldValue(attributeInfo, jsonReaderIdent, i, structInfo, loopLabel, objectIdent, isJsonb);
+                    loopBody.appendList(List.of(defIf(binary(JCTree.Tag.EQ, literal(TypeTag.LONG, attributeInfo.nameHashCode), hashCode64), block(readFieldValueStmts), null)));
                 }
-                cases.append(defCase(getHashCode32Var(literal(fieldNameHash)).getInitializer(), stmts));
+            } else {
+                Map<Integer, java.util.List<Long>> map = new TreeMap<>();
+                Map<Long, AttributeInfo> mapping = new TreeMap<>();
+                Map<Long, Integer> mappingIndex = new TreeMap<>();
+                for (int i = 0; i < fieldsSize; ++i) {
+                    AttributeInfo attr = attributeInfos.get(i);
+                    long fieldNameHash = attr.nameHashCode;
+                    int hashCode32 = (int) (fieldNameHash ^ (fieldNameHash >>> 32));
+                    java.util.List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
+                    hashCode64List.add(fieldNameHash);
+                    mapping.put(fieldNameHash, attr);
+                    mappingIndex.put(fieldNameHash, i);
+                }
+                int[] hashCode32Keys = new int[map.size()];
+                int off = 0;
+                for (Integer key : map.keySet()) {
+                    hashCode32Keys[off++] = key;
+                }
+                Arrays.sort(hashCode32Keys);
+                JCTree.JCVariableDecl hashCode32Var = getHashCode32Var(hashCode64);
+                loopBody.append(hashCode32Var);
+                JCTree.JCExpression hashCode32 = ident(hashCode32Var.name);
+
+                JCTree.JCLabeledStatement switchLabel = label("_switch", null);
+                ListBuffer<JCTree.JCCase> cases = new ListBuffer<>();
+                for (int i = 0; i < hashCode32Keys.length; ++i) {
+                    java.util.List<Long> hashCode64Array = map.get(hashCode32Keys[i]);
+                    List<JCTree.JCStatement> stmts = List.nil();
+                    Long fieldNameHash = null;
+                    if (hashCode64Array.size() == 1 && hashCode64Array.get(0) == hashCode32Keys[i]) {
+                        fieldNameHash = hashCode64Array.get(0);
+                        int index = mappingIndex.get(fieldNameHash);
+                        AttributeInfo attributeInfo = mapping.get(fieldNameHash);
+                        stmts = stmts.appendList(genReadFieldValue(attributeInfo, jsonReaderIdent, index, structInfo, loopLabel, objectIdent, isJsonb));
+                        stmts.append(defContinue(loopLabel));
+                    } else {
+                        for (int j = 0; j < hashCode64Array.size(); ++j) {
+                            fieldNameHash = hashCode64Array.get(j);
+                            int index = mappingIndex.get(fieldNameHash);
+                            AttributeInfo field = mapping.get(fieldNameHash);
+                            List<JCTree.JCStatement> stmtsIf = genReadFieldValue(field, jsonReaderIdent, index, structInfo, loopLabel, objectIdent, isJsonb);
+                            stmts = stmts.append(defIf(binary(JCTree.Tag.EQ, hashCode64, literal(fieldNameHash)), block(stmtsIf), null));
+                            stmts.append(defContinue(loopLabel));
+                        }
+                        stmts.append(defBreak(switchLabel));
+                    }
+                    cases.append(defCase(getHashCode32Var(literal(fieldNameHash)).getInitializer(), stmts));
+                }
+                switchLabel.body = defSwitch(hashCode32, cases.toList());
+                loopBody.append(switchLabel);
             }
-            switchLabel.body = defSwitch(hashCode32, cases.toList());
-            loopBody.append(switchLabel);
+
+            if (structInfo.smartMatch) {
+                loopBody.append(defIf(method(field(ident(names._this), "readFieldValueWithLCase"), List.of(jsonReaderIdent, objectIdent, ident(hashCode64Var.name), ident(features2Var.name))), block(defContinue(loopLabel)), null));
+            }
+            JCTree.JCFieldAccess processExtraField = field(ident(names._this), "processExtra");
+            loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent, ident(features2Var.name)))));
         }
-        if (structInfo.smartMatch) {
-            loopBody.append(defIf(method(field(ident(names._this), "readFieldValueWithLCase"), List.of(jsonReaderIdent, objectIdent, ident(hashCode64Var.name), ident(features2Var.name))), block(defContinue(loopLabel)), null));
-        }
-        JCTree.JCFieldAccess processExtraField = field(ident(names._this), "processExtra");
-        loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent))));
+
         loopHead.body = block(loopBody.toList());
         loopLabel.body = loopHead;
         readObjectBody.append(loopLabel);
-
         readObjectBody.append(exec(method(field(jsonReaderIdent, "nextIfComma"))));
 
         readObjectBody.append(defReturn(objectIdent));

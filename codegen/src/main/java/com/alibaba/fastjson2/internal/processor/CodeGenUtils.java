@@ -11,6 +11,24 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.util.*;
 
 public class CodeGenUtils {
+    public static final int JVM_VERSION;
+
+    static {
+        int jvmVersion = -1;
+        try {
+            String javaSpecVer = System.getProperty("java.specification.version");
+            if (javaSpecVer.startsWith("1.")) {
+                javaSpecVer = javaSpecVer.substring(2);
+            }
+            if (javaSpecVer.indexOf('.') == -1) {
+                jvmVersion = Integer.parseInt(javaSpecVer);
+            }
+        } catch (Throwable ignored) {
+            // ignored
+        }
+        JVM_VERSION = jvmVersion;
+    }
+
     static Map<String, String> readDirectMap = new HashMap<>();
     static {
         readDirectMap.put("boolean", "readBoolValue");
