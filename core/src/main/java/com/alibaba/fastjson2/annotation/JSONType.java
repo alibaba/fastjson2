@@ -81,10 +81,25 @@ public @interface JSONType {
     /**
      * @since 2.0.50
      */
+    boolean disableReferenceDetect() default false;
+
+    /**
+     * @since 2.0.50
+     */
     boolean disableSmartMatch() default false;
 
     /**
      * @since 2.0.50
      */
-    boolean disableReferenceDetect() default false;
+    boolean disableArrayMapping() default false;
+
+    /**
+     * @since 2.0.50
+     */
+    boolean disableAutoType() default false;
+
+    /**
+     * @since 2.0.50
+     */
+    boolean disableJSONB() default false;
 }

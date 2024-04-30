@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.internal.codegen.Label;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
@@ -108,7 +109,7 @@ public class JSONCompiledAnnotationProcessor
                         }
 
                         // generate constructor
-                        innerClass.defs = innerClass.defs.append(genConstructor(beanType, beanNew, attributeInfos, superClass, generatedFields));
+                        innerClass.defs = innerClass.defs.append(genConstructor(structInfo, beanType, beanNew, attributeInfos, superClass, generatedFields));
 
                         // generate createInstance
                         innerClass.defs = innerClass.defs.append(genCreateInstance(objectType, beanNew));
@@ -193,6 +194,7 @@ public class JSONCompiledAnnotationProcessor
     }
 
     private JCTree.JCMethodDecl genConstructor(
+            StructInfo structInfo,
             JCTree.JCExpression beanType,
             JCTree.JCNewClass beanNew,
             java.util.List<AttributeInfo> fields,
@@ -224,7 +226,11 @@ public class JSONCompiledAnnotationProcessor
             }
         }
         JCTree.JCNewArray fieldReadersArray = newArray(fieldReaderType, null, List.from(fieldReaders));
-        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, 0L), lambda, defNull(), fieldReadersArray));
+        long features = 0L;
+        if (!structInfo.smartMatch) {
+            features |= FieldInfo.DISABLE_SMART_MATCH;
+        }
+        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, features), lambda, defNull(), fieldReadersArray));
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
         stmts.append(exec(superMethod));
         // initialize fields if necessary
@@ -308,17 +314,11 @@ public class JSONCompiledAnnotationProcessor
         loopBody.append(hashCode64Var);
 
         if (switchGen) {
-            // processExtra(jsonReader, object);
-            if (structInfo.smartMatch) {
-                loopBody.append(
-                        exec(method(
-                                field(ident(names._this), "readFieldValue"),
-                                List.of(hashCode64, jsonReaderIdent, ident(features2Var.name), ident(objectVar.name))
-                        )));
-            } else {
-                JCTree.JCFieldAccess processExtraField = field(ident(names._this), "processExtra");
-                loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent, ident(features2Var.name)))));
-            }
+            loopBody.append(
+                    exec(method(
+                            field(ident(names._this), "readFieldValue"),
+                            List.of(hashCode64, jsonReaderIdent, ident(features2Var.name), ident(objectVar.name))
+                    )));
         } else {
             if (fieldsSize <= 6) {
                 for (int i = 0; i < fieldsSize; ++i) {
@@ -378,9 +378,7 @@ public class JSONCompiledAnnotationProcessor
                 loopBody.append(switchLabel);
             }
 
-            if (structInfo.smartMatch) {
-                loopBody.append(defIf(method(field(ident(names._this), "readFieldValueWithLCase"), List.of(jsonReaderIdent, objectIdent, ident(hashCode64Var.name), ident(features2Var.name))), block(defContinue(loopLabel)), null));
-            }
+            loopBody.append(defIf(method(field(ident(names._this), "readFieldValueWithLCase"), List.of(jsonReaderIdent, objectIdent, ident(hashCode64Var.name), ident(features2Var.name))), block(defContinue(loopLabel)), null));
             JCTree.JCFieldAccess processExtraField = field(ident(names._this), "processExtra");
             loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent, ident(features2Var.name)))));
         }
