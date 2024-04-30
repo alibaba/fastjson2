@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.benchmark.jjb;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.dslplatform.json.CompiledJson;
 import com.dslplatform.json.JsonAttribute;
 
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 @CompiledJson
+//@com.alibaba.fastjson2.annotation.JSONCompiled
+@JSONType(disableReferenceDetect = true)
 public class Clients {
     private List<Client> clients;
 
@@ -23,6 +26,8 @@ public class Clients {
     }
 
     @CompiledJson
+//    @com.alibaba.fastjson2.annotation.JSONCompiled
+    @JSONType(disableReferenceDetect = true)
     public static final class Client {
         private long id;
         private int index;
