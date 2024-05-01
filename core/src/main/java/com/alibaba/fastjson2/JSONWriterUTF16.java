@@ -28,6 +28,7 @@ class JSONWriterUTF16
         extends JSONWriter {
     static final char[] REF_PREF = "{\"$ref\":".toCharArray();
     static final int[] HEX256;
+
     static {
         int[] digits = new int[16 * 16];
 
@@ -3284,7 +3285,7 @@ class JSONWriterUTF16
                 chars[off + 3] = 's';
                 chars[off + 4] = 'e';
                 off += 5;
-            } else{
+            } else {
                 chars[off] = 't';
                 chars[off + 1] = 'r';
                 chars[off + 2] = 'u';
