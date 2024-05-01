@@ -444,7 +444,6 @@ public class ObjectReaderAdapter<T>
     protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {
         FieldReader fieldReader = getFieldReader(hashCode);
         if (fieldReader == null
-                && !disableSmartMatch
                 && jsonReader.isSupportSmartMatch(this.features | features)) {
             long hashCodeL = jsonReader.getNameHashCodeLCase();
             fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);

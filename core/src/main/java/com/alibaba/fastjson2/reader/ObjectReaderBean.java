@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
@@ -30,7 +29,6 @@ public abstract class ObjectReaderBean<T>
 
     protected boolean hasDefaultValue;
     protected final boolean serializable;
-    protected final boolean disableSmartMatch;
 
     protected final JSONSchema schema;
 
@@ -59,7 +57,6 @@ public abstract class ObjectReaderBean<T>
 
         this.schema = schema;
         this.serializable = objectClass != null && Serializable.class.isAssignableFrom(objectClass);
-        this.disableSmartMatch = (features & FieldInfo.DISABLE_SMART_MATCH) != 0;
     }
 
     @Override

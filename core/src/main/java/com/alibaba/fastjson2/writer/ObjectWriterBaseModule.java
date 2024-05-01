@@ -242,6 +242,22 @@ public class ObjectWriterBaseModule
                 if (jsonType.writeEnumAsJavaBean()) {
                     beanInfo.writeEnumAsJavaBean = true;
                 }
+
+                if (jsonType.disableReferenceDetect()) {
+                    beanInfo.writerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
+                }
+
+                if (jsonType.disableArrayMapping()) {
+                    beanInfo.writerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
+                }
+
+                if (jsonType.disableAutoType()) {
+                    beanInfo.writerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
+                }
+
+                if (jsonType.disableJSONB()) {
+                    beanInfo.writerFeatures |= FieldInfo.DISABLE_JSONB;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));

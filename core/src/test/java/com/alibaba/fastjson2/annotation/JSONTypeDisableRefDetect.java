@@ -22,10 +22,10 @@ public class JSONTypeDisableRefDetect {
 
         String str1 = "{\"UserId\":123}";
         assertEquals(0, JSON.parseObject(str1, Bean.class).id);
-        assertEquals(0, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
+        assertEquals(123, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
     }
 
-    @JSONType(disableSmartMatch = true, disableReferenceDetect = true, disableArrayMapping = true, disableAutoType = true)
+    @JSONType(disableSmartMatch = true, disableReferenceDetect = true, disableArrayMapping = true)
     public static class Bean {
         @JSONField(name = "userId")
         public int id;

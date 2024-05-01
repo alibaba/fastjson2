@@ -1530,75 +1530,73 @@ public class ObjectReaderCreatorASM
             mw.visitLabel(json_);
         }
 
-        if (!disableArrayMapping || !disableSmartMatch) {
-            Label object_ = new Label();
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isArray", "()Z", false);
-            mw.visitJumpInsn(Opcodes.IFEQ, object_);
+        Label object_ = new Label();
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isArray", "()Z", false);
+        mw.visitJumpInsn(Opcodes.IFEQ, object_);
 
-            if (!disableArrayMapping) {
-                Label singleItemArray_ = new Label();
+        if (!disableArrayMapping) {
+            Label singleItemArray_ = new Label();
 
-                if ((readerFeatures & JSONReader.Feature.SupportArrayToBean.mask) == 0) {
-                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                    mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportBeanArray", "(J)Z", false);
-                    mw.visitJumpInsn(Opcodes.IFEQ, singleItemArray_);
-                }
-
+            if ((readerFeatures & JSONReader.Feature.SupportArrayToBean.mask) == 0) {
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayStart", "()Z", false);
-
-                genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
-                mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
-
-                for (int i = 0; i < fieldReaderArray.length; ++i) {
-                    FieldReader fieldReader = fieldReaderArray[i];
-                    varIndex = genReadFieldValue(
-                            context,
-                            fieldReader,
-                            fieldBased,
-                            classNameType,
-                            mw,
-                            THIS,
-                            JSON_READER,
-                            OBJECT,
-                            FEATURES,
-                            varIndex,
-                            variants,
-                            ITEM_CNT,
-                            J,
-                            i,
-                            false, // JSONB
-                            true, // arrayMapping
-                            TYPE_OBJECT
-                    );
-                }
-
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayEnd", "()Z", false);
-                mw.visitInsn(Opcodes.POP); // TODO HANDLE ERROR
-
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfComma", "()Z", false);
-                mw.visitInsn(Opcodes.POP);
-
-                mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-                mw.visitInsn(Opcodes.ARETURN);
-
-                mw.visitLabel(singleItemArray_);
+                mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportBeanArray", "(J)Z", false);
+                mw.visitJumpInsn(Opcodes.IFEQ, singleItemArray_);
             }
 
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
-            mw.visitVarInsn(Opcodes.ALOAD, FIELD_NAME);
-            mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "processObjectInputSingleItemArray", METHOD_DESC_READ_OBJECT, false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayStart", "()Z", false);
+
+            genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
+            mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
+
+            for (int i = 0; i < fieldReaderArray.length; ++i) {
+                FieldReader fieldReader = fieldReaderArray[i];
+                varIndex = genReadFieldValue(
+                        context,
+                        fieldReader,
+                        fieldBased,
+                        classNameType,
+                        mw,
+                        THIS,
+                        JSON_READER,
+                        OBJECT,
+                        FEATURES,
+                        varIndex,
+                        variants,
+                        ITEM_CNT,
+                        J,
+                        i,
+                        false, // JSONB
+                        true, // arrayMapping
+                        TYPE_OBJECT
+                );
+            }
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayEnd", "()Z", false);
+            mw.visitInsn(Opcodes.POP); // TODO HANDLE ERROR
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfComma", "()Z", false);
+            mw.visitInsn(Opcodes.POP);
+
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitInsn(Opcodes.ARETURN);
 
-            mw.visitLabel(object_);
+            mw.visitLabel(singleItemArray_);
         }
+
+        mw.visitVarInsn(Opcodes.ALOAD, THIS);
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_NAME);
+        mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "processObjectInputSingleItemArray", METHOD_DESC_READ_OBJECT, false);
+        mw.visitInsn(Opcodes.ARETURN);
+
+        mw.visitLabel(object_);
 
         Label notNull_ = new Label(), end_ = new Label();
 
