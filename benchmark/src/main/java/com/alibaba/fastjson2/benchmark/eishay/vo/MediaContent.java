@@ -2,7 +2,8 @@ package com.alibaba.fastjson2.benchmark.eishay.vo;
 
 import java.util.List;
 
-//@com.alibaba.fastjson2.annotation.JSONCompiled(referenceDetect = false)
+//@com.alibaba.fastjson2.annotation.JSONCompiled
+//@com.alibaba.fastjson2.annotation.JSONType(disableReferenceDetect = true, disableArrayMapping = true, disableSmartMatch = true, disableAutoType = true, disableJSONB = true)
 @SuppressWarnings("serial")
 public class MediaContent
         implements java.io.Serializable {

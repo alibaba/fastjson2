@@ -1,15 +1,15 @@
 package com.alibaba.fastjson2.issues_2400;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.util.Fnv;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue2411 {
     static JSONWriter.Feature[] writerFeatures = {
@@ -51,6 +51,15 @@ public class Issue2411 {
 
         assertEquals(course.userId, result.userId);
         assertEquals(course.courseId, result.courseId);
+    }
+
+    @Test
+    public void getFieldReader() {
+        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(RmsFinishCourseDTO.class);
+        assertNotNull(
+                objectReader.getFieldReader("courseId"));
+        assertNotNull(
+                objectReader.getFieldReader(Fnv.hashCode64("courseId")));
     }
 
     @Data

@@ -11,9 +11,15 @@ public class FieldInfo {
     public static final long RAW_VALUE_MASK = 1L << 50;
     public static final long READ_USING_MASK = 1L << 51;
     public static final long FIELD_MASK = 1L << 52;
-//    public static final long JSON_AUTO_WIRED_ANNOTATED = 1L << 53;
+    //    public static final long JSON_AUTO_WIRED_ANNOTATED = 1L << 53;
     public static final long JIT = 1L << 54;
     public static final long DISABLE_UNSAFE = 1L << 55;
+    public static final long READ_ONLY = 1L << 56;
+    public static final long DISABLE_SMART_MATCH = 1L << 57;
+    public static final long DISABLE_REFERENCE_DETECT = 1L << 58;
+    public static final long DISABLE_ARRAY_MAPPING = 1L << 59;
+    public static final long DISABLE_AUTO_TYPE = 1L << 60;
+    public static final long DISABLE_JSONB = 1L << 61;
 
     public String fieldName;
     public String format;
