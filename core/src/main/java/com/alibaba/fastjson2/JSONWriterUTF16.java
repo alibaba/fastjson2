@@ -28,8 +28,6 @@ class JSONWriterUTF16
         extends JSONWriter {
     static final char[] REF_PREF = "{\"$ref\":".toCharArray();
     static final int[] HEX256;
-    static final long TRUE_64;
-    static final long ALSE_64;
     static {
         int[] digits = new int[16 * 16];
 
@@ -49,19 +47,6 @@ class JSONWriterUTF16
         }
 
         HEX256 = digits;
-
-        char[] chars4 = new char[4];
-        chars4[0] = 't';
-        chars4[1] = 'r';
-        chars4[2] = 'u';
-        chars4[3] = 'e';
-        TRUE_64 = UNSAFE.getLong(chars4, ARRAY_CHAR_BASE_OFFSET);
-
-        chars4[0] = 'a';
-        chars4[1] = 'l';
-        chars4[2] = 's';
-        chars4[3] = 'e';
-        ALSE_64 = UNSAFE.getLong(chars4, ARRAY_CHAR_BASE_OFFSET);
     }
 
     protected char[] chars;
@@ -3293,9 +3278,19 @@ class JSONWriterUTF16
             chars[off++] = value ? '1' : '0';
         } else {
             if (!value) {
-                chars[off++] = 'f';
+                chars[off] = 'f';
+                chars[off + 1] = 'a';
+                chars[off + 2] = 'l';
+                chars[off + 3] = 's';
+                chars[off + 4] = 'e';
+                off += 5;
+            } else {
+                chars[off] = 't';
+                chars[off + 1] = 'r';
+                chars[off + 2] = 'u';
+                chars[off + 3] = 'e';
+                off += 4;
             }
-            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), value ? TRUE_64 : ALSE_64);
             off += 4;
         }
         this.off = off;
