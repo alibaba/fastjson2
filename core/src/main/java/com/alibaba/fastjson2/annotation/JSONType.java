@@ -79,26 +79,36 @@ public @interface JSONType {
     Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler() default JSONReader.AutoTypeBeforeHandler.class;
 
     /**
+     * Reduce code branches during code generation to improve performance,
+     * If it is true, there will be no code related to reference detection.
      * @since 2.0.50
      */
     boolean disableReferenceDetect() default false;
 
     /**
+     * Reduce code branches during code generation to improve performance,
+     * If it is true, there will be no code related to smart match.
      * @since 2.0.50
      */
     boolean disableSmartMatch() default false;
 
     /**
+     * Reduce code branches during code generation to improve performance,
+     * If it is true, there will be no code related to array mapping.
      * @since 2.0.50
      */
     boolean disableArrayMapping() default false;
 
     /**
+     * Reduce code branches during code generation to improve performance,
+     * If it is true, there will be no code related to autoType.
      * @since 2.0.50
      */
     boolean disableAutoType() default false;
 
     /**
+     * Reduce code branches during code generation to improve performance,
+     * If it is true, there will be no code related to jsonb.
      * @since 2.0.50
      */
     boolean disableJSONB() default false;
