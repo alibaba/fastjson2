@@ -223,7 +223,7 @@ public class ObjectReaderAdapter<T>
         }
     }
 
-    public Object auoType(JSONReader jsonReader, Class expectClass, long features) {
+    public Object autoType(JSONReader jsonReader, Class expectClass, long features) {
         long typeHash = jsonReader.readTypeHashCode();
         JSONReader.Context context = jsonReader.getContext();
 
