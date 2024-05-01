@@ -16,7 +16,7 @@ public class EishayWriteUTF8BytesTest {
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.58.0.13 : 336 347 317
             // zulu11.52.13 : 337 314 289 2888 2606 2441
-            // zulu17.40.19 : 317 320 285
+            // zulu17.40.19 : 317 320 285 2446
             // zulu17.40.19_vec : 267 250
             // graalvm_17.0.7 207
         }

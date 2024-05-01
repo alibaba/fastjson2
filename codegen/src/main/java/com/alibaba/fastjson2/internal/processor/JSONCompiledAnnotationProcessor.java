@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.internal.codegen.Label;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
@@ -227,9 +226,6 @@ public class JSONCompiledAnnotationProcessor
         }
         JCTree.JCNewArray fieldReadersArray = newArray(fieldReaderType, null, List.from(fieldReaders));
         long features = 0L;
-        if (!structInfo.smartMatch) {
-            features |= FieldInfo.DISABLE_SMART_MATCH;
-        }
         JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, features), lambda, defNull(), fieldReadersArray));
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
         stmts.append(exec(superMethod));

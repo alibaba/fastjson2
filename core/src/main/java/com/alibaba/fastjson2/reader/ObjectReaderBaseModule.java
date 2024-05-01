@@ -533,11 +533,6 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
-                        case "disableSmartMatch":
-                            if (Boolean.TRUE.equals(result)) {
-                                beanInfo.readerFeatures |= FieldInfo.DISABLE_SMART_MATCH;
-                            }
-                            break;
                         case "disableReferenceDetect":
                             if (Boolean.TRUE.equals(result)) {
                                 beanInfo.readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;

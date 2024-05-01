@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class StructInfo {
     final int modifiers;
     final boolean referenceDetect;
-    final boolean smartMatch;
 
     String typeKey;
     int readerFeatures;
@@ -64,7 +63,6 @@ public class StructInfo {
         }
 
         this.referenceDetect = referenceDetect;
-        this.smartMatch = smartMatch;
     }
 
     public AttributeInfo getAttributeByField(String name, VariableElement field) {

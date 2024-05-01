@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 //@com.alibaba.fastjson2.annotation.JSONCompiled
-//@com.alibaba.fastjson2.annotation.JSONType.JSONType(disableReferenceDetect = true, disableArrayMapping = true, disableSmartMatch = true, disableAutoType = true, disableJSONB = true)
+//@com.alibaba.fastjson2.annotation.JSONType(disableReferenceDetect = true, disableArrayMapping = true, disableSmartMatch = true, disableAutoType = true, disableJSONB = true)
 @SuppressWarnings("serial")
 public class Media
         implements java.io.Serializable {
