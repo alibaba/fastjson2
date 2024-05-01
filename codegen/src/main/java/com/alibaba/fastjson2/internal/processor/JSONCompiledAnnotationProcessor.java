@@ -35,6 +35,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.*;
+import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.qualIdent;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
@@ -120,7 +121,7 @@ public class JSONCompiledAnnotationProcessor
                         beanClassDecl.defs = beanClassDecl.defs.append(innerClass);
 
                         // generate source file
-                        genSource(innerClassFQN, structInfo, innerClass);
+//                        genSource(innerClassFQN, structInfo, innerClass);
                     }
                 }
             });
@@ -198,28 +199,15 @@ public class JSONCompiledAnnotationProcessor
             JCTree.JCNewClass beanNew,
             java.util.List<AttributeInfo> fields,
             Class superClass,
-            boolean generatedFields) {
-        JCTree.JCLambda lambda = lambda(List.nil(), beanNew);
+            boolean generatedFields
+    ) {
+        JCTree.JCMemberReference lambda = constructorRef(beanType);
         JCTree.JCExpression fieldReaderType = qualIdent(FieldReader.class.getName());
         ListBuffer<JCTree.JCMethodInvocation> fieldReaders = new ListBuffer<>();
         JCTree.JCExpression objectReadersType = qualIdent(ObjectReaders.class.getName());
         int fieldsSize = fields.size();
         for (int i = 0; i < fieldsSize; ++i) {
-            JCTree.JCMethodInvocation readerMethod = null;
-            AttributeInfo attributeInfo = fields.get(i);
-            if (attributeInfo.setMethod != null) {
-                String methodName = attributeInfo.setMethod.getSimpleName().toString();
-                readerMethod = method(field(objectReadersType, "fieldReaderWithMethod"), List.of(literal(attributeInfo.name), field(beanType, names._class), literal(methodName)));
-            } else if (attributeInfo.field != null) {
-                String fieldName = attributeInfo.field.getSimpleName().toString();
-                if (fieldName.equals(attributeInfo.name)) {
-                    readerMethod = method(field(objectReadersType, "fieldReaderWithField"), List.of(literal(fieldName), field(beanType, names._class)));
-                } else {
-                    readerMethod = method(field(objectReadersType, "fieldReaderWithField"), List.of(literal(attributeInfo.name), field(beanType, names._class), literal(fieldName)));
-                }
-            } else {
-                messager.printMessage(Diagnostic.Kind.WARNING, "not implemented yet");
-            }
+            JCTree.JCMethodInvocation readerMethod = genFieldReader(beanType, fields.get(i), objectReadersType);
             if (readerMethod != null) {
                 fieldReaders.append(readerMethod);
             }
@@ -234,6 +222,238 @@ public class JSONCompiledAnnotationProcessor
             stmts.appendList(genInitFields(fieldsSize));
         }
         return defMethod(Flags.PUBLIC, names.init, type(TypeTag.VOID), null, null, null, block(stmts.toList()), null);
+    }
+
+    private JCTree.JCMethodInvocation genFieldReader(
+            JCTree.JCExpression beanType,
+            AttributeInfo attributeInfo,
+            JCTree.JCExpression objectReadersType
+    ) {
+        if (attributeInfo.setMethod == null && attributeInfo.field == null) {
+            messager.printMessage(Diagnostic.Kind.WARNING, "not implemented yet");
+            return null;
+        }
+        JCTree.JCMethodInvocation readerMethod;
+        String fieldType = attributeInfo.type.toString();
+        JCTree.JCLiteral fieldName = literal(attributeInfo.name);
+        JCTree.JCExpression lambda = null;
+        if (attributeInfo.setMethod != null) {
+            lambda = methodRef(beanType, attributeInfo.setMethod.getSimpleName().toString());
+        }
+
+        JCTree.JCExpression identType;
+        String methodName = null;
+        switch (fieldType) {
+            case "byte":
+                methodName = "fieldReaderByte";
+                identType = type(TypeTag.BYTE);
+                break;
+            case "short":
+                identType = type(TypeTag.SHORT);
+                methodName = "fieldReaderShort";
+                break;
+            case "int":
+                identType = type(TypeTag.INT);
+                methodName = "fieldReaderInt";
+                break;
+            case "long":
+                identType = type(TypeTag.LONG);
+                methodName = "fieldReaderLong";
+                break;
+            case "char":
+                identType = type(TypeTag.CHAR);
+                methodName = "fieldReaderChar";
+                break;
+            case "float":
+                identType = type(TypeTag.FLOAT);
+                methodName = "fieldReaderFloat";
+                break;
+            case "double":
+                identType = type(TypeTag.DOUBLE);
+                methodName = "fieldReaderDouble";
+                break;
+            case "boolean":
+                identType = type(TypeTag.BOOLEAN);
+                methodName = "fieldReaderBool";
+                break;
+            case "java.lang.String":
+                identType = qualIdent("java.lang.String");
+                methodName = "fieldReaderString";
+                break;
+            default:
+                identType = getFieldValueType(fieldType);
+                break;
+        }
+
+        if (lambda == null) {
+            JCTree.JCVariableDecl object = defVar(Flags.PARAMETER, "o", beanType);
+            JCTree.JCExpression valueType = identType;
+            if (fieldType.startsWith("java.util.Map<")) {
+                valueType = qualIdent("java.util.Map");
+            }
+            JCTree.JCVariableDecl fieldValue = defVar(Flags.PARAMETER, "v", valueType);
+            List<JCTree.JCVariableDecl> args = List.of(object, fieldValue);
+
+            lambda = lambda(
+                    args,
+                    assign(
+                            field(
+                                    ident("o"),
+                                    attributeInfo.field.getSimpleName().toString()),
+                            ident("v")));
+        }
+
+        if (methodName != null) {
+            return method(field(objectReadersType, methodName), List.of(fieldName, lambda));
+        }
+
+        readerMethod = genFieldReaderList(objectReadersType, fieldType, fieldName, lambda);
+        if (readerMethod != null) {
+            return readerMethod;
+        }
+
+        readerMethod = genFieldReaderMap(objectReadersType, fieldType, fieldName, lambda);
+        if (readerMethod != null) {
+            return readerMethod;
+        }
+
+        if (fieldType.indexOf('<') == -1) {
+            readerMethod = method(
+                    field(objectReadersType, "fieldReader"),
+                    List.of(
+                            fieldName,
+                            field(getFieldValueType(fieldType), names._class),
+                            lambda
+                    )
+            );
+        } else {
+            JCTree.JCFieldAccess fieldClassRef = field(beanType, names._class);
+            String fieldReaderMethodName;
+            List<JCTree.JCExpression> args;
+            if (attributeInfo.setMethod != null) {
+                fieldReaderMethodName = "fieldReaderWithMethod";
+                args = List.of(literal(attributeInfo.name), fieldClassRef, literal(methodName));
+            } else {
+                JCTree.JCLiteral fieldNameLiteral = literal(attributeInfo.field.getSimpleName().toString());
+                if (fieldName.toString().equals(attributeInfo.name)) {
+                    args = List.of(fieldNameLiteral, fieldClassRef);
+                } else {
+                    args = List.of(literal(attributeInfo.name), fieldClassRef, fieldNameLiteral);
+                }
+                fieldReaderMethodName = "fieldReaderWithField";
+            }
+            readerMethod = method(field(objectReadersType, fieldReaderMethodName), args);
+        }
+        return readerMethod;
+    }
+
+    private JCTree.JCMethodInvocation genFieldReaderList(
+            JCTree.JCExpression objectReadersType,
+            String fieldType,
+            JCTree.JCLiteral fieldName,
+            JCTree.JCExpression lambda
+    ) {
+        String listType = null, itemType = null;
+        String[] listTypes = {"java.util.List", "java.util.ArrayList"};
+        for (String item : listTypes) {
+            if (fieldType.startsWith(item)) {
+                if (fieldType.length() != item.length()
+                        && fieldType.charAt(item.length()) == '<'
+                ) {
+                    int lastIndex = fieldType.lastIndexOf('>');
+                    String temp = fieldType.substring(item.length() + 1, lastIndex);
+                    if (temp.indexOf(',') == -1 && temp.indexOf('?') == -1) {
+                        listType = item;
+                        itemType = temp;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (listType == null) {
+            return null;
+        }
+
+        JCTree.JCMethodInvocation readerMethod;
+        if ("java.lang.String".equals(itemType) && "java.util.List".equals(listType)) {
+            readerMethod = method(
+                    field(objectReadersType, "fieldReaderListStr"),
+                    List.of(
+                            fieldName,
+                            lambda
+                    )
+            );
+        } else {
+            readerMethod = method(
+                    field(objectReadersType, "fieldReaderList"),
+                    List.of(
+                            fieldName,
+                            field(getFieldValueType(itemType), names._class),
+                            constructorRef(qualIdent("java.util.ArrayList")),
+                            lambda
+                    )
+            );
+        }
+
+        return readerMethod;
+    }
+
+    private JCTree.JCMethodInvocation genFieldReaderMap(
+            JCTree.JCExpression objectReadersType,
+            String fieldType,
+            JCTree.JCLiteral fieldName,
+            JCTree.JCExpression lambda
+    ) {
+        String mapType = null, keyType = null, valueType = null;
+        String[] mapTypes = {"java.util.Map", "java.util.HashMap", "java.util.TreeMap"};
+        for (String item : mapTypes) {
+            if (fieldType.startsWith(item)) {
+                if (fieldType.length() != item.length()
+                        && fieldType.charAt(item.length()) == '<'
+                ) {
+                    int lastIndex = fieldType.lastIndexOf('>');
+                    String keyValueType = fieldType.substring(item.length() + 1, lastIndex);
+                    if (keyValueType.indexOf('<') == -1 && keyValueType.indexOf('?') == -1) {
+                        int commaIndex = keyValueType.indexOf(',');
+                        if (commaIndex == -1) {
+                            continue;
+                        }
+
+                        keyType = keyValueType.substring(0, commaIndex);
+                        valueType = keyValueType.substring(commaIndex + 1);
+
+                        if (keyType.indexOf('<') != -1
+                                || keyType.indexOf('?') != -1
+                                || valueType.indexOf('<') != -1
+                                || valueType.indexOf('?') != -1
+                        ) {
+                            keyType = null;
+                            valueType = null;
+                            continue;
+                        }
+
+                        mapType = item;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (mapType == null) {
+            return null;
+        }
+
+        return method(
+                field(objectReadersType, "fieldReaderMap"),
+                List.of(
+                        fieldName,
+                        field(getFieldValueType(mapType), names._class),
+                        field(getFieldValueType(keyType), names._class),
+                        field(getFieldValueType(valueType), names._class),
+                        lambda
+                )
+        );
     }
 
     private List<JCTree.JCStatement> genInitFields(int fieldsSize) {
@@ -1060,10 +1280,10 @@ public class JSONCompiledAnnotationProcessor
                 Formatter formatter = new Formatter();
                 writer.write(formatter.formatSource(str));
             } catch (Exception e) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Failed saving compiled json serialization file " + fullQualifiedName);
+                messager.printMessage(Diagnostic.Kind.ERROR, "Failed saving compiled json serialization file " + fullQualifiedName + e.getMessage());
             }
         } catch (IOException e) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Failed creating compiled json serialization file " + fullQualifiedName);
+            messager.printMessage(Diagnostic.Kind.ERROR, "Failed creating compiled json serialization file " + fullQualifiedName + e.getMessage());
         }
     }
 
@@ -1078,7 +1298,11 @@ public class JSONCompiledAnnotationProcessor
     }
 
     private String findConverterName(StructInfo structInfo) {
-        int dotIndex = structInfo.binaryName.lastIndexOf('.');
+        int dotIndex;
+        dotIndex = structInfo.binaryName.lastIndexOf('$');
+        if (dotIndex != -1) {
+            dotIndex = structInfo.binaryName.lastIndexOf('.');
+        }
         String className = structInfo.binaryName.substring(dotIndex + 1);
         if (dotIndex == -1) {
             return className + "_FASTJSONReader";

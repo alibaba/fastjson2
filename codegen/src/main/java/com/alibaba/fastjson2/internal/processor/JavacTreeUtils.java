@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.internal.processor;
 
+import com.sun.source.tree.MemberReferenceTree;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
@@ -405,6 +406,14 @@ final class JavacTreeUtils {
             args = List.nil();
         }
         return treeMaker.Lambda(args, body);
+    }
+
+    static JCTree.JCMemberReference constructorRef(JCTree.JCExpression beanClass) {
+        return treeMaker.Reference(MemberReferenceTree.ReferenceMode.NEW, names.init, beanClass, null);
+    }
+
+    static JCTree.JCMemberReference methodRef(JCTree.JCExpression beanClass, String methodName) {
+        return treeMaker.Reference(MemberReferenceTree.ReferenceMode.INVOKE, names.fromString(methodName), beanClass, null);
     }
 
     static JCTree.JCNewArray newArray(JCTree.JCExpression elemTypeExpr, List<JCTree.JCExpression> dimsExprs, List<JCTree.JCExpression> elemDataExprs) {
