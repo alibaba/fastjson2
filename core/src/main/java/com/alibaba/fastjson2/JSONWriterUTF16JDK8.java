@@ -55,33 +55,4 @@ final class JSONWriterUTF16JDK8
 
         writeStringEscape(str);
     }
-
-    public void writeBool(boolean value) {
-        int minCapacity = off + 5;
-        if (minCapacity >= this.chars.length) {
-            ensureCapacity(minCapacity);
-        }
-
-        char[] chars = this.chars;
-        int off = this.off;
-        if ((context.features & WriteBooleanAsNumber.mask) != 0) {
-            chars[off++] = value ? '1' : '0';
-        } else {
-            if (!value) {
-                chars[off] = 'f';
-                chars[off + 1] = 'a';
-                chars[off + 2] = 'l';
-                chars[off + 3] = 's';
-                chars[off + 4] = 'e';
-                off += 5;
-            } else {
-                chars[off] = 't';
-                chars[off + 1] = 'r';
-                chars[off + 2] = 'u';
-                chars[off + 3] = 'e';
-                off += 4;
-            }
-        }
-        this.off = off;
-    }
 }
