@@ -1022,9 +1022,7 @@
                 <jdk>[17,)</jdk>
             </activation>
             <modules>
-                <!--
                 <module>example-graalvm-native</module>
-                -->
                 <module>extension-spring6</module>
                 <module>example-spring6-test</module>
                 <module>incubator-vector</module>
