@@ -3,9 +3,10 @@ package com.alibaba.fastjson2;
 import sun.misc.Unsafe;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteBooleanAsNumber;
+import static com.alibaba.fastjson2.util.IOUtils.ALSE_64;
+import static com.alibaba.fastjson2.util.IOUtils.TRUE_64;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF16JDK9UF
         extends JSONWriterUTF16 {
@@ -65,5 +66,25 @@ final class JSONWriterUTF16JDK9UF
         }
 
         writeStringEscape(str);
+    }
+
+    public void writeBool(boolean value) {
+        int minCapacity = off + 5;
+        if (minCapacity >= this.chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        char[] chars = this.chars;
+        int off = this.off;
+        if ((context.features & WriteBooleanAsNumber.mask) != 0) {
+            chars[off++] = value ? '1' : '0';
+        } else {
+            if (!value) {
+                chars[off++] = 'f';
+            }
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), value ? TRUE_64 : ALSE_64);
+            off += 4;
+        }
+        this.off = off;
     }
 }

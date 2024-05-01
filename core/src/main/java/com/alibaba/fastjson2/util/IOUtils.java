@@ -15,8 +15,10 @@ public class IOUtils {
     public static final long NULL_64 = BIG_ENDIAN ? 0x6e0075006c006cL : 0x6c006c0075006eL;
 
     public static final int TRUE = BIG_ENDIAN ? 0x74727565 : 0x65757274;
+    public static final long TRUE_64 = BIG_ENDIAN ? 0x74007200750065L : 0x65007500720074L;
 
     public static final int ALSE = BIG_ENDIAN ? 0x616c7365 : 0x65736c61;
+    public static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
     public static final long DOT_X0 = BIG_ENDIAN ? 0x2e00L : 0x2eL;
 
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
