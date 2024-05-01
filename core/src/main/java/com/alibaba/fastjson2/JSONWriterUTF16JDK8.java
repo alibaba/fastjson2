@@ -81,7 +81,6 @@ final class JSONWriterUTF16JDK8
                 chars[off + 3] = 'e';
                 off += 4;
             }
-            off += 4;
         }
         this.off = off;
     }
