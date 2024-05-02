@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.internal.processor.annotation;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +11,28 @@ public class BasicTypeTest {
     @Test
     public void test() {
         Bean bean = new Bean();
+        bean.f0 = 100;
+        bean.f1 = 101;
+        bean.f2 = 102;
+        bean.f3 = 103;
+        bean.f4 = 104;
+        bean.f5 = 105;
+        bean.f6 = '6';
+        bean.f7 = true;
+        bean.f8 = "108";
+
         String str = JSON.toJSONString(bean);
         Bean bean1 = JSON.parseObject(str, Bean.class);
+        String str1 = JSON.toJSONString(bean1);
+        assertEquals(str, str1);
+
+        Bean bean2 = JSON.parseObject(str).to(Bean.class);
+        String str2 = JSON.toJSONString(bean2);
+        assertEquals(str, str2);
+
+        byte[] jsonb = JSONB.toBytes(bean);
+        Bean bean3 = JSONB.parseObject(jsonb, Bean.class);
+        assertEquals(str, JSON.toJSONString(bean3));
     }
 
     @JSONCompiled
@@ -30,8 +51,27 @@ public class BasicTypeTest {
     @Test
     public void test1() {
         Bean1 bean = new Bean1();
+        bean.f0 = 100;
+        bean.f1 = 101;
+        bean.f2 = 102;
+        bean.f3 = 103;
+        bean.f4 = 104;
+        bean.f5 = 105;
+        bean.f6 = '6';
+        bean.f7 = true;
+        bean.f8 = "108";
         String str = JSON.toJSONString(bean);
         Bean1 bean1 = JSON.parseObject(str, Bean1.class);
+        String str1 = JSON.toJSONString(bean1);
+        assertEquals(str, str1);
+
+        Bean1 bean2 = JSON.parseObject(str).to(Bean1.class);
+        String str2 = JSON.toJSONString(bean2);
+        assertEquals(str, str2);
+
+        byte[] jsonb = JSONB.toBytes(bean);
+        Bean1 bean3 = JSONB.parseObject(jsonb, Bean1.class);
+        assertEquals(str, JSON.toJSONString(bean3));
     }
 
     @JSONCompiled
