@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.google.googlejavaformat</groupId>
             <artifactId>google-java-format</artifactId>
-            <version>1.7</version>
+            <version>1.22.0</version>
         </dependency>
 
         <!-- test libs -->
