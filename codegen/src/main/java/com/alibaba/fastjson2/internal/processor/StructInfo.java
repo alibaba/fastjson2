@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 public class StructInfo {
     final int modifiers;
     final boolean referenceDetect;
+    final boolean disableJSONB;
+    final boolean disableAutoType;
+    final boolean disableArrayMapping;
 
     String typeKey;
     int readerFeatures;
@@ -44,7 +47,10 @@ public class StructInfo {
             }
         }
 
-        boolean referenceDetect = true, smartMatch = true;
+        boolean referenceDetect = true,
+                disableJSONB = false,
+                disableAutoType = false,
+                disableArrayMapping = false;
         if (jsonType != null) {
             for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : jsonType.getElementValues().entrySet()) {
                 String annFieldName = entry.getKey().getSimpleName().toString();
@@ -53,8 +59,14 @@ public class StructInfo {
                     case "disableReferenceDetect":
                         referenceDetect = !(Boolean) value.getValue();
                         break;
-                    case "disableSmartMatch":
-                        smartMatch = !(Boolean) value.getValue();
+                    case "disableJSONB":
+                        disableJSONB = (Boolean) value.getValue();
+                        break;
+                    case "disableAutoType":
+                        disableAutoType = (Boolean) value.getValue();
+                        break;
+                    case "disableArrayMapping":
+                        disableArrayMapping = (Boolean) value.getValue();
                         break;
                     default:
                         break;
@@ -63,6 +75,9 @@ public class StructInfo {
         }
 
         this.referenceDetect = referenceDetect;
+        this.disableJSONB = disableJSONB;
+        this.disableAutoType = disableAutoType;
+        this.disableArrayMapping = disableArrayMapping;
     }
 
     public AttributeInfo getAttributeByField(String name, VariableElement field) {
