@@ -1,6 +1,7 @@
 // https://www.oracle.com/corporate/features/understanding-java-9-modules.html
 
 open module com.alibaba.fastjson2 {
+    requires transitive fastjson
     requires transitive jdk.unsupported;
     requires java.management;
 
