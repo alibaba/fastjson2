@@ -34,7 +34,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
         <fastjson2.version>2.0.50-SNAPSHOT</fastjson2.version>
         <imageName>fastjson2-example-graalvm-native</imageName>
     </properties>
