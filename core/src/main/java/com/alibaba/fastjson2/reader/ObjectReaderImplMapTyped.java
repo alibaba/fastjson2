@@ -123,7 +123,7 @@ class ObjectReaderImplMapTyped
                     } catch (Exception ignored) {
                         // ignored
                     }
-                } else if (value instanceof Collection) {
+                } else if (value instanceof Collection && !multiValue) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
