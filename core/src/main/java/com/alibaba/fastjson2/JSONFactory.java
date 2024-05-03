@@ -47,6 +47,10 @@ public final class JSONFactory {
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
     static boolean defaultWriterAlphabetic;
+    static final boolean disableReferenceDetect;
+    static final boolean disableArrayMapping;
+    static final boolean disableJSONB;
+    static final boolean disableAutoType;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
@@ -167,6 +171,41 @@ public final class JSONFactory {
 
             CREATOR = property == null ? "asm" : property;
         }
+        {
+            boolean disableReferenceDetect0 = false,
+                    disableArrayMapping0 = false,
+                    disableJSONB0 = false,
+                    disableAutoType0 = false;
+            String features = System.getProperty("fastjson2.features");
+            if (features == null) {
+                features = getProperty("fastjson2.features");
+            }
+            if (features != null) {
+                for (String feature : features.split(",")) {
+                    switch (feature) {
+                        case "disableReferenceDetect":
+                            disableReferenceDetect0 = true;
+                            break;
+                        case "disableArrayMapping":
+                            disableArrayMapping0 = true;
+                            break;
+                        case "disableJSONB":
+                            disableJSONB0 = true;
+                            break;
+                        case "disableAutoType":
+                            disableAutoType0 = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            disableReferenceDetect = disableReferenceDetect0;
+            disableArrayMapping = disableArrayMapping0;
+            disableJSONB = disableJSONB0;
+            disableAutoType = disableAutoType0;
+        }
 
         useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
         useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
@@ -252,6 +291,21 @@ public final class JSONFactory {
         }
 
         return propertyValue;
+    }
+
+    private static String getProperty(Properties properties, String name) {
+        String property = System.getProperty(name);
+        if (property != null) {
+            property = property.trim();
+            if (property.isEmpty()) {
+                property = properties.getProperty(name);
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+        }
+
+        return property;
     }
 
     public static boolean isUseJacksonAnnotation() {
@@ -523,5 +577,21 @@ public final class JSONFactory {
 
     public static void setDefaultWriterAlphabetic(boolean defaultWriterAlphabetic) {
         JSONFactory.defaultWriterAlphabetic = defaultWriterAlphabetic;
+    }
+
+    public static boolean isDisableReferenceDetect() {
+        return disableReferenceDetect;
+    }
+
+    public static boolean isDisableAutoType() {
+        return disableAutoType;
+    }
+
+    public static boolean isDisableJSONB() {
+        return disableJSONB;
+    }
+
+    public static boolean isDisableArrayMapping() {
+        return disableArrayMapping;
     }
 }
