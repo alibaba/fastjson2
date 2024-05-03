@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -25,7 +26,7 @@ public class StringToAny
     @Override
     public Object apply(Object from) {
         String str = (String) from;
-        if (str == null || "null".equals(str) || "".equals(str)) {
+        if (str == null || "null".equals(str) || str.isEmpty()) {
             return defaultValue;
         }
 
@@ -75,10 +76,15 @@ public class StringToAny
         }
 
         if (targetClass == Collections.class || targetClass == List.class || targetClass == JSONArray.class) {
-            if ("[]".equals(str)) {
-                return new JSONArray();
-            } else {
+            char firstChar = str.charAt(0);
+            if (firstChar == '[') {
                 return JSON.parseObject(str, targetClass);
+            }
+
+            int commaIndex = str.indexOf(',');
+            if (commaIndex != -1) {
+                String[] items = str.split(",");
+                return Arrays.asList(items);
             }
         }
 
