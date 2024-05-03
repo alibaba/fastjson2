@@ -769,7 +769,7 @@ final class JSONReaderJSONB
                         return readArray();
                     }
 
-                    throw new JSONException("auoType not support , offset " + offset + "/" + bytes.length);
+                    throw new JSONException("autoType not support , offset " + offset + "/" + bytes.length);
                 }
 
                 ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
@@ -778,7 +778,7 @@ final class JSONReaderJSONB
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException("auoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
+                        throw new JSONException("autoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
                     }
                 }
                 return autoTypeObjectReader.readJSONBObject(this, null, null, 0);

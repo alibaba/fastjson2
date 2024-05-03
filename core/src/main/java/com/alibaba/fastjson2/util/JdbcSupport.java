@@ -218,15 +218,7 @@ public class JdbcSupport {
             }
 
             Timestamp ts = (Timestamp) object;
-            long millis = ts.getTime();
-
-            int nanos = ts.getNanos();
-            if (nanos == 0) {
-                jsonWriter.writeMillis(millis);
-                return;
-            }
-
-            jsonWriter.writeInstant(millis, nanos);
+            jsonWriter.writeInstant(ts.getTime(), ts.getNanos());
         }
 
         @Override
@@ -277,12 +269,6 @@ public class JdbcSupport {
                 }
 
                 int nanos = ts.getNanos();
-
-                if (nanos == 0) {
-                    jsonWriter.writeInt64(ts.getTime());
-                    return;
-                }
-
                 int year = zdt.dateTime.date.year;
                 int month = zdt.dateTime.date.monthValue;
                 int dayOfMonth = zdt.dateTime.date.dayOfMonth;

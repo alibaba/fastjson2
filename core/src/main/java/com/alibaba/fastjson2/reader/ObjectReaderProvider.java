@@ -1178,7 +1178,8 @@ public class ObjectReaderProvider {
                     case "autoTypeBeforeHandler":
                     case "autoTypeCheckHandler": {
                         Class<?> autoTypeCheckHandler = (Class) result;
-                        if (JSONReader.AutoTypeBeforeHandler.class.isAssignableFrom(autoTypeCheckHandler)) {
+                        if (autoTypeCheckHandler != JSONReader.AutoTypeBeforeHandler.class
+                                && JSONReader.AutoTypeBeforeHandler.class.isAssignableFrom(autoTypeCheckHandler)) {
                             beanInfo.autoTypeBeforeHandler = (Class<JSONReader.AutoTypeBeforeHandler>) autoTypeCheckHandler;
                         }
                         break;
