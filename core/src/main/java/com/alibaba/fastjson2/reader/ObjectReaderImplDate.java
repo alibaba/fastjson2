@@ -39,23 +39,15 @@ public class ObjectReaderImplDate
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isInt()) {
-            long millis = jsonReader.readInt64Value();
-            if (formatUnixTime) {
-                millis *= 1000;
-            }
-            return new Date(millis);
-        }
-
-        if (jsonReader.readIfNull()) {
-            return null;
-        }
-
         return readDate(jsonReader);
     }
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        return readDate(jsonReader);
+    }
+
+    private Object readDate(JSONReader jsonReader) {
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
             if (formatUnixTime) {
@@ -68,10 +60,14 @@ public class ObjectReaderImplDate
             return null;
         }
 
-        return readDate(jsonReader);
-    }
+        if (jsonReader.nextIfNullOrEmptyString()) {
+            return null;
+        }
 
-    private Object readDate(JSONReader jsonReader) {
+        if (jsonReader.current() == 'n') {
+            return jsonReader.readNullOrNewDate();
+        }
+
         long millis;
         if (useSimpleFormatter) {
             String str = jsonReader.readString();

@@ -1204,7 +1204,8 @@ public class ObjectReaderProvider {
                     case "autoTypeBeforeHandler":
                     case "autoTypeCheckHandler": {
                         Class<?> autoTypeCheckHandler = (Class) result;
-                        if (JSONReader.AutoTypeBeforeHandler.class.isAssignableFrom(autoTypeCheckHandler)) {
+                        if (autoTypeCheckHandler != JSONReader.AutoTypeBeforeHandler.class
+                                && JSONReader.AutoTypeBeforeHandler.class.isAssignableFrom(autoTypeCheckHandler)) {
                             beanInfo.autoTypeBeforeHandler = (Class<JSONReader.AutoTypeBeforeHandler>) autoTypeCheckHandler;
                         }
                         break;
@@ -1858,6 +1859,14 @@ public class ObjectReaderProvider {
 
         if (type == UUID.class) {
             return ObjectReaderImplUUID.INSTANCE;
+        }
+
+        if (type == Duration.class) {
+            return new ObjectReaderImplFromString(Duration.class, (Function<String, Duration>) Duration::parse);
+        }
+
+        if (type == Period.class) {
+            return new ObjectReaderImplFromString(Period.class, (Function<String, Period>) Period::parse);
         }
 
         if (type == AtomicBoolean.class) {

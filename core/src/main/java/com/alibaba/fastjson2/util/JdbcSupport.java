@@ -240,10 +240,6 @@ public class JdbcSupport {
             long millis = ts.getTime();
 
             int nanos = ts.getNanos();
-            if (nanos == 0) {
-                jsonWriter.writeMillis(millis);
-                return;
-            }
 
             ts.toLocalDateTime();
             jsonWriter.writeInstant(millis / 1000, nanos);
@@ -297,12 +293,6 @@ public class JdbcSupport {
                 }
 
                 int nanos = date.getNanos();
-
-                if (nanos == 0) {
-                    jsonWriter.writeInt64(date.getTime());
-                    return;
-                }
-
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();

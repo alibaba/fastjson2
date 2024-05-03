@@ -65,7 +65,7 @@ public class Case1 {
     }
 
     @Test
-    public void test_jsonb_arrayMapping_auoType() {
+    public void test_jsonb_arrayMapping_autoType() {
         Bean bean = new Bean();
         bean.userId = 101;
         bean.UserId = 102;

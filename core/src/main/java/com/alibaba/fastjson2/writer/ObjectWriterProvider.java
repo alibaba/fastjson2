@@ -1258,7 +1258,7 @@ public class ObjectWriterProvider {
                 return ObjectWriterImplInstant.INSTANCE;
             }
 
-            if (Duration.class == clazz) {
+            if (Duration.class == clazz || Period.class == clazz) {
                 return ObjectWriterImplToString.INSTANCE;
             }
 

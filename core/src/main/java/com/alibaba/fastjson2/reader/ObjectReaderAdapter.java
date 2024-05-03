@@ -209,7 +209,7 @@ public class ObjectReaderAdapter<T>
         return Arrays.copyOf(this.fieldReaders, this.fieldReaders.length);
     }
 
-    public Object auoType(JSONReader jsonReader, Class expectClass, long features) {
+    public Object autoType(JSONReader jsonReader, Class expectClass, long features) {
         long typeHash = jsonReader.readTypeHashCode();
         JSONReader.Context context = jsonReader.context;
 
@@ -377,6 +377,22 @@ public class ObjectReaderAdapter<T>
 
         int index = this.mapping[m];
         return fieldReaders[index];
+    }
+
+    protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && !disableSmartMatch
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);
+        }
+
+        if (fieldReader != null) {
+            fieldReader.readFieldValue(jsonReader, object);
+        } else {
+            processExtra(jsonReader, object, 0);
+        }
     }
 
     @Override

@@ -8,6 +8,8 @@ import com.alibaba.fastjson2.writer.ObjectWriterPrimitiveImpl;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1758,19 +1760,14 @@ public class TypeUtils {
             return (Long) value;
         }
 
-        if (value instanceof Number) {
-            return Long.valueOf(((Number) value).longValue());
-        }
-
         if (value instanceof String) {
             String str = (String) value;
             if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
-            return Long.parseLong(str);
         }
 
-        throw new JSONException("can not cast to long, class " + value.getClass());
+        return toLongValue(value);
     }
 
     public static long toLongValue(Object value) {
@@ -1791,7 +1788,24 @@ public class TypeUtils {
             if (str.isEmpty() || "null".equals(str)) {
                 return 0;
             }
-            return Long.parseLong(str);
+
+            try {
+                int lastCommaIndex = str.lastIndexOf(',');
+                if (lastCommaIndex == str.length() - 4 && str.indexOf('.') == -1) {
+                    return NumberFormat
+                            .getNumberInstance()
+                            .parse(str)
+                            .longValue();
+                }
+            } catch (ParseException ignored) {
+                // ignored
+            }
+
+            if (IOUtils.isNumber(str)) {
+                return Long.parseLong(str);
+            }
+
+            throw new JSONException("parseLong error " + str);
         }
 
         throw new JSONException("can not cast to long from " + value.getClass());
@@ -2724,7 +2738,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return Integer.valueOf(((Number) value).intValue());
+            return ((Number) value).intValue();
         }
 
         if (value instanceof String) {
@@ -2733,14 +2747,26 @@ public class TypeUtils {
                 return 0;
             }
 
-            if (str.indexOf('.') != -1) {
-                return new BigDecimal(str).intValueExact();
+            try {
+                int lastCommaIndex = str.lastIndexOf(',');
+                if (lastCommaIndex == str.length() - 4 && str.indexOf('.') == -1) {
+                    return NumberFormat
+                            .getNumberInstance()
+                            .parse(str)
+                            .intValue();
+                }
+            } catch (ParseException ignored) {
+                // ignored
             }
 
-            return Integer.parseInt(str);
+            if (IOUtils.isNumber(str)) {
+                return Integer.parseInt(str);
+            }
+
+            throw new JSONException("parseInt error, " + str);
         }
 
-        throw new JSONException("can not cast to decimal");
+        throw new JSONException("can not cast to int");
     }
 
     public static boolean toBooleanValue(Object value) {

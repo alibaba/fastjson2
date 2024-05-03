@@ -1403,6 +1403,10 @@ public abstract class JSONReader
             return null;
         }
 
+        if (current() == 'n') {
+            return readNullOrNewDate();
+        }
+
         long millis;
         if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
             nextIfMatch(':');
@@ -2606,15 +2610,16 @@ public abstract class JSONReader
     public abstract void close();
 
     protected final int toInt32(String val) {
-        if (IOUtils.isNumber(val)) {
-            return Integer.parseInt(val);
+        if (IOUtils.isNumber(val) || val.lastIndexOf(',') == val.length() - 4) {
+            return TypeUtils.toIntValue(val);
         }
         throw new JSONException("parseInt error, value : " + val);
     }
 
     protected final long toInt64(String val) {
-        if (IOUtils.isNumber(val)) {
-            return Long.parseLong(val);
+        if (IOUtils.isNumber(val)
+                || val.lastIndexOf(',') == val.length() - 4) {
+            return TypeUtils.toLongValue(val);
         }
 
         if (val.length() > 10 && val.length() < 40) {
