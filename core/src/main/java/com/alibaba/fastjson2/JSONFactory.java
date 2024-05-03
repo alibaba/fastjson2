@@ -47,10 +47,11 @@ public final class JSONFactory {
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
     static boolean defaultWriterAlphabetic;
-    static final boolean disableReferenceDetect;
-    static final boolean disableArrayMapping;
-    static final boolean disableJSONB;
-    static final boolean disableAutoType;
+    static boolean disableReferenceDetect;
+    static boolean disableArrayMapping;
+    static boolean disableJSONB;
+    static boolean disableAutoType;
+    static boolean disableSmartMatch;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
@@ -175,7 +176,8 @@ public final class JSONFactory {
             boolean disableReferenceDetect0 = false,
                     disableArrayMapping0 = false,
                     disableJSONB0 = false,
-                    disableAutoType0 = false;
+                    disableAutoType0 = false,
+                    disableSmartMatch0 = false;
             String features = System.getProperty("fastjson2.features");
             if (features == null) {
                 features = getProperty("fastjson2.features");
@@ -195,6 +197,9 @@ public final class JSONFactory {
                         case "disableAutoType":
                             disableAutoType0 = true;
                             break;
+                        case "disableSmartMatch":
+                            disableSmartMatch0 = true;
+                            break;
                         default:
                             break;
                     }
@@ -205,6 +210,7 @@ public final class JSONFactory {
             disableArrayMapping = disableArrayMapping0;
             disableJSONB = disableJSONB0;
             disableAutoType = disableAutoType0;
+            disableSmartMatch = disableSmartMatch0;
         }
 
         useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
@@ -593,5 +599,29 @@ public final class JSONFactory {
 
     public static boolean isDisableArrayMapping() {
         return disableArrayMapping;
+    }
+
+    public static void setDisableReferenceDetect(boolean disableReferenceDetect) {
+        JSONFactory.disableReferenceDetect = disableReferenceDetect;
+    }
+
+    public static void setDisableArrayMapping(boolean disableArrayMapping) {
+        JSONFactory.disableArrayMapping = disableArrayMapping;
+    }
+
+    public static void setDisableJSONB(boolean disableJSONB) {
+        JSONFactory.disableJSONB = disableJSONB;
+    }
+
+    public static void setDisableAutoType(boolean disableAutoType) {
+        JSONFactory.disableAutoType = disableAutoType;
+    }
+
+    public static boolean isDisableSmartMatch() {
+        return disableSmartMatch;
+    }
+
+    public static void setDisableSmartMatch(boolean disableSmartMatch) {
+        JSONFactory.disableSmartMatch = disableSmartMatch;
     }
 }

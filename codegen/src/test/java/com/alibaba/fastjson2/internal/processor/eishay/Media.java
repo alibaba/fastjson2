@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 @JSONCompiled
-@JSONType(disableReferenceDetect = true)
+@JSONType
 public class Media
         implements java.io.Serializable {
     public enum Player {

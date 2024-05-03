@@ -25,7 +25,7 @@ public class JSONTypeDisableRefDetect {
         assertEquals(123, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
     }
 
-    @JSONType(disableSmartMatch = true, disableReferenceDetect = true, disableArrayMapping = true)
+    @JSONType
     public static class Bean {
         @JSONField(name = "userId")
         public int id;
@@ -40,7 +40,7 @@ public class JSONTypeDisableRefDetect {
         assertEquals(bean.id, bean1.id);
     }
 
-    @JSONType(disableJSONB = true)
+    @JSONType
     public static class Bean1 {
         @JSONField(name = "userId")
         public int id;
