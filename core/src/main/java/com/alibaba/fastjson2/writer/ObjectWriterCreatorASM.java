@@ -801,14 +801,16 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(endErrorOnNoneSerializable_);
         }
 
-        Label notWriteType = new Label();
-        isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, FIELD_FEATURES, notWriteType);
+        if ((objectFeatures & FieldInfo.DISABLE_AUTO_TYPE) == 0) {
+            Label notWriteType = new Label();
+            isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, FIELD_FEATURES, notWriteType);
 
-        mw.visitVarInsn(Opcodes.ALOAD, THIS);
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "writeClassInfo", METHOD_DESC_WRITE_CLASS_INFO, false);
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "writeClassInfo", METHOD_DESC_WRITE_CLASS_INFO, false);
 
-        mw.visitLabel(notWriteType);
+            mw.visitLabel(notWriteType);
+        }
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "startObject", "()V", false);
@@ -847,7 +849,7 @@ public class ObjectWriterCreatorASM
         final int FIELD_TYPE = 4;
         final int FIELD_FEATURES = 5;
 
-        {
+        if ((features & FieldInfo.DISABLE_AUTO_TYPE) == 0) {
             Label notWriteType = new Label();
             isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, FIELD_FEATURES, notWriteType);
 

@@ -65,6 +65,9 @@ public class BeanInfo {
             writerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
             readerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
         }
+        if (JSONFactory.isDisableSmartMatch()) {
+            readerFeatures |= FieldInfo.DISABLE_SMART_MATCH;
+        }
     }
 
     public void required(String fieldName) {

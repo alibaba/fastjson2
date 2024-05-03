@@ -35,7 +35,7 @@ public class JSONObjectTest {
     }
 
     @JSONCompiled
-    @JSONType(disableReferenceDetect = true)
+    @JSONType
     public static class Bean1 {
         public JSONObject v01;
     }
