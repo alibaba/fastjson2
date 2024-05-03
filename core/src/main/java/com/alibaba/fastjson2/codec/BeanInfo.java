@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.filter.Filter;
@@ -46,6 +47,25 @@ public class BeanInfo {
     public String objectWriterFieldName;
     public String objectReaderFieldName;
     public Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler;
+
+    public BeanInfo() {
+        if (JSONFactory.isDisableAutoType()) {
+            writerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
+            readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
+        }
+        if (JSONFactory.isDisableReferenceDetect()) {
+            writerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
+            readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
+        }
+        if (JSONFactory.isDisableJSONB()) {
+            writerFeatures |= FieldInfo.DISABLE_JSONB;
+            readerFeatures |= FieldInfo.DISABLE_JSONB;
+        }
+        if (JSONFactory.isDisableArrayMapping()) {
+            writerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
+            readerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
+        }
+    }
 
     public void required(String fieldName) {
         if (schema == null) {
