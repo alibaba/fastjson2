@@ -104,7 +104,13 @@ public abstract class FieldWriter<T>
 
         long fieldOffset = -1L;
         if (field != null) {
-            fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
+            if (JDKUtils.ANDROID_SDK_INT >= 24
+                    || (!fieldClass.isPrimitive())
+                    || fieldClass == int.class
+                    || fieldClass == long.class
+            ) {
+                fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
+            }
         }
         this.fieldOffset = fieldOffset;
 

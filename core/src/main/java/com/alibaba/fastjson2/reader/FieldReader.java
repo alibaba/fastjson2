@@ -77,7 +77,13 @@ public abstract class FieldReader<T>
 
         long fieldOffset = -1L;
         if (field != null && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
-            fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
+            if (JDKUtils.ANDROID_SDK_INT >= 24
+                    || (!fieldClass.isPrimitive())
+                    || fieldClass == int.class
+                    || fieldClass == long.class
+            ) {
+                fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
+            }
         }
         this.fieldOffset = fieldOffset;
 
