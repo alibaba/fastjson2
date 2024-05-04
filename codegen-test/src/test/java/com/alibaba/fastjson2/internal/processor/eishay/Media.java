@@ -1,13 +1,11 @@
 package com.alibaba.fastjson2.internal.processor.eishay;
 
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import com.alibaba.fastjson2.annotation.JSONType;
 import lombok.Data;
 
 import java.util.List;
 
 @JSONCompiled
-@JSONType(disableReferenceDetect = true)
 @Data
 public class Media
         implements java.io.Serializable {
