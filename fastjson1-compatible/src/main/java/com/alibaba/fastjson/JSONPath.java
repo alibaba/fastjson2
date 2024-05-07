@@ -77,6 +77,8 @@ public class JSONPath {
         Object result = jsonPath.extract(jsonReader);
         if (result instanceof com.alibaba.fastjson2.JSONArray) {
             result = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        } else if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            result = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) result);
         }
         return result;
     }
