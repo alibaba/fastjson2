@@ -293,9 +293,16 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 fieldReader = paramReader;
             }
 
-            if (fieldReader == null && (featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+            if (fieldReader == null
+                    && (featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0
+            ) {
                 long hashCodeLCase = jsonReader.getNameHashCodeLCase();
                 fieldReader = getFieldReaderLCase(hashCodeLCase);
+                if (fieldReader != null
+                        && valueMap != null
+                        && valueMap.containsKey(fieldReader.fieldNameHash)) {
+                    fieldReader = null;
+                }
             }
 
             if (fieldReader == null) {
