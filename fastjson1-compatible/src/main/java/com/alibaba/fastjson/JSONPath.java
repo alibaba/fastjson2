@@ -74,7 +74,11 @@ public class JSONPath {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
         JSONReader jsonReader = JSONReader.of(json, context);
-        return jsonPath.extract(jsonReader);
+        Object result = jsonPath.extract(jsonReader);
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            result = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        }
+        return result;
     }
 
     public static boolean remove(Object root, String path) {
