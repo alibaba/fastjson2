@@ -1166,6 +1166,13 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
+                        case "unwrapped": {
+                            boolean unwrapped = (Boolean) result;
+                            if (unwrapped) {
+                                fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }
