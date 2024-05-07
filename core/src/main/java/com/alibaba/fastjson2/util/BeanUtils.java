@@ -696,13 +696,28 @@ public abstract class BeanUtils {
             String fieldName = field.getName();
             for (int i = 0; i < enumConstants.length; i++) {
                 Enum e = enumConstants[i];
+                final int enumIndex = i;
                 String enumName = e.name();
                 if (fieldName.equals(enumName)) {
-                    JSONField annotation = field.getAnnotation(JSONField.class);
-                    if (annotation != null) {
-                        String annotationName = annotation.name();
-                        if (annotationName.length() != 0 && !annotationName.equals(enumName)) {
-                            annotationNames[i] = annotationName;
+                    for (Annotation annotation : field.getAnnotations()) {
+                        Class annotationType = annotation.annotationType();
+                        String annotationTypeName = annotationType.getName();
+                        if ("com.alibaba.fastjson2.annotation.JSONField".equals(annotationTypeName)
+                                || "com.alibaba.fastjson.annotation.JSONField".equals(annotationTypeName)) {
+                            BeanUtils.annotationMethods(annotationType, m -> {
+                                String name = m.getName();
+                                try {
+                                    Object result = m.invoke(annotation);
+                                    if ("name".equals(name)) {
+                                        String annotationName = (String) result;
+                                        if (annotationName.length() != 0 && !annotationName.equals(enumName)) {
+                                            annotationNames[enumIndex] = annotationName;
+                                        }
+                                    }
+                                } catch (Exception ignored) {
+                                    // ignored
+                                }
+                            });
                         }
                     }
                     break;
