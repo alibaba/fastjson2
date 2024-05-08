@@ -50,6 +50,9 @@ public class JSONPath {
     }
 
     public static Object eval(Object rootObject, String path) {
+        if (rootObject instanceof String) {
+            return com.alibaba.fastjson2.JSONPath.eval((String) rootObject, path);
+        }
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         return jsonPath.eval(rootObject);
     }
