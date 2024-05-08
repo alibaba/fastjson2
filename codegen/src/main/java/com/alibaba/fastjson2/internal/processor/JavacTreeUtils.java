@@ -443,6 +443,10 @@ final class JavacTreeUtils {
         return treeMaker.Annotation(type, args);
     }
 
+    static JCTree.JCConditional ternary(JCTree.JCExpression cond, JCTree.JCExpression trueExpr, JCTree.JCExpression falseExpr) {
+        return treeMaker.Conditional(cond, trueExpr, falseExpr);
+    }
+
     static void pos(int pos) {
         treeMaker.pos = pos;
     }

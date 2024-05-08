@@ -4,9 +4,12 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ToByteFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -196,5 +199,33 @@ public class ObjectWriters {
 
     public static <T> FieldWriter fieldWriterListString(String fieldName, Function<T, List<String>> function) {
         return INSTANCE.createFieldWriter(fieldName, TypeUtils.PARAM_TYPE_LIST_STR, List.class, function);
+    }
+
+    public static FieldWriter fieldWriterWithField(String format, Class objectClass, String fieldName) {
+        Field field = BeanUtils.getDeclaredField(objectClass, fieldName);
+        return ObjectWriterCreator.INSTANCE.createFieldWriter(
+                fieldName,
+                format,
+                field
+        );
+    }
+
+    public static FieldWriter fieldWriterWithField(String name, String format, Class objectClass, String fieldName) {
+        Field field = BeanUtils.getDeclaredField(objectClass, fieldName);
+        return ObjectWriterCreator.INSTANCE.createFieldWriter(
+                name,
+                format,
+                field
+        );
+    }
+
+    public static FieldWriter fieldWriterWithMethod(String name, String format, Class objectClass, String methodName) {
+        Method method = BeanUtils.getSetter(objectClass, methodName);
+        return ObjectWriterCreator.INSTANCE.createFieldWriter(
+                objectClass,
+                name,
+                format,
+                method
+        );
     }
 }
