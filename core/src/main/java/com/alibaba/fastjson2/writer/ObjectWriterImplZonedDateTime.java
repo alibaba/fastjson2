@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
@@ -52,7 +53,11 @@ final class ObjectWriterImplZonedDateTime
             return;
         }
 
-        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
+        if (formatMillis
+                || (format == null
+                && ctx.isDateFormatMillis()
+                && ctx.provider.namingStrategy != PropertyNamingStrategy.CamelCase1x)
+        ) {
             jsonWriter.writeInt64(zdt
                     .toInstant()
                     .toEpochMilli());
