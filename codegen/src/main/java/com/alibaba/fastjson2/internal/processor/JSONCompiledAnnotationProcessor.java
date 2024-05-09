@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.internal.processor;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
@@ -37,7 +38,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.qualIdent;
@@ -558,12 +559,14 @@ public class JSONCompiledAnnotationProcessor
     private List<JCTree.JCStatement> genInitFields(int fieldsSize, Class superClass) {
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
         if (ObjectReaderAdapter.class.isAssignableFrom(superClass)) {
+            JCTree.JCFieldAccess fieldReaders = field(ident(names._this), "fieldReaders");
             for (int i = 0; i < fieldsSize; ++i) {
-                stmts.append(exec(assign(ident(fieldReader(i)), indexed(field(ident(names._this), "fieldReaders"), literal(i)))));
+                stmts.append(exec(assign(ident(fieldReader(i)), indexed(fieldReaders, literal(i)))));
             }
         } else if (ObjectWriterAdapter.class.isAssignableFrom(superClass)) {
+            JCTree.JCFieldAccess fieldWriters = field(ident(names._this), "fieldWriters");
             for (int i = 0; i < fieldsSize; ++i) {
-                stmts.append(exec(assign(ident(fieldWriter(i)), indexed(field(ident(names._this), "fieldWriters"), literal(i)))));
+                stmts.append(exec(assign(ident(fieldWriter(i)), cast(qualIdent("com.alibaba.fastjson2.writer.FieldWriter"), method(field(fieldWriters, "get"), List.of(literal(i)))))));
             }
         }
         return stmts.toList();
@@ -760,6 +763,7 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCVariableDecl jsonWriterVar = defVar(Flags.PARAMETER, "jsonWriter", qualIdent(JSONWriter.class.getName()));
         JCTree.JCIdent jsonWriterIdent = ident(jsonWriterVar.name);
         JCTree.JCVariableDecl objectVar = defVar(Flags.PARAMETER, "object", objectType);
+        JCTree.JCIdent objectIdent = ident(objectVar.name);
         JCTree.JCVariableDecl fieldNameVar = defVar(Flags.PARAMETER, "fieldName", objectType);
         JCTree.JCVariableDecl fieldTypeVar = defVar(Flags.PARAMETER, "fieldType", qualIdent(Type.class.getName()));
         JCTree.JCVariableDecl featuresVar = defVar(Flags.PARAMETER, "features", type(TypeTag.LONG));
@@ -770,9 +774,9 @@ public class JSONCompiledAnnotationProcessor
         writeBody.append(contextFeaturesVar);
 
         JCTree.JCUnary unary = unary(JCTree.Tag.NOT, field(jsonWriterIdent, "useSingleQuote"));
-        JCTree.JCBinary binary = binary(JCTree.Tag.EQ, binary(JCTree.Tag.BITOR, literal(TypeTag.LONG, JSONWriter.Feature.IgnoreErrorGetter.mask), literal(TypeTag.LONG, JSONWriter.Feature.UnquoteFieldName.mask)), literal(0));
-        JCTree.JCVariableDecl var10Var = defVar(Flags.PARAMETER, "var10", type(TypeTag.BOOLEAN), binary(JCTree.Tag.AND, unary, binary));
-        writeBody.append(var10Var);
+        JCTree.JCBinary binary = binary(JCTree.Tag.EQ, binary(JCTree.Tag.BITOR, literal(TypeTag.LONG, JSONWriter.Feature.UnquoteFieldName.mask), literal(TypeTag.LONG, JSONWriter.Feature.UseSingleQuotes.mask)), literal(0));
+        JCTree.JCVariableDecl isQuotedVar = defVar(Flags.PARAMETER, "isUnquoted", type(TypeTag.BOOLEAN), binary(JCTree.Tag.AND, unary, binary));
+        writeBody.append(isQuotedVar);
 
         JCTree.JCVariableDecl var18Var = defVar(Flags.PARAMETER, "var18", type(TypeTag.LONG), binary(JCTree.Tag.BITAND, ident(contextFeaturesVar.name), literal(TypeTag.LONG, JSONWriter.Feature.NotWriteDefaultValue.mask)));
         writeBody.append(var18Var);
@@ -789,11 +793,339 @@ public class JSONCompiledAnnotationProcessor
         thenStmts.append(var17Var);
         writeBody.append(defIf(binary(JCTree.Tag.NE, ident(var12Var.name), literal(0)), block(defVar(Flags.PARAMETER, "var13", type(TypeTag.BOOLEAN), literal(false))), block(thenStmts.toList())));
 
-        writeBody.append(defIf(binary(JCTree.Tag.NE, ident(contextFeaturesVar.name), literal(TypeTag.LONG, 0)),
-                block(exec(method(field(ident(names._super), "write"), List.of(ident(jsonWriterVar.name), ident(objectVar.name), ident(fieldNameVar.name), ident(fieldTypeVar.name), ident(featuresVar.name))))),
+        ListBuffer<JCTree.JCStatement> elseStmts = new ListBuffer<>();
+
+        elseStmts.append(exec(method(field(jsonWriterIdent, "startObject"))));
+        JCTree.JCVariableDecl var7Var = defVar(Flags.PARAMETER, "var7", type(TypeTag.BOOLEAN), literal(true));
+        elseStmts.append(var7Var);
+        JCTree.JCBinary notnullBinary = binary(JCTree.Tag.NE, objectIdent, defNull());
+        JCTree.JCBinary notClassBinary = binary(JCTree.Tag.NE, method(field(objectIdent, "getClass")), ident(fieldTypeVar.name));
+        JCTree.JCMethodInvocation isWriteTypeInfoMethod = method(field(jsonWriterIdent, "isWriteTypeInfo"), List.of(objectIdent, ident(fieldTypeVar.name), ident(featuresVar.name)));
+        elseStmts.append(defIf(binary(JCTree.Tag.AND, notnullBinary, binary(JCTree.Tag.AND, notClassBinary, isWriteTypeInfoMethod)),
+                block(exec(assign(ident(var7Var.name), binary(JCTree.Tag.BITXOR, method(field(ident(names._this), "writeTypeInfo"), List.of(jsonWriterIdent)), literal(true))))),
                 block(List.nil())));
 
+        for (int i = 0; i < attributeInfos.size(); ++i) {
+            AttributeInfo attributeInfo = attributeInfos.get(i);
+            elseStmts.append(writeFieldName(jsonWriterIdent, attributeInfo, isQuotedVar, isJsonb));
+            elseStmts.append(writeFieldValue(jsonWriterIdent, attributeInfo, objectIdent, beanType, isJsonb));
+        }
+
+        elseStmts.append(exec(method(field(jsonWriterIdent, "endObject"))));
+
+        JCTree.JCIf errorOnNoneSerializableIf = defIf(binary(JCTree.Tag.NE, binary(JCTree.Tag.BITAND, ident(contextFeaturesVar.name), literal(TypeTag.LONG, ErrorOnNoneSerializable.mask)), literal(TypeTag.LONG, 0)),
+                block(List.of(exec(method(field(ident(names._this), "errorOnNoneSerializable"))))),
+                block(elseStmts.toList()));
+
+        JCTree.JCIf ignoreNoneSerializableIf = defIf(binary(JCTree.Tag.NE, binary(JCTree.Tag.BITAND, ident(contextFeaturesVar.name), literal(TypeTag.LONG, IgnoreNoneSerializable.mask)), literal(TypeTag.LONG, 0)),
+                block(List.of(exec(method(field(jsonWriterIdent, "writeNull"))))),
+                block(List.of(errorOnNoneSerializableIf)));
+
+        JCTree.JCIf hasFilterIf = defIf(method(field(ident(names._this), "hasFilter"), List.of(ident(jsonWriterVar.name))),
+                block(exec(method(field(ident(names._this), "writeWithFilter"), List.of(ident(jsonWriterVar.name), objectIdent, ident(fieldNameVar.name), ident(fieldTypeVar.name), ident(featuresVar.name))))),
+                block(List.of(ignoreNoneSerializableIf)));
+
+        JCTree.JCIf beanToArrayIf = defIf(binary(JCTree.Tag.NE, binary(JCTree.Tag.BITAND, ident(contextFeaturesVar.name), literal(TypeTag.LONG, BeanToArray.mask)), literal(TypeTag.LONG, 0)),
+                block(exec(method(field(ident(names._this), "writeArrayMapping"), List.of(ident(jsonWriterVar.name), objectIdent, ident(fieldNameVar.name), ident(fieldTypeVar.name), ident(featuresVar.name))))),
+                block(List.of(hasFilterIf)));
+
+        JCTree.JCIf jsonbIfStmts = defIf(binary(JCTree.Tag.NE, binary(JCTree.Tag.BITAND, ident(contextFeaturesVar.name), literal(TypeTag.LONG, BeanToArray.mask)), literal(TypeTag.LONG, 0)),
+                block(exec(method(field(ident(names._this), "writeArrayMappingJSONB"), List.of(ident(jsonWriterVar.name), objectIdent, ident(fieldNameVar.name), ident(fieldTypeVar.name), ident(featuresVar.name))))),
+                block(exec(method(field(ident(names._this), "writeJSONB"), List.of(ident(jsonWriterVar.name), objectIdent, ident(fieldNameVar.name), ident(fieldTypeVar.name), ident(featuresVar.name))))));
+        JCTree.JCIf jsonbIf = defIf(field(jsonWriterIdent, "jsonb"), block(jsonbIfStmts), block(List.of(beanToArrayIf)));
+
+        writeBody.append(defIf(binary(JCTree.Tag.NE, binary(JCTree.Tag.BITAND, ident(contextFeaturesVar.name), binary(JCTree.Tag.BITOR, literal(TypeTag.LONG, IgnoreErrorGetter.mask), literal(TypeTag.LONG, UnquoteFieldName.mask))), literal(TypeTag.LONG, 0)),
+                block(exec(method(field(ident(names._super), "write"), List.of(ident(jsonWriterVar.name), objectIdent, ident(fieldNameVar.name), ident(fieldTypeVar.name), ident(featuresVar.name))))),
+                block(List.of(jsonbIf))));
+
         return defMethod(Flags.PUBLIC, "write", type(TypeTag.VOID), null, List.of(jsonWriterVar, objectVar, fieldNameVar, fieldTypeVar, featuresVar), null, block(writeBody.toList()), null);
+    }
+
+    private JCTree.JCExpressionStatement writeFieldName(
+            JCTree.JCIdent jsonWriterIdent,
+            AttributeInfo attributeInfo,
+            JCTree.JCVariableDecl isQuotedVar,
+            boolean isJsonb) {
+        String methodName = null;
+        if (!isJsonb) {
+            byte[] fieldNameUTF8 = attributeInfo.name.getBytes(StandardCharsets.UTF_8);
+
+            boolean asciiName = true;
+            for (int j = 0; j < fieldNameUTF8.length; j++) {
+                if (fieldNameUTF8[j] < 0) {
+                    asciiName = false;
+                    break;
+                }
+            }
+
+            int length = fieldNameUTF8.length;
+            if (length >= 2 && length <= 16 && asciiName) {
+                Number name1 = 0, name1SQ = 0;
+                byte[] bytes = new byte[8];
+                switch (length) {
+                    case 2:
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 2);
+                        bytes[3] = '"';
+                        bytes[4] = ':';
+                        methodName = "writeName2Raw";
+                        break;
+                    case 3:
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 3);
+                        bytes[4] = '"';
+                        bytes[5] = ':';
+                        methodName = "writeName3Raw";
+                        break;
+                    case 4:
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 4);
+                        bytes[5] = '"';
+                        bytes[6] = ':';
+                        methodName = "writeName4Raw";
+                        break;
+                    case 5:
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 5);
+                        bytes[6] = '"';
+                        bytes[7] = ':';
+                        methodName = "writeName5Raw";
+                        break;
+                    case 6:
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 6);
+                        bytes[7] = '"';
+                        methodName = "writeName6Raw";
+                        break;
+                    case 7:
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        methodName = "writeName7Raw";
+                        break;
+                    case 8: {
+                        bytes = fieldNameUTF8;
+                        methodName = "writeName8Raw";
+                        break;
+                    }
+                    case 9: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        byte[] name1Bytes = new byte[4];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = '"';
+                        name1Bytes[3] = ':';
+                        name1 = UNSAFE.getInt(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        name1Bytes[2] = '\'';
+                        name1SQ = UNSAFE.getInt(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        methodName = "writeName9Raw";
+                        break;
+                    }
+                    case 10: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = '"';
+                        name1Bytes[4] = ':';
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        name1Bytes[3] = '\'';
+                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        methodName = "writeName10Raw";
+                        break;
+                    }
+                    case 11: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = '"';
+                        name1Bytes[5] = ':';
+
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        name1Bytes[4] = '\'';
+                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        methodName = "writeName11Raw";
+                        break;
+                    }
+                    case 12: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = fieldNameUTF8[11];
+                        name1Bytes[5] = '"';
+                        name1Bytes[6] = ':';
+
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        name1Bytes[5] = '\'';
+                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        methodName = "writeName12Raw";
+                        break;
+                    }
+                    case 13: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = fieldNameUTF8[11];
+                        name1Bytes[5] = fieldNameUTF8[12];
+                        name1Bytes[6] = '"';
+                        name1Bytes[7] = ':';
+
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        name1Bytes[6] = '\'';
+                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        methodName = "writeName13Raw";
+                        break;
+                    }
+                    case 14: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        byte[] name1Bytes = new byte[8];
+                        name1Bytes[0] = fieldNameUTF8[7];
+                        name1Bytes[1] = fieldNameUTF8[8];
+                        name1Bytes[2] = fieldNameUTF8[9];
+                        name1Bytes[3] = fieldNameUTF8[10];
+                        name1Bytes[4] = fieldNameUTF8[11];
+                        name1Bytes[5] = fieldNameUTF8[12];
+                        name1Bytes[6] = fieldNameUTF8[13];
+                        name1Bytes[7] = '"';
+
+                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        name1Bytes[7] = '\'';
+                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                        methodName = "writeName14Raw";
+                        break;
+                    }
+                    case 15: {
+                        bytes[0] = '"';
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
+                        name1 = UNSAFE.getLong(fieldNameUTF8, ARRAY_BYTE_BASE_OFFSET + 7);
+                        name1SQ = name1;
+                        methodName = "writeName15Raw";
+                        break;
+                    }
+                    case 16: {
+                        System.arraycopy(fieldNameUTF8, 0, bytes, 0, 8);
+                        name1 = UNSAFE.getLong(fieldNameUTF8, ARRAY_BYTE_BASE_OFFSET + 8);
+                        name1SQ = name1;
+                        methodName = "writeName16Raw";
+                        break;
+                    }
+                    default:
+                        throw new IllegalStateException("length : " + length);
+                }
+
+                long nameIn64 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+
+                for (int j = 0; j < bytes.length; j++) {
+                    if (bytes[j] == '"') {
+                        bytes[j] = '\'';
+                    }
+                }
+            }
+        } else {
+            byte[] fieldNameUTF8 = JSONB.toBytes(attributeInfo.name);
+            int length = fieldNameUTF8.length;
+            byte[] bytes = Arrays.copyOf(fieldNameUTF8, 16);
+            switch (length) {
+                case 2:
+                    methodName = "writeName2Raw";
+                    break;
+                case 3:
+                    methodName = "writeName3Raw";
+                    break;
+                case 4:
+                    methodName = "writeName4Raw";
+                    break;
+                case 5:
+                    methodName = "writeName5Raw";
+                    break;
+                case 6:
+                    methodName = "writeName6Raw";
+                    break;
+                case 7:
+                    methodName = "writeName7Raw";
+                    break;
+                case 8:
+                    methodName = "writeName8Raw";
+                    break;
+                case 9:
+                    methodName = "writeName9Raw";
+                    break;
+                case 10:
+                    methodName = "writeName10Raw";
+                    break;
+                case 11:
+                    methodName = "writeName11Raw";
+                    break;
+                case 12:
+                    methodName = "writeName12Raw";
+                    break;
+                case 13:
+                    methodName = "writeName13Raw";
+                    break;
+                case 14:
+                    methodName = "writeName14Raw";
+                    break;
+                case 15:
+                    methodName = "writeName15Raw";
+                    break;
+                case 16:
+                    methodName = "writeName16Raw";
+                    break;
+                default:
+                    break;
+            }
+        }
+        return exec(method(field(jsonWriterIdent, methodName), List.of(literal(TypeTag.LONG, attributeInfo.nameHashCode))));
+    }
+
+    private JCTree.JCExpressionStatement writeFieldValue(
+            JCTree.JCIdent jsonWriterIdent,
+            AttributeInfo attributeInfo,
+            JCTree.JCIdent objectIdent,
+            JCTree.JCExpression beanType,
+            boolean isJsonb) {
+        String type = attributeInfo.type.toString();
+        boolean writeDirect = supportWriteDirect(type);
+        if (!isJsonb) {
+            if (writeDirect) {
+                String writeDirectMethod = getWriteDirectMethod(type);
+                if (attributeInfo.getMethod != null) {
+                    JCTree.JCMethodInvocation fieldValue = method(field(cast(beanType, objectIdent), attributeInfo.getMethod.getSimpleName().toString()));
+                    return exec(method(field(jsonWriterIdent, writeDirectMethod), List.of(fieldValue)));
+                } else {
+                    JCTree.JCFieldAccess fieldValue = field(cast(beanType, objectIdent), attributeInfo.name);
+                    return exec(method(field(jsonWriterIdent, writeDirectMethod), List.of(fieldValue)));
+                }
+            }
+        }
+        return null;
     }
 
     private JCTree.JCVariableDecl getHashCode32Var(JCTree.JCExpression hashCode64) {

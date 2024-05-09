@@ -34,8 +34,8 @@ public class CodeGenUtils {
     static {
         readDirectMap.put("boolean", "readBoolValue");
         readDirectMap.put("char", "readCharValue");
-        writeDirectMap.put("boolean", "writeBoolValue");
-        writeDirectMap.put("char", "writeCharValue");
+        writeDirectMap.put("boolean", "writeBool");
+        writeDirectMap.put("char", "writeChar");
 
         readDirectMap.put("byte", "readInt8Value");
         readDirectMap.put("short", "readInt16Value");
@@ -43,12 +43,12 @@ public class CodeGenUtils {
         readDirectMap.put("long", "readInt64Value");
         readDirectMap.put("float", "readFloatValue");
         readDirectMap.put("double", "readDoubleValue");
-        writeDirectMap.put("byte", "writeInt8Value");
-        writeDirectMap.put("short", "writeInt16Value");
-        writeDirectMap.put("int", "writeInt32Value");
-        writeDirectMap.put("long", "writeInt64Value");
-        writeDirectMap.put("float", "writeFloatValue");
-        writeDirectMap.put("double", "writeDoubleValue");
+        writeDirectMap.put("byte", "writeInt8");
+        writeDirectMap.put("short", "writeInt16");
+        writeDirectMap.put("int", "writeInt32");
+        writeDirectMap.put("long", "writeInt64");
+        writeDirectMap.put("float", "writeFloat");
+        writeDirectMap.put("double", "writeDouble");
 
         readDirectMap.put("java.lang.Boolean", "readBool");
         readDirectMap.put("java.lang.Character", "readCharacter");
