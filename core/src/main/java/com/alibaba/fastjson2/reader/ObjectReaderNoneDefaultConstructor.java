@@ -360,6 +360,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
                 if (fieldValue != null) {
+                    if (paramReader != null) {
+                        continue;
+                    }
                     fieldReader.accept(object, fieldValue);
                 }
             }
