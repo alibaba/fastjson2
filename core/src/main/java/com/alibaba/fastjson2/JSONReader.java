@@ -397,7 +397,7 @@ public abstract class JSONReader
     }
 
     public final ObjectReader getObjectReader(Type type) {
-        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         return context.provider.getObjectReader(type, fieldBased);
     }
 
@@ -1913,7 +1913,7 @@ public abstract class JSONReader
 
             Object origin = map.put(name, value);
             if (origin != null) {
-                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
                         map.put(name, origin);
@@ -2106,7 +2106,7 @@ public abstract class JSONReader
 
             Object origin = map.put(name, value);
             if (origin != null) {
-                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
                         map.put(name, origin);
@@ -2162,7 +2162,7 @@ public abstract class JSONReader
 
             Object origin = object.put(name, value);
             if (origin != null) {
-                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
                         object.put(name, origin);
@@ -2293,7 +2293,7 @@ public abstract class JSONReader
 
             Object origin = object.put(name, val);
             if (origin != null) {
-                if ((context.features & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                if ((context.features & Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(val);
                         object.put(name, origin);
@@ -2339,21 +2339,29 @@ public abstract class JSONReader
             return null;
         }
 
-        if (!nextIfArrayStart()) {
-            throw new JSONException(info("syntax error : " + ch));
-        }
-
-        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
-
         List list = new ArrayList();
-        for (Object item; !nextIfArrayEnd(); list.add(item)) {
-            int mark = offset;
-            item = objectReader.readObject(this, null, null, 0);
-
-            if (mark == offset || ch == '}' || ch == EOI) {
-                throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
+        if (ch == '[') {
+            if (!nextIfArrayStart()) {
+                throw new JSONException(info("syntax error : " + ch));
             }
+
+            boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
+            ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
+            for (Object item; !nextIfArrayEnd(); list.add(item)) {
+                int mark = offset;
+                item = objectReader.readObject(this, null, null, 0);
+
+                if (mark == offset || ch == '}' || ch == EOI) {
+                    throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
+                }
+            }
+        } else if (ch == '"' || ch == '\'' || ch == '{') {
+            String str = readString();
+            if (str != null && !str.isEmpty()) {
+                list.add(str);
+            }
+        } else {
+            throw new JSONException(info("syntax error"));
         }
 
         if (comma = (ch == ',')) {
@@ -3118,7 +3126,7 @@ public abstract class JSONReader
     }
 
     @Deprecated
-    public static JSONReader of(JSONReader.Context context, byte[] utf8Bytes) {
+    public static JSONReader of(Context context, byte[] utf8Bytes) {
         boolean ascii = false;
         if (PREDICATE_IS_ASCII != null) {
             ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
@@ -3139,7 +3147,7 @@ public abstract class JSONReader
         }
     }
 
-    public static JSONReader of(byte[] utf8Bytes, JSONReader.Context context) {
+    public static JSONReader of(byte[] utf8Bytes, Context context) {
         boolean ascii = false;
         if (PREDICATE_IS_ASCII != null) {
             ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
@@ -3219,7 +3227,7 @@ public abstract class JSONReader
     }
 
     @Deprecated
-    public static JSONReader ofJSONB(JSONReader.Context context, byte[] jsonbBytes) {
+    public static JSONReader ofJSONB(Context context, byte[] jsonbBytes) {
         return new JSONReaderJSONB(
                 context,
                 jsonbBytes,
@@ -3227,7 +3235,7 @@ public abstract class JSONReader
                 jsonbBytes.length);
     }
 
-    public static JSONReader ofJSONB(byte[] jsonbBytes, JSONReader.Context context) {
+    public static JSONReader ofJSONB(byte[] jsonbBytes, Context context) {
         return new JSONReaderJSONB(
                 context,
                 jsonbBytes,
@@ -3235,11 +3243,11 @@ public abstract class JSONReader
                 jsonbBytes.length);
     }
 
-    public static JSONReader ofJSONB(InputStream in, JSONReader.Context context) {
+    public static JSONReader ofJSONB(InputStream in, Context context) {
         return new JSONReaderJSONB(context, in);
     }
 
-    public static JSONReader ofJSONB(byte[] jsonbBytes, JSONReader.Feature... features) {
+    public static JSONReader ofJSONB(byte[] jsonbBytes, Feature... features) {
         Context context = JSONFactory.createReadContext();
         context.config(features);
         return new JSONReaderJSONB(
@@ -3420,14 +3428,14 @@ public abstract class JSONReader
         return JSONReader.of(new InputStreamReader(is, charset), context);
     }
 
-    public static JSONReader of(java.io.Reader is) {
+    public static JSONReader of(Reader is) {
         return new JSONReaderUTF16(
                 JSONFactory.createReadContext(),
                 is
         );
     }
 
-    public static JSONReader of(java.io.Reader is, Context context) {
+    public static JSONReader of(Reader is, Context context) {
         return new JSONReaderUTF16(
                 context,
                 is
@@ -4464,7 +4472,8 @@ public abstract class JSONReader
         ErrorOnUnknownProperties(1 << 26),
 
         /**
-         *  empty string "" convert to null
+         * empty string "" convert to null
+         *
          * @since 2.0.48
          */
         EmptyStringAsNull(1 << 27),
