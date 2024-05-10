@@ -439,7 +439,9 @@ public abstract class FieldReader<T>
                 typedFieldValue = ((JSONObject) fieldValue).to(fieldType, toFeatures);
             } else if (fieldValue instanceof JSONArray) {
                 typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
-            } else if (features == 0 && !fieldClass.isInstance(fieldValue) && format == null) {
+            } else if ((features == 0 || features == JSONReader.Feature.SupportSmartMatch.mask) // default or fastjson 1.x default
+                    && !fieldClass.isInstance(fieldValue) && format == null
+            ) {
                 ObjectReader initReader = getInitReader();
                 if (initReader != null) {
                     String fieldValueJson = JSON.toJSONString(fieldValue);
