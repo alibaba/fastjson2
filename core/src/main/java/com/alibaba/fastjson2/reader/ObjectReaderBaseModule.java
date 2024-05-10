@@ -262,7 +262,6 @@ public class ObjectReaderBaseModule
                         getBeanInfo1x(beanInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeInfo":
                         if (useJacksonAnnotation) {
                             processJacksonJsonTypeInfo(beanInfo, annotation);
                         }
