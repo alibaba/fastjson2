@@ -109,11 +109,15 @@ final class JavacTreeUtils {
 
     static JCTree.JCExpression arrayIdent(String name) {
         int idx = name.indexOf("[");
-        String type = name.substring(0, idx);
-        int count = 0;
-        for (char c : name.substring(idx).toCharArray()) {
-            if (c == '[') {
-                count++;
+        String type = name;
+        int count = 1;
+        if (idx != -1) {
+            type = name.substring(0, idx);
+            count = 0;
+            for (char c : name.substring(idx).toCharArray()) {
+                if (c == '[') {
+                    count++;
+                }
             }
         }
         JCTree.JCExpression elemTypeExpr;
@@ -148,7 +152,39 @@ final class JavacTreeUtils {
         return arrayType(elemTypeExpr, count);
     }
 
-    public static JCTree.JCArrayTypeTree arrayType(JCTree.JCExpression elemTypeExpr, int dims) {
+    static String boxed(String type) {
+        String boxed = type;
+        switch (type) {
+            case "int":
+                boxed = "Integer";
+                break;
+            case "long":
+                boxed = "Long";
+                break;
+            case "float":
+                boxed = "Float";
+                break;
+            case "double":
+                boxed = "Double";
+                break;
+            case "boolean":
+                boxed = "Boolean";
+                break;
+            case "char":
+                boxed = "Character";
+                break;
+            case "byte":
+                boxed = "Byte";
+                break;
+            case "short":
+                boxed = "Short";
+                break;
+            default:
+        }
+        return boxed;
+    }
+
+    static JCTree.JCArrayTypeTree arrayType(JCTree.JCExpression elemTypeExpr, int dims) {
         if (dims == 1) {
             return treeMaker.TypeArray(elemTypeExpr);
         } else {
