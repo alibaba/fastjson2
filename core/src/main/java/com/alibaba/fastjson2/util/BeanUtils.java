@@ -510,13 +510,13 @@ public abstract class BeanUtils {
             ) {
                 Annotation[] annotations = getAnnotations(method);
 
-                boolean unwrapped = false;
+                AtomicBoolean unwrapped = new AtomicBoolean(false);
                 for (Annotation annotation : annotations) {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
                     JSONField jsonField = findAnnotation(annotation, JSONField.class);
                     if (jsonField != null) {
                         if (jsonField.unwrapped()) {
-                            unwrapped = true;
+                            unwrapped.set(true);
                             break;
                         }
                         continue;
@@ -526,15 +526,31 @@ public abstract class BeanUtils {
                         case "com.fasterxml.jackson.annotation.JsonAnySetter":
                         case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
                             if (JSONFactory.isUseJacksonAnnotation()) {
-                                unwrapped = true;
+                                unwrapped.set(true);
                             }
                             break;
+                        case "com.alibaba.fastjson.annotation.JSONField": {
+                            BeanUtils.annotationMethods(annotation.getClass(), m -> {
+                                String name = m.getName();
+                                try {
+                                    if ("unwrapped".equals(name)) {
+                                        Object result = m.invoke(annotation);
+                                        if ((Boolean) result) {
+                                            unwrapped.set(true);
+                                        }
+                                    }
+                                } catch (Throwable ignored) {
+                                    // ignored
+                                }
+                            });
+                            break;
+                        }
                         default:
                             break;
                     }
                 }
 
-                if (unwrapped) {
+                if (unwrapped.get()) {
                     methodConsumer.accept(method);
                 }
                 continue;
