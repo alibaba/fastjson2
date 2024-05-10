@@ -148,7 +148,7 @@ final class JavacTreeUtils {
         return arrayType(elemTypeExpr, count);
     }
 
-    private static JCTree.JCArrayTypeTree arrayType(JCTree.JCExpression elemTypeExpr, int dims) {
+    public static JCTree.JCArrayTypeTree arrayType(JCTree.JCExpression elemTypeExpr, int dims) {
         if (dims == 1) {
             return treeMaker.TypeArray(elemTypeExpr);
         } else {

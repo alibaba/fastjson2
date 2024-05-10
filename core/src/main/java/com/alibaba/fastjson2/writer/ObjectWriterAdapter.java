@@ -28,7 +28,7 @@ public class ObjectWriterAdapter<T>
     static final String TYPE = "@type";
 
     final Class objectClass;
-    protected final List<FieldWriter> fieldWriters;
+    final List<FieldWriter> fieldWriters;
     protected final FieldWriter[] fieldWriterArray;
 
     final String typeKey;
