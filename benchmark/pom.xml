@@ -122,9 +122,9 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.furyio</groupId>
+            <groupId>org.apache.fury</groupId>
             <artifactId>fury-core</artifactId>
-            <version>0.4.1</version>
+            <version>0.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.msgpack</groupId>

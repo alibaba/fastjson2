@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
-import io.fury.Fury;
-import io.fury.ThreadSafeFury;
 import org.apache.commons.io.IOUtils;
+import org.apache.fury.Fury;
+import org.apache.fury.ThreadSafeFury;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -33,10 +33,10 @@ public class EishayFuryCompatibleWrite {
     );
 
     static ThreadSafeFury furyCompatible = Fury.builder()
-            .withLanguage(io.fury.config.Language.JAVA)
+            .withLanguage(org.apache.fury.config.Language.JAVA)
             .withRefTracking(true)
             .requireClassRegistration(false)
-            .withCompatibleMode(io.fury.config.CompatibleMode.COMPATIBLE)
+            .withCompatibleMode(org.apache.fury.config.CompatibleMode.COMPATIBLE)
             .buildThreadSafeFury();
 
     static {
