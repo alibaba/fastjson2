@@ -84,8 +84,8 @@ public class JSONCompiledAnnotationProcessor
             StructInfo structInfo = structs.get(element.toString());
             java.util.List<AttributeInfo> attributeInfos = structInfo.getReaderAttributes();
             int fieldsSize = attributeInfos.size();
-            Class readSuperClass = getReadSuperClass(attributeInfos.size());
-            Class writeSuperClass = getWriteSuperClass(attributeInfos.size());
+            Class readSuperClass = getReadSuperClass(fieldsSize);
+            Class writeSuperClass = getWriteSuperClass(fieldsSize);
 
             JCTree tree = javacTrees.getTree(element);
             pos(tree.pos);
@@ -1148,13 +1148,11 @@ public class JSONCompiledAnnotationProcessor
             return stmts.appendList(genWriteDouble(jsonWriterIdent, attributeInfo, objectIdent, beanType, i, contextFeaturesIdent, quoteIdent, var12Var, isJsonb));
         } else if ("java.lang.String".equals(type)) {
             return stmts.appendList(genWriteFieldValueString(jsonWriterIdent, attributeInfo, objectIdent, beanType, i, contextFeaturesIdent, quoteIdent, var12Var, isJsonb));
-        }
-//        else if (fieldClass.isEnum()
-//                && BeanUtils.getEnumValueField(fieldClass, mwc.provider) == null
-//                && !(fieldWriter instanceof FieldWriterObject)) {
-//            genWriteFieldValueEnum(jsonWriterIdent, attributeInfo, objectIdent, beanType, i, isJsonb);
-//        }
-        else if ("java.util.Date".equals(type)) {
+        } else if (attributeInfo.type instanceof com.sun.tools.javac.code.Type.ClassType
+                && ((com.sun.tools.javac.code.Type.ClassType) attributeInfo.type).supertype_field != null
+                && "java.lang.Enum".equals(((com.sun.tools.javac.code.Type.ClassType) attributeInfo.type).supertype_field.tsym.toString())) {
+            return stmts.appendList(genWriteFieldValueEnum(jsonWriterIdent, attributeInfo, objectIdent, beanType, i, contextFeaturesIdent, quoteIdent, var12Var, isJsonb));
+        } else if ("java.util.Date".equals(type)) {
             return stmts.appendList(genWriteFieldValueDate(jsonWriterIdent, attributeInfo, objectIdent, beanType, i, contextFeaturesIdent, quoteIdent, var12Var, isJsonb));
         } else if ("java.util.List".equals(type)) {
             return stmts.appendList(genWriteFieldValueList(jsonWriterIdent, attributeInfo, objectIdent, beanType, i, contextFeaturesIdent, quoteIdent, var12Var, isJsonb));
@@ -1538,6 +1536,29 @@ public class JSONCompiledAnnotationProcessor
         return stmts;
     }
 
+    private ListBuffer<JCTree.JCStatement> genWriteFieldValueEnum(
+            JCTree.JCIdent jsonWriterIdent,
+            AttributeInfo attributeInfo,
+            JCTree.JCIdent objectIdent,
+            JCTree.JCExpression beanType,
+            int i,
+            JCTree.JCIdent contextFeaturesIdent,
+            JCTree.JCIdent quoteIdent,
+            JCTree.JCVariableDecl var12Var,
+            boolean isJsonb) {
+        ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
+        String type = attributeInfo.type.toString();
+        JCTree.JCVariableDecl enumVar = defVar(Flags.PARAMETER, "enumVar" + i, qualIdent(type), genWriteFieldValue(attributeInfo, objectIdent, beanType));
+        stmts.append(enumVar);
+        stmts.append(defIf(binary(JCTree.Tag.NE, ident(enumVar.name), defNull()),
+                block(List.of(exec(method(field(field(ident(names._this), fieldWriter(i)), "writeEnum"), List.of(jsonWriterIdent, ident(enumVar.name)))))),
+                        defIf(binary(JCTree.Tag.NE, ident(var12Var.name), literal(TypeTag.LONG, 0L)),
+                                block(List.of(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
+                                        exec(method(field(jsonWriterIdent, "writeNull"))))),
+                                null)));
+        return stmts;
+    }
+
     private ListBuffer<JCTree.JCStatement> genWriteFieldValueDate(
             JCTree.JCIdent jsonWriterIdent,
             AttributeInfo attributeInfo,
@@ -1552,24 +1573,12 @@ public class JSONCompiledAnnotationProcessor
         String type = attributeInfo.type.toString();
         JCTree.JCVariableDecl dateVar = defVar(Flags.PARAMETER, "dateVar" + i, qualIdent(type), genWriteFieldValue(attributeInfo, objectIdent, beanType));
         stmts.append(dateVar);
-
-        ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
-        notNullStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        JCTree.JCTypeCast charsCast = cast(arrayIdent("char"), method(field(field(qualIdent("com.alibaba.fastjson2.util.JDKUtils"), "UNSAFE"), "getObject"), List.of(ident(dateVar.name), literal(TypeTag.LONG, 12L))));
-        notNullStmts.append(exec(method(field(jsonWriterIdent, "writeString"), List.of(charsCast))));
-
-        ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
-        notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        notZeroStmts.append(defIf(method(field(jsonWriterIdent, "isEnabled"), List.of(contextFeaturesIdent)),
-                block(exec(method(field(jsonWriterIdent, "writeString"), List.of(literal(""))))),
-                block(exec(method(field(jsonWriterIdent, "writeStringNull"))))));
-
-        ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
-        JCTree.JCBinary binary1 = binary(JCTree.Tag.NE, binary(JCTree.Tag.BITAND, contextFeaturesIdent, binary(JCTree.Tag.BITOR, binary(JCTree.Tag.BITOR, literal(TypeTag.LONG, BrowserCompatible.mask), literal(TypeTag.LONG, WriteBooleanAsNumber.mask)), literal(TypeTag.LONG, WriteNullNumberAsZero.mask))), literal(TypeTag.LONG, 0L));
-        JCTree.JCBinary binary2 = binary(JCTree.Tag.EQ, binary(JCTree.Tag.BITAND, contextFeaturesIdent, literal(TypeTag.LONG, WriteEnumsUsingName.mask)), literal(TypeTag.LONG, 0L));
-        nullStmts.append(defIf(binary(JCTree.Tag.AND, binary1, binary2), block(notZeroStmts.toList()), null));
-
-        stmts.append(defIf(binary(JCTree.Tag.NE, ident(dateVar.name), defNull()), block(notNullStmts.toList()), block(nullStmts.toList())));
+        stmts.append(defIf(binary(JCTree.Tag.NE, ident(dateVar.name), defNull()),
+                block(List.of(exec(method(field(field(ident(names._this), fieldWriter(i)), "writeDate"), List.of(jsonWriterIdent, method(field(ident(dateVar.name), "getTime"))))))),
+                        defIf(binary(JCTree.Tag.NE, ident(var12Var.name), literal(TypeTag.LONG, 0L)),
+                                block(List.of(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
+                                        exec(method(field(jsonWriterIdent, "writeNull"))))),
+                                null)));
         return stmts;
     }
 

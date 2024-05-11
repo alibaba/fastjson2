@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.util.Fnv;
+import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.util.Name;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
@@ -25,6 +27,15 @@ public class AttributeInfo
             ExecutableElement setMethod,
             VariableElement argument
     ) {
+        if (field instanceof Symbol.VarSymbol) {
+            Name symbolName = ((Symbol.VarSymbol) field).name;
+            if (symbolName != null) {
+                String fieldName = symbolName.toString();
+                if (!name.equals(fieldName)) {
+                    name = fieldName;
+                }
+            }
+        }
         this.name = name;
         this.nameHashCode = Fnv.hashCode64(name);
         this.type = type;
