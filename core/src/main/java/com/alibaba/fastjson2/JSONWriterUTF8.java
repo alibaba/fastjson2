@@ -363,14 +363,10 @@ class JSONWriterUTF8
 
     @Override
     public final void writeString(boolean value) {
-        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
-        if (writeAsString) {
-            writeQuote();
-        }
+        byte quote = (byte) this.quote;
+        bytes[off++] = quote;
         writeBool(value);
-        if (writeAsString) {
-            writeQuote();
-        }
+        bytes[off++] = quote;
     }
 
     @Override
