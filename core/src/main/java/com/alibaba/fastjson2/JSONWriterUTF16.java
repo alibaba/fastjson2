@@ -3131,14 +3131,9 @@ class JSONWriterUTF16
 
     @Override
     public final void writeString(boolean value) {
-        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
-        if (writeAsString) {
-            writeQuote();
-        }
+        chars[off++] = quote;
         writeBool(value);
-        if (writeAsString) {
-            writeQuote();
-        }
+        chars[off++] = quote;
     }
 
     @Override

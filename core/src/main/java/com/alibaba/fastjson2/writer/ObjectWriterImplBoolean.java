@@ -23,7 +23,7 @@ final class ObjectWriterImplBoolean
         }
 
         boolean value = (Boolean) object;
-        if ((features & WriteNonStringValueAsString.mask) != 0) {
+        if ((jsonWriter.getFeatures(features) & WriteNonStringValueAsString.mask) != 0) {
             jsonWriter.writeString(value);
             return;
         }
