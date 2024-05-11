@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.File;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -57,16 +58,24 @@ public class ObjectWriterBaseModule
                 Class superclass = objectClass.getSuperclass();
                 if (superclass != Object.class && superclass != null && superclass != Enum.class) {
                     getBeanInfo(beanInfo, superclass);
+                }
 
-                    if (beanInfo.seeAlso != null && beanInfo.seeAlsoNames != null) {
-                        for (int i = 0; i < beanInfo.seeAlso.length; i++) {
-                            Class seeAlso = beanInfo.seeAlso[i];
-                            if (seeAlso == objectClass && i < beanInfo.seeAlsoNames.length) {
-                                String seeAlsoName = beanInfo.seeAlsoNames[i];
-                                if (seeAlsoName != null && seeAlsoName.length() != 0) {
-                                    beanInfo.typeName = seeAlsoName;
-                                    break;
-                                }
+                Class[] interfaces = objectClass.getInterfaces();
+                for (Class item : interfaces) {
+                    if (item == Serializable.class) {
+                        continue;
+                    }
+                    getBeanInfo(beanInfo, item);
+                }
+
+                if (beanInfo.seeAlso != null && beanInfo.seeAlsoNames != null) {
+                    for (int i = 0; i < beanInfo.seeAlso.length; i++) {
+                        Class seeAlso = beanInfo.seeAlso[i];
+                        if (seeAlso == objectClass && i < beanInfo.seeAlsoNames.length) {
+                            String seeAlsoName = beanInfo.seeAlsoNames[i];
+                            if (seeAlsoName != null && seeAlsoName.length() != 0) {
+                                beanInfo.typeName = seeAlsoName;
+                                break;
                             }
                         }
                     }
