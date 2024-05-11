@@ -28,7 +28,14 @@ final class ObjectWriterImplZonedDateTime
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        jsonWriter.writeZonedDateTime((ZonedDateTime) object);
+        ZonedDateTime zdt;
+        if (function != null) {
+            zdt = (ZonedDateTime) function.apply(object);
+        } else {
+            zdt = (ZonedDateTime) object;
+        }
+
+        jsonWriter.writeZonedDateTime(zdt);
     }
 
     @Override
