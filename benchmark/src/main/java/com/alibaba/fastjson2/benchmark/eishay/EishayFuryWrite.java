@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class EishayFuryWrite {
     static MediaContent object;
 
-    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-            .withLanguage(io.fury.config.Language.JAVA)
+    static org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
+            .withLanguage(org.apache.fury.config.Language.JAVA)
             .requireClassRegistration(false)
             .withRefTracking(true)
             .buildThreadSafeFury();

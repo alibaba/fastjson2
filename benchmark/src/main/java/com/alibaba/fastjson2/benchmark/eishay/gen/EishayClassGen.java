@@ -289,8 +289,8 @@ public class EishayClassGen {
     }
 
     public byte[][] genFuryBytes(int count) throws Exception {
-//        io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//                .withLanguage(io.fury.Language.JAVA)
+//        org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
+//                .withLanguage(org.apache.fury.Language.JAVA)
 //                .withReferenceTracking(true)
 //                .disableSecureMode()
 //                .buildThreadSafeFury();

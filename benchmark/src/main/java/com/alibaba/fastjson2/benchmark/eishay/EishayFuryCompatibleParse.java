@@ -32,11 +32,11 @@ public class EishayFuryCompatibleParse {
     static byte[] jsonbBytes;
     static byte[] furyCompatibleBytes;
 
-    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
-            .withLanguage(io.fury.config.Language.JAVA)
+    static org.apache.fury.ThreadSafeFury furyCompatible = org.apache.fury.Fury.builder()
+            .withLanguage(org.apache.fury.config.Language.JAVA)
             .withRefTracking(true)
             .requireClassRegistration(false)
-            .withCompatibleMode(io.fury.config.CompatibleMode.COMPATIBLE)
+            .withCompatibleMode(org.apache.fury.config.CompatibleMode.COMPATIBLE)
             .buildThreadSafeFury();
 
     static {
