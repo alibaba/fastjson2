@@ -303,7 +303,8 @@ public class BeanUtilsTest {
                 "org.mockito.internal.creation.bytebuddy.MockMethodInterceptor",
                 "sun.nio.ch.FileChannelImpl",
                 "java.io.InputStream",
-                "java.util.concurrent.locks.ReentrantLock"
+                "java.util.concurrent.locks.ReentrantLock",
+                "java.security.ProtectionDomain"
         };
 
         long[] hashCodes = new long[names.length];
