@@ -10,18 +10,19 @@ import java.util.Map;
 
 public class ReadResult {
     public static void main(String[] args) throws Exception {
-        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_" + JSON.VERSION + "_raw.md");
+        String version = JSON.VERSION;
+        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_" + version + "_raw.md");
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
 
         Map<String, String> files = new LinkedHashMap<>();
-        files.put("aliyun_ecs.c8i.large", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_g8i.out");
+        files.put("aliyun_ecs.c8i.large", "/Users/wenshao/Downloads/result_" + version + "_g8i.out");
 //        files.put("aliyun_ecs.g7.large", "/Users/wenshao/Downloads/result_2.0.33_g7.out");
-        files.put("aliyun_ecs.g8y.large", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_g8y.out");
+        files.put("aliyun_ecs.g8y.large", "/Users/wenshao/Downloads/result_" + version + "_g8y.out");
 //        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.41_aws_c6g.out");
-        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_aws_c7g.out");
-        files.put("orangepi5p", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_orangepi5.out");
-        files.put("orangepi_aipro", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_orangepi_aipro.out");
-        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + JSON.VERSION + "_applem1pro.out");
+//        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_" + version + "_aws_c7g.out");
+        files.put("orangepi5p", "/Users/wenshao/Downloads/result_" + version + "_orangepi5.out");
+        files.put("orangepi_aipro", "/Users/wenshao/Downloads/result_" + version + "_orangepi_aipro.out");
+        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + version + "_applem1pro.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
