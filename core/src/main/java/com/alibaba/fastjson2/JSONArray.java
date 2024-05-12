@@ -988,6 +988,10 @@ public class JSONArray
             return (T) toString();
         }
 
+        if (type == JSON.class) {
+            return (T) this;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
         return objectReader.createInstance(this);
