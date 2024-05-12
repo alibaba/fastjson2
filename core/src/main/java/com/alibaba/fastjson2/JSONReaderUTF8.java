@@ -5945,7 +5945,7 @@ class JSONReaderUTF8
     @Override
     public final int getStringLength() {
         if (ch != '"' && ch != '\'') {
-            throw new JSONException("string length only support string input");
+            throw new JSONException("string length only support string input " + ch);
         }
         final char quote = ch;
 
