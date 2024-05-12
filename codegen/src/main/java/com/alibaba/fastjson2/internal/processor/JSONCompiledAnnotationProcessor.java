@@ -39,8 +39,6 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicIntegerArray;
-import java.util.concurrent.atomic.AtomicLongArray;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.*;
