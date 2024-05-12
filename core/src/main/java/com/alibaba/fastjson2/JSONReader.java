@@ -1620,7 +1620,18 @@ public abstract class JSONReader
                     return Long.parseLong(str);
                 }
 
-                return DateUtils.parseMillis19(str, null);
+                return DateUtils.parseMillis19(str, context.getZoneId());
+            }
+
+            if ("yyyy-MM-dd HH:mm:ss.SSS".equals(format)
+                    && str.length() == 19
+                    && str.charAt(4) == '-'
+                    && str.charAt(7) == '-'
+                    && str.charAt(10) == ' '
+                    && str.charAt(13) == ':'
+                    && str.charAt(16) == ':'
+            ) {
+                return DateUtils.parseMillis19(str, context.getZoneId());
             }
 
             SimpleDateFormat utilFormat = new SimpleDateFormat(format);
