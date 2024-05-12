@@ -107,7 +107,7 @@ final class JavacTreeUtils {
         }
     }
 
-    static JCTree.JCExpression arrayIdent(String name) {
+    static JCTree.JCExpression arrayIdentType(String name) {
         int idx = name.indexOf("[");
         String type = name;
         int count = 1;
@@ -120,36 +120,40 @@ final class JavacTreeUtils {
                 }
             }
         }
-        JCTree.JCExpression elemTypeExpr;
+        return arrayType(identType(type), count);
+    }
+
+    static JCTree.JCExpression identType(String type) {
+        JCTree.JCExpression identType;
         switch (type) {
             case "int":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.INT);
+                identType = treeMaker.TypeIdent(TypeTag.INT);
                 break;
             case "long":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.LONG);
+                identType = treeMaker.TypeIdent(TypeTag.LONG);
                 break;
             case "float":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.FLOAT);
+                identType = treeMaker.TypeIdent(TypeTag.FLOAT);
                 break;
             case "double":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.DOUBLE);
+                identType = treeMaker.TypeIdent(TypeTag.DOUBLE);
                 break;
             case "boolean":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.BOOLEAN);
+                identType = treeMaker.TypeIdent(TypeTag.BOOLEAN);
                 break;
             case "char":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.CHAR);
+                identType = treeMaker.TypeIdent(TypeTag.CHAR);
                 break;
             case "byte":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.BYTE);
+                identType = treeMaker.TypeIdent(TypeTag.BYTE);
                 break;
             case "short":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.SHORT);
+                identType = treeMaker.TypeIdent(TypeTag.SHORT);
                 break;
             default:
-                elemTypeExpr = qualIdent(type);
+                identType = qualIdent(type);
         }
-        return arrayType(elemTypeExpr, count);
+        return identType;
     }
 
     static String boxed(String type) {
@@ -442,6 +446,13 @@ final class JavacTreeUtils {
             args = List.nil();
         }
         return treeMaker.Lambda(args, body);
+    }
+
+    static JCTree.JCMemberReference memberReference(MemberReferenceTree.ReferenceMode mode, String name, JCTree.JCExpression expr, List<JCTree.JCExpression> typeargs) {
+        if (typeargs == null) {
+            typeargs = List.nil();
+        }
+        return treeMaker.Reference(mode, name(name), expr, typeargs);
     }
 
     static JCTree.JCMemberReference constructorRef(JCTree.JCExpression beanClass) {
