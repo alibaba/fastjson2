@@ -34,7 +34,7 @@ public class JSONValidator {
         try {
             firstChar = jsonReader.current();
             jsonReader.skipValue();
-        } catch (JSONException error) {
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
             return validateResult = false;
         } finally {
             jsonReader.close();
