@@ -149,8 +149,6 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, Set<Filter>> cacheFilter = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, Set<Filter>> cacheFieldBasedFilter = new ConcurrentHashMap<>();
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -768,19 +766,6 @@ public class ObjectReaderProvider
             if (upperBounds.length == 1) {
                 objectType = upperBounds[0];
             }
-        }
-
-        Set<Filter> filters = fieldBased
-                ? cacheFieldBasedFilter.getOrDefault(objectType, new HashSet<>())
-                : cacheFilter.getOrDefault(objectType, new HashSet<>());
-        if (!filters.isEmpty()) {
-            cleanup((Class) objectType);
-        }
-        filters.add(filter);
-        if (fieldBased) {
-            cacheFieldBasedFilter.put(objectType, filters);
-        } else {
-            cacheFilter.put(objectType, filters);
         }
         return getObjectReader(objectType, fieldBased);
     }

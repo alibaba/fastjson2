@@ -1,9 +1,12 @@
 package com.alibaba.fastjson2.issues_2300;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class Issue2367 {
     @Data
@@ -74,10 +78,12 @@ public class Issue2367 {
 
         final String jsonStr = JSON.toJSONString(subscription, JSONWriter.Feature.WriteClassName);
 
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader objectReader = provider.getObjectReader(Subscription.class, filter, false);
+        ObjectReader objectReader1 = provider.getObjectReader(Subscription.class, filter, false);
+        assertSame(objectReader, objectReader1);
+
         System.out.println(jsonStr);
-        //works
-        //final Subscription parsedSubscription = JSON.parseObject(jsonStr, Subscription.class, SupportAutoType);
-        //does not work
         final Subscription parsedSubscription = JSON.parseObject(jsonStr, Subscription.class, filter);
         PubSubAttributes attributes1 = parsedSubscription.getAttributes();
         assertEquals(1, attributes1.attributes.size());
