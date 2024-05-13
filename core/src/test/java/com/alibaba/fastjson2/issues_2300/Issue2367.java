@@ -83,7 +83,6 @@ public class Issue2367 {
         ObjectReader objectReader1 = provider.getObjectReader(Subscription.class, filter, false);
         assertSame(objectReader, objectReader1);
 
-        System.out.println(jsonStr);
         final Subscription parsedSubscription = JSON.parseObject(jsonStr, Subscription.class, filter);
         PubSubAttributes attributes1 = parsedSubscription.getAttributes();
         assertEquals(1, attributes1.attributes.size());
