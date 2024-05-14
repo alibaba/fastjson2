@@ -69,20 +69,33 @@ public class ListTest {
             this.id = id;
         }
     }
-//
-//    @Test
-//    public void test3() {
-//        Bean3 bean = new Bean3();
-//        bean.values = Arrays.asList("a", "b", "c");
-//        String str = JSON.toJSONString(bean);
-//        Bean3 bean1 = JSON.parseObject(str, Bean3.class);
-//        assertEquals(bean.values.size(), bean1.values.size());
-//        String str1 = JSON.toJSONString(bean1);
-//        assertEquals(str, str1);
-//    }
-//
+
+    @Test
+    public void item() {
+        Item item = new Item(1);
+        String str = JSON.toJSONString(item);
+        assertEquals("{\"id\":1}", str);
+        Item item1 = JSON.parseObject(str, Item.class);
+        assertEquals(item.id, item1.id);
+    }
+
+    @Test
+    public void test3() {
+        Bean3 bean = new Bean3();
+        bean.strings = Arrays.asList("a", "b", "c");
+        bean.items = Arrays.asList(new Item(1), new Item(2), new Item(3));
+        String str = JSON.toJSONString(bean);
+        System.out.println(str);
+        Bean3 bean1 = JSON.parseObject(str, Bean3.class);
+        assertEquals(bean.strings.size(), bean1.strings.size());
+        assertEquals(bean.items.size(), bean1.items.size());
+        String str1 = JSON.toJSONString(bean1);
+        assertEquals(str, str1);
+    }
+
 //    @JSONCompiled
-//    public static class Bean3 {
-//        public List<?> values;
-//    }
+    public static class Bean3 {
+        public List<Item> items;
+        public List<String> strings;
+    }
 }
