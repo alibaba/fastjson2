@@ -818,7 +818,7 @@ public interface JSON {
 
         final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, filter, fieldBased);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             if (reader.nextIfNull()) {

@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.function.FieldBiConsumer;
 import com.alibaba.fastjson2.function.FieldConsumer;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
@@ -164,7 +162,6 @@ public class ObjectReaderProvider
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
-    private NameFilter nameFilter;
 
     {
         long[] hashCodes;
@@ -227,14 +224,6 @@ public class ObjectReaderProvider
 
     public void setAutoTypeHandler(Consumer<Class> autoTypeHandler) {
         this.autoTypeHandler = autoTypeHandler;
-    }
-
-    public NameFilter getNameFilter() {
-        return nameFilter;
-    }
-
-    public void setNameFilter(NameFilter nameFilter) {
-        this.nameFilter = nameFilter;
     }
 
     public Class getMixIn(Class target) {
@@ -756,18 +745,6 @@ public class ObjectReaderProvider
         return objectReader != null
                 ? objectReader
                 : getObjectReaderInternal(objectType, fieldBased);
-    }
-
-    public ObjectReader getObjectReader(Type objectType, Filter filter, boolean fieldBased) {
-        if (objectType == null) {
-            objectType = Object.class;
-        } else if (objectType instanceof WildcardType) {
-            Type[] upperBounds = ((WildcardType) objectType).getUpperBounds();
-            if (upperBounds.length == 1) {
-                objectType = upperBounds[0];
-            }
-        }
-        return getObjectReader(objectType, fieldBased);
     }
 
     private ObjectReader getObjectReaderInternal(Type objectType, boolean fieldBased) {
