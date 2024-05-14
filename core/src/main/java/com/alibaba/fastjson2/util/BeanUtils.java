@@ -17,8 +17,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import static com.alibaba.fastjson2.util.JDKUtils.ANDROID_SDK_INT;
@@ -53,6 +51,7 @@ public abstract class BeanUtils {
             -4863137578837233966L,
             -3653547262287832698L,
             -2819277587813726773L,
+            -2669552864532011468L,
             -2458634727370886912L,
             -2291619803571459675L,
             -1811306045128064037L,
@@ -61,6 +60,7 @@ public abstract class BeanUtils {
             8731803887940231L,
             1616814008855344660L,
             2164749833121980361L,
+            2688642392827789427L,
             3724195282986200606L,
             3742915795806478647L,
             3977020351318456359L,
@@ -295,8 +295,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (fieldClass == Lock.class
-                    || fieldClass == ReentrantLock.class) {
+            if (BeanUtils.ignore(fieldClass)) {
                 continue;
             }
 
@@ -923,7 +922,7 @@ public abstract class BeanUtils {
             }
 
             Class<?> returnClass = method.getReturnType();
-            if (returnClass == Void.class || ignore(returnClass)) {
+            if (returnClass == Void.class || returnClass == void.class || ignore(returnClass)) {
                 continue;
             }
 
