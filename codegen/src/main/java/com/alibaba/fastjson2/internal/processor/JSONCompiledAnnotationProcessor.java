@@ -885,7 +885,7 @@ public class JSONCompiledAnnotationProcessor
         writeBody.append(contextFeaturesVar);
 
         JCTree.JCUnary unary = unary(JCTree.Tag.NOT, field(jsonWriterIdent, "useSingleQuote"));
-        JCTree.JCBinary binary = binary(JCTree.Tag.EQ, binary(JCTree.Tag.BITOR, literal(TypeTag.LONG, UnquoteFieldName.mask), literal(TypeTag.LONG, UseSingleQuotes.mask)), literal(0));
+        JCTree.JCBinary binary = binary(JCTree.Tag.NE, binary(JCTree.Tag.BITOR, literal(TypeTag.LONG, UnquoteFieldName.mask), literal(TypeTag.LONG, UseSingleQuotes.mask)), literal(0));
         JCTree.JCVariableDecl quoteVar = defVar(Flags.PARAMETER, "quote", type(TypeTag.BOOLEAN), binary(JCTree.Tag.AND, unary, binary));
         JCTree.JCIdent quoteIdent = ident(quoteVar.name);
         writeBody.append(quoteVar);
