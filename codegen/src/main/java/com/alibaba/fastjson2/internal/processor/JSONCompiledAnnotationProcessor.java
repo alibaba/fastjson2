@@ -350,8 +350,7 @@ public class JSONCompiledAnnotationProcessor
                 || "int".equals(type)
                 || "long".equals(type)
                 || "float".equals(type)
-                || "double".equals(type)
-                || "java.lang.String".equals(type)) {
+                || "double".equals(type)) {
             if (isMethodReference) {
                 String methodName = attributeInfo.getMethod.getSimpleName().toString();
                 JCTree.JCMemberReference memberedReference = methodRef(beanType, methodName);
