@@ -954,7 +954,7 @@ public class JSONCompiledAnnotationProcessor
         return defMethod(Flags.PUBLIC, "write", type(TypeTag.VOID), null, List.of(jsonWriterVar, objectVar, fieldNameVar, fieldTypeVar, featuresVar), null, block(writeBody.toList()), null);
     }
 
-    private JCTree.JCExpressionStatement genWriteFieldName(
+    private JCTree.JCStatement genWriteFieldName(
             JCTree.JCIdent jsonWriterIdent,
             AttributeInfo attributeInfo,
             JCTree.JCIdent quoteIdent,
@@ -1164,13 +1164,12 @@ public class JSONCompiledAnnotationProcessor
                 long nameIn64SingleQuote = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
                 JCTree.JCConditional ternary = ternary(quoteIdent, literal(TypeTag.LONG, nameIn64DoubleQuote), literal(TypeTag.LONG, nameIn64SingleQuote));
                 if (length == 9) {
+                    ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
                     JCTree.JCConditional ternary2 = ternary(quoteIdent, literal(TypeTag.INT, name12), literal(TypeTag.INT, name1SQ2));
-                    if (JVM_VERSION > 8) {
-                        JCTree.JCMethodInvocation intMethod = method(field(method(field(qualIdent("java.lang.Long"), "valueOf"), List.of(ternary2)), "intValue"));
-                        return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, intMethod)));
-                    } else {
-                        return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ternary2)));
-                    }
+                    JCTree.JCVariableDecl name1Var = defVar(Flags.PARAMETER, "name1", type(TypeTag.INT), ternary2);
+                    stmts.append(defVar(Flags.PARAMETER, "name1", type(TypeTag.INT), ternary2));
+                    stmts.append(exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ident(name1Var.name)))));
+                    return block(stmts.toList());
                 } else if (length > 9) {
                     JCTree.JCConditional ternary2 = ternary(quoteIdent, literal(TypeTag.LONG, name1), literal(TypeTag.LONG, name1SQ));
                     return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ternary2)));
