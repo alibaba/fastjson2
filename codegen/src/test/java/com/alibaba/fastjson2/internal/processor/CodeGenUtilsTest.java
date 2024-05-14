@@ -11,9 +11,9 @@ public class CodeGenUtilsTest {
     @Test
     public void getSupperClass() {
         for (int i = 1; i <= 12; i++) {
-            assertEquals("ObjectReader" + i, CodeGenUtils.getSuperClass(i).getSimpleName());
+            assertEquals("ObjectReader" + i, CodeGenUtils.getReadSuperClass(i).getSimpleName());
         }
-        assertEquals("ObjectReaderAdapter", CodeGenUtils.getSuperClass(13).getSimpleName());
+        assertEquals("ObjectReaderAdapter", CodeGenUtils.getReadSuperClass(13).getSimpleName());
     }
 
     @Test

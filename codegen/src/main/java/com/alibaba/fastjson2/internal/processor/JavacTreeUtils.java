@@ -107,48 +107,88 @@ final class JavacTreeUtils {
         }
     }
 
-    static JCTree.JCExpression arrayIdent(String name) {
+    static JCTree.JCExpression arrayIdentType(String name) {
         int idx = name.indexOf("[");
-        String type = name.substring(0, idx);
-        int count = 0;
-        for (char c : name.substring(idx).toCharArray()) {
-            if (c == '[') {
-                count++;
+        String type = name;
+        int count = 1;
+        if (idx != -1) {
+            type = name.substring(0, idx);
+            count = 0;
+            for (char c : name.substring(idx).toCharArray()) {
+                if (c == '[') {
+                    count++;
+                }
             }
         }
-        JCTree.JCExpression elemTypeExpr;
-        switch (type) {
-            case "int":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.INT);
-                break;
-            case "long":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.LONG);
-                break;
-            case "float":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.FLOAT);
-                break;
-            case "double":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.DOUBLE);
-                break;
-            case "boolean":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.BOOLEAN);
-                break;
-            case "char":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.CHAR);
-                break;
-            case "byte":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.BYTE);
-                break;
-            case "short":
-                elemTypeExpr = treeMaker.TypeIdent(TypeTag.SHORT);
-                break;
-            default:
-                elemTypeExpr = qualIdent(type);
-        }
-        return arrayType(elemTypeExpr, count);
+        return arrayType(identType(type), count);
     }
 
-    private static JCTree.JCArrayTypeTree arrayType(JCTree.JCExpression elemTypeExpr, int dims) {
+    static JCTree.JCExpression identType(String type) {
+        JCTree.JCExpression identType;
+        switch (type) {
+            case "int":
+                identType = treeMaker.TypeIdent(TypeTag.INT);
+                break;
+            case "long":
+                identType = treeMaker.TypeIdent(TypeTag.LONG);
+                break;
+            case "float":
+                identType = treeMaker.TypeIdent(TypeTag.FLOAT);
+                break;
+            case "double":
+                identType = treeMaker.TypeIdent(TypeTag.DOUBLE);
+                break;
+            case "boolean":
+                identType = treeMaker.TypeIdent(TypeTag.BOOLEAN);
+                break;
+            case "char":
+                identType = treeMaker.TypeIdent(TypeTag.CHAR);
+                break;
+            case "byte":
+                identType = treeMaker.TypeIdent(TypeTag.BYTE);
+                break;
+            case "short":
+                identType = treeMaker.TypeIdent(TypeTag.SHORT);
+                break;
+            default:
+                identType = qualIdent(type);
+        }
+        return identType;
+    }
+
+    static String boxed(String type) {
+        String boxed = type;
+        switch (type) {
+            case "int":
+                boxed = "Integer";
+                break;
+            case "long":
+                boxed = "Long";
+                break;
+            case "float":
+                boxed = "Float";
+                break;
+            case "double":
+                boxed = "Double";
+                break;
+            case "boolean":
+                boxed = "Boolean";
+                break;
+            case "char":
+                boxed = "Character";
+                break;
+            case "byte":
+                boxed = "Byte";
+                break;
+            case "short":
+                boxed = "Short";
+                break;
+            default:
+        }
+        return boxed;
+    }
+
+    static JCTree.JCArrayTypeTree arrayType(JCTree.JCExpression elemTypeExpr, int dims) {
         if (dims == 1) {
             return treeMaker.TypeArray(elemTypeExpr);
         } else {
@@ -441,6 +481,10 @@ final class JavacTreeUtils {
             args = List.nil();
         }
         return treeMaker.Annotation(type, args);
+    }
+
+    static JCTree.JCConditional ternary(JCTree.JCExpression cond, JCTree.JCExpression trueExpr, JCTree.JCExpression falseExpr) {
+        return treeMaker.Conditional(cond, trueExpr, falseExpr);
     }
 
     static void pos(int pos) {
