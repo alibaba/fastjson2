@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import com.alibaba.fastjson2.writer.*;
 
 import java.util.*;
 
@@ -30,9 +30,12 @@ public class CodeGenUtils {
     }
 
     static Map<String, String> readDirectMap = new HashMap<>();
+    static Map<String, String> writeDirectMap = new HashMap<>();
     static {
         readDirectMap.put("boolean", "readBoolValue");
         readDirectMap.put("char", "readCharValue");
+        writeDirectMap.put("boolean", "writeBool");
+        writeDirectMap.put("char", "writeChar");
 
         readDirectMap.put("byte", "readInt8Value");
         readDirectMap.put("short", "readInt16Value");
@@ -40,9 +43,17 @@ public class CodeGenUtils {
         readDirectMap.put("long", "readInt64Value");
         readDirectMap.put("float", "readFloatValue");
         readDirectMap.put("double", "readDoubleValue");
+        writeDirectMap.put("byte", "writeInt8");
+        writeDirectMap.put("short", "writeInt16");
+        writeDirectMap.put("int", "writeInt32");
+        writeDirectMap.put("long", "writeInt64");
+        writeDirectMap.put("float", "writeFloat");
+        writeDirectMap.put("double", "writeDouble");
 
         readDirectMap.put("java.lang.Boolean", "readBool");
         readDirectMap.put("java.lang.Character", "readCharacter");
+        writeDirectMap.put("java.lang.Boolean", "writeBool");
+        writeDirectMap.put("java.lang.Character", "writeCharacter");
 
         readDirectMap.put("java.lang.Byte", "readInt8");
         readDirectMap.put("java.lang.Short", "readInt16");
@@ -51,15 +62,28 @@ public class CodeGenUtils {
         readDirectMap.put("java.lang.Float", "readFloat");
         readDirectMap.put("java.lang.Double", "readDouble");
         readDirectMap.put("java.lang.Number", "readNumber");
+        writeDirectMap.put("java.lang.Byte", "writeInt8");
+        writeDirectMap.put("java.lang.Short", "writeInt16");
+        writeDirectMap.put("java.lang.Integer", "writeInt32");
+        writeDirectMap.put("java.lang.Long", "writeInt64");
+        writeDirectMap.put("java.lang.Float", "writeFloat");
+        writeDirectMap.put("java.lang.Double", "writeDouble");
+        writeDirectMap.put("java.lang.Number", "writeNumber");
 
         readDirectMap.put("java.lang.String", "readString");
+        writeDirectMap.put("java.lang.String", "writeString");
 
         readDirectMap.put("java.math.BigInteger", "readBigInteger");
         readDirectMap.put("java.math.BigDecimal", "readBigDecimal");
+        writeDirectMap.put("java.math.BigInteger", "writeBigInteger");
+        writeDirectMap.put("java.math.BigDecimal", "writeBigDecimal");
 
         readDirectMap.put("java.util.UUID", "readUUID");
         readDirectMap.put("java.util.Date", "readDate");
         readDirectMap.put("java.util.Calendar", "readCalendar");
+        writeDirectMap.put("java.util.UUID", "writeUUID");
+        writeDirectMap.put("java.util.Date", "writeDate");
+        writeDirectMap.put("java.util.Calendar", "writeCalendar");
 
         readDirectMap.put("java.time.LocalDate", "readLocalDate");
         readDirectMap.put("java.time.LocalTime", "readLocalTime");
@@ -67,16 +91,27 @@ public class CodeGenUtils {
         readDirectMap.put("java.time.ZonedDateTime", "readZonedDateTime");
         readDirectMap.put("java.time.OffsetDateTime", "readOffsetDateTime");
         readDirectMap.put("java.time.OffsetTime", "readOffsetTime");
+        writeDirectMap.put("java.time.LocalDate", "writeLocalDate");
+        writeDirectMap.put("java.time.LocalTime", "writeLocalTime");
+        writeDirectMap.put("java.time.LocalDateTime", "writeLocalDateTime");
+        writeDirectMap.put("java.time.ZonedDateTime", "writeZonedDateTime");
+        writeDirectMap.put("java.time.OffsetDateTime", "writeOffsetDateTime");
+        writeDirectMap.put("java.time.OffsetTime", "writeOffsetTime");
 
         readDirectMap.put("int[]", "readInt32ValueArray");
         readDirectMap.put("long[]", "readInt64ValueArray");
         readDirectMap.put("java.lang.String[]", "readStringArray");
+        writeDirectMap.put("int[]", "writeInt32ValueArray");
+        writeDirectMap.put("long[]", "writeInt64ValueArray");
+        writeDirectMap.put("java.lang.String[]", "writeStringArray");
 
         readDirectMap.put("com.alibaba.fastjson2.JSONObject", "readJSONObject");
         readDirectMap.put("com.alibaba.fastjson2.JSONArray", "readJSONArray");
+        writeDirectMap.put("com.alibaba.fastjson2.JSONObject", "writeJSONObject");
+        writeDirectMap.put("com.alibaba.fastjson2.JSONArray", "writeJSONArray");
     }
 
-    public static Class getSuperClass(int fieldReaders) {
+    public static Class getReadSuperClass(int fieldReaders) {
         Class objectReaderSuper;
         switch (fieldReaders) {
             case 1:
@@ -122,6 +157,52 @@ public class CodeGenUtils {
         return objectReaderSuper;
     }
 
+    public static Class getWriteSuperClass(int fieldWriters) {
+        Class objectWriterSuper;
+        switch (fieldWriters) {
+            case 1:
+                objectWriterSuper = ObjectWriter1.class;
+                break;
+            case 2:
+                objectWriterSuper = ObjectWriter2.class;
+                break;
+            case 3:
+                objectWriterSuper = ObjectWriter3.class;
+                break;
+            case 4:
+                objectWriterSuper = ObjectWriter4.class;
+                break;
+            case 5:
+                objectWriterSuper = ObjectWriter5.class;
+                break;
+            case 6:
+                objectWriterSuper = ObjectWriter6.class;
+                break;
+            case 7:
+                objectWriterSuper = ObjectWriter7.class;
+                break;
+            case 8:
+                objectWriterSuper = ObjectWriter8.class;
+                break;
+            case 9:
+                objectWriterSuper = ObjectWriter9.class;
+                break;
+            case 10:
+                objectWriterSuper = ObjectWriter10.class;
+                break;
+            case 11:
+                objectWriterSuper = ObjectWriter11.class;
+                break;
+            case 12:
+                objectWriterSuper = ObjectWriter12.class;
+                break;
+            default:
+                objectWriterSuper = ObjectWriterAdapter.class;
+                break;
+        }
+        return objectWriterSuper;
+    }
+
     public static String fieldReader(int i) {
         switch (i) {
             case 0:
@@ -158,6 +239,45 @@ public class CodeGenUtils {
                 return "fieldReader15";
             default:
                 return getName("fieldReader", i);
+        }
+    }
+
+    public static String fieldWriter(int i) {
+        switch (i) {
+            case 0:
+                return "fieldWriter0";
+            case 1:
+                return "fieldWriter1";
+            case 2:
+                return "fieldWriter2";
+            case 3:
+                return "fieldWriter3";
+            case 4:
+                return "fieldWriter4";
+            case 5:
+                return "fieldWriter5";
+            case 6:
+                return "fieldWriter6";
+            case 7:
+                return "fieldWriter7";
+            case 8:
+                return "fieldWriter8";
+            case 9:
+                return "fieldWriter9";
+            case 10:
+                return "fieldWriter10";
+            case 11:
+                return "fieldWriter11";
+            case 12:
+                return "fieldWriter12";
+            case 13:
+                return "fieldWriter13";
+            case 14:
+                return "fieldWriter14";
+            case 15:
+                return "fieldWriter15";
+            default:
+                return getName("fieldWriter", i);
         }
     }
 
@@ -200,6 +320,45 @@ public class CodeGenUtils {
         }
     }
 
+    public static String fieldObjectWriter(int i) {
+        switch (i) {
+            case 0:
+                return "objectWriter0";
+            case 1:
+                return "objectWriter1";
+            case 2:
+                return "objectWriter2";
+            case 3:
+                return "objectWriter3";
+            case 4:
+                return "objectWriter4";
+            case 5:
+                return "objectWriter5";
+            case 6:
+                return "objectWriter6";
+            case 7:
+                return "objectWriter7";
+            case 8:
+                return "objectWriter8";
+            case 9:
+                return "objectWriter9";
+            case 10:
+                return "objectWriter10";
+            case 11:
+                return "objectWriter11";
+            case 12:
+                return "objectWriter12";
+            case 13:
+                return "objectWriter13";
+            case 14:
+                return "objectWriter14";
+            case 15:
+                return "objectWriter15";
+            default:
+                return getName("objectWriter", i);
+        }
+    }
+
     public static String fieldItemObjectReader(int i) {
         switch (i) {
             case 0:
@@ -236,6 +395,45 @@ public class CodeGenUtils {
                 return "itemReader15";
             default:
                 return getName("itemReader", i);
+        }
+    }
+
+    public static String fieldItemObjectWriter(int i) {
+        switch (i) {
+            case 0:
+                return "itemWriter0";
+            case 1:
+                return "itemWriter1";
+            case 2:
+                return "itemWriter2";
+            case 3:
+                return "itemWriter3";
+            case 4:
+                return "itemWriter4";
+            case 5:
+                return "itemWriter5";
+            case 6:
+                return "itemWriter6";
+            case 7:
+                return "itemWriter7";
+            case 8:
+                return "itemWriter8";
+            case 9:
+                return "itemWriter9";
+            case 10:
+                return "itemWriter10";
+            case 11:
+                return "itemWriter11";
+            case 12:
+                return "itemWriter12";
+            case 13:
+                return "itemWriter13";
+            case 14:
+                return "itemWriter14";
+            case 15:
+                return "itemWriter15";
+            default:
+                return getName("itemWriter", i);
         }
     }
 
@@ -377,7 +575,15 @@ public class CodeGenUtils {
         return readDirectMap.containsKey(type);
     }
 
+    public static boolean supportWriteDirect(String type) {
+        return writeDirectMap.containsKey(type);
+    }
+
     public static String getReadDirectMethod(String type) {
         return readDirectMap.get(type);
+    }
+
+    public static String getWriteDirectMethod(String type) {
+        return writeDirectMap.get(type);
     }
 }
