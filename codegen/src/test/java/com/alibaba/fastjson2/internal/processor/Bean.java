@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.PropertyNamingStrategy;
-import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 @JSONType(naming = PropertyNamingStrategy.PascalCase)
-@JSONCompiled
+//@com.alibaba.fastjson2.annotation.JSONCompiled
 public class Bean {
     @JSONField(name = "uid")
     public int id;

@@ -1036,6 +1036,10 @@ public class ObjectWriterCreator {
         return new FieldWriterDoubleValueFunc(fieldName, 0, 0, null, null, null, null, function);
     }
 
+    public <T> FieldWriter createFieldWriter(String fieldName, ToCharFunction<T> function) {
+        return new FieldWriterCharValFunc(fieldName, 0, 0, null, null, null, null, function);
+    }
+
     public <T> FieldWriter createFieldWriter(String fieldName, Predicate<T> function) {
         return new FieldWriterBoolValFunc(fieldName, 0, 0, null, null, null, null, function);
     }

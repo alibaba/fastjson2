@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BasicTypeTest {
-//    @Test
+    @Test
     public void test() {
         Bean bean = new Bean();
         bean.f0 = 100;
@@ -31,6 +31,7 @@ public class BasicTypeTest {
         assertEquals(str, str2);
 
         byte[] jsonb = JSONB.toBytes(bean);
+        System.out.println(JSONB.toJSONString(jsonb));
         Bean bean3 = JSONB.parseObject(jsonb, Bean.class);
         assertEquals(str, JSON.toJSONString(bean3));
     }
@@ -48,7 +49,7 @@ public class BasicTypeTest {
         public String f8;
     }
 
-//    @Test
+    @Test
     public void test1() {
         Bean1 bean = new Bean1();
         bean.f0 = 100;

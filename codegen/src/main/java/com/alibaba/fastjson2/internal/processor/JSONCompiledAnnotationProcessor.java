@@ -345,6 +345,7 @@ public class JSONCompiledAnnotationProcessor
             boolean isMethodReference) {
         String type = attributeInfo.type.toString();
         if ("boolean".equals(type)
+                || "char".equals(type)
                 || "byte".equals(type)
                 || "short".equals(type)
                 || "int".equals(type)
