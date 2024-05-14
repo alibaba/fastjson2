@@ -47,6 +47,7 @@ import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.qualIdent;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
