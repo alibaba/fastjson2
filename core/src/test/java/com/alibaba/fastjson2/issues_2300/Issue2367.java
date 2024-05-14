@@ -79,8 +79,8 @@ public class Issue2367 {
         final String jsonStr = JSON.toJSONString(subscription, JSONWriter.Feature.WriteClassName);
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(Subscription.class, filter, false);
-        ObjectReader objectReader1 = provider.getObjectReader(Subscription.class, filter, false);
+        ObjectReader objectReader = provider.getObjectReader(Subscription.class, false);
+        ObjectReader objectReader1 = provider.getObjectReader(Subscription.class, false);
         assertSame(objectReader, objectReader1);
 
         final Subscription parsedSubscription = JSON.parseObject(jsonStr, Subscription.class, filter);
