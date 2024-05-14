@@ -1993,7 +1993,7 @@ public abstract class JSONReader
 
             Object name;
             if (match || typeRedirect) {
-                if (ch >= '1' && ch <= '9') {
+                if ((ch >= '0' && ch <= '9') || ch == '-') {
                     name = null;
                 } else {
                     name = readFieldName();
