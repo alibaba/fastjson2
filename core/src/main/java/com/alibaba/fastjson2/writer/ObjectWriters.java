@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ToByteFunction;
+import com.alibaba.fastjson2.function.ToCharFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
@@ -160,6 +161,10 @@ public class ObjectWriters {
     }
 
     public static <T> FieldWriter fieldWriter(String fieldName, ToDoubleFunction<T> function) {
+        return INSTANCE.createFieldWriter(fieldName, function);
+    }
+
+    public static <T> FieldWriter fieldWriter(String fieldName, ToCharFunction<T> function) {
         return INSTANCE.createFieldWriter(fieldName, function);
     }
 
