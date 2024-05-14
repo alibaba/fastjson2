@@ -448,13 +448,6 @@ final class JavacTreeUtils {
         return treeMaker.Lambda(args, body);
     }
 
-    static JCTree.JCMemberReference memberReference(MemberReferenceTree.ReferenceMode mode, String name, JCTree.JCExpression expr, List<JCTree.JCExpression> typeargs) {
-        if (typeargs == null) {
-            typeargs = List.nil();
-        }
-        return treeMaker.Reference(mode, name(name), expr, typeargs);
-    }
-
     static JCTree.JCMemberReference constructorRef(JCTree.JCExpression beanClass) {
         return treeMaker.Reference(MemberReferenceTree.ReferenceMode.NEW, names.init, beanClass, null);
     }
