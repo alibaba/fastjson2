@@ -1651,8 +1651,19 @@ public class JSONCompiledAnnotationProcessor
 
         ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
         notNullStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        JCTree.JCTypeCast charsCast = cast(arrayIdentType("char"), method(field(field(qualIdent("com.alibaba.fastjson2.util.JDKUtils"), "UNSAFE"), "getObject"), List.of(ident(stringVar.name), literal(TypeTag.LONG, 12L))));
-        notNullStmts.append(exec(method(field(jsonWriterIdent, "writeString"), List.of(charsCast))));
+        JCTree.JCExpression stringArrayExpr;
+        if (JVM_VERSION <= 8) {
+            stringArrayExpr = arrayIdentType("char");
+        } else {
+            stringArrayExpr = arrayIdentType("byte");
+        }
+        JCTree.JCTypeCast charsCast = cast(stringArrayExpr, method(field(field(qualIdent("com.alibaba.fastjson2.util.JDKUtils"), "UNSAFE"), "getObject"), List.of(ident(stringVar.name), literal(TypeTag.LONG, 12L))));
+
+        if (JVM_VERSION <= 8) {
+            notNullStmts.append(exec(method(field(jsonWriterIdent, "writeString"), List.of(charsCast))));
+        } else {
+            notNullStmts.append(exec(method(field(jsonWriterIdent, "writeStringLatin1"), List.of(charsCast))));
+        }
 
         ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
         notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
