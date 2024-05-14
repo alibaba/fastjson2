@@ -1165,7 +1165,12 @@ public class JSONCompiledAnnotationProcessor
                 JCTree.JCConditional ternary = ternary(quoteIdent, literal(TypeTag.LONG, nameIn64DoubleQuote), literal(TypeTag.LONG, nameIn64SingleQuote));
                 if (length == 9) {
                     JCTree.JCConditional ternary2 = ternary(quoteIdent, literal(TypeTag.INT, name12), literal(TypeTag.INT, name1SQ2));
-                    return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ternary2)));
+                    if (JVM_VERSION > 8) {
+                        JCTree.JCMethodInvocation intMethod = method(field(method(field(qualIdent("java.lang.Long"), "valueOf"), List.of(ternary2)), "intValue"));
+                        return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, intMethod)));
+                    } else {
+                        return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ternary2)));
+                    }
                 } else if (length > 9) {
                     JCTree.JCConditional ternary2 = ternary(quoteIdent, literal(TypeTag.LONG, name1), literal(TypeTag.LONG, name1SQ));
                     return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ternary2)));
