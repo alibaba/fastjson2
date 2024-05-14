@@ -43,7 +43,7 @@
         <springboot3.version>3.2.2</springboot3.version>
         <springdata2021.version>2021.2.18</springdata2021.version>
         <springdata2023.version>2023.1.0</springdata2023.version>
-        <arrow.version>16.0.0</arrow.version>
+        <arrow.version>16.1.0</arrow.version>
 
         <!-- Requires kotlin minor version less than the latest version -->
         <kotlin.version>2.0.0</kotlin.version>
