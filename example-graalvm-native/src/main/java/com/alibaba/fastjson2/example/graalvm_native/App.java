@@ -1,16 +1,7 @@
 package com.alibaba.fastjson2.example.graalvm_native;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.example.graalvm_native.vo.Image;
-import com.alibaba.fastjson2.example.graalvm_native.vo.Media;
 import com.alibaba.fastjson2.example.graalvm_native.vo.MediaContent;
-import com.alibaba.fastjson2.reader.ObjectReaders;
-import com.alibaba.fastjson2.writer.ObjectWriters;
-
-import java.util.ArrayList;
-
-import static com.alibaba.fastjson2.reader.ObjectReaders.*;
-import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReaderString;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -45,14 +36,6 @@ public class App {
                 "  }\n" +
                 "}";
 
-        registerWriter();
-        registerReader();
-
-//        com.alibaba.fastjson2.reader.ObjectReaderProvider provider = com.alibaba.fastjson2.JSONFactory.getDefaultObjectReaderProvider();
-//        provider.register(MediaContent.class, new com.alibaba.fastjson2.example.graalvm_native.vo.MediaContent_FASTJSONReader());
-//        provider.register(Media.class, new com.alibaba.fastjson2.example.graalvm_native.vo.Media_FASTJSONReader());
-//        provider.register(Image.class, new com.alibaba.fastjson2.example.graalvm_native.vo.Image_FASTJSONReader());
-
         MediaContent mediaContent = JSON.parseObject(str, MediaContent.class);
 
         int LOOP_COUNT = 1000000;
@@ -72,69 +55,5 @@ public class App {
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 eishay parseObject time : " + millis);
         }
-    }
-
-    private static void registerWriter() {
-        JSON.register(MediaContent.class, ObjectWriters.objectWriter(
-                MediaContent.class,
-                ObjectWriters.fieldWriter("media", Media.class, MediaContent::getMedia),
-                ObjectWriters.fieldWriterList("images", Image.class, MediaContent::getImages)
-        ));
-
-        JSON.register(Media.class, ObjectWriters.objectWriter(
-                Media.class,
-                ObjectWriters.fieldWriter("bitrate", Media::getBitrate),
-                ObjectWriters.fieldWriter("duration", Media::getDuration),
-                ObjectWriters.fieldWriter("format", Media::getFormat),
-                ObjectWriters.fieldWriter("height", Media::getHeight),
-                ObjectWriters.fieldWriterList("persons", String.class, Media::getPersons),
-                ObjectWriters.fieldWriter("player", Media.Player.class, Media::getPlayer),
-                ObjectWriters.fieldWriter("size", Media::getSize),
-                ObjectWriters.fieldWriter("title", Media::getTitle),
-                ObjectWriters.fieldWriter("uri", Media::getUri),
-                ObjectWriters.fieldWriter("width", Media::getWidth),
-                ObjectWriters.fieldWriter("copyright", Media::getCopyright)
-        ));
-
-        JSON.register(Image.class, ObjectWriters.objectWriter(
-                Image.class,
-                ObjectWriters.fieldWriter("height", Image::getHeight),
-                ObjectWriters.fieldWriter("size", Image.Size.class, Image::getSize),
-                ObjectWriters.fieldWriter("title", Image::getTitle),
-                ObjectWriters.fieldWriter("uri", Image::getUri),
-                ObjectWriters.fieldWriter("width", Image::getWidth)
-        ));
-    }
-
-    private static void registerReader() {
-        JSON.register(MediaContent.class, ObjectReaders.of(
-                MediaContent::new,
-                fieldReader("media", Media.class, MediaContent::setMedia),
-                fieldReaderList("images", Image.class, ArrayList::new, MediaContent::setImages)
-        ));
-
-        JSON.register(Media.class, ObjectReaders.of(
-                Media::new,
-                fieldReaderInt("bitrate", Media::setBitrate),
-                fieldReaderLong("duration", Media::setDuration),
-                fieldReaderString("format", Media::setFormat),
-                fieldReaderInt("height", Media::setHeight),
-                fieldReaderList("persons", String.class, ArrayList::new, Media::setPersons),
-                fieldReader("player", Media.Player.class, Media::setPlayer),
-                fieldReaderLong("size", Media::setSize),
-                fieldReaderString("title", Media::setTitle),
-                fieldReaderString("uri", Media::setUri),
-                fieldReaderInt("width", Media::setWidth),
-                fieldReaderString("copyright", Media::setCopyright)
-        ));
-
-        JSON.register(Image.class, ObjectReaders.of(
-                Image::new,
-                fieldReaderInt("height", Image::setHeight),
-                fieldReader("size", Image.Size.class, Image::setSize),
-                fieldReaderString("title", Image::setTitle),
-                fieldReaderString("uri", Image::setUri),
-                fieldReaderInt("width", Image::setWidth)
-        ));
     }
 }
