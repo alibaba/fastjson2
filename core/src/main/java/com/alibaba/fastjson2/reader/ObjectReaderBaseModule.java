@@ -230,7 +230,7 @@ public class ObjectReaderBaseModule
                     break;
                 }
 
-                BeanInfo superBeanInfo = new BeanInfo();
+                BeanInfo superBeanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
                 getBeanInfo(superBeanInfo, superClass);
                 if (superBeanInfo.seeAlso != null) {
                     boolean inSeeAlso = false;
@@ -417,7 +417,7 @@ public class ObjectReaderBaseModule
                                 for (int i = 0; i < classes.length; i++) {
                                     Class<?> item = classes[i];
 
-                                    BeanInfo itemBeanInfo = new BeanInfo();
+                                    BeanInfo itemBeanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
                                     processSeeAlsoAnnotation(itemBeanInfo, item);
                                     String typeName = itemBeanInfo.typeName;
                                     if (typeName == null || typeName.isEmpty()) {

@@ -965,7 +965,7 @@ public class ObjectReaderCreator {
             boolean fieldBased,
             ObjectReaderProvider provider
     ) {
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = new BeanInfo(provider);
         if (fieldBased) {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
         }
@@ -1605,7 +1605,7 @@ public class ObjectReaderCreator {
             ObjectReaderProvider provider
     ) {
         if (beanInfo == null) {
-            beanInfo = new BeanInfo();
+            beanInfo = new BeanInfo(provider);
             for (ObjectReaderModule module : provider.modules) {
                 ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                 if (annotationProcessor != null) {

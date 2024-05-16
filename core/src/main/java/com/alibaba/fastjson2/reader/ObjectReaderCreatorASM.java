@@ -218,7 +218,7 @@ public class ObjectReaderCreatorASM
             return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         }
 
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = new BeanInfo(provider);
         provider.getBeanInfo(beanInfo, objectClass);
         if (externalClass || !Modifier.isPublic(objectClassModifiers)) {
             beanInfo.readerFeatures |= FieldInfo.JIT;
@@ -377,7 +377,7 @@ public class ObjectReaderCreatorASM
             }
 
             if (allFunction) {
-                BeanInfo beanInfo = new BeanInfo();
+                BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
                 return jitObjectReader(
                         objectClass,
                         objectClass,

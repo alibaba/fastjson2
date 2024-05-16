@@ -41,7 +41,7 @@ public class ObjectReaderGen {
         this.className = objectClass.getSimpleName() + "_ObjectReader";
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        beanInfo = new BeanInfo();
+        beanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
         for (ObjectReaderModule module : provider.getModules()) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
