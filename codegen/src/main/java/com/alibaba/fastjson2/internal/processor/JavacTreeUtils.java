@@ -295,12 +295,16 @@ final class JavacTreeUtils {
         return block(0L, stmt);
     }
 
-    static JCTree.JCBlock block(long pos, JCTree.JCStatement stmt) {
-        return block(pos, List.of(stmt));
+    static JCTree.JCBlock block(JCTree.JCStatement... stmts) {
+        return block(0L, List.from(stmts));
     }
 
     static JCTree.JCBlock block(List<JCTree.JCStatement> stmts) {
         return block(0L, stmts);
+    }
+
+    static JCTree.JCBlock block(long pos, JCTree.JCStatement stmt) {
+        return block(pos, List.of(stmt));
     }
 
     static JCTree.JCBlock block(long pos, List<JCTree.JCStatement> stmts) {
