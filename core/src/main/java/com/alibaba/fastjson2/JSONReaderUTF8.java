@@ -6804,6 +6804,10 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
+        if (longValue < 0) {
+            overflow = true;
+        }
+
         this.scale = 0;
         if (ch == '.') {
             valueType = JSON_TYPE_DEC;
