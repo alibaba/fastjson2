@@ -12,7 +12,7 @@ import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import com.alibaba.fastjson2.writer.ObjectWriters;
-import com.google.googlejavaformat.java.Formatter;
+import com.sun.source.util.TreePath;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
@@ -36,10 +36,12 @@ import javax.lang.model.type.ArrayType;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -147,9 +149,6 @@ public class JSONCompiledAnnotationProcessor
                         // link with inner class
                         beanClassDecl.defs = beanClassDecl.defs.append(innerReadClass);
 
-                        // generate source file
-//                        genSource(innerReadClassFQN, structInfo, innerReadClass);
-
                         // initialization
                         String innerWriteClassFQN = findConverterName(structInfo, "_FASTJSONWriter");
                         dotIdx = innerWriteClassFQN.lastIndexOf('.');
@@ -175,8 +174,12 @@ public class JSONCompiledAnnotationProcessor
                         // link with inner class
                         beanClassDecl.defs = beanClassDecl.defs.append(innerWriteClass);
 
-                        // generate source file
-//                        genSource(innerWriteClassFQN, structInfo, innerWriteClass);
+                        // generate source if debug is true
+                        if (isDebug(beanClassDecl)) {
+                            messager.printMessage(Diagnostic.Kind.WARNING, "Whoops! You have changed the debug of JSONCompiled from false to true for " + structInfo.binaryName +
+                                    ", which means the additional source file being generated. It's usually not recommended to enable debug until you are in developer mode");
+                            genSource(structInfo, javacTrees.getPath(element));
+                        }
                     }
                 }
             });
@@ -2708,26 +2711,54 @@ public class JSONCompiledAnnotationProcessor
         return ident(fieldValueVar.name);
     }
 
-    private void genSource(String fullQualifiedName, StructInfo structInfo, JCTree.JCClassDecl innerClass) {
+    private void genSource(StructInfo structInfo, TreePath treePath) {
+        String fullQualifiedName = structInfo.binaryName;
+        JavaFileObject converterFile = null;
         try {
-            JavaFileObject converterFile = processingEnv.getFiler().createSourceFile(fullQualifiedName, structInfo.element);
-            try (Writer writer = converterFile.openWriter()) {
-                int idx = fullQualifiedName.lastIndexOf(".");
-                if (idx != -1) {
-                    String pkgPath = fullQualifiedName.substring(0, idx);
-                    writer.write("package " + pkgPath + ";");
-                    writer.write(System.lineSeparator());
+            if (treePath.getCompilationUnit() instanceof JCTree.JCCompilationUnit) {
+                JCTree.JCCompilationUnit compilationUnit = (JCTree.JCCompilationUnit) treePath.getCompilationUnit();
+                converterFile = processingEnv.getFiler().createSourceFile(fullQualifiedName, structInfo.element);
+                String fileName = converterFile.getName() + ".txt";
+                Path filePath = Paths.get(fileName);
+                String dirName = fileName.substring(0, fileName.lastIndexOf(File.separator));
+                Path dirPath = Paths.get(dirName);
+                Files.createDirectories(dirPath);
+                Files.createFile(filePath);
+                try (Writer writer = new FileWriter(filePath.toString())) {
+                    writer.write(compilationUnit.toString());
+                } catch (Exception e) {
+                    messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for " + fullQualifiedName + " caused by " + e.getMessage());
                 }
-                String str = innerClass.toString().replaceFirst("public static final class ", "public final class ")
-                        .replaceAll("::<>", "::");
-                Formatter formatter = new Formatter();
-                writer.write(formatter.formatSource(str));
-            } catch (Exception e) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Failed saving compiled json serialization file " + fullQualifiedName + e.getMessage());
+            } else {
+                messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for " + fullQualifiedName + " caused by invalid compilation unit");
             }
-        } catch (IOException e) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Failed creating compiled json serialization file " + fullQualifiedName + e.getMessage());
+        } catch (Exception e) {
+            messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for " + fullQualifiedName + " caused by " + e.getMessage());
+        } finally {
+            if (converterFile != null) {
+                converterFile.delete();
+            }
         }
+    }
+
+    private boolean isDebug(JCTree.JCClassDecl beanClassDecl) {
+        JCTree.JCExpression jsonCompiledIdent = qualIdent("com.alibaba.fastjson2.annotation.JSONCompiled");
+        List<JCTree.JCAnnotation> annotations = beanClassDecl.mods.annotations;
+        Optional<JCTree.JCAnnotation> jsonCompiledAnnoOpt = annotations.stream()
+                .filter(a -> a.getAnnotationType().type.tsym.toString().equals(jsonCompiledIdent.type.tsym.toString()))
+                .findAny();
+        if (jsonCompiledAnnoOpt.isPresent()) {
+            JCTree.JCAnnotation jsonCompiledAnno = jsonCompiledAnnoOpt.get();
+            Optional<JCTree.JCAssign> jsonCompiledAsgOpt = jsonCompiledAnno.args.stream()
+                    .map(a -> (JCTree.JCAssign) a)
+                    .filter(a2 -> "debug".equals(a2.lhs.toString()))
+                    .findAny();
+            if (jsonCompiledAsgOpt.isPresent()) {
+                JCTree.JCAssign jcAssign = jsonCompiledAsgOpt.get();
+                return "true".equals(jcAssign.rhs.toString());
+            }
+        }
+        return false;
     }
 
     private JCTree.JCExpression getFieldValueType(String type) {
