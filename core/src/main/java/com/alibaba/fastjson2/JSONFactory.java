@@ -46,11 +46,11 @@ public final class JSONFactory {
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
     static boolean defaultWriterAlphabetic;
-    static boolean disableReferenceDetect;
-    static boolean disableArrayMapping;
-    static boolean disableJSONB;
-    static boolean disableAutoType;
-    static boolean disableSmartMatch;
+    static final boolean disableReferenceDetect;
+    static final boolean disableArrayMapping;
+    static final boolean disableJSONB;
+    static final boolean disableAutoType;
+    static final boolean disableSmartMatch;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
@@ -597,19 +597,23 @@ public final class JSONFactory {
     }
 
     public static void setDisableReferenceDetect(boolean disableReferenceDetect) {
-        JSONFactory.disableReferenceDetect = disableReferenceDetect;
+        defaultObjectWriterProvider.setDisableReferenceDetect(disableReferenceDetect);
+        defaultObjectReaderProvider.setDisableReferenceDetect(disableReferenceDetect);
     }
 
     public static void setDisableArrayMapping(boolean disableArrayMapping) {
-        JSONFactory.disableArrayMapping = disableArrayMapping;
+        defaultObjectWriterProvider.setDisableArrayMapping(disableArrayMapping);
+        defaultObjectReaderProvider.setDisableArrayMapping(disableArrayMapping);
     }
 
     public static void setDisableJSONB(boolean disableJSONB) {
-        JSONFactory.disableJSONB = disableJSONB;
+        defaultObjectWriterProvider.setDisableJSONB(disableJSONB);
+        defaultObjectReaderProvider.setDisableJSONB(disableJSONB);
     }
 
     public static void setDisableAutoType(boolean disableAutoType) {
-        JSONFactory.disableAutoType = disableAutoType;
+        defaultObjectWriterProvider.setDisableAutoType(disableAutoType);
+        defaultObjectReaderProvider.setDisableAutoType(disableAutoType);
     }
 
     public static boolean isDisableSmartMatch() {
@@ -617,6 +621,6 @@ public final class JSONFactory {
     }
 
     public static void setDisableSmartMatch(boolean disableSmartMatch) {
-        JSONFactory.disableSmartMatch = disableSmartMatch;
+        defaultObjectReaderProvider.setDisableSmartMatch(disableSmartMatch);
     }
 }

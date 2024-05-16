@@ -158,6 +158,12 @@ public class ObjectReaderProvider
     final ObjectReaderCreator creator;
     final List<ObjectReaderModule> modules = new ArrayList<>();
 
+    boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
+    boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
+    boolean disableJSONB = JSONFactory.isDisableJSONB();
+    boolean disableAutoType = JSONFactory.isDisableAutoType();
+    boolean disableSmartMatch = JSONFactory.isDisableSmartMatch();
+
     private long[] acceptHashCodes;
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
@@ -981,5 +987,45 @@ public class ObjectReaderProvider
                 supplier,
                 fieldReaders
         );
+    }
+
+    public boolean isDisableReferenceDetect() {
+        return disableReferenceDetect;
+    }
+
+    public boolean isDisableAutoType() {
+        return disableAutoType;
+    }
+
+    public boolean isDisableJSONB() {
+        return disableJSONB;
+    }
+
+    public boolean isDisableArrayMapping() {
+        return disableArrayMapping;
+    }
+
+    public void setDisableReferenceDetect(boolean disableReferenceDetect) {
+        this.disableReferenceDetect = disableReferenceDetect;
+    }
+
+    public void setDisableArrayMapping(boolean disableArrayMapping) {
+        this.disableArrayMapping = disableArrayMapping;
+    }
+
+    public void setDisableJSONB(boolean disableJSONB) {
+        this.disableJSONB = disableJSONB;
+    }
+
+    public void setDisableAutoType(boolean disableAutoType) {
+        this.disableAutoType = disableAutoType;
+    }
+
+    public boolean isDisableSmartMatch() {
+        return disableSmartMatch;
+    }
+
+    public void setDisableSmartMatch(boolean disableSmartMatch) {
+        this.disableSmartMatch = disableSmartMatch;
     }
 }

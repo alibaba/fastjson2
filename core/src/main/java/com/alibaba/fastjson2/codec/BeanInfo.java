@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -68,6 +70,40 @@ public class BeanInfo {
         if (JSONFactory.isDisableSmartMatch()) {
             readerFeatures |= FieldInfo.DISABLE_SMART_MATCH;
         }
+    }
+
+    public BeanInfo(ObjectReaderProvider provider) {
+        if (provider.isDisableAutoType()) {
+            readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
+        }
+        if (provider.isDisableReferenceDetect()) {
+            readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
+        }
+        if (provider.isDisableJSONB()) {
+            readerFeatures |= FieldInfo.DISABLE_JSONB;
+        }
+        if (provider.isDisableArrayMapping()) {
+            readerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
+        }
+        if (provider.isDisableSmartMatch()) {
+            readerFeatures |= FieldInfo.DISABLE_SMART_MATCH;
+        }
+    }
+
+    public BeanInfo(ObjectWriterProvider provider) {
+        if (provider.isDisableAutoType()) {
+            readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
+        }
+        if (provider.isDisableReferenceDetect()) {
+            readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
+        }
+        if (provider.isDisableJSONB()) {
+            readerFeatures |= FieldInfo.DISABLE_JSONB;
+        }
+        if (provider.isDisableArrayMapping()) {
+            readerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
+        }
+        alphabetic = provider.isAlphabetic();
     }
 
     public void required(String fieldName) {

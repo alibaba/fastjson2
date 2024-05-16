@@ -694,7 +694,7 @@ public abstract class BeanUtils {
             Class<? extends Annotation> annotationType = annotation.annotationType();
             String name = annotationType.getName();
             if ("com.alibaba.fastjson.annotation.JSONType".equals(name)) {
-                BeanInfo beanInfo = new BeanInfo();
+                BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectWriterProvider());
                 BeanUtils.annotationMethods(annotationType, method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
                 if (beanInfo.writeEnumAsJavaBean) {
                     return true;
