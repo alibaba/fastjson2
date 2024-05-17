@@ -2115,6 +2115,14 @@ public abstract class JSONReader
                 continue;
             }
 
+            if (i == 0
+                    && (contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
+                continue;
+            }
+
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -2352,9 +2360,7 @@ public abstract class JSONReader
 
         List list = new ArrayList();
         if (ch == '[') {
-            if (!nextIfArrayStart()) {
-                throw new JSONException(info("syntax error : " + ch));
-            }
+            next();
 
             boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
             ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
