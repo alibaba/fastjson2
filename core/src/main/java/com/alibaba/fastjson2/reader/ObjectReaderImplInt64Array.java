@@ -84,6 +84,12 @@ public final class ObjectReaderImplInt64Array
             throw new JSONException(jsonReader.info("not support input " + str));
         }
 
+        if (jsonReader.isNumber()) {
+            return new Long[]{
+                    jsonReader.readInt64()
+            };
+        }
+
         throw new JSONException(jsonReader.info("TODO"));
     }
 
