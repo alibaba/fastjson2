@@ -84,6 +84,12 @@ public final class ObjectReaderImplInt32Array
             throw new JSONException(jsonReader.info("not support input " + str));
         }
 
+        if (jsonReader.isNumber()) {
+            return new Integer[]{
+                    jsonReader.readInt32()
+            };
+        }
+
         throw new JSONException(jsonReader.info("TODO"));
     }
 
