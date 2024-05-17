@@ -374,9 +374,22 @@ class ObjectReaderImplMapTyped
                     } else {
                         name = jsonReader.read(keyType);
                     }
+                    if (name == null && Enum.class.isAssignableFrom((Class) keyType)) {
+                        name = jsonReader.getString();
+                        jsonReader.nextIfMatch(':');
+                    }
                     if (index == 0
                             && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                             && name.equals(getTypeKey())) {
+                        long typeHashCode = jsonReader.readTypeHashCode();
+                        ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
+                        if (objectReaderAutoType != null) {
+                            if (objectReaderAutoType instanceof ObjectReaderImplMap) {
+                                if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
+                                    object = (Map) objectReaderAutoType.createInstance(features);
+                                }
+                            }
+                        }
                         continue;
                     }
                     jsonReader.nextIfMatch(':');
