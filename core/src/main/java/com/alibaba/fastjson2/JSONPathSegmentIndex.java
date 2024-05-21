@@ -70,7 +70,7 @@ final class JSONPathSegmentIndex
             return;
         }
 
-        if ((object instanceof SortedSet || object instanceof LinkedHashSet)
+        if ((object instanceof SortedSet || object instanceof LinkedHashSet || object instanceof Queue)
                 || (index == 0 && object instanceof Collection && ((Collection<?>) object).size() == 1)
         ) {
             Collection collection = (Collection) object;
