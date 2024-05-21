@@ -5527,26 +5527,30 @@ class JSONReaderUTF8
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            if (!intOverflow) {
-                switch (ch) {
-                    case 'B':
+            switch (ch) {
+                case 'B':
+                    if (!intOverflow) {
                         valueType = JSON_TYPE_INT8;
-                        break;
-                    case 'S':
+                    }
+                    break;
+                case 'S':
+                    if (!intOverflow) {
                         valueType = JSON_TYPE_INT16;
-                        break;
-                    case 'L':
+                    }
+                    break;
+                case 'L':
+                    if (offset - start < 19) {
                         valueType = JSON_TYPE_INT64;
-                        break;
-                    case 'F':
-                        valueType = JSON_TYPE_FLOAT;
-                        break;
-                    case 'D':
-                        valueType = JSON_TYPE_DOUBLE;
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
             }
             ch = offset == end ? EOI : bytes[offset++];
         }

@@ -841,8 +841,17 @@ public abstract class JSONReader
             }
             case JSON_TYPE_INT64:
             case JSON_TYPE_FLOAT:
-            case JSON_TYPE_DOUBLE:
-                return getNumber().intValue();
+            case JSON_TYPE_DOUBLE: {
+                Number num = getNumber();
+                long int64 = num.longValue();
+                if ((int64 < Integer.MIN_VALUE || int64 > Integer.MAX_VALUE)
+                        && (context.features & Feature.NonErrorOnNumberOverflow.mask) == 0
+                ) {
+                    throw new JSONException(info("integer overflow " + int64));
+                }
+                return (int) int64;
+                //if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
+            }
             case JSON_TYPE_BIG_DEC:
                 try {
                     return getBigDecimal()
