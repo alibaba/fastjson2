@@ -51,6 +51,7 @@ public abstract class JSONWriter
     protected String lastReference;
     protected boolean pretty;
     protected int indent;
+    protected Object attachment;
 
     protected JSONWriter(
             Context context,
@@ -249,6 +250,22 @@ public abstract class JSONWriter
 
     public final boolean containsReference(Object value) {
         return refs != null && refs.containsKey(value);
+    }
+
+    public final String getPath(Object value) {
+        Path path;
+        return refs == null || (path = refs.get(value)) == null
+                ? "$"
+                : path.toString();
+    }
+
+    /**
+     * If ReferenceDetection has been set, returns the path of the current object, otherwise returns null
+     * @since 2.0.51
+     * @return the path of the current object
+     */
+    public String getPath() {
+        return path == null ? null : path.toString();
     }
 
     public final boolean removeReference(Object value) {
@@ -2504,5 +2521,13 @@ public abstract class JSONWriter
         if (path != null) {
             writeReference(path.toString());
         }
+    }
+
+    public Object getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Object attachment) {
+        this.attachment = attachment;
     }
 }
