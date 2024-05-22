@@ -1713,6 +1713,13 @@ public abstract class JSONWriter
             return features;
         }
 
+        /**
+         * @since 2.0.51
+         */
+        public void setFeatures(long features) {
+            this.features = features;
+        }
+
         public boolean isEnabled(Feature feature) {
             return (this.features & feature.mask) != 0;
         }

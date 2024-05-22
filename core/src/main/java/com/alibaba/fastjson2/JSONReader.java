@@ -4328,6 +4328,13 @@ public abstract class JSONReader
             return features;
         }
 
+        /**
+         * @since 2.0.51
+         */
+        public void setFeatures(long features) {
+            this.features = features;
+        }
+
         public void setZoneId(ZoneId zoneId) {
             this.zoneId = zoneId;
         }
