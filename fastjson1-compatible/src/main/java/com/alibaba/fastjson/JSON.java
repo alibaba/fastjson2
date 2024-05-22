@@ -97,7 +97,7 @@ public abstract class JSON
         return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), featuresValue, features);
     }
 
-    static JSONReader.Context createReadContext(ObjectReaderProvider provider, int featuresValue, Feature... features) {
+    public static JSONReader.Context createReadContext(ObjectReaderProvider provider, int featuresValue, Feature... features) {
         for (Feature feature : features) {
             featuresValue |= feature.mask;
         }
@@ -846,6 +846,32 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
+        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> T parseObject(byte[] jsonBytes, Type type, JSONReader.Context context) {
+        if (jsonBytes == null) {
+            return null;
+        }
+
         JSONReader jsonReader = JSONReader.of(jsonBytes, context);
 
         try {
@@ -2059,6 +2085,40 @@ public abstract class JSON
             SerializerFeature... features
     ) throws IOException {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
+        try (JSONWriter jsonWriter = JSONWriter.ofUTF8(context)) {
+            for (SerializeFilter filter : filters) {
+                configFilter(context, filter);
+            }
+
+            if (object == null) {
+                jsonWriter.writeNull();
+            } else {
+                jsonWriter.setRootObject(object);
+                ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
+                objectWriter.write(jsonWriter, object, null, null, 0);
+            }
+            byte[] bytes = jsonWriter.getBytes();
+            os.write(bytes);
+            return bytes.length;
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("writeJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("writeJSONString error", ex);
+        }
+    }
+
+    public static final int writeJSONString(
+            OutputStream os,
+            Object object,
+            String dateFormat,
+            SerializeFilter[] filters,
+            SerializerFeature... features
+    ) throws IOException {
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
+        if (dateFormat != null) {
+            context.setDateFormat(dateFormat);
+        }
         try (JSONWriter jsonWriter = JSONWriter.ofUTF8(context)) {
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
