@@ -15,6 +15,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 public class ObjectReaderImplDate
         extends DateTimeCodec
@@ -184,5 +185,9 @@ public class ObjectReaderImplDate
         }
 
         return new Date(millis);
+    }
+
+    public Date createInstance(Map map, long features) {
+        return TypeUtils.toDate(map);
     }
 }
