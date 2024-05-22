@@ -28,6 +28,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
+import static com.alibaba.fastjson2.util.TypeUtils.toDate;
 
 public abstract class JSONReader
         implements Closeable {
@@ -1390,6 +1391,13 @@ public abstract class JSONReader
             millis = readInt64Value();
             nextIfObjectEnd();
             setTypeRedirect(false);
+        } else if (isObject()) {
+            JSONObject object = readJSONObject();
+            Object date = object.get("$date");
+            if (date instanceof String) {
+                return DateUtils.parseDate((String) date, context.getZoneId());
+            }
+            return toDate(object);
         } else {
             millis = readMillisFromString();
         }

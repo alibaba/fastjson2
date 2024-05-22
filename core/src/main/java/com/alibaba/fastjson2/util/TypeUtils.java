@@ -1291,6 +1291,13 @@ public class TypeUtils {
             return new Date(((Number) obj).longValue());
         }
 
+        if (obj instanceof Map) {
+            Object date = ((Map) obj).get("$date");
+            if (date instanceof String) {
+                return DateUtils.parseDate((String) date);
+            }
+        }
+
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
