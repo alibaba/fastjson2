@@ -34,6 +34,20 @@ public class JSONSerializer {
         this.raw = out.raw;
     }
 
+    public static JSONSerializer getJSONSerializer(JSONWriter writer) {
+        JSONSerializer serializer = null;
+        Object attachment = writer.getAttachment();
+        if (attachment == null) {
+            attachment = serializer = new JSONSerializer(writer);
+            writer.setAttachment(attachment);
+        } else if (attachment instanceof JSONSerializer) {
+            serializer = (JSONSerializer) attachment;
+        } else {
+            serializer = new JSONSerializer(writer);
+        }
+        return serializer;
+    }
+
     public void config(SerializerFeature feature, boolean state) {
         if (!state) {
             throw new JSONException("not support");
