@@ -8,6 +8,8 @@ import com.alibaba.fastjson2.function.ToShortFunction;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -178,6 +180,18 @@ public class ObjectWriters {
 
     public static <T, V> FieldWriter fieldWriter(String fieldName, Class<V> fieldClass, Function<T, V> function) {
         return INSTANCE.createFieldWriter(fieldName, fieldClass, function);
+    }
+
+    public static <T, V> FieldWriter fieldWriter(String fieldName, Field field) {
+        return INSTANCE.createFieldWriter(fieldName, null, field);
+    }
+
+    public static <T, V> FieldWriter fieldWriter(String fieldName, Method method) {
+        return INSTANCE.createFieldWriter(method.getDeclaringClass(), fieldName, null, method);
+    }
+
+    public static <T, V> FieldWriter fieldWriter(Class objectClass, String fieldName, Method method) {
+        return INSTANCE.createFieldWriter(objectClass, fieldName, null, method);
     }
 
     public static <T, V> FieldWriter fieldWriter(String fieldName,

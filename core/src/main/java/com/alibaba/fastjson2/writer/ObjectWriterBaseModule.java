@@ -1059,6 +1059,19 @@ public class ObjectWriterBaseModule
                 return new ObjectWriterImplInt8ValueArray(
                         o -> ((ByteBuffer) o).array()
                 );
+            case "java.awt.Color":
+                try {
+                    List<FieldWriter> fieldWriters = Arrays.asList(
+                            ObjectWriters.fieldWriter("r", objectClass.getMethod("getRed")),
+                            ObjectWriters.fieldWriter("g", objectClass.getMethod("getGreen")),
+                            ObjectWriters.fieldWriter("b", objectClass.getMethod("getBlue")),
+                            ObjectWriters.fieldWriter("alpha", objectClass.getMethod("getAlpha"))
+                    );
+                    return new ObjectWriter4(objectClass, null, null, 0, fieldWriters);
+                } catch (NoSuchMethodException e) {
+                    // ignored
+                }
+
             default:
                 break;
         }

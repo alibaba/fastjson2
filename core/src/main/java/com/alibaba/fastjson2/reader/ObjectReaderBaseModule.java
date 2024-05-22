@@ -2224,6 +2224,13 @@ public class ObjectReaderBaseModule
             case "gnu.trove.set.hash.TLongHashSet":
             case "org.bson.types.Decimal128":
                 return LambdaMiscCodec.getObjectReader((Class) type);
+            case "java.awt.Color":
+                try {
+                    Constructor constructor = ((Class) type).getConstructor(int.class, int.class, int.class, int.class);
+                    return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstructor(constructor, "r", "g", "b", "alpha");
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             default:
                 break;
         }
