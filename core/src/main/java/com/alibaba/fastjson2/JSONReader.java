@@ -2769,22 +2769,39 @@ public abstract class JSONReader
             case JSON_TYPE_INT:
             case JSON_TYPE_INT64: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    int intVlaue;
+                    int intValue;
                     if (negative) {
                         if (mag3 < 0) {
-                            return -(mag3 & 0xFFFFFFFFL);
+                            long longValue = -(mag3 & 0xFFFFFFFFL);
+                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                                return BigInteger.valueOf(longValue);
+                            }
+                            return longValue;
                         }
-                        intVlaue = -mag3;
+                        intValue = -mag3;
                     } else {
                         if (mag3 < 0) {
-                            return mag3 & 0xFFFFFFFFL;
+                            long longValue = mag3 & 0xFFFFFFFFL;
+                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                                return BigInteger.valueOf(longValue);
+                            }
+                            return longValue;
                         }
-                        intVlaue = mag3;
+                        intValue = mag3;
                     }
+
+                    if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                        return BigInteger.valueOf(intValue);
+                    }
+
+                    if ((context.features & Feature.UseLongForInts.mask) != 0) {
+                        return Long.valueOf(intValue);
+                    }
+
                     if (valueType == JSON_TYPE_INT64) {
-                        return (long) intVlaue;
+                        return (long) intValue;
                     }
-                    return intVlaue;
+                    return intValue;
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -2794,7 +2811,11 @@ public abstract class JSONReader
 
                         if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
-                            return negative ? -v23 : v23;
+                            long longValue = negative ? -v23 : v23;
+                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                                return BigInteger.valueOf(longValue);
+                            }
+                            return longValue;
                         }
                         mag = new int[]{mag2, mag3};
                     } else {
@@ -2805,7 +2826,11 @@ public abstract class JSONReader
                 }
 
                 int signum = negative ? -1 : 1;
-                return BIG_INTEGER_CREATOR.apply(signum, mag);
+                BigInteger integer = BIG_INTEGER_CREATOR.apply(signum, mag);
+                if ((context.features & Feature.UseLongForInts.mask) != 0) {
+                    return integer.longValue();
+                }
+                return integer;
             }
             case JSON_TYPE_INT16: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
@@ -4522,7 +4547,47 @@ public abstract class JSONReader
         /**
          * @since 2.0.48
          */
-        NonErrorOnNumberOverflow(1 << 28);
+        NonErrorOnNumberOverflow(1 << 28),
+
+        /**
+         * Feature that determines whether JSON integral (non-floating-point)
+         * numbers are to be deserialized into {@link java.math.BigInteger}s
+         * if only generic type description (either {@link Object} or
+         * {@link Number}, or within untyped {@link java.util.Map}
+         * or {@link java.util.Collection} context) is available.
+         * If enabled such values will be deserialized as
+         * {@link java.math.BigInteger}s;
+         * if disabled, will be deserialized as "smallest" available type,
+         * which is either {@link Integer}, {@link Long} or
+         * {@link java.math.BigInteger}, depending on number of digits.
+         * <p>
+         * Feature is disabled by default, meaning that "untyped" integral
+         * numbers will by default be deserialized using whatever
+         * is the most compact integral type, to optimize efficiency.
+         * @since 2.0.51
+         */
+        UseBigIntegerForInts(1 << 29),
+
+        /**
+         * Feature that determines how "small" JSON integral (non-floating-point)
+         * numbers -- ones that fit in 32-bit signed integer (`int`) -- are bound
+         * when target type is loosely typed as {@link Object} or {@link Number}
+         * (or within untyped {@link java.util.Map} or {@link java.util.Collection} context).
+         * If enabled, such values will be deserialized as {@link java.lang.Long};
+         * if disabled, they will be deserialized as "smallest" available type,
+         * {@link Integer}.
+         *<p>
+         * Note: if {@link #UseBigIntegerForInts} is enabled, it has precedence
+         * over this setting, forcing use of {@link java.math.BigInteger} for all
+         * integral values.
+         *<p>
+         * Feature is disabled by default, meaning that "untyped" integral
+         * numbers will by default be deserialized using {@link java.lang.Integer}
+         * if value fits.
+         *
+         * @since 2.0.51
+         */
+        UseLongForInts(1 << 30);
 
         public final long mask;
 
