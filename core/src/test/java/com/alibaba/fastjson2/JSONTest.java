@@ -236,6 +236,15 @@ public class JSONTest {
     }
 
     @Test
+    public void test_toJSONBytes_2() {
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JSON.writeTo(out, null, context);
+        assertEquals("null", new String(out.toByteArray()));
+    }
+
+    @Test
     public void test_object_empty() {
         Map object = (Map) JSON.parse("{}");
         assertTrue(object.isEmpty());
@@ -1029,6 +1038,20 @@ public class JSONTest {
                     JSON.writeTo(out, JSONObject.of("id", 123)));
             assertThrows(JSONException.class, () ->
                     JSON.writeTo(out, JSONObject.of("id", 123), JSONWriter.Feature.PrettyFormat));
+        }
+        {
+            JSONWriter.Context context = JSONFactory.createWriteContext();
+            ByteArrayOutputStream out = new ByteArrayOutputStream() {
+                public void write(byte[] b, int off, int len) {
+                    throw new UnsupportedOperationException();
+                }
+            };
+            assertThrows(JSONException.class, () ->
+                    JSON.writeTo(out, JSONObject.of("id", 123)));
+            assertThrows(JSONException.class, () ->
+                    JSON.writeTo(out, JSONObject.of("id", 123), JSONWriter.Feature.PrettyFormat));
+            assertThrows(JSONException.class, () ->
+                    JSON.writeTo(out, JSONObject.of("id", 123), context));
         }
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();

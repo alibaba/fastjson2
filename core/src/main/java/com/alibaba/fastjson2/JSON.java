@@ -3463,6 +3463,35 @@ public interface JSON {
      *
      * @param out the specified output stream to be written
      * @param object the specified object will be serialized
+     * @param context the specified custom context
+     * @return the length of byte stream
+     * @throws JSONException If an I/O error or serialization error occurs
+     * @since 2.0.51
+     */
+    static int writeTo(OutputStream out, Object object, JSONWriter.Context context) {
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.flushTo(out);
+        } catch (Exception e) {
+            throw new JSONException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
+     *
+     * @param out the specified output stream to be written
+     * @param object the specified object will be serialized
      * @param features the specified features is applied to serialization
      * @return the length of byte stream
      * @throws JSONException If an I/O error or serialization error occurs
