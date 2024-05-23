@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.internal.processor;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.internal.codegen.Label;
+import com.alibaba.fastjson2.internal.graalmeta.ReflectionMetadata;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
@@ -43,6 +45,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.*;
@@ -86,6 +89,7 @@ public class JSONCompiledAnnotationProcessor
 
         Map<String, StructInfo> structs = analysis.analyze();
         Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(JSONCompiled.class);
+        Set<ReflectionMetadata> reflects = new HashSet<>(elementsAnnotatedWith.size() * 2);
         elementsAnnotatedWith.forEach(element -> {
             StructInfo structInfo = structs.get(element.toString());
             java.util.List<AttributeInfo> attributeInfos = structInfo.getReaderAttributes();
@@ -180,10 +184,25 @@ public class JSONCompiledAnnotationProcessor
                                     ", which means the additional source file being generated. It's usually not recommended to enable debug until you are in developer mode");
                             genSource(structInfo, javacTrees.getPath(element));
                         }
+
+                        // generate reflect-config.json only for graal
+                        if (GRAAL) {
+                            ReflectionMetadata readMeta = new ReflectionMetadata();
+                            readMeta.setName(innerReadClassFQN);
+                            readMeta.setAllPublicConstructors(true);
+                            reflects.add(readMeta);
+                            ReflectionMetadata writeMeta = new ReflectionMetadata();
+                            writeMeta.setName(innerWriteClassFQN);
+                            writeMeta.setAllPublicConstructors(true);
+                            reflects.add(writeMeta);
+                        }
                     }
                 }
             });
         });
+        if (!reflects.isEmpty()) {
+            genReflect(reflects);
+        }
         return true;
     }
 
@@ -2717,8 +2736,12 @@ public class JSONCompiledAnnotationProcessor
                 Path filePath = Paths.get(fileName);
                 String dirName = fileName.substring(0, fileName.lastIndexOf(File.separator));
                 Path dirPath = Paths.get(dirName);
-                Files.createDirectories(dirPath);
-                Files.createFile(filePath);
+                if (!Files.exists(dirPath)) {
+                    Files.createDirectories(dirPath);
+                }
+                if (!Files.exists(filePath)) {
+                    Files.createFile(filePath);
+                }
                 try (Writer writer = new FileWriter(filePath.toString())) {
                     writer.write(compilationUnit.toString());
                 } catch (Exception e) {
@@ -2732,6 +2755,40 @@ public class JSONCompiledAnnotationProcessor
         } finally {
             if (converterFile != null) {
                 converterFile.delete();
+            }
+        }
+    }
+
+    private void genReflect(Set<ReflectionMetadata> reflects) {
+        File file = null;
+        try {
+            file = new File("");
+            String absolutePath = file.getAbsolutePath() + File.separator + Arrays.stream("src/main/resources/META-INF/native-image/reflect-config.json".split("/")).sequential().collect(Collectors.joining(File.separator));
+            int idx = absolutePath.lastIndexOf(File.separator);
+            Path dirPath = Paths.get(absolutePath.substring(0, idx));
+            Path filePath = Paths.get(absolutePath);
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath);
+            }
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+            }
+            try (BufferedReader reader = Files.newBufferedReader(filePath)) {
+                String content = reader.lines().collect(Collectors.joining());
+                java.util.List<ReflectionMetadata> reflectionMetadata = JSON.parseArray(content, ReflectionMetadata.class);
+                if (reflectionMetadata != null) {
+                    reflects.addAll(reflectionMetadata);
+                }
+                String jsonString = JSON.toJSONString(reflects, PrettyFormat);
+                try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
+                    writer.write(jsonString);
+                }
+            }
+        } catch (Exception e) {
+            messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate reflect-config.json caused by " + e.getMessage());
+        } finally {
+            if (file != null && file.exists()) {
+                file.delete();
             }
         }
     }
