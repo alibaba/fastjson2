@@ -1224,4 +1224,22 @@ public class JSONTest {
             assertEquals("null", new String(bytes, StandardCharsets.ISO_8859_1));
         }
     }
+
+    @Test
+    public void paseByte() {
+        String str = "{}";
+        byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
+        JSONObject parse = (JSONObject) JSON.parse(utf8, JSONFactory.createReadContext());
+        assertTrue(parse.isEmpty());
+
+        JSONObject parse1 = (JSONObject) JSON.parse(utf8, 0, utf8.length, StandardCharsets.UTF_8, JSONFactory.createReadContext());
+        assertTrue(parse1.isEmpty());
+    }
+
+    @Test
+    public void paseChars() {
+        String str = "{}";
+        JSONObject parse = (JSONObject) JSON.parse(str.toCharArray(), JSONFactory.createReadContext());
+        assertTrue(parse.isEmpty());
+    }
 }
