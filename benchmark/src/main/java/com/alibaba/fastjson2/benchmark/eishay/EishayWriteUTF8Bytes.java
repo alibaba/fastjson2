@@ -2,7 +2,9 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
@@ -22,8 +24,16 @@ public class EishayWriteUTF8Bytes {
     static MediaContent mc;
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
-
+    static final ObjectWriterProvider featuresProvider;
+    static final JSONWriter.Context featuresContext;
     static {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.setDisableReferenceDetect(true);
+        provider.setDisableJSONB(true);
+        provider.setDisableArrayMapping(true);
+        provider.setDisableAutoType(true);
+        featuresProvider = provider;
+        featuresContext = new JSONWriter.Context(provider);
         try {
             InputStream is = EishayWriteUTF8Bytes.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
@@ -42,6 +52,10 @@ public class EishayWriteUTF8Bytes {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(mc));
+    }
+
+    public void fastjson2_features(Blackhole bh) {
+        bh.consume(JSON.toJSONBytes(mc, StandardCharsets.UTF_8, featuresContext));
     }
 
     @Benchmark
