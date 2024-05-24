@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.internal.processor;
 
+import com.alibaba.fastjson2.JSONWriter;
 import com.sun.source.tree.MemberReferenceTree;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
@@ -96,6 +97,10 @@ final class JavacTreeUtils {
 
     static JCTree.JCIdent ident(Name name) {
         return treeMaker.Ident(name);
+    }
+
+    static JCTree.JCIdent ident(JCTree.JCVariableDecl var) {
+        return treeMaker.Ident(var.name);
     }
 
     static JCTree.JCExpression qualIdent(String name) {
@@ -224,6 +229,18 @@ final class JavacTreeUtils {
         return treeMaker.VarDef(modifiers(flag), name(identName), identType, init);
     }
 
+    static JCTree.JCVariableDecl defVar(long flag, String identName, long init) {
+        return treeMaker.VarDef(modifiers(flag), name(identName), type(TypeTag.LONG), literal(init));
+    }
+
+    static JCTree.JCVariableDecl defVar(long flag, String identName, int init) {
+        return treeMaker.VarDef(modifiers(flag), name(identName), type(TypeTag.INT), literal(init));
+    }
+
+    static JCTree.JCVariableDecl defVar(long flag, String identName, boolean init) {
+        return treeMaker.VarDef(modifiers(flag), name(identName), type(TypeTag.BOOLEAN), literal(init));
+    }
+
     static JCTree.JCMethodDecl defMethod(long flag, String name, JCTree.JCExpression rtnType, List<JCTree.JCTypeParameter> typeArgs, List<JCTree.JCVariableDecl> params, List<JCTree.JCExpression> recvArgs, JCTree.JCBlock block, JCTree.JCExpression defaultValue) {
         return defMethod(flag, name(name), rtnType, typeArgs, params, recvArgs, block, defaultValue);
     }
@@ -249,6 +266,104 @@ final class JavacTreeUtils {
         return method(null, method, args);
     }
 
+    static JCTree.JCMethodInvocation method(Name owner, String methodName, List<JCTree.JCExpression> args) {
+        return method(null, field(ident(owner), methodName), args);
+    }
+
+    static JCTree.JCMethodInvocation method(
+            Name owner, String methodName
+    ) {
+        return method(null, field(ident(owner), methodName), null);
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner, String methodName
+    ) {
+        return method(null, field(owner, methodName), null);
+    }
+
+    static JCTree.JCMethodInvocation method(
+            Name owner,
+            String methodName,
+            JCTree.JCExpression arg0
+    ) {
+        return method(null, field(ident(owner), methodName), List.of(arg0));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            JCTree.JCExpression arg0
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            JCTree.JCVariableDecl arg0
+    ) {
+        return method(null, field(owner, methodName), List.of(ident(arg0)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            Name owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1
+    ) {
+        return method(null, field(ident(owner), methodName), List.of(arg0, arg1));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, arg1));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCVariableDecl arg1
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, ident(arg1)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1,
+            JCTree.JCExpression arg2
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, arg1, arg2));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            Name owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1,
+            JCTree.JCExpression arg2
+    ) {
+        return method(null, field(ident(owner), methodName), List.of(arg0, arg1, arg2));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            Name owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1,
+            JCTree.JCExpression arg2,
+            JCTree.JCExpression... args
+    ) {
+        return method(null, field(ident(owner), methodName), List.of(arg0, arg1, arg2, args));
+    }
+
     static JCTree.JCMethodInvocation method(List<JCTree.JCExpression> typeArgs, JCTree.JCExpression method, List<JCTree.JCExpression> args) {
         if (typeArgs == null) {
             typeArgs = List.nil();
@@ -259,8 +374,16 @@ final class JavacTreeUtils {
         return treeMaker.Apply(typeArgs, method, args);
     }
 
+    static JCTree.JCFieldAccess field(JCTree.JCVariableDecl expr, String name) {
+        return treeMaker.Select(ident(expr), name(name));
+    }
+
     static JCTree.JCFieldAccess field(JCTree.JCExpression expr, String name) {
         return treeMaker.Select(expr, name(name));
+    }
+
+    static JCTree.JCFieldAccess field(Name expr, String name) {
+        return treeMaker.Select(ident(expr), name(name));
     }
 
     static JCTree.JCFieldAccess field(JCTree.JCExpression expr, Name name) {
@@ -275,6 +398,14 @@ final class JavacTreeUtils {
         return treeMaker.Exec(expr);
     }
 
+    static JCTree.JCAssign assign(JCTree.JCVariableDecl expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Assign(ident(expr1), expr2);
+    }
+
+    static JCTree.JCAssign assign(Name expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Assign(ident(expr1), expr2);
+    }
+
     static JCTree.JCAssign assign(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
         return treeMaker.Assign(expr1, expr2);
     }
@@ -283,8 +414,108 @@ final class JavacTreeUtils {
         return treeMaker.If(cond, thenStmt, elseStmt);
     }
 
+    static JCTree.JCIf defIf(JCTree.JCExpression cond, JCTree.JCStatement thenStmt) {
+        return treeMaker.If(cond, thenStmt, null);
+    }
+
+    static JCTree.JCIf defIfReturn(JCTree.JCExpression cond, JCTree.JCStatement thenStmt) {
+        return treeMaker.If(cond, block(thenStmt, defReturn()), null);
+    }
+
     static JCTree.JCBinary binary(JCTree.Tag tag, JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
         return treeMaker.Binary(tag, expr1, expr2);
+    }
+
+    static JCTree.JCBinary or(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.OR, expr1, expr2);
+    }
+
+    static JCTree.JCBinary lt(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.LT, expr1, expr2);
+    }
+
+    static JCTree.JCBinary lt(JCTree.JCExpression expr1, int expr2) {
+        return treeMaker.Binary(JCTree.Tag.LT, expr1, literal(expr2));
+    }
+
+    static JCTree.JCBinary lt(JCTree.JCVariableDecl expr1, int expr2) {
+        return treeMaker.Binary(JCTree.Tag.LT, ident(expr1), literal(expr2));
+    }
+
+    static JCTree.JCBinary eq(JCTree.JCVariableDecl expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.EQ, ident(expr1), expr2);
+    }
+
+    static JCTree.JCBinary eq(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.EQ, expr1, expr2);
+    }
+
+    static JCTree.JCBinary eq(JCTree.JCExpression expr1, JCTree.JCVariableDecl expr2) {
+        return treeMaker.Binary(JCTree.Tag.EQ, expr1, ident(expr2));
+    }
+
+    static JCTree.JCBinary eq(JCTree.JCExpression expr1, int expr2) {
+        return treeMaker.Binary(JCTree.Tag.EQ, expr1, literal(expr2));
+    }
+
+    static JCTree.JCBinary eq(JCTree.JCExpression expr1, long expr2) {
+        return treeMaker.Binary(JCTree.Tag.EQ, expr1, literal(expr2));
+    }
+
+    static JCTree.JCBinary eq(JCTree.JCVariableDecl expr1, int expr2) {
+        return treeMaker.Binary(JCTree.Tag.EQ, ident(expr1), literal(expr2));
+    }
+
+    static JCTree.JCBinary ne(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.NE, expr1, expr2);
+    }
+
+    static JCTree.JCBinary ne(JCTree.JCVariableDecl expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.NE, ident(expr1), expr2);
+    }
+
+    static JCTree.JCBinary ne(JCTree.JCVariableDecl expr1, int expr2) {
+        return treeMaker.Binary(JCTree.Tag.NE, ident(expr1), literal(expr2));
+    }
+
+    static JCTree.JCBinary ne(JCTree.JCVariableDecl expr1, long expr2) {
+        return treeMaker.Binary(JCTree.Tag.NE, ident(expr1), literal(expr2));
+    }
+
+    static JCTree.JCBinary ne(Name expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.NE, ident(expr1), expr2);
+    }
+
+    static JCTree.JCBinary ne(JCTree.JCExpression expr1, int value) {
+        return treeMaker.Binary(JCTree.Tag.NE, expr1, literal(value));
+    }
+
+    static JCTree.JCBinary ne(JCTree.JCExpression expr1, long value) {
+        return treeMaker.Binary(JCTree.Tag.NE, expr1, literal(value));
+    }
+
+    static JCTree.JCBinary and(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.AND, expr1, expr2);
+    }
+
+    static JCTree.JCBinary bitXor(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.BITXOR, expr1, expr2);
+    }
+
+    static JCTree.JCBinary bitAnd(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.BITAND, expr1, expr2);
+    }
+
+    static JCTree.JCBinary bitAnd(JCTree.JCExpression expr1, long value) {
+        return treeMaker.Binary(JCTree.Tag.BITAND, expr1, literal(value));
+    }
+
+    static JCTree.JCBinary bitAnd(JCTree.JCExpression expr1, JSONWriter.Feature value) {
+        return treeMaker.Binary(JCTree.Tag.BITAND, expr1, literal(value.mask));
+    }
+
+    static JCTree.JCBinary bitOr(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
+        return treeMaker.Binary(JCTree.Tag.BITOR, expr1, expr2);
     }
 
     static JCTree.JCUnary unary(JCTree.Tag tag, JCTree.JCExpression expr) {
@@ -313,6 +544,14 @@ final class JavacTreeUtils {
 
     static JCTree.JCLiteral literal(TypeTag tag, Object object) {
         return treeMaker.Literal(tag, object);
+    }
+
+    static JCTree.JCLiteral literal(int value) {
+        return treeMaker.Literal(TypeTag.INT, value);
+    }
+
+    static JCTree.JCLiteral literal(long value) {
+        return treeMaker.Literal(TypeTag.LONG, value);
     }
 
     static JCTree.JCLiteral literal(Object object) {
@@ -426,6 +665,10 @@ final class JavacTreeUtils {
         return treeMaker.Return(expr);
     }
 
+    static JCTree.JCReturn defReturn() {
+        return treeMaker.Return(null);
+    }
+
     static JCTree.JCParens parens(JCTree.JCExpression expr) {
         return treeMaker.Parens(expr);
     }
@@ -489,6 +732,10 @@ final class JavacTreeUtils {
 
     static JCTree.JCConditional ternary(JCTree.JCExpression cond, JCTree.JCExpression trueExpr, JCTree.JCExpression falseExpr) {
         return treeMaker.Conditional(cond, trueExpr, falseExpr);
+    }
+
+    static JCTree.JCConditional ternary(JCTree.JCExpression cond, int trueExpr, int falseExpr) {
+        return treeMaker.Conditional(cond, literal(trueExpr), literal(falseExpr));
     }
 
     static void pos(int pos) {
