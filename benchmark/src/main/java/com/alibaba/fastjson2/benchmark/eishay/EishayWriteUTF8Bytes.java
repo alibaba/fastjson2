@@ -74,6 +74,7 @@ public class EishayWriteUTF8Bytes {
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(EishayWriteUTF8Bytes.class.getName())
+                .exclude(EishayWriteUTF8BytesTree.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
