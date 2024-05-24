@@ -92,16 +92,16 @@ public class BeanInfo {
 
     public BeanInfo(ObjectWriterProvider provider) {
         if (provider.isDisableAutoType()) {
-            readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
+            writerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
         }
         if (provider.isDisableReferenceDetect()) {
-            readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
+            writerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
         }
         if (provider.isDisableJSONB()) {
-            readerFeatures |= FieldInfo.DISABLE_JSONB;
+            writerFeatures |= FieldInfo.DISABLE_JSONB;
         }
         if (provider.isDisableArrayMapping()) {
-            readerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
+            writerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
         }
         alphabetic = provider.isAlphabetic();
     }
