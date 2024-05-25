@@ -308,7 +308,18 @@ public class JSONCompiledAnnotationProcessor
         }
         JCTree.JCNewArray fieldReadersArray = newArray(fieldReaderType, null, List.from(fieldReaders));
         long features = 0L;
-        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(TypeTag.LONG, features), lambda, defNull(), fieldReadersArray));
+        JCTree.JCMethodInvocation superMethod = method(
+                ident(names._super),
+                List.of(
+                        field(beanType, names._class),
+                        defNull(),
+                        defNull(),
+                        literal(features),
+                        lambda,
+                        defNull(),
+                        fieldReadersArray
+                )
+        );
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
         stmts.append(exec(superMethod));
         // initialize fields if necessary
@@ -348,8 +359,17 @@ public class JSONCompiledAnnotationProcessor
             }
         }
         JCTree.JCNewArray fieldReadersArray = newArray(fieldWriterType, null, List.from(fieldWriters));
-        JCTree.JCMethodInvocation fieldReadersList = method(field(qualIdent("java.util.Arrays"), "asList"), List.of(fieldReadersArray));
-        JCTree.JCMethodInvocation superMethod = method(ident(names._super), List.of(field(beanType, names._class), defNull(), defNull(), literal(0L), fieldReadersList));
+        JCTree.JCMethodInvocation fieldReadersList = method(qualIdent("java.util.Arrays"), "asList", fieldReadersArray);
+        JCTree.JCMethodInvocation superMethod = method(
+                ident(names._super),
+                List.of(
+                        field(beanType, names._class),
+                        defNull(),
+                        defNull(),
+                        literal(0L),
+                        fieldReadersList
+                )
+        );
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
         stmts.append(exec(superMethod));
         // initialize fields if necessary
@@ -376,41 +396,81 @@ public class JSONCompiledAnnotationProcessor
             if (isMethodReference) {
                 String methodName = attributeInfo.getMethod.getSimpleName().toString();
                 JCTree.JCMemberReference memberedReference = methodRef(beanType, methodName);
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(attributeInfo.name), memberedReference));
+                return method(objectWritersType, "fieldWriter", literal(attributeInfo.name), memberedReference);
             } else {
                 String fieldName = attributeInfo.field.getSimpleName().toString();
-                JCTree.JCLambda lambda = lambda(List.of(defVar(Flags.PARAMETER, "bean", beanType)), field(ident("bean"), fieldName));
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(fieldName), lambda));
+                JCTree.JCLambda lambda = lambda(
+                        defVar(Flags.PARAMETER, "bean", beanType),
+                        field(ident("bean"), fieldName)
+                );
+                return method(objectWritersType, "fieldWriter", literal(fieldName), lambda);
             }
         } else if ("java.lang.Class".equals(type)) {
             if (isMethodReference) {
                 String methodName = attributeInfo.getMethod.getSimpleName().toString();
                 JCTree.JCMemberReference memberedReference = methodRef(beanType, methodName);
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(attributeInfo.name), field(beanType, names._class), memberedReference));
+                return method(
+                        objectWritersType,
+                        "fieldWriter",
+                        literal(attributeInfo.name),
+                        field(beanType, names._class),
+                        memberedReference
+                );
             } else {
                 String fieldName = attributeInfo.field.getSimpleName().toString();
-                JCTree.JCLambda lambda = lambda(List.of(defVar(Flags.PARAMETER, "bean", beanType)), field(ident("bean"), fieldName));
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(fieldName), field(beanType, names._class), lambda));
+                JCTree.JCLambda lambda = lambda(
+                        defVar(Flags.PARAMETER, "bean", beanType),
+                        field(ident("bean"), fieldName)
+                );
+                return method(
+                        objectWritersType,
+                        "fieldWriter",
+                        literal(fieldName),
+                        field(beanType, names._class),
+                        lambda
+                );
             }
         } else if ("java.lang.Type".equals(type)) {
             if (isMethodReference) {
                 String methodName = attributeInfo.getMethod.getSimpleName().toString();
                 JCTree.JCMemberReference memberedReference = methodRef(beanType, methodName);
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(attributeInfo.name), field(beanType, names._class), field(beanType, names._class), memberedReference));
+                return method(
+                        objectWritersType,
+                        "fieldWriter",
+                        literal(attributeInfo.name),
+                        field(beanType, names._class),
+                        field(beanType, names._class),
+                        memberedReference
+                );
             } else {
                 String fieldName = attributeInfo.field.getSimpleName().toString();
-                JCTree.JCLambda lambda = lambda(List.of(defVar(Flags.PARAMETER, "bean", beanType)), field(ident("bean"), fieldName));
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(fieldName), field(beanType, names._class), field(beanType, names._class), lambda));
+                JCTree.JCLambda lambda = lambda(
+                        List.of(
+                                defVar(Flags.PARAMETER, "bean", beanType)
+                        ),
+                        field(ident("bean"), fieldName)
+                );
+                return method(
+                        objectWritersType,
+                        "fieldWriter",
+                        literal(fieldName),
+                        field(beanType, names._class),
+                        field(beanType, names._class),
+                        lambda
+                );
             }
         } else if ("java.util.List<java.lang.String>".equals(type)) {
             if (isMethodReference) {
                 String methodName = attributeInfo.getMethod.getSimpleName().toString();
                 JCTree.JCMemberReference memberedReference = methodRef(beanType, methodName);
-                return method(field(objectWritersType, "fieldWriterListString"), List.of(literal(attributeInfo.name), memberedReference));
+                return method(objectWritersType, "fieldWriterListString", literal(attributeInfo.name), memberedReference);
             } else {
                 String fieldName = attributeInfo.field.getSimpleName().toString();
-                JCTree.JCLambda lambda = lambda(List.of(defVar(Flags.PARAMETER, "bean", beanType)), field(ident("bean"), fieldName));
-                return method(field(objectWritersType, "fieldWriterListString"), List.of(literal(fieldName), lambda));
+                JCTree.JCLambda lambda = lambda(
+                        defVar(Flags.PARAMETER, "bean", beanType),
+                        field(ident("bean"), fieldName)
+                );
+                return method(objectWritersType, "fieldWriterListString", literal(fieldName), lambda);
             }
         } else if (type.startsWith("java.util.List")
                 || type.startsWith("java.util.ArrayList")
@@ -426,11 +486,14 @@ public class JSONCompiledAnnotationProcessor
             if (isMethodReference) {
                 String methodName = attributeInfo.getMethod.getSimpleName().toString();
                 JCTree.JCMemberReference memberedReference = methodRef(beanType, methodName);
-                return method(field(objectWritersType, "fieldWriterList"), List.of(literal(attributeInfo.name), itemTypeClass, memberedReference));
+                return method(objectWritersType, "fieldWriterList", literal(attributeInfo.name), itemTypeClass, memberedReference);
             } else {
                 String fieldName = attributeInfo.field.getSimpleName().toString();
-                JCTree.JCLambda lambda = lambda(List.of(defVar(Flags.PARAMETER, "bean", beanType)), field(ident("bean"), fieldName));
-                return method(field(objectWritersType, "fieldWriterList"), List.of(literal(fieldName), itemTypeClass, lambda));
+                JCTree.JCLambda lambda = lambda(
+                        defVar(Flags.PARAMETER, "bean", beanType),
+                        field(ident("bean"), fieldName)
+                );
+                return method(objectWritersType, "fieldWriterList", literal(fieldName), itemTypeClass, lambda);
             }
         } else {
             JCTree.JCFieldAccess fieldClass;
@@ -446,11 +509,14 @@ public class JSONCompiledAnnotationProcessor
             if (isMethodReference) {
                 String methodName = attributeInfo.getMethod.getSimpleName().toString();
                 JCTree.JCMemberReference memberedReference = methodRef(beanType, methodName);
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(attributeInfo.name), fieldClass, memberedReference));
+                return method(objectWritersType, "fieldWriter", literal(attributeInfo.name), fieldClass, memberedReference);
             } else {
                 String fieldName = attributeInfo.field.getSimpleName().toString();
-                JCTree.JCLambda lambda = lambda(List.of(defVar(Flags.PARAMETER, "bean", beanType)), field(ident("bean"), fieldName));
-                return method(field(objectWritersType, "fieldWriter"), List.of(literal(fieldName), fieldClass, lambda));
+                JCTree.JCLambda lambda = lambda(
+                        defVar(Flags.PARAMETER, "bean", beanType),
+                        field(ident("bean"), fieldName)
+                );
+                return method(objectWritersType, "fieldWriter", literal(fieldName), fieldClass, lambda);
             }
         }
     }
@@ -535,7 +601,7 @@ public class JSONCompiledAnnotationProcessor
         }
 
         if (methodName != null) {
-            return method(field(objectReadersType, methodName), List.of(fieldName, lambda));
+            return method(objectReadersType, methodName, fieldName, lambda);
         }
 
         readerMethod = genFieldReaderList(objectReadersType, fieldType, fieldName, lambda);
@@ -550,12 +616,11 @@ public class JSONCompiledAnnotationProcessor
 
         if (fieldType.indexOf('<') == -1) {
             readerMethod = method(
-                    field(objectReadersType, "fieldReader"),
-                    List.of(
-                            fieldName,
-                            field(getFieldValueType(fieldType), names._class),
-                            lambda
-                    )
+                    objectReadersType,
+                    "fieldReader",
+                    fieldName,
+                    field(getFieldValueType(fieldType), names._class),
+                    lambda
             );
         } else {
             JCTree.JCFieldAccess fieldClassRef = field(beanType, names._class);
@@ -573,7 +638,7 @@ public class JSONCompiledAnnotationProcessor
                 }
                 fieldReaderMethodName = "fieldReaderWithField";
             }
-            readerMethod = method(field(objectReadersType, fieldReaderMethodName), args);
+            readerMethod = method(objectReadersType, fieldReaderMethodName, args);
         }
         return readerMethod;
     }
@@ -609,21 +674,19 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCMethodInvocation readerMethod;
         if ("java.lang.String".equals(itemType) && "java.util.List".equals(listType)) {
             readerMethod = method(
-                    field(objectReadersType, "fieldReaderListStr"),
-                    List.of(
-                            fieldName,
-                            lambda
-                    )
+                    objectReadersType,
+                    "fieldReaderListStr",
+                    fieldName,
+                    lambda
             );
         } else {
             readerMethod = method(
-                    field(objectReadersType, "fieldReaderList"),
-                    List.of(
-                            fieldName,
-                            field(getFieldValueType(itemType), names._class),
-                            constructorRef(qualIdent("java.util.ArrayList")),
-                            lambda
-                    )
+                    objectReadersType,
+                    "fieldReaderList",
+                    fieldName,
+                    field(getFieldValueType(itemType), names._class),
+                    constructorRef(qualIdent("java.util.ArrayList")),
+                    lambda
             );
         }
 
@@ -676,14 +739,13 @@ public class JSONCompiledAnnotationProcessor
         }
 
         return method(
-                field(objectReadersType, "fieldReaderMap"),
-                List.of(
-                        fieldName,
-                        field(getFieldValueType(mapType), names._class),
-                        field(getFieldValueType(keyType), names._class),
-                        field(getFieldValueType(valueType), names._class),
-                        lambda
-                )
+                objectReadersType,
+                "fieldReaderMap",
+                fieldName,
+                field(getFieldValueType(mapType), names._class),
+                field(getFieldValueType(keyType), names._class),
+                field(getFieldValueType(valueType), names._class),
+                lambda
         );
     }
 
@@ -704,8 +766,8 @@ public class JSONCompiledAnnotationProcessor
     }
 
     private JCTree.JCMethodDecl genCreateInstance(JCTree.JCIdent objectType, JCTree.JCNewClass beanNew) {
-        JCTree.JCVariableDecl featuresVar = defVar(Flags.PARAMETER, "features", type(TypeTag.LONG));
-        return defMethod(Flags.PUBLIC, "createInstance", objectType, null, List.of(featuresVar), null, block(defReturn(beanNew)), null);
+        JCTree.JCVariableDecl featuresVar = defVar(Flags.PARAMETER, "features", TypeTag.LONG);
+        return defMethod(Flags.PUBLIC, "createInstance", objectType, List.of(featuresVar), block(defReturn(beanNew)));
     }
 
     private JCTree.JCMethodDecl genReadObject(
@@ -734,21 +796,21 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCIdent jsonReaderIdent = ident(jsonReaderVar);
         JCTree.JCVariableDecl fieldTypeVar = defVar(Flags.PARAMETER, "fieldType", qualIdent(Type.class.getName()));
         JCTree.JCVariableDecl fieldNameVar = defVar(Flags.PARAMETER, "fieldName", objectType);
-        JCTree.JCVariableDecl featuresVar = defVar(Flags.PARAMETER, "features", type(TypeTag.LONG));
+        JCTree.JCVariableDecl featuresVar = defVar(Flags.PARAMETER, "features", TypeTag.LONG);
 
         JCTree.JCReturn nullReturn = defReturn(defNull());
 
         ListBuffer<JCTree.JCStatement> readObjectBody = new ListBuffer<>();
 
-        JCTree.JCMethodInvocation nextIfNullMethod = method(field(jsonReaderIdent, "nextIfNull"));
+        JCTree.JCMethodInvocation nextIfNullMethod = method(jsonReaderIdent, "nextIfNull");
         readObjectBody.append(defIf(nextIfNullMethod, block(nullReturn), null));
 
-        readObjectBody.append(exec(method(field(jsonReaderIdent, "nextIfObjectStart"))));
+        readObjectBody.append(exec(method(jsonReaderIdent, "nextIfObjectStart")));
 
         JCTree.JCVariableDecl features2Var = defVar(
                 Flags.PARAMETER,
                 "features2",
-                type(TypeTag.LONG),
+                TypeTag.LONG,
                 bitOr(
                         ident("features"),
                         field(ident(names._this), "features")
@@ -763,7 +825,7 @@ public class JSONCompiledAnnotationProcessor
         int fieldsSize = attributeInfos.size();
 
         JCTree.JCLabeledStatement loopLabel = label("_while", null);
-        JCTree.JCWhileLoop loopHead = whileLoop(unary(JCTree.Tag.NOT, method(field(jsonReaderIdent, "nextIfObjectEnd"))), null);
+        JCTree.JCWhileLoop loopHead = whileLoop(unary(JCTree.Tag.NOT, method(jsonReaderIdent, "nextIfObjectEnd")), null);
         ListBuffer<JCTree.JCStatement> loopBody = new ListBuffer<>();
 
         boolean switchGen = false;
@@ -773,7 +835,7 @@ public class JSONCompiledAnnotationProcessor
         }
 
         JCTree.JCFieldAccess readFieldNameHashCode = field(jsonReaderIdent, "readFieldNameHashCode");
-        JCTree.JCVariableDecl hashCode64Var = defVar(Flags.PARAMETER, "hashCode64", type(TypeTag.LONG), method(readFieldNameHashCode));
+        JCTree.JCVariableDecl hashCode64Var = defVar(Flags.PARAMETER, "hashCode64", TypeTag.LONG, method(readFieldNameHashCode));
         JCTree.JCExpression hashCode64 = ident(hashCode64Var);
         loopBody.append(hashCode64Var);
 
@@ -842,9 +904,21 @@ public class JSONCompiledAnnotationProcessor
                 loopBody.append(switchLabel);
             }
 
-            loopBody.append(defIf(method(field(ident(names._this), "readFieldValueWithLCase"), List.of(jsonReaderIdent, objectIdent, ident(hashCode64Var), ident(features2Var))), block(defContinue(loopLabel)), null));
+            loopBody.append(
+                    defIf(
+                            method(
+                                    ident(names._this),
+                                    "readFieldValueWithLCase",
+                                    jsonReaderIdent,
+                                    objectIdent,
+                                    ident(hashCode64Var),
+                                    ident(features2Var)
+                            ),
+                            defContinue(loopLabel)
+                    )
+            );
             JCTree.JCFieldAccess processExtraField = field(ident(names._this), "processExtra");
-            loopBody.append(exec(method(processExtraField, List.of(jsonReaderIdent, objectIdent, ident(features2Var)))));
+            loopBody.append(exec(method(processExtraField, jsonReaderIdent, objectIdent, ident(features2Var))));
         }
 
         loopHead.body = block(loopBody.toList());
@@ -852,7 +926,7 @@ public class JSONCompiledAnnotationProcessor
         readObjectBody.append(loopLabel);
 
         if (!isJsonb) {
-            readObjectBody.append(exec(method(field(jsonReaderIdent, "nextIfComma"))));
+            readObjectBody.append(exec(method(jsonReaderIdent, "nextIfComma")));
         }
 
         readObjectBody.append(defReturn(objectIdent));
@@ -861,11 +935,8 @@ public class JSONCompiledAnnotationProcessor
                 Flags.PUBLIC,
                 isJsonb ? "readJSONBObject" : "readObject",
                 objectType,
-                null,
                 List.of(jsonReaderVar, fieldTypeVar, fieldNameVar, featuresVar),
-                null,
-                block(readObjectBody.toList()),
-                null
+                block(readObjectBody.toList())
         );
     }
 
@@ -896,24 +967,24 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCIdent objectIdent = ident(objectVar);
         JCTree.JCVariableDecl fieldNameVar = defVar(Flags.PARAMETER, "fieldName", objectType);
         JCTree.JCVariableDecl fieldTypeVar = defVar(Flags.PARAMETER, "fieldType", qualIdent(Type.class.getName()));
-        JCTree.JCVariableDecl featuresVar = defVar(Flags.PARAMETER, "features", type(TypeTag.LONG));
+        JCTree.JCVariableDecl featuresVar = defVar(Flags.PARAMETER, "features", TypeTag.LONG);
 
         ListBuffer<JCTree.JCStatement> writeBody = new ListBuffer<>();
 
-        JCTree.JCVariableDecl contextFeaturesVar = defVar(Flags.PARAMETER, "contextFeatures", type(TypeTag.LONG), method(field(jsonWriterIdent, "getFeatures")));
+        JCTree.JCVariableDecl contextFeaturesVar = defVar(Flags.PARAMETER, "contextFeatures", TypeTag.LONG, method(jsonWriterIdent, "getFeatures"));
         JCTree.JCIdent contextFeaturesIdent = ident(contextFeaturesVar);
         writeBody.append(contextFeaturesVar);
 
         JCTree.JCUnary unary = unary(JCTree.Tag.NOT, field(jsonWriterIdent, "useSingleQuote"));
-        JCTree.JCBinary binary = ne(bitOr(literal(TypeTag.LONG, UnquoteFieldName.mask), literal(TypeTag.LONG, UseSingleQuotes.mask)), 0);
-        JCTree.JCVariableDecl quoteVar = defVar(Flags.PARAMETER, "quote", type(TypeTag.BOOLEAN), and(unary, binary));
+        JCTree.JCBinary binary = eq(bitAnd(contextFeaturesIdent, literal(UnquoteFieldName.mask | UseSingleQuotes.mask)), 0);
+        JCTree.JCVariableDecl quoteVar = defVar(Flags.PARAMETER, "quote", TypeTag.BOOLEAN, and(unary, binary));
         JCTree.JCIdent quoteIdent = ident(quoteVar);
         writeBody.append(quoteVar);
 
         JCTree.JCVariableDecl notWriteDefaultValueVar = defVar(
                 Flags.PARAMETER,
                 "notWriteDefaultValue",
-                type(TypeTag.LONG),
+                TypeTag.LONG,
                 bitAnd(contextFeaturesIdent, NotWriteDefaultValue.mask)
         );
         writeBody.append(notWriteDefaultValueVar);
@@ -921,7 +992,7 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCVariableDecl var12Var = defVar(
                 Flags.PARAMETER,
                 "var12",
-                type(TypeTag.INT),
+                TypeTag.INT,
                 ternary(
                         eq(ident(notWriteDefaultValueVar), 0),
                         literal(0),
@@ -945,7 +1016,7 @@ public class JSONCompiledAnnotationProcessor
                 defVar(
                         Flags.PARAMETER,
                         "var17",
-                        type(TypeTag.INT),
+                        TypeTag.INT,
                         ternary(
                                 eq(nullAsDefaultIdent, 0),
                                 literal(0),
@@ -1036,7 +1107,7 @@ public class JSONCompiledAnnotationProcessor
         writeBody.append(
                 defIfReturn(
                         ne(bitAnd(contextFeaturesIdent, IgnoreNoneSerializable.mask), 0L),
-                        exec(method(field(jsonWriterIdent, "writeNull")))
+                        exec(method(jsonWriterIdent, "writeNull"))
                 )
         );
 
@@ -1094,9 +1165,15 @@ public class JSONCompiledAnnotationProcessor
             );
         }
 
-        writeBody.append(exec(method(field(jsonWriterIdent, "endObject"))));
+        writeBody.append(exec(method(jsonWriterIdent, "endObject")));
 
-        return defMethod(Flags.PUBLIC, "write", type(TypeTag.VOID), null, List.of(jsonWriterVar, objectVar, fieldNameVar, fieldTypeVar, featuresVar), null, block(writeBody.toList()), null);
+        return defMethod(
+                Flags.PUBLIC,
+                "write",
+                type(TypeTag.VOID),
+                List.of(jsonWriterVar, objectVar, fieldNameVar, fieldTypeVar, featuresVar),
+                block(writeBody.toList())
+        );
     }
 
     private JCTree.JCStatement genWriteFieldName(
@@ -1307,19 +1384,19 @@ public class JSONCompiledAnnotationProcessor
                     }
                 }
                 long nameIn64SingleQuote = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
-                JCTree.JCConditional ternary = ternary(quoteIdent, literal(TypeTag.LONG, nameIn64DoubleQuote), literal(TypeTag.LONG, nameIn64SingleQuote));
+                JCTree.JCConditional ternary = ternary(quoteIdent, literal(nameIn64DoubleQuote), literal(nameIn64SingleQuote));
                 if (length == 9) {
                     ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
-                    JCTree.JCConditional ternary2 = ternary(quoteIdent, literal(TypeTag.INT, name12), literal(TypeTag.INT, name1SQ2));
-                    JCTree.JCVariableDecl name1Var = defVar(Flags.PARAMETER, "name1", type(TypeTag.INT), ternary2);
-                    stmts.append(defVar(Flags.PARAMETER, "name1", type(TypeTag.INT), ternary2));
-                    stmts.append(exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ident(name1Var)))));
+                    JCTree.JCConditional ternary2 = ternary(quoteIdent, name12, name1SQ2);
+                    JCTree.JCVariableDecl name1Var = defVar(Flags.PARAMETER, "name1", TypeTag.INT, ternary2);
+                    stmts.append(defVar(Flags.PARAMETER, "name1", TypeTag.INT, ternary2));
+                    stmts.append(exec(method(jsonWriterIdent, methodName, ternary, name1Var)));
                     return block(stmts.toList());
                 } else if (length > 9) {
-                    JCTree.JCConditional ternary2 = ternary(quoteIdent, literal(TypeTag.LONG, name1), literal(TypeTag.LONG, name1SQ));
-                    return exec(method(field(jsonWriterIdent, methodName), List.of(ternary, ternary2)));
+                    JCTree.JCConditional ternary2 = ternary(quoteIdent, name1, name1SQ);
+                    return exec(method(jsonWriterIdent, methodName, ternary, ternary2));
                 } else {
-                    return exec(method(field(jsonWriterIdent, methodName), List.of(ternary)));
+                    return exec(method(jsonWriterIdent, methodName, ternary));
                 }
             }
         } else {
@@ -1459,57 +1536,57 @@ public class JSONCompiledAnnotationProcessor
                 0
         );
         if ("boolean".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeBool"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeBool", fieldValueExprs)));
         } else if ("char".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeChar"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeChar", fieldValueExprs)));
         } else if ("byte".equals(type)) {
             stmts.append(defIf(writeAsStringBinary,
-                    block(exec(method(field(jsonWriterIdent, "writeString"), fieldValueExprs))),
-                    block(exec(method(field(jsonWriterIdent, "writeInt8"), fieldValueExprs)))));
+                    block(exec(method(jsonWriterIdent, "writeString", fieldValueExprs))),
+                    block(exec(method(jsonWriterIdent, "writeInt8", fieldValueExprs)))));
         } else if ("short".equals(type)) {
             stmts.append(defIf(writeAsStringBinary,
-                    block(exec(method(field(jsonWriterIdent, "writeString"), fieldValueExprs))),
-                    block(exec(method(field(jsonWriterIdent, "writeInt16"), fieldValueExprs)))));
+                    block(exec(method(jsonWriterIdent, "writeString", fieldValueExprs))),
+                    block(exec(method(jsonWriterIdent, "writeInt16", fieldValueExprs)))));
         } else if ("int".equals(type)) {
             stmts.append(defIf(writeAsStringBinary,
-                    block(exec(method(field(jsonWriterIdent, "writeString"), fieldValueExprs))),
-                    block(exec(method(field(jsonWriterIdent, "writeInt32"), fieldValueExprs)))));
+                    block(exec(method(jsonWriterIdent, "writeString", fieldValueExprs))),
+                    block(exec(method(jsonWriterIdent, "writeInt32", fieldValueExprs)))));
         } else if ("Integer".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeInt32"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeInt32", fieldValueExprs)));
         } else if ("long".equals(type)) {
             stmts.append(defIf(writeAsStringBinary,
-                    block(exec(method(field(jsonWriterIdent, "writeString"), fieldValueExprs))),
-                    block(exec(method(field(jsonWriterIdent, "writeInt64"), fieldValueExprs)))));
+                    block(exec(method(jsonWriterIdent, "writeString", fieldValueExprs))),
+                    block(exec(method(jsonWriterIdent, "writeInt64", fieldValueExprs)))));
         } else if ("Long".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeInt64"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeInt64", fieldValueExprs)));
         } else if ("float".equals(type)) {
             stmts.append(defIf(writeAsStringBinary,
-                    block(exec(method(field(jsonWriterIdent, "writeString"), fieldValueExprs))),
-                    block(exec(method(field(jsonWriterIdent, "writeFloat"), fieldValueExprs)))));
+                    block(exec(method(jsonWriterIdent, "writeString", fieldValueExprs))),
+                    block(exec(method(jsonWriterIdent, "writeFloat", fieldValueExprs)))));
         } else if ("double".equals(type)) {
             stmts.append(defIf(writeAsStringBinary,
-                    block(exec(method(field(jsonWriterIdent, "writeString"), fieldValueExprs))),
-                    block(exec(method(field(jsonWriterIdent, "writeDouble"), fieldValueExprs)))));
+                    block(exec(method(jsonWriterIdent, "writeString", fieldValueExprs))),
+                    block(exec(method(jsonWriterIdent, "writeDouble", fieldValueExprs)))));
         } else if ("boolean[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeBool"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeBool", fieldValueExprs)));
         } else if ("char[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeString"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeString", fieldValueExprs)));
         } else if ("byte[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeBinary"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeBinary", fieldValueExprs)));
         } else if ("short[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeInt16"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeInt16", fieldValueExprs)));
         } else if ("int[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeInt32"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeInt32", fieldValueExprs)));
         } else if ("long[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeInt64"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeInt64", fieldValueExprs)));
         } else if ("float[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeFloat"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeFloat", fieldValueExprs)));
         } else if ("double[]".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeDouble"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeDouble", fieldValueExprs)));
         } else if ("BigDecimal".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeDecimal"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeDecimal", fieldValueExprs)));
         } else if ("Enum".equals(type)) {
-            stmts.append(exec(method(field(jsonWriterIdent, "writeEnum"), fieldValueExprs)));
+            stmts.append(exec(method(jsonWriterIdent, "writeEnum", fieldValueExprs)));
         } else {
             throw new UnsupportedOperationException();
         }
@@ -1525,10 +1602,10 @@ public class JSONCompiledAnnotationProcessor
             boolean isJsonb
     ) {
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
-        JCTree.JCVariableDecl boolVar = defVar(Flags.PARAMETER, "bool" + i, type(TypeTag.BOOLEAN), genWriteFieldValue(attributeInfo, objectIdent, beanType));
+        JCTree.JCVariableDecl boolVar = defVar(Flags.PARAMETER, "bool" + i, TypeTag.BOOLEAN, genWriteFieldValue(attributeInfo, objectIdent, beanType));
         stmts.append(boolVar);
         stmts.append(defIf(unary(JCTree.Tag.NOT, ident(boolVar)), block(List.nil()), null));
-        stmts.append(exec(method(field(field(names._this, fieldWriter(i)), "writeBool"), List.of(jsonWriterIdent, ident(boolVar)))));
+        stmts.append(exec(method(field(names._this, fieldWriter(i)), "writeBool", jsonWriterIdent, boolVar)));
         return stmts;
     }
 
@@ -1562,7 +1639,7 @@ public class JSONCompiledAnnotationProcessor
         } else {
             throw new UnsupportedOperationException();
         }
-        return stmts.append(exec(method(field(field(names._this, fieldWriter(i)), methodName), fieldValueExprs)));
+        return stmts.append(exec(method(field(names._this, fieldWriter(i)), methodName, fieldValueExprs)));
     }
 
     private ListBuffer<JCTree.JCStatement> genWriteFieldValueInt32V(
@@ -1575,7 +1652,7 @@ public class JSONCompiledAnnotationProcessor
             JCTree.JCVariableDecl var12Var,
             boolean isJsonb) {
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
-        JCTree.JCVariableDecl int32Var = defVar(Flags.PARAMETER, "int32" + i, type(TypeTag.INT), genWriteFieldValue(attributeInfo, objectIdent, beanType));
+        JCTree.JCVariableDecl int32Var = defVar(Flags.PARAMETER, "int32" + i, TypeTag.INT, genWriteFieldValue(attributeInfo, objectIdent, beanType));
         stmts.append(int32Var);
         ListBuffer<JCTree.JCStatement> ifStmts = new ListBuffer<>();
         ifStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
@@ -1628,7 +1705,7 @@ public class JSONCompiledAnnotationProcessor
             JCTree.JCVariableDecl var12Var,
             boolean isJsonb) {
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
-        JCTree.JCVariableDecl int64Var = defVar(Flags.PARAMETER, "int64" + i, type(TypeTag.LONG), genWriteFieldValue(attributeInfo, objectIdent, beanType));
+        JCTree.JCVariableDecl int64Var = defVar(Flags.PARAMETER, "int64" + i, TypeTag.LONG, genWriteFieldValue(attributeInfo, objectIdent, beanType));
         stmts.append(int64Var);
         ListBuffer<JCTree.JCStatement> ifStmts = new ListBuffer<>();
         ifStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
@@ -1656,14 +1733,14 @@ public class JSONCompiledAnnotationProcessor
 
         ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
         notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        notZeroStmts.append(exec(method(field(jsonWriterIdent, "writeArrayNull"))));
+        notZeroStmts.append(exec(method(jsonWriterIdent, "writeArrayNull")));
 
         ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
         nullStmts.append(defIf(ne(nullAsDefaultIdent, 0), block(notZeroStmts.toList()), null));
 
         ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
         notNullStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        notNullStmts.append(exec(method(field(jsonWriterIdent, "writeInt64"), List.of(ident(longArrayVar)))));
+        notNullStmts.append(exec(method(jsonWriterIdent, "writeInt64", longArrayVar)));
 
         stmts.append(defIf(eq(longArrayVar, defNull()), block(nullStmts.toList()), block(notNullStmts.toList())));
         return stmts;
@@ -1686,7 +1763,7 @@ public class JSONCompiledAnnotationProcessor
 
         ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
         notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        notZeroStmts.append(exec(method(field(jsonWriterIdent, "writeNumberNull"))));
+        notZeroStmts.append(exec(method(jsonWriterIdent, "writeNumberNull")));
 
         ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
         JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
@@ -1717,7 +1794,7 @@ public class JSONCompiledAnnotationProcessor
 
         ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
         notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        notZeroStmts.append(exec(method(field(jsonWriterIdent, "writeInt64Null"))));
+        notZeroStmts.append(exec(method(jsonWriterIdent, "writeInt64Null")));
 
         ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
         JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
@@ -1748,14 +1825,14 @@ public class JSONCompiledAnnotationProcessor
 
         ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
         notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        notZeroStmts.append(exec(method(field(jsonWriterIdent, "writeNumberNull"))));
+        notZeroStmts.append(exec(method(jsonWriterIdent, "writeNumberNull")));
 
         ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
         JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
         nullStmts.append(defIf(ne(bitAnd(contextFeaturesIdent, writeAsStringBinary), 0), block(notZeroStmts.toList()), null));
 
         ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
-        notNullStmts.append(exec(method(field(field(names._this, fieldWriter(i)), "writeFloat"), List.of(jsonWriterIdent, ident(floatVar)))));
+        notNullStmts.append(exec(method(field(names._this, fieldWriter(i)), "writeFloat", jsonWriterIdent, floatVar)));
 
         stmts.append(defIf(eq(floatVar, defNull()), block(nullStmts.toList()), block(notNullStmts.toList())));
         return stmts;
@@ -1777,14 +1854,14 @@ public class JSONCompiledAnnotationProcessor
 
         ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
         notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-        notZeroStmts.append(exec(method(field(jsonWriterIdent, "writeNumberNull"))));
+        notZeroStmts.append(exec(method(jsonWriterIdent, "writeNumberNull")));
 
         ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
         JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
         nullStmts.append(defIf(ne(bitAnd(contextFeaturesIdent, writeAsStringBinary), 0), block(notZeroStmts.toList()), null));
 
         ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
-        notNullStmts.append(exec(method(field(field(ident(names._this), fieldWriter(i)), "writeDouble"), List.of(jsonWriterIdent, ident(doubleVar)))));
+        notNullStmts.append(exec(method(field(names._this, fieldWriter(i)), "writeDouble", jsonWriterIdent, doubleVar)));
 
         stmts.append(defIf(eq(doubleVar, defNull()), block(nullStmts.toList()), block(notNullStmts.toList())));
         return stmts;
@@ -1844,11 +1921,26 @@ public class JSONCompiledAnnotationProcessor
         String type = attributeInfo.type.toString();
         JCTree.JCVariableDecl enumVar = defVar(Flags.PARAMETER, "enum" + i, qualIdent(type), genWriteFieldValue(attributeInfo, objectIdent, beanType));
         stmts.append(enumVar);
-        stmts.append(defIf(ne(enumVar, defNull()),
-                block(exec(method(field(field(names._this, fieldWriter(i)), "writeEnum"), List.of(jsonWriterIdent, ident(enumVar))))),
-                        defIf(ne(var12Var, 0L),
-                                block(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
-                                        exec(method(field(jsonWriterIdent, "writeNull")))), null)));
+        stmts.append(
+                defIf(
+                        ne(enumVar, defNull()),
+                        block(
+                                method(
+                                        field(names._this, fieldWriter(i)),
+                                        "writeEnum",
+                                        jsonWriterIdent,
+                                        ident(enumVar)
+                                )
+                        ),
+                        defIf(
+                                ne(var12Var, 0L),
+                                block(
+                                        genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
+                                        exec(method(jsonWriterIdent, "writeNull"))
+                                )
+                        )
+                )
+        );
         return stmts;
     }
 
@@ -1866,11 +1958,26 @@ public class JSONCompiledAnnotationProcessor
         String type = attributeInfo.type.toString();
         JCTree.JCVariableDecl dateVar = defVar(Flags.PARAMETER, "date" + i, qualIdent(type), genWriteFieldValue(attributeInfo, objectIdent, beanType));
         stmts.append(dateVar);
-        stmts.append(defIf(ne(dateVar, defNull()),
-                block(exec(method(field(field(names._this, fieldWriter(i)), "writeDate"), List.of(jsonWriterIdent, method(field(ident(dateVar), "getTime")))))),
-                        defIf(ne(var12Var, 0L),
-                                block(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
-                                        exec(method(field(jsonWriterIdent, "writeNull")))), null)));
+        stmts.append(
+                defIf(
+                        ne(dateVar, defNull()),
+                        block(
+                                exec(method(
+                                        field(names._this, fieldWriter(i)),
+                                        "writeDate",
+                                        jsonWriterIdent,
+                                        method(dateVar, "getTime")
+                                ))
+                        ),
+                        defIf(
+                                ne(var12Var, 0L),
+                                block(
+                                        genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
+                                        exec(method(jsonWriterIdent, "writeNull"))
+                                )
+                        )
+                )
+        );
         return stmts;
     }
 
@@ -1896,7 +2003,7 @@ public class JSONCompiledAnnotationProcessor
 
         ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
         notZeroStmts.append(defIf(eq(objectIdent, listVar),
-                block(exec(method(field(jsonWriterIdent, "writeReference"), List.of(literal("..")))),
+                block(exec(method(jsonWriterIdent, "writeReference", "..")),
                         defBreak(label)), null));
 
         notZeroStmts.append(exec(assign(listStrVar, method(jsonWriterIdent, "setPath", field(ident(names._this), fieldWriter(i)), listVar))));
@@ -1909,7 +2016,7 @@ public class JSONCompiledAnnotationProcessor
         labelStmts.append(defIf(ne(bitAnd(contextFeaturesIdent, ReferenceDetection.mask), 0L), block(notZeroStmts.toList()), null));
 
         JCTree.JCBinary binary = eq(bitAnd(contextFeaturesIdent, NotWriteEmptyArray), 0L);
-        JCTree.JCUnary unary = unary(JCTree.Tag.NOT, method(field(listVar, "isEmpty")));
+        JCTree.JCUnary unary = unary(JCTree.Tag.NOT, method(listVar, "isEmpty"));
 
         ListBuffer<JCTree.JCStatement> notEmptyStmts = new ListBuffer<>();
         notEmptyStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
@@ -1917,7 +2024,14 @@ public class JSONCompiledAnnotationProcessor
         if ("java.util.List<java.lang.String>".equals(type)) {
             notEmptyStmts.append(exec(method(jsonWriterIdent, "writeString", listVar)));
         } else {
-            notEmptyStmts.append(exec(method(field(field(names._this, fieldWriter(i)), "writeListValue"), List.of(jsonWriterIdent, ident(listVar)))));
+            notEmptyStmts.append(
+                    exec(method(
+                            field(names._this, fieldWriter(i)),
+                            "writeListValue",
+                            jsonWriterIdent,
+                            listVar
+                    ))
+            );
         }
         notEmptyStmts.append(exec(method(jsonWriterIdent, "popPath", listVar)));
         labelStmts.append(defIf(or(binary, unary), block(notEmptyStmts.toList()), null));
@@ -1925,7 +2039,7 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCExpression writeAsStringBinary = literal(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask);
         JCTree.JCIf notNUllIf = defIf(ne(bitAnd(contextFeaturesIdent, writeAsStringBinary), 0L),
                 block(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
-                        exec(method(field(jsonWriterIdent, "writeArrayNull")))), null);
+                        exec(method(jsonWriterIdent, "writeArrayNull"))), null);
 
         label.body = block(labelStmts.toList());
         notNullStmts.append(label);
@@ -1935,7 +2049,7 @@ public class JSONCompiledAnnotationProcessor
 
     private JCTree.JCExpression genWriteFieldValue(AttributeInfo attributeInfo, JCTree.JCIdent objectIdent, JCTree.JCExpression beanType) {
         if (attributeInfo.getMethod != null) {
-            return method(field(cast(beanType, objectIdent), attributeInfo.getMethod.getSimpleName().toString()));
+            return method(cast(beanType, objectIdent), attributeInfo.getMethod.getSimpleName().toString());
         } else {
             String name = attributeInfo.name;
             VariableElement field = attributeInfo.field;
@@ -1966,7 +2080,7 @@ public class JSONCompiledAnnotationProcessor
         if (type.contains("[")) {
             JCTree.JCVariableDecl objectStrVar = defVar(Flags.PARAMETER, "objectStr" + i, ident("String"), defNull());
             stmts.append(objectStrVar);
-            JCTree.JCVariableDecl objectIntVar = defVar(Flags.PARAMETER, "objectInt" + i, type(TypeTag.INT), literal(0));
+            JCTree.JCVariableDecl objectIntVar = defVar(Flags.PARAMETER, "objectInt" + i, 0);
             stmts.append(objectIntVar);
             JCTree.JCLabeledStatement outerLabel = label("objectOuterLabel" + i, null);
             ListBuffer<JCTree.JCStatement> outerLabelStmts = new ListBuffer<>();
@@ -1978,7 +2092,7 @@ public class JSONCompiledAnnotationProcessor
             ListBuffer<JCTree.JCStatement> innerLabelStmts = new ListBuffer<>();
 
             ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
-            JCTree.JCVariableDecl objectLongVar = defVar(Flags.PARAMETER, "objectLong" + i, type(TypeTag.LONG), bitAnd(contextFeaturesIdent, ReferenceDetection.mask));
+            JCTree.JCVariableDecl objectLongVar = defVar(Flags.PARAMETER, "objectLong" + i, TypeTag.LONG, bitAnd(contextFeaturesIdent, ReferenceDetection.mask));
             notNullStmts.append(objectLongVar);
             notNullStmts.append(exec(
                     assign(
@@ -2012,13 +2126,13 @@ public class JSONCompiledAnnotationProcessor
             notNullStmts.append(defIf(eq(objectStrVar, defNull()), block(defBreak(innerLabel)), null));
 
             notNullStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-            notNullStmts.append(exec(method(field(jsonWriterIdent, "writeReference"), List.of(literal("..")))));
+            notNullStmts.append(exec(method(jsonWriterIdent, "writeReference", "..")));
 
             innerLabelStmts.append(defIf(ne(ident(objectVar), defNull()), block(notNullStmts.toList()), null));
 
             ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
             notZeroStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-            notZeroStmts.append(exec(method(field(jsonWriterIdent, "writeArrayNull"))));
+            notZeroStmts.append(exec(method(jsonWriterIdent, "writeArrayNull")));
             JCTree.JCExpression writeAsStringBinary = literal(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask);
             innerLabelStmts.append(defIf(ne(bitAnd(contextFeaturesIdent, writeAsStringBinary), 0), block(notZeroStmts.toList()), null));
 
@@ -2030,9 +2144,22 @@ public class JSONCompiledAnnotationProcessor
             ListBuffer<JCTree.JCStatement> notEmptyArrayStmts = new ListBuffer<>();
             notEmptyArrayStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
             notEmptyArrayStmts.append(
-                    exec(method(field(method(field(field(names._this, fieldWriter(i)), "getObjectWriter"), List.of(jsonWriterIdent, field(arrayIdentType(type), names._class))),
-                            "write"), List.of(jsonWriterIdent, ident(objectVar), literal(attributeInfo), method(field(ident(objectVar), "getClass")), literal(0L)))));
-            notEmptyArrayStmts.append(defIf(ne(objectIntVar, 0), block(exec(method(field(jsonWriterIdent, "popPath"), List.of(ident(objectVar))))), null));
+                    exec(method(
+                            method(field(names._this, fieldWriter(i)), "getObjectWriter", jsonWriterIdent, field(arrayIdentType(type), names._class)),
+                            "write",
+                            jsonWriterIdent,
+                            ident(objectVar),
+                            literal(attributeInfo),
+                            method(objectVar, "getClass"),
+                            literal(0L)
+                    ))
+            );
+            notEmptyArrayStmts.append(
+                    defIf(
+                            ne(objectIntVar, 0),
+                            exec(method(jsonWriterIdent, "popPath", objectVar))
+                    )
+            );
             JCTree.JCBinary binary1 = eq(bitAnd(contextFeaturesIdent, NotWriteEmptyArray.mask), 0);
             JCTree.JCBinary binary2 = ne(field(objectVar, "length"), 0);
             outerLabelStmts.append(defIf(and(binary1, binary2), block(notEmptyArrayStmts.toList()), null));
@@ -2048,14 +2175,14 @@ public class JSONCompiledAnnotationProcessor
 
             JCTree.JCVariableDecl objectVar = defVar(Flags.PARAMETER, "object" + i, getFieldValueType(type), genWriteFieldValue(attributeInfo, objectIdent, beanType));
             outerLabelStmts.append(objectVar);
-            JCTree.JCVariableDecl objectIntVar = defVar(Flags.PARAMETER, "objectInt" + i, type(TypeTag.INT), literal(0));
+            JCTree.JCVariableDecl objectIntVar = defVar(Flags.PARAMETER, "objectInt" + i, TypeTag.INT, literal(0));
             outerLabelStmts.append(objectIntVar);
 
             JCTree.JCLabeledStatement innerLabel = label("objectInnerLabel" + i, null);
             ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
             notNullStmts.append(defIf(method(jsonWriterIdent, "isIgnoreNoneSerializable", objectVar), block(defBreak(outerLabel)), null));
 
-            JCTree.JCVariableDecl objectLongVar = defVar(Flags.PARAMETER, "objectLong" + i, type(TypeTag.LONG), bitAnd(contextFeaturesIdent, ReferenceDetection.mask));
+            JCTree.JCVariableDecl objectLongVar = defVar(Flags.PARAMETER, "objectLong" + i, TypeTag.LONG, bitAnd(contextFeaturesIdent, ReferenceDetection.mask));
             notNullStmts.append(objectLongVar);
             notNullStmts.append(exec(
                     assign(
@@ -2087,15 +2214,33 @@ public class JSONCompiledAnnotationProcessor
             JCTree.JCBinary binary = ne(bitAnd(contextFeaturesIdent, WriteMapNullValue.mask), 0);
             innerLabelStmts.append(defIf(binary,
                             block(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
-                                    exec(method(field(jsonWriterIdent, "writeNull")))), null));
+                                    exec(method(jsonWriterIdent, "writeNull"))), null));
             innerLabelStmts.append(defBreak(outerLabel));
             innerLabel.body = block(innerLabelStmts.toList());
 
             outerLabelStmts.append(innerLabel);
             outerLabelStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-            outerLabelStmts.append(exec(method(field(method(field(field(ident(names._this), fieldWriter(i)), "getObjectWriter"), List.of(jsonWriterIdent, method(field(ident(objectVar), "getClass")))),
-                    "write"), List.of(jsonWriterIdent, ident(objectVar), literal(attributeInfo.name), field(field(ident(names._this), fieldWriter(i)), "fieldType"), literal(0L)))));
-            outerLabelStmts.append(defIf(ne(objectIntVar, 0), block(exec(method(field(jsonWriterIdent, "popPath"), List.of(ident(objectVar))))), null));
+            outerLabelStmts.append(
+                    exec(method(
+                            method(
+                                    field(names._this, fieldWriter(i)),
+                                    "getObjectWriter",
+                                    jsonWriterIdent,
+                                    method(objectVar, "getClass")
+                            ),
+                            "write",
+                            jsonWriterIdent, ident(objectVar),
+                            literal(attributeInfo.name),
+                            field(field(names._this, fieldWriter(i)), "fieldType"),
+                            literal(0L))
+                    )
+            );
+            outerLabelStmts.append(
+                    defIf(
+                            ne(objectIntVar, 0),
+                            exec(method(jsonWriterIdent, "popPath", objectVar))
+                    )
+            );
 
             outerLabel.body = block(outerLabelStmts.toList());
             stmts.append(outerLabel);
@@ -2127,7 +2272,7 @@ public class JSONCompiledAnnotationProcessor
 
             JCTree.JCVariableDecl objectVar = defVar(Flags.PARAMETER, "object" + i, getFieldValueType(type), genWriteFieldValue(attributeInfo, objectIdent, beanType));
             outerLabelStmts.append(objectVar);
-            JCTree.JCVariableDecl objectIntVar = defVar(Flags.PARAMETER, "objectInt" + i, type(TypeTag.INT), literal(0));
+            JCTree.JCVariableDecl objectIntVar = defVar(Flags.PARAMETER, "objectInt" + i, TypeTag.INT, literal(0));
             outerLabelStmts.append(objectIntVar);
 
             JCTree.JCLabeledStatement innerLabel = label("objectInnerLabel" + i, null);
@@ -2145,22 +2290,34 @@ public class JSONCompiledAnnotationProcessor
                 notNullStmts.append(defIf(method(jsonWriterIdent, "isIgnoreNoneSerializable", objectVar), block(defBreak(outerLabel)), null));
             }
 
-            JCTree.JCVariableDecl objectLongVar = defVar(Flags.PARAMETER, "objectLong" + i, type(TypeTag.LONG), bitAnd(contextFeaturesIdent, ReferenceDetection.mask));
+            JCTree.JCVariableDecl objectLongVar = defVar(Flags.PARAMETER, "objectLong" + i, TypeTag.LONG, bitAnd(contextFeaturesIdent, ReferenceDetection.mask));
             notNullStmts.append(objectLongVar);
             notNullStmts.append(exec(assign(objectIntVar, ternary(eq(objectLongVar, 0), literal(0), ternary(lt(objectLongVar, 0), -1, 1)))));
             notNullStmts.append(defIf(eq(objectIntVar, 0), block(defBreak(innerLabel)), null));
 
             notNullStmts.append(defIf(eq(objectIdent, ident(objectVar)),
                     block(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
-                            exec(method(field(jsonWriterIdent, "writeReference"), List.of(literal("..")))),
+                            exec(method(jsonWriterIdent, "writeReference", "..")),
                             defBreak(outerLabel)), null));
 
-            notNullStmts.append(exec(assign(objectStrVar, method(field(jsonWriterIdent, "setPath"), List.of(field(ident(names._this), fieldWriter(i)), ident(objectVar))))));
+            notNullStmts.append(
+                    exec(
+                            assign(
+                                    objectStrVar,
+                                    method(
+                                            jsonWriterIdent,
+                                            "setPath",
+                                            field(names._this, fieldWriter(i)),
+                                            objectVar
+                                    )
+                            )
+                    )
+            );
             notNullStmts.append(defIf(eq(objectStrVar, defNull()), block(defBreak(innerLabel)), null));
 
             notNullStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-            notNullStmts.append(exec(method(field(jsonWriterIdent, "writeReference"), List.of(ident(objectStrVar)))));
-            notNullStmts.append(exec(method(field(jsonWriterIdent, "popPath"), List.of(ident(objectVar)))));
+            notNullStmts.append(exec(method(jsonWriterIdent, "writeReference", objectStrVar)));
+            notNullStmts.append(exec(method(jsonWriterIdent, "popPath", objectVar)));
 
             ListBuffer<JCTree.JCStatement> innerLabelStmts = new ListBuffer<>();
             innerLabelStmts.append(defIf(ne(objectVar, defNull()), block(notNullStmts.toList()), null));
@@ -2168,16 +2325,35 @@ public class JSONCompiledAnnotationProcessor
             JCTree.JCBinary binary = ne(bitAnd(contextFeaturesIdent, WriteMapNullValue.mask), 0);
             innerLabelStmts.append(defIf(binary,
                     block(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb),
-                            exec(method(field(jsonWriterIdent, WRITE_NULL_METHOD)))),
+                            exec(method(jsonWriterIdent, WRITE_NULL_METHOD))),
                     null));
             innerLabelStmts.append(defBreak(outerLabel));
             innerLabel.body = block(innerLabelStmts.toList());
 
             outerLabelStmts.append(innerLabel);
             outerLabelStmts.append(genWriteFieldName(jsonWriterIdent, attributeInfo, quoteIdent, isJsonb));
-            outerLabelStmts.append(exec(method(field(method(field(field(ident(names._this), fieldWriter(i)), "getObjectWriter"), List.of(jsonWriterIdent, method(field(ident(objectVar), "getClass")))),
-                    "write"), List.of(jsonWriterIdent, ident(objectVar), literal(attributeInfo.name), field(field(ident(names._this), fieldWriter(i)), "fieldType"), literal(TypeTag.LONG, 0L)))));
-            outerLabelStmts.append(defIf(ne(objectIntVar, 0), block(exec(method(field(jsonWriterIdent, "popPath"), List.of(ident(objectVar))))), null));
+            outerLabelStmts.append(
+                    exec(method(
+                            method(
+                                    field(names._this, fieldWriter(i)),
+                                    "getObjectWriter",
+                                    jsonWriterIdent,
+                                    method(objectVar, "getClass")
+                            ),
+                            "write",
+                            jsonWriterIdent,
+                            ident(objectVar),
+                            literal(attributeInfo.name),
+                            field(field(ident(names._this), fieldWriter(i)), "fieldType"),
+                            literal(0L))
+                    )
+            );
+            outerLabelStmts.append(
+                    defIf(
+                            ne(objectIntVar, 0),
+                            exec(method(jsonWriterIdent, "popPath", objectVar))
+                    )
+            );
 
             outerLabel.body = block(outerLabelStmts.toList());
             stmts.append(outerLabel);
@@ -2186,7 +2362,7 @@ public class JSONCompiledAnnotationProcessor
     }
 
     private JCTree.JCVariableDecl getHashCode32Var(JCTree.JCExpression hashCode64) {
-        JCTree.JCBinary usrBinary = binary(JCTree.Tag.USR, hashCode64, literal(TypeTag.INT, 32));
+        JCTree.JCBinary usrBinary = binary(JCTree.Tag.USR, hashCode64, literal(32));
         JCTree.JCPrimitiveTypeTree intType = type(TypeTag.INT);
         JCTree.JCTypeCast hashCode32Cast = cast(intType, bitXor(hashCode64, parens(usrBinary)));
         return defVar(Flags.PARAMETER, "hashCode32", intType, hashCode32Cast);
@@ -2213,18 +2389,18 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCFieldAccess fieldReaderField = field(ident(names._this), fieldReader(i));
         if (referenceDetect) {
             ListBuffer<JCTree.JCStatement> thenStmts = new ListBuffer<>();
-            JCTree.JCMethodInvocation readReferenceMethod = method(field(jsonReaderIdent, "readReference"));
+            JCTree.JCMethodInvocation readReferenceMethod = method(jsonReaderIdent, "readReference");
             JCTree.JCVariableDecl refVar = defVar(Flags.PARAMETER, "ref", ident("String"), readReferenceMethod);
             thenStmts.append(refVar);
-            JCTree.JCMethodInvocation addResolveTaskMethod = method(field(fieldReaderField, "addResolveTask"), List.of(jsonReaderIdent, objectIdent, ident(refVar)));
+            JCTree.JCMethodInvocation addResolveTaskMethod = method(fieldReaderField, "addResolveTask", jsonReaderIdent, objectIdent, ident(refVar));
             thenStmts.append(exec(addResolveTaskMethod));
             thenStmts.append(defContinue(loopLabel));
-            stmts.append(defIf(method(field(jsonReaderIdent, "isReference")), block(thenStmts.toList()), null));
+            stmts.append(defIf(method(jsonReaderIdent, "isReference"), block(thenStmts.toList()), null));
         }
 
         String readDirectMethod = getReadDirectMethod(type);
         if (readDirectMethod != null) {
-            valueExpr = method(field(jsonReaderIdent, readDirectMethod));
+            valueExpr = method(jsonReaderIdent, readDirectMethod);
         } else {
             JCTree.JCExpression fieldValueType = getFieldValueType(type);
             JCTree.JCVariableDecl fieldValueVar = defVar(Flags.PARAMETER, attributeInfo.name, fieldValueType);
@@ -2238,17 +2414,16 @@ public class JSONCompiledAnnotationProcessor
 
             if (valueExpr == null) {
                 JCTree.JCIdent objectReaderIdent = ident(fieldObjectReader(i));
-                JCTree.JCMethodInvocation getObjectReaderMethod = method(field(fieldReaderField, "getObjectReader"), List.of(jsonReaderIdent));
+                JCTree.JCMethodInvocation getObjectReaderMethod = method(fieldReaderField, "getObjectReader", jsonReaderIdent);
                 JCTree.JCAssign objectReaderAssign = assign(objectReaderIdent, getObjectReaderMethod);
                 stmts.append(defIf(eq(objectReaderIdent, defNull()), block(exec(objectReaderAssign)), null));
                 JCTree.JCMethodInvocation objectMethod = method(
-                        field(field(ident(names._this), fieldObjectReader(i)), isJsonb ? "readJSONBObject" : "readObject"),
-                        List.of(
-                                jsonReaderIdent,
-                                field(fieldReaderField, "fieldType"),
-                                literal(attributeInfo.name),
-                                literal(TypeTag.LONG, 0L)
-                        )
+                        field(ident(names._this), fieldObjectReader(i)),
+                        isJsonb ? "readJSONBObject" : "readObject",
+                        jsonReaderIdent,
+                        field(fieldReaderField, "fieldType"),
+                        literal(attributeInfo.name),
+                        literal(0L)
                 );
                 stmts.append(exec(assign(fieldValueVar, cast(fieldValueType, objectMethod))));
                 valueExpr = ident(fieldValueVar);
@@ -2256,7 +2431,7 @@ public class JSONCompiledAnnotationProcessor
         }
 
         if (attributeInfo.setMethod != null) {
-            stmts.append(exec(method(field(objectIdent, attributeInfo.setMethod.getSimpleName().toString()), List.of(valueExpr))));
+            stmts.append(exec(method(objectIdent, attributeInfo.setMethod.getSimpleName().toString(), valueExpr)));
         } else if (attributeInfo.field != null) {
             stmts.append(exec(assign(field(objectIdent, attributeInfo.field.getSimpleName().toString()), valueExpr)));
         } else {
@@ -2326,13 +2501,13 @@ public class JSONCompiledAnnotationProcessor
                 JCTree.JCMethodInvocation nextIfMethod;
                 switch (fieldNameLength) {
                     case 2:
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match2"));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match2");
                         break;
                     case 3:
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match3"));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match3");
                         break;
                     case 4:
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match4"), List.of(cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[3]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match4", literal(fieldName[3]));
                         break;
                     case 5: {
                         byte[] bytes4 = new byte[4];
@@ -2341,7 +2516,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match5"), List.of(literal(name1)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match5", literal(name1));
                         break;
                     }
                     case 6: {
@@ -2351,17 +2526,17 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = fieldName[5];
                         bytes4[3] = '"';
                         int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match6"), List.of(literal(name1)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match6", literal(name1));
                         break;
                     }
                     case 7: {
                         int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match7"), List.of(literal(name1)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match7", literal(name1));
                         break;
                     }
                     case 8: {
                         int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match8"), List.of(literal(name1), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[7]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match8", literal(name1), literal(fieldName[7]));
                         break;
                     }
                     case 9: {
@@ -2370,7 +2545,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match9"), List.of(literal(name1)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match9", literal(name1));
                         break;
                     }
                     case 10: {
@@ -2378,17 +2553,17 @@ public class JSONCompiledAnnotationProcessor
                         System.arraycopy(fieldName, 3, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match10"), List.of(literal(name1)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match10", literal(name1));
                         break;
                     }
                     case 11: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match11"), List.of(literal(name1)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match11", literal(name1));
                         break;
                     }
                     case 12: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match12"), List.of(literal(name1), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[11]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match12", literal(name1), literal(fieldName[11]));
                         break;
                     }
                     case 13: {
@@ -2399,7 +2574,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match13"), List.of(literal(name1), literal(name2)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match13", literal(name1), literal(name2));
                         break;
                     }
                     case 14: {
@@ -2410,19 +2585,19 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = fieldName[13];
                         bytes4[3] = '"';
                         int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match14"), List.of(literal(name1), literal(name2)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match14", name1, name2);
                         break;
                     }
                     case 15: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match15"), List.of(literal(name1), literal(name2)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match15", name1, name2);
                         break;
                     }
                     case 16: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match16"), List.of(literal(name1), literal(name2), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[15]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match16", name1, name2, fieldName[15]);
                         break;
                     }
                     case 17: {
@@ -2432,7 +2607,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match17"), List.of(literal(name1), literal(name2)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match17", name1, name2);
                         break;
                     }
                     case 18: {
@@ -2441,19 +2616,19 @@ public class JSONCompiledAnnotationProcessor
                         System.arraycopy(fieldName, 11, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match18"), List.of(literal(name1), literal(name2)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match18", name1, name2);
                         break;
                     }
                     case 19: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match19"), List.of(literal(name1), literal(name2)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match19", name1, name2);
                         break;
                     }
                     case 20: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match20"), List.of(literal(name1), literal(name2), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[19]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match20", name1, name2, fieldName[19]);
                         break;
                     }
                     case 21: {
@@ -2465,7 +2640,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match21"), List.of(literal(name1), literal(name2), literal(name3)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match21", name1, name2, name3);
                         break;
                     }
                     case 22: {
@@ -2477,21 +2652,21 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = fieldName[21];
                         bytes4[3] = '"';
                         int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match22"), List.of(literal(name1), literal(name2), literal(name3)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match22", name1, name2, name3);
                         break;
                     }
                     case 23: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match23"), List.of(literal(name1), literal(name2), literal(name3)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match23", name1, name2, name3);
                         break;
                     }
                     case 24: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match24"), List.of(literal(name1), literal(name2), literal(name3), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[23]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match24", name1, name2, name3, fieldName[23]);
                         break;
                     }
                     case 25: {
@@ -2502,7 +2677,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match25"), List.of(literal(name1), literal(name2), literal(name3)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match25", name1, name2, name3);
                         break;
                     }
                     case 26: {
@@ -2512,21 +2687,21 @@ public class JSONCompiledAnnotationProcessor
                         System.arraycopy(fieldName, 19, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match26"), List.of(literal(name1), literal(name2), literal(name3)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match26", name1, name2, name3);
                         break;
                     }
                     case 27: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match27"), List.of(literal(name1), literal(name2), literal(name3)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match27", name1, name2, name3);
                         break;
                     }
                     case 28: {
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match28"), List.of(literal(name1), literal(name2), literal(name3), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[27]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match28", name1, name2, name3, fieldName[27]);
                         break;
                     }
                     case 29: {
@@ -2539,7 +2714,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match29"), List.of(literal(name1), literal(name2), literal(name3), literal(name4)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match29", name1, name2, name3, name4);
                         break;
                     }
                     case 30: {
@@ -2552,7 +2727,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = fieldName[29];
                         bytes4[3] = '"';
                         int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match30"), List.of(literal(name1), literal(name2), literal(name3), literal(name4)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match30", name1, name2, name3, name4);
                         break;
                     }
                     case 31: {
@@ -2560,7 +2735,7 @@ public class JSONCompiledAnnotationProcessor
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
                         int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match31"), List.of(literal(name1), literal(name2), literal(name3), literal(name4)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match31", name1, name2, name3, name4);
                         break;
                     }
                     case 32: {
@@ -2568,7 +2743,7 @@ public class JSONCompiledAnnotationProcessor
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
                         int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match32"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[31]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match32", name1, name2, name3, name4, fieldName[31]);
                         break;
                     }
                     case 33: {
@@ -2580,7 +2755,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match33"), List.of(literal(name1), literal(name2), literal(name3), literal(name4)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match33", name1, name2, name3, name4);
                         break;
                     }
                     case 34: {
@@ -2591,7 +2766,7 @@ public class JSONCompiledAnnotationProcessor
                         System.arraycopy(fieldName, 27, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match34"), List.of(literal(name1), literal(name2), literal(name3), literal(name4)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match34", name1, name2, name3, name4);
                         break;
                     }
                     case 35: {
@@ -2599,7 +2774,7 @@ public class JSONCompiledAnnotationProcessor
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
                         long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match35"), List.of(literal(name1), literal(name2), literal(name3), literal(name4)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match35", name1, name2, name3, name4);
                         break;
                     }
                     case 36: {
@@ -2607,7 +2782,7 @@ public class JSONCompiledAnnotationProcessor
                         long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
                         long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match36"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[35]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match36", name1, name2, name3, name4, fieldName[35]);
                         break;
                     }
                     case 37: {
@@ -2621,7 +2796,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = '"';
                         bytes4[3] = ':';
                         int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match37"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), literal(name5)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match37", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 38: {
@@ -2635,7 +2810,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[2] = fieldName[37];
                         bytes4[3] = '"';
                         int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match38"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), literal(name5)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match38", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 39: {
@@ -2644,7 +2819,7 @@ public class JSONCompiledAnnotationProcessor
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
                         long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
                         int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match39"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), literal(name5)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match39", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 40: {
@@ -2653,7 +2828,7 @@ public class JSONCompiledAnnotationProcessor
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
                         long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
                         int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match40"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), literal(name5), cast(type(TypeTag.BYTE), literal(TypeTag.INT, fieldName[39]))));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match40", name1, name2, name3, name4, name5, fieldName[39]);
                         break;
                     }
                     case 41: {
@@ -2667,7 +2842,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes8[6] = '"';
                         bytes8[7] = ':';
                         long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match41"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), literal(name5)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match41", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 42: {
@@ -2679,7 +2854,7 @@ public class JSONCompiledAnnotationProcessor
                         System.arraycopy(fieldName, 35, bytes8, 0, 7);
                         bytes8[7] = '"';
                         long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match42"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), literal(name5)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match42", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 43: {
@@ -2688,7 +2863,7 @@ public class JSONCompiledAnnotationProcessor
                         long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
                         long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
                         long name5 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
-                        nextIfMethod = method(field(jsonReaderIdent, "nextIfName4Match43"), List.of(literal(name1), literal(name2), literal(name3), literal(name4), literal(name5)));
+                        nextIfMethod = method(jsonReaderIdent, "nextIfName4Match43", name1, name2, name3, name4, name5);
                         break;
                     }
                     default:
@@ -2700,7 +2875,7 @@ public class JSONCompiledAnnotationProcessor
             caseStmts.append(defBreak(switchLabel));
             cases.append(defCase(literal(name0), caseStmts.toList()));
         }
-        switchLabel.body = defSwitch(method(field(jsonReaderIdent, "getRawInt")), cases.toList());
+        switchLabel.body = defSwitch(method(jsonReaderIdent, "getRawInt"), cases.toList());
         stmts = stmts.append(switchLabel);
         return stmts;
     }
@@ -2720,7 +2895,7 @@ public class JSONCompiledAnnotationProcessor
         String itemType = type.substring(15, type.length() - 1);
         boolean itemTypeIsClass = itemType.indexOf('<') == -1;
         if (itemTypeIsClass) {
-            JCTree.JCMethodInvocation nextIfNullMethod = method(field(jsonReaderIdent, "nextIfNull"));
+            JCTree.JCMethodInvocation nextIfNullMethod = method(jsonReaderIdent, "nextIfNull");
             stmts.append(defIf(nextIfNullMethod,
                     block(exec(assign(fieldValueVar, defNull()))),
                     block(exec(assign(fieldValueVar, newClass(null, null, qualIdent("java.util.ArrayList"), null, null))))));
@@ -2729,7 +2904,7 @@ public class JSONCompiledAnnotationProcessor
             JCTree.JCIdent itemReaderIdent = ident(fieldItemObjectReader(i));
             if (readDirectMethod == null) {
                 JCTree.JCFieldAccess getItemObjectReaderField = field(fieldReaderField, "getItemObjectReader");
-                JCTree.JCExpressionStatement getItemObjectReaderExec = exec(assign(itemReaderIdent, method(getItemObjectReaderField, List.of(jsonReaderIdent))));
+                JCTree.JCExpressionStatement getItemObjectReaderExec = exec(assign(itemReaderIdent, method(getItemObjectReaderField, jsonReaderIdent)));
                 stmts.append(defIf(eq(itemReaderIdent, defNull()), block(getItemObjectReaderExec), null));
             }
 
@@ -2739,26 +2914,25 @@ public class JSONCompiledAnnotationProcessor
 
             JCTree.JCVariableDecl for_iVar;
             if ("i".equals(attributeInfo.name)) {
-                for_iVar = defVar(Flags.PARAMETER, "j", type(TypeTag.INT), literal(0));
+                for_iVar = defVar(Flags.PARAMETER, "j", TypeTag.INT, literal(0));
             } else {
-                for_iVar = defVar(Flags.PARAMETER, "i", type(TypeTag.INT), literal(0));
+                for_iVar = defVar(Flags.PARAMETER, "i", TypeTag.INT, literal(0));
             }
-            JCTree.JCMethodInvocation nextIfArrayStartMethod = method(field(jsonReaderIdent, "nextIfArrayStart"));
-            JCTree.JCMethodInvocation nextIfArrayEndMethod = method(field(jsonReaderIdent, "nextIfArrayEnd"));
+            JCTree.JCMethodInvocation nextIfArrayStartMethod = method(jsonReaderIdent, "nextIfArrayStart");
+            JCTree.JCMethodInvocation nextIfArrayEndMethod = method(jsonReaderIdent, "nextIfArrayEnd");
             ListBuffer<JCTree.JCStatement> whileStmts = new ListBuffer<>();
             JCTree.JCExpression item;
             if (readDirectMethod != null) {
-                item = method(field(jsonReaderIdent, readDirectMethod));
+                item = method(jsonReaderIdent, readDirectMethod);
             } else {
                 item = cast(
                         qualIdent(itemType),
                         method(
-                                field(itemReaderIdent, isJsonb ? "readJSONBObject" : "readObject"),
-                                List.of(
-                                        jsonReaderIdent, defNull(),
-                                        defNull(),
-                                        literal(TypeTag.LONG, 0L)
-                                )
+                                itemReaderIdent,
+                                isJsonb ? "readJSONBObject" : "readObject",
+                                jsonReaderIdent, defNull(),
+                                defNull(),
+                                literal(0L)
                         )
                 );
             }
@@ -2766,29 +2940,29 @@ public class JSONCompiledAnnotationProcessor
             if (referenceDetect) {
                 JCTree.JCVariableDecl listItemVar = defVar(Flags.PARAMETER, attributeInfo.name + "_item", getFieldValueType(itemType), item);
                 ListBuffer<JCTree.JCStatement> isReferenceStmts = new ListBuffer<>();
-                JCTree.JCMethodInvocation readReferenceMethod = method(field(jsonReaderIdent, "readReference"));
+                JCTree.JCMethodInvocation readReferenceMethod = method(jsonReaderIdent, "readReference");
                 JCTree.JCVariableDecl refVar = defVar(Flags.PARAMETER, "ref", ident("String"), readReferenceMethod);
                 isReferenceStmts.append(refVar);
                 JCTree.JCMethodInvocation addResolveTaskMethod = method(
-                        field(jsonReaderIdent, "addResolveTask"),
-                        List.of(
-                                ident(fieldValueVar),
-                                ident(for_iVar),
-                                method(
-                                        field(qualIdent("com.alibaba.fastjson2.JSONPath"), "of"),
-                                        List.of(ident(refVar))
-                                )
+                        jsonReaderIdent,
+                        "addResolveTask",
+                        ident(fieldValueVar),
+                        ident(for_iVar),
+                        method(
+                                qualIdent("com.alibaba.fastjson2.JSONPath"),
+                                "of",
+                                ident(refVar)
                         )
                 );
                 isReferenceStmts.append(exec(addResolveTaskMethod));
-                isReferenceStmts.append(exec(method(field(fieldValueVar, "add"), List.of(defNull()))));
+                isReferenceStmts.append(exec(method(fieldValueVar, "add", defNull())));
                 isReferenceStmts.append(defContinue(loopLabel));
-                whileStmts.append(defIf(method(field(jsonReaderIdent, "isReference")), block(isReferenceStmts.toList()), null));
+                whileStmts.append(defIf(method(jsonReaderIdent, "isReference"), block(isReferenceStmts.toList()), null));
                 whileStmts.append(listItemVar);
                 item = ident(listItemVar);
             }
 
-            whileStmts.append(exec(method(field(fieldValueVar, "add"), List.of(item))));
+            whileStmts.append(exec(method(fieldValueVar, "add", item)));
 
             ListBuffer<JCTree.JCStatement> condStmts = new ListBuffer<>();
             if (referenceDetect) {
@@ -2815,7 +2989,7 @@ public class JSONCompiledAnnotationProcessor
             boolean isJsonb
     ) {
         String itemType = type.substring(31, type.length() - 1);
-        JCTree.JCMethodInvocation nextIfNullMethod = method(field(jsonReaderIdent, "nextIfNull"));
+        JCTree.JCMethodInvocation nextIfNullMethod = method(jsonReaderIdent, "nextIfNull");
 
         boolean readDirect = supportReadDirect(itemType);
 
@@ -2823,16 +2997,21 @@ public class JSONCompiledAnnotationProcessor
         JCTree.JCIdent itemReaderIdent = ident(fieldItemObjectReader(i));
         if (!readDirect) {
             JCTree.JCFieldAccess getObjectReaderField = field(jsonReaderIdent, "getObjectReader");
-            JCTree.JCExpressionStatement getItemObjectReaderExec = exec(assign(itemReaderIdent, method(getObjectReaderField, List.of(field(qualIdent(itemType), names._class)))));
+            JCTree.JCExpressionStatement getItemObjectReaderExec = exec(
+                    assign(
+                            itemReaderIdent,
+                            method(getObjectReaderField, field(qualIdent(itemType), names._class))
+                    )
+            );
             elseStmts.append(defIf(eq(itemReaderIdent, defNull()), block(getItemObjectReaderExec), null));
         }
 
         elseStmts.append(exec(assign(fieldValueVar, newClass(null, null, qualIdent("java.util.HashMap"), null, null))));
 
-        JCTree.JCMethodInvocation nextIfObjectStartMethod = method(field(jsonReaderIdent, "nextIfObjectStart"));
+        JCTree.JCMethodInvocation nextIfObjectStartMethod = method(jsonReaderIdent, "nextIfObjectStart");
         elseStmts.append(exec(nextIfObjectStartMethod));
 
-        JCTree.JCMethodInvocation nextIfObjectEndMethod = method(field(jsonReaderIdent, "nextIfObjectEnd"));
+        JCTree.JCMethodInvocation nextIfObjectEndMethod = method(jsonReaderIdent, "nextIfObjectEnd");
         ListBuffer<JCTree.JCStatement> whileStmts = new ListBuffer<>();
 
         if (referenceDetect) {
@@ -2841,22 +3020,21 @@ public class JSONCompiledAnnotationProcessor
 
         JCTree.JCExpression mapEntryValueExpr;
         if (readDirect) {
-            mapEntryValueExpr = cast(qualIdent(itemType), method(field(jsonReaderIdent, getReadDirectMethod(itemType))));
+            mapEntryValueExpr = cast(qualIdent(itemType), method(jsonReaderIdent, getReadDirectMethod(itemType)));
         } else {
             mapEntryValueExpr = cast(
                     qualIdent(itemType),
                     method(
-                            field(itemReaderIdent, isJsonb ? "readJSONBObject" : "readObject"),
-                            List.of(
-                                    jsonReaderIdent,
-                                    field(qualIdent(itemType), names._class),
+                            itemReaderIdent,
+                            isJsonb ? "readJSONBObject" : "readObject",
+                            jsonReaderIdent,
+                            field(qualIdent(itemType), names._class),
                                     literal(attributeInfo.name), ident("features")
-                            )
                     )
             );
         }
 
-        JCTree.JCExpression mapEntryKeyExpr = method(field(jsonReaderIdent, "readFieldName"));
+        JCTree.JCExpression mapEntryKeyExpr = method(jsonReaderIdent, "readFieldName");
 
         if (referenceDetect) {
             JCTree.JCVariableDecl mapKey = defVar(Flags.PARAMETER, attributeInfo.name + "_key", ident("String"), mapEntryKeyExpr);
@@ -2865,19 +3043,31 @@ public class JSONCompiledAnnotationProcessor
             whileStmts.append(mapValue);
 
             ListBuffer<JCTree.JCStatement> isReferenceStmts = new ListBuffer<>();
-            JCTree.JCMethodInvocation readReferenceMethod = method(field(jsonReaderIdent, "readReference"));
+            JCTree.JCMethodInvocation readReferenceMethod = method(jsonReaderIdent, "readReference");
             JCTree.JCVariableDecl refVar = defVar(Flags.PARAMETER, "ref", ident("String"), readReferenceMethod);
             isReferenceStmts.append(refVar);
-            JCTree.JCMethodInvocation addResolveTaskMethod = method(field(jsonReaderIdent, "addResolveTask"), List.of(ident(fieldValueVar), ident(mapKey), method(field(qualIdent("com.alibaba.fastjson2.JSONPath"), "of"), List.of(ident(refVar)))));
+            JCTree.JCMethodInvocation addResolveTaskMethod = method(
+                    jsonReaderIdent,
+                    "addResolveTask",
+                    ident(fieldValueVar),
+                    ident(mapKey),
+                    method(qualIdent("com.alibaba.fastjson2.JSONPath"), "of", ident(refVar))
+            );
             isReferenceStmts.append(exec(addResolveTaskMethod));
-            whileStmts.append(defIf(method(field(jsonReaderIdent, "isReference")), block(isReferenceStmts.toList()), exec(method(field(fieldValueVar, "put"), List.of(mapEntryKeyExpr, mapEntryValueExpr)))));
+            whileStmts.append(
+                    defIf(
+                            method(jsonReaderIdent, "isReference"),
+                            block(isReferenceStmts.toList()),
+                            exec(method(fieldValueVar, "put", mapEntryKeyExpr, mapEntryValueExpr))
+                    )
+            );
         } else {
-            whileStmts.append(exec(method(field(fieldValueVar, "put"), List.of(mapEntryKeyExpr, mapEntryValueExpr))));
+            whileStmts.append(exec(method(fieldValueVar, "put", mapEntryKeyExpr, mapEntryValueExpr)));
         }
 
         elseStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfObjectEndMethod), block(whileStmts.toList())));
 
-        elseStmts.append(exec(method(field(jsonReaderIdent, "nextIfComma"))));
+        elseStmts.append(exec(method(jsonReaderIdent, "nextIfComma")));
 
         stmts.append(defIf(nextIfNullMethod,
                 block(exec(assign(fieldValueVar, defNull()))),

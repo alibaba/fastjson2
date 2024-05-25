@@ -225,8 +225,16 @@ final class JavacTreeUtils {
         return defVar(flag, identName, identType, null);
     }
 
+    static JCTree.JCVariableDecl defVar(long flag, String identName, TypeTag typeTag) {
+        return defVar(flag, identName, type(typeTag), null);
+    }
+
     static JCTree.JCVariableDecl defVar(long flag, String identName, JCTree.JCExpression identType, JCTree.JCExpression init) {
         return treeMaker.VarDef(modifiers(flag), name(identName), identType, init);
+    }
+
+    static JCTree.JCVariableDecl defVar(long flag, String identName, TypeTag typeTag, JCTree.JCExpression init) {
+        return treeMaker.VarDef(modifiers(flag), name(identName), type(typeTag), init);
     }
 
     static JCTree.JCVariableDecl defVar(long flag, String identName, long init) {
@@ -241,11 +249,39 @@ final class JavacTreeUtils {
         return treeMaker.VarDef(modifiers(flag), name(identName), type(TypeTag.BOOLEAN), literal(init));
     }
 
-    static JCTree.JCMethodDecl defMethod(long flag, String name, JCTree.JCExpression rtnType, List<JCTree.JCTypeParameter> typeArgs, List<JCTree.JCVariableDecl> params, List<JCTree.JCExpression> recvArgs, JCTree.JCBlock block, JCTree.JCExpression defaultValue) {
+    static JCTree.JCMethodDecl defMethod(
+            long flag,
+            String name,
+            JCTree.JCExpression rtnType,
+            List<JCTree.JCVariableDecl> params,
+            JCTree.JCBlock block
+    ) {
+        return defMethod(flag, name(name), rtnType, null, params, null, block, null);
+    }
+
+    static JCTree.JCMethodDecl defMethod(
+            long flag,
+            String name,
+            JCTree.JCExpression rtnType,
+            List<JCTree.JCTypeParameter> typeArgs,
+            List<JCTree.JCVariableDecl> params,
+            List<JCTree.JCExpression> recvArgs,
+            JCTree.JCBlock block,
+            JCTree.JCExpression defaultValue
+    ) {
         return defMethod(flag, name(name), rtnType, typeArgs, params, recvArgs, block, defaultValue);
     }
 
-    static JCTree.JCMethodDecl defMethod(long flag, Name name, JCTree.JCExpression rtnType, List<JCTree.JCTypeParameter> typeArgs, List<JCTree.JCVariableDecl> params, List<JCTree.JCExpression> recvArgs, JCTree.JCBlock block, JCTree.JCExpression defaultValue) {
+    static JCTree.JCMethodDecl defMethod(
+            long flag,
+            Name name,
+            JCTree.JCExpression rtnType,
+            List<JCTree.JCTypeParameter> typeArgs,
+            List<JCTree.JCVariableDecl> params,
+            List<JCTree.JCExpression> recvArgs,
+            JCTree.JCBlock block,
+            JCTree.JCExpression defaultValue
+    ) {
         if (typeArgs == null) {
             typeArgs = List.nil();
         }
@@ -266,12 +302,39 @@ final class JavacTreeUtils {
         return method(null, method, args);
     }
 
+    static JCTree.JCMethodInvocation method(JCTree.JCExpression owner, String methodName, List<JCTree.JCExpression> args) {
+        return method(null, field(owner, methodName), args);
+    }
+
+    static JCTree.JCMethodInvocation method(JCTree.JCExpression method, JCTree.JCExpression arg0) {
+        return method(null, method, List.of(arg0));
+    }
+
+    static JCTree.JCMethodInvocation method(JCTree.JCExpression method, JCTree.JCExpression arg0, JCTree.JCExpression arg1, JCTree.JCExpression arg2) {
+        return method(null, method, List.of(arg0, arg1, arg2));
+    }
+
     static JCTree.JCMethodInvocation method(Name owner, String methodName, List<JCTree.JCExpression> args) {
         return method(null, field(ident(owner), methodName), args);
     }
 
     static JCTree.JCMethodInvocation method(
-            Name owner, String methodName
+            JCTree.JCExpression owner,
+            String methodName
+    ) {
+        return method(null, field(owner, methodName), null);
+    }
+
+    static JCTree.JCMethodInvocation method(
+            Name owner,
+            String methodName
+    ) {
+        return method(null, field(ident(owner), methodName), null);
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCVariableDecl owner,
+            String methodName
     ) {
         return method(null, field(ident(owner), methodName), null);
     }
@@ -283,7 +346,23 @@ final class JavacTreeUtils {
     }
 
     static JCTree.JCMethodInvocation method(
+            JCTree.JCExpression owner,
+            String methodName,
+            JCTree.JCExpression arg0
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0));
+    }
+
+    static JCTree.JCMethodInvocation method(
             Name owner,
+            String methodName,
+            JCTree.JCExpression arg0
+    ) {
+        return method(null, field(ident(owner), methodName), List.of(arg0));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCVariableDecl owner,
             String methodName,
             JCTree.JCExpression arg0
     ) {
@@ -296,6 +375,14 @@ final class JavacTreeUtils {
             JCTree.JCExpression arg0
     ) {
         return method(null, field(owner, methodName), List.of(arg0));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            String arg0
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0)));
     }
 
     static JCTree.JCMethodInvocation method(
@@ -316,7 +403,102 @@ final class JavacTreeUtils {
     }
 
     static JCTree.JCMethodInvocation method(
+            JCTree.JCExpression owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, arg1));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCExpression owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCVariableDecl arg1
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, ident(arg1)));
+    }
+
+    static JCTree.JCMethodInvocation method(
             JCTree.JCIdent owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, arg1));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            int arg1
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            int arg1,
+            byte arg2
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            byte arg2
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            int arg2
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            JCTree.JCExpression arg2
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), arg2));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCVariableDecl owner,
             String methodName,
             JCTree.JCExpression arg0,
             JCTree.JCExpression arg1
@@ -331,6 +513,16 @@ final class JavacTreeUtils {
             JCTree.JCVariableDecl arg1
     ) {
         return method(null, field(owner, methodName), List.of(arg0, ident(arg1)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCExpression owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1,
+            JCTree.JCExpression arg2
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, arg1, arg2));
     }
 
     static JCTree.JCMethodInvocation method(
@@ -354,6 +546,111 @@ final class JavacTreeUtils {
     }
 
     static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            long arg3
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            int arg3
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            byte arg3
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            int arg2,
+            byte arg3
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            int arg3,
+            byte arg4
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3), literal(arg4)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            long arg3,
+            byte arg4
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3), literal(arg4)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            long arg3,
+            int arg4
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3), literal(arg4)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            long arg3,
+            long arg4
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3), literal(arg4)));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCIdent owner,
+            String methodName,
+            long arg0,
+            long arg1,
+            long arg2,
+            long arg3,
+            int arg4,
+            byte arg5
+    ) {
+        return method(null, field(owner, methodName), List.of(literal(arg0), literal(arg1), literal(arg2), literal(arg3), literal(arg4), literal(arg5)));
+    }
+
+    static JCTree.JCMethodInvocation method(
             Name owner,
             String methodName,
             JCTree.JCExpression arg0,
@@ -362,6 +659,17 @@ final class JavacTreeUtils {
             JCTree.JCExpression... args
     ) {
         return method(null, field(ident(owner), methodName), List.of(arg0, arg1, arg2, args));
+    }
+
+    static JCTree.JCMethodInvocation method(
+            JCTree.JCExpression owner,
+            String methodName,
+            JCTree.JCExpression arg0,
+            JCTree.JCExpression arg1,
+            JCTree.JCExpression arg2,
+            JCTree.JCExpression... args
+    ) {
+        return method(null, field(owner, methodName), List.of(arg0, arg1, arg2, args));
     }
 
     static JCTree.JCMethodInvocation method(List<JCTree.JCExpression> typeArgs, JCTree.JCExpression method, List<JCTree.JCExpression> args) {
@@ -526,6 +834,10 @@ final class JavacTreeUtils {
         return block(0L, stmt);
     }
 
+    static JCTree.JCBlock block(JCTree.JCMethodInvocation expr) {
+        return block(0L, exec(expr));
+    }
+
     static JCTree.JCBlock block(JCTree.JCStatement... stmts) {
         return block(0L, List.from(stmts));
     }
@@ -546,6 +858,10 @@ final class JavacTreeUtils {
         return treeMaker.Literal(tag, object);
     }
 
+    static JCTree.JCExpression literal(byte value) {
+        return cast(type(TypeTag.BYTE), treeMaker.Literal(TypeTag.INT, value));
+    }
+
     static JCTree.JCLiteral literal(int value) {
         return treeMaker.Literal(TypeTag.INT, value);
     }
@@ -560,6 +876,10 @@ final class JavacTreeUtils {
 
     static JCTree.JCTypeCast cast(JCTree type, JCTree.JCExpression expr) {
         return treeMaker.TypeCast(type, expr);
+    }
+
+    static JCTree.JCTypeCast cast(TypeTag typeTage, JCTree.JCExpression expr) {
+        return treeMaker.TypeCast(type(typeTage), expr);
     }
 
     static JCTree.JCNewClass newClass(JCTree.JCExpression encl, List<JCTree.JCExpression> typeArgs, JCTree.JCExpression clazz, List<JCTree.JCExpression> args, JCTree.JCClassDecl def) {
@@ -688,6 +1008,10 @@ final class JavacTreeUtils {
         return treeMaker.Indexed(indexedExpr, indexExpr);
     }
 
+    static JCTree.JCLambda lambda(JCTree.JCVariableDecl arg, JCTree body) {
+        return treeMaker.Lambda(List.of(arg), body);
+    }
+
     static JCTree.JCLambda lambda(List<JCTree.JCVariableDecl> args, JCTree body) {
         if (args == null) {
             args = List.nil();
@@ -735,6 +1059,10 @@ final class JavacTreeUtils {
     }
 
     static JCTree.JCConditional ternary(JCTree.JCExpression cond, int trueExpr, int falseExpr) {
+        return treeMaker.Conditional(cond, literal(trueExpr), literal(falseExpr));
+    }
+
+    static JCTree.JCConditional ternary(JCTree.JCExpression cond, long trueExpr, long falseExpr) {
         return treeMaker.Conditional(cond, literal(trueExpr), literal(falseExpr));
     }
 
