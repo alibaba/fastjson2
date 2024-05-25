@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.sun.source.tree.MemberReferenceTree;
+import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
@@ -101,6 +102,10 @@ final class JavacTreeUtils {
 
     static JCTree.JCIdent ident(JCTree.JCVariableDecl var) {
         return treeMaker.Ident(var.name);
+    }
+
+    static JCTree.JCExpression qualIdent(Class type) {
+        return qualIdent(type.getName());
     }
 
     static JCTree.JCExpression qualIdent(String name) {
@@ -225,16 +230,40 @@ final class JavacTreeUtils {
         return defVar(flag, identName, identType, null);
     }
 
+    static JCTree.JCVariableDecl defVar(String identName, JCTree.JCExpression identType) {
+        return defVar(Flags.PARAMETER, identName, identType, null);
+    }
+
     static JCTree.JCVariableDecl defVar(long flag, String identName, TypeTag typeTag) {
         return defVar(flag, identName, type(typeTag), null);
+    }
+
+    static JCTree.JCVariableDecl defVar(String identName, TypeTag typeTag) {
+        return defVar(Flags.PARAMETER, identName, type(typeTag), null);
+    }
+
+    static JCTree.JCVariableDecl defVar(String identName, JCTree.JCExpression identType, JCTree.JCExpression init) {
+        return defVar(Flags.PARAMETER, identName, identType, init);
     }
 
     static JCTree.JCVariableDecl defVar(long flag, String identName, JCTree.JCExpression identType, JCTree.JCExpression init) {
         return treeMaker.VarDef(modifiers(flag), name(identName), identType, init);
     }
 
+    static JCTree.JCVariableDecl defVar(String identName, TypeTag typeTag, JCTree.JCExpression init) {
+        return treeMaker.VarDef(modifiers(Flags.PARAMETER), name(identName), type(typeTag), init);
+    }
+
     static JCTree.JCVariableDecl defVar(long flag, String identName, TypeTag typeTag, JCTree.JCExpression init) {
         return treeMaker.VarDef(modifiers(flag), name(identName), type(typeTag), init);
+    }
+
+    static JCTree.JCVariableDecl defVar(String identName, long init) {
+        return defVar(Flags.PARAMETER, identName, TypeTag.LONG, literal(init));
+    }
+
+    static JCTree.JCVariableDecl defVar(String identName, int init) {
+        return defVar(Flags.PARAMETER, identName, TypeTag.INT, literal(init));
     }
 
     static JCTree.JCVariableDecl defVar(long flag, String identName, long init) {
@@ -243,6 +272,10 @@ final class JavacTreeUtils {
 
     static JCTree.JCVariableDecl defVar(long flag, String identName, int init) {
         return treeMaker.VarDef(modifiers(flag), name(identName), type(TypeTag.INT), literal(init));
+    }
+
+    static JCTree.JCVariableDecl defVar(String identName, boolean init) {
+        return defVar(Flags.PARAMETER, identName, init);
     }
 
     static JCTree.JCVariableDecl defVar(long flag, String identName, boolean init) {
@@ -718,6 +751,10 @@ final class JavacTreeUtils {
         return treeMaker.Assign(expr1, expr2);
     }
 
+    static JCTree.JCIf defIf(JCTree.JCVariableDecl cond, JCTree.JCStatement thenStmt, JCTree.JCStatement elseStmt) {
+        return defIf(ident(cond), thenStmt, elseStmt);
+    }
+
     static JCTree.JCIf defIf(JCTree.JCExpression cond, JCTree.JCStatement thenStmt, JCTree.JCStatement elseStmt) {
         return treeMaker.If(cond, thenStmt, elseStmt);
     }
@@ -774,6 +811,10 @@ final class JavacTreeUtils {
         return treeMaker.Binary(JCTree.Tag.EQ, ident(expr1), literal(expr2));
     }
 
+    static JCTree.JCBinary notNull(JCTree.JCExpression expr1) {
+        return treeMaker.Binary(JCTree.Tag.NE, expr1, defNull());
+    }
+
     static JCTree.JCBinary ne(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
         return treeMaker.Binary(JCTree.Tag.NE, expr1, expr2);
     }
@@ -818,6 +859,10 @@ final class JavacTreeUtils {
         return treeMaker.Binary(JCTree.Tag.BITAND, expr1, literal(value));
     }
 
+    static JCTree.JCBinary bitAnd(JCTree.JCVariableDecl expr1, long value) {
+        return treeMaker.Binary(JCTree.Tag.BITAND, ident(expr1), literal(value));
+    }
+
     static JCTree.JCBinary bitAnd(JCTree.JCExpression expr1, JSONWriter.Feature value) {
         return treeMaker.Binary(JCTree.Tag.BITAND, expr1, literal(value.mask));
     }
@@ -828,6 +873,18 @@ final class JavacTreeUtils {
 
     static JCTree.JCUnary unary(JCTree.Tag tag, JCTree.JCExpression expr) {
         return treeMaker.Unary(tag, expr);
+    }
+
+    static JCTree.JCUnary not(JCTree.JCExpression expr) {
+        return treeMaker.Unary(JCTree.Tag.NOT, expr);
+    }
+
+    static JCTree.JCUnary not(JCTree.JCVariableDecl var) {
+        return treeMaker.Unary(JCTree.Tag.NOT, ident(var));
+    }
+
+    static JCTree.JCUnary not(JCTree.JCExpression expr, String name) {
+        return not(field(expr, name));
     }
 
     static JCTree.JCBlock block(JCTree.JCStatement stmt) {
@@ -894,6 +951,10 @@ final class JavacTreeUtils {
 
     static JCTree.JCPrimitiveTypeTree type(TypeTag tag) {
         return treeMaker.TypeIdent(tag);
+    }
+
+    static JCTree.JCLabeledStatement label(String name) {
+        return label(name, null);
     }
 
     static JCTree.JCLabeledStatement label(String name, JCTree.JCStatement stmt) {
@@ -1058,8 +1119,20 @@ final class JavacTreeUtils {
         return treeMaker.Conditional(cond, trueExpr, falseExpr);
     }
 
+    static JCTree.JCConditional ternary(JCTree.JCVariableDecl cond, JCTree.JCExpression trueExpr, JCTree.JCExpression falseExpr) {
+        return treeMaker.Conditional(ident(cond), trueExpr, falseExpr);
+    }
+
+    static JCTree.JCConditional ternary(JCTree.JCExpression cond, JCTree.JCExpression trueExpr, boolean falseExpr) {
+        return treeMaker.Conditional(cond, trueExpr, literal(falseExpr));
+    }
+
     static JCTree.JCConditional ternary(JCTree.JCExpression cond, int trueExpr, int falseExpr) {
         return treeMaker.Conditional(cond, literal(trueExpr), literal(falseExpr));
+    }
+
+    static JCTree.JCConditional ternary(JCTree.JCVariableDecl cond, int trueExpr, int falseExpr) {
+        return treeMaker.Conditional(ident(cond), literal(trueExpr), literal(falseExpr));
     }
 
     static JCTree.JCConditional ternary(JCTree.JCExpression cond, long trueExpr, long falseExpr) {
@@ -1068,5 +1141,21 @@ final class JavacTreeUtils {
 
     static void pos(int pos) {
         treeMaker.pos = pos;
+    }
+
+    static JCTree.JCBinary isDisable(JCTree.JCExpression featureValues, JSONWriter.Feature feature) {
+        return eq(bitAnd(featureValues, literal(feature.mask)), 0);
+    }
+
+    static JCTree.JCBinary isDisable(JCTree.JCExpression featureValues, JSONWriter.Feature feature0, JSONWriter.Feature feature1) {
+        return eq(bitAnd(featureValues, literal(feature0.mask | feature1.mask)), 0);
+    }
+
+    static JCTree.JCBinary isEnable(JCTree.JCExpression featureValues, JSONWriter.Feature feature) {
+        return ne(bitAnd(featureValues, literal(feature.mask)), 0);
+    }
+
+    static JCTree.JCBinary isEnable(JCTree.JCExpression featureValues, JSONWriter.Feature feature0, JSONWriter.Feature feature1) {
+        return ne(bitAnd(featureValues, literal(feature0.mask | feature1.mask)), 0);
     }
 }
