@@ -41,7 +41,7 @@ public final class ObjectReaderImplInt64ValueArray
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         long[] array = new long[collection.size()];
         int i = 0;
         for (Object item : collection) {

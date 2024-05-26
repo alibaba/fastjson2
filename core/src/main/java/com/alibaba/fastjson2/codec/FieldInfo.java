@@ -17,6 +17,7 @@ public class FieldInfo {
     public static final long READ_ONLY = 1L << 56;
     public static final long DISABLE_SMART_MATCH = 1L << 57;
     public static final long DISABLE_REFERENCE_DETECT = 1L << 58;
+    public static final long BACKR_EFERENCE = 1L << 61;
 
     public String fieldName;
     public String format;

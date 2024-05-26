@@ -105,7 +105,7 @@ class ObjectReaderImplMapTyped
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
                     try {
-                        value = valueObjectReader.createInstance((JSONArray) value);
+                        value = valueObjectReader.createInstance((JSONArray) value, features);
                     } catch (Exception ignored) {
                         // ignored
                     }
@@ -125,7 +125,7 @@ class ObjectReaderImplMapTyped
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    value = valueObjectReader.createInstance((Collection) value);
+                    value = valueObjectReader.createInstance((Collection) value, features);
                 } else {
                     if (!valueClass.isInstance(value)) {
                         throw new JSONException("can not convert from " + valueClass + " to " + valueType);
@@ -264,6 +264,9 @@ class ObjectReaderImplMapTyped
         }
 
         if (builder != null) {
+            if (builder == ObjectReaderImplMap.ENUM_MAP_BUILDER && object.isEmpty()) {
+                return new EnumMap((Class) keyType);
+            }
             return builder.apply(object);
         }
 
@@ -364,9 +367,22 @@ class ObjectReaderImplMapTyped
                     } else {
                         name = jsonReader.read(keyType);
                     }
+                    if (name == null && Enum.class.isAssignableFrom((Class) keyType)) {
+                        name = jsonReader.getString();
+                        jsonReader.nextIfMatch(':');
+                    }
                     if (index == 0
                             && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                             && name.equals(getTypeKey())) {
+                        long typeHashCode = jsonReader.readTypeHashCode();
+                        ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
+                        if (objectReaderAutoType != null) {
+                            if (objectReaderAutoType instanceof ObjectReaderImplMap) {
+                                if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
+                                    object = (Map) objectReaderAutoType.createInstance(features);
+                                }
+                            }
+                        }
                         continue;
                     }
                     jsonReader.nextIfMatch(':');

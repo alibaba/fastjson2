@@ -21,7 +21,7 @@ public final class ObjectReaderImplFromLong<T>
         }
 
         return creator.apply(
-                jsonReader.readInt32Value()
+                jsonReader.readInt64Value()
         );
     }
 
@@ -32,7 +32,7 @@ public final class ObjectReaderImplFromLong<T>
         }
 
         return creator.apply(
-                jsonReader.readInt32Value()
+                jsonReader.readInt64Value()
         );
     }
 }

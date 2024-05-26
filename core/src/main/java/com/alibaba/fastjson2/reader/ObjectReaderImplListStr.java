@@ -39,7 +39,7 @@ public final class ObjectReaderImplListStr
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         if (listType.isInstance(collection)) {
             boolean typeMatch = true;
             for (Object item : collection) {
@@ -53,7 +53,7 @@ public final class ObjectReaderImplListStr
             }
         }
 
-        Collection typedList = (Collection) createInstance(0L);
+        Collection typedList = (Collection) createInstance(features);
         for (Object item : collection) {
             if (item == null || item instanceof String) {
                 typedList.add(item);

@@ -16,7 +16,7 @@ public final class ObjectReaderImplStringArray
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         String[] array = new String[collection.size()];
         int i = 0;
         for (Object item : collection) {

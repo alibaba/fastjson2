@@ -585,8 +585,17 @@ public abstract class JSONReader
             }
             case JSON_TYPE_INT64:
             case JSON_TYPE_FLOAT:
-            case JSON_TYPE_DOUBLE:
-                return getNumber().intValue();
+            case JSON_TYPE_DOUBLE: {
+                Number num = getNumber();
+                long int64 = num.longValue();
+                if ((int64 < Integer.MIN_VALUE || int64 > Integer.MAX_VALUE)
+                        && (context.features & Feature.NonErrorOnNumberOverflow.mask) == 0
+                ) {
+                    throw new JSONException(info("integer overflow " + int64));
+                }
+                return (int) int64;
+                //if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
+            }
             case JSON_TYPE_BIG_DEC:
                 return getBigDecimal()
                         .intValue();
@@ -823,6 +832,14 @@ public abstract class JSONReader
             Instant instant = Instant.ofEpochMilli(millis);
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
             return zdt.dateTime;
+        }
+
+        if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
+            nextIfMatch(':');
+            LocalDateTime dateTime = readLocalDateTime();
+            nextIfObjectEnd();
+            setTypeRedirect(false);
+            return dateTime;
         }
 
         if (context.dateFormat == null
@@ -1564,7 +1581,7 @@ public abstract class JSONReader
 
             Object name;
             if (match || typeRedirect) {
-                if (ch >= '1' && ch <= '9') {
+                if ((ch >= '0' && ch <= '9') || ch == '-') {
                     name = null;
                 } else {
                     name = readFieldName();
@@ -1659,6 +1676,14 @@ public abstract class JSONReader
             }
 
             if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
+            if (i == 0
+                    && (contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
                 continue;
             }
 
@@ -2280,22 +2305,39 @@ public abstract class JSONReader
             case JSON_TYPE_INT:
             case JSON_TYPE_INT64: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    int intVlaue;
+                    int intValue;
                     if (negative) {
                         if (mag3 < 0) {
-                            return -(mag3 & 0xFFFFFFFFL);
+                            long longValue = -(mag3 & 0xFFFFFFFFL);
+                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                                return BigInteger.valueOf(longValue);
+                            }
+                            return longValue;
                         }
-                        intVlaue = -mag3;
+                        intValue = -mag3;
                     } else {
                         if (mag3 < 0) {
-                            return mag3 & 0xFFFFFFFFL;
+                            long longValue = mag3 & 0xFFFFFFFFL;
+                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                                return BigInteger.valueOf(longValue);
+                            }
+                            return longValue;
                         }
-                        intVlaue = mag3;
+                        intValue = mag3;
                     }
+
+                    if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                        return BigInteger.valueOf(intValue);
+                    }
+
+                    if ((context.features & Feature.UseLongForInts.mask) != 0) {
+                        return Long.valueOf(intValue);
+                    }
+
                     if (valueType == JSON_TYPE_INT64) {
-                        return Long.valueOf(intVlaue);
+                        return (long) intValue;
                     }
-                    return Integer.valueOf(intVlaue);
+                    return intValue;
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -2305,7 +2347,11 @@ public abstract class JSONReader
 
                         if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
-                            return negative ? -v23 : v23;
+                            long longValue = negative ? -v23 : v23;
+                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                                return BigInteger.valueOf(longValue);
+                            }
+                            return longValue;
                         }
                         mag = new int[]{mag2, mag3};
                     } else {
@@ -2316,7 +2362,11 @@ public abstract class JSONReader
                 }
 
                 int signum = negative ? -1 : 1;
-                return BIG_INTEGER_CREATOR.apply(signum, mag);
+                BigInteger integer = BIG_INTEGER_CREATOR.apply(signum, mag);
+                if ((context.features & Feature.UseLongForInts.mask) != 0) {
+                    return integer.longValue();
+                }
+                return integer;
             }
             case JSON_TYPE_INT16: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
@@ -3564,6 +3614,13 @@ public abstract class JSONReader
             return features;
         }
 
+        /**
+         * @since 2.0.51
+         */
+        public void setFeatures(long features) {
+            this.features = features;
+        }
+
         public void setZoneId(ZoneId zoneId) {
             this.zoneId = zoneId;
         }
@@ -3726,7 +3783,47 @@ public abstract class JSONReader
         /**
          * @since 2.0.48
          */
-        NonErrorOnNumberOverflow(1 << 28);
+        NonErrorOnNumberOverflow(1 << 28),
+
+        /**
+         * Feature that determines whether JSON integral (non-floating-point)
+         * numbers are to be deserialized into {@link java.math.BigInteger}s
+         * if only generic type description (either {@link Object} or
+         * {@link Number}, or within untyped {@link java.util.Map}
+         * or {@link java.util.Collection} context) is available.
+         * If enabled such values will be deserialized as
+         * {@link java.math.BigInteger}s;
+         * if disabled, will be deserialized as "smallest" available type,
+         * which is either {@link Integer}, {@link Long} or
+         * {@link java.math.BigInteger}, depending on number of digits.
+         * <p>
+         * Feature is disabled by default, meaning that "untyped" integral
+         * numbers will by default be deserialized using whatever
+         * is the most compact integral type, to optimize efficiency.
+         * @since 2.0.51
+         */
+        UseBigIntegerForInts(1 << 29),
+
+        /**
+         * Feature that determines how "small" JSON integral (non-floating-point)
+         * numbers -- ones that fit in 32-bit signed integer (`int`) -- are bound
+         * when target type is loosely typed as {@link Object} or {@link Number}
+         * (or within untyped {@link java.util.Map} or {@link java.util.Collection} context).
+         * If enabled, such values will be deserialized as {@link java.lang.Long};
+         * if disabled, they will be deserialized as "smallest" available type,
+         * {@link Integer}.
+         *<p>
+         * Note: if {@link #UseBigIntegerForInts} is enabled, it has precedence
+         * over this setting, forcing use of {@link java.math.BigInteger} for all
+         * integral values.
+         *<p>
+         * Feature is disabled by default, meaning that "untyped" integral
+         * numbers will by default be deserialized using {@link java.lang.Integer}
+         * if value fits.
+         *
+         * @since 2.0.51
+         */
+        UseLongForInts(1 << 30);
 
         public final long mask;
 

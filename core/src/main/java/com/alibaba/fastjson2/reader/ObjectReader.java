@@ -33,6 +33,22 @@ public interface ObjectReader<T> {
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
     default T createInstance(Collection collection) {
+        return createInstance(collection, 0L);
+    }
+
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
+    default T createInstance(Collection collection, JSONReader.Feature... features) {
+        return createInstance(collection, JSONReader.Feature.of(features));
+    }
+
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
+    default T createInstance(Collection collection, long features) {
         throw new UnsupportedOperationException(this.getClass().getName());
     }
 

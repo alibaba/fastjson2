@@ -256,7 +256,7 @@ public final class ObjectReaderImplList
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         int size = collection.size();
 
         if (size == 0 && (listClass == List.class)) {
@@ -273,7 +273,7 @@ public final class ObjectReaderImplList
         if (instanceType == ArrayList.class) {
             list = new ArrayList(collection.size());
         } else {
-            list = (Collection) createInstance(0L);
+            list = (Collection) createInstance(features);
         }
 
         for (Object item : collection) {
@@ -290,7 +290,7 @@ public final class ObjectReaderImplList
                 if (itemObjectReader == null) {
                     itemObjectReader = provider.getObjectReader(itemType);
                 }
-                value = itemObjectReader.createInstance((JSONObject) value, 0L);
+                value = itemObjectReader.createInstance((JSONObject) value, features);
             } else if (valueClass != itemType) {
                 Function typeConvert = provider.getTypeConvert(valueClass, itemType);
                 if (typeConvert != null) {
@@ -300,12 +300,12 @@ public final class ObjectReaderImplList
                     if (itemObjectReader == null) {
                         itemObjectReader = provider.getObjectReader(itemType);
                     }
-                    value = itemObjectReader.createInstance(map, 0L);
+                    value = itemObjectReader.createInstance(map, features);
                 } else if (value instanceof Collection) {
                     if (itemObjectReader == null) {
                         itemObjectReader = provider.getObjectReader(itemType);
                     }
-                    value = itemObjectReader.createInstance((Collection) value);
+                    value = itemObjectReader.createInstance((Collection) value, features);
                 } else if (itemClass.isInstance(value)) {
                     // skip
                 } else if (Enum.class.isAssignableFrom(itemClass)) {

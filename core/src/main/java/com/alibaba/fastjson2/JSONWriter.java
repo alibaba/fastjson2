@@ -246,6 +246,22 @@ public abstract class JSONWriter
         return refs != null && refs.containsKey(value);
     }
 
+    public final String getPath(Object value) {
+        Path path;
+        return refs == null || (path = refs.get(value)) == null
+                ? "$"
+                : path.toString();
+    }
+
+    /**
+     * If ReferenceDetection has been set, returns the path of the current object, otherwise returns null
+     * @since 2.0.51
+     * @return the path of the current object
+     */
+    public String getPath() {
+        return path == null ? null : path.toString();
+    }
+
     public final boolean removeReference(Object value) {
         return this.refs != null && this.refs.remove(value) != null;
     }
@@ -1592,6 +1608,13 @@ public abstract class JSONWriter
             return features;
         }
 
+        /**
+         * @since 2.0.51
+         */
+        public void setFeatures(long features) {
+            this.features = features;
+        }
+
         public boolean isEnabled(Feature feature) {
             return (this.features & feature.mask) != 0;
         }
@@ -1923,7 +1946,17 @@ public abstract class JSONWriter
         /**
          * @since 2.0.7
          */
+        /**
+         * @since 2.0.7
+         * @deprecated use IgnoreEmpty
+         */
         NotWriteEmptyArray(1 << 26),
+
+        /**
+         * @since 2.0.51
+         */
+        IgnoreEmpty(1L << 26),
+
         WriteNonStringKeyAsString(1 << 27),
         /**
          * @since 2.0.11
