@@ -246,6 +246,14 @@ final class JavacTreeUtils {
         return defVar(Flags.PARAMETER, identName, identType, init);
     }
 
+    static JCTree.JCVariableDecl defVar(Name identName, JCTree.JCExpression identType, JCTree.JCExpression init) {
+        return defVar(Flags.PARAMETER, identName, identType, init);
+    }
+
+    static JCTree.JCVariableDecl defVar(long flag, Name identName, JCTree.JCExpression identType, JCTree.JCExpression init) {
+        return treeMaker.VarDef(modifiers(flag), identName, identType, init);
+    }
+
     static JCTree.JCVariableDecl defVar(long flag, String identName, JCTree.JCExpression identType, JCTree.JCExpression init) {
         return treeMaker.VarDef(modifiers(flag), name(identName), identType, init);
     }
@@ -811,8 +819,12 @@ final class JavacTreeUtils {
         return treeMaker.Binary(JCTree.Tag.EQ, ident(expr1), literal(expr2));
     }
 
+    static JCTree.JCBinary notNull(JCTree.JCVariableDecl expr1) {
+        return ne(expr1, defNull());
+    }
+
     static JCTree.JCBinary notNull(JCTree.JCExpression expr1) {
-        return treeMaker.Binary(JCTree.Tag.NE, expr1, defNull());
+        return ne(expr1, defNull());
     }
 
     static JCTree.JCBinary ne(JCTree.JCExpression expr1, JCTree.JCExpression expr2) {
@@ -1157,5 +1169,13 @@ final class JavacTreeUtils {
 
     static JCTree.JCBinary isEnable(JCTree.JCExpression featureValues, JSONWriter.Feature feature0, JSONWriter.Feature feature1) {
         return ne(bitAnd(featureValues, literal(feature0.mask | feature1.mask)), 0);
+    }
+    static JCTree.JCBinary isEnable(
+            JCTree.JCExpression featureValues,
+            JSONWriter.Feature feature0,
+            JSONWriter.Feature feature1,
+            JSONWriter.Feature feature2
+    ) {
+        return ne(bitAnd(featureValues, feature0.mask | feature1.mask | feature2.mask), 0);
     }
 }

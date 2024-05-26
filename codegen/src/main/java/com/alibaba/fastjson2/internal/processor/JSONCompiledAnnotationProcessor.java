@@ -1651,23 +1651,27 @@ public class JSONCompiledAnnotationProcessor
             int i
     ) {
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
+
         String type = attributeInfo.type.toString();
         JCTree.JCVariableDecl integerVar = defVar("integer" + i, qualIdent(type), genWriteFieldValue(attributeInfo, mwc.object, mwc.beanType));
         stmts.append(integerVar);
 
-        ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
-        notZeroStmts.append(genWriteFieldName(mwc, attributeInfo));
-        notZeroStmts.append(exec(mwc.jsonWriterMethod("writeNumberNull")));
-
-        ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
-        JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
-        nullStmts.append(defIf(ne(bitAnd(mwc.contextFeatures, writeAsStringBinary), 0), block(notZeroStmts.toList())));
-
-        ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
-        notNullStmts.append(genWriteFieldName(mwc, attributeInfo));
-        notNullStmts.append(exec(mwc.jsonWriterMethod("writeInt32", integerVar)));
-
-        stmts.append(defIf(eq(integerVar, defNull()), block(nullStmts.toList()), block(notNullStmts.toList())));
+        stmts.append(
+                defIf(
+                        ne(integerVar, defNull()),
+                        block(
+                                genWriteFieldName(mwc, attributeInfo),
+                                exec(mwc.jsonWriterMethod("writeInt32", integerVar))
+                        ),
+                        defIf(
+                                isEnable(mwc.contextFeatures, WriteNulls, NullAsDefaultValue, WriteNullNumberAsZero),
+                                block(
+                                        genWriteFieldName(mwc, attributeInfo),
+                                        exec(mwc.jsonWriterMethod("writeNumberNull"))
+                                )
+                        )
+                )
+        );
         return stmts;
     }
 
@@ -1677,23 +1681,27 @@ public class JSONCompiledAnnotationProcessor
             int i
     ) {
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
+
         String type = attributeInfo.type.toString();
-        JCTree.JCVariableDecl longVar = defVar("long" + i, qualIdent(type), genWriteFieldValue(attributeInfo, mwc.object, mwc.beanType));
-        stmts.append(longVar);
+        JCTree.JCVariableDecl integerVar = defVar("long" + i, qualIdent(type), genWriteFieldValue(attributeInfo, mwc.object, mwc.beanType));
+        stmts.append(integerVar);
 
-        ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
-        notZeroStmts.append(genWriteFieldName(mwc, attributeInfo));
-        notZeroStmts.append(exec(mwc.jsonWriterMethod("writeInt64Null")));
-
-        ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
-        JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
-        nullStmts.append(defIf(ne(bitAnd(mwc.contextFeatures, writeAsStringBinary), 0), block(notZeroStmts.toList())));
-
-        ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
-        notNullStmts.append(genWriteFieldName(mwc, attributeInfo));
-        notNullStmts.append(exec(mwc.jsonWriterMethod("writeInt64", longVar)));
-
-        stmts.append(defIf(eq(longVar, defNull()), block(nullStmts.toList()), block(notNullStmts.toList())));
+        stmts.append(
+                defIf(
+                        ne(integerVar, defNull()),
+                        block(
+                                genWriteFieldName(mwc, attributeInfo),
+                                exec(mwc.jsonWriterMethod("writeInt64", integerVar))
+                        ),
+                        defIf(
+                                isEnable(mwc.contextFeatures, WriteNulls, NullAsDefaultValue, WriteNullNumberAsZero),
+                                block(
+                                        genWriteFieldName(mwc, attributeInfo),
+                                        exec(mwc.jsonWriterMethod("writeInt64Null"))
+                                )
+                        )
+                )
+        );
         return stmts;
     }
 
@@ -1752,33 +1760,33 @@ public class JSONCompiledAnnotationProcessor
             AttributeInfo attributeInfo,
             int i
     ) {
+        final long writeNullFeatures = WriteNulls.mask | NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask;
+        final long writeNullAsEmptyFeatures = JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+
+        JCTree.JCIdent fieldValue = ident("string" + i);
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
-        String type = attributeInfo.type.toString();
-        JCTree.JCVariableDecl stringVar = defVar("string" + i, qualIdent(type), genWriteFieldValue(attributeInfo, mwc.object, mwc.beanType));
-        stmts.append(stringVar);
-
-        ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
-        notNullStmts.append(genWriteFieldName(mwc, attributeInfo));
-        notNullStmts.append(exec(mwc.jsonWriterMethod("writeString", stringVar)));
-
-        ListBuffer<JCTree.JCStatement> notZeroStmts = new ListBuffer<>();
-        notZeroStmts.append(genWriteFieldName(mwc, attributeInfo));
-        notZeroStmts.append(defIf(mwc.jsonWriterMethod("isEnabled", mwc.contextFeatures),
-                block(exec(mwc.jsonWriterMethod("writeString", literal("")))),
-                block(exec(mwc.jsonWriterMethod("writeStringNull")))));
-
-        ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
-        JCTree.JCBinary binary1
-                = ne(
-                bitAnd(
-                        mwc.contextFeatures,
-                        literal(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask)
-                ),
-                0L);
-        JCTree.JCBinary binary2 = eq(bitAnd(mwc.contextFeatures, NotWriteDefaultValue.mask), 0L);
-        nullStmts.append(defIf(and(binary1, binary2), block(notZeroStmts.toList())));
-
-        stmts.append(defIf(ne(stringVar, defNull()), block(notNullStmts.toList()), block(nullStmts.toList())));
+        stmts.append(genWriteFieldName(mwc, attributeInfo));
+        stmts.append(
+                defVar(
+                        fieldValue.name,
+                        qualIdent(attributeInfo.type.toString()),
+                        genWriteFieldValue(attributeInfo, mwc.object, mwc.beanType)
+                )
+        );
+        stmts.append(
+                defIf(
+                        notNull(fieldValue),
+                        block(exec(mwc.jsonWriterMethod("writeString", fieldValue))),
+                        block(defIf(
+                                ne(bitAnd(mwc.contextFeatures, writeNullFeatures), 0L),
+                                defIf(
+                                        ne(bitAnd(mwc.contextFeatures, writeNullAsEmptyFeatures), 0L),
+                                        block(exec(mwc.jsonWriterMethod("writeString", ""))),
+                                        block(exec(mwc.jsonWriterMethod("writeStringNull")))
+                                )
+                        ))
+                )
+        );
         return stmts;
     }
 
