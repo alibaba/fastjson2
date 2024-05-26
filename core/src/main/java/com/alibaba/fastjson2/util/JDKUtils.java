@@ -13,6 +13,7 @@ public class JDKUtils {
     public static final long ARRAY_BYTE_BASE_OFFSET;
     public static final long ARRAY_CHAR_BASE_OFFSET;
     public static final int ANDROID_SDK_INT;
+    public static final boolean GRAAL = false;
 
     static {
         Unsafe unsafe = null;

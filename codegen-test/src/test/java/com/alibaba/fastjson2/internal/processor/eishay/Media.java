@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.annotation.JSONCompiled;
 import java.util.List;
 import java.util.Objects;
 
-@JSONCompiled(referenceDetect = false)
+@JSONCompiled
 public class Media
         implements java.io.Serializable {
     public enum Player {

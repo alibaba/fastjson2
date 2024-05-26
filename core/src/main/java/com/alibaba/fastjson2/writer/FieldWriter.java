@@ -836,4 +836,16 @@ public abstract class FieldWriter<T>
 
         return null;
     }
+
+    public void writeListValue(JSONWriter jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeListJSONB(JSONWriter jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
 }
