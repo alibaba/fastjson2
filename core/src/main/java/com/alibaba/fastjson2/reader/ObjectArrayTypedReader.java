@@ -132,7 +132,7 @@ final class ObjectArrayTypedReader
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         Object[] values = (Object[]) Array.newInstance(componentClass, collection.size());
         int index = 0;
         for (Object item : collection) {
@@ -150,11 +150,11 @@ final class ObjectArrayTypedReader
             if (!componentType.isInstance(item)) {
                 ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(componentType);
                 if (item instanceof Map) {
-                    item = objectReader.createInstance((Map) item);
+                    item = objectReader.createInstance((Map) item, features);
                 } else if (item instanceof Collection) {
-                    item = objectReader.createInstance((Collection) item);
+                    item = objectReader.createInstance((Collection) item, features);
                 } else if (item instanceof Object[]) {
-                    item = objectReader.createInstance(JSONArray.of((Object[]) item));
+                    item = objectReader.createInstance(JSONArray.of((Object[]) item), features);
                 } else if (item != null) {
                     Class<?> itemClass = item.getClass();
                     if (itemClass.isArray()) {
@@ -163,7 +163,7 @@ final class ObjectArrayTypedReader
                         for (int i = 0; i < length; i++) {
                             array.add(Array.get(item, i));
                         }
-                        item = objectReader.createInstance(array);
+                        item = objectReader.createInstance(array, features);
                     } else {
                         throw new JSONException("component type not match, expect " + componentType.getName() + ", but " + itemClass);
                     }

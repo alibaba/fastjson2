@@ -22,7 +22,7 @@ public final class ObjectReaderImplInt32Array
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         Integer[] array = new Integer[collection.size()];
         int i = 0;
         for (Object item : collection) {
@@ -86,6 +86,12 @@ public final class ObjectReaderImplInt32Array
             }
 
             throw new JSONException(jsonReader.info("not support input " + str));
+        }
+
+        if (jsonReader.isNumber()) {
+            return new Integer[]{
+                    jsonReader.readInt32()
+            };
         }
 
         throw new JSONException(jsonReader.info("TODO"));

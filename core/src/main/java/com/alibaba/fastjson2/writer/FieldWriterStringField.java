@@ -21,8 +21,8 @@ final class FieldWriterStringField<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         String value = (String) getFieldValue(object);
 
+        long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) == 0
                     || (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0) {
                 return false;
@@ -33,10 +33,15 @@ final class FieldWriterStringField<T>
                 jsonWriter.writeString("");
                 return true;
             }
+        } else if (trim) {
+            value = value.trim();
         }
 
-        if (trim && value != null) {
-            value = value.trim();
+        if (value != null
+                && value.isEmpty()
+                && (features & JSONWriter.Feature.IgnoreEmpty.mask) != 0
+        ) {
+            return false;
         }
 
         writeFieldName(jsonWriter);

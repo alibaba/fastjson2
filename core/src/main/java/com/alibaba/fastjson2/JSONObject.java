@@ -1334,7 +1334,7 @@ public class JSONObject
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, features);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -1420,7 +1420,7 @@ public class JSONObject
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, features);
         }
 
         if (type instanceof Class) {

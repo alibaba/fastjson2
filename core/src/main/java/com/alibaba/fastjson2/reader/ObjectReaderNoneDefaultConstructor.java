@@ -329,7 +329,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         return object;
     }
 
-    public T createInstance(Collection collection) {
+    public T createInstance(Collection collection, long features) {
         int index = 0;
 
         ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;

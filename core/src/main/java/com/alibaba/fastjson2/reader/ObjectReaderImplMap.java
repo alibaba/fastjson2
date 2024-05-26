@@ -16,6 +16,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectReaderImplMap
         implements ObjectReader {
+    static final Function ENUM_MAP_BUILDER = e -> new EnumMap((Map) e);
     public static final ObjectReaderImplMap INSTANCE = new ObjectReaderImplMap(
             null,
             HashMap.class,
@@ -132,6 +133,25 @@ public final class ObjectReaderImplMap
             } else if (mapClassName.equals("java.util.Collections$SingletonMap")) {
                 builder = new SingleMapBuilder();
             }
+        }
+
+        Type genericSuperclass = instanceType.getGenericSuperclass();
+        if (mapType != JSONObject.class && genericSuperclass instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
+            Type[] arguments = parameterizedType.getActualTypeArguments();
+            if (arguments.length == 2) {
+                Type arg0 = arguments[0];
+                Type arg1 = arguments[1];
+                boolean typed = !(arg0 instanceof TypeVariable || arg1 instanceof TypeVariable);
+                if (typed) {
+                    return new ObjectReaderImplMapTyped(mapType, instanceType, arg0, arg1, 0, builder);
+                }
+            }
+        }
+
+        if (mapType == EnumMap.class) {
+            instanceType = LinkedHashMap.class;
+            builder = ENUM_MAP_BUILDER;
         }
 
         return new ObjectReaderImplMap(fieldType, mapType, instanceType, features, builder);

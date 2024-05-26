@@ -589,57 +589,74 @@ public final class ObjectWriterImplMap
         PropertyFilter propertyFilter = context.getPropertyFilter();
         AfterFilter afterFilter = context.getAfterFilter();
         boolean writeNulls = context.isEnabled(JSONWriter.Feature.WriteNulls.mask);
+        boolean refDetect = context.isEnabled(ReferenceDetection.mask);
 
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             Object value = entry.getValue();
             if (value == null && !writeNulls) {
                 continue;
             }
 
-            Object enryKey = entry.getKey();
+            Object entryKey = entry.getKey();
             String key;
-            if (enryKey == null) {
+            if (entryKey == null) {
                 key = null;
             } else {
-                key = enryKey.toString();
+                key = entryKey.toString();
             }
 
-            if (propertyPreFilter != null) {
-                if (!propertyPreFilter.process(jsonWriter, object, key)) {
+            String refPath = null;
+            if (refDetect) {
+                refPath = jsonWriter.setPath(key, value);
+                if (refPath != null) {
+                    jsonWriter.writeName(key);
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(value);
                     continue;
                 }
             }
 
-            if (nameFilter != null) {
-                key = nameFilter.process(object, key, value);
-            }
-
-            if (propertyFilter != null) {
-                if (!propertyFilter.apply(object, key, value)) {
-                    continue;
+            try {
+                if (propertyPreFilter != null) {
+                    if (!propertyPreFilter.process(jsonWriter, object, key)) {
+                        continue;
+                    }
                 }
-            }
 
-            if (valueFilter != null) {
-                value = valueFilter.apply(object, key, value);
-            }
-
-            if (value == null) {
-                if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNulls.mask) == 0) {
-                    continue;
+                if (nameFilter != null) {
+                    key = nameFilter.process(object, key, value);
                 }
-            }
 
-            jsonWriter.writeName(key);
-            jsonWriter.writeColon();
+                if (propertyFilter != null) {
+                    if (!propertyFilter.apply(object, key, value)) {
+                        continue;
+                    }
+                }
 
-            if (value == null) {
-                jsonWriter.writeNull();
-            } else {
-                Class<?> valueType = value.getClass();
-                ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
-                valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
+                if (valueFilter != null) {
+                    value = valueFilter.apply(object, key, value);
+                }
+
+                if (value == null) {
+                    if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNulls.mask) == 0) {
+                        continue;
+                    }
+                }
+
+                jsonWriter.writeName(key);
+                jsonWriter.writeColon();
+
+                if (value == null) {
+                    jsonWriter.writeNull();
+                } else {
+                    Class<?> valueType = value.getClass();
+                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
+                    valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
+                }
+            } finally {
+                if (refDetect) {
+                    jsonWriter.popPath(value);
+                }
             }
         }
 

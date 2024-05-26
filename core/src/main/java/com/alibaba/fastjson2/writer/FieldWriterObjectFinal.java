@@ -76,6 +76,12 @@ abstract class FieldWriterObjectFinal<T>
         }
 
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
+
+        if (unwrapped
+                && writeWithUnwrapped(jsonWriter, value, features, refDetect, valueWriter)) {
+            return true;
+        }
+
         writeFieldName(jsonWriter);
         if (jsonWriter.jsonb) {
             valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);

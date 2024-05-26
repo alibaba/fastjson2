@@ -419,7 +419,7 @@ public abstract class FieldReader<T>
                         : new JSONReader.Feature[0];
                 typedFieldValue = ((JSONObject) fieldValue).to(fieldType, toFeatures);
             } else if (fieldValue instanceof JSONArray) {
-                typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
+                typedFieldValue = ((JSONArray) fieldValue).to(fieldType, features);
             } else if (features == 0 && !fieldClass.isInstance(fieldValue) && format == null) {
                 ObjectReader initReader = getInitReader();
                 if (initReader != null) {

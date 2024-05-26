@@ -89,7 +89,7 @@ final class ObjectReaderImplDoubleArray
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         Double[] array = new Double[collection.size()];
         int i = 0;
         for (Object item : collection) {

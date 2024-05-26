@@ -20,7 +20,7 @@ public final class ObjectArrayReader
     }
 
     @Override
-    public Object[] createInstance(Collection collection) {
+    public Object[] createInstance(Collection collection, long features) {
         Object[] array = new Object[collection.size()];
         int i = 0;
         for (Object item : collection) {
