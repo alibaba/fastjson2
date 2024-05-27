@@ -1426,6 +1426,8 @@ public class JSONCompiledAnnotationProcessor
             return stmts.appendList(genWriteFloat(mwc, attributeInfo, i));
         } else if ("java.lang.Double".equals(type)) {
             return stmts.appendList(genWriteDouble(mwc, attributeInfo, i));
+        } else if ("java.lang.Boolean".equals(type)) {
+            return stmts.appendList(genWriteBoolean(mwc, attributeInfo, i));
         } else if ("java.lang.String".equals(type)) {
             return stmts.appendList(genWriteFieldValueString(mwc, attributeInfo, i));
         } else if (attributeInfo.type instanceof com.sun.tools.javac.code.Type.ClassType
@@ -1642,6 +1644,37 @@ public class JSONCompiledAnnotationProcessor
         notNullStmts.append(exec(mwc.jsonWriterMethod("writeInt64", longArrayVar)));
 
         stmts.append(defIf(eq(longArrayVar, defNull()), block(nullStmts.toList()), block(notNullStmts.toList())));
+        return stmts;
+    }
+
+    private ListBuffer<JCTree.JCStatement> genWriteBoolean(
+            MethodWriterContext mwc,
+            AttributeInfo attributeInfo,
+            int i
+    ) {
+        ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
+
+        String type = attributeInfo.type.toString();
+        JCTree.JCVariableDecl fieldValue = defVar("Boolean" + i, qualIdent(type), genWriteFieldValue(attributeInfo, mwc.object, mwc.beanType));
+        stmts.append(fieldValue);
+
+        stmts.append(
+                defIf(
+                        or(notNull(fieldValue), isEnable(mwc.contextFeatures, WriteNulls)),
+                        block(
+                                genWriteFieldName(mwc, attributeInfo),
+                                defIf(
+                                        notNull(fieldValue),
+                                    block(
+                                        exec(mwc.jsonWriterMethod("writeBool", fieldValue))
+                                    ),
+                                    block(
+                                            exec(mwc.jsonWriterMethod("writeNull"))
+                                    )
+                                )
+                        )
+                )
+        );
         return stmts;
     }
 

@@ -586,4 +586,29 @@ public class CodeGenUtils {
     public static String getWriteDirectMethod(String type) {
         return writeDirectMap.get(type);
     }
+
+    public static boolean isNotReferenceDetect(String type) {
+        switch (type) {
+            case "java.lang.Boolean":
+            case "java.lang.Byte":
+            case "java.lang.Short":
+            case "java.lang.Integer":
+            case "java.lang.Long":
+            case "java.math.BigInteger":
+            case "java.math.BigDecimal":
+            case "java.lang.Float":
+            case "java.lang.Double":
+            case "java.util.Date":
+            case "java.time.LocalDate":
+            case "java.time.LocalTime":
+            case "java.time.LocalDateTime":
+            case "java.time.OffsetDateTime":
+            case "java.time.ZonedDateTime":
+            case "java.time.Instant":
+            case "java.time.Period":
+                return true;
+            default:
+                return false;
+        }
+    }
 }
