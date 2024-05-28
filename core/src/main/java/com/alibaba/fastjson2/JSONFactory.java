@@ -329,8 +329,16 @@ public final class JSONFactory {
         return defaultWriterFeatures;
     }
 
+    public static ZoneId getDefaultWriterZoneId() {
+        return defaultWriterZoneId;
+    }
+
     public static long getDefaultReaderFeatures() {
         return defaultReaderFeatures;
+    }
+
+    public static ZoneId getDefaultReaderZoneId() {
+        return defaultReaderZoneId;
     }
 
     static final CacheItem[] CACHE_ITEMS;
