@@ -325,6 +325,14 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
+    public static long getDefaultWriterFeatures() {
+        return defaultWriterFeatures;
+    }
+
+    public static long getDefaultReaderFeatures() {
+        return defaultReaderFeatures;
+    }
+
     static final CacheItem[] CACHE_ITEMS;
 
     static {
