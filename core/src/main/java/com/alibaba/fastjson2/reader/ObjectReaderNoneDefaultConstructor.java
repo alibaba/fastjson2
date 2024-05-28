@@ -130,7 +130,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
 
                         if (autoTypeObjectReader == null) {
-                            throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                            throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                         }
                     }
 
