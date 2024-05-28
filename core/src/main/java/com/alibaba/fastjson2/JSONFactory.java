@@ -568,6 +568,26 @@ public final class JSONFactory {
         JSONPath compile(Class objectClass, JSONPath path);
     }
 
+    public static long getDefaultReaderFeatures() {
+        return defaultReaderFeatures;
+    }
+
+    public static ZoneId getDefaultReaderZoneId() {
+        return defaultReaderZoneId;
+    }
+
+    public static String getDefaultReaderFormat() {
+        return defaultReaderFormat;
+    }
+
+    public static long getDefaultWriterFeatures() {
+        return defaultWriterFeatures;
+    }
+
+    public static ZoneId getDefaultWriterZoneId() {
+        return defaultWriterZoneId;
+    }
+
     public static String getDefaultWriterFormat() {
         return defaultWriterFormat;
     }
