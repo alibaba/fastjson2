@@ -6737,6 +6737,48 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 23;
+        } else if (len == 23
+                && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ',' && c12 == ' '
+                && c14 == ':' && c17 == ':'
+                && c20 == ' ' && (c21 == 'A' || c21 == 'P') && c22 == 'M'
+        ) {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c4;
+
+            h0 = '0';
+            h1 = c13;
+            pm = c21 == 'P';
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 23;
         } else if (len == 24
                 && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
                 && c15 == ':' && c18 == ':'
@@ -6758,6 +6800,90 @@ public class DateUtils {
 
             d0 = c4;
             d1 = c5;
+
+            h0 = c13;
+            h1 = c14;
+            pm = c22 == 'P';
+
+            i0 = c16;
+            i1 = c17;
+
+            s0 = c19;
+            s1 = c20;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
+        } else if (len == 24
+                && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ',' && c13 == ' '
+                && c15 == ':' && c18 == ':'
+                && c21 == ' ' && (c22 == 'A' || c22 == 'P') && c23 == 'M'
+        ) {
+            y0 = c8;
+            y1 = c9;
+            y2 = c10;
+            y3 = c11;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c4;
+            d1 = c5;
+
+            h0 = '0';
+            h1 = c14;
+            pm = c22 == 'P';
+
+            i0 = c16;
+            i1 = c17;
+
+            s0 = c19;
+            s1 = c20;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
+        } else if (len == 24
+                && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ',' && c12 == ' '
+                && c15 == ':' && c18 == ':'
+                && c21 == ' ' && (c22 == 'A' || c22 == 'P') && c23 == 'M'
+        ) {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c4;
 
             h0 = c13;
             h1 = c14;
@@ -6883,6 +7009,48 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 25;
             isTimeZone = c25 == '|';
+        } else if (len == 25
+                && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ',' && c13 == ' '
+                && c16 == ':' && c19 == ':'
+                && c22 == ' ' && (c23 == 'A' || c23 == 'P') && c24 == 'M'
+        ) {
+            y0 = c8;
+            y1 = c9;
+            y2 = c10;
+            y3 = c11;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c4;
+            d1 = c5;
+
+            h0 = c14;
+            h1 = c15;
+            pm = c23 == 'P';
+
+            i0 = c17;
+            i1 = c18;
+
+            s0 = c20;
+            s1 = c21;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 25;
         } else if (c4 == '-' && c7 == '-'
                 && (c10 == ' ' || c10 == 'T')
                 && c13 == ':' && c16 == ':' && c19 == '.'
@@ -7209,6 +7377,10 @@ public class DateUtils {
             return ZonedDateTime.parse(new String(str, off, len), formatter);
         } else {
             return null;
+        }
+
+        if (pm && h0 == '1' && h1 == '2') {
+            pm = false;
         }
 
         if (pm) {
@@ -7770,6 +7942,48 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 23;
+        } else if (len == 23
+                && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ',' && c12 == ' '
+                && c14 == ':' && c17 == ':'
+                && c20 == ' ' && (c21 == 'A' || c21 == 'P') && c22 == 'M'
+        ) {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c4;
+
+            h0 = '0';
+            h1 = c13;
+            pm = c21 == 'P';
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 23;
         } else if (len == 24
                 && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
                 && c15 == ':' && c18 == ':'
@@ -7880,6 +8094,90 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 24;
             isTimeZone = c24 == '|';
+        } else if (len == 24
+                && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ',' && c13 == ' '
+                && c15 == ':' && c18 == ':'
+                && c21 == ' ' && (c22 == 'A' || c22 == 'P') && c23 == 'M'
+        ) {
+            y0 = c8;
+            y1 = c9;
+            y2 = c10;
+            y3 = c11;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c4;
+            d1 = c5;
+
+            h0 = '0';
+            h1 = c14;
+            pm = c22 == 'P';
+
+            i0 = c16;
+            i1 = c17;
+
+            s0 = c19;
+            s1 = c20;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
+        } else if (len == 24
+                && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ',' && c12 == ' '
+                && c15 == ':' && c18 == ':'
+                && c21 == ' ' && (c22 == 'A' || c22 == 'P') && c23 == 'M'
+        ) {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c4;
+
+            h0 = c13;
+            h1 = c14;
+            pm = c22 == 'P';
+
+            i0 = c16;
+            i1 = c17;
+
+            s0 = c19;
+            s1 = c20;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
         } else if (c4 == '-' && c7 == '-'
                 && (c10 == ' ' || c10 == 'T')
                 && c13 == ':' && c16 == ':' && c19 == '.'
@@ -7916,6 +8214,48 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 25;
             isTimeZone = c25 == '|';
+        } else if (len == 25
+                && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ',' && c13 == ' '
+                && c16 == ':' && c19 == ':'
+                && c22 == ' ' && (c23 == 'A' || c23 == 'P') && c24 == 'M'
+        ) {
+            y0 = c8;
+            y1 = c9;
+            y2 = c10;
+            y3 = c11;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c4;
+            d1 = c5;
+
+            h0 = c14;
+            h1 = c15;
+            pm = c23 == 'P';
+
+            i0 = c17;
+            i1 = c18;
+
+            s0 = c20;
+            s1 = c21;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 25;
         } else if (c4 == '-' && c7 == '-'
                 && (c10 == ' ' || c10 == 'T')
                 && c13 == ':' && c16 == ':' && c19 == '.'
@@ -8242,6 +8582,10 @@ public class DateUtils {
             return ZonedDateTime.parse(new String(str, off, len), formatter);
         } else {
             return null;
+        }
+
+        if (pm && h0 == '1' && h1 == '2') {
+            pm = false;
         }
 
         if (pm) {
