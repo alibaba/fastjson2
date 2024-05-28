@@ -98,7 +98,7 @@ final class ObjectArrayTypedReader
                 if (jsonReader.isSupportAutoType(features)) {
                     ObjectReader autoTypeObjectReader = jsonReader.getObjectReaderAutoType(typeHash, objectClass, features);
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("auotype not support : " + jsonReader.getString()));
+                        throw new JSONException(jsonReader.info("autoType not support : " + jsonReader.getString()));
                     }
 
                     return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);

@@ -207,7 +207,7 @@ public interface ObjectReader<T> {
                     reader = context.getObjectReaderAutoType(typeName, null);
 
                     if (reader == null) {
-                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
+                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for " + typeName));
                     }
                 }
 

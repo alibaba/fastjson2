@@ -230,7 +230,7 @@ public abstract class ObjectReaderBean<T>
     }
 
     private JSONException auotypeError(JSONReader jsonReader) {
-        return new JSONException(jsonReader.info("auotype not support"));
+        return new JSONException(jsonReader.info("autoType not support"));
     }
 
     protected void initDefaultValue(T object) {
@@ -352,7 +352,7 @@ public abstract class ObjectReaderBean<T>
                     );
 
                     if (reader == null) {
-                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
+                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for " + typeName));
                     }
                 }
 
