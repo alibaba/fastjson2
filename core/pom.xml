@@ -234,7 +234,7 @@
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
-            <version>3.2.12</version>
+            <version>3.2.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
