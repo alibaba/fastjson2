@@ -119,7 +119,7 @@ class JSONReaderASCII
             if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
                 errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
             } else {
-                errorMsg = "illegal fieldName input" + ch;
+                errorMsg = "illegal fieldName input " + ch;
             }
 
             throw new JSONException(info(errorMsg));

@@ -16,6 +16,7 @@ import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
+import com.sun.tools.javac.processing.JavacFiler;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
@@ -111,7 +112,8 @@ public class JSONCompiledAnnotationProcessor
                                 Symbol.ClassSymbol classSymbol = (Symbol.ClassSymbol) element;
                                 String owner = classSymbol.owner.toString();
                                 dotIdx = owner.indexOf(".");
-                                beanType = field(dotIdx == -1 ? ident(owner) : qualIdent(owner), beanClassFQN.substring(beanClassFQN.lastIndexOf(".") + 1));
+                                beanType = field(dotIdx == -1 ? ident(owner) : qualIdent(owner),
+                                        beanClassFQN.substring(beanClassFQN.lastIndexOf(".") + 1));
                             }
                         } else {
                             dotIdx = beanClassFQN.indexOf(".");
@@ -176,8 +178,10 @@ public class JSONCompiledAnnotationProcessor
 
                         // generate source if debug is true
                         if (isDebug(beanClassDecl)) {
-                            messager.printMessage(Diagnostic.Kind.WARNING, "Whoops! You have changed the debug of JSONCompiled from false to true for " + structInfo.binaryName +
-                                    ", which means the additional source file being generated. It's usually not recommended to enable debug until you are in developer mode");
+                            messager.printMessage(Diagnostic.Kind.WARNING, "Whoops! You have changed the debug of " +
+                                    "JSONCompiled from false to true for " + structInfo.binaryName + ", which means the " +
+                                    "additional source file being generated. It's usually not recommended to enable debug " +
+                                    "until you are in developer mode");
                             genSource(structInfo, javacTrees.getPath(element));
                         }
 
@@ -759,7 +763,7 @@ public class JSONCompiledAnnotationProcessor
         } else if (ObjectWriterAdapter.class.isAssignableFrom(superClass)) {
             JCTree.JCFieldAccess fieldWriters = field(ident(names._this), "fieldWriterArray");
             for (int i = 0; i < fieldsSize; ++i) {
-                stmts.append(exec(assign(ident(fieldWriter(i)), cast(qualIdent("com.alibaba.fastjson2.writer.FieldWriter"), indexed(fieldWriters, literal(i))))));
+                stmts.append(exec(assign(ident(fieldWriter(i)), cast(qualIdent(FieldWriter.class.getName()), indexed(fieldWriters, literal(i))))));
             }
         }
         return stmts.toList();
@@ -849,7 +853,15 @@ public class JSONCompiledAnnotationProcessor
             if (fieldsSize <= 6) {
                 for (int i = 0; i < fieldsSize; ++i) {
                     AttributeInfo attributeInfo = attributeInfos.get(i);
-                    List<JCTree.JCStatement> readFieldValueStmts = genReadFieldValue(attributeInfo, jsonReaderIdent, i, structInfo, loopLabel, objectIdent, beanType, isJsonb);
+                    List<JCTree.JCStatement> readFieldValueStmts = genReadFieldValue(
+                            attributeInfo,
+                            jsonReaderIdent,
+                            i,
+                            structInfo,
+                            loopLabel,
+                            objectIdent,
+                            beanType,
+                            isJsonb);
                     loopBody.appendList(List.of(defIf(eq(hashCode64, attributeInfo.nameHashCode), block(readFieldValueStmts))));
                 }
             } else {
@@ -885,14 +897,30 @@ public class JSONCompiledAnnotationProcessor
                         fieldNameHash = hashCode64Array.get(0);
                         int index = mappingIndex.get(fieldNameHash);
                         AttributeInfo attributeInfo = mapping.get(fieldNameHash);
-                        stmts = stmts.appendList(genReadFieldValue(attributeInfo, jsonReaderIdent, index, structInfo, loopLabel, objectIdent, beanType, isJsonb));
+                        stmts = stmts.appendList(genReadFieldValue(
+                                attributeInfo,
+                                jsonReaderIdent,
+                                index,
+                                structInfo,
+                                loopLabel,
+                                objectIdent,
+                                beanType,
+                                isJsonb));
                         stmts.append(defContinue(loopLabel));
                     } else {
                         for (int j = 0; j < hashCode64Array.size(); ++j) {
                             fieldNameHash = hashCode64Array.get(j);
                             int index = mappingIndex.get(fieldNameHash);
                             AttributeInfo field = mapping.get(fieldNameHash);
-                            List<JCTree.JCStatement> stmtsIf = genReadFieldValue(field, jsonReaderIdent, index, structInfo, loopLabel, objectIdent, beanType, isJsonb);
+                            List<JCTree.JCStatement> stmtsIf = genReadFieldValue(
+                                    field,
+                                    jsonReaderIdent,
+                                    index,
+                                    structInfo,
+                                    loopLabel,
+                                    objectIdent,
+                                    beanType,
+                                    isJsonb);
                             stmts = stmts.append(defIf(eq(hashCode64, fieldNameHash), block(stmtsIf)));
                             stmts.append(defContinue(loopLabel));
                         }
@@ -2315,7 +2343,18 @@ public class JSONCompiledAnnotationProcessor
             stmts.append(fieldValueVar);
 
             if (type.startsWith("java.util.List<")) {
-                valueExpr = genFieldValueList(type, attributeInfo, jsonReaderIdent, fieldValueVar, loopLabel, stmts, i, referenceDetect, fieldReaderField, beanType, isJsonb);
+                valueExpr = genFieldValueList(
+                        type,
+                        attributeInfo,
+                        jsonReaderIdent,
+                        fieldValueVar,
+                        loopLabel,
+                        stmts,
+                        i,
+                        referenceDetect,
+                        fieldReaderField,
+                        beanType,
+                        isJsonb);
             } else if (type.startsWith("java.util.Map<java.lang.String,")) {
                 valueExpr = genFieldValueMap(type, attributeInfo, jsonReaderIdent, fieldValueVar, loopLabel, stmts, i, referenceDetect, isJsonb);
             }
@@ -2777,7 +2816,15 @@ public class JSONCompiledAnnotationProcessor
                     default:
                         throw new IllegalStateException("fieldNameLength " + fieldNameLength);
                 }
-                List<JCTree.JCStatement> readFieldValueStmts = genReadFieldValue(fieldReader, jsonReaderIdent, fieldReaderIndex, structInfo, loopLabel, objectIdent, beanType, isJsonb);
+                List<JCTree.JCStatement> readFieldValueStmts = genReadFieldValue(
+                        fieldReader,
+                        jsonReaderIdent,
+                        fieldReaderIndex,
+                        structInfo,
+                        loopLabel,
+                        objectIdent,
+                        beanType,
+                        isJsonb);
                 caseStmts.append(defIf(nextIfMethod, block(readFieldValueStmts)));
             }
             caseStmts.append(defBreak(switchLabel));
@@ -2874,7 +2921,11 @@ public class JSONCompiledAnnotationProcessor
 
             ListBuffer<JCTree.JCStatement> condStmts = new ListBuffer<>();
             if (referenceDetect) {
-                condStmts.append(forLoop(List.of(for_iVar), unary(JCTree.Tag.NOT, nextIfArrayEndMethod), List.of(exec(unary(JCTree.Tag.PREINC, ident(for_iVar)))), block(whileStmts.toList())));
+                condStmts.append(forLoop(
+                        List.of(for_iVar),
+                        unary(JCTree.Tag.NOT, nextIfArrayEndMethod),
+                        List.of(exec(unary(JCTree.Tag.PREINC, ident(for_iVar)))),
+                        block(whileStmts.toList())));
             } else {
                 condStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfArrayEndMethod), block(whileStmts.toList())));
             }
@@ -2985,12 +3036,13 @@ public class JSONCompiledAnnotationProcessor
     }
 
     private void genSource(StructInfo structInfo, TreePath treePath) {
+        Filer filer = processingEnv.getFiler();
         String fullQualifiedName = structInfo.binaryName;
         JavaFileObject converterFile = null;
         try {
             if (treePath.getCompilationUnit() instanceof JCTree.JCCompilationUnit) {
                 JCTree.JCCompilationUnit compilationUnit = (JCTree.JCCompilationUnit) treePath.getCompilationUnit();
-                converterFile = processingEnv.getFiler().createSourceFile(fullQualifiedName, structInfo.element);
+                converterFile = filer.createSourceFile(fullQualifiedName, structInfo.element);
                 String fileName = converterFile.getName() + ".txt";
                 Path filePath = Paths.get(fileName);
                 String dirName = fileName.substring(0, fileName.lastIndexOf(File.separator));
@@ -3004,16 +3056,22 @@ public class JSONCompiledAnnotationProcessor
                 try (Writer writer = new FileWriter(filePath.toString())) {
                     writer.write(compilationUnit.toString());
                 } catch (Exception e) {
-                    messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for " + fullQualifiedName + " caused by " + e.getMessage());
+                    messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for "
+                            + fullQualifiedName + " caused by " + e.getMessage());
                 }
             } else {
-                messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for " + fullQualifiedName + " caused by invalid compilation unit");
+                messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for "
+                        + fullQualifiedName + " caused by invalid compilation unit");
             }
         } catch (Exception e) {
-            messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for " + fullQualifiedName + " caused by " + e.getMessage());
+            messager.printMessage(Diagnostic.Kind.WARNING, "Failed to generate source file for "
+                    + fullQualifiedName + " caused by " + e.getMessage());
         } finally {
             if (converterFile != null) {
                 converterFile.delete();
+            }
+            if (filer instanceof JavacFiler) {
+                ((JavacFiler) filer).close();
             }
         }
     }
@@ -3022,7 +3080,11 @@ public class JSONCompiledAnnotationProcessor
         File file = null;
         try {
             file = new File("");
-            String absolutePath = file.getAbsolutePath() + File.separator + Arrays.stream("src/main/resources/META-INF/native-image/reflect-config.json".split("/")).sequential().collect(Collectors.joining(File.separator));
+            String absolutePath = file.getAbsolutePath() +
+                    File.separator +
+                    Arrays.stream("src/main/resources/META-INF/native-image/reflect-config.json".split("/"))
+                            .sequential()
+                            .collect(Collectors.joining(File.separator));
             int idx = absolutePath.lastIndexOf(File.separator);
             Path dirPath = Paths.get(absolutePath.substring(0, idx));
             Path filePath = Paths.get(absolutePath);
@@ -3053,7 +3115,7 @@ public class JSONCompiledAnnotationProcessor
     }
 
     private boolean isDebug(JCTree.JCClassDecl beanClassDecl) {
-        JCTree.JCExpression jsonCompiledIdent = qualIdent("com.alibaba.fastjson2.annotation.JSONCompiled");
+        JCTree.JCExpression jsonCompiledIdent = qualIdent(JSONCompiled.class.getName());
         List<JCTree.JCAnnotation> annotations = beanClassDecl.mods.annotations;
         Optional<JCTree.JCAnnotation> jsonCompiledAnnoOpt = annotations.stream()
                 .filter(a -> a.getAnnotationType().type.tsym.toString().equals(jsonCompiledIdent.type.tsym.toString()))

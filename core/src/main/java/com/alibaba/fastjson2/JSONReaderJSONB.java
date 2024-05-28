@@ -817,7 +817,7 @@ final class JSONReaderJSONB
                                 autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                                 if (autoTypeObjectReader == null) {
-                                    throw new JSONException("auotype not support : " + typeName + ", offset " + offset + "/" + bytes.length);
+                                    throw new JSONException("autoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
                                 }
                             }
 
@@ -1399,7 +1399,7 @@ final class JSONReaderJSONB
     }
 
     void autoTypeError() {
-        throw new JSONException("auotype not support : " + getString());
+        throw new JSONException("autoType not support : " + getString());
     }
 
     private ObjectReader getObjectReaderContext(

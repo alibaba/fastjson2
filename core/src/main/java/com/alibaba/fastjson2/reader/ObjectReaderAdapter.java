@@ -239,7 +239,7 @@ public class ObjectReaderAdapter<T>
                 if (expectClass == objectClass) {
                     autoTypeObjectReader = this;
                 } else {
-                    throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                    throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                 }
             }
         }
@@ -480,7 +480,7 @@ public class ObjectReaderAdapter<T>
             autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                throw new JSONException(jsonReader.info("autoType not support : " + typeName));
             }
         }
 
@@ -528,7 +528,7 @@ public class ObjectReaderAdapter<T>
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                     }
                 }
 
