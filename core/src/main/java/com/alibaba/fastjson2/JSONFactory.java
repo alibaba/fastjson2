@@ -325,21 +325,6 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
-    public static long getDefaultWriterFeatures() {
-        return defaultWriterFeatures;
-    }
-
-    public static ZoneId getDefaultWriterZoneId() {
-        return defaultWriterZoneId;
-    }
-
-    public static long getDefaultReaderFeatures() {
-        return defaultReaderFeatures;
-    }
-
-    public static ZoneId getDefaultReaderZoneId() {
-        return defaultReaderZoneId;
-    }
 
     static final CacheItem[] CACHE_ITEMS;
 
@@ -582,6 +567,26 @@ public final class JSONFactory {
 
     public interface JSONPathCompiler {
         JSONPath compile(Class objectClass, JSONPath path);
+    }
+
+    public static long getDefaultReaderFeatures() {
+        return defaultReaderFeatures;
+    }
+
+    public static ZoneId getDefaultReaderZoneId() {
+        return defaultReaderZoneId;
+    }
+
+    public static String getDefaultReaderFormat() {
+        return defaultReaderFormat;
+    }
+
+    public static long getDefaultWriterFeatures() {
+        return defaultWriterFeatures;
+    }
+
+    public static ZoneId getDefaultWriterZoneId() {
+        return defaultWriterZoneId;
     }
 
     public static String getDefaultWriterFormat() {
