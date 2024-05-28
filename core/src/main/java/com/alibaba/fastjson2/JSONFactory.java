@@ -325,7 +325,6 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
-
     static final CacheItem[] CACHE_ITEMS;
 
     static {
