@@ -1454,6 +1454,8 @@ public class JSONCompiledAnnotationProcessor
             return stmts.appendList(genWriteFloat(mwc, attributeInfo, i));
         } else if ("java.lang.Double".equals(type)) {
             return stmts.appendList(genWriteDouble(mwc, attributeInfo, i));
+        } else if ("java.math.BigDecimal".equals(type)) {
+            return stmts.appendList(genWriteBigDecimal(mwc, attributeInfo, i));
         } else if ("java.lang.Boolean".equals(type)) {
             return stmts.appendList(genWriteBoolean(mwc, attributeInfo, i));
         } else if ("java.lang.String".equals(type)) {
@@ -1672,6 +1674,29 @@ public class JSONCompiledAnnotationProcessor
         notNullStmts.append(exec(mwc.jsonWriterMethod("writeInt64", longArrayVar)));
 
         stmts.append(defIf(eq(longArrayVar, defNull()), block(nullStmts.toList()), block(notNullStmts.toList())));
+        return stmts;
+    }
+
+    private ListBuffer<JCTree.JCStatement> genWriteBigDecimal(
+            MethodWriterContext mwc,
+            AttributeInfo attributeInfo,
+            int i
+    ) {
+        ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
+
+        String type = attributeInfo.type.toString();
+        JCTree.JCVariableDecl fieldValue = defVar("bigDecimal" + i, qualIdent(type), genWriteFieldValue(attributeInfo, mwc.object, mwc.beanType));
+        stmts.append(fieldValue);
+
+        stmts.append(
+                defIf(
+                        or(notNull(fieldValue), isEnable(mwc.contextFeatures, WriteNulls)),
+                        block(
+                                genWriteFieldName(mwc, attributeInfo),
+                                exec(mwc.jsonWriterMethod("writeDecimal", fieldValue))
+                        )
+                )
+        );
         return stmts;
     }
 
