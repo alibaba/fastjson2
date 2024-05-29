@@ -1940,6 +1940,20 @@ public class ObjectWriterCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, notNull_);
 
             mw.visitLabel(notWriteEmptyArrayEnd_);
+        } else if (Collection.class.isAssignableFrom(fieldClass)) {
+            Label notWriteEmptyArrayEnd_ = new Label();
+            if ((features & NotWriteEmptyArray.mask) == 0) {
+                mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
+            }
+
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitTypeInsn(Opcodes.CHECKCAST, "java/util/Collection");
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Collection", "isEmpty", "()Z", true);
+            mw.visitJumpInsn(Opcodes.IFEQ, notWriteEmptyArrayEnd_);
+
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+            mw.visitLabel(notWriteEmptyArrayEnd_);
         }
 
         // writeFieldName(w);
