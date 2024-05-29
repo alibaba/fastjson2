@@ -2806,6 +2806,37 @@ public abstract class BeanUtils {
                         case "NON_DEFAULT":
                             beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
                             break;
+                        case "NON_EMPTY":
+                            beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteEmptyArray.mask;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonInclude(FieldInfo fieldInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                if ("value".equals(name)) {
+                    String include = ((Enum) result).name();
+                    switch (include) {
+                        case "ALWAYS":
+                            fieldInfo.features |= JSONWriter.Feature.WriteNulls.mask;
+                            break;
+                        case "NON_DEFAULT":
+                            fieldInfo.features |= JSONWriter.Feature.NotWriteDefaultValue.mask;
+                            break;
+                        case "NON_EMPTY":
+                            fieldInfo.features |= JSONWriter.Feature.NotWriteEmptyArray.mask;
+                            break;
                         default:
                             break;
                     }

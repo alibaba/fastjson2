@@ -350,12 +350,10 @@ public class ObjectWriterBaseModule
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonInclude":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
                         if (useJacksonAnnotation) {
                             processJacksonJsonInclude(beanInfo, annotation);
                         }
                         break;
-                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
                     case "com.fasterxml.jackson.databind.annotation.JsonSerialize":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSerialize(fieldInfo, annotation);
@@ -818,13 +816,11 @@ public class ObjectWriterBaseModule
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
                             processJacksonJsonIgnore(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnyGetter":
                         if (useJacksonAnnotation) {
                             fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                         }
@@ -836,7 +832,6 @@ public class ObjectWriterBaseModule
                         fieldInfo.ignore = true;
                         fieldInfo.isTransient = true;
                         break;
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                     case "com.fasterxml.jackson.annotation.JsonProperty": {
                         if (useJacksonAnnotation) {
                             processJacksonJsonProperty(fieldInfo, annotation);
@@ -844,27 +839,28 @@ public class ObjectWriterBaseModule
                         break;
                     }
                     case "com.fasterxml.jackson.annotation.JsonFormat":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
                             processJacksonJsonFormat(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
                         if (useJacksonAnnotation) {
                             fieldInfo.features |= FieldInfo.VALUE_MASK;
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonRawValue":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonRawValue":
                         if (useJacksonAnnotation) {
                             fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
                         }
                         break;
-                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
                     case "com.fasterxml.jackson.databind.annotation.JsonSerialize":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSerialize(fieldInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonInclude":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonInclude(fieldInfo, annotation);
                         }
                         break;
                     default:

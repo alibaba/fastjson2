@@ -279,19 +279,16 @@ public class ObjectReaderBaseModule
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonFormat":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
                             processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonInclude":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
                         if (useJacksonAnnotation) {
                             processJacksonJsonInclude(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonSubTypes":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSubTypes(beanInfo, annotation);
                         }
@@ -795,20 +792,17 @@ public class ObjectReaderBaseModule
                             processJacksonJsonIgnore(fieldInfo, annotation);
                         }
                         break;
-                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonDeserialize":
                     case "com.fasterxml.jackson.databind.annotation.JsonDeserialize":
                         if (useJacksonAnnotation) {
                             processJacksonJsonDeserialize(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonFormat":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
                             processJacksonJsonFormat(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnySetter":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
                         if (useJacksonAnnotation) {
                             fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                         }
@@ -816,14 +810,12 @@ public class ObjectReaderBaseModule
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                     case "com.fasterxml.jackson.annotation.JsonProperty":
                         if (useJacksonAnnotation) {
                             processJacksonJsonProperty(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAlias":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAlias":
                         if (useJacksonAnnotation) {
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }
@@ -831,6 +823,11 @@ public class ObjectReaderBaseModule
                     case "com.google.gson.annotations.SerializedName":
                         if (JSONFactory.isUseGsonAnnotation()) {
                             processGsonSerializedName(fieldInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonInclude":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonInclude(fieldInfo, annotation);
                         }
                         break;
                     default:
@@ -932,13 +929,11 @@ public class ObjectReaderBaseModule
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonFormat":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
                             processJacksonJsonFormat(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.databind.annotation.JsonDeserialize":
-                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonDeserialize":
                         if (useJacksonAnnotation) {
                             processJacksonJsonDeserialize(fieldInfo, annotation);
                         }
