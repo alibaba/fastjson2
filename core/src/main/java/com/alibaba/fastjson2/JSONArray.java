@@ -970,13 +970,29 @@ public class JSONArray
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Type type) {
+        return to(type, 0L);
+    }
+
+    /**
+     * Convert this {@link JSONArray} to the specified Object
+     *
+     * <pre>{@code
+     * JSONArray array = ...
+     * List<User> users = array.to(new TypeReference<ArrayList<User>>(){}.getType());
+     * }</pre>
+     *
+     * @param type specify the {@link Type} to be converted
+     * @since 2.0.51
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T to(Type type, long features) {
         if (type == String.class) {
             return (T) toString();
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this);
+        return objectReader.createInstance(this, features);
     }
 
     /**
@@ -1179,7 +1195,7 @@ public class JSONArray
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, featuresValue);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -1238,7 +1254,7 @@ public class JSONArray
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, featuresValue);
         }
 
         Class clazz = TypeUtils.getMapping(type);

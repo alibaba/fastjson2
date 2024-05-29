@@ -25,7 +25,7 @@ public final class ObjectReaderImplObject
         return new JSONObject();
     }
 
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         return collection;
     }
 

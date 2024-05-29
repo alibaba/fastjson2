@@ -123,7 +123,7 @@ class ObjectReaderImplInt8ValueArray
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         byte[] bytes = new byte[collection.size()];
         int i = 0;
         for (Object item : collection) {

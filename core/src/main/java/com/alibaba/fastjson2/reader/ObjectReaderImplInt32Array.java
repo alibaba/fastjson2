@@ -22,7 +22,7 @@ public final class ObjectReaderImplInt32Array
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         Integer[] array = new Integer[collection.size()];
         int i = 0;
         for (Object item : collection) {

@@ -40,7 +40,7 @@ public final class ObjectReaderImplListStr
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         if (listType.isInstance(collection)) {
             boolean typeMatch = true;
             for (Object item : collection) {
