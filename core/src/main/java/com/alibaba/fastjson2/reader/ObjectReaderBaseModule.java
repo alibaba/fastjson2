@@ -923,7 +923,6 @@ public class ObjectReaderBaseModule
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                         if (useJacksonAnnotation) {
                             processJacksonJsonProperty(fieldInfo, annotation);
                         }
@@ -939,7 +938,6 @@ public class ObjectReaderBaseModule
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAlias":
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAlias":
                         if (useJacksonAnnotation) {
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }

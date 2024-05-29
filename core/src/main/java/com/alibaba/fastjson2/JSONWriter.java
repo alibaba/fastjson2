@@ -2057,8 +2057,15 @@ public abstract class JSONWriter
 
         /**
          * @since 2.0.7
+         * @deprecated use IgnoreEmpty
          */
         NotWriteEmptyArray(1 << 26),
+
+        /**
+         * @since 2.0.51
+         */
+        IgnoreEmpty(1L << 26),
+
         WriteNonStringKeyAsString(1 << 27),
         /**
          * @since 2.0.11
