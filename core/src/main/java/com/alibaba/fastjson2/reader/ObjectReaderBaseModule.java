@@ -947,6 +947,11 @@ public class ObjectReaderBaseModule
                             processGsonSerializedName(fieldInfo, annotation);
                         }
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonSetter":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonSetter(fieldInfo, annotation);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -1036,6 +1041,29 @@ public class ObjectReaderBaseModule
                                 fieldInfo.required = true;
                             }
                             break;
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private void processJacksonJsonSetter(FieldInfo fieldInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.fieldName = value;
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }
