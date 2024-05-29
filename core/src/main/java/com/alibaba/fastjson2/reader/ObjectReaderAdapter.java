@@ -357,7 +357,7 @@ public class ObjectReaderAdapter<T>
         }
     }
 
-    public T createInstance(Collection collection) {
+    public T createInstance(Collection collection, long features) {
         T object = createInstance(0L);
         int index = 0;
         for (Object fieldValue : collection) {
@@ -632,7 +632,7 @@ public class ObjectReaderAdapter<T>
             }
         }
 
-        T object = createInstance(0L);
+        T object = createInstance(features);
 
         if (extraFieldReader == null
                 && (features2 & (JSONReader.Feature.SupportSmartMatch.mask | JSONReader.Feature.ErrorOnUnknownProperties.mask)) == 0
@@ -652,7 +652,7 @@ public class ObjectReaderAdapter<T>
                             && fieldValue instanceof JSONArray
                     ) {
                         ObjectReader objectReader = fieldReader.getObjectReader(provider);
-                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue);
+                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue, features);
                         fieldReader.accept(object, fieldValueList);
                         continue;
                     } else if (fieldValue instanceof JSONObject

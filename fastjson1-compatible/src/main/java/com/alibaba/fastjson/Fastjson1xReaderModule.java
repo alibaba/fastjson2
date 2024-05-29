@@ -40,7 +40,7 @@ public class Fastjson1xReaderModule
         }
 
         @Override
-        public Object createInstance(Collection collection) {
+        public Object createInstance(Collection collection, long features) {
             return Collections.emptyList();
         }
     }

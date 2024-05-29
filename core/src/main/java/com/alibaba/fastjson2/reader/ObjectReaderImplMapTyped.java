@@ -107,7 +107,7 @@ class ObjectReaderImplMapTyped
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
                     try {
-                        value = valueObjectReader.createInstance((JSONArray) value);
+                        value = valueObjectReader.createInstance((JSONArray) value, features);
                     } catch (Exception ignored) {
                         // ignored
                     }
@@ -127,7 +127,7 @@ class ObjectReaderImplMapTyped
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    value = valueObjectReader.createInstance((Collection) value);
+                    value = valueObjectReader.createInstance((Collection) value, features);
                 } else {
                     if (!valueClass.isInstance(value)) {
                         throw new JSONException("can not convert from " + valueClass + " to " + valueType);
@@ -193,7 +193,7 @@ class ObjectReaderImplMapTyped
         } else {
             object = instanceType == HashMap.class
                     ? new HashMap<>()
-                    : (Map) createInstance();
+                    : (Map) createInstance(features);
         }
 
         for (int i = 0; ; ++i) {

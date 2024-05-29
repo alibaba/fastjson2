@@ -95,7 +95,7 @@ class ObjectReaderImplFloatValueArray
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         float[] array = new float[collection.size()];
         int i = 0;
         for (Object item : collection) {

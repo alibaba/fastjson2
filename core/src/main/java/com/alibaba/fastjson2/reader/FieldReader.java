@@ -438,7 +438,7 @@ public abstract class FieldReader<T>
                         : new JSONReader.Feature[0];
                 typedFieldValue = ((JSONObject) fieldValue).to(fieldType, toFeatures);
             } else if (fieldValue instanceof JSONArray) {
-                typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
+                typedFieldValue = ((JSONArray) fieldValue).to(fieldType, features);
             } else if ((features == 0 || features == JSONReader.Feature.SupportSmartMatch.mask) // default or fastjson 1.x default
                     && !fieldClass.isInstance(fieldValue) && format == null
             ) {

@@ -58,7 +58,7 @@ public class FieldReaderList<T, V>
             return new ArrayList<>();
         }
 
-        return (Collection<V>) getObjectReader(context).createInstance();
+        return (Collection<V>) getObjectReader(context).createInstance(features);
     }
 
     @Override
