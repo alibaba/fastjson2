@@ -3379,14 +3379,28 @@ public class ObjectWriterCreatorASM
 
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
 
-        // void writeFieldName(JSONWriter w)
-        gwFieldName(mwc, fieldWriter, i);
-
         if ("trim".equals(format)) {
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "trim", "()Ljava/lang/String;", false);
             mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
         }
+
+        Label ignoreEmptyEnd_ = null;
+        if ((features & IgnoreEmpty.mask) == 0) {
+            ignoreEmptyEnd_ = new Label();
+            mwc.genIsEnabled(IgnoreEmpty.mask, ignoreEmptyEnd_);
+        }
+
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "isEmpty", "()Z", false);
+        mw.visitJumpInsn(Opcodes.IFNE, endIfNull_);
+
+        if (ignoreEmptyEnd_ != null) {
+            mw.visitLabel(ignoreEmptyEnd_);
+        }
+
+        // void writeFieldName(JSONWriter w)
+        gwFieldName(mwc, fieldWriter, i);
 
         final boolean symbol = jsonb && "symbol".equals(format);
         gwString(mwc, symbol, false, FIELD_VALUE);

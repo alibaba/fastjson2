@@ -2836,9 +2836,28 @@ public abstract class BeanUtils {
                             break;
                         case "NON_EMPTY":
                             fieldInfo.features |= JSONWriter.Feature.NotWriteEmptyArray.mask;
+                            fieldInfo.features |= JSONWriter.Feature.IgnoreEmpty.mask;
                             break;
                         default:
                             break;
+                    }
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonUnwrapped(FieldInfo fieldInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                if ("enabled".equals(name)) {
+                    boolean value = (Boolean) result;
+                    if (value) {
+                        fieldInfo.features = FieldInfo.UNWRAPPED_MASK;
                     }
                 }
             } catch (Throwable ignored) {

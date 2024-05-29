@@ -48,12 +48,22 @@ final class FieldWriterStringFunc<T>
             throw error;
         }
 
+        long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) == 0) {
                 return false;
             }
+        } else if (trim) {
+            value = value.trim();
         }
+
+        if (value != null
+                && value.isEmpty()
+                && (features & JSONWriter.Feature.IgnoreEmpty.mask) != 0
+        ) {
+            return false;
+        }
+
         writeFieldName(jsonWriter);
 
         if (value == null) {
@@ -63,10 +73,6 @@ final class FieldWriterStringFunc<T>
                 jsonWriter.writeNull();
             }
             return true;
-        }
-
-        if (trim && value != null) {
-            value = value.trim();
         }
 
         if (symbol && jsonWriter.jsonb) {

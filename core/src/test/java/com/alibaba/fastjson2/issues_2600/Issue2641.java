@@ -1,7 +1,11 @@
 package com.alibaba.fastjson2.issues_2600;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -11,10 +15,10 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2641 {
+    ObjectMapper objectMapper = new ObjectMapper();
+
     @Test
     public void test() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         {
             Bean bean = new Bean(new LinkedHashSet<>());
             String jackson = objectMapper.writeValueAsString(bean);
@@ -40,6 +44,124 @@ public class Issue2641 {
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         public Set<String> getGroups() {
             return groups;
+        }
+    }
+
+    @Test
+    public void test1() throws Exception {
+        Bean1 bean = new Bean1();
+        String jackson = objectMapper.writeValueAsString(bean);
+        assertEquals(jackson, JSON.toJSONString(bean));
+    }
+
+    public static class Bean1 {
+        private final Status status = Status.UP;
+
+        @JsonUnwrapped
+        public Status getStatus() {
+            return this.status;
+        }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public static final class Status {
+        public static final Status UP = new Status("UP");
+        private final String code;
+
+        private final String description;
+
+        public Status(String code) {
+            this(code, "");
+        }
+
+        public Status(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        @JsonProperty("status")
+        public String getCode() {
+            return this.code;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public String getDescription() {
+            return this.description;
+        }
+    }
+
+    public static final class Status1 {
+        public static final Status1 UP = new Status1("UP");
+        private final String code;
+
+        private final String description;
+
+        public Status1(String code) {
+            this(code, "");
+        }
+
+        public Status1(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        @JSONField(name = "status")
+        public String getCode() {
+            return this.code;
+        }
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.IgnoreEmpty)
+        public String getDescription() {
+            return this.description;
+        }
+    }
+
+    public static final class Status2 {
+        public static final Status2 UP = new Status2("UP");
+        private final String code;
+
+        public final String description;
+
+        public Status2(String code) {
+            this(code, "");
+        }
+
+        public Status2(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        @JSONField(name = "status")
+        public String getCode() {
+            return this.code;
+        }
+    }
+
+    @Test
+    public void testStatus() throws Exception {
+        String jackson = objectMapper.writeValueAsString(Status.UP);
+        assertEquals(jackson, JSON.toJSONString(Status.UP));
+        assertEquals(jackson, JSON.toJSONString(Status1.UP));
+        assertEquals("{\"description\":\"\",\"status\":\"UP\"}", JSON.toJSONString(Status2.UP));
+        assertEquals(jackson, JSON.toJSONString(Status2.UP, JSONWriter.Feature.IgnoreEmpty));
+    }
+
+    @Test
+    public void test2() throws Exception {
+        Bean2 bean = new Bean2(null);
+        String jackson = objectMapper.writeValueAsString(bean);
+        assertEquals(jackson, JSON.toJSONString(bean));
+    }
+
+    public static class Bean2 {
+        private String value;
+        public Bean2(String value) {
+            this.value = value;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public String getValue() {
+            return value;
         }
     }
 }
