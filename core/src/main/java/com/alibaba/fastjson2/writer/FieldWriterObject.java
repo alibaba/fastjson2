@@ -247,6 +247,10 @@ public class FieldWriterObject<T>
             return false;
         }
 
+        if (backReference && jsonWriter.containsReference(object)) {
+            return false;
+        }
+
         Object value;
         try {
             value = getFieldValue(object);

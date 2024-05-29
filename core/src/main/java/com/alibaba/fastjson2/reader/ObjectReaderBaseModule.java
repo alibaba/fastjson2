@@ -952,6 +952,16 @@ public class ObjectReaderBaseModule
                             processJacksonJsonSetter(fieldInfo, annotation);
                         }
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonManagedReference":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= JSONWriter.Feature.ReferenceDetection.mask;
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonBackReference":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.BACKR_EFERENCE;
+                        }
+                        break;
                     default:
                         break;
                 }
