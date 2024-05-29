@@ -1853,6 +1853,13 @@ public class ObjectWriterCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, notNull_);
         }
 
+        if (fieldWriter.backReference) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "containsReference", "(Ljava/lang/Object;)Z", false);
+            mw.visitJumpInsn(Opcodes.IFNE, notNull_);
+        }
+
         genGetObject(mwc, fieldWriter, i, OBJECT);
         mw.visitInsn(Opcodes.DUP);
         mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);

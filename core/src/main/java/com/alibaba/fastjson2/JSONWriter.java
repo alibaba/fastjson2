@@ -169,6 +169,13 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
+    public final void addManagerReference(Object object) {
+        if (refs == null) {
+            refs = new IdentityHashMap(8);
+        }
+        refs.putIfAbsent(object, Path.MANGER_REFERNCE);
+    }
+
     public final boolean writeReference(int index, Object object) {
         String refPath = setPath(index, object);
         if (refPath != null) {
@@ -2147,6 +2154,7 @@ public abstract class JSONWriter
 
     public static final class Path {
         public static final Path ROOT = new Path(null, "$");
+        public static final Path MANGER_REFERNCE = new Path(null, "#");
 
         public final Path parent;
         final String name;

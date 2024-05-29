@@ -216,8 +216,14 @@ abstract class FieldWriterList<T>
                 previousItemRefDetect = itemRefDetect;
             }
 
-            if (itemRefDetect && jsonWriter.writeReference(i, item)) {
-                continue;
+            if (itemRefDetect) {
+                if (jsonWriter.writeReference(i, item)) {
+                    continue;
+                }
+            }
+
+            if (managedReference) {
+                jsonWriter.addManagerReference(item);
             }
 
             itemObjectWriter.write(jsonWriter, item, null, itemType, features);
@@ -346,8 +352,12 @@ abstract class FieldWriterList<T>
                 previousItemRefDetect = itemRefDetect;
             }
 
-            if (itemRefDetect && jsonWriter.writeReference(i, item)) {
-                continue;
+            if (itemRefDetect) {
+                if (jsonWriter.writeReference(i, item)) {
+                    continue;
+                }
+            } else if (this.managedReference) {
+                jsonWriter.addManagerReference(item);
             }
 
             itemObjectWriter.write(jsonWriter, item, null, itemType, features);
