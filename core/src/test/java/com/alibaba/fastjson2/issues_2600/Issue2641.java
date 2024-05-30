@@ -211,4 +211,20 @@ public class Issue2641 {
             return this.strNull;
         }
     }
+
+    @Test
+    void testJsonUnwrapped() throws Exception {
+        final Bean3 testJsonUnwrapped = new Bean3();
+        final String jackson = new ObjectMapper().writeValueAsString(testJsonUnwrapped);
+        assertEquals(jackson, JSON.toJSONString(testJsonUnwrapped)); //Don't work
+    }
+
+    private static class Bean3 {
+        private final Status status = Status.UP;
+
+        @JsonUnwrapped
+        public Status getStatus() {
+            return this.status;
+        }
+    }
 }
