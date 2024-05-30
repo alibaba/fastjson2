@@ -214,6 +214,10 @@ public abstract class JSONWriter
     }
 
     public final void popPath(Object object) {
+        if (!isRefDetect(object)) {
+            return;
+        }
+
         if (this.path == null
                 || (context.features & ReferenceDetection.mask) == 0
                 || object == Collections.EMPTY_LIST
