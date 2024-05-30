@@ -306,6 +306,16 @@ public class FieldWriterObject<T>
             return false;
         }
 
+        if ((features & JSONWriter.Feature.IgnoreEmpty.mask) != 0) {
+            if ((value instanceof Collection) && ((Collection<?>) value).isEmpty()) {
+                return false;
+            }
+
+            if ((value instanceof Map) && ((Map<?, ?>) value).isEmpty()) {
+                return false;
+            }
+        }
+
         boolean refDetect = jsonWriter.isRefDetect(value);
         if (refDetect) {
             if (value == object) {

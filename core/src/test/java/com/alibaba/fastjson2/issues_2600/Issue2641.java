@@ -9,8 +9,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -162,6 +161,54 @@ public class Issue2641 {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public String getValue() {
             return value;
+        }
+    }
+
+    @Test
+    public void test3() throws Exception {
+        final TestJsonIncludeDTO dto = new TestJsonIncludeDTO();
+        final String jackson = objectMapper.writeValueAsString(dto);
+        final String fastjson2 = JSON.toJSONString(dto);
+
+        assertEquals(jackson, "{}");
+        assertEquals(fastjson2, "{}"); // fails
+    }
+
+    static class TestJsonIncludeDTO {
+        private final Map<String, String> map = new HashMap<>();
+
+        private final List<String> list = new ArrayList<>();
+
+        private final Set<String> set = new HashSet<>();
+
+        private final String strEmpty = "";
+
+        private final String strNull = null;
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @JsonProperty
+        public Map<String, String> getMap() {
+            return this.map;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public List<String> getList() {
+            return this.list;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public Set<String> getSet() {
+            return this.set;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public String getStrEmpty() {
+            return this.strEmpty;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public String getStrNull() {
+            return this.strNull;
         }
     }
 }
