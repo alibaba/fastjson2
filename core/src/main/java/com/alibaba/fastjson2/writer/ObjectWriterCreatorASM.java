@@ -1866,6 +1866,22 @@ public class ObjectWriterCreatorASM
 
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
 
+        if (Map.class.isAssignableFrom(fieldClass)) {
+            Label ignoreEmptyEnd_ = null;
+            if ((fieldWriter.features & IgnoreEmpty.mask) == 0) {
+                ignoreEmptyEnd_ = new Label();
+                mwc.genIsEnabled(IgnoreEmpty.mask, ignoreEmptyEnd_);
+            }
+
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Map", "isEmpty", "()Z", true);
+            mw.visitJumpInsn(Opcodes.IFNE, notNull_);
+
+            if (ignoreEmptyEnd_ != null) {
+                mw.visitLabel(ignoreEmptyEnd_);
+            }
+        }
+
         if (!Serializable.class.isAssignableFrom(fieldClass) && fieldClass != List.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             if (!fieldWriter.isFieldClassSerializable()) {
@@ -2157,6 +2173,20 @@ public class ObjectWriterCreatorASM
 
         Label null_ = new Label(), notNull_ = new Label();
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
+
+        Label ignoreEmptyEnd_ = null;
+        if ((fieldWriter.features & IgnoreEmpty.mask) == 0) {
+            ignoreEmptyEnd_ = new Label();
+            mwc.genIsEnabled(IgnoreEmpty.mask, ignoreEmptyEnd_);
+        }
+
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Collection", "isEmpty", "()Z", true);
+        mw.visitJumpInsn(Opcodes.IFNE, notNull_);
+
+        if (ignoreEmptyEnd_ != null) {
+            mw.visitLabel(ignoreEmptyEnd_);
+        }
 
         if (!disableReferenceDetect) {
             Label endDetect_ = new Label(), refSetPath_ = new Label();

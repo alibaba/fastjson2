@@ -227,4 +227,56 @@ public class Issue2641 {
             return this.status;
         }
     }
+
+    @Test
+    public void test4() throws Exception {
+        // given
+        final Bean4 dto = new Bean4();
+
+        // when
+        final String jackson = new ObjectMapper().writeValueAsString(dto);
+        final String fastjson2 = JSON.toJSONString(dto);
+
+        // then
+        assertEquals(jackson, "{}");
+        assertEquals(fastjson2, "{}"); // fails
+    }
+
+    public class Bean4 {
+        private final Map<String, String> map = new HashMap<>();
+
+        private final List<String> list = new ArrayList<>();
+
+        private final Set<String> set = new HashSet<>();
+
+        private final String strEmpty = "";
+
+        private final String strNull = null;
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @JsonProperty
+        public Map<String, String> getMap() {
+            return this.map;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public List<String> getList() {
+            return this.list;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public Set<String> getSet() {
+            return this.set;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public String getStrEmpty() {
+            return this.strEmpty;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public String getStrNull() {
+            return this.strNull;
+        }
+    }
 }
