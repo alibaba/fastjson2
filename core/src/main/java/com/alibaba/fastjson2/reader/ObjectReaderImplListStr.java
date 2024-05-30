@@ -16,6 +16,7 @@ public final class ObjectReaderImplListStr
         implements ObjectReader {
     final Class listType;
     final Class instanceType;
+    Object listSingleton;
 
     public ObjectReaderImplListStr(Class listType, Class instanceType) {
         this.listType = listType;
@@ -139,6 +140,12 @@ public final class ObjectReaderImplListStr
                     break;
                 case "com.google.common.collect.Lists.TransformingSequentialList":
                     list = new LinkedList();
+                    break;
+                case "kotlin.collections.EmptyList":
+                    list = getKotlinEmptyList(instanceType);
+                    break;
+                case "kotlin.collections.EmptySet":
+                    list = getKotlinEmptySet(instanceType);
                     break;
                 default:
                     try {
