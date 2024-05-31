@@ -49,10 +49,11 @@ public class JSONPath {
         return TypeUtils.cast(r, clazz, ParserConfig.global);
     }
 
+    public static Object eval(String rootObject, String path) {
+        return com.alibaba.fastjson2.JSONPath.eval(rootObject, path);
+    }
+
     public static Object eval(Object rootObject, String path) {
-        if (rootObject instanceof String) {
-            return com.alibaba.fastjson2.JSONPath.eval((String) rootObject, path);
-        }
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         return jsonPath.eval(rootObject);
     }
