@@ -3697,27 +3697,29 @@ public class ObjectReaderCreatorASM
         boolean initCapacity = JVM_VERSION == 8 && "java/util/ArrayList".equals(LIST_TYPE);
 
         if (jsonb) {
-            Label checkAutoTypeNull_ = new Label();
+            if (!context.disableAutoType()) {
+                Label checkAutoTypeNull_ = new Label();
 
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "checkObjectAutoType", METHOD_DESC_CHECK_ARRAY_AUTO_TYPE, false);
-            mw.visitInsn(Opcodes.DUP);
-            mw.visitVarInsn(Opcodes.ASTORE, AUTO_TYPE_OBJECT_READER);
-            mw.visitJumpInsn(Opcodes.IFNULL, checkAutoTypeNull_);
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "checkObjectAutoType", METHOD_DESC_CHECK_ARRAY_AUTO_TYPE, false);
+                mw.visitInsn(Opcodes.DUP);
+                mw.visitVarInsn(Opcodes.ASTORE, AUTO_TYPE_OBJECT_READER);
+                mw.visitJumpInsn(Opcodes.IFNULL, checkAutoTypeNull_);
 
-            mw.visitVarInsn(Opcodes.ALOAD, AUTO_TYPE_OBJECT_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            gwGetFieldType(classNameType, mw, THIS, i, fieldType);
-            mw.visitLdcInsn(fieldReader.fieldName);
-            mw.visitLdcInsn(fieldFeatures);
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "readJSONBObject", METHOD_DESC_READ_OBJECT, true);
-            mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
-            mw.visitVarInsn(Opcodes.ASTORE, LIST);
-            mw.visitJumpInsn(Opcodes.GOTO, loadList_);
+                mw.visitVarInsn(Opcodes.ALOAD, AUTO_TYPE_OBJECT_READER);
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                gwGetFieldType(classNameType, mw, THIS, i, fieldType);
+                mw.visitLdcInsn(fieldReader.fieldName);
+                mw.visitLdcInsn(fieldFeatures);
+                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "readJSONBObject", METHOD_DESC_READ_OBJECT, true);
+                mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
+                mw.visitVarInsn(Opcodes.ASTORE, LIST);
+                mw.visitJumpInsn(Opcodes.GOTO, loadList_);
 
-            mw.visitLabel(checkAutoTypeNull_);
+                mw.visitLabel(checkAutoTypeNull_);
+            }
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);

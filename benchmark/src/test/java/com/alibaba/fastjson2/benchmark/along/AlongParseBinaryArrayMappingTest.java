@@ -23,6 +23,20 @@ public class AlongParseBinaryArrayMappingTest {
         }
     }
 
+    public static void jsonbFeatures() throws Exception {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < LOOP; ++i) {
+                benchmark.jsonbFeatures(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("AlongParseBinaryArrayMapping-jsonbFeatures millis : " + millis);
+            // zulu8.68.0.21 :
+            // zulu11.52.13 :
+            // zulu17.32.13 :
+        }
+    }
+
     public static void fury() throws Exception {
         System.out.println("AlongParseBinaryArrayMapping-fury size " + AlongParseBinaryArrayMapping.furyBytes.length); // 449
         System.out.println();
@@ -41,7 +55,8 @@ public class AlongParseBinaryArrayMappingTest {
     }
 
     public static void main(String[] args) throws Exception {
-        jsonb();
+//        jsonb();
+        jsonbFeatures();
 //        fury();
     }
 }
