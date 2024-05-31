@@ -524,7 +524,6 @@ public abstract class BeanUtils {
 
                     switch (annotationType.getName()) {
                         case "com.fasterxml.jackson.annotation.JsonAnySetter":
-                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
                             if (JSONFactory.isUseJacksonAnnotation()) {
                                 unwrapped.set(true);
                             }
@@ -1099,10 +1098,8 @@ public abstract class BeanUtils {
                 case "com.alibaba.fastjson2.annotation.JSONField":
                     return true;
                 case "com.fasterxml.jackson.annotation.JsonValue":
-                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
                 case "com.fasterxml.jackson.annotation.JsonRawValue":
                 case "com.fasterxml.jackson.annotation.JsonProperty":
-                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                     if (JSONFactory.isUseJacksonAnnotation()) {
                         return true;
                     }
