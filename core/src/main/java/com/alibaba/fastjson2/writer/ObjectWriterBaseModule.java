@@ -559,6 +559,13 @@ public class ObjectWriterBaseModule
                             fieldInfo.ignore = "WRITE_ONLY".equals(access);
                             break;
                         }
+                        case "index": {
+                            int index = (Integer) result;
+                            if (index != -1) {
+                                fieldInfo.ordinal = index;
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }
