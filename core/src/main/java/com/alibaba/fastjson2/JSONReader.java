@@ -1104,6 +1104,14 @@ public abstract class JSONReader
             return zdt.toLocalDateTime();
         }
 
+        if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
+            nextIfMatch(':');
+            LocalDateTime dateTime = readLocalDateTime();
+            nextIfObjectEnd();
+            setTypeRedirect(false);
+            return dateTime;
+        }
+
         if (context.dateFormat == null
                 || context.formatyyyyMMddhhmmss19
                 || context.formatyyyyMMddhhmmssT19
