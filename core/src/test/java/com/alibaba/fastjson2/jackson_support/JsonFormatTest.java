@@ -4,9 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -96,5 +99,25 @@ public class JsonFormatTest {
         public void setTime(LocalTime time) {
             this.time = time;
         }
+    }
+
+    @Test
+    public void test5() throws Exception {
+        Bean5 bean = new Bean5();
+        bean.time = new Date();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fastjson = JSON.toJSONString(bean);
+        String jackson = objectMapper.writeValueAsString(bean);
+        assertEquals(jackson, fastjson);
+
+        Bean5 parsed = JSON.parseObject(fastjson, Bean5.class);
+        assertEquals(bean.time, parsed.time);
+    }
+
+    @Data
+    public static class Bean5 {
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+        private Date time;
     }
 }
