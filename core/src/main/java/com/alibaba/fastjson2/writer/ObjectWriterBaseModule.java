@@ -489,6 +489,7 @@ public class ObjectWriterBaseModule
 
         private void processJacksonJsonPropertyOrder(BeanInfo beanInfo, Annotation annotation) {
             Class<? extends Annotation> annotationClass = annotation.getClass();
+            final AtomicBoolean alphabetic = new AtomicBoolean(false);
             BeanUtils.annotationMethods(annotationClass, m -> {
                 String name = m.getName();
                 try {
@@ -498,11 +499,16 @@ public class ObjectWriterBaseModule
                         if (value.length != 0) {
                             beanInfo.orders = value;
                         }
+                    } else if ("alphabetic".equals(name)) {
+                        alphabetic.set((Boolean) result);
                     }
                 } catch (Throwable ignored) {
                     // ignored
                 }
             });
+            if (beanInfo.orders == null || beanInfo.orders.length == 0) {
+                beanInfo.alphabetic = alphabetic.get();
+            }
         }
 
         private void processJacksonJsonSerialize(FieldInfo fieldInfo, Annotation annotation) {
