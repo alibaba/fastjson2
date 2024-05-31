@@ -2761,6 +2761,8 @@ public abstract class BeanUtils {
                         String shape = ((Enum) result).name();
                         if ("STRING".equals(shape)) {
                             fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                        } else if ("NUMBER".equals(shape)) {
+                            fieldInfo.format = "millis";
                         }
                         break;
                     }
@@ -2783,6 +2785,11 @@ public abstract class BeanUtils {
                     String pattern = (String) result;
                     if (pattern.length() != 0) {
                         beanInfo.format = pattern;
+                    }
+                } else if ("shape".equals(name)) {
+                    String shape = ((Enum) result).name();
+                    if ("NUMBER".equals(shape)) {
+                        beanInfo.format = "millis";
                     }
                 }
             } catch (Throwable ignored) {
