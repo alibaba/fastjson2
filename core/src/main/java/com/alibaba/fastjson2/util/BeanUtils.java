@@ -2763,6 +2763,13 @@ public abstract class BeanUtils {
                         }
                         break;
                     }
+                    case "locale": {
+                        String locale = (String) result;
+                        if (!locale.isEmpty() && !"##default".equals(locale)) {
+                            fieldInfo.locale = Locale.forLanguageTag(locale);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2780,13 +2787,18 @@ public abstract class BeanUtils {
                 Object result = m.invoke(annotation);
                 if ("pattern".equals(name)) {
                     String pattern = (String) result;
-                    if (pattern.length() != 0) {
+                    if (!pattern.isEmpty()) {
                         beanInfo.format = pattern;
                     }
                 } else if ("shape".equals(name)) {
                     String shape = ((Enum) result).name();
                     if ("NUMBER".equals(shape)) {
                         beanInfo.format = "millis";
+                    }
+                } else if ("locale".equals(name)) {
+                    String locale = (String) result;
+                    if (!locale.isEmpty() && !"##default".equals(locale)) {
+                        beanInfo.locale = Locale.forLanguageTag(locale);
                     }
                 }
             } catch (Throwable ignored) {

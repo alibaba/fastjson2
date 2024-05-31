@@ -120,4 +120,25 @@ public class JsonFormatTest {
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
         private Date time;
     }
+
+    @Test
+    public void test6() throws Exception {
+        Bean6 bean = new Bean6();
+        bean.time = new Date();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fastjson = JSON.toJSONString(bean);
+        String jackson = objectMapper.writeValueAsString(bean);
+        assertEquals(jackson, fastjson);
+//
+//        Bean6 parsed0 = objectMapper.readValue(jackson, Bean6.class);
+//        Bean6 parsed1 = JSON.parseObject(fastjson, Bean6.class);
+//        assertEquals(parsed0.time.getTime(), parsed1.time.getTime());
+    }
+
+    @Data
+    public static class Bean6 {
+        @JsonFormat(pattern = "yyyy-MM-dd", locale = "zh_CN")
+        private Date time;
+    }
 }
