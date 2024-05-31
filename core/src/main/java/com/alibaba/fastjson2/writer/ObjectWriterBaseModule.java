@@ -548,7 +548,9 @@ public class ObjectWriterBaseModule
                     switch (name) {
                         case "value":
                             String value = (String) result;
-                            if (!value.isEmpty()) {
+                            if (!value.isEmpty()
+                                    && (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty())
+                            ) {
                                 fieldInfo.fieldName = value;
                             }
                             break;
