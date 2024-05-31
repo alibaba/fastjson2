@@ -31,49 +31,13 @@ public class FloatTest {
      */
     @Test
     public void testFloatIntByte() {
-        for (int i = INT32_BYTE_MIN; i <= INT32_BYTE_MAX; i++) {
-            if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
-                continue;
-            }
+        for (int i = BC_INT32_NUM_MIN; i <= BC_INT32_NUM_MAX; i++) {
             float floatValue = i;
 
             byte[] bytes = JSONB.toBytes(floatValue);
-            assertEquals(3, bytes.length);
+            assertEquals(2, bytes.length);
             assertEquals(BC_FLOAT_INT, bytes[0]);
-            byte b1 = bytes[1];
-            byte b2 = bytes[2];
-
-            int value = ((b1 - BC_INT32_BYTE_ZERO) << 8) + (b2 & 0xFF);
-            assertEquals(i, value);
-
-            Float parsed = (Float) JSONB.parse(bytes);
-            assertEquals(parsed.floatValue(), floatValue);
-        }
-    }
-
-    /**
-     * 0xb6
-     */
-    @Test
-    public void testIntShort() {
-        for (int i = INT32_SHORT_MIN; i <= INT32_SHORT_MAX; i++) {
-            if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
-                continue;
-            }
-
-            float floatValue = i;
-
-            byte[] bytes = JSONB.toBytes(floatValue);
-            assertEquals(4, bytes.length);
-            assertEquals(BC_FLOAT_INT, bytes[0]);
-            byte b1 = bytes[1];
-            byte b2 = bytes[2];
-            byte b3 = bytes[3];
-
-            int value = ((b1 - BC_INT32_SHORT_ZERO) << 16)
-                    + ((b2 & 0xFF) << 8)
-                    + (b3 & 0xFF);
-            assertEquals(i, value);
+            assertEquals(i, bytes[1]);
 
             Float parsed = (Float) JSONB.parse(bytes);
             assertEquals(parsed.floatValue(), floatValue);

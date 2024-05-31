@@ -927,6 +927,70 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
+    public void startArray0() {
+        startArray(0);
+    }
+
+    public void startArray1() {
+        startArray(1);
+    }
+
+    public void startArray2() {
+        startArray(2);
+    }
+
+    public void startArray3() {
+        startArray(3);
+    }
+
+    public void startArray4() {
+        startArray(4);
+    }
+
+    public void startArray5() {
+        startArray(5);
+    }
+
+    public void startArray6() {
+        startArray(6);
+    }
+
+    public void startArray7() {
+        startArray(7);
+    }
+
+    public void startArray8() {
+        startArray(8);
+    }
+
+    public void startArray9() {
+        startArray(9);
+    }
+
+    public void startArray10() {
+        startArray(10);
+    }
+
+    public void startArray11() {
+        startArray(11);
+    }
+
+    public void startArray12() {
+        startArray(12);
+    }
+
+    public void startArray13() {
+        startArray(13);
+    }
+
+    public void startArray14() {
+        startArray(14);
+    }
+
+    public void startArray15() {
+        startArray(15);
+    }
+
     public void startArray(Object array, int size) {
         throw new JSONException("UnsupportedOperation");
     }

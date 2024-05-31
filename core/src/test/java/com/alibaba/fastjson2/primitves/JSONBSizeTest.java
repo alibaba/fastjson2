@@ -294,36 +294,13 @@ public class JSONBSizeTest {
         }
 
         float[] values_3 = new float[]{
-                -17, -32, -64, -128, -256, -512, -1024, -2048,
-                48, 96, 128, 256, 512, 1024, 2047
+                -16, -15, -14, -13, -12, -11, -10, -8, -4, -2, -1,
+                47, 46, 32, 24, 16, 8, 4, 2, 1, 0
         };
         for (int i = 0; i < values_3.length; i++) {
             float val = values_3[i];
             byte[] bytes = JSONB.toBytes(val);
-            assertEquals(3, bytes.length, "input " + val);
-            Assertions.assertTrue(val == ((Float) JSONB.parse(bytes)).floatValue());
-            Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).floatValue());
-
-            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
-
-            assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
-        }
-
-        float[] values_4 = new float[]{
-                -2049, -4096, -8192, -16384, -32768, -65536, -131072, -262144,
-                2048, 4096, 8192, 16384, 32768, 65536, 131072, 262143
-        };
-        for (int i = 0; i < values_4.length; i++) {
-            float val = values_4[i];
-            byte[] bytes = JSONB.toBytes(val);
-            assertEquals(4, bytes.length, "input " + val);
+            assertEquals(2, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Float) JSONB.parse(bytes)).floatValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).floatValue());
 
@@ -340,12 +317,17 @@ public class JSONBSizeTest {
         }
 
         float[] values_5 = new float[]{
-                -262145, Integer.MIN_VALUE, 262144, Integer.MAX_VALUE, -262145.1f, 262144.1f, Float.MIN_VALUE, Float.MAX_VALUE, Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY
+                -2049, -4096, -8192, -16384, -32768,
+                -65536, -131072, -262144, 2048, 4096,
+                8192, 16384, 32768, 65536, 131072,
+                262143, -262145, Integer.MIN_VALUE, 262144, Integer.MAX_VALUE,
+                -262145.1f, 262144.1f, Float.MIN_VALUE, Float.MAX_VALUE,
+                Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY
         };
         for (int i = 0; i < values_5.length; i++) {
             float val = values_5[i];
             byte[] bytes = JSONB.toBytes(val);
-            assertEquals(5, bytes.length, "input " + val);
+            assertEquals(5, bytes.length, "input " + val + " " + i);
             float parsedValue = ((Float) JSONB.parse(bytes)).floatValue();
             if (Float.isNaN(val)) {
                 Assertions.assertTrue(Float.isNaN(parsedValue));
