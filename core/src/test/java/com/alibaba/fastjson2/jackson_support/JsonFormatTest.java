@@ -130,15 +130,15 @@ public class JsonFormatTest {
         String fastjson = JSON.toJSONString(bean);
         String jackson = objectMapper.writeValueAsString(bean);
         assertEquals(jackson, fastjson);
-//
-//        Bean6 parsed0 = objectMapper.readValue(jackson, Bean6.class);
-//        Bean6 parsed1 = JSON.parseObject(fastjson, Bean6.class);
-//        assertEquals(parsed0.time.getTime(), parsed1.time.getTime());
+
+        Bean6 parsed0 = objectMapper.readValue(jackson, Bean6.class);
+        Bean6 parsed1 = JSON.parseObject(fastjson, Bean6.class);
+        assertEquals(parsed0.time.getTime(), parsed1.time.getTime());
     }
 
     @Data
     public static class Bean6 {
-        @JsonFormat(pattern = "yyyy-MM-dd", locale = "zh_CN")
+        @JsonFormat(pattern = "yyyy-MM-dd", locale = "zh-CN", timezone = "Asia/Shanghai")
         private Date time;
     }
 }
