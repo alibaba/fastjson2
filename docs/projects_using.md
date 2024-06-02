@@ -100,3 +100,12 @@
 * https://github.com/xunlu129/teriteri-backend
 * https://github.com/moshowgame/SpringBootCodeGenerator
 * https://github.com/4379711/lol-helper
+* https://github.com/zddgg/novel-cast
+* https://github.com/Whoopsunix/PPPYSO
+* https://github.com/wangzihaogithub/spring-boot-protocol
+* https://github.com/woodwhales/woodwhales-music
+* https://github.com/JanesenGit/FastChar
+* https://github.com/tokyohost/v2nodeManager
+* https://github.com/giteecode/hospitalRegistePublic
+* https://github.com/wujun728/jun_java_plugin
+* https://github.com/anhan123456/vrpc
