@@ -170,7 +170,7 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
-                <version>0.48.2-public</version>
+                <version>0.48.4-public</version>
             </dependency>
             <dependency>
                 <groupId>com.carrotsearch</groupId>
