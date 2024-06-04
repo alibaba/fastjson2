@@ -447,7 +447,7 @@ public abstract class FieldReader<T>
                     String fieldValueJson = JSON.toJSONString(fieldValue);
                     typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), fieldType, fieldName, features);
                 } else {
-                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                    typedFieldValue = TypeUtils.cast(fieldValue, fieldType, provider);
                 }
             } else {
                 if (autoCast) {
