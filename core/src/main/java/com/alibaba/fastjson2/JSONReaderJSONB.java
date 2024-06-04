@@ -5662,6 +5662,11 @@ final class JSONReaderJSONB
     }
 
     @Override
+    public boolean nextIfMatchIdent(char c0, char c1) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2) {
         throw new JSONException("UnsupportedOperation");
     }

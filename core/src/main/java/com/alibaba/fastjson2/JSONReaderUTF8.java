@@ -7110,6 +7110,32 @@ class JSONReaderUTF8
     }
 
     @Override
+    public final boolean nextIfMatchIdent(char c0, char c1) {
+        if (ch != c0) {
+            return false;
+        }
+
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (offset + 1 > end || bytes[offset] != c1) {
+            return false;
+        }
+
+        offset += 1;
+        int ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (offset == this.offset + 2 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
+            return false;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+        return true;
+    }
+
+    @Override
     public final boolean nextIfMatchIdent(char c0, char c1, char c2) {
         if (ch != c0) {
             return false;

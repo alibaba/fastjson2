@@ -757,6 +757,8 @@ public abstract class JSONReader
         throw new JSONException("UnsupportedOperation");
     }
 
+    public abstract boolean nextIfMatchIdent(char c0, char c1);
+
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2);
 
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3);
