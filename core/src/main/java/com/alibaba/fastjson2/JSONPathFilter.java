@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
@@ -341,6 +342,57 @@ abstract class JSONPathFilter
         }
     }
 
+    static final class NameDoubleOpSegment
+            extends NameFilter {
+        final Operator operator;
+        final double value;
+
+        public NameDoubleOpSegment(String name, long nameHashCode, Operator operator, Double value) {
+            super(name, nameHashCode);
+            this.operator = operator;
+            this.value = value;
+        }
+
+        protected boolean applyNull() {
+            return operator == Operator.NE;
+        }
+
+        @Override
+        public boolean apply(Object fieldValue) {
+            if (fieldValue == null) {
+                return false;
+            }
+
+            Double fieldValueDouble;
+
+            if (fieldValue instanceof Boolean) {
+                fieldValueDouble = (Boolean) fieldValue ? 1D : 0D;
+            } else if (fieldValue instanceof Number) {
+                fieldValueDouble = ((Number) fieldValue).doubleValue();
+            } else {
+                throw new UnsupportedOperationException();
+            }
+
+            int cmp = fieldValueDouble.compareTo(value);
+            switch (operator) {
+                case LT:
+                    return cmp < 0;
+                case LE:
+                    return cmp <= 0;
+                case EQ:
+                    return cmp == 0;
+                case NE:
+                    return cmp != 0;
+                case GT:
+                    return cmp > 0;
+                case GE:
+                    return cmp >= 0;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+    }
+
     static final class NameRLikeSegment
             extends NameFilter {
         final Pattern pattern;
@@ -609,7 +661,7 @@ abstract class JSONPathFilter
         }
 
         @Override
-        public final boolean apply(JSONPath.Context context, Object object) {
+        public boolean apply(JSONPath.Context context, Object object) {
             if (object == null) {
                 return false;
             }
@@ -1337,6 +1389,208 @@ abstract class JSONPathFilter
             }
 
             return not;
+        }
+    }
+
+    static final class NameName
+            extends NameFilter {
+        final String fieldName1;
+        final long fieldNameName1Hash;
+
+        public NameName(
+                String fieldName,
+                long fieldNameNameHash,
+                String fieldName1,
+                long fieldNameName1Hash
+        ) {
+            super(fieldName, fieldNameNameHash);
+            this.fieldName1 = fieldName1;
+            this.fieldNameName1Hash = fieldNameName1Hash;
+        }
+
+        @Override
+        public boolean apply(JSONPath.Context context, Object object) {
+            if (object == null) {
+                return false;
+            }
+
+            JSONWriter.Context writerContext = context.path.getWriterContext();
+
+            Object fieldValue, fieldValue1;
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                fieldValue = map.get(fieldName);
+                fieldValue1 = map.get(fieldName1);
+            } else {
+                ObjectWriter objectWriter = writerContext.getObjectWriter(object.getClass());
+                if (objectWriter instanceof ObjectWriterAdapter) {
+                    FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldNameNameHash);
+                    if (fieldWriter == null) {
+                        return false;
+                    }
+                    fieldValue = fieldWriter.getFieldValue(object);
+
+                    FieldWriter fieldWriter1 = objectWriter.getFieldWriter(fieldNameNameHash);
+                    if (fieldWriter1 == null) {
+                        return false;
+                    }
+                    fieldValue1 = fieldWriter1.getFieldValue(object);
+                } else {
+                    return false;
+                }
+            }
+
+            return Objects.equals(fieldValue, fieldValue1);
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            throw new JSONException("TODO");
+        }
+    }
+
+    static final class SegmentFilter
+            extends JSONPathFilter {
+        final JSONPathSegment expr;
+        final Operator operator;
+        final Object value;
+
+        public SegmentFilter(JSONPathSegment expr, Operator operator, Object value) {
+            this.expr = expr;
+            this.operator = operator;
+            this.value = value;
+        }
+
+        @Override
+        boolean apply(JSONPath.Context context, Object object) {
+            if (object == null) {
+                return false;
+            }
+            JSONPath.Context context0 = new JSONPath.Context(null, null, expr, null, 0);
+            context0.root = object;
+            expr.eval(context0);
+            Object result = context0.value;
+            int cmp = TypeUtils.compare(result, value);
+            switch (operator) {
+                case LT:
+                    return cmp < 0;
+                case LE:
+                    return cmp <= 0;
+                case EQ:
+                    return cmp == 0;
+                case NE:
+                    return cmp != 0;
+                case GT:
+                    return cmp > 0;
+                case GE:
+                    return cmp >= 0;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        public void accept(JSONReader jsonReader, JSONPath.Context context) {
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        @Override
+        public void eval(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                JSONArray array = new JSONArray(list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    if (apply(context, item)) {
+                        array.add(item);
+                    }
+                }
+                context.value = array;
+                context.eval = true;
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation " + object.getClass());
+        }
+    }
+
+    static final class Segment2Filter
+            extends JSONPathFilter {
+        final JSONPathSegment left;
+        final Operator operator;
+        final JSONPathSegment right;
+
+        public Segment2Filter(JSONPathSegment left, Operator operator, JSONPathSegment right) {
+            this.left = left;
+            this.operator = operator;
+            this.right = right;
+        }
+
+        @Override
+        boolean apply(JSONPath.Context context, Object object) {
+            if (object == null) {
+                return false;
+            }
+
+            JSONPath.Context context0 = new JSONPath.Context(null, null, left, null, 0);
+            context0.root = object;
+            left.eval(context0);
+            Object result0 = context0.value;
+
+            JSONPath.Context context1 = new JSONPath.Context(null, null, right, null, 0);
+            context1.root = object;
+            right.eval(context1);
+            Object result1 = context1.value;
+
+            int cmp = TypeUtils.compare(result0, result1);
+            switch (operator) {
+                case LT:
+                    return cmp < 0;
+                case LE:
+                    return cmp <= 0;
+                case EQ:
+                    return cmp == 0;
+                case NE:
+                    return cmp != 0;
+                case GT:
+                    return cmp > 0;
+                case GE:
+                    return cmp >= 0;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        public void accept(JSONReader jsonReader, JSONPath.Context context) {
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        @Override
+        public void eval(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                JSONArray array = new JSONArray(list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    if (apply(context, item)) {
+                        array.add(item);
+                    }
+                }
+                context.value = array;
+                context.eval = true;
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation " + object.getClass());
         }
     }
 }

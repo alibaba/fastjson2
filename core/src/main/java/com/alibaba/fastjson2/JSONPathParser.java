@@ -573,7 +573,7 @@ class JSONPathParser {
 
         boolean starts = jsonReader.nextIfMatchIdent('s', 't', 'a', 'r', 't', 's');
         boolean ends = (!starts) && jsonReader.nextIfMatchIdent('e', 'n', 'd', 's');
-        if ((at && (starts || ends)) || (jsonReader.ch != '.' && !JSONReader.isFirstIdentifier(jsonReader.ch))) {
+        if ((at && (starts || ends)) || (jsonReader.ch != '.' && jsonReader.ch != '[' && !JSONReader.isFirstIdentifier(jsonReader.ch))) {
             if (jsonReader.nextIfMatch('(')) {
                 filterNests++;
                 filterNests++;
@@ -633,12 +633,39 @@ class JSONPathParser {
             throw new JSONException(jsonReader.info("jsonpath syntax error"));
         }
 
+        String fieldName = null;
+        long hashCode = 0;
         if (at) {
-            jsonReader.next();
+            if (jsonReader.ch == '[') {
+                JSONPathSegment segment = parseArrayAccess();
+                if (segment instanceof JSONPathSegmentName) {
+                    fieldName = ((JSONPathSegmentName) segment).name;
+                    hashCode = ((JSONPathSegmentName) segment).nameHashCode;
+                } else {
+                    JSONPathFilter.Operator operator = JSONPath.parseOperator(jsonReader);
+                    if (jsonReader.ch == '@') {
+                        JSONPathSegment segment2 = parseSegment();
+                        if (parentheses) {
+                            jsonReader.nextIfMatch(')');
+                        }
+                        return new JSONPathFilter.Segment2Filter(segment, operator, segment2);
+                    } else {
+                        Object value = jsonReader.readAny();
+                        if (parentheses) {
+                            jsonReader.nextIfMatch(')');
+                        }
+                        return new JSONPathFilter.SegmentFilter(segment, operator, value);
+                    }
+                }
+            } else {
+                jsonReader.next();
+            }
         }
 
-        long hashCode = jsonReader.readFieldNameHashCodeUnquote();
-        String fieldName = jsonReader.getFieldName();
+        if (fieldName == null) {
+            hashCode = jsonReader.readFieldNameHashCodeUnquote();
+            fieldName = jsonReader.getFieldName();
+        }
 
         if (parentheses) {
             if (jsonReader.nextIfMatch(')')) {
@@ -902,6 +929,8 @@ class JSONPathParser {
                     segment = new JSONPathFilter.NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, number.longValue());
                 } else if (number instanceof BigDecimal) {
                     segment = new JSONPathFilter.NameDecimalOpSegment(fieldName, hashCode, operator, (BigDecimal) number);
+                } else if (number instanceof Float || number instanceof Double) {
+                    segment = new JSONPathFilter.NameDoubleOpSegment(fieldName, hashCode, operator, number.doubleValue());
                 } else {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
@@ -1001,6 +1030,16 @@ class JSONPathParser {
                     break;
                 }
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
+            case '@':
+                jsonReader.next();
+                if (!jsonReader.nextIfMatch('.')) {
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                }
+                String fieldName1 = jsonReader.readFieldNameUnquote();
+                long fieldName1Hash = Fnv.hashCode64(fieldName1);
+
+                segment = new JSONPathFilter.NameName(fieldName, hashCode, fieldName1, fieldName1Hash);
+                break;
             default:
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
         }
@@ -1017,5 +1056,38 @@ class JSONPathParser {
         }
 
         return segment;
+    }
+
+    public JSONPathSegment parseSegment() {
+        boolean at = jsonReader.nextIfMatch('@');
+        if (at) {
+            Object field = null;
+            if (jsonReader.nextIfMatch('.')) {
+                if (jsonReader.isNumber()) {
+                    field = jsonReader.readNumber();
+                } else {
+                    field = jsonReader.readFieldNameUnquote();
+                }
+            } else if (jsonReader.nextIfArrayStart()) {
+                if (jsonReader.isNumber()) {
+                    field = jsonReader.readNumber();
+                } else if (jsonReader.isString()) {
+                    field = jsonReader.readString();
+                } else {
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                }
+                if (!jsonReader.nextIfArrayEnd()) {
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                }
+            }
+            if (field instanceof String) {
+                String name = (String) field;
+                return new JSONPathSegmentName(name, Fnv.hashCode64(name));
+            }
+            if (field instanceof Integer) {
+                return new JSONPathSegmentIndex(((Integer) field));
+            }
+        }
+        throw new JSONException(jsonReader.info("jsonpath syntax error"));
     }
 }
