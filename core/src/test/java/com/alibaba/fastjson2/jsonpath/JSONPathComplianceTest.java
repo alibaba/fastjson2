@@ -77,12 +77,12 @@ public class JSONPathComplianceTest {
         try {
             JSONPath path = JSONPath.of(selector);
             if (invalid_selector) {
-                stat.errorCount ++;
+                stat.errorCount++;
                 firstChar = '-';
             }
         } catch (Exception e) {
             if (!invalid_selector) {
-                stat.errorCount ++;
+                stat.errorCount++;
                 firstChar = '*';
             }
         }
@@ -96,8 +96,7 @@ public class JSONPathComplianceTest {
                 .append(i < 10 ? "0" : "")
                 .append(i)
                 .append("]\t")
-                .append(JSON.toJSONString(selector))
-                ;
+                .append(JSON.toJSONString(selector));
         System.out.println(buf);
         // validate(i, name, selector, document, results);
     }
