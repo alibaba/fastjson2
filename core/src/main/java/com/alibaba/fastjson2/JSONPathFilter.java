@@ -1091,6 +1091,9 @@ abstract class JSONPathFilter
 
         @Override
         public boolean apply(JSONPath.Context context, Object object) {
+            if (object instanceof Map) {
+                return ((Map) object).containsKey(name);
+            }
             throw new UnsupportedOperationException();
         }
     }

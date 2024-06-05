@@ -701,6 +701,12 @@ class JSONPathParser {
             }
         }
 
+        if (fieldName2 == null && !parentheses
+                && (jsonReader.ch == ']' || jsonReader.ch == '|' || jsonReader.ch == '&')
+        ) {
+            return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
+        }
+
         JSONPathFilter.Operator operator = null;
         Function function = null;
         if (jsonReader.ch == '(') {

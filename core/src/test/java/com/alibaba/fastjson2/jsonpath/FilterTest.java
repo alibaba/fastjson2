@@ -138,4 +138,40 @@ public class FilterTest {
                 )
         );
     }
+
+    @Test
+    public void test6() {
+        JSONArray doc = JSONArray.of(
+                JSONObject.of("a", 1, "d", 4),
+                JSONObject.of("b", 2, "d", 5),
+                JSONObject.of("a", 3, "b", 6),
+                JSONObject.of("d", 3, "e", 6)
+        );
+
+        assertEquals("[{\"a\":1,\"d\":4},{\"a\":3,\"b\":6}]",
+                JSON.toJSONString(
+                        JSONPath.of("$[?@.a]")
+                                .eval(doc)
+                )
+        );
+
+        assertEquals("[{\"a\":1,\"d\":4},{\"b\":2,\"d\":5},{\"a\":3,\"b\":6}]",
+                JSON.toJSONString(
+                        JSONPath.of("$[?@.a||@.b]")
+                                .eval(doc)
+                )
+        );
+        assertEquals("[{\"a\":3,\"b\":6}]",
+                JSON.toJSONString(
+                        JSONPath.of("$[?@.a&&@.b]")
+                                .eval(doc)
+                )
+        );
+        assertEquals("[{\"a\":3,\"b\":6}]",
+                JSON.toJSONString(
+                        JSONPath.of("$[?@.a&&@.b]")
+                                .eval(doc)
+                )
+        );
+    }
 }
