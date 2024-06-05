@@ -168,6 +168,7 @@ public class ObjectReaderProvider
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
+    PropertyNamingStrategy namingStrategy;
 
     {
         long[] hashCodes;
@@ -1027,5 +1028,19 @@ public class ObjectReaderProvider
 
     public void setDisableSmartMatch(boolean disableSmartMatch) {
         this.disableSmartMatch = disableSmartMatch;
+    }
+
+    /**
+     * @since 2.0.52
+     */
+    public PropertyNamingStrategy getNamingStrategy() {
+        return namingStrategy;
+    }
+
+    /**
+     * @since 2.0.52
+     */
+    public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
     }
 }

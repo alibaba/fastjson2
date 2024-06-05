@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
@@ -87,6 +84,10 @@ public class BeanInfo {
         }
         if (provider.isDisableSmartMatch()) {
             readerFeatures |= FieldInfo.DISABLE_SMART_MATCH;
+        }
+        PropertyNamingStrategy naming = provider.getNamingStrategy();
+        if (naming != null) {
+            namingStrategy = naming.name();
         }
     }
 
