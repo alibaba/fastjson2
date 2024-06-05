@@ -420,6 +420,8 @@ class JSONReaderASCII
                 case ')':
                 case ',':
                 case ':':
+                case '|':
+                case '&':
                 case EOI:
                     nameLength = i;
                     this.nameEnd = ch == EOI ? offset : offset - 1;
