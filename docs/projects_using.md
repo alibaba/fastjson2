@@ -109,3 +109,4 @@
 * https://github.com/giteecode/hospitalRegistePublic
 * https://github.com/wujun728/jun_java_plugin
 * https://github.com/anhan123456/vrpc
+* https://github.com/spring-projects/spring-ai
