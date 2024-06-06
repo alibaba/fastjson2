@@ -106,11 +106,10 @@ class ObjectReaderImplMapTyped
                 } else if ((typeConvert = provider.getTypeConvert(valueClass, valueType)) != null) {
                     value = typeConvert.apply(value);
                 } else if (value instanceof Map) {
-                    Map map = (Map) value;
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    value = valueObjectReader.createInstance(map, features);
+                    value = valueObjectReader.createInstance((Map) value, features);
                 } else if (value instanceof Collection && !multiValue) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
