@@ -11,7 +11,9 @@ class JSONPathSingle
     JSONPathSingle(JSONPathSegment segment, String path, Feature... features) {
         super(path, features);
         this.segment = segment;
-        this.ref = segment instanceof JSONPathSegmentIndex || segment instanceof JSONPathSegmentName;
+        this.ref = segment instanceof JSONPathSegmentIndex
+                || segment instanceof JSONPathSegmentName
+                || segment instanceof JSONPathSegment.SelfSegment;
 
         boolean extractSupport = true;
         if (segment instanceof JSONPathSegment.EvalSegment) {
