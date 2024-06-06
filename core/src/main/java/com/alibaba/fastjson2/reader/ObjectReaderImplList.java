@@ -299,7 +299,7 @@ public final class ObjectReaderImplList
                 if (itemObjectReader == null) {
                     itemObjectReader = provider.getObjectReader(itemType);
                 }
-                value = itemObjectReader.createInstance((JSONObject) value, features);
+                value = itemObjectReader.createInstance((Map) value, features);
             } else if (valueClass != itemType) {
                 Function typeConvert = provider.getTypeConvert(valueClass, itemType);
                 if (typeConvert != null) {

@@ -95,34 +95,21 @@ class ObjectReaderImplMapTyped
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    try {
-                        value = valueObjectReader.createInstance((JSONObject) value, features);
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
+                    value = valueObjectReader.createInstance((Map) value, features);
                 } else if ((valueClass == JSONArray.class || valueClass == CLASS_JSON_ARRAY_1x)
                         && this.valueClass == List.class
                 ) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    try {
-                        value = valueObjectReader.createInstance((JSONArray) value, features);
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
+                    value = valueObjectReader.createInstance((List) value, features);
                 } else if ((typeConvert = provider.getTypeConvert(valueClass, valueType)) != null) {
                     value = typeConvert.apply(value);
                 } else if (value instanceof Map) {
-                    Map map = (Map) value;
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    try {
-                        value = valueObjectReader.createInstance(map, features);
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
+                    value = valueObjectReader.createInstance((Map) value, features);
                 } else if (value instanceof Collection && !multiValue) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
