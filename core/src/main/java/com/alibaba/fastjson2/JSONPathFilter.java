@@ -1519,6 +1519,129 @@ abstract class JSONPathFilter
 
             throw new JSONException("UnsupportedOperation " + object.getClass());
         }
+
+        @Override
+        public boolean remove(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = list.size() - 1; i >= 0; i--) {
+                    Object item = list.get(i);
+                    if (apply(context, item)) {
+                        list.remove(i);
+                    }
+                }
+                return true;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        @Override
+        public void set(JSONPath.Context context, Object value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    if (apply(context, item)) {
+                        list.set(i, value);
+                    }
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation ");
+        }
+    }
+
+    static final class RangeIndexSegmentFilter
+            extends JSONPathFilter {
+        final RangeIndexSegment expr;
+        final Operator operator;
+        final Object value;
+
+        public RangeIndexSegmentFilter(RangeIndexSegment expr, Operator operator, Object value) {
+            this.expr = expr;
+            this.operator = operator;
+            this.value = value;
+        }
+
+        @Override
+        boolean apply(JSONPath.Context context, Object object) {
+            if (object == null) {
+                return false;
+            }
+            JSONPath.Context context0 = new JSONPath.Context(null, null, expr, null, 0);
+            context0.root = object;
+            expr.eval(context0);
+            List result = (List) context0.value;
+            for (int i = 0; i < result.size(); i++) {
+                Object item = result.get(i);
+                int cmp = TypeUtils.compare(item, value);
+                boolean itemResult;
+                switch (operator) {
+                    case LT:
+                        itemResult = cmp < 0;
+                        break;
+                    case LE:
+                        itemResult = cmp <= 0;
+                        break;
+                    case EQ:
+                        itemResult = cmp == 0;
+                        break;
+                    case NE:
+                        itemResult = cmp != 0;
+                        break;
+                    case GT:
+                        itemResult = cmp > 0;
+                        break;
+                    case GE:
+                        itemResult = cmp >= 0;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+                }
+                if (!itemResult) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public void accept(JSONReader jsonReader, JSONPath.Context context) {
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        @Override
+        public void eval(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                JSONArray array = new JSONArray(list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    if (apply(context, item)) {
+                        array.add(item);
+                    }
+                }
+                context.value = array;
+                context.eval = true;
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation " + object.getClass());
+        }
     }
 
     static final class Segment2Filter

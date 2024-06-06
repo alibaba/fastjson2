@@ -304,7 +304,7 @@ class JSONPathParser {
                 throw new JSONException("TODO : " + jsonReader.current());
         }
 
-        if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
+        while (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
             filterNests--;
             segment = parseFilterRest(segment);
         }
@@ -573,7 +573,12 @@ class JSONPathParser {
 
         boolean starts = jsonReader.nextIfMatchIdent('s', 't', 'a', 'r', 't', 's');
         boolean ends = (!starts) && jsonReader.nextIfMatchIdent('e', 'n', 'd', 's');
-        if ((at && (starts || ends)) || (jsonReader.ch != '.' && jsonReader.ch != '[' && !JSONReader.isFirstIdentifier(jsonReader.ch))) {
+        if ((at && (starts || ends))
+                || (jsonReader.ch != '.'
+                && jsonReader.ch != '['
+                && !isOperator(jsonReader.ch)
+                && !JSONReader.isFirstIdentifier(jsonReader.ch))
+        ) {
             if (jsonReader.nextIfMatch('(')) {
                 filterNests++;
                 filterNests++;
@@ -654,8 +659,32 @@ class JSONPathParser {
                         if (parentheses) {
                             jsonReader.nextIfMatch(')');
                         }
+                        if (segment instanceof JSONPathSegment.RangeIndexSegment) {
+                            return new JSONPathFilter.RangeIndexSegmentFilter((JSONPathSegment.RangeIndexSegment) segment, operator, value);
+                        }
                         return new JSONPathFilter.SegmentFilter(segment, operator, value);
                     }
+                }
+            } else if (isOperator(jsonReader.ch)) {
+                JSONPathSegment.SelfSegment self = JSONPathSegment.SelfSegment.INSTANCE;
+                JSONPathFilter.Operator operator = JSONPath.parseOperator(jsonReader);
+                if (jsonReader.ch == '@') {
+                    JSONPathSegment segment2 = parseSegment();
+                    if (parentheses) {
+                        jsonReader.nextIfMatch(')');
+                    }
+                    return new JSONPathFilter.Segment2Filter(self, operator, segment2);
+                } else {
+                    Object value = jsonReader.readAny();
+                    JSONPathSegment segment = new JSONPathFilter.SegmentFilter(self, operator, value);
+                    if (parentheses) {
+                        while (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
+                            filterNests--;
+                            segment = parseFilterRest(segment);
+                        }
+                        jsonReader.nextIfMatch(')');
+                    }
+                    return segment;
                 }
             } else {
                 jsonReader.next();
@@ -1095,5 +1124,9 @@ class JSONPathParser {
             }
         }
         throw new JSONException(jsonReader.info("jsonpath syntax error"));
+    }
+
+    static boolean isOperator(char ch) {
+        return ch == '=' || ch == '<' || ch == '>' || ch == '!';
     }
 }
