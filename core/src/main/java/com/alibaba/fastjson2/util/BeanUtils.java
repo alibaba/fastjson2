@@ -2794,6 +2794,8 @@ public abstract class BeanUtils {
                     String shape = ((Enum) result).name();
                     if ("NUMBER".equals(shape)) {
                         beanInfo.format = "millis";
+                    } else if ("OBJECT".equals(shape)) {
+                        beanInfo.writeEnumAsJavaBean = true;
                     }
                 } else if ("locale".equals(name)) {
                     String locale = (String) result;

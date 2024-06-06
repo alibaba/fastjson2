@@ -141,4 +141,31 @@ public class JsonFormatTest {
         @JsonFormat(pattern = "yyyy-MM-dd", locale = "zh-CN", timezone = "Asia/Shanghai")
         private Date time;
     }
+
+    @Test
+    public void test7() throws Exception {
+        Level level = Level.LEVEL1;
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fastjson = JSON.toJSONString(level);
+        String jackson = objectMapper.writeValueAsString(level);
+        assertEquals(jackson, fastjson);
+    }
+
+    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+    public enum Level {
+        LEVEL1("level1"),
+        LEVEL2("level2"),
+        LEVEL3("level3");
+
+        String label;
+
+        Level(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
 }
