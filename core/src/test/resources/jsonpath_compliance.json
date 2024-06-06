@@ -1,0 +1,763 @@
+{
+    "tests": [
+        {
+            "name": "existence",
+            "selector" : "$[?@.a]",
+            "document" : [{"a": "b", "d": "e"}, {"b":"c", "d": "f"}],
+            "result": [
+                {"a": "b", "d": "e"}
+            ]
+        },
+        {
+            "name": "existence, present with null",
+            "selector" : "$[?@.a]",
+            "document" : [{"a": null, "d": "e"}, {"b":"c", "d": "f"}],
+            "result": [
+                {"a": null, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals string, single quotes",
+            "selector" : "$[?@.a=='b']",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": "b", "d": "e"}
+            ]
+        },
+        {
+            "name": "equals numeric string, single quotes",
+            "selector" : "$[?@.a=='1']",
+            "document" : [{"a": "1", "d": "e"}, {"a":1, "d": "f"}],
+            "result": [
+                {"a": "1", "d": "e"}
+            ]
+        },
+        {
+            "name": "equals string, double quotes",
+            "selector" : "$[?@.a==\"b\"]",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": "b", "d": "e"}
+            ]
+        },
+        {
+            "name": "equals numeric string, double quotes",
+            "selector" : "$[?@.a==\"1\"]",
+            "document" : [{"a": "1", "d": "e"}, {"a":1, "d": "f"}],
+            "result": [
+                {"a": "1", "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number",
+            "selector" : "$[?@.a==1]",
+            "document" : [{"a": 1, "d": "e"}, {"a":"c", "d": "f"}, {"a":2, "d": "f"}, {"a":"1", "d": "f"}],
+            "result": [
+                {"a": 1, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals null",
+            "selector" : "$[?@.a==null]",
+            "document" : [{"a": null, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": null, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals null, absent from data",
+            "selector" : "$[?@.a==null]",
+            "document" : [{"d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+            ]
+        },
+        {
+            "name": "equals true",
+            "selector" : "$[?@.a==true]",
+            "document" : [{"a": true, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": true, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals false",
+            "selector" : "$[?@.a==false]",
+            "document" : [{"a": false, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": false, "d": "e"}
+            ]
+        },
+        {
+            "name": "deep equality, arrays",
+            "selector" : "$[?@.a==@.b]",
+            "document" : [
+                {"a": false, "b": [1, 2]},
+                {"a": [[1, [2]]], "b": [[1, [2]]]},
+                {"a": [[1, [2]]], "b": [[[2], 1]]},
+                {"a": [[1, [2]]], "b": [[1, 2]]}
+            ],
+            "result": [
+                {"a": [[1, [2]]], "b": [[1, [2]]]}
+            ]
+        },
+        {
+            "name": "deep equality, objects",
+            "selector" : "$[?@.a==@.b]",
+            "document" : [
+                {"a": false, "b": {"x": 1, "y": {"z": 1}}},
+                {"a": {"x": 1, "y": {"z": 1}}, "b": {"x": 1, "y": {"z": 1}}},
+                {"a": {"x": 1, "y": {"z": 1}}, "b": {"y": {"z": 1}, "x": 1}},
+                {"a": {"x": 1, "y": {"z": 1}}, "b": {"x": 1}},
+                {"a": {"x": 1, "y": {"z": 1}}, "b": {"x": 1, "y": {"z": 2}}}
+            ],
+            "result": [
+                {"a": {"x": 1, "y": {"z": 1}}, "b": {"x": 1, "y": {"z": 1}}},
+                {"a": {"x": 1, "y": {"z": 1}}, "b": {"y": {"z": 1}, "x": 1}}
+            ]
+        },
+        {
+            "name": "not-equals string, single quotes",
+            "selector" : "$[?@.a!='b']",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals numeric string, single quotes",
+            "selector" : "$[?@.a!='1']",
+            "document" : [{"a": "1", "d": "e"}, {"a":1, "d": "f"}],
+            "result": [
+                {"a":1, "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals string, single quotes, different type",
+            "selector" : "$[?@.a!='b']",
+            "document" : [{"a": "b", "d": "e"}, {"a":1, "d": "f"}],
+            "result": [
+                {"a":1, "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals string, double quotes",
+            "selector" : "$[?@.a!=\"b\"]",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals numeric string, double quotes",
+            "selector" : "$[?@.a!=\"1\"]",
+            "document" : [{"a": "1", "d": "e"}, {"a":1, "d": "f"}],
+            "result": [
+                {"a":1, "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals string, double quotes, different types",
+            "selector" : "$[?@.a!=\"b\"]",
+            "document" : [{"a": "b", "d": "e"}, {"a":1, "d": "f"}],
+            "result": [
+                {"a":1, "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals number",
+            "selector" : "$[?@.a!=1]",
+            "document" : [{"a": 1, "d": "e"}, {"a":2, "d": "f"}, {"a":"1", "d": "f"}],
+            "result": [
+                {"a":2, "d": "f"},
+                {"a":"1", "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals number, different types",
+            "selector" : "$[?@.a!=1]",
+            "document" : [{"a": 1, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals null",
+            "selector" : "$[?@.a!=null]",
+            "document" : [{"a": null, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals null, absent from data",
+            "selector" : "$[?@.a!=null]",
+            "document" : [{"d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"d": "e"},
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals true",
+            "selector" : "$[?@.a!=true]",
+            "document" : [{"a": true, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "not-equals false",
+            "selector" : "$[?@.a!=false]",
+            "document" : [{"a": false, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "less than string, single quotes",
+            "selector" : "$[?@.a<'c']",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": "b", "d": "e"}
+            ]
+        },
+        {
+            "name": "less than string, double quotes",
+            "selector" : "$[?@.a<\"c\"]",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": "b", "d": "e"}
+            ]
+        },
+        {
+            "name": "less than number",
+            "selector" : "$[?@.a<10]",
+            "document" : [{"a": 1, "d": "e"}, {"a": 10, "d": "e"}, {"a":"c", "d": "f"}, {"a":20, "d": "f"}],
+            "result": [
+                {"a": 1, "d": "e"}
+            ]
+        },
+        {
+            "name": "less than null",
+            "selector" : "$[?@.a<null]",
+            "document" : [{"a": null, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [ ]
+        },
+        {
+            "name": "less than true",
+            "selector" : "$[?@.a<true]",
+            "document" : [{"a": true, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [ ]
+        },
+        {
+            "name": "less than false",
+            "selector" : "$[?@.a<false]",
+            "document" : [{"a": false, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [ ]
+        },
+        {
+            "name": "less than or equal to string, single quotes",
+            "selector" : "$[?@.a<='c']",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": "b", "d": "e"},
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "less than or equal to string, double quotes",
+            "selector" : "$[?@.a<=\"c\"]",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": "b", "d": "e"},
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "less than or equal to number",
+            "selector" : "$[?@.a<=10]",
+            "document" : [{"a": 1, "d": "e"}, {"a": 10, "d": "e"}, {"a":"c", "d": "f"}, {"a":20, "d": "f"}],
+            "result": [
+                {"a": 1, "d": "e"},
+                {"a": 10, "d": "e"}
+            ]
+        },
+        {
+            "name": "less than or equal to null",
+            "selector" : "$[?@.a<=null]",
+            "document" : [{"a": null, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": null, "d": "e"}
+            ]
+        },
+        {
+            "name": "less than or equal to true",
+            "selector" : "$[?@.a<=true]",
+            "document" : [{"a": true, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": true, "d": "e"}
+            ]
+        },
+        {
+            "name": "less than or equal to false",
+            "selector" : "$[?@.a<=false]",
+            "document" : [{"a": false, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": false, "d": "e"}
+            ]
+        },
+        {
+            "name": "greater than string, single quotes",
+            "selector" : "$[?@.a>'c']",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}, {"a":"d", "d": "f"}],
+            "result": [
+                {"a":"d", "d": "f"}
+            ]
+        },
+        {
+            "name": "greater than string, double quotes",
+            "selector" : "$[?@.a>\"c\"]",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}, {"a":"d", "d": "f"}],
+            "result": [
+                {"a":"d", "d": "f"}
+            ]
+        },
+        {
+            "name": "greater than number",
+            "selector" : "$[?@.a>10]",
+            "document" : [{"a": 1, "d": "e"}, {"a": 10, "d": "e"}, {"a":"c", "d": "f"}, {"a":20, "d": "f"}],
+            "result": [
+                {"a":20, "d": "f"}
+            ]
+        },
+        {
+            "name": "greater than null",
+            "selector" : "$[?@.a>null]",
+            "document" : [{"a": null, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [ ]
+        },
+        {
+            "name": "greater than true",
+            "selector" : "$[?@.a>true]",
+            "document" : [{"a": true, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [ ]
+        },
+        {
+            "name": "greater than false",
+            "selector" : "$[?@.a>false]",
+            "document" : [{"a": false, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [ ]
+        },
+        {
+            "name": "greater than or equal to string, single quotes",
+            "selector" : "$[?@.a>='c']",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}, {"a":"d", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"},
+                {"a":"d", "d": "f"}
+            ]
+        },
+        {
+            "name": "greater than or equal to string, double quotes",
+            "selector" : "$[?@.a>=\"c\"]",
+            "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}, {"a":"d", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"},
+                {"a":"d", "d": "f"}
+            ]
+        },
+        {
+            "name": "greater than or equal to number",
+            "selector" : "$[?@.a>=10]",
+            "document" : [{"a": 1, "d": "e"}, {"a": 10, "d": "e"}, {"a":"c", "d": "f"}, {"a":20, "d": "f"}],
+            "result": [
+                {"a": 10, "d": "e"},
+                {"a":20, "d": "f"}
+            ]
+        },
+        {
+            "name": "greater than or equal to null",
+            "selector" : "$[?@.a>=null]",
+            "document" : [{"a": null, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": null, "d": "e"}
+            ]
+        },
+        {
+            "name": "greater than or equal to true",
+            "selector" : "$[?@.a>=true]",
+            "document" : [{"a": true, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": true, "d": "e"}
+            ]
+        },
+        {
+            "name": "greater than or equal to false",
+            "selector" : "$[?@.a>=false]",
+            "document" : [{"a": false, "d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a": false, "d": "e"}
+            ]
+        },
+        {
+            "name": "exists and not-equals null, absent from data",
+            "selector" : "$[?@.a&&@.a!=null]",
+            "document" : [{"d": "e"}, {"a":"c", "d": "f"}],
+            "result": [
+                {"a":"c", "d": "f"}
+            ]
+        },
+        {
+            "name": "exists and exists, data false",
+            "selector" : "$[?@.a&&@.b]",
+            "document" : [{"a": false, "b": false}, {"b": false}, {"c": false}],
+            "result": [
+                {"a": false, "b": false}
+            ]
+        },
+        {
+            "name": "exists or exists, data false",
+            "selector" : "$[?@.a||@.b]",
+            "document" : [{"a": false, "b": false}, {"b": false}, {"c": false}],
+            "result": [
+                {"a": false, "b": false},
+                {"b": false}
+            ]
+        },
+        {
+            "name": "and",
+            "selector" : "$[?@.a>0&&@.a<10]",
+            "document" : [{"a": -10, "d": "e"}, {"a":5, "d": "f"}, {"a":20, "d": "f"}],
+            "result": [
+                {"a":5, "d": "f"}
+            ]
+        },
+        {
+            "name": "or",
+            "selector" : "$[?@.a=='b'||@.a=='d']",
+            "document" : [{"a": "a", "d": "e"}, {"a":"b", "d": "f"}, {"a":"c", "d": "f"}, {"a":"d", "d": "f"}],
+            "result": [
+                {"a":"b", "d": "f"},
+                {"a":"d", "d": "f"}
+            ]
+        },
+        {
+            "name": "non-singular query in comparison, slice",
+            "selector" : "$[?@[0:0]==0]",
+            "invalid_selector": true
+        },
+        {
+            "name": "non-singular query in comparison, all children",
+            "selector" : "$[?@[*]==0]",
+            "invalid_selector": true
+        },
+        {
+            "name": "non-singular query in comparison, descendants",
+            "selector" : "$[?@..a==0]",
+            "invalid_selector": true
+        },
+        {
+            "name": "non-singular query in comparison, combined",
+            "selector" : "$[?@.a[*].a==0]",
+            "invalid_selector": true
+        },
+        {
+            "name": "name segment on primitive, selects nothing",
+            "selector": "$[?@.a == 1]",
+            "document": {"a": 1},
+            "result": []
+        },
+        {
+            "name": "name segment on array, selects nothing",
+            "selector": "$[?@['0'] == 5]",
+            "document": [[5, 6]],
+            "result": []
+        },
+        {
+            "name": "index segment on object, selects nothing",
+            "selector": "$[?@[0] == 5]",
+            "document": [{"0": 5}],
+            "result": []
+        },
+        {
+            "name": "relative non-singular query, index, equal",
+            "selector": "$[?(@[0, 0]==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, index, not equal",
+            "selector": "$[?(@[0, 0]!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, index, less-or-equal",
+            "selector": "$[?(@[0, 0]<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, name, equal",
+            "selector": "$[?(@['a', 'a']==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, name, not equal",
+            "selector": "$[?(@['a', 'a']!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, name, less-or-equal",
+            "selector": "$[?(@['a', 'a']<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, combined, equal",
+            "selector": "$[?(@[0, '0']==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, combined, not equal",
+            "selector": "$[?(@[0, '0']!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, combined, less-or-equal",
+            "selector": "$[?(@[0, '0']<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, wildcard, equal",
+            "selector": "$[?(@.*==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, wildcard, not equal",
+            "selector": "$[?(@.*!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, wildcard, less-or-equal",
+            "selector": "$[?(@.*<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, slice, equal",
+            "selector": "$[?(@[0:0]==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, slice, not equal",
+            "selector": "$[?(@[0:0]!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "relative non-singular query, slice, less-or-equal",
+            "selector": "$[?(@[0:0]<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, index, equal",
+            "selector": "$[?($[0, 0]==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, index, not equal",
+            "selector": "$[?($[0, 0]!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, index, less-or-equal",
+            "selector": "$[?($[0, 0]<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, name, equal",
+            "selector": "$[?($['a', 'a']==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, name, not equal",
+            "selector": "$[?($['a', 'a']!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, name, less-or-equal",
+            "selector": "$[?($['a', 'a']<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, combined, equal",
+            "selector": "$[?($[0, '0']==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, combined, not equal",
+            "selector": "$[?($[0, '0']!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, combined, less-or-equal",
+            "selector": "$[?($[0, '0']<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, wildcard, equal",
+            "selector": "$[?($.*==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, wildcard, not equal",
+            "selector": "$[?($.*!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, wildcard, less-or-equal",
+            "selector": "$[?($.*<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, slice, equal",
+            "selector": "$[?($[0:0]==42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, slice, not equal",
+            "selector": "$[?($[0:0]!=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "absolute non-singular query, slice, less-or-equal",
+            "selector": "$[?($[0:0]<=42)]",
+            "invalid_selector": true
+        },
+        {
+            "name": "equals number, zero and negative zero",
+            "selector" : "$[?@.a==-0]",
+            "document" : [{"a": 0, "d": "e"}, {"a":0.1, "d": "f"}, {"a":"0", "d": "g"}],
+            "result": [
+                {"a": 0, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, with and without decimal fraction",
+            "selector" : "$[?@.a==1.0]",
+            "document" : [{"a": 1, "d": "e"}, {"a":2, "d": "f"}, {"a":"1", "d": "g"}],
+            "result": [
+                {"a": 1, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, exponent",
+            "selector" : "$[?@.a==1e2]",
+            "document" : [{"a": 100, "d": "e"}, {"a":100.1, "d": "f"}, {"a":"100", "d": "g"}],
+            "result": [
+                {"a": 100, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, positive exponent",
+            "selector" : "$[?@.a==1e+2]",
+            "document" : [{"a": 100, "d": "e"}, {"a":100.1, "d": "f"}, {"a":"100", "d": "g"}],
+            "result": [
+                {"a": 100, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, negative exponent",
+            "selector" : "$[?@.a==1e-2]",
+            "document" : [{"a": 0.01, "d": "e"}, {"a":0.02, "d": "f"}, {"a":"0.01", "d": "g"}],
+            "result": [
+                {"a": 0.01, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, decimal fraction",
+            "selector" : "$[?@.a==1.1]",
+            "document" : [{"a": 1.1, "d": "e"}, {"a":1.0, "d": "f"}, {"a":"1.1", "d": "g"}],
+            "result": [
+                {"a": 1.1, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, decimal fraction, no fractional digit",
+            "selector" : "$[?@.a==1.]",
+            "invalid_selector": true
+        },
+        {
+            "name": "equals number, decimal fraction, exponent",
+            "selector" : "$[?@.a==1.1e2]",
+            "document" : [{"a": 110, "d": "e"}, {"a":110.1, "d": "f"}, {"a":"110", "d": "g"}],
+            "result": [
+                {"a": 110, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, decimal fraction, positive exponent",
+            "selector" : "$[?@.a==1.1e+2]",
+            "document" : [{"a": 110, "d": "e"}, {"a":110.1, "d": "f"}, {"a":"110", "d": "g"}],
+            "result": [
+                {"a": 110, "d": "e"}
+            ]
+        },
+        {
+            "name": "equals number, decimal fraction, negative exponent",
+            "selector" : "$[?@.a==1.1e-2]",
+            "document" : [{"a": 0.011, "d": "e"}, {"a":0.012, "d": "f"}, {"a":"0.011", "d": "g"}],
+            "result": [
+                {"a": 0.011, "d": "e"}
+            ]
+        },
+        {
+            "name": "object data",
+            "selector" : "$[?@<3]",
+            "document" : {
+                "a": 1,
+                "b": 2,
+                "c": 3
+            },
+            "results": [
+                [1, 2],
+                [2, 1]
+            ]
+        },
+        {
+            "name": "and binds more tightly than or",
+            "selector" : "$[?@.a || @.b && @.b]",
+            "document" : [{"a": 1}],
+            "result": [
+                {"a": 1}
+            ]
+        },
+        {
+            "name": "left to right evaluation",
+            "selector" : "$[?@.b && @.b || @.a]",
+            "document" : [{"a": 1}],
+            "result": [
+                {"a": 1}
+            ]
+        },
+        {
+            "name": "string literal, single quote in double quotes",
+            "selector" : "$[?@ == \"quoted' literal\"]",
+            "document" : ["quoted' literal", "a", "quoted\\' literal"],
+            "result": ["quoted' literal"]
+        },
+        {
+            "name": "string literal, double quote in single quotes",
+            "selector" : "$[?@ == 'quoted\" literal']",
+            "document" : ["quoted\" literal", "a", "quoted\\\" literal", "'quoted\" literal'"],
+            "result": ["quoted\" literal"]
+        },
+        {
+            "name": "string literal, escaped single quote in single quotes",
+            "selector" : "$[?@ == 'quoted\\' literal']",
+            "document" : ["quoted' literal", "a", "quoted\\' literal", "'quoted\" literal'"],
+            "result": ["quoted' literal"]
+        },
+        {
+            "name": "string literal, escaped double quote in double quotes",
+            "selector" : "$[?@ == \"quoted\\\" literal\"]",
+            "document" : ["quoted\" literal", "a", "quoted\\\" literal", "'quoted\" literal'"],
+            "result": ["quoted\" literal"]
+        }
+    ]
+}

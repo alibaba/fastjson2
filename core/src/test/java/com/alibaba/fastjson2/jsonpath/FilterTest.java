@@ -173,5 +173,42 @@ public class FilterTest {
                                 .eval(doc)
                 )
         );
+
+        assertEquals("[{\"b\":2,\"d\":5},{\"a\":3,\"b\":6}]",
+                JSON.toJSONString(
+                        JSONPath.of("$[?@.a || @.b && @.b]")
+                                .eval(doc)
+                )
+        );
+    }
+
+    @Test
+    public void test7() {
+        validate(
+                "[[1,2,3,4,5],[2,3,4,5,6],[3,4,5,6,7]]",
+                "$[?@[0:1] == 2]",
+                "[[2,3,4,5,6]]"
+        );
+        validate(
+                "[[1,2,3,4,5],[2,3,4,5,6],[3,4,5,6,7]]",
+                "$[?(@[0:1]==2)]",
+                "[[2,3,4,5,6]]"
+        );
+        validate(
+                "[\"a\",\"b\",\"c\",\"d\",\"a\"]",
+                "$[?@ == 'a']",
+                "[\"a\",\"a\"]"
+        );
+    }
+
+    static void validate(String doc, String jsonpath, String result) {
+        assertEquals(result,
+                JSON.toJSONString(
+                        JSONPath.of(jsonpath)
+                                .eval(
+                                        JSON.parse(doc)
+                                )
+                )
+        );
     }
 }
