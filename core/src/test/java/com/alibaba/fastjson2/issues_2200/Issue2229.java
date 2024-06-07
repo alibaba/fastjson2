@@ -47,6 +47,6 @@ public class Issue2229 {
     }
 
     enum Type {
-        A,B;
+        A, B;
     }
 }

@@ -272,7 +272,7 @@ public abstract class FieldReader<T>
                         return -1;
                     }
 
-                    if (needCompareToActualFieldClass(thisParamType)|| needCompareToActualFieldClass(otherParamType)) {
+                    if (needCompareToActualFieldClass(thisParamType) || needCompareToActualFieldClass(otherParamType)) {
                         Class actualFieldClass = null;
                         try {
                             actualFieldClass = thisDeclaringClass.getDeclaredField(this.fieldName).getType();
