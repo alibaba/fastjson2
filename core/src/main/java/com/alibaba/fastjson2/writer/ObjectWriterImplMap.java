@@ -624,6 +624,7 @@ public final class ObjectWriterImplMap
                 refPath = jsonWriter.setPath(key, value);
                 if (refPath != null) {
                     jsonWriter.writeName(key);
+                    jsonWriter.writeColon();
                     jsonWriter.writeReference(refPath);
                     jsonWriter.popPath(value);
                     continue;
