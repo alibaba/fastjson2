@@ -3311,8 +3311,14 @@ public class ObjectReaderCreator {
             return;
         }
         if (!fieldReader.isReadOnly()) {
-            FieldReader finalReader = fieldReader;
-            FieldReader sameReader = origin.stream().filter(o -> o.sameTo(finalReader)).findAny().orElse(null);
+            FieldReader sameReader = null;
+            for (int i = 0; i < origin.size(); i++) {
+                FieldReader tempReader = origin.get(i);
+                if (tempReader.sameTo(fieldReader)) {
+                    sameReader = tempReader;
+                    break;
+                }
+            }
             if (sameReader != null) {
                 if (sameReader.compareTo(fieldReader) > 0 || !sameReader.belongTo(objectClass)) {
                     origin.set(origin.indexOf(sameReader), fieldReader);
