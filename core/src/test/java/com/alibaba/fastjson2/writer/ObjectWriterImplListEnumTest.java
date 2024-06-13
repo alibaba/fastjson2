@@ -15,7 +15,7 @@ public class ObjectWriterImplListEnumTest {
         enumList.add(null);
         enumList.add(TestEnum.EN);
         bean.setEnumList(enumList);
-        ObjectWriterImplListEnum writerImplListEnum = new ObjectWriterImplListEnum(Bean.class, TestEnum.class,0L);
+        ObjectWriterImplListEnum writerImplListEnum = new ObjectWriterImplListEnum(Bean.class, TestEnum.class, 0L);
         JSONWriter jsonWriter = JSONWriter.ofJSONB();
         final String fieldName = "enumList";
         writerImplListEnum.writeJSONB(jsonWriter, enumList, fieldName, TestEnum.class, 0L);
