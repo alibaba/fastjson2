@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,7 +14,11 @@ public class ObjectWriterImplListEnumTest {
         enumList.add(TestEnum.CN);
         enumList.add(null);
         enumList.add(TestEnum.EN);
-        String str = JSON.toJSONString(enumList);
+        bean.setEnumList(enumList);
+        ObjectWriterImplListEnum writerImplListEnum = new ObjectWriterImplListEnum(Bean.class, TestEnum.class,0L);
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        final String fieldName = "enumList";
+        writerImplListEnum.writeJSONB(jsonWriter, enumList, fieldName, TestEnum.class, 0L);
     }
 
     static class Bean {
