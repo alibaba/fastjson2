@@ -40,7 +40,7 @@ final class ObjectWriterImplListEnum
         boolean writeEnumUsingToString = jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString);
         for (int i = 0; i < size; i++) {
             Enum e = (Enum) list.get(i);
-            if(e == null) {
+            if (e == null) {
                 jsonWriter.writeNull();
                 continue;
             }
