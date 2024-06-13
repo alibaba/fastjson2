@@ -17,7 +17,7 @@ public class Issue2673 {
     void test() {
         String jsonStr = "{\r\n"
                 + "  \"id\":\"01\",\r\n"
-                +"\"list\":[1,2,3],"
+                + "\"list\":[1,2,3],"
                 + "  \"data\":{\r\n"
                 + "      \"key\":\"test\"\r\n"
                 + "  }\r\n"
