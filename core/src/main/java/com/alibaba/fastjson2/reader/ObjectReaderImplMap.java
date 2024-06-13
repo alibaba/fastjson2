@@ -127,7 +127,7 @@ public final class ObjectReaderImplMap
         switch (instanceTypeName) {
             case "com.alibaba.fastjson.JSONObject":
                 builder = createObjectSupplier(instanceType);
-                instanceType = HashMap.class;
+//                instanceType = HashMap.class;//?为什么
                 break;
             case "com.google.common.collect.RegularImmutableMap":
                 builder = GuavaSupport.immutableMapConverter();
