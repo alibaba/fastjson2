@@ -278,7 +278,7 @@ class ObjectReaderImplMapTyped
 
         JSONReader.Context context = jsonReader.getContext();
         long contextFeatures = context.getFeatures() | features;
-        Map object, innerMap = null;
+        Map object;
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();
             if (mapType == Map.class && objectSupplier != null) {
@@ -288,7 +288,7 @@ class ObjectReaderImplMapTyped
                     object = new HashMap();
                 } else {
                     object = objectSupplier.get();
-                    innerMap = TypeUtils.getInnerMap(object);
+                    object = TypeUtils.getInnerMap(object);
                 }
             } else {
                 object = new HashMap<>();
@@ -402,11 +402,7 @@ class ObjectReaderImplMapTyped
                         value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
                         list.add(value);
                     }
-                    if (innerMap != null) {
-                        innerMap.put(name, list);
-                    } else {
-                        object.put(name, list);
-                    }
+                    object.put(name, list);
                     continue;
                 } else {
                     value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
@@ -417,12 +413,7 @@ class ObjectReaderImplMapTyped
                 continue;
             }
 
-            Object origin;
-            if (innerMap != null) {
-                origin = innerMap.put(name, value);
-            } else {
-                origin = object.put(name, value);
-            }
+            Object origin = object.put(name, value);
 
             if (origin != null) {
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -438,7 +429,6 @@ class ObjectReaderImplMapTyped
         }
 
         jsonReader.nextIfComma();
-
         if (builder != null) {
             return builder.apply(object);
         }
