@@ -441,7 +441,7 @@ public abstract class FieldReader<T>
         }
 
         Object typedFieldValue;
-        if (fieldValue == null || fieldType == fieldValue.getClass()) {
+        if (fieldValue == null || fieldType == fieldValue.getClass() || fieldType == Object.class) {
             typedFieldValue = fieldValue;
         } else {
             if (fieldValue instanceof JSONObject) {
