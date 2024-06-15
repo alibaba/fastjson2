@@ -3770,7 +3770,11 @@ class JSONReaderUTF16
             }
         }
 
-        if (!comma && ch != EOI && ch != '}' && ch != ']' && ch != EOI) {
+        if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        if (comma && (ch == '}' || ch == ']' || ch == EOI)) {
             throw error(offset, ch);
         }
 
