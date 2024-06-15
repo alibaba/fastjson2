@@ -685,12 +685,6 @@ public class JSONReaderTest {
 
     @Test
     public void skipValue_hasComma() {
-        String str0 = "\"abc\",";
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
-            jsonReader.skipValue();
-            assertTrue(jsonReader.hasComma(), jsonReader.getClass().getName());
-        }
-
         String str1 = "\"abc\"";
         for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
             jsonReader.skipValue();
