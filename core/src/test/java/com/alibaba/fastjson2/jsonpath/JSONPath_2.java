@@ -188,13 +188,14 @@ public class JSONPath_2 {
                 + "                        6,\n"
                 + "                        7\n"
                 + "                    ]\n"
-                + "                },\n"
+                + "                }\n"
                 + "            ]\n"
-                + "        },\n"
+                + "        }\n"
                 + "    },\n"
                 + "    \"msg\":\"\",\n"
                 + "    \"status\":\"1\"\n"
                 + "}\n";
+        System.out.println(content);
         JSONPath path = JSONPath.of("$.status");
         assertEquals(path.extract(JSONReader.of(content)), "1");
     }
