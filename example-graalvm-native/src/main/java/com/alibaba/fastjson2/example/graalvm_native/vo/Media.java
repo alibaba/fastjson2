@@ -16,6 +16,8 @@ public class Media
     private String uri;
     private int width;
     private String copyright;
+    private String looooongFieldName;
+    private String s;
 
     public Media() {
     }
@@ -106,6 +108,22 @@ public class Media
 
     public void setCopyright(String copyright) {
         this.copyright = copyright;
+    }
+
+    public String getLooooongFieldName() {
+        return looooongFieldName;
+    }
+
+    public String getS() {
+        return s;
+    }
+
+    public void setS(String s) {
+        this.s = s;
+    }
+
+    public void setLooooongFieldName(String looooongFieldName) {
+        this.looooongFieldName = looooongFieldName;
     }
 
     public enum Player {
