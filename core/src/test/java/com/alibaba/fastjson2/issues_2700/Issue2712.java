@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2712 {
     @Test
-    void test(){
+    void test() {
         ClueListInfo info1 = new ClueListInfo();
         info1.setClueId(1L);
         info1.setName("Clue 01");
@@ -30,7 +30,7 @@ public class Issue2712 {
 
         info1.setContacts(contacts);
         info2.setContacts(contacts);
-        List<ClueListInfo> infos = Lists.newArrayList(info1,info2);
+        List<ClueListInfo> infos = Lists.newArrayList(info1, info2);
 
         String jsonString = JSON.toJSONString(infos, JSONWriter.Feature.ReferenceDetection);
         List<ClueListInfo> clueListInfos = JSON.parseArray(jsonString, ClueListInfo.class);
