@@ -739,7 +739,7 @@ public class ObjectWriterCreatorASM
             int FEILD_FEATURE,
             Label notWriteType
     ) {
-        if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
+        if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0 || (objectFeatures & NotWriteRootClassName.mask) != 0) {
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitJumpInsn(Opcodes.IFNULL, notWriteType);
 
