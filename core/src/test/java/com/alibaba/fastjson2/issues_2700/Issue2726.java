@@ -1,14 +1,13 @@
 package com.alibaba.fastjson2.issues_2700;
 
 import com.alibaba.fastjson2.annotation.JSONType;
-import lombok.Getter;
-import lombok.Setter;
-import org.junit.jupiter.api.Test;
-
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import lombok.Getter;
+import lombok.Setter;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
@@ -74,4 +73,3 @@ public class Issue2726 {
         }
     }
 }
-
