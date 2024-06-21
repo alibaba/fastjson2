@@ -2247,6 +2247,8 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ASTORE, REF_PATH);
             mw.visitJumpInsn(Opcodes.IFNULL, endDetect_);
 
+            gwFieldName(mwc, fieldWriter, i);
+
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, REF_PATH);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", METHOD_DESC_WRITE_REFERENCE, false);
