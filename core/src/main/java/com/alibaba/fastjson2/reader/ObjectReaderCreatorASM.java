@@ -3743,7 +3743,15 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.DUP);
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
                 mw.visitVarInsn(Opcodes.ASTORE, LIST);
-                mw.visitJumpInsn(IFNONNULL, listInitEnd_);
+                Label listNull_ =  new Label();
+                mw.visitJumpInsn(Opcodes.IFNULL, listNull_);
+
+                mw.visitVarInsn(Opcodes.ALOAD, LIST);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+                mw.visitFieldInsn(Opcodes.GETSTATIC, "java/util/Collections", "EMPTY_LIST", "Ljava/util/List;");
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+                mw.visitJumpInsn(Opcodes.IF_ACMPNE, listInitEnd_);
+                mw.visitLabel(listNull_);
             }
 
             mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
