@@ -3743,7 +3743,7 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.DUP);
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
                 mw.visitVarInsn(Opcodes.ASTORE, LIST);
-                Label listNull_ =  new Label();
+                Label listNull_ = new Label();
                 mw.visitJumpInsn(Opcodes.IFNULL, listNull_);
 
                 mw.visitVarInsn(Opcodes.ALOAD, LIST);
