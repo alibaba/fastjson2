@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.lang.reflect.GenericArrayType;
@@ -2569,7 +2568,6 @@ public abstract class JSONWriter
         }
     }
 
-    @NotNull
     protected static IllegalArgumentException illegalYear(int year) {
         return new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
     }
