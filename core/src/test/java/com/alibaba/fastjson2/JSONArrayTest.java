@@ -1474,4 +1474,17 @@ public class JSONArrayTest {
         assertEquals(1L, integers.get(0));
         assertEquals(2L, integers.get(1));
     }
+
+    @Test
+    public void getJSONArray() {
+        JSONArray jsonArray = JSONObject.of("k", "v").getJSONArray("k");
+        assertNotNull(jsonArray);
+        assertEquals(1, jsonArray.size());
+        assertEquals("v", jsonArray.getString(0));
+
+        jsonArray = jsonArray.getJSONArray(0);
+        assertNotNull(jsonArray);
+        assertEquals(1, jsonArray.size());
+        assertEquals("v", jsonArray.getString(0));
+    }
 }

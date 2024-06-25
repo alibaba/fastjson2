@@ -212,6 +212,10 @@ public class JSONObject
                 return null;
             }
 
+            if (str.charAt(0) != '[') {
+                return JSONArray.of(str);
+            }
+
             JSONReader reader = JSONReader.of(str);
             if (arrayReader == null) {
                 arrayReader = reader.getObjectReader(JSONArray.class);
