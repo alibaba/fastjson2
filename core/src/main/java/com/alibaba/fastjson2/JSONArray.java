@@ -135,6 +135,10 @@ public class JSONArray
                 return null;
             }
 
+            if (str.charAt(0) != '[') {
+                return JSONArray.of(str);
+            }
+
             JSONReader reader = JSONReader.of(str);
             return JSONFactory.ARRAY_READER.readObject(reader, null, null, 0);
         }
