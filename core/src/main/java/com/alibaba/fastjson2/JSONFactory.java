@@ -7,10 +7,13 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.ZoneId;
@@ -509,13 +512,24 @@ public final class JSONFactory {
     public static JSONReader.Context createReadContext(
             Supplier<Map> objectSupplier,
             Supplier<List> arraySupplier,
-            JSONReader.Feature... features) {
+            JSONReader.Feature... features
+    ) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
         context.setObjectSupplier(objectSupplier);
         context.setArraySupplier(arraySupplier);
         context.config(features);
         return context;
+    }
+
+    public static ObjectReader getObjectReader(Type type, long features) {
+        return getDefaultObjectReaderProvider()
+                .getObjectReader(type, JSONReader.Feature.FieldBased.isEnabled(features));
+    }
+
+    public static ObjectWriter getObjectWriter(Type type, long features) {
+        return getDefaultObjectWriterProvider()
+                .getObjectWriter(type, TypeUtils.getClass(type), JSONWriter.Feature.FieldBased.isEnabled(features));
     }
 
     public static ObjectWriterProvider getDefaultObjectWriterProvider() {

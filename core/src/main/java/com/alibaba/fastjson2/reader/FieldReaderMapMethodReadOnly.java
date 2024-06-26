@@ -1,17 +1,20 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 class FieldReaderMapMethodReadOnly<T>
-        extends FieldReaderObject<T> {
+        extends FieldReaderMapMethod<T> {
     FieldReaderMapMethodReadOnly(
             String fieldName,
             Type fieldType,
@@ -21,9 +24,26 @@ class FieldReaderMapMethodReadOnly<T>
             String format,
             JSONSchema schema,
             Method method,
-            Field field
+            Field field,
+            String arrayToMapKey,
+            BiConsumer arrayToMapDuplicateHandler
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method, field, null);
+        super(
+                fieldName,
+                fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                null,
+                null,
+                schema,
+                method,
+                field,
+                null,
+                arrayToMapKey,
+                arrayToMapDuplicateHandler
+        );
     }
 
     @Override
@@ -122,5 +142,25 @@ class FieldReaderMapMethodReadOnly<T>
         }
 
         accept(object, value);
+    }
+
+    protected void acceptAny(T object, Object fieldValue, long features) {
+        if (arrayToMapKey != null && fieldValue instanceof Collection) {
+            Map map;
+            try {
+                map = (Map) method.invoke(object);
+            } catch (Exception e) {
+                throw new JSONException("set " + fieldName + " error");
+            }
+
+            arrayToMap(map,
+                    (Collection) fieldValue,
+                    arrayToMapKey,
+                    JSONFactory.getObjectReader(valueType, this.features | features),
+                    arrayToMapDuplicateHandler);
+            return;
+        }
+
+        super.acceptAny(object, fieldValue, features);
     }
 }

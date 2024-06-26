@@ -1297,6 +1297,15 @@ public class ObjectReaderBaseModule
             if (ObjectReader.class.isAssignableFrom(deserializeUsing)) {
                 fieldInfo.readUsing = deserializeUsing;
             }
+
+            String keyName = jsonField.arrayToMapKey().trim();
+            if (!keyName.isEmpty()) {
+                fieldInfo.arrayToMapKey = keyName;
+            }
+            Class<?> arrayToMapDuplicateHandler = jsonField.arrayToMapDuplicateHandler();
+            if (arrayToMapDuplicateHandler != Void.class) {
+                fieldInfo.arrayToMapDuplicateHandler = arrayToMapDuplicateHandler;
+            }
         }
     }
 

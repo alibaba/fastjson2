@@ -21,6 +21,14 @@ public interface ObjectWriter<T> {
         return null;
     }
 
+    default Object getFieldValue(Object object, String fieldName) {
+        FieldWriter fieldWriter = getFieldWriter(fieldName);
+        if (fieldWriter == null) {
+            return null;
+        }
+        return fieldWriter.getFieldValue(object);
+    }
+
     default FieldWriter getFieldWriter(String name) {
         long nameHash = Fnv.hashCode64(name);
         FieldWriter fieldWriter = getFieldWriter(nameHash);

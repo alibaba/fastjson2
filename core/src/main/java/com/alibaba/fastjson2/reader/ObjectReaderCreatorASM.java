@@ -138,39 +138,6 @@ public class ObjectReaderCreatorASM
         return fieldName;
     }
 
-    @Override
-    public <T> FieldReader<T> createFieldReader(
-            Class objectClass,
-            Type objectType,
-            String fieldName,
-            int ordinal,
-            long features,
-            String format,
-            Locale locale,
-            Object defaultValue,
-            String schema,
-            Type fieldType,
-            Class fieldClass,
-            Field field,
-            ObjectReader initReader
-    ) {
-        return super.createFieldReader(
-                objectClass,
-                objectType,
-                fieldName,
-                ordinal,
-                features,
-                format,
-                locale,
-                defaultValue,
-                schema,
-                fieldType,
-                fieldClass,
-                field,
-                initReader
-        );
-    }
-
     private static class FieldReaderInfo {
         final String interfaceDesc;
         final String acceptDesc;
