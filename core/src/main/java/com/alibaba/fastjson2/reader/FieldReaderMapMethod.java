@@ -8,13 +8,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class FieldReaderMapMethod<T>
-        extends FieldReaderObject<T>
-        implements FieldReaderMap {
+        extends FieldReaderObject<T> {
     protected final String arrayToMapKey;
     protected final Type valueType;
     protected final BiConsumer arrayToMapDuplicateHandler;
@@ -58,7 +58,19 @@ public class FieldReaderMapMethod<T>
     }
 
     @Override
-    public final String getArrayToMapKey() {
-        return arrayToMapKey;
+    public void readFieldValue(JSONReader jsonReader, T object) {
+        if (arrayToMapKey != null && jsonReader.isArray()) {
+            ObjectReader reader = this.getObjectReader(jsonReader);
+            Map map = (Map) reader.createInstance(features);
+            List array = jsonReader.readArray(valueType);
+            arrayToMap(map,
+                    array,
+                    arrayToMapKey,
+                    JSONFactory.getObjectReader(valueType, this.features | features),
+                    arrayToMapDuplicateHandler);
+            accept(object, map);
+            return;
+        }
+        super.readFieldValue(jsonReader, object);
     }
 }

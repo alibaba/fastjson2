@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -120,6 +121,22 @@ class FieldReaderMapFieldReadOnly<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        if (arrayToMapKey != null && jsonReader.isArray()) {
+            Map map;
+            try {
+                map = (Map) field.get(object);
+            } catch (Exception e) {
+                throw new JSONException("set " + fieldName + " error");
+            }
+            List array = jsonReader.readArray(valueType);
+            arrayToMap(map,
+                    array,
+                    arrayToMapKey,
+                    JSONFactory.getObjectReader(valueType, this.features | features),
+                    arrayToMapDuplicateHandler);
+            return;
+        }
+
         if (initReader == null) {
             initReader = jsonReader
                     .getContext()

@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.read;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
@@ -46,6 +47,37 @@ public class ComplexTest {
                                 "category", "window")
                 )
         );
+
+        String json = JSON.toJSONString(root);
+
+        {
+            Bean bean = JSON.parseObject(json, Bean.class);
+            assertEquals(2, bean.functions.size());
+            assertEquals(2, bean.functions.get("count").category.size());
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Aggregate));
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Window));
+        }
+        {
+            Bean1 bean = JSON.parseObject(json, Bean1.class);
+            assertEquals(2, bean.functions.size());
+            assertEquals(2, bean.functions.get("count").category.size());
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Aggregate));
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Window));
+        }
+        {
+            Bean2 bean = JSON.parseObject(json, Bean2.class);
+            assertEquals(2, bean.functions.size());
+            assertEquals(2, bean.functions.get("count").category.size());
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Aggregate));
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Window));
+        }
+        {
+            Bean3 bean = JSON.parseObject(json, Bean3.class);
+            assertEquals(2, bean.functions.size());
+            assertEquals(2, bean.functions.get("count").category.size());
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Aggregate));
+            assertTrue(bean.functions.get("count").category.contains(Function.Category.Window));
+        }
 
         {
             Bean3 bean = root.to(Bean3.class);
