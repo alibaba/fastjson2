@@ -239,7 +239,6 @@ public class ObjectReaderCreatorASM
             }
 
             for (FieldReader fieldReader : fieldReaderArray) {
-                Method method = fieldReader.method;
                 if (fieldReader.isReadOnly()
                         || fieldReader.isUnwrapped()
                 ) {
@@ -267,6 +266,18 @@ public class ObjectReaderCreatorASM
 
                 Class fieldClass = fieldReader.fieldClass;
                 if (!Modifier.isPublic(fieldClass.getModifiers())) {
+                    match = false;
+                    break;
+                }
+
+                if (fieldReader instanceof FieldReaderMapField
+                        && ((FieldReaderMapField<?>) fieldReader).arrayToMapKey != null) {
+                    match = false;
+                    break;
+                }
+
+                if (fieldReader instanceof FieldReaderMapMethod
+                        && ((FieldReaderMapMethod<?>) fieldReader).arrayToMapKey != null) {
                     match = false;
                     break;
                 }
