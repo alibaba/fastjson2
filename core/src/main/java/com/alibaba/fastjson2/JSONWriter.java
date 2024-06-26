@@ -2217,6 +2217,10 @@ public abstract class JSONWriter
         Feature(long mask) {
             this.mask = mask;
         }
+
+        public boolean isEnabled(long features) {
+            return (features & mask) != 0;
+        }
     }
 
     public static final class Path {

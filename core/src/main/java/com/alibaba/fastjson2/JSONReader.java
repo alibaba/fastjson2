@@ -4618,6 +4618,14 @@ public abstract class JSONReader
 
             return value;
         }
+
+        public boolean isEnabled(long features) {
+            return (features & mask) != 0;
+        }
+
+        public static boolean isEnabled(long features, Feature feature) {
+            return (features & feature.mask) != 0;
+        }
     }
 
     static class ResolveTask {

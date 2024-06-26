@@ -4350,4 +4350,15 @@ public class TypeUtils {
     public static boolean isJavaScriptSupport(BigInteger i) {
         return i.compareTo(BIGINT_JAVASCRIPT_LOW) >= 0 && i.compareTo(BIGINT_JAVASCRIPT_HIGH) <= 0;
     }
+
+    public static Type getMapValueType(Type fieldType) {
+        if (fieldType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) fieldType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (actualTypeArguments.length == 2) {
+                return actualTypeArguments[1];
+            }
+        }
+        return Object.class;
+    }
 }

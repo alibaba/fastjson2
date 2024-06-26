@@ -619,7 +619,23 @@ public final class ObjectReaderImplList
                 return null;
             }
 
-            Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
+            ObjectReaderProvider provider = context.getProvider();
+            if (itemClass.isEnum()) {
+                ObjectReader enumReader = provider.getObjectReader(itemClass);
+                if (enumReader instanceof ObjectReaderImplEnum) {
+                    Enum e = ((ObjectReaderImplEnum) enumReader).getEnum(str);
+                    if (e == null) {
+                        if (JSONReader.Feature.ErrorOnEnumNotMatch.isEnabled(jsonReader.features(features))) {
+                            throw new JSONException(jsonReader.info("enum not match : " + str));
+                        }
+                        return null;
+                    }
+                    list.add(e);
+                    return list;
+                }
+            }
+
+            Function typeConvert = provider.getTypeConvert(String.class, itemType);
             if (typeConvert != null) {
                 Object converted = typeConvert.apply(str);
                 jsonReader.nextIfComma();
