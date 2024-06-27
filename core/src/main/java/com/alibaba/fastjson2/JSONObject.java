@@ -620,6 +620,10 @@ public class JSONObject
             return Integer.parseInt(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
@@ -976,6 +980,10 @@ public class JSONObject
             }
 
             return new BigInteger(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
