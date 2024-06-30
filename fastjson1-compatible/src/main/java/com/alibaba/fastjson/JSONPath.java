@@ -50,12 +50,24 @@ public class JSONPath {
     }
 
     public static Object eval(String rootObject, String path) {
-        return com.alibaba.fastjson2.JSONPath.eval(rootObject, path);
+        Object result = com.alibaba.fastjson2.JSONPath.eval(rootObject, path);
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            result = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        } else if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            result = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) result);
+        }
+        return result;
     }
 
     public static Object eval(Object rootObject, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        return jsonPath.eval(rootObject);
+        Object result = jsonPath.eval(rootObject);
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            result = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        } else if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            result = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) result);
+        }
+        return result;
     }
 
     public static boolean set(Object rootObject, String path, Object value) {
