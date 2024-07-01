@@ -184,6 +184,7 @@ public class ObjectWriterCreatorASM
 
         if (Throwable.class.isAssignableFrom(objectClass)
                 || BeanUtils.isExtendedMap(objectClass)
+                || beanInfo.rootName != null
         ) {
             return super.createObjectWriter(objectClass, features, provider);
         }

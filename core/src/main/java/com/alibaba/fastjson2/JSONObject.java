@@ -184,6 +184,23 @@ public class JSONObject
     }
 
     /**
+     * @since 2.0.52
+     * @param key
+     * @param action
+     */
+    public void forEchArrayObject(String key, Consumer<JSONObject> action) {
+        JSONArray array = getJSONArray(key);
+        if (array == null) {
+            return;
+        }
+
+        for (int i = 0; i < array.size(); i++) {
+            action.accept(
+                    array.getJSONObject(i));
+        }
+    }
+
+    /**
      * Returns the {@link JSONArray} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned

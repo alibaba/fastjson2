@@ -284,7 +284,9 @@ public class ObjectReaderCreatorASM
             }
         }
 
-        if (match && beanInfo.schema != null && !beanInfo.schema.isEmpty()) {
+        if (match
+                && (beanInfo.rootName != null
+                || (beanInfo.schema != null && !beanInfo.schema.isEmpty()))) {
             match = false;
         }
 
@@ -335,9 +337,11 @@ public class ObjectReaderCreatorASM
         );
     }
 
+    @Override
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             String typeKey,
+            String rootName,
             long features,
             JSONSchema schema,
             Supplier<T> defaultCreator,
@@ -373,6 +377,7 @@ public class ObjectReaderCreatorASM
         return super.createObjectReader(
                 objectClass,
                 typeKey,
+                rootName,
                 features,
                 schema,
                 defaultCreator,
