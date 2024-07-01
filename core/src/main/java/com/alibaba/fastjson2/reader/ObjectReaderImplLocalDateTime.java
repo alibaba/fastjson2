@@ -58,7 +58,7 @@ class ObjectReaderImplLocalDateTime
             return null;
         }
 
-        if (format == null || yyyyMMddhhmmss19 || formatISO8601) {
+        if (format == null || yyyyMMdd8 || yyyyMMdd10 || yyyyMMddhhmmss19 || formatISO8601) {
             return jsonReader.readLocalDateTime();
         }
 
