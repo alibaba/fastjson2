@@ -781,6 +781,27 @@ public class ObjectReaderCreator {
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
+        return createObjectReader(
+                objectClass,
+                typeKey,
+                null,
+                features,
+                schema,
+                defaultCreator,
+                buildFunction,
+                fieldReaders);
+    }
+
+    public <T> ObjectReader<T> createObjectReader(
+            Class<T> objectClass,
+            String typeKey,
+            String rootName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> defaultCreator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
         if (objectClass != null) {
             int modifiers = objectClass.getModifiers();
             if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
@@ -788,10 +809,27 @@ public class ObjectReaderCreator {
             }
         }
 
+        if (rootName != null) {
+            return new ObjectReaderRootName(
+                    objectClass,
+                    typeKey,
+                    null,
+                    rootName,
+                    features,
+                    schema,
+                    defaultCreator,
+                    buildFunction,
+                    null,
+                    null,
+                    null,
+                    fieldReaders);
+        }
         switch (fieldReaders.length) {
             case 1:
                 return new ObjectReader1(
                         objectClass,
+                        null,
+                        null,
                         features,
                         schema,
                         defaultCreator,
@@ -1248,6 +1286,7 @@ public class ObjectReaderCreator {
         ObjectReader<T> objectReader = createObjectReader(
                 objectClass,
                 beanInfo.typeKey,
+                beanInfo.rootName,
                 beanInfo.readerFeatures,
                 jsonSchema,
                 creator,

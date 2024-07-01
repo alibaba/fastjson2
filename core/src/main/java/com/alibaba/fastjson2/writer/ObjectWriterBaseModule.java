@@ -251,6 +251,11 @@ public class ObjectWriterBaseModule
                 if (jsonType.writeEnumAsJavaBean()) {
                     beanInfo.writeEnumAsJavaBean = true;
                 }
+
+                String rootName = jsonType.rootName();
+                if (!rootName.isEmpty()) {
+                    beanInfo.rootName = rootName;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));

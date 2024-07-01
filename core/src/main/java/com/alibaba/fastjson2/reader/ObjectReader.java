@@ -295,6 +295,15 @@ public interface ObjectReader<T> {
     /**
      * @return {@link T}
      */
+    default T readObject(String str, JSONReader.Feature... features) {
+        try (JSONReader jsonReader = JSONReader.of(str, JSONFactory.createReadContext(features))) {
+            return readObject(jsonReader, null, null, getFeatures());
+        }
+    }
+
+    /**
+     * @return {@link T}
+     */
     default T readObject(JSONReader jsonReader) {
         return readObject(jsonReader, null, null, getFeatures());
     }

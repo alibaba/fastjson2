@@ -135,9 +135,10 @@ public interface ObjectWriter<T> {
     }
 
     default String toJSONString(T object, JSONWriter.Feature... features) {
-        JSONWriter jsonWriter = JSONWriter.of(features);
-        write(jsonWriter, object, null, null, 0);
-        return jsonWriter.toString();
+        try (JSONWriter jsonWriter = JSONWriter.of(features)) {
+            write(jsonWriter, object, null, null, 0);
+            return jsonWriter.toString();
+        }
     }
 
     void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features);
