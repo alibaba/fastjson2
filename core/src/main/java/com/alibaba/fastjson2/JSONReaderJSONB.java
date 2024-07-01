@@ -4665,6 +4665,14 @@ final class JSONReaderJSONB
     }
 
     private LocalDate readLocalDate0(int type) {
+        /**
+         * 定义的类型为<code>LocalDateTime</code>时，但是序列化时通过<code>@JSONField(format = "yyyy-MM-dd")</code>指定格式为<code>LocalDate</code>类型
+         */
+        if (type == BC_LOCAL_DATE) {
+            LocalDate localDate = readLocalDate();
+            return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
+        }
+
         if (type == BC_LOCAL_DATETIME) {
             return readLocalDateTime().toLocalDate();
         }
