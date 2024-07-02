@@ -69,7 +69,7 @@ public abstract class JSON
         features |= SerializerFeature.SkipTransientField.getMask();
         features |= SerializerFeature.WriteEnumUsingName.getMask();
         features |= SerializerFeature.SortField.getMask();
-
+        features |= SerializerFeature.UseISO8601DateFormat.getMask();
         DEFAULT_GENERATE_FEATURE = features;
     }
 
@@ -1756,7 +1756,7 @@ public abstract class JSON
     }
 
     public static byte[] toJSONBytes(Object object, SerializeFilter filter) {
-        return toJSONBytes(object, SerializeConfig.global, new SerializeFilter[] {filter}, DEFAULT_GENERATE_FEATURE);
+        return toJSONBytes(object, SerializeConfig.global, new SerializeFilter[]{filter}, DEFAULT_GENERATE_FEATURE);
     }
 
     public static byte[] toJSONBytes(Object object, SerializeFilter filter, SerializerFeature... features) {
