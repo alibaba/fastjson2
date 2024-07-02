@@ -5535,17 +5535,17 @@ class JSONReaderUTF8
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             switch (ch) {
                 case 'B':
-                    if (!intOverflow) {
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT8;
                     }
                     break;
                 case 'S':
-                    if (!intOverflow) {
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT16;
                     }
                     break;
                 case 'L':
-                    if (offset - start < 19) {
+                    if (offset - start < 19 && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT64;
                     }
                     break;
