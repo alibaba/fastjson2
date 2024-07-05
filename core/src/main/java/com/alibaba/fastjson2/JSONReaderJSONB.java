@@ -817,7 +817,7 @@ final class JSONReaderJSONB
                                 autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                                 if (autoTypeObjectReader == null) {
-                                    throw new JSONException("auotype not support : " + typeName + ", offset " + offset + "/" + bytes.length);
+                                    throw new JSONException("autoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
                                 }
                             }
 
@@ -1399,7 +1399,7 @@ final class JSONReaderJSONB
     }
 
     void autoTypeError() {
-        throw new JSONException("auotype not support : " + getString());
+        throw new JSONException("autoType not support : " + getString());
     }
 
     private ObjectReader getObjectReaderContext(
@@ -4742,6 +4742,14 @@ final class JSONReaderJSONB
     }
 
     private LocalDateTime readLocalDateTime0(int type) {
+        /**
+         * 定义的类型为<code>LocalDateTime</code>时，但是序列化时通过<code>@JSONField(format = "yyyy-MM-dd")</code>指定格式为<code>LocalDate</code>类型
+         */
+        if (type == BC_LOCAL_DATE) {
+            LocalDate localDate = readLocalDate();
+            return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
+        }
+
         if (type == BC_TIMESTAMP_WITH_TIMEZONE) {
             return readZonedDateTime().toLocalDateTime();
         }
@@ -5658,6 +5666,11 @@ final class JSONReaderJSONB
 
     @Override
     public String readPattern() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public boolean nextIfMatchIdent(char c0, char c1) {
         throw new JSONException("UnsupportedOperation");
     }
 

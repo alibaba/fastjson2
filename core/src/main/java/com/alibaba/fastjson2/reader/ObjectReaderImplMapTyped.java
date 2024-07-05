@@ -95,39 +95,26 @@ class ObjectReaderImplMapTyped
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    try {
-                        value = valueObjectReader.createInstance((JSONObject) value, features);
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
+                    value = valueObjectReader.createInstance((Map) value, features);
                 } else if ((valueClass == JSONArray.class || valueClass == CLASS_JSON_ARRAY_1x)
                         && this.valueClass == List.class
                 ) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    try {
-                        value = valueObjectReader.createInstance((JSONArray) value);
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
+                    value = valueObjectReader.createInstance((List) value, features);
                 } else if ((typeConvert = provider.getTypeConvert(valueClass, valueType)) != null) {
                     value = typeConvert.apply(value);
                 } else if (value instanceof Map) {
-                    Map map = (Map) value;
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    try {
-                        value = valueObjectReader.createInstance(map, features);
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
-                } else if (value instanceof Collection) {
+                    value = valueObjectReader.createInstance((Map) value, features);
+                } else if (value instanceof Collection && !multiValue) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    value = valueObjectReader.createInstance((Collection) value);
+                    value = valueObjectReader.createInstance((Collection) value, features);
                 } else {
                     if (!valueClass.isInstance(value)) {
                         throw new JSONException("can not convert from " + valueClass + " to " + valueType);
@@ -193,7 +180,7 @@ class ObjectReaderImplMapTyped
         } else {
             object = instanceType == HashMap.class
                     ? new HashMap<>()
-                    : (Map) createInstance();
+                    : (Map) createInstance(features);
         }
 
         for (int i = 0; ; ++i) {
@@ -291,7 +278,7 @@ class ObjectReaderImplMapTyped
 
         JSONReader.Context context = jsonReader.getContext();
         long contextFeatures = context.getFeatures() | features;
-        Map object, innerMap = null;
+        Map object;
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();
             if (mapType == Map.class && objectSupplier != null) {
@@ -301,7 +288,7 @@ class ObjectReaderImplMapTyped
                     object = new HashMap();
                 } else {
                     object = objectSupplier.get();
-                    innerMap = TypeUtils.getInnerMap(object);
+                    object = TypeUtils.getInnerMap(object);
                 }
             } else {
                 object = new HashMap<>();
@@ -374,9 +361,22 @@ class ObjectReaderImplMapTyped
                     } else {
                         name = jsonReader.read(keyType);
                     }
+                    if (name == null && Enum.class.isAssignableFrom((Class) keyType)) {
+                        name = jsonReader.getString();
+                        jsonReader.nextIfMatch(':');
+                    }
                     if (index == 0
                             && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                             && name.equals(getTypeKey())) {
+                        long typeHashCode = jsonReader.readTypeHashCode();
+                        ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
+                        if (objectReaderAutoType != null) {
+                            if (objectReaderAutoType instanceof ObjectReaderImplMap) {
+                                if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
+                                    object = (Map) objectReaderAutoType.createInstance(features);
+                                }
+                            }
+                        }
                         continue;
                     }
                     jsonReader.nextIfMatch(':');
@@ -402,11 +402,7 @@ class ObjectReaderImplMapTyped
                         value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
                         list.add(value);
                     }
-                    if (innerMap != null) {
-                        innerMap.put(name, list);
-                    } else {
-                        object.put(name, list);
-                    }
+                    object.put(name, list);
                     continue;
                 } else {
                     value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
@@ -417,12 +413,7 @@ class ObjectReaderImplMapTyped
                 continue;
             }
 
-            Object origin;
-            if (innerMap != null) {
-                origin = innerMap.put(name, value);
-            } else {
-                origin = object.put(name, value);
-            }
+            Object origin = object.put(name, value);
 
             if (origin != null) {
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -438,7 +429,6 @@ class ObjectReaderImplMapTyped
         }
 
         jsonReader.nextIfComma();
-
         if (builder != null) {
             return builder.apply(object);
         }

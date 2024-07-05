@@ -1,13 +1,20 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -220,6 +227,109 @@ public class FieldReaderTest {
 
         public void setValues(List<Long> values) {
             this.values = values;
+        }
+    }
+
+    @Test
+    public void testRangeTemporal() {
+        ObjectReader<RangeDateTime> objectReader = ObjectReaders.of(
+                RangeDateTime.class,
+                RangeDateTime::new,
+                ObjectReaders.fieldReader(
+                        "start",
+                        LocalDateTime.class,
+                        Temporal.class,
+                        (AbstractRangeTemporal value, Temporal start) -> value.setStart(start)
+                )
+        );
+        FieldReader start = objectReader.getFieldReader("start");
+        RangeDateTime rangeDateTime = new RangeDateTime();
+        LocalDateTime startTime = LocalDateTime.now();
+        Assertions.assertDoesNotThrow(() -> start.acceptAny(rangeDateTime, startTime.toString(), 0));
+        Assertions.assertEquals(startTime, rangeDateTime.start);
+    }
+    public static class RangeDateTime
+            extends AbstractRangeTemporal<RangeDateTime, LocalDateTime> {
+    }
+    /**
+     * @author 张治保
+     * @since 2024/5/30
+     */
+    @Getter
+    @ToString
+    @EqualsAndHashCode
+    public abstract static class AbstractRangeTemporal<S extends AbstractRangeTemporal<S, T>, T extends Temporal>
+            implements Serializable {
+        /**
+         * 开始时间
+         */
+        protected T start;
+
+        /**
+         * 结束时间
+         */
+        protected T end;
+
+        @SuppressWarnings("unchecked")
+        public final S setStart(T start) {
+            validateIt(start, end);
+            this.start = start;
+            return (S) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public final S setEnd(T end) {
+            validateIt(start, end);
+            this.end = end;
+            return (S) this;
+        }
+
+        /**
+         * 开始时间结束时间转换成时间段
+         *
+         * @return 时间段
+         */
+        public final Duration toDuration() {
+            if (start == null || end == null) {
+                return null;
+            }
+            return Duration.between(start, end);
+        }
+
+        /**
+         * 验证时间范围 设置是否正确
+         *
+         * @param start 开始时间
+         * @param end   结束时间
+         */
+        private void validateIt(T start, T end) {
+            if (start == null || end == null) {
+                return;
+            }
+            if (isAfter(start, end)) {
+                throw new TimeRangeException();
+            }
+        }
+
+        /**
+         * 判断开始时间是否在结束时间之后
+         *
+         * @param start 开始时间
+         * @param end   结束时间
+         * @return 是否在结束时间之后
+         */
+        protected final boolean isAfter(@NonNull T start, @NonNull T end) {
+            return Duration.between(start, end).isNegative();
+        }
+
+        /**
+         * 时间范围异常
+         */
+        public static final class TimeRangeException
+                extends RuntimeException {
+            public TimeRangeException() {
+                super("start time cannot be greater than end time");
+            }
         }
     }
 }

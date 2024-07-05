@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.jackson_support;
 
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -96,5 +97,32 @@ public class JsonPropertyTest {
     public static class Bean3 {
         @JsonProperty(value = "bean_id", required = true)
         public Integer id;
+    }
+
+    @Test
+    public void test4() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        Bean4 bean = new Bean4();
+        bean.f0 = 100;
+        bean.f1 = 101;
+        bean.f2 = 102;
+        bean.f3 = 103;
+
+        assertEquals(
+                mapper.writeValueAsString(bean),
+                JSON.toJSONString(bean)
+        );
+    }
+
+    public static class Bean4 {
+        @JsonProperty(index = 2)
+        public Integer f0;
+        @JsonProperty(index = 1)
+        public Integer f1;
+        @JsonProperty(index = 4)
+        public Integer f2;
+        @JsonProperty(index = 3)
+        public Integer f3;
     }
 }

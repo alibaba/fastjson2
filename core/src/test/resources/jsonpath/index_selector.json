@@ -1,0 +1,94 @@
+{
+  "tests": [
+    {
+      "name": "first element",
+      "selector": "$[0]",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": [
+        "first"
+      ]
+    },
+    {
+      "name": "second element",
+      "selector": "$[1]",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": [
+        "second"
+      ]
+    },
+    {
+      "name": "out of bound",
+      "selector": "$[2]",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": []
+    },
+    {
+      "name": "overflowing index",
+      "selector": "$[231584178474632390847141970017375815706539969331281128078915168015826259279872]",
+      "invalid_selector": true
+    },
+    {
+      "name": "not actually an index, overflowing index leads into general text",
+      "selector": "$[231584178474632390847141970017375815706539969331281128078915168SomeRandomText]",
+      "invalid_selector": true
+    },
+    {
+      "name": "negative",
+      "selector": "$[-1]",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": [
+        "second"
+      ]
+    },
+    {
+      "name": "more negative",
+      "selector": "$[-2]",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": [
+        "first"
+      ]
+    },
+    {
+      "name": "negative out of bound",
+      "selector": "$[-3]",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": []
+    },
+    {
+      "name": "on object",
+      "selector": "$[0]",
+      "document": {
+        "foo": 1
+      },
+      "result": []
+    },
+    {
+      "name": "leading 0",
+      "selector": "$[01]",
+      "invalid_selector": true
+    },
+    {
+      "name": "leading -0",
+      "selector": "$[-01]",
+      "invalid_selector": true
+    }
+  ]
+}

@@ -1291,6 +1291,13 @@ public class TypeUtils {
             return new Date(((Number) obj).longValue());
         }
 
+        if (obj instanceof Map) {
+            Object date = ((Map) obj).get("$date");
+            if (date instanceof String) {
+                return DateUtils.parseDate((String) date);
+            }
+        }
+
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
@@ -1475,10 +1482,10 @@ public class TypeUtils {
                 if (obj instanceof Integer) {
                     int intValue = (Integer) obj;
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
-                } else {
-                    JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
-                    return (T) objectReader.readObject(jsonReader, null, null, 0);
                 }
+            } else {
+                JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
+                return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
             }
         }
 
@@ -1520,6 +1527,23 @@ public class TypeUtils {
                     return (T) JdbcSupport.createTime(millis);
                 default:
                     break;
+            }
+        }
+        // fix org.bson.types.Decimal128 to Double
+        String objClassName = obj.getClass().getName();
+        if (objClassName.equals("org.bson.types.Decimal128") && targetClass == Double.class) {
+            ObjectWriter objectWriter = JSONFactory
+                    .getDefaultObjectWriterProvider()
+                    .getObjectWriter(obj.getClass());
+            if (objectWriter instanceof ObjectWriterPrimitiveImpl) {
+                Function function = ((ObjectWriterPrimitiveImpl<?>) objectWriter).getFunction();
+                if (function != null) {
+                    Object apply = function.apply(obj);
+                    Function DecimalTypeConvert = provider.getTypeConvert(apply.getClass(), targetClass);
+                    if (DecimalTypeConvert != null) {
+                        return (T) DecimalTypeConvert.apply(obj);
+                    }
+                }
             }
         }
 
@@ -4325,5 +4349,16 @@ public class TypeUtils {
 
     public static boolean isJavaScriptSupport(BigInteger i) {
         return i.compareTo(BIGINT_JAVASCRIPT_LOW) >= 0 && i.compareTo(BIGINT_JAVASCRIPT_HIGH) <= 0;
+    }
+
+    public static Type getMapValueType(Type fieldType) {
+        if (fieldType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) fieldType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (actualTypeArguments.length == 2) {
+                return actualTypeArguments[1];
+            }
+        }
+        return Object.class;
     }
 }

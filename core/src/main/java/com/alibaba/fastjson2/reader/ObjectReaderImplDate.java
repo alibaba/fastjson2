@@ -15,6 +15,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 public class ObjectReaderImplDate
         extends DateTimeCodec
@@ -69,10 +70,16 @@ public class ObjectReaderImplDate
         }
 
         long millis;
-        if (useSimpleFormatter) {
+        if (useSimpleFormatter || locale != null) {
             String str = jsonReader.readString();
             try {
-                return new SimpleDateFormat(format).parse(str);
+                SimpleDateFormat dateFormat;
+                if (locale != null) {
+                    dateFormat = new SimpleDateFormat(format, locale);
+                } else {
+                    dateFormat = new SimpleDateFormat(format);
+                }
+                return dateFormat.parse(str);
             } catch (ParseException e) {
                 throw new JSONException(jsonReader.info("parse error : " + str), e);
             }
@@ -184,5 +191,9 @@ public class ObjectReaderImplDate
         }
 
         return new Date(millis);
+    }
+
+    public Date createInstance(Map map, long features) {
+        return TypeUtils.toDate(map);
     }
 }

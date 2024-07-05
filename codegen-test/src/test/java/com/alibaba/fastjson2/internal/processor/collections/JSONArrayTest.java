@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.internal.processor.collections;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +34,6 @@ public class JSONArrayTest {
     }
 
     @JSONCompiled
-    @JSONType(disableReferenceDetect = true)
     public static class Bean1 {
         public JSONArray v01;
     }

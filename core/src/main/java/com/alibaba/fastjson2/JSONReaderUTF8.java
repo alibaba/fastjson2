@@ -492,6 +492,8 @@ class JSONReaderUTF8
                 case ')':
                 case ',':
                 case ':':
+                case '|':
+                case '&':
                 case EOI:
                     nameLength = i;
                     this.nameEnd = ch == EOI ? offset : offset - 1;
@@ -4925,7 +4927,11 @@ class JSONReaderUTF8
             }
         }
 
-        if (!comma && ch != EOI && ch != '}' && ch != ']' && ch != EOI) {
+        if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        if (comma && (ch == '}' || ch == ']' || ch == EOI)) {
             throw error(offset, ch);
         }
 
@@ -5527,26 +5533,30 @@ class JSONReaderUTF8
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            if (!intOverflow) {
-                switch (ch) {
-                    case 'B':
+            switch (ch) {
+                case 'B':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT8;
-                        break;
-                    case 'S':
+                    }
+                    break;
+                case 'S':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT16;
-                        break;
-                    case 'L':
+                    }
+                    break;
+                case 'L':
+                    if (offset - start < 19 && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT64;
-                        break;
-                    case 'F':
-                        valueType = JSON_TYPE_FLOAT;
-                        break;
-                    case 'D':
-                        valueType = JSON_TYPE_DOUBLE;
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
             }
             ch = offset == end ? EOI : bytes[offset++];
         }
@@ -5945,7 +5955,7 @@ class JSONReaderUTF8
     @Override
     public final int getStringLength() {
         if (ch != '"' && ch != '\'') {
-            throw new JSONException("string length only support string input");
+            throw new JSONException("string length only support string input " + ch);
         }
         final char quote = ch;
 
@@ -6804,6 +6814,10 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
+        if (longValue < 0) {
+            overflow = true;
+        }
+
         this.scale = 0;
         if (ch == '.') {
             valueType = JSON_TYPE_DEC;
@@ -7094,6 +7108,32 @@ class JSONReaderUTF8
         if (ch < 0) {
             char_utf8(ch, offset);
             return true;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfMatchIdent(char c0, char c1) {
+        if (ch != c0) {
+            return false;
+        }
+
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (offset + 1 > end || bytes[offset] != c1) {
+            return false;
+        }
+
+        offset += 1;
+        int ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (offset == this.offset + 2 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
+            return false;
         }
 
         this.offset = offset;

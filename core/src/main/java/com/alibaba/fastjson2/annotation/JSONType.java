@@ -86,30 +86,12 @@ public @interface JSONType {
     boolean disableReferenceDetect() default false;
 
     /**
-     * Reduce code branches during code generation to improve performance,
-     * If it is true, there will be no code related to smart match.
-     * @since 2.0.50
+     * Similar to {@code javax.xml.bind.annotation.XmlRootElement},
+     * used to indicate name to use for root-level wrapping, if wrapping is
+     * enabled. Annotation itself does not indicate that wrapping should
+     * be used; but if it is, the name used for serialization should be the
+     * name specified here, and deserializer will expect the name as well.
+     * @since 2.0.52
      */
-    boolean disableSmartMatch() default false;
-
-    /**
-     * Reduce code branches during code generation to improve performance,
-     * If it is true, there will be no code related to array mapping.
-     * @since 2.0.50
-     */
-    boolean disableArrayMapping() default false;
-
-    /**
-     * Reduce code branches during code generation to improve performance,
-     * If it is true, there will be no code related to autoType.
-     * @since 2.0.50
-     */
-    boolean disableAutoType() default false;
-
-    /**
-     * Reduce code branches during code generation to improve performance,
-     * If it is true, there will be no code related to jsonb.
-     * @since 2.0.50
-     */
-    boolean disableJSONB() default false;
+    String rootName() default "";
 }

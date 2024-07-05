@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import java.util.Objects;
 
 @JSONCompiled
-@JSONType(disableReferenceDetect = true)
+@JSONType
 public class Image
         implements java.io.Serializable {
     private static final long serialVersionUID = 1L;

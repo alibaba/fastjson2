@@ -10,7 +10,6 @@ import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.function.ObjBoolConsumer;
 import com.alibaba.fastjson2.function.ObjByteConsumer;
 import com.alibaba.fastjson2.function.ObjCharConsumer;
@@ -782,6 +781,27 @@ public class ObjectReaderCreator {
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
+        return createObjectReader(
+                objectClass,
+                typeKey,
+                null,
+                features,
+                schema,
+                defaultCreator,
+                buildFunction,
+                fieldReaders);
+    }
+
+    public <T> ObjectReader<T> createObjectReader(
+            Class<T> objectClass,
+            String typeKey,
+            String rootName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> defaultCreator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
         if (objectClass != null) {
             int modifiers = objectClass.getModifiers();
             if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
@@ -789,10 +809,27 @@ public class ObjectReaderCreator {
             }
         }
 
+        if (rootName != null) {
+            return new ObjectReaderRootName(
+                    objectClass,
+                    typeKey,
+                    null,
+                    rootName,
+                    features,
+                    schema,
+                    defaultCreator,
+                    buildFunction,
+                    null,
+                    null,
+                    null,
+                    fieldReaders);
+        }
         switch (fieldReaders.length) {
             case 1:
                 return new ObjectReader1(
                         objectClass,
+                        null,
+                        null,
                         features,
                         schema,
                         defaultCreator,
@@ -966,7 +1003,7 @@ public class ObjectReaderCreator {
             boolean fieldBased,
             ObjectReaderProvider provider
     ) {
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = new BeanInfo(provider);
         if (fieldBased) {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
         }
@@ -984,7 +1021,7 @@ public class ObjectReaderCreator {
                 constructor.setAccessible(true);
                 return (ObjectReader<T>) constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                    InvocationTargetException e) {
+                     InvocationTargetException e) {
                 throw new JSONException("create deserializer error", e);
             }
         }
@@ -1095,14 +1132,6 @@ public class ObjectReaderCreator {
                         parameterNames[i] = fieldInfo.fieldName;
                     }
                 }
-            }
-
-            if (provider.getNameFilter() != null) {
-                NameFilter nameFilter = provider.getNameFilter();
-                for (int i = 0; i < parameterNames.length; i++) {
-                    parameterNames[i] = nameFilter.process(null, parameterNames[i], null);
-                }
-                provider.setNameFilter(null);
             }
 
             int matchCount = 0;
@@ -1257,6 +1286,7 @@ public class ObjectReaderCreator {
         ObjectReader<T> objectReader = createObjectReader(
                 objectClass,
                 beanInfo.typeKey,
+                beanInfo.rootName,
                 beanInfo.readerFeatures,
                 jsonSchema,
                 creator,
@@ -1373,7 +1403,9 @@ public class ObjectReaderCreator {
                 fieldType,
                 fieldClass,
                 field,
-                initReader
+                initReader,
+                fieldInfo.arrayToMapKey,
+                fieldInfo.getInitArrayToMapDuplicateHandler()
         );
 
         putIfAbsent(fieldReaders, fieldName, fieldReader, objectClass);
@@ -1495,7 +1527,9 @@ public class ObjectReaderCreator {
                     fieldType,
                     fieldClass,
                     method,
-                    fieldInfo.getInitReader()
+                    fieldInfo.getInitReader(),
+                    fieldInfo.arrayToMapKey,
+                    fieldInfo.getInitArrayToMapDuplicateHandler()
             );
             putIfAbsent(fieldReaders, fieldName, fieldReader, objectClass);
             return;
@@ -1572,7 +1606,9 @@ public class ObjectReaderCreator {
                     fieldType,
                     fieldClass,
                     method,
-                    initReader
+                    initReader,
+                    fieldInfo.arrayToMapKey,
+                    fieldInfo.getInitArrayToMapDuplicateHandler()
             );
         }
 
@@ -1614,7 +1650,7 @@ public class ObjectReaderCreator {
             ObjectReaderProvider provider
     ) {
         if (beanInfo == null) {
-            beanInfo = new BeanInfo();
+            beanInfo = new BeanInfo(provider);
             for (ObjectReaderModule module : provider.modules) {
                 ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                 if (annotationProcessor != null) {
@@ -2161,6 +2197,42 @@ public class ObjectReaderCreator {
             Method method,
             ObjectReader initReader
     ) {
+        return createFieldReaderMethod(
+                objectClass,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema,
+                fieldType,
+                fieldClass,
+                method,
+                initReader,
+                null,
+                null
+        );
+    }
+
+    public <T> FieldReader createFieldReaderMethod(
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Method method,
+            ObjectReader initReader,
+            String keyName,
+            BiConsumer arrayToMapDuplicateHandler
+    ) {
         if (method != null) {
             method.setAccessible(true);
         }
@@ -2411,7 +2483,9 @@ public class ObjectReaderCreator {
                         format,
                         jsonSchema,
                         method,
-                        field
+                        field,
+                        keyName,
+                        arrayToMapDuplicateHandler
                 );
             }
 
@@ -2475,6 +2549,25 @@ public class ObjectReaderCreator {
                     // ignored
                 }
             }
+        }
+
+        if (Map.class.isAssignableFrom(fieldClass)) {
+            return new FieldReaderMapMethod(
+                    fieldName,
+                    fieldTypeResolved != null ? fieldTypeResolved : fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    method,
+                    field,
+                    null,
+                    keyName,
+                    arrayToMapDuplicateHandler
+            );
         }
 
         return new FieldReaderObject(
@@ -2577,6 +2670,8 @@ public class ObjectReaderCreator {
                 fieldType,
                 field.getType(),
                 field,
+                null,
+                null,
                 null
         );
     }
@@ -2595,6 +2690,42 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Field field,
             ObjectReader initReader
+    ) {
+        return createFieldReader(
+                objectClass,
+                objectType,
+                fieldName,
+                0,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema,
+                fieldType,
+                field.getType(),
+                field,
+                initReader,
+                null,
+                null
+        );
+    }
+
+    public <T> FieldReader<T> createFieldReader(
+            Class objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            ObjectReader initReader,
+            String keyName,
+            BiConsumer arrayToMapDuplicateHandler
     ) {
         if (defaultValue instanceof String && fieldClass.isEnum()) {
             defaultValue = Enum.valueOf(fieldClass, (String) defaultValue);
@@ -2808,7 +2939,18 @@ public class ObjectReaderCreator {
 
                 if (actualTypeArguments.length == 2) {
                     if (finalField && ((features & JSONReader.Feature.FieldBased.mask) == 0)) {
-                        return new FieldReaderMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
+                        return new FieldReaderMapFieldReadOnly(
+                                fieldName,
+                                fieldTypeResolved,
+                                fieldClassResolved,
+                                ordinal,
+                                features,
+                                format,
+                                jsonSchema,
+                                field,
+                                keyName,
+                                arrayToMapDuplicateHandler
+                        );
                     }
                 }
             }
@@ -2835,7 +2977,41 @@ public class ObjectReaderCreator {
                         features,
                         format,
                         jsonSchema,
-                        field);
+                        field,
+                        keyName,
+                        arrayToMapDuplicateHandler
+                );
+            }
+
+            if (Map.class.isAssignableFrom(fieldClassResolved)) {
+                if ((features & FieldInfo.UNWRAPPED_MASK) != 0) {
+                    return new FieldReaderMapFieldReadOnly(fieldName,
+                            fieldTypeResolved,
+                            fieldClass,
+                            ordinal,
+                            features,
+                            format,
+                            jsonSchema,
+                            field,
+                            keyName,
+                            arrayToMapDuplicateHandler
+                    );
+                }
+
+                return new FieldReaderMapField(
+                        fieldName,
+                        fieldTypeResolved,
+                        fieldClass,
+                        ordinal,
+                        features,
+                        format,
+                        locale,
+                        defaultValue,
+                        jsonSchema,
+                        field,
+                        keyName,
+                        arrayToMapDuplicateHandler
+                );
             }
 
             return new FieldReaderObjectField(
@@ -3313,15 +3489,24 @@ public class ObjectReaderCreator {
         return list;
     }
 
-    private void putIfAbsent(Map<String, List<FieldReader>> fieldReaders, String fieldName, FieldReader fieldReader, Class objectClass) {
+    private void putIfAbsent(Map<String, List<FieldReader>> fieldReaders,
+                             String fieldName,
+                             FieldReader fieldReader,
+                             Class objectClass) {
         List<FieldReader> origin = fieldReaders.get(fieldName);
         if (origin == null) {
             fieldReaders.put(fieldName, listOf(fieldReader));
             return;
         }
         if (!fieldReader.isReadOnly()) {
-            FieldReader finalReader = fieldReader;
-            FieldReader sameReader = origin.stream().filter(o -> o.sameTo(finalReader)).findAny().orElse(null);
+            FieldReader sameReader = null;
+            for (int i = 0; i < origin.size(); i++) {
+                FieldReader tempReader = origin.get(i);
+                if (tempReader.sameTo(fieldReader)) {
+                    sameReader = tempReader;
+                    break;
+                }
+            }
             if (sameReader != null) {
                 if (sameReader.compareTo(fieldReader) > 0 || !sameReader.belongTo(objectClass)) {
                     origin.set(origin.indexOf(sameReader), fieldReader);

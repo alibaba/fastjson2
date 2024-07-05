@@ -135,6 +135,10 @@ public class JSONArray
                 return null;
             }
 
+            if (str.charAt(0) != '[') {
+                return JSONArray.of(str);
+            }
+
             JSONReader reader = JSONReader.of(str);
             return JSONFactory.ARRAY_READER.readObject(reader, null, null, 0);
         }
@@ -486,6 +490,10 @@ public class JSONArray
             return Integer.parseInt(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
@@ -764,6 +772,10 @@ public class JSONArray
             return new BigInteger(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
@@ -970,13 +982,29 @@ public class JSONArray
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Type type) {
+        return to(type, 0L);
+    }
+
+    /**
+     * Convert this {@link JSONArray} to the specified Object
+     *
+     * <pre>{@code
+     * JSONArray array = ...
+     * List<User> users = array.to(new TypeReference<ArrayList<User>>(){}.getType());
+     * }</pre>
+     *
+     * @param type specify the {@link Type} to be converted
+     * @since 2.0.51
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T to(Type type, long features) {
         if (type == String.class) {
             return (T) toString();
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this);
+        return objectReader.createInstance(this, features);
     }
 
     /**
@@ -986,6 +1014,10 @@ public class JSONArray
     public <T> T to(Class<T> type) {
         if (type == String.class) {
             return (T) toString();
+        }
+
+        if (type == JSON.class) {
+            return (T) this;
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -1175,7 +1207,7 @@ public class JSONArray
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, featuresValue);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -1234,7 +1266,7 @@ public class JSONArray
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, featuresValue);
         }
 
         Class clazz = TypeUtils.getMapping(type);

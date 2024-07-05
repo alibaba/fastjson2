@@ -184,6 +184,23 @@ public class JSONObject
     }
 
     /**
+     * @since 2.0.52
+     * @param key
+     * @param action
+     */
+    public void forEchArrayObject(String key, Consumer<JSONObject> action) {
+        JSONArray array = getJSONArray(key);
+        if (array == null) {
+            return;
+        }
+
+        for (int i = 0; i < array.size(); i++) {
+            action.accept(
+                    array.getJSONObject(i));
+        }
+    }
+
+    /**
      * Returns the {@link JSONArray} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
@@ -210,6 +227,10 @@ public class JSONObject
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
+            }
+
+            if (str.charAt(0) != '[') {
+                return JSONArray.of(str);
             }
 
             JSONReader reader = JSONReader.of(str);
@@ -616,6 +637,10 @@ public class JSONObject
             return Integer.parseInt(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
@@ -974,6 +999,10 @@ public class JSONObject
             return new BigInteger(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
@@ -1227,22 +1256,29 @@ public class JSONObject
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Class<T> clazz, JSONReader.Feature... features) {
-        long featuresValue = JSONFactory.defaultReaderFeatures;
-        boolean fieldBased = false;
-        for (JSONReader.Feature feature : features) {
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-            featuresValue |= feature.mask;
-        }
+        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
+        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
 
         if (clazz == String.class) {
             return (T) toString();
         }
 
+        if (clazz == JSON.class) {
+            return (T) this;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
         return objectReader.createInstance(this, featuresValue);
+    }
+
+    public void copyTo(Object object, JSONReader.Feature... features) {
+        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
+        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
+        Class clazz = object.getClass();
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        objectReader.accept(object, this, featuresValue);
     }
 
     /**
@@ -1321,7 +1357,7 @@ public class JSONObject
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, features);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -1407,7 +1443,7 @@ public class JSONObject
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, features);
         }
 
         if (type instanceof Class) {

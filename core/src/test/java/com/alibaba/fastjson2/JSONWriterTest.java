@@ -2855,4 +2855,12 @@ public class JSONWriterTest {
             assertEquals(expect_pretty, jsonWriter.toString());
         }
     }
+
+    @Test
+    public void setFeatures() {
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        long features = 123456L;
+        context.setFeatures(features);
+        assertEquals(features, context.getFeatures());
+    }
 }

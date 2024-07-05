@@ -3131,14 +3131,9 @@ class JSONWriterUTF16
 
     @Override
     public final void writeString(boolean value) {
-        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
-        if (writeAsString) {
-            writeQuote();
-        }
+        chars[off++] = quote;
         writeBool(value);
-        if (writeAsString) {
-            writeQuote();
-        }
+        chars[off++] = quote;
     }
 
     @Override
@@ -3278,10 +3273,19 @@ class JSONWriterUTF16
             chars[off++] = value ? '1' : '0';
         } else {
             if (!value) {
-                chars[off++] = 'f';
+                chars[off] = 'f';
+                chars[off + 1] = 'a';
+                chars[off + 2] = 'l';
+                chars[off + 3] = 's';
+                chars[off + 4] = 'e';
+                off += 5;
+            } else {
+                chars[off] = 't';
+                chars[off + 1] = 'r';
+                chars[off + 2] = 'u';
+                chars[off + 3] = 'e';
+                off += 4;
             }
-            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), value ? TRUE_64 : ALSE_64);
-            off += 4;
         }
         this.off = off;
     }

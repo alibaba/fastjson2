@@ -616,7 +616,11 @@ public class ObjectWriterAdapter<T>
             Class fieldClass = fieldWriter.fieldClass;
             if (format != null) {
                 if (fieldClass == Date.class) {
-                    fieldValue = DateUtils.format((Date) fieldValue, format);
+                    if ("millis".equals(format)) {
+                        fieldValue = ((Date) fieldValue).getTime();
+                    } else {
+                        fieldValue = DateUtils.format((Date) fieldValue, format);
+                    }
                 } else if (fieldClass == LocalDate.class) {
                     fieldValue = DateUtils.format((LocalDate) fieldValue, format);
                 } else if (fieldClass == LocalDateTime.class) {

@@ -103,7 +103,7 @@ final class ObjectArrayReaderMultiType
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         return new Object[types.length];
     }
 }

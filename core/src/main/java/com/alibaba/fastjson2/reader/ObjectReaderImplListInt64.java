@@ -43,8 +43,8 @@ public final class ObjectReaderImplListInt64
     }
 
     @Override
-    public Object createInstance(Collection collection) {
-        Collection list = (Collection) createInstance(0);
+    public Object createInstance(Collection collection, long features) {
+        Collection list = (Collection) createInstance(features);
         for (Object item : collection) {
             list.add(TypeUtils.toLong(item));
         }

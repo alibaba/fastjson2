@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.function.FieldBiConsumer;
 import com.alibaba.fastjson2.function.FieldConsumer;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
@@ -149,8 +147,6 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, Set<Filter>> cacheFilter = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, Set<Filter>> cacheFieldBasedFilter = new ConcurrentHashMap<>();
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -162,11 +158,17 @@ public class ObjectReaderProvider
     final ObjectReaderCreator creator;
     final List<ObjectReaderModule> modules = new ArrayList<>();
 
+    boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
+    boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
+    boolean disableJSONB = JSONFactory.isDisableJSONB();
+    boolean disableAutoType = JSONFactory.isDisableAutoType();
+    boolean disableSmartMatch = JSONFactory.isDisableSmartMatch();
+
     private long[] acceptHashCodes;
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
-    private NameFilter nameFilter;
+    PropertyNamingStrategy namingStrategy;
 
     {
         long[] hashCodes;
@@ -229,14 +231,6 @@ public class ObjectReaderProvider
 
     public void setAutoTypeHandler(Consumer<Class> autoTypeHandler) {
         this.autoTypeHandler = autoTypeHandler;
-    }
-
-    public NameFilter getNameFilter() {
-        return nameFilter;
-    }
-
-    public void setNameFilter(NameFilter nameFilter) {
-        this.nameFilter = nameFilter;
     }
 
     public Class getMixIn(Class target) {
@@ -760,31 +754,6 @@ public class ObjectReaderProvider
                 : getObjectReaderInternal(objectType, fieldBased);
     }
 
-    public ObjectReader getObjectReader(Type objectType, Filter filter, boolean fieldBased) {
-        if (objectType == null) {
-            objectType = Object.class;
-        } else if (objectType instanceof WildcardType) {
-            Type[] upperBounds = ((WildcardType) objectType).getUpperBounds();
-            if (upperBounds.length == 1) {
-                objectType = upperBounds[0];
-            }
-        }
-
-        Set<Filter> filters = fieldBased
-                ? cacheFieldBasedFilter.getOrDefault(objectType, new HashSet<>())
-                : cacheFilter.getOrDefault(objectType, new HashSet<>());
-        if (!filters.isEmpty()) {
-            cleanup((Class) objectType);
-        }
-        filters.add(filter);
-        if (fieldBased) {
-            cacheFieldBasedFilter.put(objectType, filters);
-        } else {
-            cacheFilter.put(objectType, filters);
-        }
-        return getObjectReader(objectType, fieldBased);
-    }
-
     private ObjectReader getObjectReaderInternal(Type objectType, boolean fieldBased) {
         ObjectReader objectReader = null;
 
@@ -1019,5 +988,59 @@ public class ObjectReaderProvider
                 supplier,
                 fieldReaders
         );
+    }
+
+    public boolean isDisableReferenceDetect() {
+        return disableReferenceDetect;
+    }
+
+    public boolean isDisableAutoType() {
+        return disableAutoType;
+    }
+
+    public boolean isDisableJSONB() {
+        return disableJSONB;
+    }
+
+    public boolean isDisableArrayMapping() {
+        return disableArrayMapping;
+    }
+
+    public void setDisableReferenceDetect(boolean disableReferenceDetect) {
+        this.disableReferenceDetect = disableReferenceDetect;
+    }
+
+    public void setDisableArrayMapping(boolean disableArrayMapping) {
+        this.disableArrayMapping = disableArrayMapping;
+    }
+
+    public void setDisableJSONB(boolean disableJSONB) {
+        this.disableJSONB = disableJSONB;
+    }
+
+    public void setDisableAutoType(boolean disableAutoType) {
+        this.disableAutoType = disableAutoType;
+    }
+
+    public boolean isDisableSmartMatch() {
+        return disableSmartMatch;
+    }
+
+    public void setDisableSmartMatch(boolean disableSmartMatch) {
+        this.disableSmartMatch = disableSmartMatch;
+    }
+
+    /**
+     * @since 2.0.52
+     */
+    public PropertyNamingStrategy getNamingStrategy() {
+        return namingStrategy;
+    }
+
+    /**
+     * @since 2.0.52
+     */
+    public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
     }
 }

@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.50-SNAPSHOT</version>
+        <version>2.0.52-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -53,13 +53,6 @@
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <!-- do not upgrade which is compatible with java8 -->
-        <dependency>
-            <groupId>com.google.googlejavaformat</groupId>
-            <artifactId>google-java-format</artifactId>
-            <version>1.7</version>
         </dependency>
 
         <!-- test libs -->

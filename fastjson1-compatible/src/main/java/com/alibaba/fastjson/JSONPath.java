@@ -49,9 +49,25 @@ public class JSONPath {
         return TypeUtils.cast(r, clazz, ParserConfig.global);
     }
 
+    public static Object eval(String rootObject, String path) {
+        Object result = com.alibaba.fastjson2.JSONPath.eval(rootObject, path);
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            result = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        } else if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            result = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) result);
+        }
+        return result;
+    }
+
     public static Object eval(Object rootObject, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        return jsonPath.eval(rootObject);
+        Object result = jsonPath.eval(rootObject);
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            result = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        } else if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            result = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) result);
+        }
+        return result;
     }
 
     public static boolean set(Object rootObject, String path, Object value) {
@@ -74,7 +90,13 @@ public class JSONPath {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
         JSONReader jsonReader = JSONReader.of(json, context);
-        return jsonPath.extract(jsonReader);
+        Object result = jsonPath.extract(jsonReader);
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            result = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        } else if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            result = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) result);
+        }
+        return result;
     }
 
     public static boolean remove(Object root, String path) {

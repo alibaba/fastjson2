@@ -173,11 +173,14 @@ final class ObjectReaderSeeAlso<T>
                     }
                 }
 
+                String typeName = null;
                 if (reader == null) {
                     reader = autoType(context, typeHash);
+                    if (reader != null && hash != HASH_TYPE) {
+                        typeName = jsonReader.getString();
+                    }
                 }
 
-                String typeName = null;
                 if (reader == null) {
                     typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(
@@ -198,6 +201,9 @@ final class ObjectReaderSeeAlso<T>
                 }
 
                 FieldReader fieldReader = reader.getFieldReader(hash);
+                if (fieldReader == null && hash != HASH_TYPE) {
+                    fieldReader = reader.getFieldReader(typeKey);
+                }
                 if (fieldReader != null && typeName == null) {
                     if (typeNumberStr != null) {
                         typeName = typeNumberStr;

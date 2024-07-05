@@ -516,7 +516,7 @@ public class ObjectWriterCreator {
         googleCollection =
                 "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
                         || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
-        if (!googleCollection) {
+        if (!googleCollection && beanInfo.rootName == null) {
             switch (fieldWriters.size()) {
                 case 1:
                     if ((fieldWriters.get(0).features & FieldInfo.VALUE_MASK) == 0) {
@@ -561,7 +561,11 @@ public class ObjectWriterCreator {
             }
         }
         if (writerAdapter == null) {
-            writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+            if (beanInfo.rootName != null) {
+                writerAdapter = new ObjectWriterRootName(objectClass, beanInfo.typeKey, beanInfo.typeName, beanInfo.rootName, writerFeatures, fieldWriters);
+            } else {
+                writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+            }
         }
 
         if (beanInfo.serializeFilters != null) {
@@ -1034,6 +1038,10 @@ public class ObjectWriterCreator {
 
     public <T> FieldWriter createFieldWriter(String fieldName, ToDoubleFunction<T> function) {
         return new FieldWriterDoubleValueFunc(fieldName, 0, 0, null, null, null, null, function);
+    }
+
+    public <T> FieldWriter createFieldWriter(String fieldName, ToCharFunction<T> function) {
+        return new FieldWriterCharValFunc(fieldName, 0, 0, null, null, null, null, function);
     }
 
     public <T> FieldWriter createFieldWriter(String fieldName, Predicate<T> function) {

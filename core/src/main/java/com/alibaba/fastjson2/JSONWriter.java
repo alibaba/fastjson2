@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.lang.reflect.GenericArrayType;
@@ -51,6 +50,7 @@ public abstract class JSONWriter
     protected String lastReference;
     protected boolean pretty;
     protected int indent;
+    protected Object attachment;
 
     protected JSONWriter(
             Context context,
@@ -168,6 +168,13 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
+    public final void addManagerReference(Object object) {
+        if (refs == null) {
+            refs = new IdentityHashMap(8);
+        }
+        refs.putIfAbsent(object, Path.MANGER_REFERNCE);
+    }
+
     public final boolean writeReference(int index, Object object) {
         String refPath = setPath(index, object);
         if (refPath != null) {
@@ -206,6 +213,10 @@ public abstract class JSONWriter
     }
 
     public final void popPath(Object object) {
+        if (!isRefDetect(object)) {
+            return;
+        }
+
         if (this.path == null
                 || (context.features & ReferenceDetection.mask) == 0
                 || object == Collections.EMPTY_LIST
@@ -249,6 +260,22 @@ public abstract class JSONWriter
 
     public final boolean containsReference(Object value) {
         return refs != null && refs.containsKey(value);
+    }
+
+    public final String getPath(Object value) {
+        Path path;
+        return refs == null || (path = refs.get(value)) == null
+                ? "$"
+                : path.toString();
+    }
+
+    /**
+     * If ReferenceDetection has been set, returns the path of the current object, otherwise returns null
+     * @since 2.0.51
+     * @return the path of the current object
+     */
+    public String getPath() {
+        return path == null ? null : path.toString();
     }
 
     public final boolean removeReference(Object value) {
@@ -897,6 +924,70 @@ public abstract class JSONWriter
 
     public void startArray(int size) {
         throw new JSONException("UnsupportedOperation");
+    }
+
+    public void startArray0() {
+        startArray(0);
+    }
+
+    public void startArray1() {
+        startArray(1);
+    }
+
+    public void startArray2() {
+        startArray(2);
+    }
+
+    public void startArray3() {
+        startArray(3);
+    }
+
+    public void startArray4() {
+        startArray(4);
+    }
+
+    public void startArray5() {
+        startArray(5);
+    }
+
+    public void startArray6() {
+        startArray(6);
+    }
+
+    public void startArray7() {
+        startArray(7);
+    }
+
+    public void startArray8() {
+        startArray(8);
+    }
+
+    public void startArray9() {
+        startArray(9);
+    }
+
+    public void startArray10() {
+        startArray(10);
+    }
+
+    public void startArray11() {
+        startArray(11);
+    }
+
+    public void startArray12() {
+        startArray(12);
+    }
+
+    public void startArray13() {
+        startArray(13);
+    }
+
+    public void startArray14() {
+        startArray(14);
+    }
+
+    public void startArray15() {
+        startArray(15);
     }
 
     public void startArray(Object array, int size) {
@@ -1696,6 +1787,13 @@ public abstract class JSONWriter
             return features;
         }
 
+        /**
+         * @since 2.0.51
+         */
+        public void setFeatures(long features) {
+            this.features = features;
+        }
+
         public boolean isEnabled(Feature feature) {
             return (this.features & feature.mask) != 0;
         }
@@ -2033,8 +2131,15 @@ public abstract class JSONWriter
 
         /**
          * @since 2.0.7
+         * @deprecated use IgnoreEmpty
          */
         NotWriteEmptyArray(1 << 26),
+
+        /**
+         * @since 2.0.51
+         */
+        IgnoreEmpty(1L << 26),
+
         WriteNonStringKeyAsString(1 << 27),
         /**
          * @since 2.0.11
@@ -2112,10 +2217,15 @@ public abstract class JSONWriter
         Feature(long mask) {
             this.mask = mask;
         }
+
+        public boolean isEnabled(long features) {
+            return (features & mask) != 0;
+        }
     }
 
     public static final class Path {
         public static final Path ROOT = new Path(null, "$");
+        public static final Path MANGER_REFERNCE = new Path(null, "#");
 
         public final Path parent;
         final String name;
@@ -2462,7 +2572,6 @@ public abstract class JSONWriter
         }
     }
 
-    @NotNull
     protected static IllegalArgumentException illegalYear(int year) {
         return new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
     }
@@ -2504,5 +2613,13 @@ public abstract class JSONWriter
         if (path != null) {
             writeReference(path.toString());
         }
+    }
+
+    public Object getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Object attachment) {
+        this.attachment = attachment;
     }
 }

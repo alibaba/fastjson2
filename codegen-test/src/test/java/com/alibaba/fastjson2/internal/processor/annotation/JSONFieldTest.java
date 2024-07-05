@@ -22,11 +22,11 @@ public class JSONFieldTest {
 
         String str1 = "{\"UserId\":123}";
         assertEquals(0, JSON.parseObject(str1, Bean.class).id);
-        assertEquals(0, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
+        assertEquals(123, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
     }
 
     @JSONCompiled
-    @JSONType(disableReferenceDetect = true, disableSmartMatch = true)
+    @JSONType
     public static class Bean {
         @JSONField(name = "userId")
         public int id;
@@ -44,10 +44,10 @@ public class JSONFieldTest {
 
         String str1 = "{\"UserId\":123}";
         assertEquals(0, JSON.parseObject(str1, Bean1.class).id);
-        assertEquals(0, JSON.parseObject(str1, Bean1.class, JSONReader.Feature.SupportSmartMatch).id);
+        assertEquals(123, JSON.parseObject(str1, Bean1.class, JSONReader.Feature.SupportSmartMatch).id);
     }
 
-    @JSONType(disableReferenceDetect = true, disableSmartMatch = true)
+    @JSONType
     public static class Bean1 {
         @JSONField(name = "userId")
         public int id;

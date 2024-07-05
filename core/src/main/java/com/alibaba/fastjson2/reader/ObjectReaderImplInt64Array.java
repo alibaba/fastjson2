@@ -22,7 +22,7 @@ public final class ObjectReaderImplInt64Array
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         Long[] array = new Long[collection.size()];
         int i = 0;
         for (Object item : collection) {
@@ -82,6 +82,12 @@ public final class ObjectReaderImplInt64Array
             }
 
             throw new JSONException(jsonReader.info("not support input " + str));
+        }
+
+        if (jsonReader.isNumber()) {
+            return new Long[]{
+                    jsonReader.readInt64()
+            };
         }
 
         throw new JSONException(jsonReader.info("TODO"));

@@ -28,6 +28,8 @@ public final class ObjectReaderImplList
     static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(Collections.emptyNavigableSet()).getClass();
 
     public static ObjectReaderImplList INSTANCE = new ObjectReaderImplList(ArrayList.class, ArrayList.class, ArrayList.class, Object.class, null);
+    static List kotlinEmptyList;
+    static Set kotlinEmptySet;
 
     final Type listType;
     final Class listClass;
@@ -178,20 +180,13 @@ public final class ObjectReaderImplList
         }
 
         switch (type.getTypeName()) {
-            case "kotlin.collections.EmptySet":
-            case "kotlin.collections.EmptyList": {
-                Object empty;
+            case "kotlin.collections.EmptySet": {
                 Class<?> clazz = (Class<?>) type;
-                try {
-                    Field field = clazz.getField("INSTANCE");
-                    if (!field.isAccessible()) {
-                        field.setAccessible(true);
-                    }
-                    empty = field.get(null);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new IllegalStateException("Failed to get singleton of " + type, e);
-                }
-                return new ObjectReaderImplList(clazz, empty);
+                return new ObjectReaderImplList(clazz, getKotlinEmptySet(clazz));
+            }
+            case "kotlin.collections.EmptyList": {
+                Class<?> clazz = (Class<?>) type;
+                return new ObjectReaderImplList(clazz, getKotlinEmptyList(clazz));
             }
             case "java.util.Collections$EmptySet": {
                 return new ObjectReaderImplList((Class) type, Collections.emptySet());
@@ -229,6 +224,38 @@ public final class ObjectReaderImplList
         this.itemClassNameHash = itemClassName != null ? Fnv.hashCode64(itemClassName) : 0;
     }
 
+    static Set getKotlinEmptySet(Class clazz) {
+        Set empty = kotlinEmptySet;
+        if (empty == null) {
+            try {
+                Field field = clazz.getField("INSTANCE");
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                kotlinEmptySet = empty = (Set) field.get(null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalStateException("Failed to get singleton of " + clazz, e);
+            }
+        }
+        return empty;
+    }
+
+    static List getKotlinEmptyList(Class clazz) {
+        List empty = kotlinEmptyList;
+        if (empty == null) {
+            try {
+                Field field = clazz.getField("INSTANCE");
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                kotlinEmptyList = empty = (List) field.get(null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalStateException("Failed to get singleton of " + clazz, e);
+            }
+        }
+        return empty;
+    }
+
     @Override
     public Class getObjectClass() {
         return listClass;
@@ -240,7 +267,7 @@ public final class ObjectReaderImplList
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         int size = collection.size();
 
         if (size == 0 && (listClass == List.class)) {
@@ -272,7 +299,7 @@ public final class ObjectReaderImplList
                 if (itemObjectReader == null) {
                     itemObjectReader = provider.getObjectReader(itemType);
                 }
-                value = itemObjectReader.createInstance((JSONObject) value, 0L);
+                value = itemObjectReader.createInstance((Map) value, features);
             } else if (valueClass != itemType) {
                 Function typeConvert = provider.getTypeConvert(valueClass, itemType);
                 if (typeConvert != null) {
@@ -287,7 +314,7 @@ public final class ObjectReaderImplList
                     if (itemObjectReader == null) {
                         itemObjectReader = provider.getObjectReader(itemType);
                     }
-                    value = itemObjectReader.createInstance((Collection) value);
+                    value = itemObjectReader.createInstance((Collection) value, features);
                 } else if (itemClass.isInstance(value)) {
                     // skip
                 } else if (Enum.class.isAssignableFrom(itemClass)) {
@@ -353,7 +380,8 @@ public final class ObjectReaderImplList
                     } else {
                         return instanceType.newInstance();
                     }
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | RuntimeException e) {
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                         RuntimeException e) {
                     instanceError = true;
                     error = new JSONException("create list error, type " + instanceType);
                 }
@@ -490,10 +518,20 @@ public final class ObjectReaderImplList
                 }
             };
         } else if (listType != null && listType != this.listType) {
-            try {
-                list = (Collection) listType.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException(jsonReader.info("create instance error " + listType), e);
+            switch (listType.getName()) {
+                case "kotlin.collections.EmptySet":
+                    list = (Collection) getKotlinEmptySet(listType);
+                    break;
+                case "kotlin.collections.EmptyList":
+                    list = (Collection) getKotlinEmptyList(listType);
+                    break;
+                default:
+                    try {
+                        list = (Collection) listType.newInstance();
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new JSONException(jsonReader.info("create instance error " + listType), e);
+                    }
+                    break;
             }
         } else {
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
@@ -581,7 +619,23 @@ public final class ObjectReaderImplList
                 return null;
             }
 
-            Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
+            ObjectReaderProvider provider = context.getProvider();
+            if (itemClass.isEnum()) {
+                ObjectReader enumReader = provider.getObjectReader(itemClass);
+                if (enumReader instanceof ObjectReaderImplEnum) {
+                    Enum e = ((ObjectReaderImplEnum) enumReader).getEnum(str);
+                    if (e == null) {
+                        if (JSONReader.Feature.ErrorOnEnumNotMatch.isEnabled(jsonReader.features(features))) {
+                            throw new JSONException(jsonReader.info("enum not match : " + str));
+                        }
+                        return null;
+                    }
+                    list.add(e);
+                    return list;
+                }
+            }
+
+            Function typeConvert = provider.getTypeConvert(String.class, itemType);
             if (typeConvert != null) {
                 Object converted = typeConvert.apply(str);
                 jsonReader.nextIfComma();

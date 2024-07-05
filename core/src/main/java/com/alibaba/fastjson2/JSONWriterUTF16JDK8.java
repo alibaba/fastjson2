@@ -2,8 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.JDKUtils;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
-import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 final class JSONWriterUTF16JDK8
         extends JSONWriterUTF16 {
