@@ -113,8 +113,15 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
             }
         }
 
-        if (jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString)) {
+        long features2 = jsonWriter.getFeatures(features | this.features);
+
+        if ((features2 & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0) {
             jsonWriter.writeString(e.toString());
+            return;
+        }
+
+        if ((features2 & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0) {
+            jsonWriter.writeInt32(e.ordinal());
             return;
         }
 
