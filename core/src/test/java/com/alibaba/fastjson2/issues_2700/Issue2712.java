@@ -2,6 +2,9 @@ package com.alibaba.fastjson2.issues_2700;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
@@ -10,7 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue2712 {
     @Test
@@ -34,7 +37,19 @@ public class Issue2712 {
 
         String jsonString = JSON.toJSONString(infos, JSONWriter.Feature.ReferenceDetection);
         List<ClueListInfo> clueListInfos = JSON.parseArray(jsonString, ClueListInfo.class);
-        assertEquals(clueListInfos.get(0).getContacts(), clueListInfos.get(1).getContacts());
+        assertSame(clueListInfos.get(0).getContacts(), clueListInfos.get(1).getContacts());
+
+        assertNotNull(JSON.register(ClueListInfo.class,
+                ObjectWriterCreator.INSTANCE.createObjectWriter(ClueListInfo.class)));
+
+        assertEquals(jsonString,
+                JSON.toJSONString(infos, JSONWriter.Feature.ReferenceDetection));
+
+        assertNotNull(JSON.register(ClueListInfo.class,
+                ObjectReaderCreator.INSTANCE.createObjectReader(ClueListInfo.class)));
+
+        List<ClueListInfo> clueListInfos1 = JSON.parseArray(jsonString, ClueListInfo.class);
+        assertSame(clueListInfos1.get(0).getContacts(), clueListInfos1.get(1).getContacts());
     }
 
     @Data
