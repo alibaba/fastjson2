@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
@@ -70,6 +71,16 @@ public class FieldReaderList<T, V>
 
         if (jsonReader.nextIfNull()) {
             accept(object, null);
+            return;
+        }
+
+        if (jsonReader.isReference()) {
+            String reference = jsonReader.readReference();
+            if ("..".equals(reference)) {
+                accept(object, object);
+            } else {
+                addResolveTask(jsonReader, object, reference);
+            }
             return;
         }
 
