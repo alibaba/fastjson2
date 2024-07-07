@@ -42,7 +42,7 @@ public class ObjectReaderProvider
 
     static ObjectReaderCachePair readerCache;
 
-    static class ObjectReaderCachePair {
+    private static final class ObjectReaderCachePair {
         final long hashCode;
         final ObjectReader reader;
         volatile int missCount;
@@ -858,7 +858,7 @@ public class ObjectReaderProvider
         this.autoTypeBeforeHandler = autoTypeBeforeHandler;
     }
 
-    static class LRUAutoTypeCache
+    private static final class LRUAutoTypeCache
             extends LinkedHashMap<String, Date> {
         private final int maxSize;
 
