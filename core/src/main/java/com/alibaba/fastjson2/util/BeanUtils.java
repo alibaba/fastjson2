@@ -767,6 +767,7 @@ public abstract class BeanUtils {
             methodCache.putIfAbsent(enumClass, methods);
         }
 
+        Member valueMember = null;
         for (Method method : methods) {
             if (method.getReturnType() == Void.class) {
                 continue;
@@ -794,7 +795,13 @@ public abstract class BeanUtils {
                 String fieldName = BeanUtils.getterName(methodName, null);
                 Field field = BeanUtils.getDeclaredField(enumClass, fieldName);
                 if (field != null && isJSONField(field)) {
-                    return method;
+                    if (valueMember == null) {
+                        valueMember = method;
+                    } else if (!valueMember.getName().equals(method.getName())) {
+                        // multi annotation
+                        return null;
+                    }
+                    continue;
                 }
             }
 
@@ -827,8 +834,17 @@ public abstract class BeanUtils {
             }
             Member refMember = memberRef.get();
             if (refMember != null) {
-                return refMember;
+                if (valueMember == null) {
+                    valueMember = refMember;
+                } else if (!valueMember.getName().equals(refMember.getName())) {
+                    // multi annotation
+                    return null;
+                }
             }
+        }
+
+        if (valueMember != null) {
+            return valueMember;
         }
 
         Field[] fields = fieldCache.get(enumClass);
