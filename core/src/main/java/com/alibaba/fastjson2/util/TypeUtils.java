@@ -1540,10 +1540,10 @@ public class TypeUtils {
                 if (obj instanceof Integer) {
                     int intValue = (Integer) obj;
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
-                } else {
-                    JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
-                    return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
                 }
+            } else {
+                JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
+                return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
             }
         }
 
