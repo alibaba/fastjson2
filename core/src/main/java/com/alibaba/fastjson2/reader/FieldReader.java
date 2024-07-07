@@ -257,12 +257,28 @@ public abstract class FieldReader<T>
                         return -1;
                     }
 
-                    if (thisParamType.isEnum() && (otherParamType == Integer.class || otherParamType == int.class)) {
-                        return 1;
-                    }
-
-                    if (otherParamType.isEnum() && (thisParamType == Integer.class || thisParamType == int.class)) {
-                        return -1;
+                    if (needCompareToActualFieldClass(thisParamType) || needCompareToActualFieldClass(otherParamType)) {
+                        Class actualFieldClass = null;
+                        try {
+                            actualFieldClass = thisDeclaringClass.getDeclaredField(this.fieldName).getType();
+                            if (actualFieldClass == null) {
+                                actualFieldClass = otherDeclaringClass.getDeclaredField(this.fieldName).getType();
+                            }
+                        } catch (NoSuchFieldException ignored) {
+                            // ignored
+                        }
+                        if (actualFieldClass != null) {
+                            for (Class s = thisParamType; s != null && s != Object.class; s = s.getSuperclass()) {
+                                if (s == actualFieldClass) {
+                                    return -1;
+                                }
+                            }
+                            for (Class s = otherParamType; s != null && s != Object.class; s = s.getSuperclass()) {
+                                if (s == actualFieldClass) {
+                                    return 1;
+                                }
+                            }
+                        }
                     }
 
                     JSONField thisAnnotation = BeanUtils.findAnnotation(this.method, JSONField.class);
@@ -543,5 +559,12 @@ public abstract class FieldReader<T>
             }
         }
         return null;
+    }
+
+    private static boolean needCompareToActualFieldClass(Class clazz) {
+        if (clazz.isEnum() || clazz.isInterface()) {
+            return true;
+        }
+        return false;
     }
 }

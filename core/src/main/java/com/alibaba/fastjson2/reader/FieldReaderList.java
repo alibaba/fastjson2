@@ -72,6 +72,16 @@ public class FieldReaderList<T, V>
             return;
         }
 
+        if (jsonReader.isReference()) {
+            String reference = jsonReader.readReference();
+            if ("..".equals(reference)) {
+                accept(object, object);
+            } else {
+                addResolveTask(jsonReader, object, reference);
+            }
+            return;
+        }
+
         JSONReader.Context context = jsonReader.context;
         ObjectReader objectReader = getObjectReader(context);
 

@@ -32,7 +32,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 public abstract class JSONReader
         implements Closeable {
-    static final int MAX_EXP = 1023;
+    static final int MAX_EXP = 2047;
 
     static final byte JSON_TYPE_INT = 1;
     static final byte JSON_TYPE_DEC = 2;
