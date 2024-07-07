@@ -692,8 +692,8 @@ public class ObjectReaderProvider
             int paramIndex,
             Parameter parameter
     ) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectReaderAnnotationProcessor annotationProcessor = modules.get(i).getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, constructor, paramIndex, parameter);
             }
@@ -706,8 +706,8 @@ public class ObjectReaderProvider
             Method method,
             int paramIndex,
             Parameter parameter) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectReaderAnnotationProcessor annotationProcessor = modules.get(i).getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, method, paramIndex, parameter);
             }
