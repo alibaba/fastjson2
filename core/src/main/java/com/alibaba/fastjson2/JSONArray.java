@@ -424,6 +424,10 @@ public class JSONArray
             return Long.parseLong(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? Long.valueOf(1) : Long.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Long");
     }
 
@@ -491,6 +495,10 @@ public class JSONArray
             }
 
             return Integer.parseInt(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
@@ -769,6 +777,10 @@ public class JSONArray
             }
 
             return new BigInteger(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
