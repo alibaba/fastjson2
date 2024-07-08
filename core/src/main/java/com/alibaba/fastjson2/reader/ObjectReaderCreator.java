@@ -1182,7 +1182,9 @@ public class ObjectReaderCreator {
                     fieldType,
                     fieldClass,
                     field,
-                    initReader
+                    initReader,
+                    fieldInfo.arrayToMapKey,
+                    fieldInfo.getInitArrayToMapDuplicateHandler()
             );
 
             FieldReader previous = fieldReaders.get(fieldName);
@@ -1346,7 +1348,9 @@ public class ObjectReaderCreator {
                         method.getGenericReturnType(),
                         method.getReturnType(),
                         method,
-                        fieldInfo.getInitReader()
+                        fieldInfo.getInitReader(),
+                        fieldInfo.arrayToMapKey,
+                        fieldInfo.getInitArrayToMapDuplicateHandler()
                 );
                 FieldReader origin = fieldReaders.get(fieldName);
                 if (origin == null) {
@@ -1403,7 +1407,9 @@ public class ObjectReaderCreator {
                     fieldType,
                     fieldClass,
                     method,
-                    initReader
+                    initReader,
+                    fieldInfo.arrayToMapKey,
+                    fieldInfo.getInitArrayToMapDuplicateHandler()
             );
 
             FieldReader origin = fieldReaders.get(fieldName);
@@ -1718,6 +1724,40 @@ public class ObjectReaderCreator {
             Method method,
             ObjectReader initReader
     ) {
+        return createFieldReaderMethod(
+                objectClass,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                fieldType,
+                fieldClass,
+                method,
+                initReader,
+                null,
+                null
+        );
+    }
+
+    public <T> FieldReader createFieldReaderMethod(
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            Type fieldType,
+            Class fieldClass,
+            Method method,
+            ObjectReader initReader,
+            String keyName,
+            BiConsumer arrayToMapDuplicateHandler
+    ) {
         if (method != null) {
             method.setAccessible(true);
         }
@@ -1914,7 +1954,9 @@ public class ObjectReaderCreator {
                         features,
                         format,
                         method,
-                        field
+                        field,
+                        keyName,
+                        arrayToMapDuplicateHandler
                 );
             }
 
@@ -1980,6 +2022,24 @@ public class ObjectReaderCreator {
                     // ignored
                 }
             }
+        }
+
+        if (Map.class.isAssignableFrom(fieldClass)) {
+            return new FieldReaderMapMethod(
+                    fieldName,
+                    fieldTypeResolved != null ? fieldTypeResolved : fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    method,
+                    field,
+                    null,
+                    keyName,
+                    arrayToMapDuplicateHandler
+            );
         }
 
         return new FieldReaderObject(
@@ -2054,6 +2114,40 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Field field,
             ObjectReader initReader
+    ) {
+        return createFieldReader(
+                objectClass,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                fieldType,
+                field.getType(),
+                field,
+                initReader,
+                null,
+                null
+        );
+    }
+
+    public <T> FieldReader<T> createFieldReader(
+            Class objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            ObjectReader initReader,
+            String keyName,
+            BiConsumer arrayToMapDuplicateHandler
     ) {
         if (defaultValue instanceof String && fieldClass.isEnum()) {
             defaultValue = Enum.valueOf(fieldClass, (String) defaultValue);
@@ -2241,7 +2335,7 @@ public class ObjectReaderCreator {
 
                 if (actualTypeArguments.length == 2) {
                     if (finalField && ((features & JSONReader.Feature.FieldBased.mask) == 0)) {
-                        return new FieldReaderMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, field);
+                        return new FieldReaderMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, field, keyName, arrayToMapDuplicateHandler);
                     }
                 }
             }
@@ -2267,7 +2361,38 @@ public class ObjectReaderCreator {
                         ordinal,
                         features,
                         format,
-                        field);
+                        field,
+                        keyName,
+                        arrayToMapDuplicateHandler);
+            }
+
+            if (Map.class.isAssignableFrom(fieldClassResolved)) {
+                if ((features & FieldInfo.UNWRAPPED_MASK) != 0) {
+                    return new FieldReaderMapFieldReadOnly(fieldName,
+                            fieldTypeResolved,
+                            fieldClass,
+                            ordinal,
+                            features,
+                            format,
+                            field,
+                            keyName,
+                            arrayToMapDuplicateHandler
+                    );
+                }
+
+                return new FieldReaderMapField(
+                        fieldName,
+                        fieldTypeResolved,
+                        fieldClass,
+                        ordinal,
+                        features,
+                        format,
+                        locale,
+                        defaultValue,
+                        field,
+                        keyName,
+                        arrayToMapDuplicateHandler
+                );
             }
 
             return new FieldReaderObjectField(

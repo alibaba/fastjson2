@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
+import com.alibaba.fastjson2.function.BiConsumer;
 import com.alibaba.fastjson2.reader.ObjectReader;
 
 import java.lang.reflect.Constructor;
@@ -36,13 +37,34 @@ public class FieldInfo {
     public Locale locale;
     public String schema;
     public boolean required;
+    /**
+     * @since 2.0.52
+     */
+    public String arrayToMapKey;
+    public Class<?> arrayToMapDuplicateHandler;
 
     public ObjectReader getInitReader() {
-        if (readUsing != null && ObjectReader.class.isAssignableFrom(readUsing)) {
+        Class<?> calzz = readUsing;
+        if (calzz != null && ObjectReader.class.isAssignableFrom(calzz)) {
             try {
-                Constructor<?> constructor = readUsing.getDeclaredConstructor();
+                Constructor<?> constructor = calzz.getDeclaredConstructor();
                 constructor.setAccessible(true);
                 return (ObjectReader) constructor.newInstance();
+            } catch (Exception ignored) {
+                // ignored
+            }
+            return null;
+        }
+        return null;
+    }
+
+    public BiConsumer getInitArrayToMapDuplicateHandler() {
+        Class<?> clazz = arrayToMapDuplicateHandler;
+        if (clazz != null && BiConsumer.class.isAssignableFrom(clazz)) {
+            try {
+                Constructor<?> constructor = clazz.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (BiConsumer) constructor.newInstance();
             } catch (Exception ignored) {
                 // ignored
             }
@@ -68,5 +90,8 @@ public class FieldInfo {
         isTransient = false;
         defaultValue = null;
         locale = null;
+
+        arrayToMapKey = null;
+        arrayToMapDuplicateHandler = null;
     }
 }

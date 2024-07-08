@@ -91,6 +91,10 @@ public interface ObjectReader<T> {
         }
 
         T object = createInstance(0L);
+        return accept(object, map, features);
+    }
+
+    default T accept(T object, Map map, long features) {
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String entryKey = entry.getKey().toString();
             Object fieldValue = entry.getValue();
@@ -158,6 +162,15 @@ public interface ObjectReader<T> {
         }
 
         return fieldReader;
+    }
+
+    default boolean setFieldValue(Object object, String fieldName, Object value) {
+        FieldReader fieldReader = getFieldReader(fieldName);
+        if (fieldReader == null) {
+            return false;
+        }
+        fieldReader.accept(object, value);
+        return true;
     }
 
     default Function getBuildFunction() {

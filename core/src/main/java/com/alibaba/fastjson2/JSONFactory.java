@@ -6,8 +6,11 @@ import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.NameCacheEntry;
+import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -236,6 +239,16 @@ public final class JSONFactory {
         context.setArraySupplier(arraySupplier);
         context.config(features);
         return context;
+    }
+
+    public static ObjectReader getObjectReader(Type type, long features) {
+        return getDefaultObjectReaderProvider()
+                .getObjectReader(type, JSONReader.Feature.FieldBased.isEnabled(features));
+    }
+
+    public static ObjectWriter getObjectWriter(Type type, long features) {
+        return getDefaultObjectWriterProvider()
+                .getObjectWriter(type, TypeUtils.getClass(type), JSONWriter.Feature.FieldBased.isEnabled(features));
     }
 
     public static ObjectWriterProvider getDefaultObjectWriterProvider() {
