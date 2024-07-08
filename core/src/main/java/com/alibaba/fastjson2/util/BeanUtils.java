@@ -2449,6 +2449,13 @@ public abstract class BeanUtils {
                     }
                     break;
                 }
+                case "rootName": {
+                    String rootName = (String) result;
+                    if (!rootName.isEmpty()) {
+                        beanInfo.rootName = rootName;
+                    }
+                    break;
+                }
                 case "alphabetic": {
                     Boolean alphabetic = (Boolean) result;
                     if (!alphabetic.booleanValue()) {

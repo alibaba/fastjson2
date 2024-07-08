@@ -22,7 +22,7 @@ public abstract class ObjectReaderBean<T>
     protected final Supplier<T> creator;
     protected final Function buildFunction;
     protected final long features;
-    private String typeName;
+    protected String typeName;
     private long typeNameHash;
 
     protected FieldReader extraFieldReader;

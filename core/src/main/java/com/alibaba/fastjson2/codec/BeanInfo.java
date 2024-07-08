@@ -43,4 +43,5 @@ public class BeanInfo {
     public String objectWriterFieldName;
     public String objectReaderFieldName;
     public Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler;
+    public String rootName;
 }
