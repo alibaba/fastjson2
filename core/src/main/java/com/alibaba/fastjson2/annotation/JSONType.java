@@ -112,4 +112,14 @@ public @interface JSONType {
      * @since 2.0.50
      */
     boolean disableJSONB() default false;
+
+    /**
+     * Similar to {@code javax.xml.bind.annotation.XmlRootElement},
+     * used to indicate name to use for root-level wrapping, if wrapping is
+     * enabled. Annotation itself does not indicate that wrapping should
+     * be used; but if it is, the name used for serialization should be the
+     * name specified here, and deserializer will expect the name as well.
+     * @since 2.0.52
+     */
+    String rootName() default "";
 }

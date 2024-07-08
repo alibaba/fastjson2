@@ -1103,6 +1103,13 @@ public class ObjectReaderProvider {
                         }
                         break;
                     }
+                    case "rootName": {
+                        String rootName = (String) result;
+                        if (!rootName.isEmpty()) {
+                            beanInfo.rootName = rootName;
+                        }
+                        break;
+                    }
                     case "naming": {
                         Enum naming = (Enum) result;
                         beanInfo.namingStrategy = naming.name();

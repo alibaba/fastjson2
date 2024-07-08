@@ -655,7 +655,7 @@ public class ObjectReaderCreator {
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        return createObjectReader(objectClass, null, features, defaultCreator, buildFunction, fieldReaders);
+        return createObjectReader(objectClass, null, null, features, defaultCreator, buildFunction, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReader(
@@ -666,11 +666,45 @@ public class ObjectReaderCreator {
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
+        return createObjectReader(
+                objectClass,
+                typeKey,
+                null,
+                features,
+                defaultCreator,
+                buildFunction,
+                fieldReaders);
+    }
+
+    public <T> ObjectReader<T> createObjectReader(
+            Class<T> objectClass,
+            String typeKey,
+            String rootName,
+            long features,
+            Supplier<T> defaultCreator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
         if (objectClass != null) {
             int modifiers = objectClass.getModifiers();
             if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
                 return new ObjectReaderAdapter(objectClass, typeKey, null, features, defaultCreator, buildFunction, fieldReaders);
             }
+        }
+
+        if (rootName != null) {
+            return new ObjectReaderRootName(
+                    objectClass,
+                    typeKey,
+                    null,
+                    rootName,
+                    features,
+                    defaultCreator,
+                    buildFunction,
+                    null,
+                    null,
+                    null,
+                    fieldReaders);
         }
 
         switch (fieldReaders.length) {
@@ -1040,6 +1074,7 @@ public class ObjectReaderCreator {
         ObjectReader<T> objectReader = createObjectReader(
                 objectClass,
                 beanInfo.typeKey,
+                beanInfo.rootName,
                 beanInfo.readerFeatures,
                 creator,
                 null,
