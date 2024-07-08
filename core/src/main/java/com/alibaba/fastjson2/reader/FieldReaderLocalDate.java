@@ -1,0 +1,56 @@
+package com.alibaba.fastjson2.reader;
+
+import com.alibaba.fastjson2.JSONReader;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+
+final class FieldReaderLocalDate
+        extends FieldReaderObject {
+    public FieldReaderLocalDate(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            Method method,
+            Field field,
+            BiConsumer function
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, method, field, function);
+        initReader = ObjectReaderImplLocalDate.of(format, locale);
+    }
+
+    @Override
+    public ObjectReader getObjectReader(JSONReader jsonReader) {
+        return initReader;
+    }
+
+    @Override
+    public ObjectReader getObjectReader(JSONReader.Context context) {
+        return initReader;
+    }
+
+    @Override
+    public void readFieldValue(JSONReader jsonReader, Object object) {
+        LocalDate localDate;
+        // 若使用的是JSONReaderJSONB则使用JSONReaderJSONB定义的时间反序列化方法
+        if (jsonReader.jsonb) {
+            localDate = (LocalDate) initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        } else {
+            if (format != null) {
+                localDate = (LocalDate) initReader.readObject(jsonReader, fieldType, fieldName, features);
+            } else {
+                localDate = jsonReader.readLocalDate();
+            }
+        }
+        accept(object, localDate);
+    }
+}

@@ -2,14 +2,20 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.DateUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
+
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class FieldReaderDate<T>
         extends FieldReaderDateTimeCodec<T> {
@@ -46,12 +52,20 @@ final class FieldReaderDate<T>
 
     @Override
     protected void acceptNull(T object) {
-        accept(object, null);
+        accept(object, (Date) null);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        Date date = (Date) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        Date date;
+        try {
+            date = (Date) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        } catch (Exception e) {
+            if ((features & JSONReader.Feature.NullOnError.mask) == 0) {
+                throw e;
+            }
+            date = null;
+        }
         accept(object, date);
     }
 
@@ -76,7 +90,7 @@ final class FieldReaderDate<T>
         }
 
         if (fieldOffset != -1) {
-            JDKUtils.UNSAFE.putObject(object, fieldOffset, value);
+            UNSAFE.putObject(object, fieldOffset, value);
             return;
         }
 
@@ -88,13 +102,52 @@ final class FieldReaderDate<T>
     }
 
     @Override
+    protected void accept(T object, Instant instant) {
+        Date date = Date.from(instant);
+        accept(object, date);
+    }
+
+    @Override
     public void accept(T object, long value) {
         accept(object, new Date(value));
     }
 
     @Override
+    protected void accept(T object, ZonedDateTime zdt) {
+        long epochMilli = zdt.toInstant().toEpochMilli();
+        Date value = new Date(epochMilli);
+        accept(object, value);
+    }
+
+    @Override
+    protected Object apply(LocalDateTime ldt) {
+        ZoneOffset offset = DateUtils.DEFAULT_ZONE_ID.getRules().getOffset(ldt);
+        Instant instant = ldt.toInstant(offset);
+        return Date.from(instant);
+    }
+
+    @Override
+    protected void accept(T object, LocalDateTime ldt) {
+        ZoneOffset offset = DateUtils.DEFAULT_ZONE_ID.getRules().getOffset(ldt);
+        Instant instant = ldt.toInstant(offset);
+        Date value = Date.from(instant);
+        accept(object, value);
+    }
+
+    @Override
     protected Object apply(Date value) {
         return value;
+    }
+
+    @Override
+    protected Object apply(Instant instant) {
+        return Date.from(instant);
+    }
+
+    @Override
+    protected Object apply(ZonedDateTime zdt) {
+        Instant instant = zdt.toInstant();
+        return Date.from(instant);
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
@@ -1863,6 +1864,38 @@ public class ObjectReaderCreator {
             return new FieldReaderStringMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (String) defaultValue, method);
         }
 
+        if (fieldType == LocalDate.class) {
+            return new FieldReaderLocalDate(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    method,
+                    null,
+                    null
+            );
+        }
+
+        if (fieldType == OffsetDateTime.class) {
+            return new FieldReaderOffsetDateTime(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    method,
+                    null,
+                    null
+            );
+        }
+
         if (fieldType == UUID.class) {
             return new FieldReaderUUID(
                     fieldName,
@@ -2404,6 +2437,18 @@ public class ObjectReaderCreator {
                     format,
                     defaultValue,
                     field);
+        }
+
+        if (fieldClass == LocalDateTime.class) {
+            return new FieldReaderLocalDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, field, null, null);
+        }
+
+        if (fieldClass == ZonedDateTime.class) {
+            return new FieldReaderZonedDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, field, null, null);
+        }
+
+        if (fieldClass == Instant.class) {
+            return new FieldReaderInstant(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, field, null, null);
         }
 
         return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, field);

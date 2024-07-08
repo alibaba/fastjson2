@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.time.*;
 import java.util.Date;
 import java.util.Locale;
 
@@ -68,7 +69,19 @@ abstract class FieldReaderDateTimeCodec<T>
 
     protected abstract void acceptNull(T object);
 
+    protected abstract void accept(T object, Instant value);
+
+    protected abstract void accept(T object, LocalDateTime ldt);
+
+    protected abstract void accept(T object, ZonedDateTime zdt);
+
     protected abstract Object apply(Date value);
+
+    protected abstract Object apply(Instant value);
+
+    protected abstract Object apply(ZonedDateTime zdt);
+
+    protected abstract Object apply(LocalDateTime zdt);
 
     protected abstract Object apply(long millis);
 
@@ -100,8 +113,14 @@ abstract class FieldReaderDateTimeCodec<T>
 
         if (value instanceof Date) {
             accept(object, (Date) value);
+        } else if (value instanceof Instant) {
+            accept(object, (Instant) value);
         } else if (value instanceof Long) {
             accept(object, ((Long) value).longValue());
+        } else if (value instanceof LocalDateTime) {
+            accept(object, (LocalDateTime) value);
+        } else if (value instanceof ZonedDateTime) {
+            accept(object, (ZonedDateTime) value);
         } else {
             throw new JSONException("not support value " + value.getClass());
         }

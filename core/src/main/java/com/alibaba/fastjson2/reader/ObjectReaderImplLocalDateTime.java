@@ -29,6 +29,11 @@ class ObjectReaderImplLocalDateTime
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        // 若使用的是JSONReaderJSONB则使用JSONReaderJSONB定义的时间序反列化方法
+        if (jsonReader.jsonb) {
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         JSONReader.Context context = jsonReader.getContext();
 
         if (jsonReader.isInt()) {

@@ -3631,6 +3631,7 @@ public abstract class JSONReader
                         hasDay = true;
                         hasHour = true;
                         break;
+                    case "yyyyMMdd":
                     case "yyyy-MM-dd":
                         formatyyyyMMdd8 = true;
                         hasDay = true;
