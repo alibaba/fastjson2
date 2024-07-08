@@ -4083,4 +4083,15 @@ public class TypeUtils {
         int j = i >> eq | (Integer.signum(i & mask)) | sb;
         return signNum * Math.scalb((float) j, Q_MIN_F - 2);
     }
+
+    public static Type getMapValueType(Type fieldType) {
+        if (fieldType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) fieldType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (actualTypeArguments.length == 2) {
+                return actualTypeArguments[1];
+            }
+        }
+        return Object.class;
+    }
 }

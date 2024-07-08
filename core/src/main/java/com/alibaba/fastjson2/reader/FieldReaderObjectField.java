@@ -157,6 +157,7 @@ class FieldReaderObjectField<T>
                 return;
             }
         } else {
+            Class fieldClass = this.fieldClass;
             if (fieldClass.isPrimitive()) {
                 acceptPrimitive(object, value);
                 return;

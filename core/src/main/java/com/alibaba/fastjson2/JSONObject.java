@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONFactory.defaultObjectReaderProvider;
-import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 public class JSONObject
@@ -1231,14 +1230,8 @@ public class JSONObject
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Class<T> clazz, JSONReader.Feature... features) {
-        long featuresValue = 0L;
-        boolean fieldBased = false;
-        for (JSONReader.Feature feature : features) {
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-            featuresValue |= feature.mask;
-        }
+        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
+        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
 
         if (clazz == String.class) {
             return (T) toString();
@@ -1246,6 +1239,15 @@ public class JSONObject
 
         ObjectReader<T> objectReader = defaultObjectReaderProvider.getObjectReader(clazz, fieldBased);
         return objectReader.createInstance(this, featuresValue);
+    }
+
+    public void copyTo(Object object, JSONReader.Feature... features) {
+        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
+        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
+        Class clazz = object.getClass();
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        objectReader.accept(object, this, featuresValue);
     }
 
     /**

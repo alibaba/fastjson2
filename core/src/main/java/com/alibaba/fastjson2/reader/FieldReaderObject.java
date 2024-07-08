@@ -1,16 +1,18 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -172,7 +174,8 @@ public class FieldReaderObject<T>
         }
 
         if (initReader == null) {
-            initReader = context.getObjectReader(fieldType);
+            boolean fieldBased = (contextFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+            initReader = context.provider.getObjectReader(fieldType, fieldBased);
         }
 
         if (jsonReader.isReference()) {
@@ -305,5 +308,37 @@ public class FieldReaderObject<T>
         }
 
         jsonReader.skipValue();
+    }
+
+    static void arrayToMap(
+            Map object,
+            Collection values,
+            String keyName,
+            ObjectReader valueReader,
+            BiConsumer duplicateHandler
+    ) {
+        values.forEach(item -> {
+            Object key;
+            if (item instanceof Map) {
+                key = ((Map<?, ?>) item).get(keyName);
+            } else if (item != null) {
+                ObjectWriter itemWriter = JSONFactory.getObjectWriter(item.getClass(), 0);
+                key = itemWriter.getFieldValue(item, keyName);
+            } else {
+                throw new JSONException("key not found " + keyName);
+            }
+            Object mapValue;
+            if (valueReader.getObjectClass().isInstance(item)) {
+                mapValue = item;
+            } else if (item instanceof Map) {
+                mapValue = valueReader.createInstance((Map) item);
+            } else {
+                throw new JSONException("can not accept " + JSON.toJSONString(item, JSONWriter.Feature.ReferenceDetection));
+            }
+            Object origin = object.putIfAbsent(key, mapValue);
+            if (origin != null & duplicateHandler != null) {
+                duplicateHandler.accept(origin, mapValue);
+            }
+        });
     }
 }

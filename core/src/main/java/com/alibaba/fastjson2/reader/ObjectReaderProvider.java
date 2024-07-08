@@ -29,7 +29,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
@@ -1631,6 +1630,15 @@ public class ObjectReaderProvider {
         Class deserializeUsing = jsonField.deserializeUsing();
         if (ObjectReader.class.isAssignableFrom(deserializeUsing)) {
             fieldInfo.readUsing = deserializeUsing;
+        }
+
+        String keyName = jsonField.arrayToMapKey().trim();
+        if (!keyName.isEmpty()) {
+            fieldInfo.arrayToMapKey = keyName;
+        }
+        Class<?> arrayToMapDuplicateHandler = jsonField.arrayToMapDuplicateHandler();
+        if (arrayToMapDuplicateHandler != Void.class) {
+            fieldInfo.arrayToMapDuplicateHandler = arrayToMapDuplicateHandler;
         }
     }
 
