@@ -283,7 +283,7 @@ class FieldWriterEnum
         int size = IOUtils.stringSize(ordinal);
         char[] original = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + size);
         chars = Arrays.copyOf(original, original.length);
-        IOUtils.writeInt32(chars, 0, ordinal);
+        IOUtils.writeInt32(chars, nameWithColonUTF16.length, ordinal);
         return chars;
     }
 
