@@ -17,6 +17,7 @@ public class Issue2745 {
         assertEquals(BigDecimal.ONE, jsonArray.getBigDecimal(0));
         assertEquals(BigInteger.ONE, jsonArray.getBigInteger(0));
         assertEquals(Integer.valueOf(1), jsonArray.getInteger(0));
+        assertEquals(Long.valueOf(1), jsonArray.getLong(0));
     }
 
     @Test
@@ -26,5 +27,6 @@ public class Issue2745 {
         assertEquals(BigDecimal.ONE, obj.getBigDecimal("bool"));
         assertEquals(BigInteger.ONE, obj.getBigInteger("bool"));
         assertEquals(Integer.valueOf(1), obj.getInteger("bool"));
+        assertEquals(Long.valueOf(1), obj.getLong("bool"));
     }
 }
