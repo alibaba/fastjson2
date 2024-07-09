@@ -37,7 +37,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 public class ObjectReaderProvider {
     static ObjectReaderCachePair readerCache;
 
-    static class ObjectReaderCachePair {
+    private static final class ObjectReaderCachePair {
         final long hashCode;
         final ObjectReader reader;
         volatile int missCount;
@@ -889,7 +889,7 @@ public class ObjectReaderProvider {
         this.autoTypeBeforeHandler = autoTypeBeforeHandler;
     }
 
-    static final class LRUAutoTypeCache
+    private static final class LRUAutoTypeCache
             extends LinkedHashMap<String, Date> {
         private final int maxSize;
 
