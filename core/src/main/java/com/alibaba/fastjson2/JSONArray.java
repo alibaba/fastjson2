@@ -421,6 +421,10 @@ public class JSONArray
             return Long.parseLong(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? Long.valueOf(1) : Long.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Long");
     }
 
