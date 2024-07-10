@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.issues_2700;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.google.common.collect.Lists;
 import lombok.Data;
