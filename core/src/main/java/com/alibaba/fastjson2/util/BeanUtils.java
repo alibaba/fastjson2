@@ -1339,6 +1339,8 @@ public abstract class BeanUtils {
                     } else if (fieldName.regionMatches(0, methodName, prefix, fieldNameLength)) {
                         fields[1] = field;
                     }
+                } else if (boolean.class == field.getType() && methodName.equals(fieldName)) {
+                    fields[0] = field;
                 }
             });
         }
