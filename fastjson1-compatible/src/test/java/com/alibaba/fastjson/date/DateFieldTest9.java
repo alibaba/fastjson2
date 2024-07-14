@@ -15,6 +15,7 @@ public class DateFieldTest9 {
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
+        TimeZone.setDefault(JSON.defaultTimeZone);
     }
 
     @Test
