@@ -2432,6 +2432,8 @@ final class JSONReaderJSONB
             case BC_STR_ASCII_FIX_0:
             case BC_FALSE:
             case BC_TRUE:
+            case BC_DOUBLE_NUM_0:
+            case BC_DOUBLE_NUM_1:
                 return;
             case BC_INT8:
                 offset++;
