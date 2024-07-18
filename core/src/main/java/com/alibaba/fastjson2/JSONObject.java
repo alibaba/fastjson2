@@ -2019,45 +2019,41 @@ public class JSONObject
         return object;
     }
     
-	/**
-	 * Pack multiple key-value pairs as {@link JSONObject}
-	 *
-	 * <pre>
-	 * JSONObject jsonObject = JSONObject.of(Object... kvArray);
-	 * </pre>
-	 *
-	 * @param kvArray key-value
-	 * @since 2.0.53
-	 */
-	public static JSONObject of(Object... kvArray) {
-		if (kvArray == null || kvArray.length <= 0) {
-			throw new JSONException("The kvArray cannot be empty");
-		}
-		int kvArrayLength = kvArray.length;
-		if ((kvArrayLength & 1) == 1) {
-			throw new JSONException("The length of kvArray cannot be odd");
-		}
-		List<Object> keyList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 == 0).mapToObj(i -> kvArray[i])
-				.collect(Collectors.toList());
-		keyList.forEach(key -> {
-			if (key == null || !(key instanceof String)) {
-				throw new JSONException(
-						"The value corresponding to the even bit index of kvArray is key, which cannot be null and must be of type string");
-			}
-		});
-		List<Object> distinctKeyList = keyList.stream().distinct().collect(Collectors.toList());
-		if (keyList.size() != distinctKeyList.size()) {
-			throw new JSONException(
-					"The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
-		}
-		List<Object> valueList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 != 0).mapToObj(i -> kvArray[i])
-				.collect(Collectors.toList());
-		JSONObject object = new JSONObject(kvArrayLength / 2);
-		for (int i = 0; i < keyList.size(); i++) {
-			object.put(keyList.get(i).toString(), valueList.get(i));
-		}
-		return object;
-	}
+    /**
+     * Pack multiple key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of(Object... kvArray);
+     * </pre>
+     *
+     * @param kvArray key-value
+     * @since 2.0.53
+     */
+    public static JSONObject of(Object... kvArray) {
+        if (kvArray == null || kvArray.length <= 0) {
+            throw new JSONException("The kvArray cannot be empty");
+        }
+        int kvArrayLength = kvArray.length;
+        if ((kvArrayLength & 1) == 1) {
+            throw new JSONException("The length of kvArray cannot be odd");
+        }
+        List<Object> keyList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 == 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
+        keyList.forEach(key -> {
+            if (key == null || !(key instanceof String)) {
+                throw new JSONException("The value corresponding to the even bit index of kvArray is key, which cannot be null and must be of type string");
+            }
+        });
+        List<Object> distinctKeyList = keyList.stream().distinct().collect(Collectors.toList());
+        if (keyList.size() != distinctKeyList.size()) {
+            throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
+        }
+        List<Object> valueList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 != 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
+        JSONObject object = new JSONObject(kvArrayLength / 2);
+        for (int i = 0; i < keyList.size(); i++) {
+            object.put(keyList.get(i).toString(), valueList.get(i));
+        }
+        return object;
+    }
 
     /**
      * See {@link JSON#parseObject} for details
