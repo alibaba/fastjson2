@@ -71,14 +71,14 @@ import com.alibaba.fastjson2.JSONArray;
 </dependency>
 ```
 
-## 4. 常见问题
-## 4.1. ParserConfig.getGlobalInstance().addAccept()如何兼容
+## 3. 常见问题
+### 3.1. ParserConfig.getGlobalInstance().addAccept()如何兼容
 在2.x版本中，ParserConfig添加autoType白名单的功能在ObjectReaderProvider中提供，可以如下的方式配置autoType白名单。
 ```java
 JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.mycompany.xxx");
 ```
 
-## 4.2. ObjectSerializer 和 ObjectDeserializer 被移除了，有什么新的代替方案
+### 3.2. ObjectSerializer 和 ObjectDeserializer 被移除了，有什么新的代替方案
 FASTJSON v2中有比较完善的扩展机制，如下：
 * Annotation介绍 [https://alibaba.github.io/fastjson2/annotations_cn](https://alibaba.github.io/fastjson2/annotations_cn)
 * Annotation注入介绍 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
@@ -86,7 +86,7 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 * 使用Mixin注入Annotation定制序列化和反序列化 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
 * 实现ObjectWriter和ObjectReader实现定制序列化和反序列化 [https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn](https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn)
 
-## 4.3. 常见的类扩展升级映射
+### 3.3. 常见的类扩展升级映射
 | fastjson1                                                   | fastjson2                                             |
 |-------------------------------------------------------------|-------------------------------------------------------|
 | com.alibaba.fastjson.parser.ParserConfig                    | com.alibaba.fastjson2.reader.ObjectReaderProvider     |
@@ -107,7 +107,7 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 | com.alibaba.fastjson.parser.Feature                         | com.alibaba.fastjson2.JSONWriter.Feature              |
 
 
-## 4.4 SerializerFeature.UseISO8601DateFormat在fastjson2的替代方案
+### 3.4 SerializerFeature.UseISO8601DateFormat在fastjson2的替代方案
 
 fastjson2的JSONWriter.Feature没有和UseISO8601DateFormat的Feature，代替方法是使用format="iso8601"，如下：
 ```java
@@ -117,13 +117,13 @@ String format = "iso8601";
 JSON.toJSONString(obj, format);
 ```
 
-## 4.5 ## SerializerFeature.DisableCircularReferenceDetect在fastjson2的替代方案
+### 3.5 SerializerFeature.DisableCircularReferenceDetect在fastjson2的替代方案
 在fastjson2中，代替的是JSONWriter.Feature.ReferenceDetection，但语义相反，缺省不一样。fastjson2中的JSONWriter.Feature.ReferenceDetection缺省是关闭的，而fastjson1缺省是打开的。
 
-## 4.6 SerializerFeature.SortField在fastjson2的替代方案
+### 3.6 SerializerFeature.SortField在fastjson2的替代方案
 不需要，在fastjson2中，JSONObject继承自LinkedHashMap，不需要配置这个Feature
 
-## 4.7 SerializerFeature.WriteDateUseDateFormat在fastjson2的替代方案
+### 3.7 SerializerFeature.WriteDateUseDateFormat在fastjson2的替代方案
 在fastjson2中的缺省行为就是使用dateFormat，如果要修改为成和fastjson 1.x一样的行为，需要配置format = "millis"，如下：
 ```java
 import com.alibaba.fastjson2.JSON;
