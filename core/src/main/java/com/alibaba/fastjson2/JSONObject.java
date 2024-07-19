@@ -2048,7 +2048,7 @@ public class JSONObject
             throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
         }
         List<Object> valueList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 != 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
-        JSONObject object = new JSONObject(kvArrayLength / 4);
+        JSONObject object = new JSONObject(kvArrayLength / 2);
         for (int i = 0; i < keyList.size(); i++) {
             object.put(keyList.get(i).toString(), valueList.get(i));
         }
