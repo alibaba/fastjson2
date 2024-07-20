@@ -1,22 +1,13 @@
 package com.alibaba.fastjson2.issues_2600;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IEnum;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import org.junit.jupiter.api.Test;
-import sun.misc.VM;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -68,8 +59,6 @@ public class Issue2682 {
             return name;
         }
 
-        public static void test123() {
-        }
     }
 
 
