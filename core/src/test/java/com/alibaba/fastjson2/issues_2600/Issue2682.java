@@ -58,21 +58,17 @@ public class Issue2682 {
         public String getName() {
             return name;
         }
-
     }
-
 
     public enum RobotActEnum implements IEnum<String> {
         /**
          * 123啊
          */
         CARTON_SCAN("123啊", "我是123"),
-
         /**
          * 456啊
          */
         PALLET_ON_SHELF("456啊", "我是456"),
-
         /**
          * 789啊
          */
@@ -80,15 +76,12 @@ public class Issue2682 {
         /**
          *147啊
          */
-        GET_PICK_BILL("147啊", "我是147"),
-        ;
-
+        GET_PICK_BILL("147啊", "我是147");
 
         @JSONField(value = true)
         private final String value;
 
         private final String message;
-
 
         RobotActEnum(String value, String message) {
             this.value = value;
