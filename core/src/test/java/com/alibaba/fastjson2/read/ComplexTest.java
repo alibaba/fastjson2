@@ -113,6 +113,12 @@ public class ComplexTest {
             assertTrue(bean.functions.get("count").category.contains(Function.Category.Aggregate));
             assertTrue(bean.functions.get("count").category.contains(Function.Category.Window));
         }
+        {
+            Bean4 bean = new Bean4();
+            root.copyTo(bean);
+            assertEquals(2, bean.functions.size());
+            assertEquals(2, bean.functions.get("COUNT").category.size());
+        }
     }
 
     public static class Bean {
@@ -181,5 +187,10 @@ public class ComplexTest {
         public void accept(Function a, Function b) {
             a.category.addAll(b.category);
         }
+    }
+
+    public static class Bean4 {
+        @JSONField(arrayToMapKey = "name", format = "upper", arrayToMapDuplicateHandler = FunctionDuplicateHandler.class)
+        public Map<String, Function> functions;
     }
 }

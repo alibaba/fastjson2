@@ -161,4 +161,32 @@ public enum PropertyNamingStrategy {
 
         return new String(chars);
     }
+
+    public static PropertyNamingStrategy of(String strategy) {
+        if (strategy == null || strategy.isEmpty()) {
+            return null;
+        }
+
+        switch (strategy) {
+            case "Upper":
+            case "upper":
+                return UpperCase;
+            case "Lower":
+            case "lower":
+                return LowerCase;
+            case "Camel":
+            case "camel":
+                return CamelCase;
+            default:
+                break;
+        }
+
+        for (PropertyNamingStrategy value : values()) {
+            if (value.name().equals(strategy)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
 }

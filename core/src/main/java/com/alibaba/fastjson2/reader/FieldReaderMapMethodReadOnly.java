@@ -117,6 +117,7 @@ class FieldReaderMapMethodReadOnly<T>
             arrayToMap(map,
                     array,
                     arrayToMapKey,
+                    namingStrategy,
                     JSONFactory.getObjectReader(valueType, this.features | features),
                     arrayToMapDuplicateHandler);
             return;
@@ -145,6 +146,7 @@ class FieldReaderMapMethodReadOnly<T>
             arrayToMap(map,
                     (Collection) fieldValue,
                     arrayToMapKey,
+                    namingStrategy,
                     JSONFactory.getObjectReader(valueType, this.features | features),
                     arrayToMapDuplicateHandler);
             return;
