@@ -2921,6 +2921,8 @@ public class ObjectReaderCreatorASM
 
             if ("trim".equals(format)) {
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "trim", "()Ljava/lang/String;", false);
+            } else if ("upper".equals(format)) {
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "toUpperCase", "()Ljava/lang/String;", false);
             }
             mw.visitLabel(null_);
         } else if (fieldClass == Byte.class) {
