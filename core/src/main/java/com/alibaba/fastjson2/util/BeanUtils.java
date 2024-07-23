@@ -26,6 +26,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
  * @author Bob Lee
  * @author Jesse Wilson
  * @author Shaojin Wen
+ * @author poo0054
  */
 public abstract class BeanUtils {
     static final Type[] EMPTY_TYPE_ARRAY = new Type[]{};
@@ -797,7 +798,15 @@ public abstract class BeanUtils {
                 if (field != null && isJSONField(field)) {
                     if (valueMember == null) {
                         valueMember = method;
-                    } else if (!valueMember.getName().equals(method.getName())) {
+                    } else if (valueMember.getName().equals(method.getName())) {
+                        // Using Subclasses #2682
+                        if (valueMember instanceof Method) {
+                            Method valueMethod = (Method) valueMember;
+                            if (valueMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
+                                valueMember = method;
+                            }
+                        }
+                    } else {
                         // multi annotation
                         return null;
                     }
