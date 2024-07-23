@@ -10,19 +10,29 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 class FieldReaderStringField<T>
         extends FieldReaderObjectField<T> {
     final boolean trim;
+    final boolean upper;
     final boolean emptyToNull;
 
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
+        upper = "upper".equals(format);
         emptyToNull = (features & JSONReader.Feature.EmptyStringAsNull.mask) != 0;
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
+            if (emptyToNull && fieldValue.isEmpty()) {
+                fieldValue = null;
+            }
         }
 
         if (schema != null) {
@@ -35,8 +45,16 @@ class FieldReaderStringField<T>
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
+            if (emptyToNull && fieldValue.isEmpty()) {
+                fieldValue = null;
+            }
         }
 
         if (schema != null) {
@@ -68,12 +86,16 @@ class FieldReaderStringField<T>
             fieldValue = (String) value;
         }
 
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
-        }
-        // empty string to null
-        if (emptyToNull && fieldValue != null && fieldValue.isEmpty()) {
-            fieldValue = null;
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
+            if (emptyToNull && fieldValue.isEmpty()) {
+                fieldValue = null;
+            }
         }
         if (schema != null) {
             schema.assertValidate(fieldValue);
