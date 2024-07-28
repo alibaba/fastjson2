@@ -127,6 +127,10 @@ public class JSONObject
             val = map.get(key.toString());
         }
 
+        if (val instanceof com.alibaba.fastjson2.JSONObject) {
+            val = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) val);
+        }
+
         return val;
     }
 
