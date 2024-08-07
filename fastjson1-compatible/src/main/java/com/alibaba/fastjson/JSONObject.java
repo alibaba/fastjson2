@@ -131,6 +131,10 @@ public class JSONObject
             val = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) val);
         }
 
+        if (val instanceof com.alibaba.fastjson2.JSONArray) {
+            val = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) val);
+        }
+
         return val;
     }
 
