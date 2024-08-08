@@ -1125,6 +1125,7 @@ public abstract class BeanUtils {
                 case "com.fasterxml.jackson.annotation.JsonValue":
                 case "com.fasterxml.jackson.annotation.JsonRawValue":
                 case "com.fasterxml.jackson.annotation.JsonProperty":
+                case "com.fasterxml.jackson.annotation.JsonUnwrapped":
                     if (JSONFactory.isUseJacksonAnnotation()) {
                         return true;
                     }
