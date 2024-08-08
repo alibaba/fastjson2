@@ -693,12 +693,20 @@ public abstract class BeanUtils {
 
             Class<? extends Annotation> annotationType = annotation.annotationType();
             String name = annotationType.getName();
-            if ("com.alibaba.fastjson.annotation.JSONType".equals(name)) {
-                BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectWriterProvider());
-                BeanUtils.annotationMethods(annotationType, method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
-                if (beanInfo.writeEnumAsJavaBean) {
-                    return true;
-                }
+            BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectWriterProvider());
+            switch (name) {
+                case "com.alibaba.fastjson.annotation.JSONType":
+                    BeanUtils.annotationMethods(annotationType, method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
+                    break;
+                case "com.fasterxml.jackson.annotation.JsonFormat":
+                    boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
+                    if (useJacksonAnnotation) {
+                        processJacksonJsonFormat(beanInfo, annotation);
+                    }
+                    break;
+            }
+            if (beanInfo.writeEnumAsJavaBean) {
+                return true;
             }
         }
 
