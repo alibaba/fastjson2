@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue2851 {
     @Test
     public void test() {
-
         List<String> list = Arrays.asList("").subList(0, 1);
         byte[] bytes = JSONB.toBytes(list, JSONWriter.Feature.WriteClassName);
         JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter("java.util.");
