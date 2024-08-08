@@ -174,6 +174,9 @@ public final class ObjectReaderImplList
                     instanceClass = TreeSet.class;
                     builder = (Function<NavigableSet, NavigableSet>) Collections::synchronizedNavigableSet;
                     break;
+                case "java.util.AbstractList$RandomAccessSubList":
+                    instanceClass = ArrayList.class;
+                    break;
                 default:
                     instanceClass = listClass;
             }
