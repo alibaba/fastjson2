@@ -824,6 +824,10 @@ public class ObjectReaderProvider
                 if (typeArguments.length == 1 && ArrayList.class.isAssignableFrom(rawClass)) {
                     return ObjectReaderImplList.of(objectType, rawClass, 0);
                 }
+
+                if (typeArguments.length == 2 && Map.class.isAssignableFrom(rawClass)) {
+                    return ObjectReaderImplMap.of(objectType, (Class) rawType, 0);
+                }
             }
         }
 
