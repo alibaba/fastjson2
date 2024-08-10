@@ -238,6 +238,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.citygml4j</groupId>
+            <artifactId>citygml4j-core</artifactId>
+            <version>3.2.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.gitlab4j</groupId>
             <artifactId>gitlab4j-api</artifactId>
             <scope>test</scope>
