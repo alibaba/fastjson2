@@ -548,6 +548,15 @@ public class ObjectWriterProvider
                 || ((clazz.getModifiers() & ENUM) != 0 && clazz.getSuperclass() == Enum.class);
     }
 
+    /**
+     * @since 2.0.53
+     */
+    public void clear() {
+        mixInCache.clear();
+        cache.clear();
+        cacheFieldBased.clear();
+    }
+
     public void cleanup(Class objectClass) {
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
