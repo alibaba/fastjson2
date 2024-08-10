@@ -4946,6 +4946,29 @@ class JSONReaderUTF16
                         }
                     }
                 }
+
+                int nextQuoteOffset = -1;
+                for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+                    if (chars[i] == quote) {
+                        nextQuoteOffset = i;
+                    }
+                }
+                if (nextQuoteOffset != -1
+                        && nextQuoteOffset - offset > 10
+                        && chars[nextQuoteOffset - 6] == '-'
+                        && chars[nextQuoteOffset - 3] == '-'
+                ) {
+                    int year = TypeUtils.parseInt(chars, offset, nextQuoteOffset - offset - 6);
+                    int month = TypeUtils.parseInt(chars, nextQuoteOffset - 5, 2);
+                    int dayOfMonth = TypeUtils.parseInt(chars, nextQuoteOffset - 2, 2);
+                    LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+                    this.offset = nextQuoteOffset + 1;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return localDate;
+                }
             }
         }
         return super.readLocalDate();

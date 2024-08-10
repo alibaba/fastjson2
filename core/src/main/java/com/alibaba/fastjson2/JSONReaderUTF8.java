@@ -6048,6 +6048,29 @@ class JSONReaderUTF8
                         }
                     }
                 }
+
+                int nextQuoteOffset = -1;
+                for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+                    if (bytes[i] == quote) {
+                        nextQuoteOffset = i;
+                    }
+                }
+                if (nextQuoteOffset != -1
+                        && nextQuoteOffset - offset > 10
+                        && bytes[nextQuoteOffset - 6] == '-'
+                        && bytes[nextQuoteOffset - 3] == '-'
+                ) {
+                    int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
+                    int month = TypeUtils.parseInt(bytes, nextQuoteOffset - 5, 2);
+                    int dayOfMonth = TypeUtils.parseInt(bytes, nextQuoteOffset - 2, 2);
+                    LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+                    this.offset = nextQuoteOffset + 1;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return localDate;
+                }
             }
         }
         return super.readLocalDate();
