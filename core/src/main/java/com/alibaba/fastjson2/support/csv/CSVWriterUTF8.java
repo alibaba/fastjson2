@@ -219,6 +219,12 @@ final class CSVWriterUTF8
 
         String str = value.toString();
         int strlen = str.length();
+
+        int minCapacity = off + 24;
+        if (minCapacity - this.bytes.length > 0) {
+            flush();
+        }
+
         str.getBytes(0, strlen, bytes, off);
         off += strlen;
     }
