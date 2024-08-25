@@ -651,6 +651,9 @@ public abstract class JSONReader
     public abstract long readFieldNameHashCodeUnquote();
 
     public final String readFieldNameUnquote() {
+        if (ch == '/') {
+            skipComment();
+        }
         readFieldNameHashCodeUnquote();
         String name = getFieldName();
         if (name == null || name.equals("")) {
