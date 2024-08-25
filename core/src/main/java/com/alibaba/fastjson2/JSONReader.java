@@ -2265,6 +2265,9 @@ public abstract class JSONReader
                     name = getNumber();
                 } else {
                     name = readFieldNameUnquote();
+                    if (name == null || name.equals("")) {
+                        throw new JSONException(info("illegal input"));
+                    }
                 }
                 nextIfMatch(':');
             }
