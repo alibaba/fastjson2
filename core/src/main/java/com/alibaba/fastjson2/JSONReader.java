@@ -652,7 +652,11 @@ public abstract class JSONReader
 
     public final String readFieldNameUnquote() {
         readFieldNameHashCodeUnquote();
-        return getFieldName();
+        String name = getFieldName();
+        if (name == null || name.equals("")) {
+            throw new JSONException(info("illegal input"));
+        }
+        return name;
     }
 
     public abstract boolean skipName();
@@ -2265,9 +2269,6 @@ public abstract class JSONReader
                     name = getNumber();
                 } else {
                     name = readFieldNameUnquote();
-                    if (name == null || name.equals("")) {
-                        throw new JSONException(info("illegal input"));
-                    }
                 }
                 nextIfMatch(':');
             }
