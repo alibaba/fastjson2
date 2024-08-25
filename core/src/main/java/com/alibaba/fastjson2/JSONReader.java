@@ -2270,6 +2270,10 @@ public abstract class JSONReader
                 if (ch == '-' || (ch >= '0' && ch <= '9')) {
                     readNumber0();
                     name = getNumber();
+                } else if (ch == '{') {
+                    name = readObject();
+                } else if (ch == '[') {
+                    name = readArray();
                 } else {
                     name = readFieldNameUnquote();
                 }
