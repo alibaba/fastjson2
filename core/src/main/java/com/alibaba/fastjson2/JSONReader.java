@@ -2873,51 +2873,6 @@ public abstract class JSONReader
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
-
-                        if (exponent == 0) {
-                            if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                                switch (scale) {
-                                    case 1:
-                                    case 2:
-                                    case 3:
-                                    case 4:
-                                    case 5:
-                                    case 6:
-                                    case 7:
-                                    case 8:
-                                    case 9:
-                                    case 10:
-                                        return (float) (unscaledVal / DOUBLE_10_POW[scale]);
-                                    default:
-                                        break;
-                                }
-                            } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
-                                if (unscaledVal == 0) {
-                                    return DOUBLE_ZERO;
-                                }
-
-                                switch (scale) {
-                                    case 1:
-                                    case 2:
-                                    case 3:
-                                    case 4:
-                                    case 5:
-                                    case 6:
-                                    case 7:
-                                    case 8:
-                                    case 9:
-                                    case 10:
-                                    case 11:
-                                    case 12:
-                                    case 13:
-                                    case 14:
-                                    case 15:
-                                        return unscaledVal / DOUBLE_10_POW[scale];
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
                         decimal = BigDecimal.valueOf(unscaledVal, scale);
                     } else {
                         long v3 = mag3 & 0XFFFFFFFFL;
@@ -3008,24 +2963,15 @@ public abstract class JSONReader
 
                     int adjustedScale = scale - exponent;
                     decimal = new BigDecimal(bigInt, adjustedScale);
-
-                    if (exponent != 0) {
+                    if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
                         return decimal.doubleValue();
                     }
                 }
 
-                if (exponent != 0) {
+                if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
                     String decimalStr = decimal.toPlainString();
                     return Double.parseDouble(
                             decimalStr + "E" + exponent);
-                }
-
-                if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                    return decimal.floatValue();
-                }
-
-                if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
-                    return decimal.doubleValue();
                 }
 
                 return decimal;
