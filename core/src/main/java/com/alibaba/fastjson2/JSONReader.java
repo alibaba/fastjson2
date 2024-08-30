@@ -1974,7 +1974,7 @@ public abstract class JSONReader
     }
 
     public void read(Map object, long features) {
-        if (ch== '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
         }
         if ((ch == '"' || ch == '\'') && !typeRedirect) {
