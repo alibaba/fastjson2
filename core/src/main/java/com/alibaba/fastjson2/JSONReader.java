@@ -1974,6 +1974,9 @@ public abstract class JSONReader
     }
 
     public void read(Map object, long features) {
+        if (ch== '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if ((ch == '"' || ch == '\'') && !typeRedirect) {
             String str = readString();
             if (str.isEmpty()) {
@@ -4555,7 +4558,12 @@ public abstract class JSONReader
          *
          * @since 2.0.51
          */
-        UseLongForInts(1 << 30);
+        UseLongForInts(1 << 30),
+
+        /**
+         * Feature that disables the support for single quote.
+         */
+        DisableSingleQuote(1 << 31);
 
         public final long mask;
 
