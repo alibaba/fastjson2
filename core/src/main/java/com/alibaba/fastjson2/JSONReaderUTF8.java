@@ -2323,6 +2323,9 @@ class JSONReaderUTF8
     public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -3127,6 +3130,9 @@ class JSONReaderUTF8
     @Override
     public String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();
@@ -4693,6 +4699,9 @@ class JSONReaderUTF8
     @Override
     public final boolean skipName() {
         char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                 readFieldNameHashCodeUnquote();
