@@ -1209,6 +1209,7 @@ public class JSONTest {
         assertFalse(JSON.isValid("{", JSONReader.Feature.AllowUnQuotedFieldNames));
         assertFalse(JSON.isValid("\"", JSONReader.Feature.AllowUnQuotedFieldNames));
         assertFalse(JSON.isValid("'", JSONReader.Feature.AllowUnQuotedFieldNames));
+        assertFalse(JSON.isValid("'", JSONReader.Feature.DisableSingleQuote));
     }
 
     @Test

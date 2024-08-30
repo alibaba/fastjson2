@@ -55,7 +55,7 @@ class Model {
 | AllowUnQuotedFieldNames         | 支持不带双引号的字段名                                                                                         |
 | NonStringKeyAsString            | 非String类型的Key当做String处理                                                                             |
 | Base64StringAsByteArray         | 将byte[]序列化为Base64格式的字符串                                                                             |
-
+| DisableSingleQuote              | Do not allow single quote on key and value
 # 5. JSONWriter.Feature介绍
 
 | JSONWriter.Feature                | 介绍                                                                                    |
