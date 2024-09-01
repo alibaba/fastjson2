@@ -2977,6 +2977,10 @@ public abstract class JSONReader
                             decimalStr + "E" + exponent);
                 }
 
+                if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
+                    return decimal.doubleValue();
+                }
+
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
@@ -4562,8 +4566,14 @@ public abstract class JSONReader
 
         /**
          * Feature that disables the support for single quote.
+         * @since 2.0.53
          */
-        DisableSingleQuote(1 << 31);
+        DisableSingleQuote(1L << 31L),
+
+        /**
+         * @since 2.0.53
+         */
+        UseDoubleForDecimals(1L << 32L);
 
         public final long mask;
 
