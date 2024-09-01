@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +25,7 @@ public class Issue2901 {
         }
     }
 
+    @Test
     void test() {
         String str1 = "{\n" +
                 "\"user_name\":\"zs\"\n" +
