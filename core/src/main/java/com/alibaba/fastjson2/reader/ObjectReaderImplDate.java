@@ -144,7 +144,12 @@ public class ObjectReaderImplDate
                             int length = yyyyMMddhhmm16 ? 16 : 19;
                             ldt = DateUtils.parseLocalDateTime(str, 0, length);
                         } else {
-                            ldt = LocalDateTime.parse(str, formatter);
+                            if (formatHasDay) {
+                                ldt = LocalDateTime.parse(str, formatter);
+                            } else {
+                                LocalTime localTime = LocalTime.parse(str, formatter);
+                                ldt = LocalDateTime.of(LocalDate.MIN, localTime);
+                            }
                         }
                     }
                     zdt = ldt.atZone(jsonReader.getContext().getZoneId());
