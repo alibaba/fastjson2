@@ -75,10 +75,4 @@ public class UserDTO
     public void setModifyDate(LocalDateTime modifyDate) {
         this.modifyDate = modifyDate;
     }
-
-    @Override
-    public String toString() {
-        return "UserDTO [name=" + name + ", deposit=" + deposit + ", birthday=" + birthday + ", actDate=" + actDate
-                + ", createDate=" + createDate + ", modifyDate=" + modifyDate + "]";
-    }
 }

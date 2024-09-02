@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.51.01</version>
+    <version>2.0.52-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -136,14 +136,12 @@
 
     <distributionManagement>
         <repository>
-            <id>local-releases</id>
-            <name>Nexus Snapshots Repository Pro</name>
-            <url>http://192.168.2.200:8081/repository/maven-releases/</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <snapshotRepository>
-            <id>local-snapshots</id>
-            <name>Nexus Releases Repository Pro</name>
-            <url>http://192.168.2.200:8081/repository/maven-snapshots/</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
