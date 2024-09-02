@@ -31,7 +31,8 @@ public class InheritMethodWriterTest {
         String text = "{\"name\":\"rose\", \"url\":\"https://www.baidu.com/web/user\"}";
         UrlEntity entity = JSON.parseObject(text,UrlEntity.class);
         System.out.println(entity);
-        System.out.println(entity.getUrl());
+        assertEquals(entity.getName(), "rose");
+        assertEquals(entity.getUrl(), "https://www.baidu.com/web/user?name=rose");
     }
     
     public static abstract class AbstractJsonEntity {
