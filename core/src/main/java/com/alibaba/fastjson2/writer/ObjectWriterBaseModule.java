@@ -769,11 +769,12 @@ public class ObjectWriterBaseModule
             if (objectClass != null) {
                 Class superclass = objectClass.getSuperclass();
                 Method supperMethod = BeanUtils.getMethod(superclass, method);
+                boolean ignore = fieldInfo.ignore;
                 if (supperMethod != null) {
                     getFieldInfo(beanInfo, fieldInfo, superclass, supperMethod);
-                    boolean ignore = fieldInfo.ignore;
+                    Field field = BeanUtils.getField(objectClass, method);
                     int supperMethodModifiers = supperMethod.getModifiers();
-                    if (ignore != fieldInfo.ignore
+                    if (null != field && ignore != fieldInfo.ignore
                             && !Modifier.isAbstract(supperMethodModifiers)
                             && !supperMethod.equals(method)
                     ) {
