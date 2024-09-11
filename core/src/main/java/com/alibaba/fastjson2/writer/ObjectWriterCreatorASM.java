@@ -1001,7 +1001,7 @@ public class ObjectWriterCreatorASM
             int REF_PATH = mwc.var("REF_PATH");
             Label endDetect_ = new Label(), refSetPath_ = new Label();
 
-            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, endDetect_);
+            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, fieldWriter, i, endDetect_);
 
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -1117,7 +1117,7 @@ public class ObjectWriterCreatorASM
         if (!disableReferenceDetect) {
             Label endDetect_ = new Label(), refSetPath_ = new Label();
 
-            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, endDetect_);
+            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, fieldWriter, i, endDetect_);
 
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -1904,7 +1904,7 @@ public class ObjectWriterCreatorASM
             Label ignoreEmptyEnd_ = null;
             if ((fieldWriter.features & IgnoreEmpty.mask) == 0) {
                 ignoreEmptyEnd_ = new Label();
-                mwc.genIsEnabled(IgnoreEmpty.mask, ignoreEmptyEnd_);
+                mwc.genIsEnabled(IgnoreEmpty.mask, fieldWriter, i, ignoreEmptyEnd_);
             }
 
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -1937,7 +1937,7 @@ public class ObjectWriterCreatorASM
                 mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "(Ljava/lang/Object;)Z", false);
             } else {
-                mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, null);
+                mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, fieldWriter, i, null);
             }
             mw.visitInsn(Opcodes.DUP);
             mw.visitVarInsn(Opcodes.ISTORE, REF_DETECT);
@@ -1987,7 +1987,7 @@ public class ObjectWriterCreatorASM
 
         if (Object[].class.isAssignableFrom(fieldClass)) {
             Label notWriteEmptyArrayEnd_ = new Label();
-            mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
+            mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, fieldWriter, i, notWriteEmptyArrayEnd_);
 
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
             mw.visitTypeInsn(Opcodes.CHECKCAST, "[Ljava/lang/Object;");
@@ -2000,7 +2000,7 @@ public class ObjectWriterCreatorASM
         } else if (Collection.class.isAssignableFrom(fieldClass)) {
             Label notWriteEmptyArrayEnd_ = new Label();
             if ((features & NotWriteEmptyArray.mask) == 0) {
-                mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
+                mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, fieldWriter, i, notWriteEmptyArrayEnd_);
             }
 
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -2133,7 +2133,7 @@ public class ObjectWriterCreatorASM
                 nullFeatures |= WriteNullStringAsEmpty.mask;
                 nullFeatures |= NullAsDefaultValue.mask;
             }
-            mwc.genIsEnabled(nullFeatures, notNull_);
+            mwc.genIsEnabled(nullFeatures, fieldWriter, i, notNull_);
 //            mw.visitVarInsn(Opcodes.ILOAD, mwc.var(WRITE_NULLS));
 //            mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
         }
@@ -2211,7 +2211,7 @@ public class ObjectWriterCreatorASM
         Label ignoreEmptyEnd_ = null;
         if ((fieldWriter.features & IgnoreEmpty.mask) == 0) {
             ignoreEmptyEnd_ = new Label();
-            mwc.genIsEnabled(IgnoreEmpty.mask, ignoreEmptyEnd_);
+            mwc.genIsEnabled(IgnoreEmpty.mask, fieldWriter, i, ignoreEmptyEnd_);
         }
 
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -2225,7 +2225,7 @@ public class ObjectWriterCreatorASM
         if (!disableReferenceDetect) {
             Label endDetect_ = new Label(), refSetPath_ = new Label();
 
-            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, endDetect_);
+            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, fieldWriter, i, endDetect_);
 
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -2264,7 +2264,7 @@ public class ObjectWriterCreatorASM
 
         {
             Label notWriteEmptyArrayEnd_ = new Label();
-            mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
+            mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, fieldWriter, i, notWriteEmptyArrayEnd_);
 
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
             mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Collection", "isEmpty", "()Z", true);
@@ -2312,7 +2312,7 @@ public class ObjectWriterCreatorASM
         mw.visitJumpInsn(Opcodes.GOTO, notNull_);
 
         mw.visitLabel(null_);
-        mwc.genIsEnabled(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask, notNull_);
+        mwc.genIsEnabled(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask, fieldWriter, i, notNull_);
 
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
@@ -2405,6 +2405,8 @@ public class ObjectWriterCreatorASM
         if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
             mwc.genIsEnabled(
                     WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                    fieldWriter,
+                    i,
                     writeNullValue_,
                     endIfNull_
             );
@@ -2480,6 +2482,8 @@ public class ObjectWriterCreatorASM
 
         mwc.genIsEnabled(
                 WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                fieldWriter,
+                i,
                 writeNullValue_,
                 endIfNull_
         );
@@ -2541,6 +2545,8 @@ public class ObjectWriterCreatorASM
 
         mwc.genIsEnabled(
                 WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                fieldWriter,
+                i,
                 writeNullValue_,
                 endIfNull_
         );
@@ -2602,6 +2608,8 @@ public class ObjectWriterCreatorASM
 
         mwc.genIsEnabled(
                 WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                fieldWriter,
+                i,
                 writeNullValue_,
                 endIfNull_
         );
@@ -3461,7 +3469,7 @@ public class ObjectWriterCreatorASM
         Label ignoreEmptyEnd_ = null;
         if ((features & IgnoreEmpty.mask) == 0) {
             ignoreEmptyEnd_ = new Label();
-            mwc.genIsEnabled(IgnoreEmpty.mask, ignoreEmptyEnd_);
+            mwc.genIsEnabled(IgnoreEmpty.mask, fieldWriter, i, ignoreEmptyEnd_);
         }
 
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -3494,6 +3502,8 @@ public class ObjectWriterCreatorASM
         if ((features & (JSONWriter.Feature.WriteNulls.mask | defaultValueMask)) == 0) {
             mwc.genIsEnabled(
                     WriteNulls.mask | NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask,
+                    fieldWriter,
+                    i,
                     writeNull_,
                     endIfNull_
             );
@@ -3502,7 +3512,7 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(writeNull_);
 
         if (fieldWriter.defaultValue == null) {
-            mwc.genIsDisabled(NotWriteDefaultValue.mask, endIfNull_);
+            mwc.genIsDisabled(NotWriteDefaultValue.mask, fieldWriter, i, endIfNull_);
         }
 
         // writeFieldName(w);
@@ -4024,8 +4034,31 @@ public class ObjectWriterCreatorASM
             }
         }
 
-        void genIsDisabled(long features, Label elseLabel) {
-            mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
+        void genIsEnabled(long features, FieldWriter fieldWriter, int i, Label elseLabel) {
+            if (fieldWriter.features != 0 && fieldWriter.features != FieldBased.mask && fieldWriter.features != FieldInfo.FIELD_MASK) {
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
+                mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_WRITER, "features", "J");
+            } else {
+                mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
+            }
+            mw.visitLdcInsn(features);
+            mw.visitInsn(Opcodes.LAND);
+            mw.visitInsn(Opcodes.LCONST_0);
+            mw.visitInsn(Opcodes.LCMP);
+            if (elseLabel != null) {
+                mw.visitJumpInsn(Opcodes.IFEQ, elseLabel);
+            }
+        }
+
+        void genIsDisabled(long features, FieldWriter fieldWriter, int i, Label elseLabel) {
+            if (fieldWriter.features != 0 && fieldWriter.features != FieldBased.mask && fieldWriter.features != FieldInfo.FIELD_MASK) {
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
+                mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_WRITER, "features", "J");
+            } else {
+                mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
+            }
             mw.visitLdcInsn(features);
             mw.visitInsn(Opcodes.LAND);
             mw.visitInsn(Opcodes.LCONST_0);
@@ -4035,6 +4068,22 @@ public class ObjectWriterCreatorASM
 
         void genIsEnabled(long features, Label trueLabel, Label falseLabel) {
             mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(features);
+            mw.visitInsn(Opcodes.LAND);
+            mw.visitInsn(Opcodes.LCONST_0);
+            mw.visitInsn(Opcodes.LCMP);
+            mw.visitJumpInsn(Opcodes.IFEQ, falseLabel);
+            mw.visitJumpInsn(Opcodes.GOTO, trueLabel);
+        }
+
+        void genIsEnabled(long features, FieldWriter fieldWriter, int i, Label trueLabel, Label falseLabel) {
+            if (fieldWriter.features != 0 && fieldWriter.features != FieldBased.mask && fieldWriter.features != FieldInfo.FIELD_MASK) {
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
+                mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_WRITER, "features", "J");
+            } else {
+                mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
+            }
             mw.visitLdcInsn(features);
             mw.visitInsn(Opcodes.LAND);
             mw.visitInsn(Opcodes.LCONST_0);
