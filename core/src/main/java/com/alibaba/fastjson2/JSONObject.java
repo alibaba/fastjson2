@@ -2157,4 +2157,9 @@ public class JSONObject
     public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
         return (JSONObject) JSON.toJSON(obj, writeFeatures);
     }
+
+    public boolean isArray(Object key) {
+        Object object = super.get(key);
+        return object instanceof JSONArray || object != null && object.getClass().isArray();
+    }
 }
