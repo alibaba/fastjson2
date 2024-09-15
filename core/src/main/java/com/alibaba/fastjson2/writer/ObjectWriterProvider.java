@@ -8,10 +8,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.GuavaSupport;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -447,6 +444,8 @@ public class ObjectWriterProvider
             case "android.net.Uri$StringUri":
                 objectWriter = ObjectWriterImplToString.INSTANCE;
                 break;
+            case "com.clickhouse.data.value.UnsignedLong":
+                objectWriter = new ObjectWriterImplToString(true);
             default:
                 break;
         }
