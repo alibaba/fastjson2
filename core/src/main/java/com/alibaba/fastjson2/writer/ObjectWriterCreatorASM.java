@@ -1897,7 +1897,6 @@ public class ObjectWriterCreatorASM
         genGetObject(mwc, fieldWriter, i, OBJECT);
         mw.visitInsn(Opcodes.DUP);
         mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
-
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
 
         if (Map.class.isAssignableFrom(fieldClass)) {
@@ -2473,16 +2472,21 @@ public class ObjectWriterCreatorASM
         Label endIfNull_ = new Label(), notNull_ = new Label(), writeNullValue_ = new Label();
 
         genGetObject(mwc, fieldWriter, i, OBJECT);
-        mw.visitInsn(Opcodes.DUP);
-        mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
 
-        mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
+        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
 
-        mwc.genIsEnabled(
-                WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
-                writeNullValue_,
-                endIfNull_
-        );
+            mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
+
+            mwc.genIsEnabled(
+                    WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                    writeNullValue_,
+                    endIfNull_
+            );
+        } else {
+            mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
+        }
 
         mw.visitLabel(writeNullValue_);
 
@@ -2534,16 +2538,20 @@ public class ObjectWriterCreatorASM
         Label endIfNull_ = new Label(), notNull_ = new Label(), writeNullValue_ = new Label();
 
         genGetObject(mwc, fieldWriter, i, OBJECT);
-        mw.visitInsn(Opcodes.DUP);
-        mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
 
-        mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
+        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
+            mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
 
-        mwc.genIsEnabled(
-                WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
-                writeNullValue_,
-                endIfNull_
-        );
+            mwc.genIsEnabled(
+                    WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                    writeNullValue_,
+                    endIfNull_
+            );
+        } else {
+            mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
+        }
 
         mw.visitLabel(writeNullValue_);
 
