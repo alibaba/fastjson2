@@ -14,27 +14,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue2959 {
     @Test
     public void test() {
-        assertEquals("{\"projectNO\":null,\"orderNO\":null,\"orderType\":null,\"PN\":null,\"qty\":null,\"description\":null,\"customerCode\":null,\"customerName\":null,\"currency\":null,\"netPrice\":null,\"USD\":null,\"rate\":null,\"orderDate\":null,\"requestDate\":null,\"planedDate\":null,\"this$0\":null}",
+        assertEquals("{\"projectNO\":null,\"orderNO\":null,\"orderType\":null,\"pN\":null,\"qty\":null,\"description\":null,\"customerCode\":null,\"customerName\":null,\"currency\":null,\"netPrice\":null,\"uSD\":null,\"rate\":null,\"orderDate\":null,\"requestDate\":null,\"planedDate\":null,\"this$0\":null}",
                 JSON.toJSONString(new TobeDelivery(), JSONWriter.Feature.WriteNulls));
     }
 
     @Data
     @JSONType(alphabetic = false)
     public class TobeDelivery {
-        private String ProjectNO;
-        private String OrderNO;
-        private String OrderType;
-        private String PN;
-        private Integer Qty;
-        private String Description;
-        private String CustomerCode;
-        private String CustomerName;
-        private String Currency;
-        private BigDecimal NetPrice;
-        private BigDecimal USD;
-        private Float Rate;
-        private Date OrderDate;
-        private Date RequestDate;
-        private Date PlanedDate;
+        private String projectNO;
+        private String orderNO;
+        private String orderType;
+        private String pN;
+        private Integer qty;
+        private String description;
+        private String customerCode;
+        private String customerName;
+        private String currency;
+        private BigDecimal netPrice;
+        private BigDecimal uSD;
+        private Float rate;
+        private Date orderDate;
+        private Date requestDate;
+        private Date planedDate;
     }
 }
