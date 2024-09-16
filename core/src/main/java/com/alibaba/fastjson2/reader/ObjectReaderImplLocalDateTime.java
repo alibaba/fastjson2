@@ -37,10 +37,12 @@ class ObjectReaderImplLocalDateTime
         JSONReader.Context context = jsonReader.getContext();
 
         if (jsonReader.isInt()) {
-            DateTimeFormatter formatter = getDateFormatter();
-            if (formatter != null) {
-                String str = jsonReader.readString();
-                return LocalDateTime.parse(str, formatter);
+            if (!yyyyMMddhhmmss19 && !formatMillis && !formatISO8601 && !formatUnixTime) {
+                DateTimeFormatter formatter = getDateFormatter();
+                if (formatter != null) {
+                    String str = jsonReader.readString();
+                    return LocalDateTime.parse(str, formatter);
+                }
             }
 
             long millis = jsonReader.readInt64Value();

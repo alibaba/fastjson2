@@ -2301,6 +2301,7 @@ final class JSONReaderJSONB
             case BC_TIMESTAMP_MINUTES:
             case BC_FLOAT:
             case BC_INT64_INT:
+            case BC_LOCAL_DATE:
                 offset += 4;
                 return;
             case BC_FLOAT_INT:

@@ -5583,6 +5583,16 @@ public class DateUtils {
             S6 = c26;
             S7 = c27;
             S8 = c28;
+        } else if (str[offset + len - 15] == '-' && str[offset + len - 12] == '-'
+                && (str[offset + len - 9] == ' ' || str[offset + len - 9] == 'T')
+                && str[offset + len - 6] == ':' && str[offset + len - 3] == ':') {
+            int year = TypeUtils.parseInt(str, offset, len - 15);
+            int month = TypeUtils.parseInt(str, offset + len - 14, 2);
+            int dayOfMonth = TypeUtils.parseInt(str, offset + len - 11, 2);
+            int hour = TypeUtils.parseInt(str, offset + len - 8, 2);
+            int minute = TypeUtils.parseInt(str, offset + len - 5, 2);
+            int second = TypeUtils.parseInt(str, offset + len - 2, 2);
+            return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second);
         } else {
             return null;
         }
@@ -5717,6 +5727,16 @@ public class DateUtils {
             S6 = c26;
             S7 = c27;
             S8 = c28;
+        } else if (str[offset + len - 15] == '-' && str[offset + len - 12] == '-'
+                && (str[offset + len - 9] == ' ' || str[offset + len - 9] == 'T')
+                && str[offset + len - 6] == ':' && str[offset + len - 3] == ':') {
+            int year = TypeUtils.parseInt(str, offset, len - 15);
+            int month = TypeUtils.parseInt(str, offset + len - 14, 2);
+            int dayOfMonth = TypeUtils.parseInt(str, offset + len - 11, 2);
+            int hour = TypeUtils.parseInt(str, offset + len - 8, 2);
+            int minute = TypeUtils.parseInt(str, offset + len - 5, 2);
+            int second = TypeUtils.parseInt(str, offset + len - 2, 2);
+            return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second);
         } else {
             return null;
         }

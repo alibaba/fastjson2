@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.IOUtilsTest;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -19,8 +20,8 @@ public class JSONReaderFloatTest {
             double d0 = Double.parseDouble(str0);
             assertEquals(f0, JSON.parseObject(str0, Float.class));
             assertEquals(d0, JSON.parseObject(str0, Double.class));
-            assertEquals(f0, ((Float) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-            assertEquals(d0, ((Double) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+            assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+            assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
             for (int i1 = 0; i1 < 10; i1++) {
                 char c1 = (char) ('0' + i1);
@@ -31,8 +32,8 @@ public class JSONReaderFloatTest {
                 double d1 = Double.parseDouble(str1);
                 assertEquals(f1, JSON.parseObject(str1, Float.class));
                 assertEquals(d1, JSON.parseObject(str1, Double.class));
-                assertEquals(f1, ((Float) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                assertEquals(d1, ((Double) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                assertEquals(f1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                assertEquals(d1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                 for (int i2 = 0; i2 < 10; i2++) {
                     char c2 = (char) ('0' + i2);
@@ -43,8 +44,8 @@ public class JSONReaderFloatTest {
                     double d2 = Double.parseDouble(str2);
                     assertEquals(f2, JSON.parseObject(str2, Float.class));
                     assertEquals(d2, JSON.parseObject(str2, Double.class));
-                    assertEquals(f2, ((Float) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                    assertEquals(d2, ((Double) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                    assertEquals(f2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                    assertEquals(d2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                     for (int i3 = 0; i3 < 10; i3++) {
                         char c3 = (char) ('0' + i3);
@@ -55,8 +56,8 @@ public class JSONReaderFloatTest {
                         double d3 = Double.parseDouble(str3);
                         assertEquals(f3, JSON.parseObject(str3, Float.class));
                         assertEquals(d3, JSON.parseObject(str3, Double.class));
-                        assertEquals(f3, ((Float) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                        assertEquals(d3, ((Double) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                        assertEquals(f3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                        assertEquals(d3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                         for (int i4 = 0; i4 < 10; i4++) {
                             char c4 = (char) ('0' + i4);
@@ -67,8 +68,8 @@ public class JSONReaderFloatTest {
                             double d4 = Double.parseDouble(str4);
                             assertEquals(f4, JSON.parseObject(str4, Float.class));
                             assertEquals(d4, JSON.parseObject(str4, Double.class));
-                            assertEquals(f4, ((Float) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                            assertEquals(d4, ((Double) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                            assertEquals(f4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                            assertEquals(d4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
                         }
                     }
                 }
@@ -95,8 +96,8 @@ public class JSONReaderFloatTest {
             double d0 = Double.parseDouble(str0);
             assertEquals(f0, JSON.parseObject(str0, Float.class));
             assertEquals(d0, JSON.parseObject(str0, Double.class));
-            assertEquals(f0, ((Float) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-            assertEquals(d0, ((Double) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+            assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+            assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
             for (int i1 = 0; i1 < 10; i1++) {
                 char c1 = (char) ('0' + i1);
@@ -107,8 +108,8 @@ public class JSONReaderFloatTest {
                 double d1 = Double.parseDouble(str1);
                 assertEquals(f1, JSON.parseObject(str1, Float.class));
                 assertEquals(d1, JSON.parseObject(str1, Double.class));
-                assertEquals(f1, ((Float) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                assertEquals(d1, ((Double) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                assertEquals(f1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                assertEquals(d1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                 for (int i2 = 0; i2 < 10; i2++) {
                     char c2 = (char) ('0' + i2);
@@ -119,8 +120,8 @@ public class JSONReaderFloatTest {
                     double d2 = Double.parseDouble(str2);
                     assertEquals(f2, JSON.parseObject(str2, Float.class));
                     assertEquals(d2, JSON.parseObject(str2, Double.class));
-                    assertEquals(f2, ((Float) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                    assertEquals(d2, ((Double) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                    assertEquals(f2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                    assertEquals(d2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                     for (int i3 = 0; i3 < 10; i3++) {
                         char c3 = (char) ('0' + i3);
@@ -131,8 +132,8 @@ public class JSONReaderFloatTest {
                         double d3 = Double.parseDouble(str3);
                         assertEquals(f3, JSON.parseObject(str3, Float.class));
                         assertEquals(d3, JSON.parseObject(str3, Double.class));
-                        assertEquals(f3, ((Float) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                        assertEquals(d3, ((Double) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                        assertEquals(f3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                        assertEquals(d3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                         for (int i4 = 0; i4 < 10; i4++) {
                             char c4 = (char) ('0' + i4);
@@ -143,8 +144,8 @@ public class JSONReaderFloatTest {
                             double d4 = Double.parseDouble(str4);
                             assertEquals(f4, JSON.parseObject(str4, Float.class));
                             assertEquals(d4, JSON.parseObject(str4, Double.class));
-                            assertEquals(f4, ((Float) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                            assertEquals(d4, ((Double) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                            assertEquals(f4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                            assertEquals(d4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
                         }
                     }
                 }
@@ -171,8 +172,8 @@ public class JSONReaderFloatTest {
             double d0 = Double.parseDouble(str0);
             assertEquals(f0, JSON.parseObject(str0, Float.class));
             assertEquals(d0, JSON.parseObject(str0, Double.class));
-            assertEquals(f0, ((Float) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-            assertEquals(d0, ((Double) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+            assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+            assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
             for (int i1 = 0; i1 < 10; i1++) {
                 char c1 = (char) ('0' + i1);
@@ -183,8 +184,8 @@ public class JSONReaderFloatTest {
                 double d1 = Double.parseDouble(str1);
                 assertEquals(f1, JSON.parseObject(str1, Float.class));
                 assertEquals(d1, JSON.parseObject(str1, Double.class));
-                assertEquals(f1, ((Float) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                assertEquals(d1, ((Double) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                assertEquals(f1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                assertEquals(d1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                 for (int i2 = 0; i2 < 10; i2++) {
                     char c2 = (char) ('0' + i2);
@@ -195,8 +196,8 @@ public class JSONReaderFloatTest {
                     double d2 = Double.parseDouble(str2);
                     assertEquals(f2, JSON.parseObject(str2, Float.class));
                     assertEquals(d2, JSON.parseObject(str2, Double.class));
-                    assertEquals(f2, ((Float) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                    assertEquals(d2, ((Double) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                    assertEquals(f2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                    assertEquals(d2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                     for (int i3 = 0; i3 < 10; i3++) {
                         char c3 = (char) ('0' + i3);
@@ -207,8 +208,8 @@ public class JSONReaderFloatTest {
                         double d3 = Double.parseDouble(str3);
                         assertEquals(f3, JSON.parseObject(str3, Float.class));
                         assertEquals(d3, JSON.parseObject(str3, Double.class));
-                        assertEquals(f3, ((Float) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                        assertEquals(d3, ((Double) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                        assertEquals(f3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                        assertEquals(d3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                         for (int i4 = 0; i4 < 10; i4++) {
                             char c4 = (char) ('0' + i4);
@@ -219,8 +220,8 @@ public class JSONReaderFloatTest {
                             double d4 = Double.parseDouble(str4);
                             assertEquals(f4, JSON.parseObject(str4, Float.class));
                             assertEquals(d4, JSON.parseObject(str4, Double.class));
-                            assertEquals(f4, ((Float) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                            assertEquals(d4, ((Double) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                            assertEquals(f4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                            assertEquals(d4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
                         }
                     }
                 }
@@ -247,8 +248,8 @@ public class JSONReaderFloatTest {
             double d0 = Double.parseDouble(str0);
             assertEquals(f0, JSON.parseObject(str0, Float.class));
             assertEquals(d0, JSON.parseObject(str0, Double.class));
-            assertEquals(f0, ((Float) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-            assertEquals(d0, ((Double) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+            assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+            assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
             for (int i1 = 0; i1 < 10; i1++) {
                 char c1 = (char) ('0' + i1);
@@ -259,8 +260,8 @@ public class JSONReaderFloatTest {
                 double d1 = Double.parseDouble(str1);
                 assertEquals(f1, JSON.parseObject(str1, Float.class));
                 assertEquals(d1, JSON.parseObject(str1, Double.class));
-                assertEquals(f1, ((Float) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                assertEquals(d1, ((Double) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                assertEquals(f1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                assertEquals(d1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                 for (int i2 = 0; i2 < 10; i2++) {
                     char c2 = (char) ('0' + i2);
@@ -271,8 +272,8 @@ public class JSONReaderFloatTest {
                     double d2 = Double.parseDouble(str2);
                     assertEquals(f2, JSON.parseObject(str2, Float.class));
                     assertEquals(d2, JSON.parseObject(str2, Double.class));
-                    assertEquals(f2, ((Float) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                    assertEquals(d2, ((Double) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                    assertEquals(f2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                    assertEquals(d2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                     for (int i3 = 0; i3 < 10; i3++) {
                         char c3 = (char) ('0' + i3);
@@ -283,8 +284,8 @@ public class JSONReaderFloatTest {
                         double d3 = Double.parseDouble(str3);
                         assertEquals(f3, JSON.parseObject(str3, Float.class));
                         assertEquals(d3, JSON.parseObject(str3, Double.class));
-                        assertEquals(f3, ((Float) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                        assertEquals(d3, ((Double) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                        assertEquals(f3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                        assertEquals(d3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                         for (int i4 = 0; i4 < 10; i4++) {
                             char c4 = (char) ('0' + i4);
@@ -295,8 +296,8 @@ public class JSONReaderFloatTest {
                             double d4 = Double.parseDouble(str4);
                             assertEquals(f4, JSON.parseObject(str4, Float.class));
                             assertEquals(d4, JSON.parseObject(str4, Double.class));
-                            assertEquals(f4, ((Float) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                            assertEquals(d4, ((Double) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                            assertEquals(f4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                            assertEquals(d4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
                         }
                     }
                 }
@@ -323,8 +324,8 @@ public class JSONReaderFloatTest {
             double d0 = Double.parseDouble(str0);
             assertEquals(f0, JSON.parseObject(str0, Float.class));
             assertEquals(d0, JSON.parseObject(str0, Double.class));
-            assertEquals(f0, ((Float) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-            assertEquals(d0, ((Double) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+            assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+            assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
             for (int i1 = 0; i1 < 10; i1++) {
                 char c1 = (char) ('0' + i1);
@@ -335,8 +336,8 @@ public class JSONReaderFloatTest {
                 double d1 = Double.parseDouble(str1);
                 assertEquals(f1, JSON.parseObject(str1, Float.class));
                 assertEquals(d1, JSON.parseObject(str1, Double.class));
-                assertEquals(f1, ((Float) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                assertEquals(d1, ((Double) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                assertEquals(f1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                assertEquals(d1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                 for (int i2 = 0; i2 < 10; i2++) {
                     char c2 = (char) ('0' + i2);
@@ -347,8 +348,8 @@ public class JSONReaderFloatTest {
                     double d2 = Double.parseDouble(str2);
                     assertEquals(f2, JSON.parseObject(str2, Float.class));
                     assertEquals(d2, JSON.parseObject(str2, Double.class));
-                    assertEquals(f2, ((Float) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                    assertEquals(d2, ((Double) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                    assertEquals(f2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                    assertEquals(d2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                     for (int i3 = 0; i3 < 10; i3++) {
                         char c3 = (char) ('0' + i3);
@@ -359,8 +360,8 @@ public class JSONReaderFloatTest {
                         double d3 = Double.parseDouble(str3);
                         assertEquals(f3, JSON.parseObject(str3, Float.class));
                         assertEquals(d3, JSON.parseObject(str3, Double.class));
-                        assertEquals(f3, ((Float) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                        assertEquals(d3, ((Double) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                        assertEquals(f3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                        assertEquals(d3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                         for (int i4 = 0; i4 < 10; i4++) {
                             char c4 = (char) ('0' + i4);
@@ -371,8 +372,8 @@ public class JSONReaderFloatTest {
                             double d4 = Double.parseDouble(str4);
                             assertEquals(f4, JSON.parseObject(str4, Float.class));
                             assertEquals(d4, JSON.parseObject(str4, Double.class));
-                            assertEquals(f4, ((Float) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                            assertEquals(d4, ((Double) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                            assertEquals(f4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                            assertEquals(d4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
                         }
                     }
                 }
@@ -409,8 +410,8 @@ public class JSONReaderFloatTest {
             double d0 = Double.parseDouble(str0);
             assertEquals(f0, JSON.parseObject(str0, Float.class));
             assertEquals(d0, JSON.parseObject(str0, Double.class));
-            assertEquals(f0, ((Float) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-            assertEquals(d0, ((Double) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+            assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+            assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
             for (int i1 = 0; i1 < 10; i1++) {
                 char c1 = (char) ('0' + i1);
@@ -421,8 +422,8 @@ public class JSONReaderFloatTest {
                 double d1 = Double.parseDouble(str1);
                 assertEquals(f1, JSON.parseObject(str1, Float.class));
                 assertEquals(d1, JSON.parseObject(str1, Double.class));
-                assertEquals(f1, ((Float) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                assertEquals(d1, ((Double) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                assertEquals(f1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                assertEquals(d1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                 for (int i2 = 0; i2 < 10; i2++) {
                     char c2 = (char) ('0' + i2);
@@ -433,8 +434,8 @@ public class JSONReaderFloatTest {
                     double d2 = Double.parseDouble(str2);
                     assertEquals(f2, JSON.parseObject(str2, Float.class));
                     assertEquals(d2, JSON.parseObject(str2, Double.class));
-                    assertEquals(f2, ((Float) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                    assertEquals(d2, ((Double) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                    assertEquals(f2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                    assertEquals(d2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                     for (int i3 = 0; i3 < 10; i3++) {
                         char c3 = (char) ('0' + i3);
@@ -445,8 +446,8 @@ public class JSONReaderFloatTest {
                         double d3 = Double.parseDouble(str3);
                         assertEquals(f3, JSON.parseObject(str3, Float.class));
                         assertEquals(d3, JSON.parseObject(str3, Double.class));
-                        assertEquals(f3, ((Float) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                        assertEquals(d3, ((Double) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                        assertEquals(f3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                        assertEquals(d3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                         for (int i4 = 0; i4 < 10; i4++) {
                             char c4 = (char) ('0' + i4);
@@ -457,8 +458,8 @@ public class JSONReaderFloatTest {
                             double d4 = Double.parseDouble(str4);
                             assertEquals(f4, JSON.parseObject(str4, Float.class));
                             assertEquals(d4, JSON.parseObject(str4, Double.class));
-                            assertEquals(f4, ((Float) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                            assertEquals(d4, ((Double) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                            assertEquals(f4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                            assertEquals(d4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
                         }
                     }
                 }
@@ -485,8 +486,8 @@ public class JSONReaderFloatTest {
             double d0 = Double.parseDouble(str0);
             assertEquals(f0, JSON.parseObject(str0, Float.class));
             assertEquals(d0, JSON.parseObject(str0, Double.class));
-            assertEquals(f0, ((Float) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-            assertEquals(d0, ((Double) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+            assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+            assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
             for (int i1 = 0; i1 < 10; i1++) {
                 char c1 = (char) ('0' + i1);
@@ -497,8 +498,8 @@ public class JSONReaderFloatTest {
                 double d1 = Double.parseDouble(str1);
                 assertEquals(f1, JSON.parseObject(str1, Float.class));
                 assertEquals(d1, JSON.parseObject(str1, Double.class));
-                assertEquals(f1, ((Float) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                assertEquals(d1, ((Double) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                assertEquals(f1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                assertEquals(d1, ((BigDecimal) JSON.parse(str1, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                 for (int i2 = 0; i2 < 10; i2++) {
                     char c2 = (char) ('0' + i2);
@@ -509,8 +510,8 @@ public class JSONReaderFloatTest {
                     double d2 = Double.parseDouble(str2);
                     assertEquals(f2, JSON.parseObject(str2, Float.class));
                     assertEquals(d2, JSON.parseObject(str2, Double.class));
-                    assertEquals(f2, ((Float) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                    assertEquals(d2, ((Double) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                    assertEquals(f2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                    assertEquals(d2, ((BigDecimal) JSON.parse(str2, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                     for (int i3 = 0; i3 < 10; i3++) {
                         char c3 = (char) ('0' + i3);
@@ -521,8 +522,8 @@ public class JSONReaderFloatTest {
                         double d3 = Double.parseDouble(str3);
                         assertEquals(f3, JSON.parseObject(str3, Float.class));
                         assertEquals(d3, JSON.parseObject(str3, Double.class));
-                        assertEquals(f3, ((Float) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                        assertEquals(d3, ((Double) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                        assertEquals(f3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                        assertEquals(d3, ((BigDecimal) JSON.parse(str3, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
 
                         for (int i4 = 0; i4 < 10; i4++) {
                             char c4 = (char) ('0' + i4);
@@ -533,8 +534,8 @@ public class JSONReaderFloatTest {
                             double d4 = Double.parseDouble(str4);
                             assertEquals(f4, JSON.parseObject(str4, Float.class));
                             assertEquals(d4, JSON.parseObject(str4, Double.class));
-                            assertEquals(f4, ((Float) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
-                            assertEquals(d4, ((Double) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
+                            assertEquals(f4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
+                            assertEquals(d4, ((BigDecimal) JSON.parse(str4, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());
                         }
                     }
                 }
@@ -550,7 +551,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtilsTest.getChars(i, len + 2, chars);
+            IOUtils.getChars(i, len + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + 2);
 
             String str = new String(chars, 0, len + 2);
@@ -572,7 +573,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtilsTest.getChars(i, len + off + 2, chars);
+            IOUtils.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -594,7 +595,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtilsTest.getChars(i, len + off + 2, chars);
+            IOUtils.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -616,7 +617,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtilsTest.getChars(i, len + off + 2, chars);
+            IOUtils.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -638,7 +639,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtilsTest.getChars(i, len + off + 2, chars);
+            IOUtils.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);

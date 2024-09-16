@@ -817,15 +817,19 @@ public abstract class BeanUtils {
 
         Class[] interfaces = enumClass.getInterfaces();
 
-        Member member = null;
         Method[] methods = methodCache.get(enumClass);
         if (methods == null) {
             methods = enumClass.getMethods();
-            methodCache.put(enumClass, methods);
+            methodCache.putIfAbsent(enumClass, methods);
         }
 
+        Member valueMember = null;
         for (Method method : methods) {
             if (method.getReturnType() == Void.class) {
+                continue;
+            }
+
+            if (method.getParameterCount() != 0) {
                 continue;
             }
 
@@ -835,11 +839,7 @@ public abstract class BeanUtils {
             }
 
             String methodName = method.getName();
-            if (methodName.equals("values")) {
-                continue;
-            }
-
-            if (method.getParameterCount() != 0) {
+            if ("values".equals(methodName)) {
                 continue;
             }
 
@@ -847,11 +847,25 @@ public abstract class BeanUtils {
                 return method;
             }
 
-            if (methodName.startsWith("get", 0)) {
+            if (methodName.startsWith("get")) {
                 String fieldName = BeanUtils.getterName(methodName, null);
                 Field field = BeanUtils.getDeclaredField(enumClass, fieldName);
                 if (field != null && isJSONField(field)) {
-                    return method;
+                    if (valueMember == null) {
+                        valueMember = method;
+                    } else if (valueMember.getName().equals(method.getName())) {
+                        // Using Subclasses #2682
+                        if (valueMember instanceof Method) {
+                            Method valueMethod = (Method) valueMember;
+                            if (valueMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
+                                valueMember = method;
+                            }
+                        }
+                    } else {
+                        // multi annotation
+                        return null;
+                    }
+                    continue;
                 }
             }
 
@@ -886,16 +900,26 @@ public abstract class BeanUtils {
             }
             Member refMember = memberRef.get();
             if (refMember != null) {
-                return refMember;
+                if (valueMember == null) {
+                    valueMember = refMember;
+                } else if (!valueMember.getName().equals(refMember.getName())) {
+                    // multi annotation
+                    return null;
+                }
             }
+        }
+
+        if (valueMember != null) {
+            return valueMember;
         }
 
         Field[] fields = fieldCache.get(enumClass);
         if (fields == null) {
             fields = enumClass.getFields();
-            fieldCache.put(enumClass, fields);
+            fieldCache.putIfAbsent(enumClass, fields);
         }
 
+        Member member = null;
         Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
         for (Field field : fields) {
             boolean found = false;

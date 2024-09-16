@@ -46,6 +46,7 @@ public class JSONTest {
     public void test_isValidArray_0() {
         assertTrue(JSON.isValidArray("[]"));
         assertFalse(JSON.isValidArray("{}"));
+        assertFalse(JSON.isValid("'", JSONReader.Feature.DisableSingleQuote));
     }
 
     @Test

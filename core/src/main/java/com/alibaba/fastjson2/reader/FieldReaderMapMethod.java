@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
@@ -16,6 +17,7 @@ import java.util.function.BiConsumer;
 public class FieldReaderMapMethod<T>
         extends FieldReaderObject<T> {
     protected final String arrayToMapKey;
+    protected final PropertyNamingStrategy namingStrategy;
     protected final Type valueType;
     protected final BiConsumer arrayToMapDuplicateHandler;
 
@@ -37,6 +39,7 @@ public class FieldReaderMapMethod<T>
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, method, field, function);
         this.valueType = TypeUtils.getMapValueType(fieldType);
         this.arrayToMapKey = arrayToMapKey;
+        this.namingStrategy = PropertyNamingStrategy.of(format);
         this.arrayToMapDuplicateHandler = arrayToMapDuplicateHandler;
     }
 
@@ -47,6 +50,7 @@ public class FieldReaderMapMethod<T>
             arrayToMap(map,
                     (Collection) fieldValue,
                     arrayToMapKey,
+                    namingStrategy,
                     JSONFactory.getObjectReader(valueType, this.features | features),
                     arrayToMapDuplicateHandler);
             accept(object, map);
@@ -65,6 +69,7 @@ public class FieldReaderMapMethod<T>
             arrayToMap(map,
                     array,
                     arrayToMapKey,
+                    namingStrategy,
                     JSONFactory.getObjectReader(valueType, this.features | features),
                     arrayToMapDuplicateHandler);
             accept(object, map);

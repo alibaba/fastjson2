@@ -314,6 +314,7 @@ public class FieldReaderObject<T>
             Map object,
             Collection values,
             String keyName,
+            PropertyNamingStrategy namingStrategy,
             ObjectReader valueReader,
             BiConsumer duplicateHandler
     ) {
@@ -326,6 +327,9 @@ public class FieldReaderObject<T>
                 key = itemWriter.getFieldValue(item, keyName);
             } else {
                 throw new JSONException("key not found " + keyName);
+            }
+            if (namingStrategy != null && key instanceof String) {
+                key = namingStrategy.fieldName((String) key);
             }
             Object mapValue;
             if (valueReader.getObjectClass().isInstance(item)) {

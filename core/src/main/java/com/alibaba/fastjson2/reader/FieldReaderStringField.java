@@ -12,10 +12,12 @@ class FieldReaderStringField<T>
     final boolean trim;
     final boolean emptyToNull;
     final long fieldOffset;
+    final boolean upper;
 
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, null, field);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
+        upper = "upper".equals(format);
         fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
         emptyToNull = (features & JSONReader.Feature.EmptyStringAsNull.mask) != 0;
     }
@@ -23,8 +25,16 @@ class FieldReaderStringField<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
+            if (emptyToNull && fieldValue.isEmpty()) {
+                fieldValue = null;
+            }
         }
 
         UNSAFE.putObject(object, fieldOffset, fieldValue);
@@ -33,8 +43,16 @@ class FieldReaderStringField<T>
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
+            if (emptyToNull && fieldValue.isEmpty()) {
+                fieldValue = null;
+            }
         }
         // empty string to null
         if (emptyToNull && fieldValue != null && fieldValue.isEmpty()) {
@@ -69,8 +87,16 @@ class FieldReaderStringField<T>
             fieldValue = (String) value;
         }
 
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
+            if (emptyToNull && fieldValue.isEmpty()) {
+                fieldValue = null;
+            }
         }
 
         UNSAFE.putObject(object, fieldOffset, fieldValue);

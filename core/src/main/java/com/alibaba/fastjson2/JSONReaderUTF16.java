@@ -1091,6 +1091,9 @@ final class JSONReaderUTF16
     @Override
     public long readFieldNameHashCode() {
         final char[] chars = this.chars;
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -1720,6 +1723,9 @@ final class JSONReaderUTF16
     @Override
     public String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();
@@ -2325,6 +2331,9 @@ final class JSONReaderUTF16
     @Override
     public boolean skipName() {
         char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                 readFieldNameHashCodeUnquote();
@@ -3721,6 +3730,9 @@ final class JSONReaderUTF16
                 break;
             default:
                 if (ch == '"' || ch == '\'') {
+                    if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+                        throw notSupportName();
+                    }
                     skipString();
                 } else if (ch == '[') {
                     next();
@@ -4918,6 +4930,29 @@ final class JSONReaderUTF16
                         next();
                     }
                     return ldt;
+                }
+
+                int nextQuoteOffset = -1;
+                for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+                    if (chars[i] == quote) {
+                        nextQuoteOffset = i;
+                    }
+                }
+                if (nextQuoteOffset != -1
+                        && nextQuoteOffset - offset > 10
+                        && chars[nextQuoteOffset - 6] == '-'
+                        && chars[nextQuoteOffset - 3] == '-'
+                ) {
+                    int year = TypeUtils.parseInt(chars, offset, nextQuoteOffset - offset - 6);
+                    int month = TypeUtils.parseInt(chars, nextQuoteOffset - 5, 2);
+                    int dayOfMonth = TypeUtils.parseInt(chars, nextQuoteOffset - 2, 2);
+                    LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+                    this.offset = nextQuoteOffset + 1;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return localDate;
                 }
             }
         }

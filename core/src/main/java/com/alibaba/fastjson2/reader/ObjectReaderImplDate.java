@@ -69,17 +69,19 @@ public class ObjectReaderImplDate
         }
 
         long millis;
-        if (useSimpleFormatter) {
+        if (useSimpleFormatter || locale != null) {
             String str = jsonReader.readString();
             try {
-                return new SimpleDateFormat(format).parse(str);
+                SimpleDateFormat dateFormat;
+                if (locale != null) {
+                    dateFormat = new SimpleDateFormat(format, locale);
+                } else {
+                    dateFormat = new SimpleDateFormat(format);
+                }
+                return dateFormat.parse(str);
             } catch (ParseException e) {
                 throw new JSONException(jsonReader.info("parse error : " + str), e);
             }
-        }
-
-        if (jsonReader.nextIfNullOrEmptyString()) {
-            return null;
         }
 
         if ((formatUnixTime || formatMillis) && jsonReader.isString()) {
@@ -141,7 +143,12 @@ public class ObjectReaderImplDate
                             int length = yyyyMMddhhmm16 ? 16 : 19;
                             ldt = DateUtils.parseLocalDateTime(str, 0, length);
                         } else {
-                            ldt = LocalDateTime.parse(str, formatter);
+                            if (formatHasDay) {
+                                ldt = LocalDateTime.parse(str, formatter);
+                            } else {
+                                LocalTime localTime = LocalTime.parse(str, formatter);
+                                ldt = LocalDateTime.of(LocalDate.MIN, localTime);
+                            }
                         }
                     }
                     zdt = ldt.atZone(jsonReader.getContext().getZoneId());
