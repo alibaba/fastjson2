@@ -7,7 +7,7 @@ fastjson 2.0.51中已经支持vector api，这个优化目前处于incubator状�
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-incubator-vector</artifactId>
-    <version>2.0.52</version>
+    <version>2.0.53</version>
 </dependency>
 ```
 
