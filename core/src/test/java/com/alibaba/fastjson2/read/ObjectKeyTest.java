@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.read;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ObjectKeyTest {
     @Test
@@ -29,6 +31,15 @@ public class ObjectKeyTest {
         assertEquals(1, JSON.parseObject(bytes, Bean.class, JSONReader.Feature.AllowUnQuotedFieldNames).items.size());
         assertEquals(1, JSON.parseObject(s.toCharArray(), Bean.class, JSONReader.Feature.AllowUnQuotedFieldNames).items.size());
         assertEquals(1, ((Bean) JSON.parseObject(s.toCharArray(), (Type) Bean.class, JSONReader.Feature.AllowUnQuotedFieldNames)).items.size());
+    }
+
+    @Test
+    public void testDisablingSingleQuote() {
+        String str = "{'key': 'value'}";
+        byte[] bytes = str.getBytes();
+        assertThrows(JSONException.class, () -> {
+            JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.UTF_8, Bean.class, JSONReader.Feature.DisableSingleQuote);
+        });
     }
 
     public static class Bean {

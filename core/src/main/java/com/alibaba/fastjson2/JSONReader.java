@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONFactory.defaultDecimalMaxScale;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
@@ -469,8 +470,15 @@ public abstract class JSONReader
     public abstract long readFieldNameHashCodeUnquote();
 
     public final String readFieldNameUnquote() {
+        if (ch == '/') {
+            skipComment();
+        }
         readFieldNameHashCodeUnquote();
-        return getFieldName();
+        String name = getFieldName();
+        if (name == null || name.equals("")) {
+            throw new JSONException(info("illegal input"));
+        }
+        return name;
     }
 
     public abstract boolean skipName();
@@ -1801,6 +1809,10 @@ public abstract class JSONReader
                 if (ch == '-' || (ch >= '0' && ch <= '9')) {
                     readNumber0();
                     name = getNumber();
+                } else if (ch == '{') {
+                    name = readObject();
+                } else if (ch == '[') {
+                    name = readArray();
                 } else {
                     name = readFieldNameUnquote();
                 }
@@ -2371,14 +2383,14 @@ public abstract class JSONReader
             case JSON_TYPE_INT16: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
-                    return Short.valueOf((short) intValue);
+                    return (short) intValue;
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
             case JSON_TYPE_INT8: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
-                    return Byte.valueOf((byte) intValue);
+                    return (byte) intValue;
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
@@ -2388,51 +2400,6 @@ public abstract class JSONReader
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
-
-                        if (exponent == 0) {
-                            if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                                switch (scale) {
-                                    case 1:
-                                    case 2:
-                                    case 3:
-                                    case 4:
-                                    case 5:
-                                    case 6:
-                                    case 7:
-                                    case 8:
-                                    case 9:
-                                    case 10:
-                                        return (float) (unscaledVal / DOUBLE_10_POW[scale]);
-                                    default:
-                                        break;
-                                }
-                            } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
-                                if (unscaledVal == 0) {
-                                    return DOUBLE_ZERO;
-                                }
-
-                                switch (scale) {
-                                    case 1:
-                                    case 2:
-                                    case 3:
-                                    case 4:
-                                    case 5:
-                                    case 6:
-                                    case 7:
-                                    case 8:
-                                    case 9:
-                                    case 10:
-                                    case 11:
-                                    case 12:
-                                    case 13:
-                                    case 14:
-                                    case 15:
-                                        return unscaledVal / DOUBLE_10_POW[scale];
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
                         decimal = BigDecimal.valueOf(unscaledVal, scale);
                     } else {
                         long v3 = mag3 & 0XFFFFFFFFL;
@@ -2494,10 +2461,15 @@ public abstract class JSONReader
                                         }
                                     }
 
+                                    int len = unsignedUnscaledVal < 10000000000000000L
+                                            ? 16
+                                            : unsignedUnscaledVal < 100000000000000000L
+                                            ? 17
+                                            : unsignedUnscaledVal < 1000000000000000000L ? 18 : 19;
                                     if (doubleChars == null) {
                                         doubleChars = new char[20];
                                     }
-                                    int len = IOUtils.writeInt64(doubleChars, 0, unsignedUnscaledVal);
+                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
                                     return TypeUtils.doubleValue(isNegative, len - scale, doubleChars, len);
                                 }
                             }
@@ -2517,24 +2489,18 @@ public abstract class JSONReader
 
                     int adjustedScale = scale - exponent;
                     decimal = new BigDecimal(bigInt, adjustedScale);
-
-                    if (exponent != 0) {
+                    if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
                         return decimal.doubleValue();
                     }
                 }
 
-                if (exponent != 0) {
+                if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
                     String decimalStr = decimal.toPlainString();
-                    double doubleValue = Double.parseDouble(
+                    return Double.parseDouble(
                             decimalStr + "E" + exponent);
-                    return Double.valueOf(doubleValue);
                 }
 
-                if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                    return decimal.floatValue();
-                }
-
-                if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
+                if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
                     return decimal.doubleValue();
                 }
 
@@ -2542,6 +2508,9 @@ public abstract class JSONReader
             }
             case JSON_TYPE_BIG_DEC: {
                 if (scale > 0) {
+                    if (scale > defaultDecimalMaxScale) {
+                        throw new JSONException("scale overflow : " + scale);
+                    }
                     return toBigDecimal(stringValue);
                 } else {
                     return new BigInteger(stringValue);
@@ -2562,18 +2531,16 @@ public abstract class JSONReader
 
                 if (valueType == JSON_TYPE_FLOAT) {
                     if (exponent != 0) {
-                        float floatValueValue = Float.parseFloat(
+                        return Float.parseFloat(
                                 decimal + "E" + exponent);
-                        return Float.valueOf(floatValueValue);
                     }
 
                     return decimal.floatValue();
                 }
 
                 if (exponent != 0) {
-                    double doubleValue = Double.parseDouble(
+                    return Double.parseDouble(
                             decimal + "E" + exponent);
-                    return Double.valueOf(doubleValue);
                 }
                 return decimal.doubleValue();
             }
@@ -3823,7 +3790,18 @@ public abstract class JSONReader
          *
          * @since 2.0.51
          */
-        UseLongForInts(1 << 30);
+        UseLongForInts(1 << 30),
+
+        /**
+         * Feature that disables the support for single quote.
+         * @since 2.0.53
+         */
+        DisableSingleQuote(1L << 31L),
+
+        /**
+         * @since 2.0.53
+         */
+        UseDoubleForDecimals(1L << 32L);
 
         public final long mask;
 

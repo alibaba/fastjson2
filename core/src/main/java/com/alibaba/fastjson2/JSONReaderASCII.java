@@ -104,6 +104,9 @@ final class JSONReaderASCII
     @Override
     public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -943,6 +946,9 @@ final class JSONReaderASCII
     @Override
     public String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();

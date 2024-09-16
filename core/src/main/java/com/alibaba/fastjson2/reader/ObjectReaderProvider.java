@@ -337,6 +337,15 @@ public class ObjectReaderProvider {
         BeanUtils.cleanupCache(objectClass);
     }
 
+    /**
+     * @since 2.0.53
+     */
+    public void clear() {
+        mixInCache.clear();
+        cache.clear();
+        cacheFieldBased.clear();
+    }
+
     static boolean match(Type objectType, ObjectReader objectReader, ClassLoader classLoader) {
         Class<?> objectClass = TypeUtils.getClass(objectType);
         if (objectClass != null && objectClass.getClassLoader() == classLoader) {
@@ -852,6 +861,13 @@ public class ObjectReaderProvider {
                         }
                         return rawClassReader;
                     }
+                }
+                if (typeArguments.length == 1 && ArrayList.class.isAssignableFrom(rawClass)) {
+                    return ObjectReaderImplList.of(objectType, rawClass, 0);
+                }
+
+                if (typeArguments.length == 2 && Map.class.isAssignableFrom(rawClass)) {
+                    return ObjectReaderImplMap.of(objectType, (Class) rawType, 0);
                 }
             }
         }

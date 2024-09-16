@@ -13,6 +13,7 @@ final class FieldReaderStringFunc<T, V>
 
     final String format;
     final boolean trim;
+    final boolean upper;
 
     FieldReaderStringFunc(
             String fieldName,
@@ -30,6 +31,7 @@ final class FieldReaderStringFunc<T, V>
 
         this.format = format;
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
+        upper = "upper".equals(format);
     }
 
     @Override
@@ -51,8 +53,13 @@ final class FieldReaderStringFunc<T, V>
             fieldValue = value.toString();
         }
 
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
         }
 
         try {
@@ -65,8 +72,13 @@ final class FieldReaderStringFunc<T, V>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
         }
         function.accept(object, (V) fieldValue);
     }

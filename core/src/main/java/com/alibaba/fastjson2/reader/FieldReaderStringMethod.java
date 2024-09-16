@@ -10,6 +10,7 @@ import java.util.Locale;
 final class FieldReaderStringMethod<T>
         extends FieldReaderObject<T> {
     final boolean trim;
+    final boolean upper;
 
     FieldReaderStringMethod(
             String fieldName,
@@ -24,13 +25,19 @@ final class FieldReaderStringMethod<T>
     ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, setter, null, null);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
+        upper = "upper".equals(format);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
         }
 
         try {
@@ -58,8 +65,13 @@ final class FieldReaderStringMethod<T>
             fieldValue = value.toString();
         }
 
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
+        if (fieldValue != null) {
+            if (trim) {
+                fieldValue = fieldValue.trim();
+            }
+            if (upper) {
+                fieldValue = fieldValue.toUpperCase();
+            }
         }
 
         try {

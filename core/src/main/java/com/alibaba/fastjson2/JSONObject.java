@@ -19,6 +19,8 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.alibaba.fastjson2.JSONFactory.defaultObjectReaderProvider;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -1999,6 +2001,87 @@ public class JSONObject
         object.put(k3, v3);
         object.put(k4, v4);
         object.put(k5, v5);
+        return object;
+    }
+
+    /**
+     * Pack multiple key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4", "key5", "value5", kvArray);
+     * </pre>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
+     * @param k4 four key
+     * @param v4 four value
+     * @param k5 five key
+     * @param v5 five value
+     * @param kvArray multiple key-value
+     * @since 2.0.53
+     */
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4,
+            String k5,
+            Object v5,
+            Object... kvArray
+
+    ) {
+        JSONObject object = new JSONObject(5);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
+        object.put(k4, v4);
+        object.put(k5, v5);
+        if (kvArray != null && kvArray.length > 0) {
+            of(object, kvArray);
+        }
+        return object;
+    }
+
+    /**
+     * Pack multiple key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of(Object... kvArray);
+     * </pre>
+     *
+     * @param kvArray key-value
+     * @since 2.0.53
+     */
+    private static JSONObject of(JSONObject object, Object... kvArray) {
+        if (kvArray == null || kvArray.length <= 0) {
+            throw new JSONException("The kvArray cannot be empty");
+        }
+        int kvArrayLength = kvArray.length;
+        if ((kvArrayLength & 1) == 1) {
+            throw new JSONException("The length of kvArray cannot be odd");
+        }
+        List<Object> keyList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 == 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
+        keyList.forEach(key -> {
+            if (key == null || !(key instanceof String)) {
+                throw new JSONException("The value corresponding to the even bit index of kvArray is key, which cannot be null and must be of type string");
+            }
+        });
+        List<Object> distinctKeyList = keyList.stream().distinct().collect(Collectors.toList());
+        if (keyList.size() != distinctKeyList.size()) {
+            throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
+        }
+        List<Object> valueList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 != 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
+        for (int i = 0; i < keyList.size(); i++) {
+            object.put(keyList.get(i).toString(), valueList.get(i));
+        }
         return object;
     }
 

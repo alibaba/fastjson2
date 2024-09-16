@@ -1085,6 +1085,9 @@ final class JSONReaderUTF16
     @Override
     public long readFieldNameHashCode() {
         final char[] chars = this.chars;
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -1714,6 +1717,10 @@ final class JSONReaderUTF16
     @Override
     public String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();
@@ -2319,6 +2326,10 @@ final class JSONReaderUTF16
     @Override
     public boolean skipName() {
         char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                 readFieldNameHashCodeUnquote();
@@ -3713,6 +3724,9 @@ final class JSONReaderUTF16
                 break;
             default:
                 if (ch == '"' || ch == '\'') {
+                    if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+                        throw notSupportName();
+                    }
                     skipString();
                 } else if (ch == '[') {
                     next();

@@ -91,6 +91,55 @@ public class IOUtils {
         return 19;
     }
 
+    public static void getChars(long i, int index, char[] buf) {
+        long q;
+        int charPos = index;
+
+        boolean negative = (i < 0);
+        if (!negative) {
+            i = -i;
+        }
+
+        // Get 2 digits/iteration using longs until quotient fits into an int
+        while (i <= Integer.MIN_VALUE) {
+            q = i / 100;
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[(int) ((q * 100) - i)]);
+            i = q;
+        }
+
+        // Get 2 digits/iteration using ints
+        int q2;
+        int i2 = (int) i;
+        while (i2 <= -100) {
+            q2 = i2 / 100;
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[(q2 * 100) - i2]);
+            i2 = q2;
+        }
+
+        // We know there are at most two digits left at this point.
+        if (i2 < -9) {
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[-i2]);
+        } else {
+            buf[--charPos] = (char) ('0' - i2);
+        }
+
+        if (negative) {
+            buf[--charPos] = '-';
+        }
+    }
+
     public static int writeDecimal(byte[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
             buf[off++] = (byte) '-';

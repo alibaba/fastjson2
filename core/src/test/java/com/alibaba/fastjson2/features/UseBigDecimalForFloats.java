@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +18,7 @@ public class UseBigDecimalForFloats {
         JSONObject object = JSON.parseObject(str, JSONReader.Feature.UseBigDecimalForFloats);
         Object val = object.get("val");
         assertNotNull(val);
-        assertEquals(Float.class, val.getClass());
+        assertEquals(BigDecimal.class, val.getClass());
     }
 
     @Test
@@ -26,7 +27,7 @@ public class UseBigDecimalForFloats {
         JSONObject object = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), JSONReader.Feature.UseBigDecimalForFloats);
         Object val = object.get("val");
         assertNotNull(val);
-        assertEquals(Float.class, val.getClass());
+        assertEquals(BigDecimal.class, val.getClass());
     }
 
     @Test
@@ -35,7 +36,7 @@ public class UseBigDecimalForFloats {
         JSONObject object = JSON.parseObject(str, JSONReader.Feature.UseBigDecimalForDoubles);
         Object val = object.get("val");
         assertNotNull(val);
-        assertEquals(Double.class, val.getClass());
+        assertEquals(BigDecimal.class, val.getClass());
     }
 
     @Test
@@ -44,6 +45,6 @@ public class UseBigDecimalForFloats {
         JSONObject object = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), JSONReader.Feature.UseBigDecimalForDoubles);
         Object val = object.get("val");
         assertNotNull(val);
-        assertEquals(Double.class, val.getClass());
+        assertEquals(BigDecimal.class, val.getClass());
     }
 }

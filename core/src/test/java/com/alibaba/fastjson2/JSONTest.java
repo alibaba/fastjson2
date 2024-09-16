@@ -1074,6 +1074,7 @@ public class JSONTest {
     public void testValid() {
         assertTrue(JSON.isValidArray("[]".getBytes(StandardCharsets.UTF_8)));
         assertFalse(JSON.isValidArray("{}".getBytes(StandardCharsets.UTF_8)));
+        assertFalse(JSON.isValid("'", JSONReader.Feature.DisableSingleQuote));
     }
 
     @Test

@@ -159,6 +159,10 @@ public final class ObjectReaderImplList
                     instanceClass = TreeSet.class;
                     builder = (Function<SortedSet, SortedSet>) Collections::synchronizedSortedSet;
                     break;
+                case "java.util.RandomAccessSubList":
+                case "java.util.AbstractList$RandomAccessSubList":
+                    instanceClass = ArrayList.class;
+                    break;
                 default:
                     instanceClass = listClass;
                     break;

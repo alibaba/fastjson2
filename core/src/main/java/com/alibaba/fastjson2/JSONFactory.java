@@ -39,6 +39,8 @@ public final class JSONFactory {
     static Supplier JSON_ARRAY_1x_SUPPLIER;
     static volatile boolean JSON_REFLECT_1x_ERROR;
 
+    static int defaultDecimalMaxScale = 2048;
+
     static final class NameCacheEntry2 {
         final String name;
         final long value0;

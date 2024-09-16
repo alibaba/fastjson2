@@ -3829,6 +3829,26 @@ public interface JSON {
     }
 
     /**
+     * Verify that the json string is legal json text
+     *
+     * @param text the specified string will be validated
+     * @param features the specified features is applied to parsing
+     * @return {@code true} or {@code false}
+     */
+    static boolean isValid(String text, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(text, JSONFactory.createReadContext(features))) {
+            jsonReader.skipValue();
+            return jsonReader.isEnd() && !jsonReader.comma;
+        } catch (JSONException | ArrayIndexOutOfBoundsException error) {
+            return false;
+        }
+    }
+
+    /**
      * Verify that the json byte array is legal json text
      *
      * @param bytes the specified array will be validated
