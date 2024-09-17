@@ -220,10 +220,6 @@ final class JSONPathMulti
 
             segment.eval(context);
             if (context.value == null && nextSegment != null) {
-                if (value == null) {
-                    return;
-                }
-
                 Object parentObject;
                 if (i == 0) {
                     parentObject = root;

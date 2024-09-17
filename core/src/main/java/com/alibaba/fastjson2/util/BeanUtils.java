@@ -26,6 +26,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
  * @author Bob Lee
  * @author Jesse Wilson
  * @author Shaojin Wen
+ * @author poo0054
  */
 public abstract class BeanUtils {
     static final Type[] EMPTY_TYPE_ARRAY = new Type[]{};
@@ -524,7 +525,6 @@ public abstract class BeanUtils {
 
                     switch (annotationType.getName()) {
                         case "com.fasterxml.jackson.annotation.JsonAnySetter":
-                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
                             if (JSONFactory.isUseJacksonAnnotation()) {
                                 unwrapped.set(true);
                             }
@@ -693,12 +693,20 @@ public abstract class BeanUtils {
 
             Class<? extends Annotation> annotationType = annotation.annotationType();
             String name = annotationType.getName();
-            if ("com.alibaba.fastjson.annotation.JSONType".equals(name)) {
-                BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectWriterProvider());
-                BeanUtils.annotationMethods(annotationType, method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
-                if (beanInfo.writeEnumAsJavaBean) {
-                    return true;
-                }
+            BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectWriterProvider());
+            switch (name) {
+                case "com.alibaba.fastjson.annotation.JSONType":
+                    BeanUtils.annotationMethods(annotationType, method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
+                    break;
+                case "com.fasterxml.jackson.annotation.JsonFormat":
+                    boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
+                    if (useJacksonAnnotation) {
+                        processJacksonJsonFormat(beanInfo, annotation);
+                    }
+                    break;
+            }
+            if (beanInfo.writeEnumAsJavaBean) {
+                return true;
             }
         }
 
@@ -768,6 +776,7 @@ public abstract class BeanUtils {
             methodCache.putIfAbsent(enumClass, methods);
         }
 
+        Member valueMember = null;
         for (Method method : methods) {
             if (method.getReturnType() == Void.class) {
                 continue;
@@ -795,7 +804,21 @@ public abstract class BeanUtils {
                 String fieldName = BeanUtils.getterName(methodName, null);
                 Field field = BeanUtils.getDeclaredField(enumClass, fieldName);
                 if (field != null && isJSONField(field)) {
-                    return method;
+                    if (valueMember == null) {
+                        valueMember = method;
+                    } else if (valueMember.getName().equals(method.getName())) {
+                        // Using Subclasses #2682
+                        if (valueMember instanceof Method) {
+                            Method valueMethod = (Method) valueMember;
+                            if (valueMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
+                                valueMember = method;
+                            }
+                        }
+                    } else {
+                        // multi annotation
+                        return null;
+                    }
+                    continue;
                 }
             }
 
@@ -828,8 +851,17 @@ public abstract class BeanUtils {
             }
             Member refMember = memberRef.get();
             if (refMember != null) {
-                return refMember;
+                if (valueMember == null) {
+                    valueMember = refMember;
+                } else if (!valueMember.getName().equals(refMember.getName())) {
+                    // multi annotation
+                    return null;
+                }
             }
+        }
+
+        if (valueMember != null) {
+            return valueMember;
         }
 
         Field[] fields = fieldCache.get(enumClass);
@@ -1099,10 +1131,9 @@ public abstract class BeanUtils {
                 case "com.alibaba.fastjson2.annotation.JSONField":
                     return true;
                 case "com.fasterxml.jackson.annotation.JsonValue":
-                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
                 case "com.fasterxml.jackson.annotation.JsonRawValue":
                 case "com.fasterxml.jackson.annotation.JsonProperty":
-                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
+                case "com.fasterxml.jackson.annotation.JsonUnwrapped":
                     if (JSONFactory.isUseJacksonAnnotation()) {
                         return true;
                     }
@@ -1326,6 +1357,8 @@ public abstract class BeanUtils {
                     } else if (fieldName.regionMatches(0, methodName, prefix, fieldNameLength)) {
                         fields[1] = field;
                     }
+                } else if (boolean.class == field.getType() && methodName.equals(fieldName)) {
+                    fields[0] = field;
                 }
             });
         }
@@ -2629,6 +2662,13 @@ public abstract class BeanUtils {
                     }
                     break;
                 }
+                case "rootName": {
+                    String rootName = (String) result;
+                    if (!rootName.isEmpty()) {
+                        beanInfo.rootName = rootName;
+                    }
+                    break;
+                }
                 case "alphabetic": {
                     Boolean alphabetic = (Boolean) result;
                     if (!alphabetic) {
@@ -2761,6 +2801,15 @@ public abstract class BeanUtils {
                         String shape = ((Enum) result).name();
                         if ("STRING".equals(shape)) {
                             fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                        } else if ("NUMBER".equals(shape)) {
+                            fieldInfo.format = "millis";
+                        }
+                        break;
+                    }
+                    case "locale": {
+                        String locale = (String) result;
+                        if (!locale.isEmpty() && !"##default".equals(locale)) {
+                            fieldInfo.locale = Locale.forLanguageTag(locale);
                         }
                         break;
                     }
@@ -2781,8 +2830,20 @@ public abstract class BeanUtils {
                 Object result = m.invoke(annotation);
                 if ("pattern".equals(name)) {
                     String pattern = (String) result;
-                    if (pattern.length() != 0) {
+                    if (!pattern.isEmpty()) {
                         beanInfo.format = pattern;
+                    }
+                } else if ("shape".equals(name)) {
+                    String shape = ((Enum) result).name();
+                    if ("NUMBER".equals(shape)) {
+                        beanInfo.format = "millis";
+                    } else if ("OBJECT".equals(shape)) {
+                        beanInfo.writeEnumAsJavaBean = true;
+                    }
+                } else if ("locale".equals(name)) {
+                    String locale = (String) result;
+                    if (!locale.isEmpty() && !"##default".equals(locale)) {
+                        beanInfo.locale = Locale.forLanguageTag(locale);
                     }
                 }
             } catch (Throwable ignored) {
@@ -2806,8 +2867,58 @@ public abstract class BeanUtils {
                         case "NON_DEFAULT":
                             beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
                             break;
+                        case "NON_EMPTY":
+                            beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteEmptyArray.mask;
+                            break;
                         default:
                             break;
+                    }
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonInclude(FieldInfo fieldInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                if ("value".equals(name)) {
+                    String include = ((Enum) result).name();
+                    switch (include) {
+                        case "ALWAYS":
+                            fieldInfo.features |= JSONWriter.Feature.WriteNulls.mask;
+                            break;
+                        case "NON_DEFAULT":
+                            fieldInfo.features |= JSONWriter.Feature.NotWriteDefaultValue.mask;
+                            break;
+                        case "NON_EMPTY":
+                            fieldInfo.features |= JSONWriter.Feature.NotWriteEmptyArray.mask;
+                            fieldInfo.features |= JSONWriter.Feature.IgnoreEmpty.mask;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonUnwrapped(FieldInfo fieldInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                if ("enabled".equals(name)) {
+                    boolean value = (Boolean) result;
+                    if (value) {
+                        fieldInfo.features = FieldInfo.UNWRAPPED_MASK;
                     }
                 }
             } catch (Throwable ignored) {

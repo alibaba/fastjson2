@@ -21,6 +21,14 @@ public interface ObjectWriter<T> {
         return null;
     }
 
+    default Object getFieldValue(Object object, String fieldName) {
+        FieldWriter fieldWriter = getFieldWriter(fieldName);
+        if (fieldWriter == null) {
+            return null;
+        }
+        return fieldWriter.getFieldValue(object);
+    }
+
     default FieldWriter getFieldWriter(String name) {
         long nameHash = Fnv.hashCode64(name);
         FieldWriter fieldWriter = getFieldWriter(nameHash);
@@ -127,9 +135,10 @@ public interface ObjectWriter<T> {
     }
 
     default String toJSONString(T object, JSONWriter.Feature... features) {
-        JSONWriter jsonWriter = JSONWriter.of(features);
-        write(jsonWriter, object, null, null, 0);
-        return jsonWriter.toString();
+        try (JSONWriter jsonWriter = JSONWriter.of(features)) {
+            write(jsonWriter, object, null, null, 0);
+            return jsonWriter.toString();
+        }
     }
 
     void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features);

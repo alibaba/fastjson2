@@ -17,17 +17,9 @@ import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.time.*;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -276,12 +268,28 @@ public abstract class FieldReader<T>
                         return -1;
                     }
 
-                    if (thisParamType.isEnum() && (otherParamType == Integer.class || otherParamType == int.class)) {
-                        return 1;
-                    }
-
-                    if (otherParamType.isEnum() && (thisParamType == Integer.class || thisParamType == int.class)) {
-                        return -1;
+                    if (needCompareToActualFieldClass(thisParamType) || needCompareToActualFieldClass(otherParamType)) {
+                        Class actualFieldClass = null;
+                        try {
+                            actualFieldClass = thisDeclaringClass.getDeclaredField(this.fieldName).getType();
+                            if (actualFieldClass == null) {
+                                actualFieldClass = otherDeclaringClass.getDeclaredField(this.fieldName).getType();
+                            }
+                        } catch (NoSuchFieldException ignored) {
+                            // ignored
+                        }
+                        if (actualFieldClass != null) {
+                            for (Class s = thisParamType; s != null && s != Object.class; s = s.getSuperclass()) {
+                                if (s == actualFieldClass) {
+                                    return -1;
+                                }
+                            }
+                            for (Class s = otherParamType; s != null && s != Object.class; s = s.getSuperclass()) {
+                                if (s == actualFieldClass) {
+                                    return 1;
+                                }
+                            }
+                        }
                     }
                     //JSONField annotation priority over non JSONField annotation
                     JSONField thisAnnotation = BeanUtils.findAnnotation(this.method, JSONField.class);
@@ -429,7 +437,7 @@ public abstract class FieldReader<T>
         }
 
         Object typedFieldValue;
-        if (fieldValue == null || fieldType == fieldValue.getClass()) {
+        if (fieldValue == null || fieldType == fieldValue.getClass() || fieldType == Object.class) {
             typedFieldValue = fieldValue;
         } else {
             if (fieldValue instanceof JSONObject) {
@@ -438,7 +446,7 @@ public abstract class FieldReader<T>
                         : new JSONReader.Feature[0];
                 typedFieldValue = ((JSONObject) fieldValue).to(fieldType, toFeatures);
             } else if (fieldValue instanceof JSONArray) {
-                typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
+                typedFieldValue = ((JSONArray) fieldValue).to(fieldType, features);
             } else if ((features == 0 || features == JSONReader.Feature.SupportSmartMatch.mask) // default or fastjson 1.x default
                     && !fieldClass.isInstance(fieldValue) && format == null
             ) {
@@ -447,7 +455,7 @@ public abstract class FieldReader<T>
                     String fieldValueJson = JSON.toJSONString(fieldValue);
                     typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), fieldType, fieldName, features);
                 } else {
-                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                    typedFieldValue = TypeUtils.cast(fieldValue, fieldType, provider);
                 }
             } else {
                 if (autoCast) {
@@ -602,5 +610,12 @@ public abstract class FieldReader<T>
     private String getActualFieldName(FieldReader fieldReader) {
         String name = fieldReader.method.getName();
         return fieldReader.isReadOnly() ? BeanUtils.getterName(name, PropertyNamingStrategy.CamelCase.name()) : BeanUtils.setterName(name, PropertyNamingStrategy.CamelCase.name());
+    }
+
+    private boolean needCompareToActualFieldClass(Class clazz) {
+        if (clazz.isEnum() || clazz.isInterface()) {
+            return true;
+        }
+        return false;
     }
 }

@@ -373,6 +373,15 @@ public abstract class JSONSchema {
 
     @JSONCreator
     public static JSONSchema of(JSONObject input, JSONSchema parent) {
+        if (input.size() == 1 && input.isArray("type")) {
+            JSONArray types = input.getJSONArray("type");
+            JSONSchema[] items = new JSONSchema[types.size()];
+            for (int i = 0; i < types.size(); i++) {
+                items[i] = JSONSchema.of(JSONObject.of("type", types.get(i)));
+            }
+            return new AnyOf(items);
+        }
+
         Type type = Type.of(
                 input.getString("type")
         );

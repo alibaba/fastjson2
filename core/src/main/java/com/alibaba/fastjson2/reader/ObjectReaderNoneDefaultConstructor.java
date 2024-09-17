@@ -130,7 +130,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
 
                         if (autoTypeObjectReader == null) {
-                            throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                            throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                         }
                     }
 
@@ -360,7 +360,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
                 if (fieldValue != null) {
-                    if (paramReader != null) {
+                    if (paramReader != null && (paramReader.fieldName == null || fieldReader.fieldName == null || !paramReader.fieldName.equals(fieldReader.fieldName))) {
                         continue;
                     }
                     fieldReader.accept(object, fieldValue);
@@ -398,7 +398,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         return createInstanceNoneDefaultConstructor(valueMap);
     }
 
-    public T createInstance(Collection collection) {
+    public T createInstance(Collection collection, long features) {
         int index = 0;
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();

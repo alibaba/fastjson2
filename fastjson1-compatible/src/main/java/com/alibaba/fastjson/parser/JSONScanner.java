@@ -113,7 +113,7 @@ public class JSONScanner
                 rawFeature = JSONReader.Feature.UseNativeObject;
                 break;
             case UseBigDecimal:
-                rawFeature = JSONReader.Feature.UseBigDecimalForDoubles;
+                rawFeature = JSONReader.Feature.UseDoubleForDecimals;
                 not = true;
                 break;
             case OrderedField:
@@ -166,7 +166,7 @@ public class JSONScanner
                 rawFeature = JSONReader.Feature.UseNativeObject;
                 break;
             case UseBigDecimal:
-                return !reader.isEnabled(JSONReader.Feature.UseBigDecimalForDoubles);
+                return !reader.isEnabled(JSONReader.Feature.UseDoubleForDecimals);
             default:
                 break;
         }

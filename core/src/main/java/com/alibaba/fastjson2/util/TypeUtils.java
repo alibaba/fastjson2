@@ -1482,10 +1482,10 @@ public class TypeUtils {
                 if (obj instanceof Integer) {
                     int intValue = (Integer) obj;
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
-                } else {
-                    JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
-                    return (T) objectReader.readObject(jsonReader, null, null, 0);
                 }
+            } else {
+                JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
+                return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
             }
         }
 
@@ -4349,5 +4349,16 @@ public class TypeUtils {
 
     public static boolean isJavaScriptSupport(BigInteger i) {
         return i.compareTo(BIGINT_JAVASCRIPT_LOW) >= 0 && i.compareTo(BIGINT_JAVASCRIPT_HIGH) <= 0;
+    }
+
+    public static Type getMapValueType(Type fieldType) {
+        if (fieldType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) fieldType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (actualTypeArguments.length == 2) {
+                return actualTypeArguments[1];
+            }
+        }
+        return Object.class;
     }
 }

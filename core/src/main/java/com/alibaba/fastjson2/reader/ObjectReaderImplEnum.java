@@ -268,7 +268,7 @@ public final class ObjectReaderImplEnum
                         // ignored
                     }
                 }
-            } else if (intValues != null && jsonReader.isString()) {
+            } else if (intValues != null && jsonReader.isInt()) {
                 int intValue = jsonReader.readInt32Value();
                 for (int i = 0; i < intValues.length; i++) {
                     if (intValues[i] == intValue) {

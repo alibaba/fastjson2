@@ -62,7 +62,7 @@ class ObjectReaderImplNumberArray
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         Number[] array = new Number[collection.size()];
         int i = 0;
         for (Object item : collection) {

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.HarmDTO;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillCategory;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.fury.Fury;
 import org.apache.fury.config.Language;
@@ -23,6 +24,9 @@ import static com.alibaba.fastjson2.JSONReader.Feature.FieldBased;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 
 public class AlongParseBinaryArrayMapping {
+    static final ObjectReaderProvider providerFeatures = new ObjectReaderProvider();
+    static final JSONReader.Context contextFeatures;
+
     static Fury fury;
 
     static SkillFire_S2C_Msg object;
@@ -30,10 +34,14 @@ public class AlongParseBinaryArrayMapping {
     static byte[] furyBytes;
 
     static {
+        providerFeatures.setDisableAutoType(true);
+        providerFeatures.setDisableReferenceDetect(true);
+        contextFeatures = new JSONReader.Context(providerFeatures, JSONReader.Feature.SupportArrayToBean, JSONReader.Feature.FieldBased);
+
         try {
             InputStream is = AlongParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
             String str = IOUtils.toString(is, "UTF-8");
-            object = JSONReader.of(str).read(SkillFire_S2C_Msg.class);
+            object = JSONReader.of(str, contextFeatures).read(SkillFire_S2C_Msg.class);
 
             fury = Fury.builder().withLanguage(Language.JAVA)
                     .withRefTracking(false)
@@ -55,6 +63,11 @@ public class AlongParseBinaryArrayMapping {
     @Benchmark
     public void jsonb(Blackhole bh) {
         bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, FieldBased, SupportArrayToBean));
+    }
+
+    @Benchmark
+    public void jsonbFeatures(Blackhole bh) {
+        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, contextFeatures));
     }
 
     @Benchmark

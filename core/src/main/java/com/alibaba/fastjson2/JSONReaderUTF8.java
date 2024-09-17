@@ -492,6 +492,8 @@ class JSONReaderUTF8
                 case ')':
                 case ',':
                 case ':':
+                case '|':
+                case '&':
                 case EOI:
                     nameLength = i;
                     this.nameEnd = ch == EOI ? offset : offset - 1;
@@ -2321,6 +2323,9 @@ class JSONReaderUTF8
     public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -3125,6 +3130,9 @@ class JSONReaderUTF8
     @Override
     public String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();
@@ -4691,6 +4699,9 @@ class JSONReaderUTF8
     @Override
     public final boolean skipName() {
         char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                 readFieldNameHashCodeUnquote();
@@ -4925,7 +4936,11 @@ class JSONReaderUTF8
             }
         }
 
-        if (!comma && ch != EOI && ch != '}' && ch != ']' && ch != EOI) {
+        if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        if (comma && (ch == '}' || ch == ']' || ch == EOI)) {
             throw error(offset, ch);
         }
 
@@ -5529,17 +5544,17 @@ class JSONReaderUTF8
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             switch (ch) {
                 case 'B':
-                    if (!intOverflow) {
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT8;
                     }
                     break;
                 case 'S':
-                    if (!intOverflow) {
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT16;
                     }
                     break;
                 case 'L':
-                    if (offset - start < 19) {
+                    if (offset - start < 19 && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT64;
                     }
                     break;
@@ -6041,6 +6056,29 @@ class JSONReaderUTF8
                             }
                         }
                     }
+                }
+
+                int nextQuoteOffset = -1;
+                for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+                    if (bytes[i] == quote) {
+                        nextQuoteOffset = i;
+                    }
+                }
+                if (nextQuoteOffset != -1
+                        && nextQuoteOffset - offset > 10
+                        && bytes[nextQuoteOffset - 6] == '-'
+                        && bytes[nextQuoteOffset - 3] == '-'
+                ) {
+                    int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
+                    int month = TypeUtils.parseInt(bytes, nextQuoteOffset - 5, 2);
+                    int dayOfMonth = TypeUtils.parseInt(bytes, nextQuoteOffset - 2, 2);
+                    LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+                    this.offset = nextQuoteOffset + 1;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return localDate;
                 }
             }
         }
@@ -7102,6 +7140,32 @@ class JSONReaderUTF8
         if (ch < 0) {
             char_utf8(ch, offset);
             return true;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfMatchIdent(char c0, char c1) {
+        if (ch != c0) {
+            return false;
+        }
+
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (offset + 1 > end || bytes[offset] != c1) {
+            return false;
+        }
+
+        offset += 1;
+        int ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (offset == this.offset + 2 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
+            return false;
         }
 
         this.offset = offset;

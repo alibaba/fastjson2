@@ -35,7 +35,7 @@ final class ObjectReaderImplString
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         if (collection == null) {
             return null;
         }

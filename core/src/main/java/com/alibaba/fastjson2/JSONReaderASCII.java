@@ -107,6 +107,9 @@ class JSONReaderASCII
     public final long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -119,7 +122,7 @@ class JSONReaderASCII
             if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
                 errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
             } else {
-                errorMsg = "illegal fieldName input" + ch;
+                errorMsg = "illegal fieldName input " + ch;
             }
 
             throw new JSONException(info(errorMsg));
@@ -420,6 +423,8 @@ class JSONReaderASCII
                 case ')':
                 case ',':
                 case ':':
+                case '|':
+                case '&':
                 case EOI:
                     nameLength = i;
                     this.nameEnd = ch == EOI ? offset : offset - 1;
@@ -1013,6 +1018,9 @@ class JSONReaderASCII
     @Override
     public final String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();

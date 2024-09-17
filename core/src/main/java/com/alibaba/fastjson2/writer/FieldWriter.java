@@ -50,6 +50,8 @@ public abstract class FieldWriter<T>
     final boolean symbol;
     final boolean trim;
     final boolean raw;
+    final boolean managedReference;
+    final boolean backReference;
 
     transient JSONWriter.Path path;
     volatile ObjectWriter initObjectWriter;
@@ -120,6 +122,8 @@ public abstract class FieldWriter<T>
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
+        this.managedReference = (features & ReferenceDetection.mask) != 0;
+        this.backReference = (features & FieldInfo.BACKR_EFERENCE) != 0;
         this.rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
 
         int nameLength = name.length();

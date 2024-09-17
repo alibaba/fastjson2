@@ -11,7 +11,7 @@ independent in the `extension` dependency.
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
-    <version>2.0.50</version>
+    <version>2.0.53</version>
 </dependency>
 
 or
@@ -19,7 +19,7 @@ or
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring6</artifactId>
-    <version>2.0.50</version>
+    <version>2.0.53</version>
 </dependency>
 ```
 
@@ -27,13 +27,13 @@ or
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.50'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.53'
 }
 
 or
 
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.50'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.53'
 }
 ```
 > After version 2.0.23, in order to be compatible with Spring 5.x / 6.x, different versions are independently opened with different dependency packages.
@@ -88,7 +88,7 @@ and deserialization speed of `@RestController` `@ResponseBody` `@RequestBody` an
 
 **Package**: `com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter`
 
-**Example**:
+**Before Spring 5 Example**:
 
 ```java
 
@@ -112,6 +112,33 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 }
 ```
 
+Starting from Spring 5.0, `WebMvcConfigurerAdapter` has been deprecated, you can directly implement the `WebMvcConfigurer` interface without using this adapter.
+
+**After Spring 5 Example**:
+
+```java
+
+@Configuration
+@EnableWebMvc
+public class CustomWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        //custom configuration...
+        FastJsonConfig config = new FastJsonConfig();
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
+        config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
+        converter.setFastJsonConfig(config);
+        converter.setDefaultCharset(StandardCharsets.UTF_8);
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        converters.add(0, converter);
+    }
+
+}
+```
+
 ## 2.2  Spring Web MVC View
 
 Use `FastJsonJsonView` to set Spring MVC's default view model resolver to improve the speed
@@ -119,7 +146,7 @@ of `@Controller` `@ResponseBody` `ModelAndView` JSON serialization.
 
 **Package**: `com.alibaba.fastjson2.support.spring.webservlet.view.FastJsonJsonView`
 
-**Example**:
+**Before Spring 5 Example**:
 
 ```java
 
@@ -136,6 +163,28 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
         //fastJsonJsonView.setFastJsonConfig(config);
         registry.enableContentNegotiation(fastJsonJsonView);
     }
+}
+```
+
+Starting from Spring 5.0, `WebMvcConfigurerAdapter` has been deprecated, you can directly implement the `WebMvcConfigurer` interface without using this adapter.
+**After Spring 5 Example**:
+
+```java
+
+@Configuration
+@EnableWebMvc
+public class CustomWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
+        //custom configuration...
+        //FastJsonConfig config = new FastJsonConfig();
+        //config.set...
+        //fastJsonJsonView.setFastJsonConfig(config);
+        registry.enableContentNegotiation(fastJsonJsonView);
+    }
+
 }
 ```
 

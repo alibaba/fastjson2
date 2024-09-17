@@ -210,6 +210,10 @@ public class JSONArray
             return toBigDecimal(str);
         }
 
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
@@ -259,6 +263,10 @@ public class JSONArray
             }
 
             return Integer.parseInt(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
@@ -584,7 +592,17 @@ public class JSONArray
 
     @Override
     public Object get(int index) {
-        return list.get(index);
+        Object value = list.get(index);
+
+        if (value instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) value);
+        }
+
+        if (value instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) value);
+        }
+
+        return value;
     }
 
     /**
@@ -648,6 +666,10 @@ public class JSONArray
             }
 
             return new BigInteger(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");

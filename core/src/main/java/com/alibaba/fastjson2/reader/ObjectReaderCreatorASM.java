@@ -138,39 +138,6 @@ public class ObjectReaderCreatorASM
         return fieldName;
     }
 
-    @Override
-    public <T> FieldReader<T> createFieldReader(
-            Class objectClass,
-            Type objectType,
-            String fieldName,
-            int ordinal,
-            long features,
-            String format,
-            Locale locale,
-            Object defaultValue,
-            String schema,
-            Type fieldType,
-            Class fieldClass,
-            Field field,
-            ObjectReader initReader
-    ) {
-        return super.createFieldReader(
-                objectClass,
-                objectType,
-                fieldName,
-                ordinal,
-                features,
-                format,
-                locale,
-                defaultValue,
-                schema,
-                fieldType,
-                fieldClass,
-                field,
-                initReader
-        );
-    }
-
     private static class FieldReaderInfo {
         final String interfaceDesc;
         final String acceptDesc;
@@ -272,7 +239,6 @@ public class ObjectReaderCreatorASM
             }
 
             for (FieldReader fieldReader : fieldReaderArray) {
-                Method method = fieldReader.method;
                 if (fieldReader.isReadOnly()
                         || fieldReader.isUnwrapped()
                 ) {
@@ -303,10 +269,24 @@ public class ObjectReaderCreatorASM
                     match = false;
                     break;
                 }
+
+                if (fieldReader instanceof FieldReaderMapField
+                        && ((FieldReaderMapField<?>) fieldReader).arrayToMapKey != null) {
+                    match = false;
+                    break;
+                }
+
+                if (fieldReader instanceof FieldReaderMapMethod
+                        && ((FieldReaderMapMethod<?>) fieldReader).arrayToMapKey != null) {
+                    match = false;
+                    break;
+                }
             }
         }
 
-        if (match && beanInfo.schema != null && !beanInfo.schema.isEmpty()) {
+        if (match
+                && (beanInfo.rootName != null
+                || (beanInfo.schema != null && !beanInfo.schema.isEmpty()))) {
             match = false;
         }
 
@@ -357,9 +337,11 @@ public class ObjectReaderCreatorASM
         );
     }
 
+    @Override
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             String typeKey,
+            String rootName,
             long features,
             JSONSchema schema,
             Supplier<T> defaultCreator,
@@ -395,6 +377,7 @@ public class ObjectReaderCreatorASM
         return super.createObjectReader(
                 objectClass,
                 typeKey,
+                rootName,
                 features,
                 schema,
                 defaultCreator,
@@ -2938,6 +2921,8 @@ public class ObjectReaderCreatorASM
 
             if ("trim".equals(format)) {
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "trim", "()Ljava/lang/String;", false);
+            } else if ("upper".equals(format)) {
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "toUpperCase", "()Ljava/lang/String;", false);
             }
             mw.visitLabel(null_);
         } else if (fieldClass == Byte.class) {
@@ -3697,27 +3682,29 @@ public class ObjectReaderCreatorASM
         boolean initCapacity = JVM_VERSION == 8 && "java/util/ArrayList".equals(LIST_TYPE);
 
         if (jsonb) {
-            Label checkAutoTypeNull_ = new Label();
+            if (!context.disableAutoType()) {
+                Label checkAutoTypeNull_ = new Label();
 
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "checkObjectAutoType", METHOD_DESC_CHECK_ARRAY_AUTO_TYPE, false);
-            mw.visitInsn(Opcodes.DUP);
-            mw.visitVarInsn(Opcodes.ASTORE, AUTO_TYPE_OBJECT_READER);
-            mw.visitJumpInsn(Opcodes.IFNULL, checkAutoTypeNull_);
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "checkObjectAutoType", METHOD_DESC_CHECK_ARRAY_AUTO_TYPE, false);
+                mw.visitInsn(Opcodes.DUP);
+                mw.visitVarInsn(Opcodes.ASTORE, AUTO_TYPE_OBJECT_READER);
+                mw.visitJumpInsn(Opcodes.IFNULL, checkAutoTypeNull_);
 
-            mw.visitVarInsn(Opcodes.ALOAD, AUTO_TYPE_OBJECT_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            gwGetFieldType(classNameType, mw, THIS, i, fieldType);
-            mw.visitLdcInsn(fieldReader.fieldName);
-            mw.visitLdcInsn(fieldFeatures);
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "readJSONBObject", METHOD_DESC_READ_OBJECT, true);
-            mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
-            mw.visitVarInsn(Opcodes.ASTORE, LIST);
-            mw.visitJumpInsn(Opcodes.GOTO, loadList_);
+                mw.visitVarInsn(Opcodes.ALOAD, AUTO_TYPE_OBJECT_READER);
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                gwGetFieldType(classNameType, mw, THIS, i, fieldType);
+                mw.visitLdcInsn(fieldReader.fieldName);
+                mw.visitLdcInsn(fieldFeatures);
+                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "readJSONBObject", METHOD_DESC_READ_OBJECT, true);
+                mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
+                mw.visitVarInsn(Opcodes.ASTORE, LIST);
+                mw.visitJumpInsn(Opcodes.GOTO, loadList_);
 
-            mw.visitLabel(checkAutoTypeNull_);
+                mw.visitLabel(checkAutoTypeNull_);
+            }
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
@@ -3741,7 +3728,15 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.DUP);
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS);
                 mw.visitVarInsn(Opcodes.ASTORE, LIST);
-                mw.visitJumpInsn(IFNONNULL, listInitEnd_);
+                Label listNull_ = new Label();
+                mw.visitJumpInsn(Opcodes.IFNULL, listNull_);
+
+                mw.visitVarInsn(Opcodes.ALOAD, LIST);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+                mw.visitFieldInsn(Opcodes.GETSTATIC, "java/util/Collections", "EMPTY_LIST", "Ljava/util/List;");
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+                mw.visitJumpInsn(Opcodes.IF_ACMPNE, listInitEnd_);
+                mw.visitLabel(listNull_);
             }
 
             mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);

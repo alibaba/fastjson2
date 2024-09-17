@@ -42,7 +42,7 @@ public class ObjectReaderProvider
 
     static ObjectReaderCachePair readerCache;
 
-    static class ObjectReaderCachePair {
+    private static final class ObjectReaderCachePair {
         final long hashCode;
         final ObjectReader reader;
         volatile int missCount;
@@ -168,6 +168,7 @@ public class ObjectReaderProvider
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
+    PropertyNamingStrategy namingStrategy;
 
     {
         long[] hashCodes;
@@ -345,6 +346,15 @@ public class ObjectReaderProvider
             }
         }
         BeanUtils.cleanupCache(objectClass);
+    }
+
+    /**
+     * @since 2.0.53
+     */
+    public void clear() {
+        mixInCache.clear();
+        cache.clear();
+        cacheFieldBased.clear();
     }
 
     static boolean match(Type objectType, ObjectReader objectReader, ClassLoader classLoader) {
@@ -691,8 +701,8 @@ public class ObjectReaderProvider
             int paramIndex,
             Parameter parameter
     ) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectReaderAnnotationProcessor annotationProcessor = modules.get(i).getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, constructor, paramIndex, parameter);
             }
@@ -705,8 +715,8 @@ public class ObjectReaderProvider
             Method method,
             int paramIndex,
             Parameter parameter) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectReaderAnnotationProcessor annotationProcessor = modules.get(i).getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, method, paramIndex, parameter);
             }
@@ -814,6 +824,10 @@ public class ObjectReaderProvider
                 if (typeArguments.length == 1 && ArrayList.class.isAssignableFrom(rawClass)) {
                     return ObjectReaderImplList.of(objectType, rawClass, 0);
                 }
+
+                if (typeArguments.length == 2 && Map.class.isAssignableFrom(rawClass)) {
+                    return ObjectReaderImplMap.of(objectType, (Class) rawType, 0);
+                }
             }
         }
 
@@ -857,7 +871,7 @@ public class ObjectReaderProvider
         this.autoTypeBeforeHandler = autoTypeBeforeHandler;
     }
 
-    static class LRUAutoTypeCache
+    private static final class LRUAutoTypeCache
             extends LinkedHashMap<String, Date> {
         private final int maxSize;
 
@@ -1027,5 +1041,19 @@ public class ObjectReaderProvider
 
     public void setDisableSmartMatch(boolean disableSmartMatch) {
         this.disableSmartMatch = disableSmartMatch;
+    }
+
+    /**
+     * @since 2.0.52
+     */
+    public PropertyNamingStrategy getNamingStrategy() {
+        return namingStrategy;
+    }
+
+    /**
+     * @since 2.0.52
+     */
+    public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
     }
 }
