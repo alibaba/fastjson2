@@ -75,6 +75,11 @@ class FieldReaderCollectionMethodReadOnly<T>
         }
 
         Collection values = (Collection) value;
+
+        if (values.size() == collection.size()) {
+            return;
+        }
+
         for (Object item : values) {
             if (item == null) {
                 collection.add(null);
