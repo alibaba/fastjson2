@@ -23,56 +23,56 @@ public class Issue2944 {
         Department parsed = jsonObject.toJavaObject(Department.class);
         assertEquals(payload, JSON.toJSONString(parsed));
     }
-}
 
-class Department {
-    private final String name;
-    private final List<Employee> employees;
+    class Department {
+        private final String name;
+        private final List<Employee> employees;
 
-    public String getName() {
-        return name;
+        public String getName() {
+            return name;
+        }
+
+        public List<Employee> getEmployees() {
+            return employees;
+        }
+
+        public Department(String name, List<Employee> employees) {
+            this.name = name;
+            this.employees = employees;
+        }
+
+        @Override
+        public String toString() {
+            return "Department{" +
+                    "name='" + name + '\'' +
+                    ", employees=" + employees +
+                    '}';
+        }
     }
 
-    public List<Employee> getEmployees() {
-        return employees;
-    }
+    class Employee {
+        private final Integer id;
+        private final String name;
 
-    public Department(String name, List<Employee> employees) {
-        this.name = name;
-        this.employees = employees;
-    }
+        public Integer getId() {
+            return id;
+        }
 
-    @Override
-    public String toString() {
-        return "Department{" +
-                "name='" + name + '\'' +
-                ", employees=" + employees +
-                '}';
-    }
-}
+        public String getName() {
+            return name;
+        }
 
-class Employee {
-    private final Integer id;
-    private final String name;
+        public Employee(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Employee(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return "Employee{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
+        @Override
+        public String toString() {
+            return "Employee{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
     }
 }
