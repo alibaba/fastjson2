@@ -1,0 +1,5 @@
+
+
+solon.serialization.json:
+  dateAsFormat: 'yyyy-MM-dd HH:mm:ss' #配置日期格式（默认输出为时间戳）
+  dateAsTimeZone: 'GMT+8' #配置时区
