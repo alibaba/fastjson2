@@ -9,7 +9,7 @@ import org.noear.solon.core.Plugin;
 import org.noear.solon.serialization.prop.JsonProps;
 
 /**
- * Fastjson2 for solon 扩展集成插件
+ * Fastjson2 for solon extension integration plugin
  *
  * @author noear
  * */

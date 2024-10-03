@@ -7,7 +7,7 @@ import org.noear.solon.serialization.prop.JsonProps;
 import org.noear.solon.serialization.prop.JsonPropsUtil;
 
 /**
- * Json 渲染器工厂
+ * Json RenderFactory
  *
  * @author noear
  * @author 暮城留风
@@ -22,7 +22,7 @@ public class Fastjson2RenderFactory extends Fastjson2RenderFactoryBase {
     }
 
     /**
-     * 后缀或名字映射
+     * Suffix or name mapping
      */
     @Override
     public String[] mappings() {
@@ -30,7 +30,7 @@ public class Fastjson2RenderFactory extends Fastjson2RenderFactoryBase {
     }
 
     /**
-     * 创建
+     * Create Render
      */
     @Override
     public Render create() {
@@ -38,21 +38,21 @@ public class Fastjson2RenderFactory extends Fastjson2RenderFactoryBase {
     }
 
     /**
-     * 重新设置特性
+     * Resetting features
      */
     public void setFeatures(JSONWriter.Feature... features) {
         serializer.cfgSerializeFeatures(true, true, features);
     }
 
     /**
-     * 添加特性
+     * Adding features
      */
     public void addFeatures(JSONWriter.Feature... features) {
         serializer.cfgSerializeFeatures(false, true, features);
     }
 
     /**
-     * 移除特性
+     * Removing features
      */
     public void removeFeatures(JSONWriter.Feature... features) {
         serializer.cfgSerializeFeatures(false, false, features);

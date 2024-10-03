@@ -18,34 +18,34 @@ public abstract class Fastjson2RenderFactoryBase implements JsonRenderFactory {
     protected Fastjson2StringSerializer serializer = new Fastjson2StringSerializer();
 
     /**
-     * 获取序列化器
+     * Gets the serializer
      */
     public Fastjson2StringSerializer getSerializer() {
         return serializer;
     }
 
     /**
-     * 序列化配置
+     * Serialize the configuration
      */
-    public ObjectWriterProvider config(){
+    public ObjectWriterProvider config() {
         return serializer.getSerializeConfig().getProvider();
     }
 
     /**
-     * 添加编码器
+     * Adding the encoder
      *
-     * @param clz     类型
-     * @param encoder 编码器
+     * @param clz type
+     * @param encoder encoder
      */
     public <T> void addEncoder(Class<T> clz, ObjectWriter encoder) {
         config().register(clz, encoder);
     }
 
     /**
-     * 添加转换器（编码器的简化版）
+     * Add converter (simplified version of encoder)
      *
-     * @param clz       类型
-     * @param converter 转换器
+     * @param clz type
+     * @param converter converter
      */
     @Override
     public <T> void addConvertor(Class<T> clz, Converter<T, Object> converter) {

@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
- * Fastjson2 字符串序列化
+ * Fastjson2 string serialization
  *
  * @author noear
  * @author 暮城留风
@@ -30,7 +30,7 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     private JSONReader.Context deserializeConfig;
 
     /**
-     * 获取序列化配置
+     * Get the serialization configuration
      */
     public JSONWriter.Context getSerializeConfig() {
         if (serializeConfig == null) {
@@ -41,11 +41,11 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 配置序列化特性
+     * Configure the serialization feature
      *
-     * @param isReset  是否重置
-     * @param isAdd    是否添加
-     * @param features 特性
+     * @param isReset Reset or not
+     * @param isAdd Add or not
+     * @param features Feature
      */
     public void cfgSerializeFeatures(boolean isReset, boolean isAdd, JSONWriter.Feature... features) {
         if (isReset) {
@@ -58,7 +58,7 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 获取反序列化配置
+     * Get the deserialized configuration
      */
     public JSONReader.Context getDeserializeConfig() {
         if (deserializeConfig == null) {
@@ -68,11 +68,11 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 配置反序列化特性
+     * Configure the deserialization feature
      *
-     * @param isReset  是否重置
-     * @param isAdd    是否添加
-     * @param features 特性
+     * @param isReset Reset or not
+     * @param isAdd Add or not
+     * @param features Feature
      */
     public void cfgDeserializeFeatures(boolean isReset, boolean isAdd, JSONReader.Feature... features) {
         if (isReset) {
@@ -85,7 +85,7 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 获取内容类型
+     * Getting the content type
      */
     @Override
     public String getContentType() {
@@ -93,10 +93,10 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 是否匹配
+     * Match or not
      *
-     * @param ctx  请求上下文
-     * @param mime 内容类型
+     * @param ctx Handling context
+     * @param mime content type
      */
     @Override
     public boolean matched(Context ctx, String mime) {
@@ -108,7 +108,7 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 序列化器名字
+     * Serializer name
      */
     @Override
     public String name() {
@@ -116,9 +116,9 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 序列化
+     * Serialize
      *
-     * @param obj 对象
+     * @param obj object
      */
     @Override
     public String serialize(Object obj) throws IOException {
@@ -126,10 +126,10 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 反序列化
+     * Deserialize
      *
-     * @param data   数据
-     * @param toType 目标类型
+     * @param data data
+     * @param toType Target type
      */
     @Override
     public Object deserialize(String data, Type toType) throws IOException {
@@ -141,10 +141,10 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 序列化主体
+     * Serialize the body
      *
-     * @param ctx  请求上下文
-     * @param data 数据
+     * @param ctx Handling context
+     * @param data data
      */
     @Override
     public void serializeToBody(Context ctx, Object data) throws IOException {
@@ -158,9 +158,9 @@ public class Fastjson2StringSerializer implements ContextSerializer<String> {
     }
 
     /**
-     * 反序列化主体
+     * Deserialize the body
      *
-     * @param ctx 请求上下文
+     * @param ctx Handling context
      */
     @Override
     public Object deserializeFromBody(Context ctx) throws IOException {

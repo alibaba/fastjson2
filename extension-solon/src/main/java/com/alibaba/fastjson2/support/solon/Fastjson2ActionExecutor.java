@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Json 动作执行器
+ * Json ActionExecuteHandler
  *
  * @author noear
  * @author 夜の孤城
@@ -29,24 +29,24 @@ public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
     }
 
     /**
-     * 获取序列化接口
+     * Gets the serialization interface
      */
     public Fastjson2StringSerializer getSerializer() {
         return serializer;
     }
 
     /**
-     * 反序列化配置
+     * Deserialize the configuration
      */
     public JSONReader.Context config() {
         return getSerializer().getDeserializeConfig();
     }
 
     /**
-     * 是否匹配
+     * Match or not
      *
-     * @param ctx  请求上下文
-     * @param mime 内容类型
+     * @param ctx Handling context
+     * @param mime Content type
      */
     @Override
     public boolean matched(Context ctx, String mime) {
@@ -54,10 +54,10 @@ public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
     }
 
     /**
-     * 转换 body
+     * Converting body
      *
-     * @param ctx   请求上下文
-     * @param mWrap 函数包装器
+     * @param ctx Handling context
+     * @param mWrap Method wrappers
      */
     @Override
     protected Object changeBody(Context ctx, MethodWrap mWrap) throws Exception {
@@ -67,21 +67,21 @@ public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
     /**
      * 转换 value
      *
-     * @param ctx     请求上下文
-     * @param p       参数包装器
-     * @param pi      参数序位
-     * @param pt      参数类型
-     * @param bodyObj 主体对象
+     * @param ctx Handling context
+     * @param p Parameter wrappers
+     * @param pi Parameter index
+     * @param pt Parameter type
+     * @param bodyObj Body object
      */
     @Override
     protected Object changeValue(Context ctx, ParamWrap p, int pi, Class<?> pt, Object bodyObj) throws Exception {
         if (p.spec().isRequiredPath() || p.spec().isRequiredCookie() || p.spec().isRequiredHeader()) {
-            //如果是 path、cookie, header 变量
+            //If path、cookie, header?
             return super.changeValue(ctx, p, pi, pt, bodyObj);
         }
 
         if (p.spec().isRequiredBody() == false && ctx.paramMap().containsKey(p.spec().getName())) {
-            //可能是 path、queryString 变量
+            //If path、queryString?
             return super.changeValue(ctx, p, pi, pt, bodyObj);
         }
 
@@ -94,10 +94,10 @@ public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
 
             if (p.spec().isRequiredBody() == false) {
                 //
-                //如果没有 body 要求；尝试找按属性找
+                //If there is no body requirement; Try to find by attribute
                 //
                 if (tmp.containsKey(p.spec().getName())) {
-                    //支持泛型的转换
+                    //Supports conversions of generic types
                     if (p.spec().isGenericType()) {
                         return tmp.getObject(p.spec().getName(), p.getGenericType());
                     } else {
@@ -106,7 +106,7 @@ public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
                 }
             }
 
-            //尝试 body 转换
+            //Try the body conversion
             if (pt.isPrimitive() || pt.getTypeName().startsWith("java.lang.")) {
                 return super.changeValue(ctx, p, pi, pt, bodyObj);
             } else {
@@ -118,7 +118,7 @@ public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
                     return null;
                 }
 
-                //支持泛型的转换 如：Map<T>
+                //Generic transformations such as Map<T>
                 if (p.spec().isGenericType()) {
                     return tmp.to(p.getGenericType());
                 } else {
@@ -129,16 +129,16 @@ public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
 
         if (bodyObj instanceof JSONArray) {
             JSONArray tmp = (JSONArray) bodyObj;
-            //如果参数是非集合类型
+            //If the argument is a non-collection type
             if (!Collection.class.isAssignableFrom(pt)) {
                 return null;
             }
-            //集合类型转换
+            //Collection Type Conversions
             if (p.spec().isGenericType()) {
-                //转换带泛型的集合
+                //Transforms a collection with generics
                 return tmp.to(p.getGenericType());
             } else {
-                //不仅可以转换为List 还可以转换成Set
+                //Can be converted not only to a List but also to a Set
                 return tmp.to(pt);
             }
         }

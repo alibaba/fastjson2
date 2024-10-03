@@ -5,7 +5,7 @@ import org.noear.solon.core.handle.Render;
 import org.noear.solon.serialization.StringSerializerRender;
 
 /**
- * Json 类型化渲染器工厂（一般用于 RPC）
+ * Json typed RenderFactory (Typically used with RPC)
  *
  * @author noear
  * @author 暮城留风
@@ -23,7 +23,7 @@ public class Fastjson2RenderTypedFactory extends Fastjson2RenderFactoryBase {
     }
 
     /**
-     * 后缀或名字映射
+     * Suffix or name mapping
      */
     @Override
     public String[] mappings() {
@@ -31,7 +31,7 @@ public class Fastjson2RenderTypedFactory extends Fastjson2RenderFactoryBase {
     }
 
     /**
-     * 创建
+     * Create Render
      */
     @Override
     public Render create() {
