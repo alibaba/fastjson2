@@ -271,9 +271,8 @@ public abstract class JSON
             context.config(processor);
         }
 
-        JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -320,9 +319,8 @@ public abstract class JSON
             context.config(processor);
         }
 
-        JSONReader jsonReader = JSONReader.of(bytes, offset, len, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(bytes, offset, len, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -698,9 +696,8 @@ public abstract class JSON
             context.config(processor);
         }
 
-        JSONReader jsonReader = JSONReader.of(is, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(is, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -743,9 +740,8 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(is, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(is, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -777,8 +773,6 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader reader = JSONReader.of(jsonBytes, context);
-
         boolean ordered = false;
         for (Feature feature : features) {
             if (feature == Feature.OrderedField) {
@@ -786,8 +780,8 @@ public abstract class JSON
                 break;
             }
         }
-
         try {
+            JSONReader reader = JSONReader.of(jsonBytes, context);
             Map<String, Object> map = ordered ? new LinkedHashMap<>() : new HashMap<>();
             reader.read(map, 0);
             JSONObject jsonObject = new JSONObject(map);
@@ -815,9 +809,8 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -846,9 +839,8 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -871,10 +863,8 @@ public abstract class JSON
         if (jsonBytes == null) {
             return null;
         }
-
-        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -903,13 +893,13 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
-
-        if (filter instanceof Filter) {
-            context.config((Filter) filter);
-        }
-
         try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
+
+            if (filter instanceof Filter) {
+                context.config((Filter) filter);
+            }
+
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
@@ -1173,16 +1163,19 @@ public abstract class JSON
                     DEFAULT_PARSER_FEATURE,
                     features
             );
-            JSONReader jsonReader = JSONReader.of(chars, 0, position, context);
-
-            T object = jsonReader.read(clazz);
-            if (object != null) {
-                jsonReader.handleResolveTasks(object);
+            try (JSONReader jsonReader = JSONReader.of(chars, 0, position, context)) {
+                T object = jsonReader.read(clazz);
+                if (object != null) {
+                    jsonReader.handleResolveTasks(object);
+                }
+                if (!jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input not end"));
+                }
+                return object;
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                throw new JSONException(ex.getMessage(), cause);
             }
-            if (!jsonReader.isEnd()) {
-                throw new JSONException(jsonReader.info("input not end"));
-            }
-            return object;
         } finally {
             if (chars.length <= 1024 * 64) {
                 CHARS_UPDATER.set(CACHE, chars);
@@ -1218,6 +1211,9 @@ public abstract class JSON
                 throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException(ex.getMessage(), cause);
         }
     }
 
