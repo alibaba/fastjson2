@@ -8,7 +8,8 @@ import org.noear.solon.test.SolonTest;
  * @author noear 2024/10/2 created
  */
 @SolonTest(SolonTestApp.class)
-public class DemoTest extends HttpTester {
+public class DemoTest
+        extends HttpTester {
     @Test
     public void ok_post_json() throws Exception {
         String json = "{\"password\":\"1234\",\"username\":\"world\"}";

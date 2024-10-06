@@ -12,7 +12,8 @@ import org.noear.solon.core.handle.Result;
  * @since 2024-10-01
  */
 @Component
-public class DemoErrorFilter implements Filter {
+public class DemoErrorFilter
+        implements Filter {
     @Override
     public void doFilter(Context ctx, FilterChain chain) throws Throwable {
         try {
