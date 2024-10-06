@@ -47,8 +47,8 @@
             <dependency>
                 <groupId>org.noear</groupId>
                 <artifactId>solon-parent</artifactId>
-                <version>${solon.version}</version>
                 <type>pom</type>
+                <version>${solon.version}</version>
                 <scope>import</scope>
             </dependency>
         </dependencies>
