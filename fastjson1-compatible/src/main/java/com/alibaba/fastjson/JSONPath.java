@@ -106,6 +106,9 @@ public class JSONPath {
     }
 
     public static boolean contains(Object rootObject, String path) {
+        if (rootObject == null) {
+            return false;
+        }
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         return jsonPath.contains(rootObject);
     }
