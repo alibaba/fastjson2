@@ -23,7 +23,8 @@ import java.lang.reflect.Type;
  * @since 2.8
  * @since 2024-10-01
  */
-public class Fastjson2StringSerializer implements ContextSerializer<String> {
+public class Fastjson2StringSerializer
+        implements ContextSerializer<String> {
     private static final String label = "/json";
 
     private JSONWriter.Context serializeConfig;

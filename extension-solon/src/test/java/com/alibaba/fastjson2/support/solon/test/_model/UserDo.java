@@ -12,7 +12,8 @@ import java.util.Map;
  */
 @Getter
 @Setter
-public class UserDo implements Serializable {
+public class UserDo
+        implements Serializable {
     String s0;
 
     String s1 = "noear";

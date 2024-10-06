@@ -20,7 +20,8 @@ import java.util.List;
  * @since 1.9
  * @since 2024-10-01
  * */
-public class Fastjson2ActionExecutor extends ActionExecuteHandlerDefault {
+public class Fastjson2ActionExecutor
+        extends ActionExecuteHandlerDefault {
     private final Fastjson2StringSerializer serializer = new Fastjson2StringSerializer();
 
     public Fastjson2ActionExecutor() {

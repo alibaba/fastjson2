@@ -13,12 +13,12 @@ import org.noear.solon.serialization.prop.JsonProps;
  *
  * @author noear
  * */
-public class Fastjson2Plugin implements Plugin {
-
+public class Fastjson2Plugin
+        implements Plugin {
     @Override
     public void start(AppContext context) {
         JsonProps jsonProps = JsonProps.create(context);
-        if(jsonProps == null){
+        if (jsonProps == null) {
             jsonProps = new JsonProps();
             jsonProps.dateAsTicks = true;
         }

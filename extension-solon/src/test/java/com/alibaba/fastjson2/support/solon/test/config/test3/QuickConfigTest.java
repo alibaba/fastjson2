@@ -22,7 +22,7 @@ public class QuickConfigTest {
     Fastjson2RenderFactory renderFactory;
 
     @Test
-    public void hello2() throws Throwable{
+    public void hello2() throws Throwable {
         UserDo userDo = new UserDo();
 
         Map<String, Object> data = new HashMap<>();

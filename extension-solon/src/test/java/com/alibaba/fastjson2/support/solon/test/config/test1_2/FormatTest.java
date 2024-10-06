@@ -12,7 +12,7 @@ import java.util.Date;
  * @author noear 2024/9/4 created
  */
 public class FormatTest {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         //
         // 当有 Provider::register 类型处理后，@JSONField 注解失效了
         //
@@ -20,7 +20,7 @@ public class FormatTest {
         context.getProvider().register(Date.class, new ObjectWriter() {
             @Override
             public void write(JSONWriter jsonWriter, Object o, Object o1, Type type, long l) {
-                jsonWriter.writeInt64(((Date)o).getTime());
+                jsonWriter.writeInt64(((Date) o).getTime());
             }
         });
 
@@ -29,7 +29,7 @@ public class FormatTest {
         dateDo.setDate(new Date(1673861993477L));
         dateDo.setDate2(new Date(1673861993477L));
 
-        String json =  JSON.toJSONString(dateDo, context);
+        String json = JSON.toJSONString(dateDo, context);
         System.out.println(json); //{"date":1673861993477,"date2":1673861993477}
 
         assert "{\"date\":1673861993477,\"date2\":\"2023-01-16 17:39:53\"}".equals(json);

@@ -25,7 +25,7 @@ public class QuickConfigTest {
     Fastjson2RenderFactory renderFactory;
 
     @Test
-    public void hello2() throws Throwable{
+    public void hello2() throws Throwable {
         UserDo userDo = new UserDo();
 
         Map<String, Object> data = new HashMap<>();
@@ -49,9 +49,9 @@ public class QuickConfigTest {
     }
 
     @Test
-    public void hello3() throws Throwable{
+    public void hello3() throws Throwable {
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("long", 1l);
+        data.put("long", 1L);
         data.put("order", new OrderDo());
 
         ContextEmpty ctx = new ContextEmpty();

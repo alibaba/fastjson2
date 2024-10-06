@@ -22,7 +22,6 @@ public class AsNumberTest2 {
 
         assert "{\"a\":0,\"b\":0,\"c\":1}".equals(tmp);
 
-
         writeContext = new JSONWriter.Context(writerProvider,
                 JSONWriter.Feature.WriteNullNumberAsZero,
                 JSONWriter.Feature.WriteLongAsString);

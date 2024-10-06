@@ -20,7 +20,7 @@ public class QuickConfigTest {
     Fastjson2RenderFactory renderFactory;
 
     @Test
-    public void hello2() throws Throwable{
+    public void hello2() throws Throwable {
         CustomDateDo dateDo = new CustomDateDo();
 
         dateDo.setDate(new Date(1673861993477L));

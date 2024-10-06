@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.support.solon;
 
-
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.noear.solon.core.convert.Converter;
@@ -14,7 +13,8 @@ import org.noear.solon.serialization.JsonRenderFactory;
  * @since 1.10
  * @since 2024-10-01
  */
-public abstract class Fastjson2RenderFactoryBase implements JsonRenderFactory {
+public abstract class Fastjson2RenderFactoryBase
+        implements JsonRenderFactory {
     protected Fastjson2StringSerializer serializer = new Fastjson2StringSerializer();
 
     /**
