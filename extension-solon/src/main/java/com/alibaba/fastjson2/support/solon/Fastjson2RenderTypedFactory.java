@@ -5,7 +5,7 @@ import org.noear.solon.core.handle.Render;
 import org.noear.solon.serialization.StringSerializerRender;
 
 /**
- * Json typed RenderFactory (Typically used with RPC)
+ * Json Typed RenderFactory (Typically used with RPC)
  *
  * @author noear
  * @author 暮城留风
@@ -18,7 +18,8 @@ public class Fastjson2RenderTypedFactory
         serializer.cfgSerializeFeatures(false, true,
                 JSONWriter.Feature.BrowserCompatible,
                 JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.ReferenceDetection
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteLongAsString
         );
     }
 

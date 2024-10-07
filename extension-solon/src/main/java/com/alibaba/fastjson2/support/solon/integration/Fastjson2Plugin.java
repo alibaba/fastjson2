@@ -18,10 +18,6 @@ public class Fastjson2Plugin
     @Override
     public void start(AppContext context) {
         JsonProps jsonProps = JsonProps.create(context);
-        if (jsonProps == null) {
-            jsonProps = new JsonProps();
-            jsonProps.dateAsTicks = true;
-        }
 
         //::renderFactory
         Fastjson2RenderFactory renderFactory = new Fastjson2RenderFactory(jsonProps); //绑定属性

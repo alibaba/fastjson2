@@ -6,7 +6,7 @@ import org.noear.solon.core.convert.Converter;
 import org.noear.solon.serialization.JsonRenderFactory;
 
 /**
- * Json 渲染器工厂基类
+ * Json RenderFactory Base
  *
  * @author noear
  * @author 暮城留风
@@ -16,6 +16,11 @@ import org.noear.solon.serialization.JsonRenderFactory;
 public abstract class Fastjson2RenderFactoryBase
         implements JsonRenderFactory {
     protected Fastjson2StringSerializer serializer = new Fastjson2StringSerializer();
+
+    public Fastjson2RenderFactoryBase() {
+        //The default time handling is a timestamp
+        serializer.getSerializeConfig().setDateFormat("millis");
+    }
 
     /**
      * Gets the serializer
