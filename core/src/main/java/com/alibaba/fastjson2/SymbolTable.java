@@ -17,26 +17,16 @@ public final class SymbolTable {
 
     public SymbolTable(String... input) {
         Set<String> set = new TreeSet<>(Arrays.asList(input));
-        names = new String[set.size()];
-        Iterator<String> it = set.iterator();
+        names = set.toArray(new String[0]);
 
-        for (int i = 0; i < names.length; i++) {
-            if (it.hasNext()) {
-                names[i] = it.next();
-            }
-        }
+        this.hashCodesOrigin = Arrays.stream(names)
+                                    .mapToLong(Fnv::hashCode64)
+                                    .toArray();
 
-        long[] hashCodes = new long[names.length];
-        for (int i = 0; i < names.length; i++) {
-            long hashCode = Fnv.hashCode64(names[i]);
-            hashCodes[i] = hashCode;
-        }
-        this.hashCodesOrigin = hashCodes;
-
-        this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
+        this.hashCodes = Arrays.copyOf(hashCodesOrigin, hashCodesOrigin.length);
         Arrays.sort(this.hashCodes);
-
         mapping = new short[this.hashCodes.length];
+        
         for (int i = 0; i < hashCodes.length; i++) {
             long hashCode = hashCodes[i];
             int index = Arrays.binarySearch(this.hashCodes, hashCode);
