@@ -30,7 +30,7 @@ final class FieldWriterObjectArrayMethod<T>
             Field field,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
         this.itemType = itemType;
         if (itemType instanceof Class) {
             itemClass = (Class) itemType;
@@ -149,6 +149,8 @@ final class FieldWriterObjectArrayMethod<T>
             }
         }
 
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+
         if (jsonWriter.jsonb) {
             Class arrayClass = array.getClass();
             if (arrayClass != this.fieldClass) {
@@ -215,6 +217,11 @@ final class FieldWriterObjectArrayMethod<T>
                 jsonWriter.writeNull();
                 continue;
             }
+            if (writeAsString) {
+                jsonWriter.writeString(item.toString());
+                continue;
+            }
+
             Class<?> itemClass = item.getClass();
             ObjectWriter itemObjectWriter;
             if (itemClass == previousClass) {

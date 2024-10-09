@@ -11,7 +11,7 @@ public class BrowserSecureTest {
     public void testUTF8_2_0() {
         JSONWriter jsonWriter = JSONWriter.ofUTF8(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("<>");
-        assertEquals("\"\\u003c\\u003e\"", jsonWriter.toString());
+        assertEquals("\"\\u003C\\u003E\"", jsonWriter.toString());
     }
 
     @Test
@@ -39,21 +39,21 @@ public class BrowserSecureTest {
     public void testUTF8_4() {
         JSONWriter jsonWriter = JSONWriter.ofUTF8(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("<>()");
-        assertEquals("\"\\u003c\\u003e\\u0028\\u0029\"", jsonWriter.toString());
+        assertEquals("\"\\u003C\\u003E\\u0028\\u0029\"", jsonWriter.toString());
     }
 
     @Test
     public void testUTF8_8() {
         JSONWriter jsonWriter = JSONWriter.ofUTF8(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("abcd<>()");
-        assertEquals("\"abcd\\u003c\\u003e\\u0028\\u0029\"", jsonWriter.toString());
+        assertEquals("\"abcd\\u003C\\u003E\\u0028\\u0029\"", jsonWriter.toString());
     }
 
     @Test
     public void testUTF16_2_0() {
         JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("<>");
-        assertEquals("\"\\u003c\\u003e\"", jsonWriter.toString());
+        assertEquals("\"\\u003C\\u003E\"", jsonWriter.toString());
     }
 
     @Test
@@ -81,14 +81,14 @@ public class BrowserSecureTest {
     public void testUTF16_4() {
         JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("<>()");
-        assertEquals("\"\\u003c\\u003e\\u0028\\u0029\"", jsonWriter.toString());
+        assertEquals("\"\\u003C\\u003E\\u0028\\u0029\"", jsonWriter.toString());
     }
 
     @Test
     public void testUTF16_8() {
         JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("abcd<>()");
-        assertEquals("\"abcd\\u003c\\u003e\\u0028\\u0029\"", jsonWriter.toString());
+        assertEquals("\"abcd\\u003C\\u003E\\u0028\\u0029\"", jsonWriter.toString());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class BrowserSecureTest {
         assertEquals("\"<script>alert('XSS');</script>\"",
                 JSON.toJSONString("<script>alert('XSS');</script>"));
 
-        assertEquals("\"\\u003cscript\\u003ealert\\u0028'XSS'\\u0029;\\u003c/script\\u003e\"",
+        assertEquals("\"\\u003Cscript\\u003Ealert\\u0028'XSS'\\u0029;\\u003C/script\\u003E\"",
                 JSON.toJSONString("<script>alert('XSS');</script>", JSONWriter.Feature.BrowserSecure));
     }
 }

@@ -70,7 +70,7 @@ final class JSONPathSegmentIndex
             return;
         }
 
-        if ((object instanceof SortedSet || object instanceof LinkedHashSet)
+        if ((object instanceof SortedSet || object instanceof LinkedHashSet || object instanceof Queue)
                 || (index == 0 && object instanceof Collection && ((Collection<?>) object).size() == 1)
         ) {
             Collection collection = (Collection) object;
@@ -477,9 +477,7 @@ final class JSONPathSegmentIndex
         for (int i = 0; jsonReader.ch != EOI; ++i) {
             if (jsonReader.ch == ']') {
                 jsonReader.next();
-                if (i == 0) {
-                    context.eval = true;
-                }
+                context.eval = true;
                 break;
             }
 

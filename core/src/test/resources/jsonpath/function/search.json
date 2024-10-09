@@ -1,0 +1,166 @@
+{
+  "tests": [
+    {
+      "name": "at the end",
+      "selector" : "$[?search(@.a, 'a.*')]",
+      "document" : [{"a": "the end is ab"}],
+      "result": [
+        {"a": "the end is ab"}
+      ]
+    },
+    {
+      "name": "double quotes",
+      "selector" : "$[?search(@.a, \"a.*\")]",
+      "document" : [{"a": "the end is ab"}],
+      "result": [
+        {"a": "the end is ab"}
+      ]
+    },
+    {
+      "name": "at the start",
+      "selector" : "$[?search(@.a, 'a.*')]",
+      "document" : [{"a": "ab is at the start"}],
+      "result": [
+        {"a": "ab is at the start"}
+      ]
+    },
+    {
+      "name": "in the middle",
+      "selector" : "$[?search(@.a, 'a.*')]",
+      "document" : [{"a": "contains two matches"}],
+      "result": [
+        {"a": "contains two matches"}
+      ]
+    },
+    {
+      "name": "regex from the document",
+      "selector" : "$.values[?search(@, $.regex)]",
+      "document" : {"regex": "b.?b", "values": ["abc", "bcd", "bab", "bba", "bbab", "b", true, [], {}]},
+      "result": ["bab", "bba", "bbab"]
+    },
+    {
+      "name": "don't select match",
+      "selector" : "$[?!search(@.a, 'a.*')]",
+      "document" : [{"a": "contains two matches"}],
+      "result": []
+    },
+    {
+      "name": "not a match",
+      "selector" : "$[?search(@.a, 'a.*')]",
+      "document" : [{"a": "bc"}],
+      "result": []
+    },
+    {
+      "name": "select non-match",
+      "selector" : "$[?!search(@.a, 'a.*')]",
+      "document" : [{"a": "bc"}],
+      "result": [{"a": "bc"}]
+    },
+    {
+      "name": "non-string first arg",
+      "selector" : "$[?search(1, 'a.*')]",
+      "document" : [{"a": "bc"}],
+      "result": []
+    },
+    {
+      "name": "non-string second arg",
+      "selector" : "$[?search(@.a, 1)]",
+      "document" : [{"a": "bc"}],
+      "result": []
+    },
+    {
+      "name": "filter, search function, unicode char class, uppercase",
+      "selector": "$[?search(@, '\\\\p{Lu}')]",
+      "document": ["ж", "Ж", "1", "жЖ", true, [], {}],
+      "result": ["Ж", "жЖ"]
+    },
+    {
+      "name": "filter, search function, unicode char class negated, uppercase",
+      "selector": "$[?search(@, '\\\\P{Lu}')]",
+      "document": ["ж", "Ж", "1", true, [], {}],
+      "result": ["ж", "1"]
+    },
+    {
+      "name": "filter, search function, unicode, surrogate pair",
+      "selector": "$[?search(@, 'a.b')]",
+      "document": ["a\uD800\uDD01bc", "abc", "1", true, [], {}],
+      "result": ["a\uD800\uDD01bc"]
+    },
+    {
+      "name": "dot matcher on \\u2028",
+      "selector": "$[?search(@, '.')]",
+      "document": ["\u2028", "\r\u2028\n", "\r", "\n", true, [], {}],
+      "result": ["\u2028", "\r\u2028\n"]
+    },
+    {
+      "name": "dot matcher on \\u2029",
+      "selector": "$[?search(@, '.')]",
+      "document": ["\u2029", "\r\u2029\n", "\r", "\n", true, [], {}],
+      "result": ["\u2029", "\r\u2029\n"]
+    },
+    {
+      "name": "result cannot be compared",
+      "selector" : "$[?search(@.a, 'a.*')==true]",
+      "invalid_selector": true
+    },
+    {
+      "name": "too few params",
+      "selector" : "$[?search(@.a)]",
+      "invalid_selector": true
+    },
+    {
+      "name": "too many params",
+      "selector" : "$[?search(@.a,@.b,@.c)]",
+      "invalid_selector": true
+    },
+    {
+      "name": "arg is a function expression",
+      "selector" : "$.values[?search(@, value($..['regex']))]",
+      "document" : {
+        "regex": "b.?b",
+        "values": [
+          "abc",
+          "bcd",
+          "bab",
+          "bba",
+          "bbab",
+          "b",
+          true,
+          [],
+          {}
+        ]
+      },
+      "result": ["bab", "bba", "bbab"]
+    },
+    {
+      "name": "dot in character class",
+      "selector" : "$[?search(@, 'a[.b]c')]",
+      "document" : ["x abc y", "x a.c y", "x axc y"],
+      "result": ["x abc y", "x a.c y"]
+    },
+    {
+      "name": "escaped dot",
+      "selector" : "$[?search(@, 'a\\\\.c')]",
+      "document" : ["x abc y", "x a.c y", "x axc y"],
+      "result": ["x a.c y"]
+    },
+    {
+      "name": "escaped backslash before dot",
+      "selector" : "$[?search(@, 'a\\\\\\\\.c')]",
+      "document" : ["x abc y", "x a.c y", "x axc y", "x a\\\u2028c y"],
+      "result": ["x a\\\u2028c y"]
+    },
+    {
+      "name": "escaped left square bracket",
+      "selector" : "$[?search(@, 'a\\\\[.c')]",
+      "document" : ["x abc y", "x a.c y", "x a[\u2028c y"],
+      "result": ["x a[\u2028c y"]
+    },
+    {
+      "name": "escaped right square bracket",
+      "selector" : "$[?search(@, 'a[\\\\].]c')]",
+      "document" : ["x abc y", "x a.c y", "x a\u2028c y", "x a]c y"],
+      "result": ["x a.c y", "x a]c y"]
+    }
+  ]
+}

@@ -15,7 +15,7 @@ final class FieldWriterBigIntField<T>
             String label,
             Field field
     ) {
-        super(name, ordinal, features, format, label, BigInteger.class, BigInteger.class, field, null);
+        super(name, ordinal, features, format, null, label, BigInteger.class, BigInteger.class, field, null);
     }
 
     @Override

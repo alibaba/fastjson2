@@ -37,7 +37,7 @@ public interface JSON {
     /**
      * fastjson2 version name
      */
-    String VERSION = "2.0.48";
+    String VERSION = "2.0.54";
 
     /**
      * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
@@ -196,6 +196,58 @@ public interface JSON {
     }
 
     /**
+     * Parses the json byte array as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received byte array is {@code null} or empty.
+     *
+     * @param bytes the specified UTF8 text to be parsed
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @since 2.0.51
+     */
+    static Object parse(byte[] bytes, JSONReader.Context context) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        ObjectReader<?> objectReader = context.getObjectReader(Object.class);
+
+        try (JSONReader reader = JSONReader.of(bytes, context)) {
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json byte array as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received byte array is {@code null} or empty.
+     *
+     * @param bytes the specified UTF8 text to be parsed
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @since 2.0.51
+     */
+    static Object parse(byte[] bytes, int offset, int length, Charset charset, JSONReader.Context context) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        ObjectReader<?> objectReader = context.getObjectReader(Object.class);
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length, charset, context)) {
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parses the json char array as a {@link JSONArray} or {@link JSONObject}.
      * Returns {@code null} if received char array is {@code null} or empty.
      *
@@ -212,6 +264,32 @@ public interface JSON {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         final JSONReader.Context context = new JSONReader.Context(provider, features);
         ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
+
+        try (JSONReader reader = JSONReader.of(chars, context)) {
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json char array as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received char array is {@code null} or empty.
+     *
+     * @param chars the specified char array to be parsed
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @since 2.0.51
+     */
+    static Object parse(char[] chars, JSONReader.Context context) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        ObjectReader<?> objectReader = context.getObjectReader(Object.class);
 
         try (JSONReader reader = JSONReader.of(chars, context)) {
             Object object = objectReader.readObject(reader, null, null, 0);
@@ -908,6 +986,37 @@ public interface JSON {
                 type,
                 (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
         );
+
+        try (JSONReader reader = JSONReader.of(text, context)) {
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json string as {@link T}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or its content is null.
+     *
+     * @param text the specified string to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @since 2.0.52
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(String text, Type type, JSONReader.Context context) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        final ObjectReader<T> objectReader = context.getObjectReader(type);
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             T object = objectReader.readObject(reader, type, null, 0);
@@ -3385,6 +3494,35 @@ public interface JSON {
      *
      * @param out the specified output stream to be written
      * @param object the specified object will be serialized
+     * @param context the specified custom context
+     * @return the length of byte stream
+     * @throws JSONException If an I/O error or serialization error occurs
+     * @since 2.0.51
+     */
+    static int writeTo(OutputStream out, Object object, JSONWriter.Context context) {
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.flushTo(out);
+        } catch (Exception e) {
+            throw new JSONException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
+     *
+     * @param out the specified output stream to be written
+     * @param object the specified object will be serialized
      * @param features the specified features is applied to serialization
      * @return the length of byte stream
      * @throws JSONException If an I/O error or serialization error occurs
@@ -4060,7 +4198,7 @@ public interface JSON {
         }
 
         boolean fieldBased = false, beanToArray = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (int i = 0; i < features.length; i++) {
             JSONWriter.Feature feature = features[i];
             featuresValue |= feature.mask;
@@ -4137,7 +4275,7 @@ public interface JSON {
         Class<?> objectClass = object.getClass();
 
         boolean fieldBased = false, beanToArray = false;
-        long featuresValue = 0;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         for (int i = 0; i < features.length; i++) {
             JSONWriter.Feature feature = features[i];
             featuresValue |= feature.mask;

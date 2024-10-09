@@ -260,12 +260,11 @@ class JSONWriterUTF16
     }
 
     public void writeStringLatin1(byte[] value) {
-        if (value == null) {
-            writeStringNull();
+        if ((context.features & BrowserSecure.mask) != 0) {
+            writeStringLatin1BrowserSecure(value);
             return;
         }
 
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
         int off = this.off;
         int minCapacity = off + value.length + 2;
@@ -283,7 +282,33 @@ class JSONWriterUTF16
                 break;
             }
 
-            if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
+            chars[off++] = (char) c;
+        }
+
+        if (!escape) {
+            chars[off] = quote;
+            this.off = off + 1;
+            return;
+        }
+
+        this.off = start;
+        writeStringEscape(value);
+    }
+
+    protected final void writeStringLatin1BrowserSecure(byte[] value) {
+        boolean escape = false;
+        int off = this.off;
+        int minCapacity = off + value.length + 2;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final int start = off;
+        final char[] chars = this.chars;
+        chars[off++] = quote;
+
+        for (byte c : value) {
+            if (c == '\\' || c == quote || c < ' ' || c == '<' || c == '>' || c == '(' || c == ')') {
                 escape = true;
                 break;
             }
@@ -1626,7 +1651,7 @@ class JSONWriterUTF16
     @Override
     public final void writeName6Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 10 + indent;
+        int minCapacity = off + 11 + indent;
         if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1649,7 +1674,7 @@ class JSONWriterUTF16
     @Override
     public final void writeName7Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 10 + indent;
+        int minCapacity = off + 12 + indent;
         if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1673,7 +1698,7 @@ class JSONWriterUTF16
     @Override
     public final void writeName8Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 10 + indent;
+        int minCapacity = off + 13 + indent;
         if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1970,7 +1995,7 @@ class JSONWriterUTF16
                 newCapacity = minCapacity;
             }
             if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
             }
 
             // minCapacity is usually close to size, so this is a win:
@@ -3104,6 +3129,68 @@ class JSONWriterUTF16
         chars[off++] = ']';
     }
 
+    @Override
+    public final void writeString(boolean value) {
+        chars[off++] = quote;
+        writeBool(value);
+        chars[off++] = quote;
+    }
+
+    @Override
+    public final void writeString(byte value) {
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt8(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    @Override
+    public final void writeString(short value) {
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt16(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    @Override
+    public final void writeString(int value) {
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt32(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    @Override
+    public final void writeString(long value) {
+        boolean writeAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt64(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    private void writeQuote() {
+        if (off == chars.length) {
+            ensureCapacity(off + 1);
+        }
+        chars[off++] = quote;
+    }
+
     public final void writeString(final char[] chars) {
         if (chars == null) {
             writeStringNull();
@@ -3186,10 +3273,19 @@ class JSONWriterUTF16
             chars[off++] = value ? '1' : '0';
         } else {
             if (!value) {
-                chars[off++] = 'f';
+                chars[off] = 'f';
+                chars[off + 1] = 'a';
+                chars[off + 2] = 'l';
+                chars[off + 3] = 's';
+                chars[off + 4] = 'e';
+                off += 5;
+            } else {
+                chars[off] = 't';
+                chars[off + 1] = 'r';
+                chars[off + 2] = 'u';
+                chars[off + 3] = 'e';
+                off += 4;
             }
-            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), value ? TRUE_64 : ALSE_64);
-            off += 4;
         }
         this.off = off;
     }

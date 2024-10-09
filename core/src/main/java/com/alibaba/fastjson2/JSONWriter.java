@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.lang.reflect.GenericArrayType;
@@ -29,7 +28,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
 public abstract class JSONWriter
         implements Closeable {
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
-    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     public final Context context;
     public final boolean utf8;
@@ -51,6 +50,7 @@ public abstract class JSONWriter
     protected String lastReference;
     protected boolean pretty;
     protected int indent;
+    protected Object attachment;
 
     protected JSONWriter(
             Context context,
@@ -168,6 +168,13 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
+    public final void addManagerReference(Object object) {
+        if (refs == null) {
+            refs = new IdentityHashMap(8);
+        }
+        refs.putIfAbsent(object, Path.MANGER_REFERNCE);
+    }
+
     public final boolean writeReference(int index, Object object) {
         String refPath = setPath(index, object);
         if (refPath != null) {
@@ -206,6 +213,10 @@ public abstract class JSONWriter
     }
 
     public final void popPath(Object object) {
+        if (!isRefDetect(object)) {
+            return;
+        }
+
         if (this.path == null
                 || (context.features & ReferenceDetection.mask) == 0
                 || object == Collections.EMPTY_LIST
@@ -249,6 +260,22 @@ public abstract class JSONWriter
 
     public final boolean containsReference(Object value) {
         return refs != null && refs.containsKey(value);
+    }
+
+    public final String getPath(Object value) {
+        Path path;
+        return refs == null || (path = refs.get(value)) == null
+                ? "$"
+                : path.toString();
+    }
+
+    /**
+     * If ReferenceDetection has been set, returns the path of the current object, otherwise returns null
+     * @since 2.0.51
+     * @return the path of the current object
+     */
+    public String getPath() {
+        return path == null ? null : path.toString();
     }
 
     public final boolean removeReference(Object value) {
@@ -854,6 +881,11 @@ public abstract class JSONWriter
         writeString(name);
     }
 
+    public final void writeNameValue(String name, Object value) {
+        writeName(name);
+        writeAny(value);
+    }
+
     public final void writeName(long name) {
         if (startObject) {
             startObject = false;
@@ -892,6 +924,70 @@ public abstract class JSONWriter
 
     public void startArray(int size) {
         throw new JSONException("UnsupportedOperation");
+    }
+
+    public void startArray0() {
+        startArray(0);
+    }
+
+    public void startArray1() {
+        startArray(1);
+    }
+
+    public void startArray2() {
+        startArray(2);
+    }
+
+    public void startArray3() {
+        startArray(3);
+    }
+
+    public void startArray4() {
+        startArray(4);
+    }
+
+    public void startArray5() {
+        startArray(5);
+    }
+
+    public void startArray6() {
+        startArray(6);
+    }
+
+    public void startArray7() {
+        startArray(7);
+    }
+
+    public void startArray8() {
+        startArray(8);
+    }
+
+    public void startArray9() {
+        startArray(9);
+    }
+
+    public void startArray10() {
+        startArray(10);
+    }
+
+    public void startArray11() {
+        startArray(11);
+    }
+
+    public void startArray12() {
+        startArray(12);
+    }
+
+    public void startArray13() {
+        startArray(13);
+    }
+
+    public void startArray14() {
+        startArray(14);
+    }
+
+    public void startArray15() {
+        startArray(15);
     }
 
     public void startArray(Object array, int size) {
@@ -1203,6 +1299,199 @@ public abstract class JSONWriter
 
     public abstract void writeString(String str);
 
+    /**
+     * write short value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(boolean value);
+
+    /**
+     * write short value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(byte value);
+
+    /**
+     * write short value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(short value);
+
+    /**
+     * write boolean array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(boolean[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write byte array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(byte[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write short array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(short[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write int array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(int[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write long array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(long[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write float array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(float[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write double array value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(double[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(value[i]);
+        }
+        endArray();
+    }
+
+    /**
+     * write int value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(int value);
+
+    /**
+     * write float value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(float value) {
+        writeString(Float.toString(value));
+    }
+
+    /**
+     * write double value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public void writeString(double value) {
+        writeString(Double.toString(value));
+    }
+
+    /**
+     * write long value as String
+     * @param value value
+     * @since 2.0.49
+     */
+    public abstract void writeString(long value);
+
     public abstract void writeStringLatin1(byte[] value);
 
     public abstract void writeStringUTF16(byte[] value);
@@ -1496,6 +1785,13 @@ public abstract class JSONWriter
 
         public long getFeatures() {
             return features;
+        }
+
+        /**
+         * @since 2.0.51
+         */
+        public void setFeatures(long features) {
+            this.features = features;
         }
 
         public boolean isEnabled(Feature feature) {
@@ -1810,6 +2106,14 @@ public abstract class JSONWriter
         WriteNameAsSymbol(1 << 18),
         WriteBigDecimalAsPlain(1 << 19),
         UseSingleQuotes(1 << 20),
+
+        /**
+         * The serialized Map will first be sorted according to Key,
+         * and is used in some scenarios where serialized content needs to be signed.
+         * SortedMap and derived classes do not need to do this.
+         * This Feature does not work for LinkedHashMap.
+         * @deprecated Use {@link Feature#SortMapEntriesByKeys} instead.
+         */
         MapSortField(1 << 21),
         WriteNullListAsEmpty(1 << 22),
         /**
@@ -1827,8 +2131,15 @@ public abstract class JSONWriter
 
         /**
          * @since 2.0.7
+         * @deprecated use IgnoreEmpty
          */
         NotWriteEmptyArray(1 << 26),
+
+        /**
+         * @since 2.0.51
+         */
+        IgnoreEmpty(1L << 26),
+
         WriteNonStringKeyAsString(1 << 27),
         /**
          * @since 2.0.11
@@ -1891,17 +2202,30 @@ public abstract class JSONWriter
         /**
          * @since 2.0.34
          */
-        NotWriteNumberClassName(1L << 40);
+        NotWriteNumberClassName(1L << 40),
+
+        /**
+         * The serialized Map will first be sorted according to Key,
+         * and is used in some scenarios where serialized content needs to be signed.
+         * SortedMap and derived classes do not need to do this.
+         * @since 2.0.48
+         */
+        SortMapEntriesByKeys(1L << 41);
 
         public final long mask;
 
         Feature(long mask) {
             this.mask = mask;
         }
+
+        public boolean isEnabled(long features) {
+            return (features & mask) != 0;
+        }
     }
 
     public static final class Path {
         public static final Path ROOT = new Path(null, "$");
+        public static final Path MANGER_REFERNCE = new Path(null, "#");
 
         public final Path parent;
         final String name;
@@ -2248,8 +2572,54 @@ public abstract class JSONWriter
         }
     }
 
-    @NotNull
     protected static IllegalArgumentException illegalYear(int year) {
         return new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+    }
+
+    /**
+     * @deprecated
+     */
+    public final void incrementIndent() {
+        indent++;
+    }
+
+    /**
+     * @deprecated
+     */
+    public final void decrementIdent() {
+        indent--;
+    }
+
+    /**
+     * @deprecated
+     */
+    public void println() {
+        writeChar('\n');
+        for (int i = 0; i < indent; ++i) {
+            writeChar('\t');
+        }
+    }
+
+    /**
+     * @deprecated
+     * @param object
+     */
+    public final void writeReference(Object object) {
+        if (refs == null) {
+            return;
+        }
+
+        Path path = refs.get(object);
+        if (path != null) {
+            writeReference(path.toString());
+        }
+    }
+
+    public Object getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Object attachment) {
+        this.attachment = attachment;
     }
 }

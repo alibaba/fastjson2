@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
 final class FieldReaderInt32Field<T>
         extends FieldReaderObjectField<T> {
     FieldReaderInt32Field(String fieldName, Class fieldType, int ordinal, long features, String format, Integer defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
     }
 
     @Override

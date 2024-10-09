@@ -147,7 +147,7 @@ final class ObjectWriterArrayFinal
                 }
             }
 
-            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemClass, 0);
+            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemClass, features);
 
             if (refDetect) {
                 jsonWriter.popPath(item);

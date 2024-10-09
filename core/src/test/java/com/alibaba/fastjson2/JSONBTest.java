@@ -1105,4 +1105,40 @@ public class JSONBTest {
     public static class Bean {
         public int id;
     }
+
+    public static class Bean0 {
+    }
+
+    public static class BeanD {
+        public double id;
+
+        public BeanD(double id) {
+            this.id = id;
+        }
+    }
+
+    public static class BeanF {
+        public float id;
+
+        public BeanF(float id) {
+            this.id = id;
+        }
+    }
+
+    @Test
+    public void testSkip() {
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanF(0)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanF(1)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanF(100)), Bean0.class);
+
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanD(0)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanD(1)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanD(100)), Bean0.class);
+    }
 }

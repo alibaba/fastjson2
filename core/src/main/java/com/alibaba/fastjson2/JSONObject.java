@@ -23,6 +23,8 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.BeanUtils.getAnnotations;
@@ -184,6 +186,23 @@ public class JSONObject
     }
 
     /**
+     * @since 2.0.52
+     * @param key
+     * @param action
+     */
+    public void forEchArrayObject(String key, Consumer<JSONObject> action) {
+        JSONArray array = getJSONArray(key);
+        if (array == null) {
+            return;
+        }
+
+        for (int i = 0; i < array.size(); i++) {
+            action.accept(
+                    array.getJSONObject(i));
+        }
+    }
+
+    /**
      * Returns the {@link JSONArray} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
@@ -210,6 +229,10 @@ public class JSONObject
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
+            }
+
+            if (str.charAt(0) != '[') {
+                return JSONArray.of(str);
             }
 
             JSONReader reader = JSONReader.of(str);
@@ -503,6 +526,10 @@ public class JSONObject
             return Long.parseLong(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? Long.valueOf(1) : Long.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Long");
     }
 
@@ -614,6 +641,10 @@ public class JSONObject
             }
 
             return Integer.parseInt(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
@@ -974,6 +1005,10 @@ public class JSONObject
             return new BigInteger(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
@@ -1179,7 +1214,7 @@ public class JSONObject
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Type type, JSONReader.Feature... features) {
-        long featuresValue = 0L;
+        long featuresValue = JSONFactory.defaultReaderFeatures;
         boolean fieldBased = false;
         for (JSONReader.Feature feature : features) {
             if (feature == JSONReader.Feature.FieldBased) {
@@ -1227,22 +1262,29 @@ public class JSONObject
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Class<T> clazz, JSONReader.Feature... features) {
-        long featuresValue = 0L;
-        boolean fieldBased = false;
-        for (JSONReader.Feature feature : features) {
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-            featuresValue |= feature.mask;
-        }
+        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
+        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
 
         if (clazz == String.class) {
             return (T) toString();
         }
 
+        if (clazz == JSON.class) {
+            return (T) this;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
         return objectReader.createInstance(this, featuresValue);
+    }
+
+    public void copyTo(Object object, JSONReader.Feature... features) {
+        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
+        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
+        Class clazz = object.getClass();
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        objectReader.accept(object, this, featuresValue);
     }
 
     /**
@@ -1321,7 +1363,7 @@ public class JSONObject
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, features);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -1407,7 +1449,7 @@ public class JSONObject
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, features);
         }
 
         if (type instanceof Class) {
@@ -1978,6 +2020,87 @@ public class JSONObject
     }
 
     /**
+     * Pack multiple key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4", "key5", "value5", kvArray);
+     * </pre>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
+     * @param k4 four key
+     * @param v4 four value
+     * @param k5 five key
+     * @param v5 five value
+     * @param kvArray multiple key-value
+     * @since 2.0.53
+     */
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4,
+            String k5,
+            Object v5,
+            Object... kvArray
+
+    ) {
+        JSONObject object = new JSONObject(5);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
+        object.put(k4, v4);
+        object.put(k5, v5);
+        if (kvArray != null && kvArray.length > 0) {
+            of(object, kvArray);
+        }
+        return object;
+    }
+
+    /**
+     * Pack multiple key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of(Object... kvArray);
+     * </pre>
+     *
+     * @param kvArray key-value
+     * @since 2.0.53
+     */
+    private static JSONObject of(JSONObject object, Object... kvArray) {
+        if (kvArray == null || kvArray.length <= 0) {
+            throw new JSONException("The kvArray cannot be empty");
+        }
+        int kvArrayLength = kvArray.length;
+        if ((kvArrayLength & 1) == 1) {
+            throw new JSONException("The length of kvArray cannot be odd");
+        }
+        List<Object> keyList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 == 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
+        keyList.forEach(key -> {
+            if (key == null || !(key instanceof String)) {
+                throw new JSONException("The value corresponding to the even bit index of kvArray is key, which cannot be null and must be of type string");
+            }
+        });
+        List<Object> distinctKeyList = keyList.stream().distinct().collect(Collectors.toList());
+        if (keyList.size() != distinctKeyList.size()) {
+            throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
+        }
+        List<Object> valueList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 != 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
+        for (int i = 0; i < keyList.size(); i++) {
+            object.put(keyList.get(i).toString(), valueList.get(i));
+        }
+        return object;
+    }
+
+    /**
      * See {@link JSON#parseObject} for details
      */
     public static <T> T parseObject(String text, Class<T> objectClass) {
@@ -2033,5 +2156,10 @@ public class JSONObject
      */
     public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
         return (JSONObject) JSON.toJSON(obj, writeFeatures);
+    }
+
+    public boolean isArray(Object key) {
+        Object object = super.get(key);
+        return object instanceof JSONArray || object != null && object.getClass().isArray();
     }
 }

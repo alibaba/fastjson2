@@ -58,6 +58,8 @@ class Model {
 | AllowUnQuotedFieldNames         |                                                                                                                                                                                                                                                                          |
 | NonStringKeyAsString            |                                                                                                                                                                                                                                                                          |
 | Base64StringAsByteArray         |                                                                                                                                                                                                                                                                          |
+| DisableSingleQuote              | Do not allow single quote in key name and values.
+
 # 5. JSONWriter.Feature
 
 | JSONWriter.Feature                | Description                                                                                                                                                                                                             |

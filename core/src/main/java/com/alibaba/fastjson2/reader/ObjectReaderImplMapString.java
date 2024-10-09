@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONReader;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 final class ObjectReaderImplMapString
@@ -53,6 +54,17 @@ final class ObjectReaderImplMapString
             }
 
             String name = jsonReader.readFieldName();
+
+            if (multiValue && jsonReader.nextIfArrayStart()) {
+                List list = new JSONArray();
+                while (!jsonReader.nextIfArrayEnd()) {
+                    String value = jsonReader.readString();
+                    list.add(value);
+                }
+                object.put(name, list);
+                continue;
+            }
+
             String value = jsonReader.readString();
             if (i == 0
                     && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0

@@ -16,6 +16,7 @@ public final class ObjectReaderImplListStr
         implements ObjectReader {
     final Class listType;
     final Class instanceType;
+    Object listSingleton;
 
     public ObjectReaderImplListStr(Class listType, Class instanceType) {
         this.listType = listType;
@@ -40,7 +41,7 @@ public final class ObjectReaderImplListStr
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         if (listType.isInstance(collection)) {
             boolean typeMatch = true;
             for (Object item : collection) {
@@ -140,6 +141,12 @@ public final class ObjectReaderImplListStr
                 case "com.google.common.collect.Lists.TransformingSequentialList":
                     list = new LinkedList();
                     break;
+                case "kotlin.collections.EmptyList":
+                    list = getKotlinEmptyList(instanceType);
+                    break;
+                case "kotlin.collections.EmptySet":
+                    list = getKotlinEmptySet(instanceType);
+                    break;
                 default:
                     try {
                         list = (Collection) instanceType.newInstance();
@@ -182,12 +189,15 @@ public final class ObjectReaderImplListStr
         if (ch == '[') {
             jsonReader.next();
             while (!jsonReader.nextIfArrayEnd()) {
-                list.add(
-                        jsonReader.readString());
+                String item = jsonReader.readString();
+                if (item == null && list instanceof SortedSet) {
+                    continue;
+                }
+                list.add(item);
             }
         } else if (ch == '"' || ch == '\'' || ch == '{') {
             String str = jsonReader.readString();
-            if (!str.isEmpty()) {
+            if (str != null && !str.isEmpty()) {
                 list.add(str);
             }
         } else {

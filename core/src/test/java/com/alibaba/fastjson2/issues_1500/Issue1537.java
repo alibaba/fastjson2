@@ -24,7 +24,10 @@ public class Issue1537 {
         assertEquals("3.14", JSON.toJSONString(new BigDecimal("3.14")));
 
         // as string
-        assertEquals("true", JSON.toJSONString(true, JSONWriter.Feature.WriteNonStringValueAsString));
+        assertEquals("\"true\"", JSON.toJSONString(true, JSONWriter.Feature.WriteNonStringValueAsString));
+        assertEquals("\"false\"", JSON.toJSONString(false, JSONWriter.Feature.WriteNonStringValueAsString));
+        assertEquals("\"true\"", new String(JSON.toJSONBytes(true, JSONWriter.Feature.WriteNonStringValueAsString)));
+        assertEquals("\"false\"", new String(JSON.toJSONBytes(false, JSONWriter.Feature.WriteNonStringValueAsString)));
         assertEquals("\"123\"", JSON.toJSONString(123, JSONWriter.Feature.WriteNonStringValueAsString));
         assertEquals("\"123\"", JSON.toJSONString(Integer.valueOf("123"), JSONWriter.Feature.WriteNonStringValueAsString));
         assertEquals("\"3.14\"", JSON.toJSONString(3.14, JSONWriter.Feature.WriteNonStringValueAsString));

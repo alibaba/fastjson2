@@ -84,4 +84,29 @@
   https://github.com/zfoo-project/zfoo
 * https://github.com/TongchengOpenSource/ckibana
 * https://github.com/geekidea/spring-boot-plus
-* 
+* https://github.com/02cx/dong-rpc
+* https://github.com/smart-doc-group/smart-doc-example-cn
+* https://github.com/shuanx/BurpFingerPrint
+* https://github.com/sagframe/sagacity-sqltoy
+* https://github.com/X1r0z/JNDIMap
+* https://github.com/apache/rocketmq
+* https://github.com/kerwincui/wumei-smart
+* https://github.com/kerwincui/FastBee
+* https://github.com/luguosong/programming-notes
+* https://github.com/niumoo/JavaNotes
+* https://github.com/OpenFeign/feign
+* https://github.com/yl-yue/yue-library
+* https://github.com/dromara/forest
+* https://github.com/xunlu129/teriteri-backend
+* https://github.com/moshowgame/SpringBootCodeGenerator
+* https://github.com/4379711/lol-helper
+* https://github.com/zddgg/novel-cast
+* https://github.com/Whoopsunix/PPPYSO
+* https://github.com/wangzihaogithub/spring-boot-protocol
+* https://github.com/woodwhales/woodwhales-music
+* https://github.com/JanesenGit/FastChar
+* https://github.com/tokyohost/v2nodeManager
+* https://github.com/giteecode/hospitalRegistePublic
+* https://github.com/wujun728/jun_java_plugin
+* https://github.com/anhan123456/vrpc
+* https://github.com/spring-projects/spring-ai

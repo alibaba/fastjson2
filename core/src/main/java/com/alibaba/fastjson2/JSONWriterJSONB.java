@@ -129,8 +129,8 @@ final class JSONWriterJSONB
     @Override
     public void startArray(int size) {
         int off = this.off;
-        if (off == bytes.length) {
-            ensureCapacity(off + 1);
+        if (off + 1 >= bytes.length) {
+            ensureCapacity(off + 2);
         }
 
         boolean tinyInt = size <= ARRAY_FIX_LEN;
@@ -139,6 +139,182 @@ final class JSONWriterJSONB
         if (!tinyInt) {
             writeInt32(size);
         }
+    }
+
+    @Override
+    public void startArray0() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = BC_ARRAY_FIX_MIN;
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray1() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 1);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray2() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 2);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray3() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 3);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray4() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 4);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray5() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 5);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray6() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 6);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray7() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 7);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray8() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 8);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray9() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 9);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray10() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 10);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray11() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 11);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray12() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 12);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray13() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 13);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray14() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 14);
+        this.off = off + 1;
+    }
+
+    @Override
+    public void startArray15() {
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        bytes[off] = (byte) (BC_ARRAY_FIX_MIN + 15);
+        this.off = off + 1;
     }
 
     @Override
@@ -191,6 +367,115 @@ final class JSONWriterJSONB
     @Override
     protected void write0(char ch) {
         throw new JSONException("unsupported operation");
+    }
+
+    @Override
+    public void writeString(boolean value) {
+        writeString(Boolean.toString(value));
+    }
+
+    @Override
+    public void writeString(byte value) {
+        writeString(Integer.toString(value));
+    }
+
+    @Override
+    public void writeString(short value) {
+        writeString(Integer.toString(value));
+    }
+
+    @Override
+    public void writeString(int value) {
+        writeString(Integer.toString(value));
+    }
+
+    @Override
+    public void writeString(long value) {
+        writeString(Long.toString(value));
+    }
+
+    @Override
+    public void writeString(boolean[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(byte[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(short[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(int[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(long[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(float[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
+    }
+
+    @Override
+    public void writeString(double[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+        startArray(value.length);
+        for (int i = 0; i < value.length; i++) {
+            writeString(value[i]);
+        }
     }
 
     @Override
@@ -853,7 +1138,7 @@ final class JSONWriterJSONB
                 newCapacity = minCapacity;
             }
             if (newCapacity > maxArraySize) {
-                throw new OutOfMemoryError();
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
             }
 
             // minCapacity is usually close to size, so this is a win:
@@ -1156,9 +1441,10 @@ final class JSONWriterJSONB
 
         final byte[] bytes = this.bytes;
         int i = (int) value;
-        if (i == value && value >= INT32_SHORT_MIN && value <= INT32_SHORT_MAX) {
+        if (i == value && value >= BC_INT32_NUM_MIN && value <= BC_INT32_NUM_MAX) {
             bytes[off] = BC_FLOAT_INT;
-            off += writeInt32(bytes, off + 1, i) + 1;
+            bytes[off + 1] = (byte) i;
+            off += 2;
         } else {
             bytes[off] = BC_FLOAT;
             i = Float.floatToIntBits(value);
@@ -1961,15 +2247,15 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void writeBool(boolean[] valeus) {
-        if (valeus == null) {
+    public void writeBool(boolean[] values) {
+        if (values == null) {
             writeNull();
             return;
         }
 
-        startArray(valeus.length);
-        for (int i = 0; i < valeus.length; i++) {
-            writeBool(valeus[i]);
+        startArray(values.length);
+        for (int i = 0; i < values.length; i++) {
+            writeBool(values[i]);
         }
         endArray();
     }
@@ -2077,7 +2363,7 @@ final class JSONWriterJSONB
 
     @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        throw new JSONException("unsupported operation");
+        writeDateYYYMMDD8(year, month, dayOfMonth);
     }
 
     @Override
@@ -2397,5 +2683,9 @@ final class JSONWriterJSONB
         } catch (Exception ex) {
             return JSONB.typeName(bytes[0]) + ", bytes length " + off;
         }
+    }
+
+    @Override
+    public void println() {
     }
 }

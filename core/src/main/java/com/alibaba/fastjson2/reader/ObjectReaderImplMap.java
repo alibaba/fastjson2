@@ -99,9 +99,11 @@ public final class ObjectReaderImplMap
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
 
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            if (actualTypeArguments.length == 2 && !"org.springframework.util.LinkedMultiValueMap".equals(instanceType.getName())) {
+            if (actualTypeArguments.length == 2) {
                 Type keyType = actualTypeArguments[0];
                 Type valueType = actualTypeArguments[1];
+
+                boolean multiValueMap = "org.springframework.util.LinkedMultiValueMap".equals(instanceType.getName());
 
                 if (keyType == String.class && valueType == String.class && builder == null) {
                     return new ObjectReaderImplMapString(mapType, instanceType, features);
@@ -125,7 +127,7 @@ public final class ObjectReaderImplMap
         switch (instanceTypeName) {
             case "com.alibaba.fastjson.JSONObject":
                 builder = createObjectSupplier(instanceType);
-                instanceType = HashMap.class;
+//                instanceType = HashMap.class;//?为什么
                 break;
             case "com.google.common.collect.RegularImmutableMap":
                 builder = GuavaSupport.immutableMapConverter();

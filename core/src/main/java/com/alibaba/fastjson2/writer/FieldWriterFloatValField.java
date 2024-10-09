@@ -17,7 +17,7 @@ final class FieldWriterFloatValField<T>
             String label,
             Field field
     ) {
-        super(name, ordinal, features, format, label, float.class, float.class, field, null);
+        super(name, ordinal, features, format, null, label, float.class, float.class, field, null);
     }
 
     @Override

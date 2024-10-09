@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.internal.processor.eishay;
 
 import com.alibaba.fastjson2.annotation.JSONCompiled;
+import com.alibaba.fastjson2.annotation.JSONType;
 
 import java.util.List;
 import java.util.Objects;
 
-@JSONCompiled(referenceDetect = false)
+@JSONCompiled
+@JSONType
 public class Media
         implements java.io.Serializable {
     public enum Player {
@@ -23,6 +25,8 @@ public class Media
     private String uri;
     private int width;
     private String copyright;
+    private String looooongFieldName;
+    private String s;
 
     public Media() {
     }
@@ -38,7 +42,9 @@ public class Media
             int bitrate,
             List<String> persons,
             Player player,
-            String copyright
+            String copyright,
+            String looooongFieldName,
+            String s
     ) {
         this.uri = uri;
         this.title = title;
@@ -51,6 +57,8 @@ public class Media
         this.persons = persons;
         this.player = player;
         this.copyright = copyright;
+        this.looooongFieldName = looooongFieldName;
+        this.s = s;
     }
 
     public String getUri() {
@@ -141,6 +149,22 @@ public class Media
         this.copyright = copyright;
     }
 
+    public String getLooooongFieldName() {
+        return looooongFieldName;
+    }
+
+    public void setLooooongFieldName(String looooongFieldName) {
+        this.looooongFieldName = looooongFieldName;
+    }
+
+    public String getS() {
+        return s;
+    }
+
+    public void setS(String s) {
+        this.s = s;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -150,11 +174,15 @@ public class Media
             return false;
         }
         Media media = (Media) o;
-        return bitrate == media.bitrate && duration == media.duration && height == media.height && size == media.size && width == media.width && Objects.equals(format, media.format) && Objects.equals(persons, media.persons) && player == media.player && Objects.equals(title, media.title) && Objects.equals(uri, media.uri) && Objects.equals(copyright, media.copyright);
+        return bitrate == media.bitrate && duration == media.duration && height == media.height && size == media.size
+                && width == media.width && Objects.equals(format, media.format) && Objects.equals(persons, media.persons)
+                && player == media.player && Objects.equals(title, media.title) && Objects.equals(uri, media.uri)
+                && Objects.equals(copyright, media.copyright) && Objects.equals(looooongFieldName, media.looooongFieldName)
+                && Objects.equals(s, media.s);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bitrate, duration, format, height, persons, player, size, title, uri, width, copyright);
+        return Objects.hash(bitrate, duration, format, height, persons, player, size, title, uri, width, copyright, looooongFieldName, s);
     }
 }

@@ -330,6 +330,100 @@ class JSONWriterUTF8
         startObject = false;
     }
 
+    public final void writeString(List<String> list) {
+        // startArray();
+        int off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+        bytes[off] = '[';
+        this.off = off + 1;
+
+        for (int i = 0, size = list.size(); i < size; i++) {
+            if (i != 0) {
+                off = this.off;
+                if (off == bytes.length) {
+                    ensureCapacity(off + 1);
+                }
+                bytes[off] = ',';
+                this.off = off + 1;
+            }
+
+            String str = list.get(i);
+            writeString(str);
+        }
+
+        off = this.off;
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+        bytes[off] = ']';
+        this.off = off + 1;
+    }
+
+    @Override
+    public final void writeString(boolean value) {
+        byte quote = (byte) this.quote;
+        bytes[off++] = quote;
+        writeBool(value);
+        bytes[off++] = quote;
+    }
+
+    @Override
+    public final void writeString(byte value) {
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt8(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    @Override
+    public final void writeString(short value) {
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt16(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    @Override
+    public final void writeString(int value) {
+        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt32(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    @Override
+    public final void writeString(long value) {
+        boolean writeAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) == 0;
+        if (writeAsString) {
+            writeQuote();
+        }
+        writeInt64(value);
+        if (writeAsString) {
+            writeQuote();
+        }
+    }
+
+    private void writeQuote() {
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+        bytes[off++] = (byte) quote;
+    }
+
     @Override
     public void writeString(String str) {
         if (str == null) {
@@ -389,13 +483,40 @@ class JSONWriterUTF8
     }
 
     public void writeStringLatin1(byte[] values) {
-        if (values == null) {
-            writeStringNull();
+        boolean escape = false;
+        if ((context.features & BrowserSecure.mask) != 0) {
+            writeStringLatin1BrowserSecure(values);
             return;
         }
 
+        final byte quote = (byte) this.quote;
+        for (int i = 0; i < values.length; i++) {
+            byte c = values[i];
+            if (c == quote || c == '\\' || c < ' ') {
+                escape = true;
+                break;
+            }
+        }
+
+        int off = this.off;
+        if (!escape) {
+            int minCapacity = off + values.length + 2;
+            if (minCapacity >= this.bytes.length) {
+                ensureCapacity(minCapacity);
+            }
+            final byte[] bytes = this.bytes;
+            bytes[off] = quote;
+            System.arraycopy(values, 0, bytes, off + 1, values.length);
+            off += values.length + 1;
+            bytes[off] = quote;
+            this.off = off + 1;
+            return;
+        }
+        writeStringEscaped(values);
+    }
+
+    protected final void writeStringLatin1BrowserSecure(byte[] values) {
         boolean escape = false;
-        final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         final byte quote = (byte) this.quote;
         for (int i = 0; i < values.length; i++) {
@@ -403,8 +524,10 @@ class JSONWriterUTF8
             if (c == quote
                     || c == '\\'
                     || c < ' '
-                    || (browserSecure
-                    && (c == '<' || c == '>' || c == '(' || c == ')'))
+                    || c == '<'
+                    || c == '>'
+                    || c == '('
+                    || c == ')'
             ) {
                 escape = true;
                 break;
@@ -1996,7 +2119,7 @@ class JSONWriterUTF8
                 newCapacity = minCapacity;
             }
             if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
             }
 
             // minCapacity is usually close to size, so this is a win:

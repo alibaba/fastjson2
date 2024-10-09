@@ -10,7 +10,7 @@ Fastjson2采用多module的结构设计，对SpringFramework等框架的支持�
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
-    <version>2.0.47</version>
+    <version>2.0.53</version>
 </dependency>
 
 or
@@ -18,7 +18,7 @@ or
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring6</artifactId>
-    <version>2.0.47</version>
+    <version>2.0.53</version>
 </dependency>
 ```
 
@@ -26,13 +26,13 @@ or
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.47'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.53'
 }
 
 or
 
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.47'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.53'
 }
 ```
 > 2.0.23版本之后为了兼容Spring 5.x / 6.x，将不同版本独立开不同的依赖包。
@@ -87,7 +87,7 @@ symbolTable | JSONB.SymbolTable | JSONB序列化和反序列化的符号表，�
 
 **Package**: `com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter`
 
-**Example**:
+**Before Spring 5 Example**:
 
 ```java
 
@@ -111,13 +111,40 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 }
 ```
 
+从Spring5.0版本开始，`WebMvcConfigurerAdapter` 已被弃用，您可以直接实现`WebMvcConfigurer`接口，而无需使用此适配器。
+
+**After Spring 5 Example**:
+
+```java
+
+@Configuration
+@EnableWebMvc
+public class CustomWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        //自定义配置...
+        FastJsonConfig config = new FastJsonConfig();
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
+        config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
+        converter.setFastJsonConfig(config);
+        converter.setDefaultCharset(StandardCharsets.UTF_8);
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        converters.add(0, converter);
+    }
+
+}
+```
+
 ## 2.2  Spring Web MVC View
 
 使用 `FastJsonJsonView` 来设置 Spring MVC 默认的视图模型解析器，以提高 `@Controller` `@ResponseBody` `ModelAndView` JSON序列化速度。
 
 **Package**: `com.alibaba.fastjson2.support.spring.webservlet.view.FastJsonJsonView`
 
-**Example**:
+**Before Spring 5 Example**:
 
 ```java
 
@@ -134,6 +161,29 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
         //fastJsonJsonView.setFastJsonConfig(config);
         registry.enableContentNegotiation(fastJsonJsonView);
     }
+}
+```
+
+从Spring5.0版本开始，`WebMvcConfigurerAdapter` 已被弃用，您可以直接实现`WebMvcConfigurer`接口，而无需使用此适配器。
+
+**After Spring 5 Example**:
+
+```java
+
+@Configuration
+@EnableWebMvc
+public class CustomWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
+        //自定义配置...
+        //FastJsonConfig config = new FastJsonConfig();
+        //config.set...
+        //fastJsonJsonView.setFastJsonConfig(config);
+        registry.enableContentNegotiation(fastJsonJsonView);
+    }
+
 }
 ```
 

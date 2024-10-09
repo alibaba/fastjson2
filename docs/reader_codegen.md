@@ -23,7 +23,7 @@ public class Image {
 
 生成如下的代码来快速将json中的name和字段关联起来：
 ```java
-public final class Image_FASTJOSNReader
+public final class Image_FASTJSONReader
     extends com.alibaba.fastjson2.reader.ObjectReader5 {
 
     public Object readObject(

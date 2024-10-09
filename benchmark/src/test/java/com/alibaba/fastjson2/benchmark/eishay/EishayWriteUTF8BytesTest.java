@@ -16,9 +16,25 @@ public class EishayWriteUTF8BytesTest {
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.58.0.13 : 336 347 317
             // zulu11.52.13 : 337 314 289 2888 2606 2441
-            // zulu17.40.19 : 317 320 285
+            // zulu17.40.19 : 317 320 285 2446
             // zulu17.40.19_vec : 267 250
             // graalvm_17.0.7 207
+        }
+    }
+
+    public static void fastjson2_features() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 10_000_000; ++i) {
+                benchmark.fastjson2_features(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("fastjson2_features millis : " + millis);
+            // zulu8.58.0.13 :
+            // zulu11.52.13 :
+            // zulu17.40.19 : 2393
+            // zulu17.40.19_vec :
+            // graalvm_17.0.7
         }
     }
 
@@ -51,7 +67,8 @@ public class EishayWriteUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
+//        fastjson2();
+        fastjson2_features();
 //        gson();
 //        jackson();
     }

@@ -13,8 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.temporal.Temporal;
 import java.util.*;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringKeyAsString;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
@@ -419,8 +418,9 @@ public final class ObjectWriterImplMap
         Map map = (Map) object;
 
         features |= jsonWriter.getFeatures();
-        if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
-            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+        if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
+            if (!(map instanceof SortedMap)
+                    && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
                 map = new TreeMap<>(map);
             }
         }
@@ -583,8 +583,9 @@ public final class ObjectWriterImplMap
         Map map = (Map) object;
 
         features |= jsonWriter.getFeatures();
-        if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
-            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+        if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
+            if (!(map instanceof SortedMap)
+                    && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
                 map = new TreeMap<>(map);
             }
         }
@@ -602,6 +603,7 @@ public final class ObjectWriterImplMap
         PropertyFilter propertyFilter = context.getPropertyFilter();
         AfterFilter afterFilter = context.getAfterFilter();
         boolean writeNulls = context.isEnabled(JSONWriter.Feature.WriteNulls.mask);
+        boolean refDetect = context.isEnabled(ReferenceDetection.mask);
 
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             Object value = entry.getValue();
@@ -617,41 +619,59 @@ public final class ObjectWriterImplMap
                 key = entryKey.toString();
             }
 
-            if (propertyPreFilter != null) {
-                if (!propertyPreFilter.process(jsonWriter, object, key)) {
+            String refPath = null;
+            if (refDetect) {
+                refPath = jsonWriter.setPath(key, value);
+                if (refPath != null) {
+                    jsonWriter.writeName(key);
+                    jsonWriter.writeColon();
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(value);
                     continue;
                 }
             }
 
-            if (nameFilter != null) {
-                key = nameFilter.process(object, key, value);
-            }
-
-            if (propertyFilter != null) {
-                if (!propertyFilter.apply(object, key, value)) {
-                    continue;
+            try {
+                if (propertyPreFilter != null) {
+                    if (!propertyPreFilter.process(jsonWriter, object, key)) {
+                        continue;
+                    }
                 }
-            }
 
-            if (valueFilter != null) {
-                value = valueFilter.apply(object, key, value);
-            }
-
-            if (value == null) {
-                if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNulls.mask) == 0) {
-                    continue;
+                if (nameFilter != null) {
+                    key = nameFilter.process(object, key, value);
                 }
-            }
 
-            jsonWriter.writeName(key);
-            jsonWriter.writeColon();
+                if (propertyFilter != null) {
+                    if (!propertyFilter.apply(object, key, value)) {
+                        continue;
+                    }
+                }
 
-            if (value == null) {
-                jsonWriter.writeNull();
-            } else {
-                Class<?> valueType = value.getClass();
-                ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
-                valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
+                if (valueFilter != null) {
+                    value = valueFilter.apply(object, key, value);
+                }
+
+                if (value == null) {
+                    if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNulls.mask) == 0) {
+                        continue;
+                    }
+                }
+
+                jsonWriter.writeName(key);
+                jsonWriter.writeColon();
+
+                if (value == null) {
+                    jsonWriter.writeNull();
+                } else {
+                    Class<?> valueType = value.getClass();
+                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
+                    valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
+                }
+            } finally {
+                if (refDetect) {
+                    jsonWriter.popPath(value);
+                }
             }
         }
 

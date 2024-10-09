@@ -97,7 +97,7 @@ public abstract class JSON
         return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), featuresValue, features);
     }
 
-    static JSONReader.Context createReadContext(ObjectReaderProvider provider, int featuresValue, Feature... features) {
+    public static JSONReader.Context createReadContext(ObjectReaderProvider provider, int featuresValue, Feature... features) {
         for (Feature feature : features) {
             featuresValue |= feature.mask;
         }
@@ -189,6 +189,9 @@ public abstract class JSON
             reader.read(map, 0);
             JSONObject jsonObject = new JSONObject(map);
             reader.handleResolveTasks(jsonObject);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return jsonObject;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -229,6 +232,9 @@ public abstract class JSON
             reader.read(map, 0);
             JSONObject jsonObject = new JSONObject(map);
             reader.handleResolveTasks(jsonObject);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return jsonObject;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -265,13 +271,15 @@ public abstract class JSON
             context.config(processor);
         }
 
-        JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -311,13 +319,15 @@ public abstract class JSON
             context.config(processor);
         }
 
-        JSONReader jsonReader = JSONReader.of(bytes, offset, len, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(bytes, offset, len, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -347,6 +357,9 @@ public abstract class JSON
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -374,6 +387,9 @@ public abstract class JSON
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -415,6 +431,9 @@ public abstract class JSON
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -449,6 +468,9 @@ public abstract class JSON
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -478,6 +500,9 @@ public abstract class JSON
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -516,6 +541,9 @@ public abstract class JSON
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -544,6 +572,9 @@ public abstract class JSON
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -571,6 +602,9 @@ public abstract class JSON
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -607,6 +641,9 @@ public abstract class JSON
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -659,13 +696,15 @@ public abstract class JSON
             context.config(processor);
         }
 
-        JSONReader jsonReader = JSONReader.of(is, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(is, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -701,13 +740,15 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(is, charset, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(is, charset, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -732,8 +773,6 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader reader = JSONReader.of(jsonBytes, context);
-
         boolean ordered = false;
         for (Feature feature : features) {
             if (feature == Feature.OrderedField) {
@@ -741,12 +780,15 @@ public abstract class JSON
                 break;
             }
         }
-
         try {
+            JSONReader reader = JSONReader.of(jsonBytes, context);
             Map<String, Object> map = ordered ? new LinkedHashMap<>() : new HashMap<>();
             reader.read(map, 0);
             JSONObject jsonObject = new JSONObject(map);
             reader.handleResolveTasks(jsonObject);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return jsonObject;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -767,13 +809,15 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -795,13 +839,39 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
-
         try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> T parseObject(byte[] jsonBytes, Type type, JSONReader.Context context) {
+        if (jsonBytes == null) {
+            return null;
+        }
+        try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -823,17 +893,20 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE,
                 features
         );
-        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
-
-        if (filter instanceof Filter) {
-            context.config((Filter) filter);
-        }
-
         try {
+            JSONReader jsonReader = JSONReader.of(jsonBytes, context);
+
+            if (filter instanceof Filter) {
+                context.config((Filter) filter);
+            }
+
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
+            }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -855,10 +928,16 @@ public abstract class JSON
                 DEFAULT_PARSER_FEATURE
         );
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
+            Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
-                return jsonReader.read(JSONObject.class);
+                object = jsonReader.read(JSONObject.class);
+            } else {
+                object = jsonReader.readAny();
             }
-            return jsonReader.readAny();
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
@@ -879,10 +958,16 @@ public abstract class JSON
                 features
         );
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
+            Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
-                return jsonReader.read(JSONObject.class);
+                object = jsonReader.read(JSONObject.class);
+            } else {
+                object = jsonReader.readAny();
             }
-            return jsonReader.readAny();
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
@@ -895,10 +980,16 @@ public abstract class JSON
 
         JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE, features);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
+            Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
-                return jsonReader.read(JSONObject.class);
+                object = jsonReader.read(JSONObject.class);
+            } else {
+                object = jsonReader.read(Object.class);
             }
-            return jsonReader.read(Object.class);
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
@@ -911,10 +1002,16 @@ public abstract class JSON
 
         JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
+            Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
-                return jsonReader.read(JSONObject.class);
+                object = jsonReader.read(JSONObject.class);
+            } else {
+                object = jsonReader.readAny();
             }
-            return jsonReader.readAny();
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
@@ -927,10 +1024,16 @@ public abstract class JSON
 
         JSONReader.Context context = createReadContext(config.getProvider(), features);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
+            Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
-                return jsonReader.read(JSONObject.class);
+                object = jsonReader.read(JSONObject.class);
+            } else {
+                object = jsonReader.readAny();
             }
-            return jsonReader.readAny();
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
@@ -947,10 +1050,16 @@ public abstract class JSON
                 features
         );
         try (JSONReader jsonReader = JSONReader.of(utf8Bytes, context)) {
+            Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
-                return jsonReader.read(JSONObject.class);
+                object = jsonReader.read(JSONObject.class);
+            } else {
+                object = jsonReader.readAny();
             }
-            return jsonReader.readAny();
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
+            return object;
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
@@ -1014,6 +1123,9 @@ public abstract class JSON
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return object;
         } finally {
             if (chars.length <= 1024 * 64) {
@@ -1051,13 +1163,19 @@ public abstract class JSON
                     DEFAULT_PARSER_FEATURE,
                     features
             );
-            JSONReader jsonReader = JSONReader.of(chars, 0, position, context);
-
-            T object = jsonReader.read(clazz);
-            if (object != null) {
-                jsonReader.handleResolveTasks(object);
+            try (JSONReader jsonReader = JSONReader.of(chars, 0, position, context)) {
+                T object = jsonReader.read(clazz);
+                if (object != null) {
+                    jsonReader.handleResolveTasks(object);
+                }
+                if (!jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input not end"));
+                }
+                return object;
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                throw new JSONException(ex.getMessage(), cause);
             }
-            return object;
         } finally {
             if (chars.length <= 1024 * 64) {
                 CHARS_UPDATER.set(CACHE, chars);
@@ -1089,7 +1207,13 @@ public abstract class JSON
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return object;
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException(ex.getMessage(), cause);
         }
     }
 
@@ -1151,6 +1275,7 @@ public abstract class JSON
 
         if ((featuresValue & SerializerFeature.BrowserCompatible.mask) != 0) {
             context.config(JSONWriter.Feature.BrowserCompatible);
+            context.config(JSONWriter.Feature.EscapeNoneAscii);
         }
 
         if ((featuresValue & SerializerFeature.BrowserSecure.mask) != 0) {
@@ -1979,6 +2104,40 @@ public abstract class JSON
         }
     }
 
+    public static final int writeJSONString(
+            OutputStream os,
+            Object object,
+            String dateFormat,
+            SerializeFilter[] filters,
+            SerializerFeature... features
+    ) throws IOException {
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
+        if (dateFormat != null) {
+            context.setDateFormat(dateFormat);
+        }
+        try (JSONWriter jsonWriter = JSONWriter.ofUTF8(context)) {
+            for (SerializeFilter filter : filters) {
+                configFilter(context, filter);
+            }
+
+            if (object == null) {
+                jsonWriter.writeNull();
+            } else {
+                jsonWriter.setRootObject(object);
+                ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
+                objectWriter.write(jsonWriter, object, null, null, 0);
+            }
+            byte[] bytes = jsonWriter.getBytes();
+            os.write(bytes);
+            return bytes.length;
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("writeJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("writeJSONString error", ex);
+        }
+    }
+
     public static JSONArray parseArray(String str, Feature... features) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -1994,6 +2153,9 @@ public abstract class JSON
 
             JSONArray jsonArray = new JSONArray();
             jsonReader.read(jsonArray);
+            if (!jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("input not end"));
+            }
             return jsonArray;
         }
     }
@@ -2018,6 +2180,9 @@ public abstract class JSON
             reader.read(list);
             JSONArray jsonArray = new JSONArray(list);
             reader.handleResolveTasks(jsonArray);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return jsonArray;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -2038,7 +2203,12 @@ public abstract class JSON
                 text,
                 createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE))
         ) {
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            reader.handleResolveTasks(list);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -2063,7 +2233,12 @@ public abstract class JSON
                 text,
                 createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE))
         ) {
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            reader.handleResolveTasks(list);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -2083,7 +2258,12 @@ public abstract class JSON
                 text,
                 createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE, features))
         ) {
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            reader.handleResolveTasks(list);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -2128,12 +2308,22 @@ public abstract class JSON
             return javaObject;
         }
 
-        String str = JSON.toJSONString(javaObject);
-        Object object = JSON.parse(str);
-        if (object instanceof List) {
-            return new JSONArray((List) object);
+        Object json;
+        try {
+            json = com.alibaba.fastjson2.JSON.toJSON(javaObject);
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            throw new JSONException(e.getMessage(), e);
         }
-        return object;
+
+        if (json instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) json);
+        }
+
+        if (json instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) json);
+        }
+
+        return json;
     }
 
     public static Object toJSON(Object javaObject, SerializeConfig config) {
@@ -2180,6 +2370,9 @@ public abstract class JSON
             }
             reader.endArray();
             reader.handleResolveTasks(array);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return array;
         }
     }

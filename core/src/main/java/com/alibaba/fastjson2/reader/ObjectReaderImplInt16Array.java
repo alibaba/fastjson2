@@ -22,7 +22,7 @@ class ObjectReaderImplInt16Array
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         Short[] array = new Short[collection.size()];
         int i = 0;
         for (Object item : collection) {

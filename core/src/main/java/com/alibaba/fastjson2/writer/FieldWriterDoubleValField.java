@@ -10,7 +10,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 final class FieldWriterDoubleValField<T>
         extends FieldWriter<T> {
     FieldWriterDoubleValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, double.class, double.class, field, null);
+        super(name, ordinal, 0, format, null, label, double.class, double.class, field, null);
     }
 
     @Override

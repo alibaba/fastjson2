@@ -1,0 +1,26 @@
+[
+    {
+        "name" : "com.alibaba.fastjson2.example.graalvm_native.vo.MediaContent$MediaContent_FASTJSONReader",
+        "allPublicConstructors" : true
+    },
+    {
+        "name" : "com.alibaba.fastjson2.example.graalvm_native.vo.MediaContent$MediaContent_FASTJSONWriter",
+        "allPublicConstructors" : true
+    },
+    {
+        "name" : "com.alibaba.fastjson2.example.graalvm_native.vo.Media$Media_FASTJSONReader",
+        "allPublicConstructors" : true
+    },
+    {
+        "name" : "com.alibaba.fastjson2.example.graalvm_native.vo.Media$Media_FASTJSONWriter",
+        "allPublicConstructors" : true
+    },
+    {
+        "name" : "com.alibaba.fastjson2.example.graalvm_native.vo.Image$Image_FASTJSONReader",
+        "allPublicConstructors" : true
+    },
+    {
+        "name" : "com.alibaba.fastjson2.example.graalvm_native.vo.Image$Image_FASTJSONWriter",
+        "allPublicConstructors" : true
+    }
+]

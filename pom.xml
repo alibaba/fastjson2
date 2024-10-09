@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.48-SNAPSHOT</version>
+    <version>2.0.54-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -32,9 +32,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
-        <jackson.version>2.16.1</jackson.version>
+        <jackson.version>2.17.2</jackson.version>
         <jetty.version>11.0.15</jetty.version>
-        <jersey.version>2.41</jersey.version>
+        <jersey.version>2.44</jersey.version>
+        <solon.version>3.0.1</solon.version>
         <springframework5.version>5.3.31</springframework5.version>
         <springframework6.version>6.1.3</springframework6.version>
         <springsecurity5.version>5.8.8</springsecurity5.version>
@@ -43,16 +44,16 @@
         <springboot3.version>3.2.2</springboot3.version>
         <springdata2021.version>2021.2.18</springdata2021.version>
         <springdata2023.version>2023.1.0</springdata2023.version>
-        <arrow.version>15.0.0</arrow.version>
+        <arrow.version>17.0.0</arrow.version>
 
         <!-- Requires kotlin minor version less than the latest version -->
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>2.0.10</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
-        <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
+        <kotlin.compiler.apiVersion>1.9</kotlin.compiler.apiVersion>
 
-        <junit5.version>5.10.2</junit5.version>
+        <junit5.version>5.11.0</junit5.version>
         <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.37</jmh.version>
 
@@ -65,19 +66,19 @@
         <module>adapter</module>
         -->
         <module>benchmark</module>
-        <!--
         <module>codegen</module>
         <module>codegen-test</module>
-        -->
         <module>core</module>
         <!--
             <module>example-graalvm-native</module>
         -->
+        <module>example-solon-test</module>
         <module>example-spring-test</module>
         <!--
             <module>example-spring6-test</module>
         -->
         <module>extension</module>
+        <module>extension-solon</module>
         <module>extension-spring5</module>
         <!--
         <module>extension-spring6</module>
@@ -162,17 +163,17 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>5.8.26</version>
+                <version>5.8.32</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-core</artifactId>
-                <version>0.46.13-public</version>
+                <version>0.49.0-public</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
-                <version>0.46.13-public</version>
+                <version>0.48.6-public</version>
             </dependency>
             <dependency>
                 <groupId>com.carrotsearch</groupId>
@@ -204,12 +205,12 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.10.1</version>
+                <version>2.11.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.0.0-jre</version>
+                <version>33.3.0-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -256,7 +257,7 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.15.1</version>
+                <version>2.16.1</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
@@ -292,7 +293,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
-                <version>3.6.2</version>
+                <version>3.6.9</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -327,7 +328,7 @@
             <dependency>
                 <groupId>net.minidev</groupId>
                 <artifactId>json-smart</artifactId>
-                <version>2.5.0</version>
+                <version>2.5.1</version>
             </dependency>
             <dependency>
                 <groupId>net.sf.json-lib</groupId>
@@ -359,7 +360,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.14.0</version>
+                <version>3.17.0</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
@@ -372,7 +373,7 @@
             <dependency>
                 <groupId>org.gitlab4j</groupId>
                 <artifactId>gitlab4j-api</artifactId>
-                <version>5.5.0</version>
+                <version>5.6.0</version>
             </dependency>
 
             <dependency>
@@ -386,7 +387,7 @@
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
-                <version>2.2</version>
+                <version>3.0</version>
                 <scope>test</scope>
             </dependency>
 
@@ -462,7 +463,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.30</version>
+                <version>1.18.34</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -578,7 +579,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.5.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
@@ -671,7 +672,7 @@
             <plugin>
                 <groupId>org.gaul</groupId>
                 <artifactId>modernizer-maven-plugin</artifactId>
-                <version>2.8.0</version>
+                <version>2.9.0</version>
                 <configuration>
                     <violationsFiles>
                         <violationsFile>${maven.multiModuleProjectDirectory}/src/violations.xml</violationsFile>
@@ -687,7 +688,7 @@
             -->
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -738,7 +739,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>3.4.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -746,58 +747,58 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.3.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.12.1</version>
+                    <version>3.13.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.6.3</version>
+                    <version>3.10.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.7.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.12.1</version>
+                    <version>3.20.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.2.5</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.13</version>
+                    <version>1.7.0</version>
                 </plugin>
                 <plugin>
                     <!-- https://github.com/moditect/moditect -->
                     <groupId>org.moditect</groupId>
                     <artifactId>moditect-maven-plugin</artifactId>
-                    <version>1.1.0</version>
+                    <version>1.2.2.Final</version>
                     <executions>
                         <execution>
                             <id>add-module-infos</id>
@@ -860,7 +861,7 @@
             </activation>
             <properties>
                 <javadoc.default.exclude.packages>
-                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*:*.internal.*.*.*.*
+                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*:*.internal.*.*.*.*:com/alibaba/fastjson2/benchmark
                 </javadoc.default.exclude.packages>
             </properties>
             <build>
@@ -940,7 +941,7 @@
                         <groupId>io.github.git-commit-id</groupId>
                         <artifactId>git-commit-id-maven-plugin</artifactId>
                         <!-- DO NOT upgrade to v5+, since don't support java 8 -->
-                        <version>8.0.0</version>
+                        <version>9.0.0</version>
                         <executions>
                             <execution>
                                 <id>get-the-git-infos</id>
@@ -992,7 +993,7 @@
                         -->
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.11</version>
+                        <version>0.8.12</version>
                         <configuration>
                             <excludes>
                                 <exclude>com/alibaba/fastjson2/benchmark</exclude>
@@ -1024,9 +1025,7 @@
                 <jdk>[17,)</jdk>
             </activation>
             <modules>
-                <!--
                 <module>example-graalvm-native</module>
-                -->
                 <module>extension-spring6</module>
                 <module>example-spring6-test</module>
                 <module>incubator-vector</module>

@@ -5,9 +5,10 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
-import io.fury.Fury;
-import io.fury.config.Language;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.apache.commons.io.IOUtils;
+import org.apache.fury.Fury;
+import org.apache.fury.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -20,6 +21,8 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 public class AlongWriteBinaryArrayMapping {
+    static final ObjectWriterProvider providerFeatures = new ObjectWriterProvider();
+    static final JSONWriter.Context contextFeatures;
     static SkillFire_S2C_Msg object;
     static Fury fury;
 
@@ -39,6 +42,10 @@ public class AlongWriteBinaryArrayMapping {
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
+
+        providerFeatures.setDisableAutoType(true);
+        providerFeatures.setDisableReferenceDetect(true);
+        contextFeatures = new JSONWriter.Context(providerFeatures, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased);
     }
 
     public int jsonbSize() {
@@ -51,6 +58,11 @@ public class AlongWriteBinaryArrayMapping {
     }
 
     @Benchmark
+    public void jsonbFeatures(Blackhole bh) {
+        bh.consume(JSONB.toBytes(object, contextFeatures));
+    }
+
+    @Benchmark
     public void fury(Blackhole bh) {
         bh.consume(fury.serialize(object));
     }
@@ -59,12 +71,12 @@ public class AlongWriteBinaryArrayMapping {
         return fury.serialize(object).length;
     }
 
-//    @Benchmark
+    //    @Benchmark
     public void json(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(object, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
-//    @Benchmark
+    //    @Benchmark
     public void jsonStr(Blackhole bh) {
         bh.consume(JSON.toJSONString(object, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }

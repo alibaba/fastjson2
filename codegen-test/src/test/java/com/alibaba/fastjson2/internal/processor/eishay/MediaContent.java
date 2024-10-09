@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONCompiled;
 
 import java.util.List;
 
-@JSONCompiled(referenceDetect = false)
+@JSONCompiled
 public class MediaContent
         implements java.io.Serializable {
     private Media media;

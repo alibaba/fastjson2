@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
@@ -14,6 +15,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Function;
 
@@ -208,6 +210,10 @@ public class JSONArray
             return toBigDecimal(str);
         }
 
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
@@ -257,6 +263,10 @@ public class JSONArray
             }
 
             return Integer.parseInt(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
@@ -582,7 +592,17 @@ public class JSONArray
 
     @Override
     public Object get(int index) {
-        return list.get(index);
+        Object value = list.get(index);
+
+        if (value instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) value);
+        }
+
+        if (value instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) value);
+        }
+
+        return value;
     }
 
     /**
@@ -646,6 +666,10 @@ public class JSONArray
             }
 
             return new BigInteger(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
@@ -744,6 +768,20 @@ public class JSONArray
 
         if (value instanceof String) {
             return (String) value;
+        }
+
+        if (value instanceof Date) {
+            long timeMillis = ((Date) value).getTime();
+            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
+        }
+
+        if (value instanceof Boolean
+                || value instanceof Character
+                || value instanceof Number
+                || value instanceof UUID
+                || value instanceof Enum
+                || value instanceof TemporalAccessor) {
+            return value.toString();
         }
 
         return com.alibaba.fastjson2.JSON.toJSONString(value);

@@ -8,10 +8,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.GuavaSupport;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -42,7 +39,13 @@ public class ObjectWriterProvider
     final List<ObjectWriterModule> modules = new ArrayList<>();
     PropertyNamingStrategy namingStrategy;
 
+    boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
+    boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
+    boolean disableJSONB = JSONFactory.isDisableJSONB();
+    boolean disableAutoType = JSONFactory.isDisableAutoType();
+
     volatile long userDefineMask;
+    boolean alphabetic = JSONFactory.isDefaultWriterAlphabetic();
 
     public ObjectWriterProvider() {
         this((PropertyNamingStrategy) null);
@@ -352,14 +355,18 @@ public class ObjectWriterProvider
                     && superclass != Object.class
                     && "com.google.protobuf.GeneratedMessageV3".equals(superclass.getName())) {
                 fieldBased = false;
-            }
-            switch (className) {
-                case "springfox.documentation.spring.web.json.Json":
-                case "cn.hutool.json.JSONArray":
-                    fieldBased = false;
-                    break;
-                default:
-                    break;
+            } else {
+                switch (className) {
+                    case "springfox.documentation.spring.web.json.Json":
+                    case "cn.hutool.json.JSONArray":
+                    case "cn.hutool.json.JSONObject":
+                    case "cn.hutool.core.map.CaseInsensitiveMap":
+                    case "cn.hutool.core.map.CaseInsensitiveLinkedMap":
+                        fieldBased = false;
+                        break;
+                    default:
+                        break;
+                }
             }
         } else {
             switch (className) {
@@ -437,6 +444,8 @@ public class ObjectWriterProvider
             case "android.net.Uri$StringUri":
                 objectWriter = ObjectWriterImplToString.INSTANCE;
                 break;
+            case "com.clickhouse.data.value.UnsignedLong":
+                objectWriter = new ObjectWriterImplToString(true);
             default:
                 break;
         }
@@ -538,6 +547,15 @@ public class ObjectWriterProvider
                 || ((clazz.getModifiers() & ENUM) != 0 && clazz.getSuperclass() == Enum.class);
     }
 
+    /**
+     * @since 2.0.53
+     */
+    public void clear() {
+        mixInCache.clear();
+        cache.clear();
+        cacheFieldBased.clear();
+    }
+
     public void cleanup(Class objectClass) {
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
@@ -603,5 +621,45 @@ public class ObjectWriterProvider
         );
 
         BeanUtils.cleanupCache(classLoader);
+    }
+
+    public boolean isDisableReferenceDetect() {
+        return disableReferenceDetect;
+    }
+
+    public boolean isDisableAutoType() {
+        return disableAutoType;
+    }
+
+    public boolean isDisableJSONB() {
+        return disableJSONB;
+    }
+
+    public boolean isDisableArrayMapping() {
+        return disableArrayMapping;
+    }
+
+    public void setDisableReferenceDetect(boolean disableReferenceDetect) {
+        this.disableReferenceDetect = disableReferenceDetect;
+    }
+
+    public void setDisableArrayMapping(boolean disableArrayMapping) {
+        this.disableArrayMapping = disableArrayMapping;
+    }
+
+    public void setDisableJSONB(boolean disableJSONB) {
+        this.disableJSONB = disableJSONB;
+    }
+
+    public void setDisableAutoType(boolean disableAutoType) {
+        this.disableAutoType = disableAutoType;
+    }
+
+    public boolean isAlphabetic() {
+        return alphabetic;
+    }
+
+    protected BeanInfo createBeanInfo() {
+        return new BeanInfo(this);
     }
 }

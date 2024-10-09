@@ -1602,4 +1602,12 @@ public class JSONReaderTest2 {
             assertFalse(jsonReader.isReference());
         }
     }
+
+    @Test
+    public void setFeatures() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+        long features = 123456L;
+        context.setFeatures(features);
+        assertEquals(features, context.getFeatures());
+    }
 }

@@ -15,6 +15,8 @@ import java.util.Date;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
 import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
+import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -668,5 +670,65 @@ public class JSONWriterUTF8Test {
         String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
         Object parse = JSON.parse(json);
         assertEquals(str, parse);
+    }
+
+    @Test
+    public void writeName8() {
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+
+        char[] name = "a123".toCharArray();
+        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.writeName6Raw(nameValue);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.writeName7Raw(nameValue);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.writeName8Raw(nameValue);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.writeName9Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName10Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName11Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName12Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName13Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName14Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName15Raw(nameValue, 1);
+        }
+        {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.off = 0;
+            jsonWriter.writeName16Raw(nameValue, 1);
+        }
     }
 }

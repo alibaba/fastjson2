@@ -30,6 +30,7 @@ public abstract class FieldWriter<T>
     public final long features;
     public final int ordinal;
     public final String format;
+    public final Locale locale;
     public final DecimalFormat decimalFormat;
     public final String label;
     public final Field field;
@@ -49,6 +50,8 @@ public abstract class FieldWriter<T>
     final boolean symbol;
     final boolean trim;
     final boolean raw;
+    final boolean managedReference;
+    final boolean backReference;
 
     transient JSONWriter.Path path;
     volatile ObjectWriter initObjectWriter;
@@ -66,6 +69,7 @@ public abstract class FieldWriter<T>
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
@@ -79,6 +83,7 @@ public abstract class FieldWriter<T>
         this.fieldName = name;
         this.ordinal = ordinal;
         this.format = format;
+        this.locale = locale;
         this.label = label;
         this.hashCode = Fnv.hashCode64(name);
         this.features = features;
@@ -117,6 +122,8 @@ public abstract class FieldWriter<T>
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
+        this.managedReference = (features & ReferenceDetection.mask) != 0;
+        this.backReference = (features & FieldInfo.BACKR_EFERENCE) != 0;
         this.rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
 
         int nameLength = name.length();
@@ -495,7 +502,9 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        if ("base64".equals(format)
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else if ("base64".equals(format)
                 || (format == null && (jsonWriter.getFeatures(this.features) & WriteByteArrayAsBase64.mask) != 0)
         ) {
             jsonWriter.writeBase64(value);
@@ -531,7 +540,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeInt16(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeInt16(value);
+        }
     }
 
     public void writeInt32(JSONWriter jsonWriter, int value) {
@@ -590,7 +603,11 @@ public abstract class FieldWriter<T>
         if (decimalFormat != null) {
             jsonWriter.writeFloat(value, decimalFormat);
         } else {
-            jsonWriter.writeFloat(value);
+            if ((features & WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(Float.toString(value));
+            } else {
+                jsonWriter.writeFloat(value);
+            }
         }
     }
 
@@ -599,7 +616,12 @@ public abstract class FieldWriter<T>
         if (decimalFormat != null) {
             jsonWriter.writeDouble(value, decimalFormat);
         } else {
-            jsonWriter.writeDouble(value);
+            boolean writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(Double.toString(value));
+            } else {
+                jsonWriter.writeDouble(value);
+            }
         }
     }
 
@@ -613,7 +635,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeBool(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeBool(value);
+        }
     }
 
     public void writeFloat(JSONWriter jsonWriter, float[] value) {
@@ -622,7 +648,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeFloat(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 
     public void writeDouble(JSONWriter jsonWriter, double[] value) {
@@ -631,7 +661,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDouble(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 
     public void writeDouble(JSONWriter jsonWriter, Double value) {

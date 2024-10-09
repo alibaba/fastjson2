@@ -127,6 +127,14 @@ public class JSONObject
             val = map.get(key.toString());
         }
 
+        if (val instanceof com.alibaba.fastjson2.JSONObject) {
+            val = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) val);
+        }
+
+        if (val instanceof com.alibaba.fastjson2.JSONArray) {
+            val = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) val);
+        }
+
         return val;
     }
 
@@ -525,6 +533,10 @@ public class JSONObject
             return Integer.parseInt(str);
         }
 
+        if (value instanceof Boolean) {
+            return (Boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
@@ -756,6 +768,10 @@ public class JSONObject
             return toBigDecimal((String) value);
         }
 
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
@@ -787,6 +803,10 @@ public class JSONObject
             }
 
             return new BigInteger(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");

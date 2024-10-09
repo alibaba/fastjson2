@@ -56,7 +56,11 @@ final class JSONWriterUTF16Vector
 
     @Override
     public void writeStringLatin1(byte[] value) {
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        if ((context.features & BrowserSecure.mask) != 0) {
+            writeStringLatin1BrowserSecure(value);
+            return;
+        }
+
         boolean escape = false;
 
         int off = this.off;
@@ -74,17 +78,10 @@ final class JSONWriterUTF16Vector
         final int upperBound = (value.length - i) & ~7;
         for (; i < upperBound; i += 8) {
             ByteVector v = (ByteVector) ByteVector.SPECIES_64.fromArray(value, i);
-
             if (v.eq(V_BYTE_64_DOUBLE_QUOTE)
                     .or(v.eq(V_BYTE_64_SLASH))
                     .or(v.lt(V_BYTE_64_SPACE))
                     .anyTrue()
-                    || (browserSecure
-                    && v.eq(V_BYTE_64_LT)
-                    .or(v.eq(V_BYTE_64_GT))
-                    .or(v.eq(V_BYTE_64_LB))
-                    .or(v.eq(V_BYTE_64_RB))
-                    .anyTrue())
             ) {
                 escape = true;
                 break;
@@ -96,59 +93,14 @@ final class JSONWriterUTF16Vector
         }
 
         if (!escape) {
-            for (; i + 4 <= value.length; i += 4) {
-                byte c0 = value[i];
-                byte c1 = value[i + 1];
-                byte c2 = value[i + 2];
-                byte c3 = value[i + 3];
-
-                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
-                        || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
-                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
-                        || (browserSecure
-                        && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
-                        || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
-                        || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
-                        || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
-                ) {
-                    escape = true;
-                    break;
-                }
-                chars[off] = (char) c0;
-                chars[off + 1] = (char) c1;
-                chars[off + 2] = (char) c2;
-                chars[off + 3] = (char) c3;
-                off += 4;
-            }
-        }
-
-        if (!escape) {
             for (; i < value.length; i++) {
                 byte c = value[i];
                 if (c == '\\'
                         || c == quote
-                        || c < ' '
-                        || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
-                ) {
+                        || c < ' ') {
                     escape = true;
                     break;
                 }
-                chars[off++] = (char) c;
-            }
-        }
-
-        if (!escape) {
-            for (; i < value.length; i++) {
-                byte c = value[i];
-                if (c == '\\'
-                        || c == quote
-                        || c < ' '
-                        || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
-                ) {
-                    escape = true;
-                    break;
-                }
-
                 chars[off++] = (char) c;
             }
         }

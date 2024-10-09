@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
@@ -52,7 +53,7 @@ public class ObjectReaderBaseModuleTest {
         ObjectReaderModule module = new ObjectReaderModule() {
         };
 
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
         module.getBeanInfo(beanInfo, Animal.class);
 
         FieldInfo fieldInfo = new FieldInfo();

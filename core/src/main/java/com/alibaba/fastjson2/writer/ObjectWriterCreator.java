@@ -255,7 +255,7 @@ public class ObjectWriterCreator {
             format = beanInfo.format;
         }
 
-        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.label, field, writeUsingWriter);
+        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.locale, fieldInfo.label, field, writeUsingWriter);
     }
 
     public ObjectWriter createObjectWriter(
@@ -304,7 +304,7 @@ public class ObjectWriterCreator {
             final long features,
             final ObjectWriterProvider provider
     ) {
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = provider.createBeanInfo();
         beanInfo.readerFeatures |= FieldInfo.JIT;
 
         provider.getBeanInfo(beanInfo, objectClass);
@@ -516,7 +516,7 @@ public class ObjectWriterCreator {
         googleCollection =
                 "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
                         || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
-        if (!googleCollection) {
+        if (!googleCollection && beanInfo.rootName == null) {
             switch (fieldWriters.size()) {
                 case 1:
                     if ((fieldWriters.get(0).features & FieldInfo.VALUE_MASK) == 0) {
@@ -561,7 +561,11 @@ public class ObjectWriterCreator {
             }
         }
         if (writerAdapter == null) {
-            writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+            if (beanInfo.rootName != null) {
+                writerAdapter = new ObjectWriterRootName(objectClass, beanInfo.typeKey, beanInfo.typeName, beanInfo.rootName, writerFeatures, fieldWriters);
+            } else {
+                writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+            }
         }
 
         if (beanInfo.serializeFilters != null) {
@@ -678,12 +682,36 @@ public class ObjectWriterCreator {
         return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, ordinal, features, format, label, field, initObjectWriter);
     }
 
+    public final <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field,
+            ObjectWriter initObjectWriter
+    ) {
+        return createFieldWriter(
+                provider,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                label,
+                field,
+                initObjectWriter
+        );
+    }
+
     public <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             String fieldName,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Field field,
             ObjectWriter initObjectWriter
@@ -721,7 +749,7 @@ public class ObjectWriterCreator {
 //                fieldType = fieldClass = Boolean.class;
 //            }
 
-            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
+            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null);
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
@@ -789,7 +817,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass.isEnum()) {
-            BeanInfo beanInfo = new BeanInfo();
+            BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
 
             boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;
@@ -822,7 +850,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
         }
 
-        return new FieldWriterObject(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field, null);
+        return new FieldWriterObject(fieldName, ordinal, features, format, null, label, field.getGenericType(), fieldClass, field, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(Class<T> objectType,
@@ -853,6 +881,31 @@ public class ObjectWriterCreator {
             Method method,
             ObjectWriter initObjectWriter
     ) {
+        return createFieldWriter(
+                provider,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                label,
+                method, initObjectWriter
+        );
+    }
+
+    public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            Class<T> objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Method method,
+            ObjectWriter initObjectWriter
+    ) {
         method.setAccessible(true);
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
@@ -862,7 +915,7 @@ public class ObjectWriterCreator {
         }
 
         if (initObjectWriter != null) {
-            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
+            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
             objMethod.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
@@ -956,7 +1009,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectArrayMethod(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method);
         }
 
-        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
+        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
     }
 
     public <T> FieldWriter createFieldWriter(String fieldName, ToLongFunction<T> function) {
@@ -985,6 +1038,10 @@ public class ObjectWriterCreator {
 
     public <T> FieldWriter createFieldWriter(String fieldName, ToDoubleFunction<T> function) {
         return new FieldWriterDoubleValueFunc(fieldName, 0, 0, null, null, null, null, function);
+    }
+
+    public <T> FieldWriter createFieldWriter(String fieldName, ToCharFunction<T> function) {
+        return new FieldWriterCharValFunc(fieldName, 0, 0, null, null, null, null, function);
     }
 
     public <T> FieldWriter createFieldWriter(String fieldName, Predicate<T> function) {
@@ -1041,7 +1098,8 @@ public class ObjectWriterCreator {
             Method method,
             Function<T, V> function
     ) {
-        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method, function);
+        return createFieldWriter(
+                provider, objectClass, fieldName, ordinal, features, format, null, label, fieldType, fieldClass, null, method, function);
     }
 
     public <T, V> FieldWriter<T> createFieldWriter(
@@ -1051,6 +1109,38 @@ public class ObjectWriterCreator {
             int ordinal,
             long features,
             String format,
+            String label,
+            Type fieldType,
+            Class<V> fieldClass,
+            Field field,
+            Method method,
+            Function<T, V> function
+    ) {
+        return createFieldWriter(
+                provider,
+                objectClass,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                null,
+                label,
+                fieldType,
+                fieldClass,
+                field,
+                method,
+                function
+        );
+    }
+
+    public <T, V> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class<V> fieldClass,
@@ -1107,10 +1197,10 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass.isEnum()) {
-            BeanInfo beanInfo = new BeanInfo();
             if (provider == null) {
                 provider = JSONFactory.getDefaultObjectWriterProvider();
             }
+            BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
 
             boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;
@@ -1149,7 +1239,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     static class LambdaInfo {

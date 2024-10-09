@@ -11,7 +11,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 class FieldReaderInt64ValueField<T>
         extends FieldReaderObjectField<T> {
     FieldReaderInt64ValueField(String fieldName, Class fieldType, int ordinal, long features, String format, Long defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
     }
 
     @Override

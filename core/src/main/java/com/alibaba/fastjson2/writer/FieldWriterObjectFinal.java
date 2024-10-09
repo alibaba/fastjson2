@@ -26,7 +26,7 @@ abstract class FieldWriterObjectFinal<T>
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
         this.refDetect = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);
@@ -76,6 +76,12 @@ abstract class FieldWriterObjectFinal<T>
         }
 
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
+
+        if (unwrapped
+                && writeWithUnwrapped(jsonWriter, value, features, refDetect, valueWriter)) {
+            return true;
+        }
+
         writeFieldName(jsonWriter);
         if (jsonWriter.jsonb) {
             valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);

@@ -365,7 +365,7 @@ final class ObjectReaderException<T>
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException("auoType not support : " + typeName + ", offset " + jsonReader.getOffset());
+                        throw new JSONException("autoType not support : " + typeName + ", offset " + jsonReader.getOffset());
                     }
                 }
                 return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);

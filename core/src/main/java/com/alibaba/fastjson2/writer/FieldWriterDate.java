@@ -32,7 +32,7 @@ abstract class FieldWriterDate<T>
             Field field,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
         boolean formatyyyyMMdd8 = false, formatyyyyMMddhhmmss14 = false, formatyyyyMMddhhmmss19 = false;

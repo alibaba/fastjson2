@@ -21,7 +21,7 @@ final class FieldReaderCollectionFieldReadOnly<T>
             JSONSchema schema,
             Field field
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, field);
     }
 
     @Override

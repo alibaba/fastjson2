@@ -23,8 +23,8 @@ public class EishayFuryWriteNoneCache {
     static final Object[] objects = new Object[classes.length];
     static int index;
 
-    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-            .withLanguage(io.fury.config.Language.JAVA)
+    static org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
+            .withLanguage(org.apache.fury.config.Language.JAVA)
             .withRefTracking(true)
             .buildThreadSafeFury();
 

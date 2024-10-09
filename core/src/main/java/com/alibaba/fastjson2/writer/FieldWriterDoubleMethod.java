@@ -21,7 +21,7 @@ class FieldWriterDoubleMethod<T>
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
     }
 
     @Override
@@ -54,7 +54,11 @@ class FieldWriterDoubleMethod<T>
             if (decimalFormat != null) {
                 jsonWriter.writeDouble(doubleValue, decimalFormat);
             } else {
-                jsonWriter.writeDouble(doubleValue);
+                if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+                    jsonWriter.writeString(doubleValue);
+                } else {
+                    jsonWriter.writeDouble(doubleValue);
+                }
             }
         }
 

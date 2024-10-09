@@ -492,6 +492,8 @@ class JSONReaderUTF8
                 case ')':
                 case ',':
                 case ':':
+                case '|':
+                case '&':
                 case EOI:
                     nameLength = i;
                     this.nameEnd = ch == EOI ? offset : offset - 1;
@@ -2321,6 +2323,9 @@ class JSONReaderUTF8
     public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -3125,6 +3130,9 @@ class JSONReaderUTF8
     @Override
     public String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();
@@ -3355,7 +3363,7 @@ class JSONReaderUTF8
                                 + (((long) bytes[nameBegin + 10]) << 32)
                                 + (((long) bytes[nameBegin + 9]) << 24)
                                 + (((long) bytes[nameBegin + 8]) << 16)
-                                + (((long) bytes[nameBegin + 8]) << 8)
+                                + (((long) bytes[nameBegin + 7]) << 8)
                                 + ((long) bytes[nameBegin + 6]);
                         break;
                     case 15:
@@ -3947,6 +3955,12 @@ class JSONReaderUTF8
                 doubleValue = 0;
                 value = true;
                 ch = offset == end ? EOI : bytes[offset++];
+            } else if (ch == 'N' && bytes[offset] == 'a' && bytes[offset + 1] == 'N') {
+                valid = true;
+                offset += 2;
+                doubleValue = Double.NaN;
+                value = true;
+                ch = offset == end ? EOI : bytes[offset++];
             } else if (ch == '{' && quote == 0) {
                 valid = true;
                 this.ch = (char) ch;
@@ -4212,6 +4226,12 @@ class JSONReaderUTF8
                 valid = true;
                 floatValue = 0;
                 value = true;
+                ch = offset == end ? EOI : chars[offset++];
+            } else if (ch == 'N' && chars[offset] == 'a' && chars[offset + 1] == 'N') {
+                offset += 2;
+                valid = true;
+                value = true;
+                floatValue = Float.NaN;
                 ch = offset == end ? EOI : chars[offset++];
             } else if (ch == '{' && quote == 0) {
                 valid = true;
@@ -4679,6 +4699,9 @@ class JSONReaderUTF8
     @Override
     public final boolean skipName() {
         char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                 readFieldNameHashCodeUnquote();
@@ -4913,7 +4936,11 @@ class JSONReaderUTF8
             }
         }
 
-        if (!comma && ch != EOI && ch != '}' && ch != ']' && ch != EOI) {
+        if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        if (comma && (ch == '}' || ch == ']' || ch == EOI)) {
             throw error(offset, ch);
         }
 
@@ -5276,6 +5303,10 @@ class JSONReaderUTF8
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
             }
+            // empty string to null
+            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                str = null;
+            }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
@@ -5511,26 +5542,30 @@ class JSONReaderUTF8
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            if (!intOverflow) {
-                switch (ch) {
-                    case 'B':
+            switch (ch) {
+                case 'B':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT8;
-                        break;
-                    case 'S':
+                    }
+                    break;
+                case 'S':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT16;
-                        break;
-                    case 'L':
+                    }
+                    break;
+                case 'L':
+                    if (offset - start < 19 && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT64;
-                        break;
-                    case 'F':
-                        valueType = JSON_TYPE_FLOAT;
-                        break;
-                    case 'D':
-                        valueType = JSON_TYPE_DOUBLE;
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
             }
             ch = offset == end ? EOI : bytes[offset++];
         }
@@ -5929,7 +5964,7 @@ class JSONReaderUTF8
     @Override
     public final int getStringLength() {
         if (ch != '"' && ch != '\'') {
-            throw new JSONException("string length only support string input");
+            throw new JSONException("string length only support string input " + ch);
         }
         final char quote = ch;
 
@@ -6021,6 +6056,29 @@ class JSONReaderUTF8
                             }
                         }
                     }
+                }
+
+                int nextQuoteOffset = -1;
+                for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+                    if (bytes[i] == quote) {
+                        nextQuoteOffset = i;
+                    }
+                }
+                if (nextQuoteOffset != -1
+                        && nextQuoteOffset - offset > 10
+                        && bytes[nextQuoteOffset - 6] == '-'
+                        && bytes[nextQuoteOffset - 3] == '-'
+                ) {
+                    int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
+                    int month = TypeUtils.parseInt(bytes, nextQuoteOffset - 5, 2);
+                    int dayOfMonth = TypeUtils.parseInt(bytes, nextQuoteOffset - 2, 2);
+                    LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+                    this.offset = nextQuoteOffset + 1;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return localDate;
                 }
             }
         }
@@ -6412,6 +6470,46 @@ class JSONReaderUTF8
     }
 
     @Override
+    protected final LocalTime readLocalTime6() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("localTime only support string input");
+        }
+
+        LocalTime time = DateUtils.parseLocalTime6(bytes, offset);
+        if (time == null) {
+            return null;
+        }
+
+        offset += 7;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return time;
+    }
+
+    @Override
+    protected final LocalTime readLocalTime7() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("localTime only support string input");
+        }
+
+        LocalTime time = DateUtils.parseLocalTime7(bytes, offset);
+        if (time == null) {
+            return null;
+        }
+
+        offset += 8;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return time;
+    }
+
+    @Override
     protected final LocalTime readLocalTime8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localTime only support string input");
@@ -6748,6 +6846,10 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
+        if (longValue < 0) {
+            overflow = true;
+        }
+
         this.scale = 0;
         if (ch == '.') {
             valueType = JSON_TYPE_DEC;
@@ -7038,6 +7140,32 @@ class JSONReaderUTF8
         if (ch < 0) {
             char_utf8(ch, offset);
             return true;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfMatchIdent(char c0, char c1) {
+        if (ch != c0) {
+            return false;
+        }
+
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (offset + 1 > end || bytes[offset] != c1) {
+            return false;
+        }
+
+        offset += 1;
+        int ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (offset == this.offset + 2 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
+            return false;
         }
 
         this.offset = offset;
@@ -7411,6 +7539,13 @@ class JSONReaderUTF8
                 }
                 throw new JSONException("can not convert to boolean : " + str);
             }
+        } else if (ch == '[') {
+            next();
+            val = readBoolValue();
+            if (!nextIfMatch(']')) {
+                throw new JSONException("not closed square brackets, expect ] but found : " + (char) ch);
+            }
+            return val;
         } else {
             throw new JSONException("syntax error : " + ch);
         }

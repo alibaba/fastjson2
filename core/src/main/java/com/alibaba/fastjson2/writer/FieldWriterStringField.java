@@ -14,29 +14,35 @@ final class FieldWriterStringField<T>
             String label,
             Field field
     ) {
-        super(fieldName, ordinal, features, format, label, String.class, String.class, field, null);
+        super(fieldName, ordinal, features, format, null, label, String.class, String.class, field, null);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         String value = (String) getFieldValue(object);
 
+        long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) == 0
                     || (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0) {
                 return false;
             }
 
+            writeFieldName(jsonWriter);
             if ((features & (JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) != 0) {
-                writeFieldName(jsonWriter);
                 jsonWriter.writeString("");
-                return true;
+            } else {
+                jsonWriter.writeNull();
             }
+            return true;
         }
 
-        if (trim && value != null) {
+        if (trim) {
             value = value.trim();
+        }
+
+        if (value.isEmpty() && (features & JSONWriter.Feature.IgnoreEmpty.mask) != 0) {
+            return false;
         }
 
         writeFieldName(jsonWriter);

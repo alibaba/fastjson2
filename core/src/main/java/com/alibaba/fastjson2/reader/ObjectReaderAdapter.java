@@ -223,7 +223,7 @@ public class ObjectReaderAdapter<T>
         }
     }
 
-    public Object auoType(JSONReader jsonReader, Class expectClass, long features) {
+    public Object autoType(JSONReader jsonReader, Class expectClass, long features) {
         long typeHash = jsonReader.readTypeHashCode();
         JSONReader.Context context = jsonReader.getContext();
 
@@ -239,7 +239,7 @@ public class ObjectReaderAdapter<T>
                 if (expectClass == objectClass) {
                     autoTypeObjectReader = this;
                 } else {
-                    throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                    throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                 }
             }
         }
@@ -357,7 +357,7 @@ public class ObjectReaderAdapter<T>
         }
     }
 
-    public T createInstance(Collection collection) {
+    public T createInstance(Collection collection, long features) {
         T object = createInstance(0L);
         int index = 0;
         for (Object fieldValue : collection) {
@@ -431,6 +431,35 @@ public class ObjectReaderAdapter<T>
         return m < 0 ? -1 : this.mapping[m];
     }
 
+    protected final FieldReader getFieldReaderUL(long hashCode, JSONReader jsonReader, long features) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);
+        }
+        return fieldReader;
+    }
+
+    protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);
+        }
+
+        if (fieldReader != null) {
+            if (jsonReader.jsonb) {
+                fieldReader.readFieldValueJSONB(jsonReader, object);
+            } else {
+                fieldReader.readFieldValue(jsonReader, object);
+            }
+        } else {
+            processExtra(jsonReader, object);
+        }
+    }
+
     @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
         int m = Arrays.binarySearch(hashCodesLCase, hashCode);
@@ -451,7 +480,7 @@ public class ObjectReaderAdapter<T>
             autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                throw new JSONException(jsonReader.info("autoType not support : " + typeName));
             }
         }
 
@@ -499,7 +528,7 @@ public class ObjectReaderAdapter<T>
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                     }
                 }
 
@@ -603,7 +632,7 @@ public class ObjectReaderAdapter<T>
             }
         }
 
-        T object = createInstance(0L);
+        T object = createInstance(features);
 
         if (extraFieldReader == null
                 && (features2 & (JSONReader.Feature.SupportSmartMatch.mask | JSONReader.Feature.ErrorOnUnknownProperties.mask)) == 0
@@ -623,7 +652,7 @@ public class ObjectReaderAdapter<T>
                             && fieldValue instanceof JSONArray
                     ) {
                         ObjectReader objectReader = fieldReader.getObjectReader(provider);
-                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue);
+                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue, features);
                         fieldReader.accept(object, fieldValueList);
                         continue;
                     } else if (fieldValue instanceof JSONObject

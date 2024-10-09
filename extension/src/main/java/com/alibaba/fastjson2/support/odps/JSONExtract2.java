@@ -13,8 +13,9 @@ public class JSONExtract2
         }
 
         Object result = null;
-        try {
-            result = JSONPath.of(path).extract(JSONReader.of(json));
+        try (JSONReader jsonReader = JSONReader.of(json)) {
+            result = JSONPath.of(path)
+                    .extract(jsonReader);
         } catch (Throwable ignored) {
             // ignored
         }
@@ -22,6 +23,10 @@ public class JSONExtract2
         if (result == null) {
             return null;
         }
-        return JSON.toJSONString(result);
+        try {
+            return JSON.toJSONString(result);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 final class ObjectWriterImplInt8
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt8 INSTANCE = new ObjectWriterImplInt8();
@@ -16,6 +18,12 @@ final class ObjectWriterImplInt8
         }
 
         byte byteValue = (Byte) object;
+
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(byteValue);
+            return;
+        }
+
         jsonWriter.writeInt8(byteValue);
     }
 
@@ -25,7 +33,15 @@ final class ObjectWriterImplInt8
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(((Number) object).intValue());
+
+        byte byteValue = (Byte) object;
+
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(byteValue);
+            return;
+        }
+
+        jsonWriter.writeInt8(byteValue);
         long features2 = jsonWriter.getFeatures(features);
         if ((features2 & JSONWriter.Feature.WriteClassName.mask) != 0
                 && (features2 & JSONWriter.Feature.WriteNonStringKeyAsString.mask) == 0

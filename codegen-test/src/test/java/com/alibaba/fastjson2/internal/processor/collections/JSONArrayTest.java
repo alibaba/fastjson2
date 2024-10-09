@@ -33,7 +33,7 @@ public class JSONArrayTest {
         assertEquals(bean.v01, bean1.v01);
     }
 
-    @JSONCompiled(referenceDetect = false)
+    @JSONCompiled
     public static class Bean1 {
         public JSONArray v01;
     }
