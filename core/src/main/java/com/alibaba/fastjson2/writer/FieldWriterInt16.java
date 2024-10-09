@@ -70,6 +70,9 @@ abstract class FieldWriterInt16<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        return ObjectWriterImplInt16.INSTANCE;
+        if (valueClass == fieldClass) {
+            return ObjectWriterImplInt16.INSTANCE;
+        }
+        return jsonWriter.getObjectWriter(valueClass);
     }
 }

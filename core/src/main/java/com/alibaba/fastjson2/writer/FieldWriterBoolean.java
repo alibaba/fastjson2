@@ -163,6 +163,9 @@ abstract class FieldWriterBoolean
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        return ObjectWriterImplBoolean.INSTANCE;
+        if (valueClass == fieldClass) {
+            return ObjectWriterImplBoolean.INSTANCE;
+        }
+        return jsonWriter.getObjectWriter(valueClass);
     }
 }
