@@ -7,10 +7,10 @@ import org.glassfish.jersey.internal.spi.AutoDiscoverable;
 
 /**
  * FastJson2AutoDiscoverable
+ * 参考: com.alibaba.fastjson.support.jaxrs.FastJsonAutoDiscoverable
  *
  * @author 张治保
  * @since 2024/10/16
- * @see com.alibaba.fastjson.support.jaxrs.FastJsonAutoDiscoverable
  * @see AutoDiscoverable
  */
 @Priority(AutoDiscoverable.DEFAULT_PRIORITY - 1)

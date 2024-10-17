@@ -10,10 +10,10 @@ import org.glassfish.jersey.internal.InternalProperties;
 import org.glassfish.jersey.internal.util.PropertiesHelper;
 /**
  *  FastJson2Feature
+ *  参考：com.alibaba.fastjson.support.jaxrs.FastJsonFeature
  *
  * @author 张治保
  * @since 2024/10/16
- * @see com.alibaba.fastjson.support.jaxrs.FastJsonFeature
  * @see Feature
  */
 public class FastJson2Feature

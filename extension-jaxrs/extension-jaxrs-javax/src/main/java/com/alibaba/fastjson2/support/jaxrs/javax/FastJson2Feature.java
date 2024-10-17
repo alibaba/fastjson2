@@ -11,10 +11,10 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 /**
  * FastJson2Feature
+ * 参考：@see com.alibaba.fastjson.support.jaxrs.FastJsonFeature
  *
  * @author 张治保
  * @since 2024/10/16
- * @see com.alibaba.fastjson.support.jaxrs.FastJsonFeature
  * @see Feature
  */
 public class FastJson2Feature

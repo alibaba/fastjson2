@@ -17,10 +17,9 @@ import java.lang.reflect.Type;
 
 /**
  * Fastjson for JAX-RS Provider.
- *
+ * 参考：com.alibaba.fastjson.support.jaxrs.FastJsonProvider
  * @author 张治保
  * @since 2024/10/16
- * @see com.alibaba.fastjson.support.jaxrs.FastJsonProvider
  * @see MessageBodyReader
  * @see MessageBodyWriter
  */

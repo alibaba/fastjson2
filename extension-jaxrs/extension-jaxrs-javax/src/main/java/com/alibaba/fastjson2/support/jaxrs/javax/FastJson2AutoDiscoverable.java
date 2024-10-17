@@ -7,12 +7,11 @@ import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.FeatureContext;
 
 /**
- * <p>Title: FastJsonAutoDiscoverable</p>
- * <p>Description: FastJsonAutoDiscoverable</p>
+ * FastJson2AutoDiscoverable
+ * 参考: com.alibaba.fastjson.support.jaxrs.FastJsonAutoDiscoverable
  *
  * @author 张治保
  * @since 2024/10/16
- * @see com.alibaba.fastjson.support.jaxrs.FastJsonAutoDiscoverable
  * @see AutoDiscoverable
  */
 @Priority(AutoDiscoverable.DEFAULT_PRIORITY - 1)
