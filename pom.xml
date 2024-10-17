@@ -78,6 +78,7 @@
             <module>example-spring6-test</module>
         -->
         <module>extension</module>
+        <module>extension-jaxrs</module>
         <module>extension-solon</module>
         <module>extension-spring5</module>
         <!--
