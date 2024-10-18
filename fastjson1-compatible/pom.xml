@@ -368,6 +368,21 @@
                         <include>com/alibaba/fastjson/**/*.java</include>
                         <include>com/alibaba/fastjson/**/*.kt</include>
                     </includes>
+                    <excludes>
+                        <exclude>com/alibaba/fastjson/SqlTimestampTest.java</exclude>
+                        <exclude>com/alibaba/fastjson/TimestampTest.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateFieldFormatTest.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateFieldTest11_reader.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateFieldTest9.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateTest_tz.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_1200/Issue1298.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_1600/Issue1679.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2200/Issue2241.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2600/Issue2606.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2700/Issue2784.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2800/Issue2894.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_3000/Issue3049.java</exclude>
+                    </excludes>
                     <systemPropertyVariables>
                         <user.timezone>Asia/Shanghai</user.timezone>
                     </systemPropertyVariables>

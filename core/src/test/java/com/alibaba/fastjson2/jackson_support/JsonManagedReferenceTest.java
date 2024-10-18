@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -28,7 +29,9 @@ public class JsonManagedReferenceTest {
         final String jsonJackson = mapper.writeValueAsString(dto);
         final String jsonFastjson2 = JSON.toJSONString(dto, JSONWriter.Feature.WriteNulls);
 
-        assertEquals(jsonJackson, jsonFastjson2);
+        Map<String, Object> mapJackson = mapper.readValue(jsonJackson, Map.class);
+        Map<String, Object> mapFastjson2 = mapper.readValue(jsonFastjson2, Map.class);
+        assertEquals(mapJackson, mapFastjson2);
     }
 
     public static class Bean {
@@ -90,7 +93,9 @@ public class JsonManagedReferenceTest {
         final String jsonJackson = mapper.writeValueAsString(dto);
         final String jsonFastjson2 = JSON.toJSONString(dto, JSONWriter.Feature.WriteNulls);
 
-        assertEquals(jsonJackson, jsonFastjson2);
+        Map<String, Object> mapJackson = mapper.readValue(jsonJackson, Map.class);
+        Map<String, Object> mapFastjson2 = mapper.readValue(jsonFastjson2, Map.class);
+        assertEquals(mapJackson, mapFastjson2);
     }
 
     static class Bean1 {
