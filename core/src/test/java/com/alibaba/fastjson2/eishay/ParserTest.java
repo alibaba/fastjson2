@@ -108,36 +108,36 @@ public class ParserTest {
 
         byte[] jsonbBytes = jw.getBytes();
         assertEquals("{\n" +
-                "\t\"images#0\":[\n" +
+                "\t\"images#0\": [\n" +
                 "\t\t{\n" +
-                "\t\t\t\"height#1\":768,\n" +
-                "\t\t\t\"size#2\":1,\n" +
-                "\t\t\t\"title#3\":\"Javaone Keynote\",\n" +
-                "\t\t\t\"uri#4\":\"http://javaone.com/keynote_large.jpg\",\n" +
-                "\t\t\t\"width#5\":1024\n" +
+                "\t\t\t\"height#1\": 768,\n" +
+                "\t\t\t\"size#2\": 1,\n" +
+                "\t\t\t\"title#3\": \"Javaone Keynote\",\n" +
+                "\t\t\t\"uri#4\": \"http://javaone.com/keynote_large.jpg\",\n" +
+                "\t\t\t\"width#5\": 1024\n" +
                 "\t\t},\n" +
                 "\t\t{\n" +
-                "\t\t\t\"#1\":240,\n" +
-                "\t\t\t\"#2\":0,\n" +
-                "\t\t\t\"#3\":\"Javaone Keynote\",\n" +
-                "\t\t\t\"#4\":\"http://javaone.com/keynote_small.jpg\",\n" +
-                "\t\t\t\"#5\":320\n" +
+                "\t\t\t\"#1\": 240,\n" +
+                "\t\t\t\"#2\": 0,\n" +
+                "\t\t\t\"#3\": \"Javaone Keynote\",\n" +
+                "\t\t\t\"#4\": \"http://javaone.com/keynote_small.jpg\",\n" +
+                "\t\t\t\"#5\": 320\n" +
                 "\t\t}\n" +
                 "\t],\n" +
-                "\t\"media#6\":{\n" +
-                "\t\t\"bitrate#7\":262144,\n" +
-                "\t\t\"duration#8\":18000000,\n" +
-                "\t\t\"format#9\":\"video/mpg4\",\n" +
-                "\t\t\"#1\":480,\n" +
-                "\t\t\"persons#10\":[\n" +
+                "\t\"media#6\": {\n" +
+                "\t\t\"bitrate#7\": 262144,\n" +
+                "\t\t\"duration#8\": 18000000,\n" +
+                "\t\t\"format#9\": \"video/mpg4\",\n" +
+                "\t\t\"#1\": 480,\n" +
+                "\t\t\"persons#10\": [\n" +
                 "\t\t\t\"Bill Gates\",\n" +
                 "\t\t\t\"Steve Jobs\"\n" +
                 "\t\t],\n" +
-                "\t\t\"player#11\":0,\n" +
-                "\t\t\"#2\":58982400,\n" +
-                "\t\t\"#3\":\"Javaone Keynote\",\n" +
-                "\t\t\"#4\":\"http://javaone.com/keynote.mpg\",\n" +
-                "\t\t\"#5\":640\n" +
+                "\t\t\"player#11\": 0,\n" +
+                "\t\t\"#2\": 58982400,\n" +
+                "\t\t\"#3\": \"Javaone Keynote\",\n" +
+                "\t\t\"#4\": \"http://javaone.com/keynote.mpg\",\n" +
+                "\t\t\"#5\": 640\n" +
                 "\t}\n" +
                 "}", JSONB.toJSONString(jsonbBytes, true));
 

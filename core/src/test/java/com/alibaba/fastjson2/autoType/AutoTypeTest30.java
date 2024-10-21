@@ -115,8 +115,8 @@ public class AutoTypeTest30 {
         JSONB.dump(bytes);
 
         assertEquals("{\n" +
-                        "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest30$Bean2\",\n" +
-                        "\t\"value\":\"1001\"\n" +
+                        "\t\"@type\": \"com.alibaba.fastjson2.autoType.AutoTypeTest30$Bean2\",\n" +
+                        "\t\"value\": \"1001\"\n" +
                         "}",
                 JSONB.toJSONString(bytes));
 

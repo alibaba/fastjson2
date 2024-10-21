@@ -37,16 +37,16 @@ public class IgnoreNoneSerializableTest {
         bean.b = new B();
 
         assertEquals("{\n" +
-                "\t\"a\":{},\n" +
-                "\t\"b\":{}\n" +
+                "\t\"a\": {},\n" +
+                "\t\"b\": {}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean)));
 
         assertEquals("{\n" +
-                "\t\"a\":{}\n" +
+                "\t\"a\": {}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean, JSONWriter.Feature.IgnoreNoneSerializable)));
 
         assertEquals("{\n" +
-                        "\t\"a\":{}\n" +
+                        "\t\"a\": {}\n" +
                         "}", JSONB.toJSONString(
                         JSONB.toBytes(bean, JSONWriter.Feature.IgnoreNoneSerializable), JSONB.symbolTable("id")
                 )
@@ -73,21 +73,21 @@ public class IgnoreNoneSerializableTest {
         bean.b = new B();
 
         assertEquals("{\n" +
-                "\t\"a\":{},\n" +
-                "\t\"b\":{}\n" +
+                "\t\"a\": {},\n" +
+                "\t\"b\": {}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean, JSONWriter.Feature.FieldBased)));
 
         assertEquals("{\n" +
-                "\t\"a\":{},\n" +
-                "\t\"b\":{}\n" +
+                "\t\"a\": {},\n" +
+                "\t\"b\": {}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean, JSONWriter.Feature.FieldBased), true));
 
         assertEquals("{\n" +
-                "\t\"a\":{}\n" +
+                "\t\"a\": {}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean, JSONWriter.Feature.IgnoreNoneSerializable, JSONWriter.Feature.FieldBased)));
 
         assertEquals("{\n" +
-                        "\t\"a\":{}\n" +
+                        "\t\"a\": {}\n" +
                         "}", JSONB.toJSONString(
                         JSONB.toBytes(bean, JSONWriter.Feature.IgnoreNoneSerializable, JSONWriter.Feature.FieldBased), JSONB.symbolTable("id")
                 )
@@ -107,8 +107,8 @@ public class IgnoreNoneSerializableTest {
         bean.b = new B();
 
         assertEquals("{\n" +
-                "\t\"a\":{},\n" +
-                "\t\"b\":{}\n" +
+                "\t\"a\": {},\n" +
+                "\t\"b\": {}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean, JSONWriter.Feature.FieldBased)));
 
         assertEquals(
@@ -130,11 +130,11 @@ public class IgnoreNoneSerializableTest {
         assertEquals("{\"value\":null}", JSON.toJSONString(object, JSONWriter.Feature.IgnoreNoneSerializable));
 
         assertEquals("{\n" +
-                "\t\"value\":{}\n" +
+                "\t\"value\": {}\n" +
                 "}", JSONB.toJSONString(object.toJSONBBytes()));
 
         assertEquals("{\n" +
-                "\t\"value\":null\n" +
+                "\t\"value\": null\n" +
                 "}", JSONB.toJSONString(object.toJSONBBytes(JSONWriter.Feature.IgnoreNoneSerializable)));
     }
 

@@ -17,7 +17,7 @@ public class Issue1385 {
         map.put("type", null);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteMapNullValue);
         assertEquals("{\n" +
-                "\t\"type\":null\n" +
+                "\t\"type\": null\n" +
                 "}", JSONB.toJSONString(bytes));
         Bean bean = JSONB.parseObject(bytes, Bean.class);
         assertNull(bean.type);

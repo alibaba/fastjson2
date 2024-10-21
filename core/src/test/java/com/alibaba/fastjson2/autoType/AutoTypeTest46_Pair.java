@@ -29,20 +29,20 @@ public class AutoTypeTest46_Pair {
         JSONB.dump(bytes);
 
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest46_Pair$Bean#0\",\n" +
-                "\t\"@value\":{\n" +
-                "\t\t\"pair1#1\":{\n" +
-                "\t\t\t\"@type\":\"org.apache.commons.lang3.tuple.ImmutablePair#2\",\n" +
-                "\t\t\t\"@value\":{\n" +
-                "\t\t\t\t\"left#3\":\"101\",\n" +
-                "\t\t\t\t\"right#4\":true\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.autoType.AutoTypeTest46_Pair$Bean#0\",\n" +
+                "\t\"@value\": {\n" +
+                "\t\t\"pair1#1\": {\n" +
+                "\t\t\t\"@type\": \"org.apache.commons.lang3.tuple.ImmutablePair#2\",\n" +
+                "\t\t\t\"@value\": {\n" +
+                "\t\t\t\t\"left#3\": \"101\",\n" +
+                "\t\t\t\t\"right#4\": true\n" +
                 "\t\t\t}\n" +
                 "\t\t},\n" +
-                "\t\t\"pair2#5\":{\n" +
-                "\t\t\t\"@type\":\"#2\",\n" +
-                "\t\t\t\"@value\":{\n" +
-                "\t\t\t\t\"#3\":\"102\",\n" +
-                "\t\t\t\t\"#4\":true\n" +
+                "\t\t\"pair2#5\": {\n" +
+                "\t\t\t\"@type\": \"#2\",\n" +
+                "\t\t\t\"@value\": {\n" +
+                "\t\t\t\t\"#3\": \"102\",\n" +
+                "\t\t\t\t\"#4\": true\n" +
                 "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t}\n" +

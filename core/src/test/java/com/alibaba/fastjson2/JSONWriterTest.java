@@ -938,7 +938,7 @@ public class JSONWriterTest {
         JSONObject object = JSONObject.of("id", 123);
         String result = "{\"id\":123}";
         String prettyResult = "{\n" +
-                "\t\"id\":123\n" +
+                "\t\"id\": 123\n" +
                 "}";
         assertEquals(result, object.toString());
         assertEquals(prettyResult, object.toString(PrettyFormat));
@@ -976,8 +976,8 @@ public class JSONWriterTest {
         JSONObject object = JSONObject.of("id", 123, "name", "DataWorks");
         String result = "{\"id\":123,\"name\":\"DataWorks\"}";
         String prettyResult = "{\n" +
-                "\t\"id\":123,\n" +
-                "\t\"name\":\"DataWorks\"\n" +
+                "\t\"id\": 123,\n" +
+                "\t\"name\": \"DataWorks\"\n" +
                 "}";
         assertEquals(result, object.toString());
         assertEquals(prettyResult, object.toString(PrettyFormat));
@@ -1100,13 +1100,13 @@ public class JSONWriterTest {
 
         byte[] jsonbBytes = JSONB.toBytes(a, WriteClassName);
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.JSONWriterTest$A#0\",\n" +
-                "\t\"@value\":{\n" +
-                "\t\t\"id\":1001,\n" +
-                "\t\t\"value\":{\n" +
-                "\t\t\t\"@type\":\"#0\",\n" +
-                "\t\t\t\"@value\":{\n" +
-                "\t\t\t\t\"id\":1002\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.JSONWriterTest$A#0\",\n" +
+                "\t\"@value\": {\n" +
+                "\t\t\"id\": 1001,\n" +
+                "\t\t\"value\": {\n" +
+                "\t\t\t\"@type\": \"#0\",\n" +
+                "\t\t\t\"@value\": {\n" +
+                "\t\t\t\t\"id\": 1002\n" +
                 "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t}\n" +
@@ -1133,9 +1133,9 @@ public class JSONWriterTest {
         byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
         assertEquals(
                 "{\n" +
-                        "\t\"id#0\":1001,\n" +
-                        "\t\"value#1\":{\n" +
-                        "\t\t\"#0\":1002\n" +
+                        "\t\"id#0\": 1001,\n" +
+                        "\t\"value#1\": {\n" +
+                        "\t\t\"#0\": 1002\n" +
                         "\t}\n" +
                         "}",
                 new JSONBDump(jsonbBytes, true).toString()
@@ -1157,9 +1157,9 @@ public class JSONWriterTest {
         byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
         assertEquals(
                 "{\n" +
-                        "\t\"id#0\":1001,\n" +
-                        "\t\"value#1\":{\n" +
-                        "\t\t\"#0\":1002\n" +
+                        "\t\"id#0\": 1001,\n" +
+                        "\t\"value#1\": {\n" +
+                        "\t\t\"#0\": 1002\n" +
                         "\t}\n" +
                         "}",
                 new JSONBDump(jsonbBytes, true).toString()
@@ -1181,9 +1181,9 @@ public class JSONWriterTest {
         byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
         assertEquals(
                 "{\n" +
-                        "\t\"a1234567890id#0\":1001,\n" +
-                        "\t\"value#1\":{\n" +
-                        "\t\t\"#0\":1002\n" +
+                        "\t\"a1234567890id#0\": 1001,\n" +
+                        "\t\"value#1\": {\n" +
+                        "\t\t\"#0\": 1002\n" +
                         "\t}\n" +
                         "}",
                 new JSONBDump(jsonbBytes, true).toString()
@@ -1205,9 +1205,9 @@ public class JSONWriterTest {
         byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
         assertEquals(
                 "{\n" +
-                        "\t\"a1234567890id#0\":1001,\n" +
-                        "\t\"value#1\":{\n" +
-                        "\t\t\"#0\":1002\n" +
+                        "\t\"a1234567890id#0\": 1001,\n" +
+                        "\t\"value#1\": {\n" +
+                        "\t\t\"#0\": 1002\n" +
                         "\t}\n" +
                         "}",
                 new JSONBDump(jsonbBytes, true).toString()
@@ -1229,9 +1229,9 @@ public class JSONWriterTest {
         byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
         assertEquals(
                 "{\n" +
-                        "\t\"a1234567890id#0\":1001,\n" +
-                        "\t\"value#1\":{\n" +
-                        "\t\t\"#0\":1002\n" +
+                        "\t\"a1234567890id#0\": 1001,\n" +
+                        "\t\"value#1\": {\n" +
+                        "\t\t\"#0\": 1002\n" +
                         "\t}\n" +
                         "}",
                 new JSONBDump(jsonbBytes, true).toString()
@@ -1275,9 +1275,9 @@ public class JSONWriterTest {
         byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
         assertEquals(
                 "{\n" +
-                        "\t\"a1234567890id#0\":1001,\n" +
-                        "\t\"value#1\":{\n" +
-                        "\t\t\"#0\":1002\n" +
+                        "\t\"a1234567890id#0\": 1001,\n" +
+                        "\t\"value#1\": {\n" +
+                        "\t\t\"#0\": 1002\n" +
                         "\t}\n" +
                         "}",
                 new JSONBDump(jsonbBytes, true).toString()
@@ -2476,7 +2476,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16(PrettyFormat);
             jsonWriter.startObject();
@@ -2511,7 +2511,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16(PrettyFormat);
             jsonWriter.startObject();
@@ -2546,7 +2546,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16(PrettyFormat);
             jsonWriter.startObject();
@@ -2583,7 +2583,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();
@@ -2620,7 +2620,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();
@@ -2657,7 +2657,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();
@@ -2694,7 +2694,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();
@@ -2731,7 +2731,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();
@@ -2768,7 +2768,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();
@@ -2805,7 +2805,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();
@@ -2841,7 +2841,7 @@ public class JSONWriterTest {
             assertEquals(expect, jsonWriter.toString());
         }
 
-        String expect_pretty = "{\n\t\"" + name + "\":";
+        String expect_pretty = "{\n\t\"" + name + "\": ";
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
             jsonWriter.startObject();

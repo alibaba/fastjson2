@@ -22,11 +22,11 @@ public class Issue104 {
 
         String pretty = JSON.toJSONString(object, JSONWriter.Feature.PrettyFormat);
         assertEquals("{\n" +
-                "\t\"passengerId\":\"220802200005217748\",\n" +
-                "\t\"firstName\":\"Hong\",\n" +
-                "\t\"lastName\":\"Test\",\n" +
-                "\t\"age\":99,\n" +
-                "\t\"telephone\":\"13104362222\"\n" +
+                "\t\"passengerId\": \"220802200005217748\",\n" +
+                "\t\"firstName\": \"Hong\",\n" +
+                "\t\"lastName\": \"Test\",\n" +
+                "\t\"age\": 99,\n" +
+                "\t\"telephone\": \"13104362222\"\n" +
                 "}", pretty);
     }
 
@@ -44,20 +44,20 @@ public class Issue104 {
 
         String pretty = JSON.toJSONString(object, JSONWriter.Feature.PrettyFormat);
         assertEquals("{\n" +
-                "\t\"age\":99,\n" +
-                "\t\"firstName\":\"Hong\",\n" +
-                "\t\"lastName\":\"Test\",\n" +
-                "\t\"passengerId\":\"220802200005217748\",\n" +
-                "\t\"telephone\":\"13104362222\"\n" +
+                "\t\"age\": 99,\n" +
+                "\t\"firstName\": \"Hong\",\n" +
+                "\t\"lastName\": \"Test\",\n" +
+                "\t\"passengerId\": \"220802200005217748\",\n" +
+                "\t\"telephone\": \"13104362222\"\n" +
                 "}", pretty);
 
         byte[] prettyBytes = JSON.toJSONBytes(object, JSONWriter.Feature.PrettyFormat);
         assertEquals("{\n" +
-                "\t\"age\":99,\n" +
-                "\t\"firstName\":\"Hong\",\n" +
-                "\t\"lastName\":\"Test\",\n" +
-                "\t\"passengerId\":\"220802200005217748\",\n" +
-                "\t\"telephone\":\"13104362222\"\n" +
+                "\t\"age\": 99,\n" +
+                "\t\"firstName\": \"Hong\",\n" +
+                "\t\"lastName\": \"Test\",\n" +
+                "\t\"passengerId\": \"220802200005217748\",\n" +
+                "\t\"telephone\": \"13104362222\"\n" +
                 "}", new String(prettyBytes));
     }
 

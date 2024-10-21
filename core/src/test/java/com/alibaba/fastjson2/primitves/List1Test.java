@@ -72,7 +72,7 @@ public class List1Test {
                 byte[] jsonbBytes = jsonWriter.getBytes();
                 JSONB.dump(jsonbBytes);
                 assertEquals("{\n" +
-                        "\t\"v0000\":[1]\n" +
+                        "\t\"v0000\": [1]\n" +
                         "}", JSONB.toJSONString(jsonbBytes));
             }
             {

@@ -32,7 +32,7 @@ public class CharTest {
             bean.value = 'a';
             objectWriter.write(jsonWriter, bean);
             assertEquals("{\n" +
-                    "\t\"value\":\"a\"\n" +
+                    "\t\"value\": \"a\"\n" +
                     "}", JSONB.toJSONString(jsonWriter.getBytes()));
         }
         {

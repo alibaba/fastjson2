@@ -25,8 +25,8 @@ public class UnwrappedTest {
 
         byte[] jsonb = JSONB.toBytes(bean);
         assertEquals("{\n" +
-                "\t\"name\":\"My bean\",\n" +
-                "\t\"attr1\":\"val1\"\n" +
+                "\t\"name\": \"My bean\",\n" +
+                "\t\"attr1\": \"val1\"\n" +
                 "}", JSONB.toJSONString(jsonb));
 
         ExtendableBean bean2 = JSONB.parseObject(jsonb, ExtendableBean.class);

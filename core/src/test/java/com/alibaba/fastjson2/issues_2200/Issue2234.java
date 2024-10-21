@@ -21,14 +21,14 @@ public class Issue2234 {
 
         byte[] jsonb = JSONB.toBytes(bean, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.FieldBased);
         assertEquals("{\n" +
-                "\t\"f0\":null,\n" +
-                "\t\"f1\":null,\n" +
-                "\t\"f2\":null,\n" +
-                "\t\"f3\":null,\n" +
-                "\t\"f4\":null,\n" +
-                "\t\"f5\":null,\n" +
-                "\t\"f6\":null,\n" +
-                "\t\"f7\":null\n" +
+                "\t\"f0\": null,\n" +
+                "\t\"f1\": null,\n" +
+                "\t\"f2\": null,\n" +
+                "\t\"f3\": null,\n" +
+                "\t\"f4\": null,\n" +
+                "\t\"f5\": null,\n" +
+                "\t\"f6\": null,\n" +
+                "\t\"f7\": null\n" +
                 "}", JSONB.toJSONString(jsonb));
     }
 

@@ -34,7 +34,7 @@ public class ObjectArrayTest {
             bean.values = new BigDecimal[] {BigDecimal.ONE, BigDecimal.TEN};
             objectWriter.write(jsonWriter, bean);
             assertEquals("{\n" +
-                    "\t\"values\":[\n" +
+                    "\t\"values\": [\n" +
                     "\t\t1,\n" +
                     "\t\t10\n" +
                     "\t]\n" +
@@ -95,7 +95,7 @@ public class ObjectArrayTest {
             bean.values = new BigDecimal[] {BigDecimal.ONE, BigDecimal.TEN};
             objectWriter.write(jsonWriter, bean);
             assertEquals("{\n" +
-                    "\t\"values\":[\n" +
+                    "\t\"values\": [\n" +
                     "\t\t1,\n" +
                     "\t\t10\n" +
                     "\t]\n" +

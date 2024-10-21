@@ -25,15 +25,15 @@ public class Issue1121 {
 
         String json = JSON.toJSONString(result, JSONWriter.Feature.PrettyFormat);
         assertEquals("{\n" +
-                "\t\"host\":\"127.0.0.1\",\n" +
-                "\t\"port\":3306,\n" +
-                "\t\"user\":{\n" +
-                "\t\t\"name\":\"jack\",\n" +
-                "\t\t\"age\":20\n" +
+                "\t\"host\": \"127.0.0.1\",\n" +
+                "\t\"port\": 3306,\n" +
+                "\t\"user\": {\n" +
+                "\t\t\"name\": \"jack\",\n" +
+                "\t\t\"age\": 20\n" +
                 "\t},\n" +
-                "\t\"admin\":{\n" +
-                "\t\t\"name\":\"jack\",\n" +
-                "\t\t\"age\":20\n" +
+                "\t\"admin\": {\n" +
+                "\t\t\"name\": \"jack\",\n" +
+                "\t\t\"age\": 20\n" +
                 "\t}\n" +
                 "}", json);
 

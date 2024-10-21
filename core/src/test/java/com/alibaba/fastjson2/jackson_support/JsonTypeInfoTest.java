@@ -15,9 +15,9 @@ public class JsonTypeInfoTest {
         Shape shape = new Circle("CustomCircle", 1);
         String str = JSON.toJSONString(shape, JSONWriter.Feature.PrettyFormat);
         assertEquals("{\n" +
-                "\t\"@type\":\"circle\",\n" +
-                "\t\"name\":\"CustomCircle\",\n" +
-                "\t\"radius\":1.0\n" +
+                "\t\"@type\": \"circle\",\n" +
+                "\t\"name\": \"CustomCircle\",\n" +
+                "\t\"radius\": 1.0\n" +
                 "}", str);
 
         Shape shape1 = JSON.parseObject(str, Shape.class);

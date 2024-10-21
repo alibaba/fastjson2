@@ -10,7 +10,7 @@ public class Issue344 {
     @Test
     public void test() {
         assertEquals("{\n" +
-                "\t\"id\":123\n" +
+                "\t\"id\": 123\n" +
                 "}", JSON.toJSONString(JSONObject.parseObject("{\"id\":123}"), true));
     }
 }

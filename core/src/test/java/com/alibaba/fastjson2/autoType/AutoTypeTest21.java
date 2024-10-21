@@ -91,26 +91,26 @@ public class AutoTypeTest21 {
         JSONB.dump(bytes);
 
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest21$Bean1#0\",\n" +
-                "\t\"@value\":{\n" +
-                "\t\t\"item#1\":{\n" +
-                "\t\t\t\"id#2\":101\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.autoType.AutoTypeTest21$Bean1#0\",\n" +
+                "\t\"@value\": {\n" +
+                "\t\t\"item#1\": {\n" +
+                "\t\t\t\"id#2\": 101\n" +
                 "\t\t},\n" +
-                "\t\t\"values#3\":{\n" +
-                "\t\t\t\"@type\":\"M#4\",\n" +
-                "\t\t\t\"@value\":{\n" +
+                "\t\t\"values#3\": {\n" +
+                "\t\t\t\"@type\": \"M#4\",\n" +
+                "\t\t\t\"@value\": {\n" +
                 "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest21$Item#5\",\n" +
-                "\t\t\t\t\t\"@value\":{\n" +
-                "\t\t\t\t\t\t\"#2\":101\n" +
+                "\t\t\t\t\t\"@type\": \"com.alibaba.fastjson2.autoType.AutoTypeTest21$Item#5\",\n" +
+                "\t\t\t\t\t\"@value\": {\n" +
+                "\t\t\t\t\t\t\"#2\": 101\n" +
                 "\t\t\t\t\t}\n" +
-                "\t\t\t\t}:\"101\"\n" +
+                "\t\t\t\t}: \"101\"\n" +
                 "\t\t\t}\n" +
                 "\t\t},\n" +
-                "\t\t\"values2#6\":{\n" +
-                "\t\t\t\"@type\":\"#4\",\n" +
-                "\t\t\t\"@value\":{\n" +
-                "\t\t\t\t{\"$ref\":\"$.item\"}:null\n" +
+                "\t\t\"values2#6\": {\n" +
+                "\t\t\t\"@type\": \"#4\",\n" +
+                "\t\t\t\"@value\": {\n" +
+                "\t\t\t\t{\"$ref\":\"$.item\"}: null\n" +
                 "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t}\n" +

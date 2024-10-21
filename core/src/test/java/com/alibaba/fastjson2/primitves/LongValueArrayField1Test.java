@@ -84,10 +84,10 @@ public class LongValueArrayField1Test {
         assertEquals("{\"values\":[101,102,103]}", new String(JSON.toJSONBytes(bean)));
 
         assertEquals("{\n" +
-                "\t\"values\":[101,102,103]\n" +
+                "\t\"values\": [101,102,103]\n" +
                 "}", JSON.toJSONString(bean, JSONWriter.Feature.PrettyFormat));
         assertEquals("{\n" +
-                "\t\"values\":[101,102,103]\n" +
+                "\t\"values\": [101,102,103]\n" +
                 "}", new String(JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat)));
     }
 }

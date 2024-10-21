@@ -16,7 +16,7 @@ public class Issue314 {
         bean.type = Type.Big;
         assertEquals("{\"type\":\"Big\"}", JSON.toJSONString(bean));
         assertEquals("{\n" +
-                "\t\"type\":\"Big\"\n" +
+                "\t\"type\": \"Big\"\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean)));
     }
 
@@ -26,7 +26,7 @@ public class Issue314 {
         bean.type = Type.Big;
         assertEquals("{\"type\":\"Big\"}", JSON.toJSONString(bean));
         assertEquals("{\n" +
-                "\t\"type\":\"Big\"\n" +
+                "\t\"type\": \"Big\"\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean)));
     }
 

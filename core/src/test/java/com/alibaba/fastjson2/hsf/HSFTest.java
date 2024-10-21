@@ -24,14 +24,14 @@ public class HSFTest {
         JSONB.dump(bytes);
         VeryComplexDO vo2 = (VeryComplexDO) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.hsf.VeryComplexDO\",\n" +
-                "\t\"fshort\":4,\n" +
-                "\t\"pBaseDO\":{},\n" +
-                "\t\"pbyte\":5,\n" +
-                "\t\"pdouble\":6.6,\n" +
-                "\t\"pfloat\":7.7,\n" +
-                "\t\"pint\":8,\n" +
-                "\t\"plong\":9\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.hsf.VeryComplexDO\",\n" +
+                "\t\"fshort\": 4,\n" +
+                "\t\"pBaseDO\": {},\n" +
+                "\t\"pbyte\": 5,\n" +
+                "\t\"pdouble\": 6.6,\n" +
+                "\t\"pfloat\": 7.7,\n" +
+                "\t\"pint\": 8,\n" +
+                "\t\"plong\": 9\n" +
                 "}", JSONB.toJSONString(bytes));
     }
 

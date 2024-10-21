@@ -33,7 +33,7 @@ public class BigIntegerTests {
             bean.value = BigInteger.ONE;
             objectWriter.write(jsonWriter, bean);
             assertEquals("{\n" +
-                    "\t\"value\":1\n" +
+                    "\t\"value\": 1\n" +
                     "}", JSONB.toJSONString(jsonWriter.getBytes()));
         }
         {

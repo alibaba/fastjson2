@@ -99,22 +99,22 @@ public class Issue304 {
         String result = JSONB.toJSONString(jsonbBytes);
         assertEquals("[\n" +
                 "\t{\n" +
-                "\t\t\"item\":{\n" +
-                "\t\t\t\"name\":\"testtt\"\n" +
+                "\t\t\"item\": {\n" +
+                "\t\t\t\"name\": \"testtt\"\n" +
                 "\t\t},\n" +
-                "\t\t\"name\":\"test\"\n" +
+                "\t\t\"name\": \"test\"\n" +
                 "\t},\n" +
                 "\t{\n" +
-                "\t\t\"item\":{\"$ref\":\"$[0].item\"},\n" +
-                "\t\t\"name\":\"test\"\n" +
+                "\t\t\"item\": {\"$ref\":\"$[0].item\"},\n" +
+                "\t\t\"name\": \"test\"\n" +
                 "\t},\n" +
                 "\t{\n" +
-                "\t\t\"item\":{\"$ref\":\"#-1\"},\n" +
-                "\t\t\"name\":\"test\"\n" +
+                "\t\t\"item\": {\"$ref\":\"#-1\"},\n" +
+                "\t\t\"name\": \"test\"\n" +
                 "\t},\n" +
                 "\t{\n" +
-                "\t\t\"item\":{\"$ref\":\"#-1\"},\n" +
-                "\t\t\"name\":\"test\"\n" +
+                "\t\t\"item\": {\"$ref\":\"#-1\"},\n" +
+                "\t\t\"name\": \"test\"\n" +
                 "\t}\n" +
                 "]", result);
 
