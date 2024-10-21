@@ -333,20 +333,26 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
+        boolean pretty = (jsonWriter.context.getFeatures() & JSONWriter.Feature.PrettyFormat.mask) != 0
+                || (jsonWriter.context.getFeatures() & PrettyFormatWithSpace.mask) != 0;
         if (jsonWriter.utf8) {
             if (nameWithColonUTF8 == null) {
                 int typeKeyLength = typeKey.length();
                 int typeNameLength = typeName.length();
-                byte[] chars = new byte[typeKeyLength + typeNameLength + 5];
-                chars[0] = '"';
-                typeKey.getBytes(0, typeKeyLength, chars, 1);
-                chars[typeKeyLength + 1] = '"';
-                chars[typeKeyLength + 2] = ':';
-                chars[typeKeyLength + 3] = '"';
-                typeName.getBytes(0, typeNameLength, chars, typeKeyLength + 4);
-                chars[typeKeyLength + typeNameLength + 4] = '"';
-
-                nameWithColonUTF8 = chars;
+                byte[] bytes = new byte[typeKeyLength + typeNameLength + (pretty ? 6 : 5)];
+                bytes[0] = '"';
+                typeKey.getBytes(0, typeKeyLength, bytes, 1);
+                int curOff = typeKeyLength + 1;
+                bytes[curOff] = '"';
+                bytes[++curOff] = ':';
+                if (pretty) {
+                    bytes[++curOff] = ' ';
+                }
+                bytes[++curOff] = '"';
+                curOff++;
+                typeName.getBytes(0, typeNameLength, bytes, curOff);
+                bytes[typeNameLength + curOff] = '"';
+                nameWithColonUTF8 = bytes;
             }
             jsonWriter.writeNameRaw(nameWithColonUTF8);
             return true;
@@ -354,14 +360,19 @@ public class ObjectWriterAdapter<T>
             if (nameWithColonUTF16 == null) {
                 int typeKeyLength = typeKey.length();
                 int typeNameLength = typeName.length();
-                char[] chars = new char[typeKeyLength + typeNameLength + 5];
+                char[] chars = new char[typeKeyLength + typeNameLength + (pretty ? 6 : 5)];
                 chars[0] = '"';
                 typeKey.getChars(0, typeKeyLength, chars, 1);
-                chars[typeKeyLength + 1] = '"';
-                chars[typeKeyLength + 2] = ':';
-                chars[typeKeyLength + 3] = '"';
-                typeName.getChars(0, typeNameLength, chars, typeKeyLength + 4);
-                chars[typeKeyLength + typeNameLength + 4] = '"';
+                int curOff = typeKeyLength + 1;
+                chars[curOff] = '"';
+                chars[++curOff] = ':';
+                if (pretty) {
+                    chars[++curOff] = ' ';
+                }
+                chars[++curOff] = '"';
+                curOff++;
+                typeName.getChars(0, typeNameLength, chars, curOff);
+                chars[typeNameLength + curOff] = '"';
 
                 nameWithColonUTF16 = chars;
             }

@@ -34,13 +34,13 @@ public class Issue2431 {
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
-                        "\t\"b\":\"1\",\n" +
-                        "\t\"d\":\"1.0\",\n" +
-                        "\t\"f\":\"1.0\",\n" +
-                        "\t\"i\":\"1\",\n" +
-                        "\t\"l\":\"1\",\n" +
-                        "\t\"s\":\"1\",\n" +
-                        "\t\"z\":\"false\"\n" +
+                        "\t\"b\": \"1\",\n" +
+                        "\t\"d\": \"1.0\",\n" +
+                        "\t\"f\": \"1.0\",\n" +
+                        "\t\"i\": \"1\",\n" +
+                        "\t\"l\": \"1\",\n" +
+                        "\t\"s\": \"1\",\n" +
+                        "\t\"z\": \"false\"\n" +
                         "}",
                 str2);
     }
@@ -77,13 +77,13 @@ public class Issue2431 {
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
-                        "\t\"b\":\"1\",\n" +
-                        "\t\"d\":\"1.0\",\n" +
-                        "\t\"f\":\"1.0\",\n" +
-                        "\t\"i\":\"1\",\n" +
-                        "\t\"l\":\"1\",\n" +
-                        "\t\"s\":\"1\",\n" +
-                        "\t\"z\":\"false\"\n" +
+                        "\t\"b\": \"1\",\n" +
+                        "\t\"d\": \"1.0\",\n" +
+                        "\t\"f\": \"1.0\",\n" +
+                        "\t\"i\": \"1\",\n" +
+                        "\t\"l\": \"1\",\n" +
+                        "\t\"s\": \"1\",\n" +
+                        "\t\"z\": \"false\"\n" +
                         "}",
                 str2);
     }
@@ -125,13 +125,13 @@ public class Issue2431 {
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
-                        "\t\"bs\":[\"1\"],\n" +
-                        "\t\"ds\":[\"1.0\"],\n" +
-                        "\t\"fs\":[\"1.0\"],\n" +
-                        "\t\"is\":[\"1\"],\n" +
-                        "\t\"ls\":[\"1\"],\n" +
-                        "\t\"ss\":[\"1\"],\n" +
-                        "\t\"zs\":[\"false\"]\n" +
+                        "\t\"bs\": [\"1\"],\n" +
+                        "\t\"ds\": [\"1.0\"],\n" +
+                        "\t\"fs\": [\"1.0\"],\n" +
+                        "\t\"is\": [\"1\"],\n" +
+                        "\t\"ls\": [\"1\"],\n" +
+                        "\t\"ss\": [\"1\"],\n" +
+                        "\t\"zs\": [\"false\"]\n" +
                         "}",
                 str2);
     }
@@ -169,13 +169,13 @@ public class Issue2431 {
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
-                        "\t\"bs\":[\"1\"],\n" +
-                        "\t\"ds\":[\"1.0\"],\n" +
-                        "\t\"fs\":[\"1.0\"],\n" +
-                        "\t\"is\":[\"1\"],\n" +
-                        "\t\"ls\":[\"1\"],\n" +
-                        "\t\"ss\":[\"1\"],\n" +
-                        "\t\"zs\":[\"false\"]\n" +
+                        "\t\"bs\": [\"1\"],\n" +
+                        "\t\"ds\": [\"1.0\"],\n" +
+                        "\t\"fs\": [\"1.0\"],\n" +
+                        "\t\"is\": [\"1\"],\n" +
+                        "\t\"ls\": [\"1\"],\n" +
+                        "\t\"ss\": [\"1\"],\n" +
+                        "\t\"zs\": [\"false\"]\n" +
                         "}",
                 str2);
     }
@@ -213,13 +213,13 @@ public class Issue2431 {
         byte[] bytes = JSONB.toBytes(bean);
         String str2 = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
-                        "\t\"bs\":[\"1\"],\n" +
-                        "\t\"ds\":[\"1.0\"],\n" +
-                        "\t\"fs\":[\"1.0\"],\n" +
-                        "\t\"is\":[\"1\"],\n" +
-                        "\t\"ls\":[\"1\"],\n" +
-                        "\t\"ss\":[\"1\"],\n" +
-                        "\t\"zs\":[\"false\"]\n" +
+                        "\t\"bs\": [\"1\"],\n" +
+                        "\t\"ds\": [\"1.0\"],\n" +
+                        "\t\"fs\": [\"1.0\"],\n" +
+                        "\t\"is\": [\"1\"],\n" +
+                        "\t\"ls\": [\"1\"],\n" +
+                        "\t\"ss\": [\"1\"],\n" +
+                        "\t\"zs\": [\"false\"]\n" +
                         "}",
                 str2);
     }

@@ -26,12 +26,12 @@ public class Issue430 {
                 "}\n");
 
         assertEquals("{\n" +
-                "\t\"value\":\"zhinan\",\n" +
-                "\t\"label\":\"指南\",\n" +
-                "\t\"children\":[\n" +
+                "\t\"value\": \"zhinan\",\n" +
+                "\t\"label\": \"指南\",\n" +
+                "\t\"children\": [\n" +
                 "\t\t{\n" +
-                "\t\t\t\"value\":\"shejiyuanze\",\n" +
-                "\t\t\t\"label\":\"设计原则\"\n" +
+                "\t\t\t\"value\": \"shejiyuanze\",\n" +
+                "\t\t\t\"label\": \"设计原则\"\n" +
                 "\t\t}\n" +
                 "\t]\n" +
                 "}", jsonObject.toString(JSONWriter.Feature.NotWriteEmptyArray, JSONWriter.Feature.PrettyFormat));
