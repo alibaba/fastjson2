@@ -333,8 +333,11 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
-        boolean pretty = (jsonWriter.context.getFeatures() & JSONWriter.Feature.PrettyFormat.mask) != 0
-                || (jsonWriter.context.getFeatures() & PrettyFormatWithSpace.mask) != 0;
+        //pretty format?
+        long writerFeatures = jsonWriter.context.getFeatures();
+        boolean pretty = (writerFeatures & JSONWriter.Feature.PrettyFormat.mask) != 0
+                || (writerFeatures & PrettyFormatWithSpace.mask) != 0;
+
         if (jsonWriter.utf8) {
             if (nameWithColonUTF8 == null) {
                 int typeKeyLength = typeKey.length();
@@ -343,13 +346,12 @@ public class ObjectWriterAdapter<T>
                 bytes[0] = '"';
                 typeKey.getBytes(0, typeKeyLength, bytes, 1);
                 int curOff = typeKeyLength + 1;
-                bytes[curOff] = '"';
-                bytes[++curOff] = ':';
+                bytes[curOff++] = '"';
+                bytes[curOff++] = ':';
                 if (pretty) {
-                    bytes[++curOff] = ' ';
+                    bytes[curOff++] = ' ';
                 }
-                bytes[++curOff] = '"';
-                curOff++;
+                bytes[curOff++] = '"';
                 typeName.getBytes(0, typeNameLength, bytes, curOff);
                 bytes[typeNameLength + curOff] = '"';
                 nameWithColonUTF8 = bytes;
@@ -364,13 +366,12 @@ public class ObjectWriterAdapter<T>
                 chars[0] = '"';
                 typeKey.getChars(0, typeKeyLength, chars, 1);
                 int curOff = typeKeyLength + 1;
-                chars[curOff] = '"';
-                chars[++curOff] = ':';
+                chars[curOff++] = '"';
+                chars[curOff++] = ':';
                 if (pretty) {
-                    chars[++curOff] = ' ';
+                    chars[curOff++] = ' ';
                 }
-                chars[++curOff] = '"';
-                curOff++;
+                chars[curOff++] = '"';
                 typeName.getChars(0, typeNameLength, chars, curOff);
                 chars[typeNameLength + curOff] = '"';
 
