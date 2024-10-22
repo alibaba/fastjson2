@@ -2259,6 +2259,10 @@ public abstract class JSONReader
         }
 
         for (int i = 0; ; ++i) {
+            if (ch == '/') {
+                skipComment();
+            }
+
             if (ch == '}') {
                 next();
                 break;
