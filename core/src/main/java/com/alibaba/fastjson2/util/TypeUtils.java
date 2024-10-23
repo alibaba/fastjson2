@@ -1525,6 +1525,10 @@ public class TypeUtils {
                     return (T) JdbcSupport.createTimestamp(millis);
                 case "java.sql.Time":
                     return (T) JdbcSupport.createTime(millis);
+                case "java.time.LocalDateTime":
+                    return (T) LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(millis),
+                            DateUtils.DEFAULT_ZONE_ID);
                 default:
                     break;
             }
