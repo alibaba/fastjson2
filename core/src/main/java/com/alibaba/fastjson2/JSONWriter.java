@@ -853,8 +853,7 @@ public abstract class JSONWriter
         }
 
         return (features & BrowserCompatible.mask) != 0
-                && value.precision() >= 16
-                && !isJavaScriptSupport(value.unscaledValue());
+                && !isJavaScriptSupport(value);
     }
 
     public abstract void writeNameRaw(char[] chars);
