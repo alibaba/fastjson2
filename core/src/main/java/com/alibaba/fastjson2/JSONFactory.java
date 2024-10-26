@@ -25,6 +25,38 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.util.JDKUtils.VECTOR_BIT_LENGTH;
 
 public final class JSONFactory {
+    public static final class Conf {
+        static final Properties DEFAULT_PROPERTIES;
+
+        static {
+            Properties properties = new Properties();
+
+            InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+                final String resourceFile = "fastjson2.properties";
+
+                if (cl != null) {
+                    return cl.getResourceAsStream(resourceFile);
+                } else {
+                    return ClassLoader.getSystemResourceAsStream(resourceFile);
+                }
+            });
+            if (inputStream != null) {
+                try {
+                    properties.load(inputStream);
+                } catch (java.io.IOException ignored) {
+                } finally {
+                    IOUtils.close(inputStream);
+                }
+            }
+            DEFAULT_PROPERTIES = properties;
+        }
+
+        public static String getProperty(String key) {
+            return DEFAULT_PROPERTIES.getProperty(key);
+        }
+    }
     static volatile Throwable initErrorLast;
 
     public static final String CREATOR;
@@ -38,7 +70,7 @@ public final class JSONFactory {
     static boolean useGsonAnnotation;
 
     public static String getProperty(String key) {
-        return DEFAULT_PROPERTIES.getProperty(key);
+        return Conf.getProperty(key);
     }
 
     static long defaultReaderFeatures;
@@ -136,29 +168,7 @@ public final class JSONFactory {
     static final Double DOUBLE_ZERO = (double) 0;
 
     static {
-        Properties properties = new Properties();
-
-        InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-            final String resourceFile = "fastjson2.properties";
-
-            if (cl != null) {
-                return cl.getResourceAsStream(resourceFile);
-            } else {
-                return ClassLoader.getSystemResourceAsStream(resourceFile);
-            }
-        });
-        if (inputStream != null) {
-            try {
-                properties.load(inputStream);
-            } catch (java.io.IOException ignored) {
-            } finally {
-                IOUtils.close(inputStream);
-            }
-        }
-        DEFAULT_PROPERTIES = properties;
-
+        Properties properties = Conf.DEFAULT_PROPERTIES;
         {
             String property = System.getProperty("fastjson2.creator");
             if (property != null) {
@@ -348,8 +358,6 @@ public final class JSONFactory {
         volatile char[] chars;
         volatile byte[] bytes;
     }
-
-    static final Properties DEFAULT_PROPERTIES;
 
     static final ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static final ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();

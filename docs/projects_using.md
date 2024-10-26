@@ -110,3 +110,17 @@
 * https://github.com/wujun728/jun_java_plugin
 * https://github.com/anhan123456/vrpc
 * https://github.com/spring-projects/spring-ai
+* https://github.com/wujun728/jun_java_plugin
+* https://github.com/Alanosy/online-exam-system-backend
+* https://github.com/zcode-zjw/zcode-commons
+* https://github.com/WeBankFinTech/Exchangis
+* https://github.com/Harries/springboot-demo
+* https://github.com/642933588/jiron-cloud
+* https://github.com/cool-team-official/cool-admin-java
+* https://github.com/akto-api-security/akto
+* https://github.com/Devo919/Gewechat
+* https://github.com/KouShenhai/KCloud-Platform-IoT
+* https://github.com/starmcc/qs-beanfun
+* https://github.com/Shleter587/aippt_PresentationGen
+* https://github.com/dromara/warm-flow
+* https://github.com/lich0821/WeChatFerry

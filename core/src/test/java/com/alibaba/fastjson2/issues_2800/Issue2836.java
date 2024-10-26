@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_2800;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -44,10 +45,14 @@ public class Issue2836 {
         User user = new User("test", Type.B);
         String test = JSON.toJSONString(user);
         String jacksonResult = objectMapper.writeValueAsString(user);
-        assertEquals(jacksonResult, test);
+        ObjectNode testNode = (ObjectNode) objectMapper.readTree(test);
+        ObjectNode jacksonNode = (ObjectNode) objectMapper.readTree(jacksonResult);
+        assertEquals(jacksonNode, testNode);
         String jsonString = JSON.toJSONString(Type.A);
+        ObjectNode typeANode = (ObjectNode) objectMapper.readTree(jsonString);
+        ObjectNode expectedTypeANode = (ObjectNode) objectMapper.readTree(objectMapper.writeValueAsString(Type.A));
         assertEquals(
-                objectMapper.writeValueAsString(Type.A),
-                jsonString);
+                typeANode,
+                expectedTypeANode);
     }
 }

@@ -57,7 +57,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_DENY_PROPERTY);
             if (property == null) {
-                property = JSONFactory.getProperty(PROPERTY_DENY_PROPERTY);
+                property = JSONFactory.Conf.getProperty(PROPERTY_DENY_PROPERTY);
             }
             if (property != null && property.length() > 0) {
                 DENYS = property.split(",");
@@ -69,7 +69,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
             if (property == null) {
-                property = JSONFactory.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
+                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
             }
             if (property != null && property.length() > 0) {
                 AUTO_TYPE_ACCEPT_LIST = property.split(",");
@@ -81,7 +81,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
+                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
             }
 
             if (property != null) {
@@ -104,7 +104,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
+                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
             }
 
             if (property != null) {
@@ -127,14 +127,14 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty("fastjson.parser.safeMode");
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.getProperty("fastjson.parser.safeMode");
+                property = JSONFactory.Conf.getProperty("fastjson.parser.safeMode");
             }
 
             if (property == null || property.isEmpty()) {
                 property = System.getProperty("fastjson2.parser.safeMode");
             }
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.getProperty("fastjson2.parser.safeMode");
+                property = JSONFactory.Conf.getProperty("fastjson2.parser.safeMode");
             }
 
             if (property != null) {
