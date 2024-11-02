@@ -26,6 +26,6 @@ public class Issue3104 {
         String json = JSON.toJSONString(new Transform("zhangsan", "lisi"));
         assertEquals("{\"bridge\":{\"from\":\"zhangsan\",\"to\":\"lisi\"}}", json);
         Transform transform = JSON.parseObject(json, Transform.class);
-        System.out.println(transform);
+        assertEquals(json, JSON.toJSONString(transform));
     }
 }
