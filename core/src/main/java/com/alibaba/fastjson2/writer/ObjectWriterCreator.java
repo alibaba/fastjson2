@@ -927,7 +927,9 @@ public class ObjectWriterCreator {
             fieldName = BeanUtils.getterName(method, false, null);
         }
 
-        Field field = BeanUtils.getField(objectType, method);
+        Field field = (features & FieldInfo.RECORD) != 0
+                ? null
+                : BeanUtils.getField(objectType, method);
 
         if (fieldClass == boolean.class || fieldClass == Boolean.class) {
             return new FieldWriterBoolMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);

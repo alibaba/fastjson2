@@ -179,7 +179,8 @@ public class ObjectWriterCreatorASM
             beanFeatures &= ~JSONWriter.Feature.WriteClassName.mask;
         }
 
-        long writerFieldFeatures = features | beanFeatures;
+        boolean record = BeanUtils.isRecord(objectClass);
+        long writerFieldFeatures = features | beanFeatures | (record ? FieldInfo.RECORD : 0);
         final boolean fieldBased = ((writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0 && !objectClass.isInterface())
                 || !beanInfo.alphabetic;
 
@@ -189,8 +190,6 @@ public class ObjectWriterCreatorASM
         ) {
             return super.createObjectWriter(objectClass, features, provider);
         }
-
-        boolean record = BeanUtils.isRecord(objectClass);
 
         List<FieldWriter> fieldWriters;
         Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
