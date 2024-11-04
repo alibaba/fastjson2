@@ -152,7 +152,7 @@
         <dependency>
             <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.6.5</version>
+            <version>0.7.1</version>
             <classifier>http</classifier>
             <scope>test</scope>
         </dependency>
