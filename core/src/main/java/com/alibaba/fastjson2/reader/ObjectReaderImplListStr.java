@@ -16,7 +16,6 @@ public final class ObjectReaderImplListStr
         implements ObjectReader {
     final Class listType;
     final Class instanceType;
-    Object listSingleton;
 
     public ObjectReaderImplListStr(Class listType, Class instanceType) {
         this.listType = listType;
