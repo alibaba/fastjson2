@@ -22,7 +22,7 @@ final class ObjectWriterImplFloat
             return;
         }
 
-        float value = ((Float) object).floatValue();
+        float value = (Float) object;
         if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
             jsonWriter.writeString(value);
         } else {
@@ -43,7 +43,7 @@ final class ObjectWriterImplFloat
             return;
         }
 
-        float value = ((Float) object).floatValue();
+        float value = (Float) object;
         if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
             jsonWriter.writeString(value);
             return;

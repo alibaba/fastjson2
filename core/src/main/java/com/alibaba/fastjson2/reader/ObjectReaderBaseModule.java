@@ -562,8 +562,7 @@ public class ObjectReaderBaseModule
             });
         }
 
-        private void processBuilder(BeanInfo beanInfo, Class result) {
-            Class<?> builderClass = result;
+        private void processBuilder(BeanInfo beanInfo, Class builderClass) {
             if (builderClass != void.class && builderClass != Void.class) {
                 beanInfo.builder = builderClass;
 

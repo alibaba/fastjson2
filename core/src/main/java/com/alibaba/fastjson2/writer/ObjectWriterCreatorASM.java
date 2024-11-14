@@ -1088,7 +1088,7 @@ public class ObjectWriterCreatorASM
         int REF_PATH = mwc.var("REF_PATH");
 
         boolean listSimple = false;
-        Type itemType = null;
+        Type itemType;
         Class itemClass = null;
         if (fieldType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;

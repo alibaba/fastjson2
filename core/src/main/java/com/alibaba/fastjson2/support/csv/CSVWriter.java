@@ -237,8 +237,8 @@ public abstract class CSVWriter
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;
