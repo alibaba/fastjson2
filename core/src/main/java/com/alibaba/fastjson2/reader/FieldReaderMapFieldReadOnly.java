@@ -133,7 +133,7 @@ class FieldReaderMapFieldReadOnly<T>
                     array,
                     arrayToMapKey,
                     namingStrategy,
-                    JSONFactory.getObjectReader(valueType, this.features | features),
+                    JSONFactory.getObjectReader(valueType, features),
                     arrayToMapDuplicateHandler);
             return;
         }

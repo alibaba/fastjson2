@@ -734,13 +734,12 @@ class JSONReaderUTF8
 
                     int c1 = (ch & 0x3ff) + '\uDC00'; // Character.lowSurrogate(uc);
                     hashCode ^= c1;
-                    hashCode *= Fnv.MAGIC_PRIME;
                 } else {
                     hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
                 }
+	            hashCode *= Fnv.MAGIC_PRIME;
 
-                ch = offset == end ? EOI : bytes[offset++];
+	            ch = offset == end ? EOI : bytes[offset++];
             }
         }
 
@@ -5836,7 +5835,7 @@ class JSONReaderUTF8
     @Override
     public final Date readNullOrNewDate() {
         final byte[] bytes = this.bytes;
-        int ch = this.ch;
+        int ch;
         int offset = this.offset;
 
         Date date = null;
@@ -5938,7 +5937,7 @@ class JSONReaderUTF8
     public final void readNull() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        int ch = this.ch;
+        int ch;
         if (bytes[offset] == 'u'
                 && bytes[offset + 1] == 'l'
                 && bytes[offset + 2] == 'l') {

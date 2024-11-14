@@ -46,7 +46,7 @@ public final class ObjectReaderImplList
     volatile Constructor constructor;
 
     public static ObjectReader of(Type type, Class listClass, long features) {
-        if (listClass == type && "".equals(listClass.getSimpleName())) {
+        if (listClass == type && listClass.getSimpleName().isEmpty()) {
             type = listClass.getGenericSuperclass();
             listClass = listClass.getSuperclass();
         }
@@ -149,7 +149,9 @@ public final class ObjectReaderImplList
                     builder = GuavaSupport.immutableSetConverter();
                     break;
                 case "com.google.common.collect.Lists$TransformingRandomAccessList":
-                    instanceClass = ArrayList.class;
+	            case "java.util.RandomAccessSubList":
+	            case "java.util.AbstractList$RandomAccessSubList":
+		            instanceClass = ArrayList.class;
                     break;
                 case "com.google.common.collect.Lists.TransformingSequentialList":
                     instanceClass = LinkedList.class;
@@ -174,11 +176,7 @@ public final class ObjectReaderImplList
                     instanceClass = TreeSet.class;
                     builder = (Function<NavigableSet, NavigableSet>) Collections::synchronizedNavigableSet;
                     break;
-                case "java.util.RandomAccessSubList":
-                case "java.util.AbstractList$RandomAccessSubList":
-                    instanceClass = ArrayList.class;
-                    break;
-                default:
+	            default:
                     instanceClass = listClass;
             }
         }
@@ -524,10 +522,10 @@ public final class ObjectReaderImplList
         } else if (listType != null && listType != this.listType) {
             switch (listType.getName()) {
                 case "kotlin.collections.EmptySet":
-                    list = (Collection) getKotlinEmptySet(listType);
+                    list = getKotlinEmptySet(listType);
                     break;
                 case "kotlin.collections.EmptyList":
-                    list = (Collection) getKotlinEmptyList(listType);
+                    list = getKotlinEmptyList(listType);
                     break;
                 default:
                     try {

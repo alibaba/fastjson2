@@ -44,7 +44,7 @@ public final class ObjectReaderImplMap
         Function builder = null;
         Class instanceType = mapType;
 
-        if ("".equals(instanceType.getSimpleName())) {
+        if (instanceType.getSimpleName().isEmpty()) {
             instanceType = mapType.getSuperclass();
             if (fieldType == null) {
                 fieldType = mapType.getGenericSuperclass();

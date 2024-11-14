@@ -40,7 +40,7 @@ final class ObjectWriterImplInt32Array
                 continue;
             }
 
-            int value = item.intValue();
+            int value = item;
             if (writeAsString) {
                 jsonWriter.writeString(value);
             } else {
@@ -66,18 +66,17 @@ final class ObjectWriterImplInt32Array
         Integer[] array = (Integer[]) object;
 
         jsonWriter.startArray(array.length);
-        for (int i = 0; i < array.length; i++) {
-            Integer item = array[i];
-            if (item == null) {
-                jsonWriter.writeNull();
-                continue;
-            }
-            int value = item.intValue();
-            if (writeAsString) {
-                jsonWriter.writeString(value);
-            } else {
-                jsonWriter.writeInt32(value);
-            }
-        }
+	    for (Integer item : array) {
+		    if (item == null) {
+			    jsonWriter.writeNull();
+			    continue;
+		    }
+		    int value = item;
+		    if (writeAsString) {
+			    jsonWriter.writeString(value);
+		    } else {
+			    jsonWriter.writeInt32(value);
+		    }
+	    }
     }
 }

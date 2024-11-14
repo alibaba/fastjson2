@@ -729,8 +729,8 @@ public abstract class FieldWriter<T>
                     .getOffset(instant);
 
             long localSecond = epochSecond + offset.getTotalSeconds();
-            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+            int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;

@@ -53,7 +53,7 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        LOCAL_EPOCH_DAY = (int) Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        LOCAL_EPOCH_DAY = (int) Math.floorDiv(localSecond, SECONDS_PER_DAY);
     }
 
     static class CacheDate8 {
@@ -10939,8 +10939,8 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;
@@ -11045,7 +11045,7 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
 
         int off = (int) (localEpochDay - LOCAL_EPOCH_DAY + 128);
 
@@ -11211,7 +11211,7 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
 
         int off = (int) (localEpochDay - LOCAL_EPOCH_DAY + 128);
         final String[] cache = CacheDate10.CACHE;
@@ -11584,8 +11584,8 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;
@@ -11745,8 +11745,8 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;

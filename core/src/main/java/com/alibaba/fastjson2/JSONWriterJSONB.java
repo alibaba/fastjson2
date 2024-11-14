@@ -1621,15 +1621,12 @@ final class JSONWriterJSONB
         }
 
         final byte[] bytes = this.bytes;
-        for (int i = 0; i < values.length; i++) {
-            int val = values[i];
-            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
-                bytes[off++] = (byte) val;
-            } else {
-                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
-                bytes[off++] = (byte) (val);
-            }
-        }
+	    for (int val : values) {
+		    if (val < BC_INT32_NUM_MIN || val > BC_INT32_NUM_MAX) {
+			    bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
+		    }
+		    bytes[off++] = (byte) val;
+	    }
         this.off = off;
     }
 

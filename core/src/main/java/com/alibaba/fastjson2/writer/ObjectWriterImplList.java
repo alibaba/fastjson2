@@ -376,10 +376,9 @@ final class ObjectWriterImplList
         } else if (object instanceof Iterable) {
             final Iterable items = (Iterable) object;
             List list = items instanceof Collection ? new ArrayList(((Collection<?>) items).size()) : new ArrayList();
-            Iterator iterator = items.iterator();
-            while (iterator.hasNext()) {
-                list.add(iterator.next());
-            }
+	        for (Object item : items) {
+		        list.add(item);
+	        }
             return list;
         } else {
             throw new JSONException("Can not cast '" + object.getClass() + "' to List");
