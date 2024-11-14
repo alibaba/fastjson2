@@ -46,23 +46,17 @@ final class CSVWriterUTF8
     }
 
     public void writeComma() {
-        if (off + 1 == bytes.length) {
-            flush();
-        }
+        checkCapacity(1);
         bytes[off++] = ',';
     }
 
     protected void writeQuote() {
-        if (off + 1 == bytes.length) {
-            flush();
-        }
+        checkCapacity(1);
         bytes[off++] = '"';
     }
 
     public void writeLine() {
-        if (off + 1 == bytes.length) {
-            flush();
-        }
+        checkCapacity(1);
         bytes[off++] = '\n';
     }
 
@@ -72,18 +66,13 @@ final class CSVWriterUTF8
     }
 
     public void writeInt64(long longValue) {
-        int minCapacity = off + 21;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+        checkCapacity(20); // -9223372036854775808
 
         off = IOUtils.writeInt64(bytes, off, longValue);
     }
 
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        if (off + 11 >= this.bytes.length) {
-            flush();
-        }
+        checkCapacity(10);
 
         off = IOUtils.writeLocalDate(bytes, off, year, month, dayOfMonth);
     }
@@ -96,9 +85,7 @@ final class CSVWriterUTF8
             int minute,
             int second
     ) {
-        if (off + 20 >= this.bytes.length) {
-            flush();
-        }
+        checkCapacity(19);
 
         final byte[] bytes = this.bytes;
         int off = this.off;
@@ -125,29 +112,20 @@ final class CSVWriterUTF8
     }
 
     public void writeInt32(int intValue) {
-        int minCapacity = off + 11;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+        checkCapacity(11); // -2147483648
 
         off = IOUtils.writeInt32(bytes, off, intValue);
     }
 
     public void writeDouble(double value) {
-        int minCapacity = off + 24;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+        checkCapacity(24);
 
         int size = DoubleToDecimal.toString(value, this.bytes, off, true);
         off += size;
     }
 
     public void writeFloat(float value) {
-        int minCapacity = off + 15;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+        checkCapacity(15);
 
         int size = DoubleToDecimal.toString(value, this.bytes, off, true);
         off += size;
@@ -196,9 +174,12 @@ final class CSVWriterUTF8
             return;
         }
 
-        if (off + 2 + utf8.length + escapeCount >= bytes.length) {
-            flush();
-        }
+        checkCapacity(2 + len + escapeCount);
+
+        // 利用本地局部变量，可以提高遍历速度
+        final byte[] bytes = this.bytes;
+        final int max = bytes.length - 2;
+        int off = this.off;
 
         bytes[off++] = '"';
         for (byte ch : utf8) {
@@ -208,8 +189,13 @@ final class CSVWriterUTF8
             } else {
                 bytes[off++] = ch;
             }
+            if (off >= max) {
+                flush();
+                off = this.off;
+            }
         }
         bytes[off++] = '"';
+        this.off = off;
     }
 
     public void writeDecimal(BigDecimal value) {
@@ -220,10 +206,7 @@ final class CSVWriterUTF8
         String str = value.toString();
         int strlen = str.length();
 
-        int minCapacity = off + 24;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+        checkCapacity(24);
 
         str.getBytes(0, strlen, bytes, off);
         off += strlen;
@@ -240,10 +223,7 @@ final class CSVWriterUTF8
             return;
         }
 
-        int minCapacity = off + 24;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+        checkCapacity(24);
 
         off = IOUtils.writeDecimal(bytes, off, unscaledVal, scale);
     }
@@ -269,18 +249,7 @@ final class CSVWriterUTF8
         }
 
         byte[] strBytes = str.getBytes(charset);
-        if (strBytes.length + off < bytes.length) {
-            System.arraycopy(strBytes, 0, bytes, off, strBytes.length);
-            off += strBytes.length;
-        } else {
-            flush();
-            if (strBytes.length >= bytes.length) {
-                writeDirect(strBytes, 0, strBytes.length);
-            } else {
-                System.arraycopy(strBytes, 0, bytes, off, strBytes.length);
-                off += strBytes.length;
-            }
-        }
+        writeRaw(strBytes);
     }
 
     public void writeLocalDateTime(LocalDateTime ldt) {
@@ -288,9 +257,18 @@ final class CSVWriterUTF8
             return;
         }
 
+        // "yyyy-MM-dd HH:mm:ss"
+        checkCapacity(19);
+
         off = IOUtils.writeLocalDate(bytes, off, ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth());
         bytes[off++] = ' ';
         off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
+    }
+
+    void checkCapacity(int incr) {
+        if (off + incr >= bytes.length) {
+            flush();
+        }
     }
 
     @Override
