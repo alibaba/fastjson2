@@ -118,17 +118,17 @@ public class JSONReader
     public void config(Feature feature, boolean state) {
         com.alibaba.fastjson2.JSONReader.Feature rawFeature = null;
         switch (feature) {
-            case SupportArrayToBean:
-                rawFeature = com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
-                break;
-            case UseNativeJavaObject:
-                rawFeature = com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
-                break;
-            case SupportAutoType:
-                rawFeature = com.alibaba.fastjson2.JSONReader.Feature.SupportAutoType;
-                break;
-            default:
-                break;
+        case SupportArrayToBean:
+            rawFeature = com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
+            break;
+        case UseNativeJavaObject:
+            rawFeature = com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
+            break;
+        case SupportAutoType:
+            rawFeature = com.alibaba.fastjson2.JSONReader.Feature.SupportAutoType;
+            break;
+        default:
+            break;
         }
 
         if (rawFeature == null) {

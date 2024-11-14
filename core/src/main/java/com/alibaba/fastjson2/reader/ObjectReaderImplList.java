@@ -149,9 +149,9 @@ public final class ObjectReaderImplList
                     builder = GuavaSupport.immutableSetConverter();
                     break;
                 case "com.google.common.collect.Lists$TransformingRandomAccessList":
-	            case "java.util.RandomAccessSubList":
-	            case "java.util.AbstractList$RandomAccessSubList":
-		            instanceClass = ArrayList.class;
+                case "java.util.RandomAccessSubList":
+                case "java.util.AbstractList$RandomAccessSubList":
+                    instanceClass = ArrayList.class;
                     break;
                 case "com.google.common.collect.Lists.TransformingSequentialList":
                     instanceClass = LinkedList.class;
@@ -176,7 +176,7 @@ public final class ObjectReaderImplList
                     instanceClass = TreeSet.class;
                     builder = (Function<NavigableSet, NavigableSet>) Collections::synchronizedNavigableSet;
                     break;
-	            default:
+                default:
                     instanceClass = listClass;
             }
         }

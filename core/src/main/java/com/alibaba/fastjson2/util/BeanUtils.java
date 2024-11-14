@@ -2828,28 +2828,28 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-	            switch (name) {
-		            case "pattern":
-			            String pattern = (String) result;
-			            if (!pattern.isEmpty()) {
-				            beanInfo.format = pattern;
-			            }
-			            break;
-		            case "shape":
-			            String shape = ((Enum) result).name();
-			            if ("NUMBER".equals(shape)) {
-				            beanInfo.format = "millis";
-			            } else if ("OBJECT".equals(shape)) {
-				            beanInfo.writeEnumAsJavaBean = true;
-			            }
-			            break;
-		            case "locale":
-			            String locale = (String) result;
-			            if (!locale.isEmpty() && !"##default".equals(locale)) {
-				            beanInfo.locale = Locale.forLanguageTag(locale);
-			            }
-			            break;
-	            }
+                switch (name) {
+                    case "pattern":
+                        String pattern = (String) result;
+                        if (!pattern.isEmpty()) {
+                            beanInfo.format = pattern;
+                        }
+                        break;
+                    case "shape":
+                        String shape = ((Enum) result).name();
+                        if ("NUMBER".equals(shape)) {
+                            beanInfo.format = "millis";
+                        } else if ("OBJECT".equals(shape)) {
+                            beanInfo.writeEnumAsJavaBean = true;
+                        }
+                        break;
+                    case "locale":
+                        String locale = (String) result;
+                        if (!locale.isEmpty() && !"##default".equals(locale)) {
+                            beanInfo.locale = Locale.forLanguageTag(locale);
+                        }
+                        break;
+                }
             } catch (Throwable ignored) {
                 // ignored
             }

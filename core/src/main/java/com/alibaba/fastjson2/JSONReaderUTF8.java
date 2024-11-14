@@ -737,9 +737,9 @@ class JSONReaderUTF8
                 } else {
                     hashCode ^= ch;
                 }
-	            hashCode *= Fnv.MAGIC_PRIME;
+                hashCode *= Fnv.MAGIC_PRIME;
 
-	            ch = offset == end ? EOI : bytes[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
             }
         }
 

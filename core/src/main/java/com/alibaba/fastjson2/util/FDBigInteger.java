@@ -267,7 +267,7 @@ public final class FDBigInteger {
                     int prev = data[idx];
                     int hi = prev >>> anticount;
                     int[] result = data;
-	                if (hi != 0) {
+                    if (hi != 0) {
                         if (nWords == data.length) {
                             this.data = result = new int[nWords + 1];
                         }

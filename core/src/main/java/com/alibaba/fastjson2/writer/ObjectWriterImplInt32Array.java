@@ -66,17 +66,17 @@ final class ObjectWriterImplInt32Array
         Integer[] array = (Integer[]) object;
 
         jsonWriter.startArray(array.length);
-	    for (Integer item : array) {
-		    if (item == null) {
-			    jsonWriter.writeNull();
-			    continue;
-		    }
-		    int value = item;
-		    if (writeAsString) {
-			    jsonWriter.writeString(value);
-		    } else {
-			    jsonWriter.writeInt32(value);
-		    }
-	    }
+        for (Integer item : array) {
+            if (item == null) {
+                jsonWriter.writeNull();
+                continue;
+            }
+            int value = item;
+            if (writeAsString) {
+                jsonWriter.writeString(value);
+            } else {
+                jsonWriter.writeInt32(value);
+            }
+        }
     }
 }

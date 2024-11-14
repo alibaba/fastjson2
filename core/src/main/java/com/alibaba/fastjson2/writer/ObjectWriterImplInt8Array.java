@@ -60,17 +60,17 @@ final class ObjectWriterImplInt8Array
 
         Byte[] array = (Byte[]) object;
         jsonWriter.startArray(array.length);
-	    for (Byte value : array) {
-		    if (value == null) {
-			    jsonWriter.writeNull();
-		    } else {
-			    byte byteValue = value;
-			    if (writeAsString) {
-				    jsonWriter.writeString(byteValue);
-			    } else {
-				    jsonWriter.writeInt8(byteValue);
-			    }
-		    }
-	    }
+        for (Byte value : array) {
+            if (value == null) {
+                jsonWriter.writeNull();
+            } else {
+                byte byteValue = value;
+                if (writeAsString) {
+                    jsonWriter.writeString(byteValue);
+                } else {
+                    jsonWriter.writeInt8(byteValue);
+                }
+            }
+        }
     }
 }

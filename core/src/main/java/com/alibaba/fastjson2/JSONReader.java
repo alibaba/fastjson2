@@ -899,10 +899,10 @@ public abstract class JSONReader
                 }
                 return number.longValue();
             case JSON_TYPE_DEC:
-	        case JSON_TYPE_INT64:
-	        case JSON_TYPE_FLOAT:
-	        case JSON_TYPE_DOUBLE:
-		        return getNumber().longValue();
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
+                return getNumber().longValue();
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
             case JSON_TYPE_NULL:
@@ -919,7 +919,7 @@ public abstract class JSONReader
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
-	        case JSON_TYPE_BIG_DEC:
+            case JSON_TYPE_BIG_DEC:
                 try {
                     return getBigDecimal()
                             .longValueExact();
