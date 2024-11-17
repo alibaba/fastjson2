@@ -984,7 +984,6 @@ public class JSONArray
      * @param type specify the {@link Type} to be converted
      * @since 2.0.4
      */
-    @SuppressWarnings("unchecked")
     public <T> T to(Type type) {
         return to(type, 0L);
     }

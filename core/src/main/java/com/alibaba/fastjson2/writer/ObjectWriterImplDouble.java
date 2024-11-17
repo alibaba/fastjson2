@@ -22,7 +22,7 @@ final class ObjectWriterImplDouble
             return;
         }
 
-        double value = ((Double) object).doubleValue();
+        double value = (Double) object;
         if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
             jsonWriter.writeString(value);
         } else {
@@ -51,7 +51,7 @@ final class ObjectWriterImplDouble
             return;
         }
 
-        double value = ((Double) object).doubleValue();
+        double value = (Double) object;
         if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
             jsonWriter.writeString(value);
             return;

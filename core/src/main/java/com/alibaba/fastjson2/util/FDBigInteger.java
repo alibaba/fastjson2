@@ -267,14 +267,13 @@ public final class FDBigInteger {
                     int prev = data[idx];
                     int hi = prev >>> anticount;
                     int[] result = data;
-                    int[] src = data;
                     if (hi != 0) {
                         if (nWords == data.length) {
                             this.data = result = new int[nWords + 1];
                         }
                         result[nWords++] = hi;
                     }
-                    leftShift(src, idx, result, bitcount, anticount, prev);
+                    leftShift(data, idx, result, bitcount, anticount, prev);
                 }
             }
             this.nWords = nWords;

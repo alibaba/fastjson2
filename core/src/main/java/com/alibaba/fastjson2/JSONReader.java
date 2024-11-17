@@ -656,7 +656,7 @@ public abstract class JSONReader
         }
         readFieldNameHashCodeUnquote();
         String name = getFieldName();
-        if (name == null || name.equals("")) {
+        if (name == null || name.isEmpty()) {
             throw new JSONException(info("illegal input"));
         }
         return name;
@@ -899,6 +899,9 @@ public abstract class JSONReader
                 }
                 return number.longValue();
             case JSON_TYPE_DEC:
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
@@ -916,11 +919,6 @@ public abstract class JSONReader
             case JSON_TYPE_ARRAY: {
                 return toInt((List) complex);
             }
-            case JSON_TYPE_INT64:
-            case JSON_TYPE_FLOAT:
-            case JSON_TYPE_DOUBLE:
-                return getNumber()
-                        .longValue();
             case JSON_TYPE_BIG_DEC:
                 try {
                     return getBigDecimal()
@@ -1829,7 +1827,7 @@ public abstract class JSONReader
             wasNull = true;
             return '\0';
         }
-        return Character.valueOf(str.charAt(0));
+        return str.charAt(0);
     }
 
     public abstract void readNull();
@@ -2823,7 +2821,7 @@ public abstract class JSONReader
                     }
 
                     if ((context.features & Feature.UseLongForInts.mask) != 0) {
-                        return Long.valueOf(intValue);
+                        return (long) intValue;
                     }
 
                     if (valueType == JSON_TYPE_INT64) {
@@ -4661,7 +4659,7 @@ public abstract class JSONReader
     }
 
     JSONException numberError() {
-        return new JSONException("illegal number, offset " + offset + ", char " + (char) ch);
+        return new JSONException("illegal number, offset " + offset + ", char " + ch);
     }
 
     public final String info() {
