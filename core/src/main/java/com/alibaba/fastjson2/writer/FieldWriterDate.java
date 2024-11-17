@@ -121,7 +121,7 @@ abstract class FieldWriterDate<T>
             return;
         }
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         JSONWriter.Context ctx = jsonWriter.context;
 

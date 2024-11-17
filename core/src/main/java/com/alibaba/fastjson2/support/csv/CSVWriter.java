@@ -226,7 +226,7 @@ public abstract class CSVWriter
     public final void writeDate(long millis) {
         ZoneId zoneId = this.zoneId;
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
         long epochSecond = Math.floorDiv(millis, 1000L);
         int offsetTotalSeconds;
         if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {

@@ -43,7 +43,7 @@ final class ObjectWriterImplInstant
 
         boolean yyyyMMddhhmmss19 = this.yyyyMMddhhmmss19 || (context.isFormatyyyyMMddhhmmss19() && this.format == null);
         if (yyyyMMddhhmmss14 || yyyyMMddhhmmss19 || yyyyMMdd8 || yyyyMMdd10) {
-            final int SECONDS_PER_DAY = 60 * 60 * 24;
+            final long SECONDS_PER_DAY = 60 * 60 * 24;
             ZoneId zoneId = context.getZoneId();
             long epochSecond = instant.getEpochSecond();
             int offsetTotalSeconds;

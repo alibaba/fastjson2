@@ -41,7 +41,7 @@ public class DateUtils {
     static {
         final long timeMillis = System.currentTimeMillis();
         ZoneId zoneId = DEFAULT_ZONE_ID;
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -10924,7 +10924,7 @@ public class DateUtils {
             zoneId = DEFAULT_ZONE_ID;
         }
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11029,7 +11029,7 @@ public class DateUtils {
     }
 
     public static String formatYMD8(long timeMillis, ZoneId zoneId) {
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11199,7 +11199,7 @@ public class DateUtils {
             zoneId = DEFAULT_ZONE_ID;
         }
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11572,7 +11572,7 @@ public class DateUtils {
 
     public static String format(long timeMillis, DateTimeFormatPattern pattern) {
         ZoneId zoneId = DEFAULT_ZONE_ID;
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11733,7 +11733,7 @@ public class DateUtils {
     }
 
     public static String toString(long timeMillis, boolean timeZone, ZoneId zoneId) {
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
