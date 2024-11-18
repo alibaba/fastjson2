@@ -11,7 +11,6 @@ import org.noear.solon.core.handle.ContextEmpty;
 import org.noear.solon.test.SolonTest;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,7 +27,7 @@ public class QuickConfigTest {
     public void hello2() throws Throwable {
         UserDo userDo = new UserDo();
 
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("time", new Date(1673861993477L));
         data.put("long", 12L);
         data.put("int", 12);
