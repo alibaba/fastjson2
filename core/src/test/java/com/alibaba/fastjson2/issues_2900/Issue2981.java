@@ -15,7 +15,7 @@ public class Issue2981 {
         assertEquals(JSON.parse(JSON.toJSONString(circle)), JSON.toJSON(circle));
     }
 
-    @JSONType(typeKey = "type", seeAlso = {Shape.Circle.class})
+    @JSONType(typeKey = "type", seeAlso = Shape.Circle.class)
     public static class Shape {
         @JSONType(typeKey = "type", typeName = "circle", serializeFeatures = JSONWriter.Feature.WriteClassName)
         public static class Circle
