@@ -3859,7 +3859,9 @@ public interface JSON {
                 JSONFactory.createWriteContext() : JSONFactory.createWriteContext(features);
         Class<?> valueClass = object.getClass();
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
-        if (objectWriter instanceof ObjectWriterAdapter && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)) {
+        if (objectWriter instanceof ObjectWriterAdapter
+                && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)
+                && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
             ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
             return objectWriterAdapter.toJSONObject(object, writeContext.features);
         }
