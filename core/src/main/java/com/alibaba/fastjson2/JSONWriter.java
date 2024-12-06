@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -245,7 +246,8 @@ public abstract class JSONWriter
     }
 
     public final boolean isRefDetect() {
-        return (context.features & ReferenceDetection.mask) != 0;
+        return (context.features & ReferenceDetection.mask) != 0
+                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0;
     }
 
     public final boolean isUseSingleQuotes() {
@@ -254,6 +256,7 @@ public abstract class JSONWriter
 
     public final boolean isRefDetect(Object object) {
         return (context.features & ReferenceDetection.mask) != 0
+                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
