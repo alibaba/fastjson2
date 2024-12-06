@@ -19,8 +19,8 @@ public class Issue1661 {
 
         byte[] jsonbBytes = JSONB.toBytes(info, JSONWriter.Feature.FieldBased);
         assertEquals("{\n" +
-                "\t\"card\":{\n" +
-                "\t\t\"cardNo\":\"98765\"\n" +
+                "\t\"card\": {\n" +
+                "\t\t\"cardNo\": \"98765\"\n" +
                 "\t}\n" +
                 "}", JSONB.toJSONString(jsonbBytes));
     }

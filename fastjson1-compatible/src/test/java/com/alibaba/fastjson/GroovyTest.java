@@ -40,8 +40,8 @@ public class GroovyTest {
         assertEquals(b.getProperty("name"), bb.getProperty("name"));
 
         assertEquals("{\n" +
-                "\t\"id\":0,\n" +
-                "\t\"name\":\"jobs\"\n" +
+                "\t\"id\": 0,\n" +
+                "\t\"name\": \"jobs\"\n" +
                 "}", JSON.toJSONString(b, true));
     }
 }
