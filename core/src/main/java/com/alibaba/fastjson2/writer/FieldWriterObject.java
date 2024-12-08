@@ -241,20 +241,15 @@ public class FieldWriterObject<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        long oldFeatures = jsonWriter.getFeatures();
-        jsonWriter.getContext().setFeatures(this.features | oldFeatures);
-        boolean result = writeInner(jsonWriter, object);
-        jsonWriter.getContext().setFeatures(oldFeatures);
+        JSONWriter.Context context = jsonWriter.context;
+        long oldFeatures = context.getFeatures();
+        context.setFeatures(this.features | oldFeatures);
+        boolean result = writeInternal(jsonWriter, object);
+        context.setFeatures(oldFeatures);
         return result;
     }
 
-    /**
-     * 写入对象(内部)
-     * @param jsonWriter JSON写入器
-     * @param object 写入对象
-     * @return 写入结果
-     */
-    private boolean writeInner(JSONWriter jsonWriter, T object) {
+    private boolean writeInternal(JSONWriter jsonWriter, T object) {
         long features = jsonWriter.getFeatures();
 
         if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
