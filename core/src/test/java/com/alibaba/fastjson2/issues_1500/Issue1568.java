@@ -22,7 +22,7 @@ public class Issue1568 {
         t.d.setTime(1686905364389L);
         byte[] bytes = JSONB.toBytes(t);
         assertEquals("{\n" +
-                "\t\"d\":1686905364389\n" +
+                "\t\"d\": 1686905364389\n" +
                 "}", JSONB.toJSONString(bytes));
     }
 }

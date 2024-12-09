@@ -68,13 +68,13 @@ public class JSONWriterPrettyTest {
         jsonWriter.writeInt32(1);
         jsonWriter.endObject();
         assertEquals("{\n" +
-                "\tA:1\n" +
+                "\tA: 1\n" +
                 "}", jsonWriter.toString());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         jsonWriter.flushTo(out, StandardCharsets.UTF_8);
         assertEquals("{\n" +
-                "\tA:1\n" +
+                "\tA: 1\n" +
                 "}", new String(out.toByteArray()));
     }
 

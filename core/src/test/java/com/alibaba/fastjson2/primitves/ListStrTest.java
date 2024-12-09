@@ -70,7 +70,7 @@ public class ListStrTest {
                 objectWriter.write(jsonWriter, vo);
                 byte[] jsonbBytes = jsonWriter.getBytes();
                 assertEquals("{\n" +
-                        "\t\"v0000\":[\"1\"]\n" +
+                        "\t\"v0000\": [\"1\"]\n" +
                         "}", JSONB.toJSONString(jsonbBytes));
             }
             {

@@ -31,7 +31,7 @@ public class JSONBDumTest {
         JSONB.dump(jsonbBytes);
 
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2_vo.Int1\"\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2_vo.Int1\"\n" +
                 "}", JSONB.toJSONString(jsonbBytes));
     }
 
@@ -61,7 +61,7 @@ public class JSONBDumTest {
         byte[] bytes = JSONB.toBytes(bean, symbolTable);
         String str = JSONB.toJSONString(bytes, symbolTable);
         assertEquals("{\n" +
-                "\t\"id\":123\n" +
+                "\t\"id\": 123\n" +
                 "}", str);
     }
 
@@ -82,8 +82,8 @@ public class JSONBDumTest {
         map.put("id", null);
         byte[] jsonbBytes = JSONB.toBytes(map, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.WriteClassName);
         assertEquals("{\n" +
-                "\t\"@type\":\"TreeMap\",\n" +
-                "\t\"id\":null\n" +
+                "\t\"@type\": \"TreeMap\",\n" +
+                "\t\"id\": null\n" +
                 "}", JSONB.toJSONString(jsonbBytes));
     }
 
@@ -104,19 +104,19 @@ public class JSONBDumTest {
         };
         byte[] jsonbBytes = JSONB.toBytes(array, JSONWriter.Feature.WriteClassName);
         assertEquals("{\n" +
-                "\t\"@type\":\"[O\",\n" +
-                "\t\"@value\":[\n" +
+                "\t\"@type\": \"[O\",\n" +
+                "\t\"@value\": [\n" +
                 "\t\t{\n" +
-                "\t\t\t\"@type\":\"TreeMap\"\n" +
+                "\t\t\t\"@type\": \"TreeMap\"\n" +
                 "\t\t},\n" +
                 "\t\t{\n" +
-                "\t\t\t\"@type\":\"TreeMap\"\n" +
+                "\t\t\t\"@type\": \"TreeMap\"\n" +
                 "\t\t},\n" +
                 "\t\t{\n" +
-                "\t\t\t\"@type\":\"ConcurrentHashMap\"\n" +
+                "\t\t\t\"@type\": \"ConcurrentHashMap\"\n" +
                 "\t\t},\n" +
                 "\t\t{\n" +
-                "\t\t\t\"@type\":\"ConcurrentHashMap\"\n" +
+                "\t\t\t\"@type\": \"ConcurrentHashMap\"\n" +
                 "\t\t}\n" +
                 "\t]\n" +
                 "}", JSONB.toJSONString(jsonbBytes));
@@ -136,20 +136,20 @@ public class JSONBDumTest {
         );
         byte[] jsonbBytes = JSONB.toBytes(object, JSONWriter.Feature.WriteClassName);
         assertEquals("{\n" +
-                "\t\"@type\":\"JSONObject\",\n" +
-                "\t\"k1\":{\n" +
-                "\t\t\"@type\":\"TreeMap\",\n" +
-                "\t\t\"v\":1\n" +
+                "\t\"@type\": \"JSONObject\",\n" +
+                "\t\"k1\": {\n" +
+                "\t\t\"@type\": \"TreeMap\",\n" +
+                "\t\t\"v\": 1\n" +
                 "\t},\n" +
-                "\t\"k2\":{\n" +
-                "\t\t\"@type\":\"TreeMap\",\n" +
-                "\t\t\"v\":2\n" +
+                "\t\"k2\": {\n" +
+                "\t\t\"@type\": \"TreeMap\",\n" +
+                "\t\t\"v\": 2\n" +
                 "\t},\n" +
-                "\t\"k3\":{\n" +
-                "\t\t\"@type\":\"ConcurrentHashMap\"\n" +
+                "\t\"k3\": {\n" +
+                "\t\t\"@type\": \"ConcurrentHashMap\"\n" +
                 "\t},\n" +
-                "\t\"k4\":{\n" +
-                "\t\t\"@type\":\"ConcurrentHashMap\"\n" +
+                "\t\"k4\": {\n" +
+                "\t\t\"@type\": \"ConcurrentHashMap\"\n" +
                 "\t}\n" +
                 "}", JSONB.toJSONString(jsonbBytes));
     }
