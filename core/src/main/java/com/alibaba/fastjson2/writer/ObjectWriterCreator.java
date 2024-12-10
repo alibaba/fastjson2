@@ -1312,6 +1312,13 @@ public class ObjectWriterCreator {
                     return objectWriter;
                 }
             }
+        } else if (fieldClass == int.class || fieldClass == Integer.class) {
+            if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT32_MASK) != 0) {
+                ObjectWriter objectWriter = provider.cache.get(Integer.class);
+                if (objectWriter != ObjectWriterImplInt32.INSTANCE) {
+                    return objectWriter;
+                }
+            }
         } else if (fieldClass == long.class || fieldClass == Long.class) {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) != 0) {
                 ObjectWriter objectWriter = provider.cache.get(Long.class);
