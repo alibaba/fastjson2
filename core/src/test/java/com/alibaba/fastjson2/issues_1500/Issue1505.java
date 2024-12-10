@@ -17,8 +17,8 @@ public class Issue1505 {
         byte[] bytes = JSONB.toBytes(resultDTO, JSONWriter.Feature.NotWriteDefaultValue);
         assertEquals(
                 "{\n" +
-                        "\t\"code\":300002,\n" +
-                        "\t\"msg\":\"非法参数\"\n" +
+                        "\t\"code\": 300002,\n" +
+                        "\t\"msg\": \"非法参数\"\n" +
                         "}",
                 JSONB.toJSONString(bytes)
         );

@@ -40,8 +40,8 @@ public class AutoTypeTest43_dynamic {
         JSONB.dump(bytes);
 
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest43_dynamic$Model\",\n" +
-                "\t\"id\":102\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.autoType.AutoTypeTest43_dynamic$Model\",\n" +
+                "\t\"id\": 102\n" +
                 "}", JSONB.toJSONString(bytes));
 
         Model value2 = (Model) JSONB.parseObject(
