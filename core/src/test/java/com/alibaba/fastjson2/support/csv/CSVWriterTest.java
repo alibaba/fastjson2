@@ -334,6 +334,22 @@ public class CSVWriterTest {
     }
 
     @Test
+    public void test7() throws Exception {
+        try (CSVWriter csvWriter = CSVWriter.of(new StringWriter())) {
+            csvWriter.writeString(",abc".getBytes());
+            assertEquals("\",abc\"", csvWriter.toString());
+        }
+    }
+
+    @Test
+    public void test7UTF8() throws Exception {
+        try (CSVWriter csvWriter = CSVWriter.of(new ByteArrayOutputStream())) {
+            csvWriter.writeString(",abc".getBytes());
+            assertEquals("\",abc\"", csvWriter.toString());
+        }
+    }
+
+    @Test
     public void testWriteInstant() throws Exception {
         LocalDate date = LocalDate.of(2018, 7, 12);
         LocalTime time = LocalTime.of(11, 9, 10);

@@ -114,7 +114,7 @@ final class CSVWriterUTF16
                 char ch = str.charAt(i);
                 if (ch == ',') {
                     comma = true;
-                } else if (ch == '"') {
+                } else if (ch == '"' || ch == '\n' || ch == '\r') {
                     escapeCount++;
                 }
             }
@@ -123,7 +123,7 @@ final class CSVWriterUTF16
             }
         }
 
-        if (escapeCount == 0) {
+        if (escapeCount == 0 && !comma) {
             if (len + off >= chars.length) {
                 flush();
                 if (len > chars.length) {

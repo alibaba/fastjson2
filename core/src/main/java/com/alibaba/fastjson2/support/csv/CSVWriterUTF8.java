@@ -160,7 +160,7 @@ final class CSVWriterUTF8
             for (byte ch : utf8) {
                 if (ch == ',') {
                     comma = true;
-                } else if (ch == '"') {
+                } else if (ch == '"' || ch == '\n' || ch == '\r') {
                     escapeCount++;
                 }
             }
@@ -169,7 +169,7 @@ final class CSVWriterUTF8
             }
         }
 
-        if (escapeCount == 0) {
+        if (escapeCount == 0 && !comma) {
             writeRaw(utf8);
             return;
         }
