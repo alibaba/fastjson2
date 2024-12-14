@@ -243,8 +243,8 @@ byte[] text = JSON.toJSONBytes(data);
 import com.alibaba.fastjson2.*
 
 val data = ... // Any
-val text = text.toJSONString() // String
-val bytes = text.toJSONByteArray() // ByteArray
+val text = data.toJSONString() // String
+val bytes = data.toJSONByteArray() // ByteArray
 ```
 
 ### 2.5 使用`JSONObject`、`JSONArray`
