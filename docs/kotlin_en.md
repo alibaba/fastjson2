@@ -127,14 +127,14 @@ Serialization as a string:
 
 ```kotlin
 val data = "..." // Any
-val text = text.toJSONString() // String
+val text = data.toJSONString() // String
 ```
 
 Serialization as a ByteArray:
 
 ```kotlin
 val data = "..." // Any
-val bytes = text.toJSONByteArray() // ByteArray
+val bytes = data.toJSONByteArray() // ByteArray
 ```
 
 ### 2.5 Use `JSONObject`、`JSONArray`
