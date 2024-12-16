@@ -16,8 +16,8 @@ public class Issue752 {
                 JSONWriter.Feature.WriteClassName);
         JSONB.dump(bytes);
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.issues.Issue752$Bean\",\n" +
-                "\t\"param\":[\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.issues.Issue752$Bean\",\n" +
+                "\t\"param\": [\n" +
                 "\t\t\"int\",\n" +
                 "\t\t\"int\"\n" +
                 "\t]\n" +

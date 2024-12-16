@@ -51,6 +51,8 @@ public abstract class JSONWriter
     protected String lastReference;
     protected boolean pretty;
     protected int indent;
+    protected byte indentSymbol;
+    protected short everyIndentTimes;
     protected Object attachment;
 
     protected JSONWriter(
@@ -71,7 +73,17 @@ public abstract class JSONWriter
 
         // 64M or 1G
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
-        pretty = (context.features & PrettyFormat.mask) != 0;
+
+        //json format?
+        if ((context.features & PrettyFormat.mask) != 0) {
+            pretty = true;
+            indentSymbol = '\t';
+            everyIndentTimes = 1;
+        } else if ((context.features & PrettyFormatWithSpace.mask) != 0) {
+            pretty = true;
+            indentSymbol = ' ';
+            everyIndentTimes = 4;
+        }
     }
 
     public final Charset getCharset() {
@@ -685,6 +697,8 @@ public abstract class JSONWriter
         if (!writer.pretty) {
             writer.pretty = true;
             writer.context.features |= PrettyFormat.mask;
+            writer.indentSymbol = '\t';
+            writer.everyIndentTimes = 1;
         }
         return writer;
     }
@@ -2213,7 +2227,12 @@ public abstract class JSONWriter
          * SortedMap and derived classes do not need to do this.
          * @since 2.0.48
          */
-        SortMapEntriesByKeys(1L << 41);
+        SortMapEntriesByKeys(1L << 41),
+
+        /**
+         * JSON formatting support using spaces for indentation
+         */
+        PrettyFormatWithSpace(1L << 42);
 
         public final long mask;
 

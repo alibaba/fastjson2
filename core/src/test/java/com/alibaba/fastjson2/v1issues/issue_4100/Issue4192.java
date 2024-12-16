@@ -25,18 +25,18 @@ public class Issue4192 {
                 "                }";
 
         assertEquals("{\n" +
-                        "\t\"head\":{\n" +
-                        "\t\t\"requestTime\":\"1654070371884\",\n" +
-                        "\t\t\"merchantcode\":\"111\",\n" +
-                        "\t\t\"ticket\":\"111\",\n" +
-                        "\t\t\"version\":\"1.0.0\"\n" +
+                        "\t\"head\": {\n" +
+                        "\t\t\"requestTime\": \"1654070371884\",\n" +
+                        "\t\t\"merchantcode\": \"111\",\n" +
+                        "\t\t\"ticket\": \"111\",\n" +
+                        "\t\t\"version\": \"1.0.0\"\n" +
                         "\t},\n" +
-                        "\t\"body\":{\n" +
-                        "\t\t\"phone\":\"111\",\n" +
-                        "\t\t\"type\":\"1\",\n" +
-                        "\t\t\"ticket\":\"\"\n" +
+                        "\t\"body\": {\n" +
+                        "\t\t\"phone\": \"111\",\n" +
+                        "\t\t\"type\": \"1\",\n" +
+                        "\t\t\"ticket\": \"\"\n" +
                         "\t},\n" +
-                        "\t\"sign\":\"111\"\n" +
+                        "\t\"sign\": \"111\"\n" +
                         "}",
                 JSON.parseObject(json).toString(JSONWriter.Feature.PrettyFormat)
         );

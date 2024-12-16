@@ -85,7 +85,7 @@ public class Int16Value_0 {
                 objectWriter.write(jsonWriter, vo);
                 byte[] jsonbBytes = jsonWriter.getBytes();
                 assertEquals("{\n" +
-                        "\t\"v0000\":1\n" +
+                        "\t\"v0000\": 1\n" +
                         "}", JSONB.toJSONString(jsonbBytes));
             }
             {
@@ -153,7 +153,7 @@ public class Int16Value_0 {
                 objectWriter.write(jsonWriter, vo);
                 byte[] jsonbBytes = jsonWriter.getBytes();
                 assertEquals("{\n" +
-                        "\t\"v0000\":2000\n" +
+                        "\t\"v0000\": 2000\n" +
                         "}", JSONB.toJSONString(jsonbBytes));
             }
             {

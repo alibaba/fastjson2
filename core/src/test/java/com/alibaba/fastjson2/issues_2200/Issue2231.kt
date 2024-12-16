@@ -16,7 +16,7 @@ class Issue2231 {
 
         assertEquals(
             """{
-	"value":"hello"
+	"value": "hello"
 }""",
             JSONB.toJSONString(jsonb)
         )
