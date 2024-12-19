@@ -73,6 +73,11 @@ class JSONReaderUTF16
                 }
                 ch = chars[this.offset];
             }
+
+            if (ch != '{') {
+                ch = EOI;
+                return;
+            }
             this.offset++;
         }
 
@@ -138,6 +143,11 @@ class JSONReaderUTF16
                 }
                 ch = chars[this.offset];
             }
+
+            if (ch != '{') {
+                ch = EOI;
+                return;
+            }
             this.offset++;
         }
 
@@ -184,6 +194,11 @@ class JSONReaderUTF16
                 }
                 ch = chars[this.offset];
             }
+
+            if (ch != '{') {
+                ch = EOI;
+                return;
+            }
             this.offset++;
         }
 
@@ -221,6 +236,10 @@ class JSONReaderUTF16
                     return;
                 }
                 ch = chars[this.offset];
+            }
+            if (ch != '{') {
+                ch = EOI;
+                return;
             }
             this.offset++;
         }

@@ -450,6 +450,11 @@ class JSONReaderUTF8
             return;
         }
 
+        if (ch != '{') {
+            ch = EOI;
+            return;
+        }
+
         this.offset = offset;
         this.ch = (char) ch;
         if (ch == '/') {
