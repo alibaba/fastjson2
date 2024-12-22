@@ -13,7 +13,7 @@ public class Issue3208 {
     @Test
     public void testArray() {
         byte[] bytes = new byte[]{1, 2, 3};
-        String jsonString = JSON.toJSONString(new byte[]{1, 2, 3}, SerializerFeature.WriteClassName);
+        String jsonString = JSON.toJSONString(bytes, SerializerFeature.WriteClassName);
         byte[] bytes1 = (byte[]) JSON.parse(jsonString);
         Assertions.assertTrue(Arrays.equals(bytes, bytes1));
     }
