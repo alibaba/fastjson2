@@ -102,8 +102,8 @@ public final class ObjectReaderImplObject
                                         contextClass = classLoader.loadClass(typeName);
                                     } catch (ClassNotFoundException ignored) {
                                     }
-
-                                    if (!objectClass.equals(contextClass)) {
+                                    //明确contextClass类型与objectClass不一致时才更改reader
+                                    if (contextClass != null && !objectClass.equals(contextClass)) {
                                         autoTypeObjectReader = context.getObjectReader(contextClass);
                                     }
                                 }
