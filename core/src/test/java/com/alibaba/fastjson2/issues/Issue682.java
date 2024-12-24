@@ -26,9 +26,9 @@ public class Issue682 {
         );
         assertEquals(
                 "{\n" +
-                        "\t\"user_name\":\"john\",\n" +
-                        "\t\"user_age\":20,\n" +
-                        "\t\"city_name\":\"beijing\"\n" +
+                        "\t\"user_name\": \"john\",\n" +
+                        "\t\"user_age\": 20,\n" +
+                        "\t\"city_name\": \"beijing\"\n" +
                         "}",
                 JSON.toJSONString(jsonObject, NameFilter.of(PropertyNamingStrategy.LowerCaseWithUnderScores), JSONWriter.Feature.PrettyFormat)
         );

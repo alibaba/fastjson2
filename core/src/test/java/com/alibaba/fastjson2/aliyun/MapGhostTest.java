@@ -87,7 +87,7 @@ public class MapGhostTest {
         byte[] bytes = JSONB.toBytes(map);
         String str = JSONB.toJSONString(bytes);
         assertEquals("{\n" +
-                "\t\"name\":123\n" +
+                "\t\"name\": 123\n" +
                 "}", str);
     }
 

@@ -23,7 +23,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"v0000\":100\n" +
+                        "\t\"v0000\": 100\n" +
                         "}",
                 jw.toString());
     }
@@ -38,7 +38,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"v0000\":100\n" +
+                        "\t\"v0000\": 100\n" +
                         "}",
                 jw.toString());
     }
@@ -53,7 +53,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"v0000\":100.0\n" +
+                        "\t\"v0000\": 100.0\n" +
                         "}",
                 jw.toString());
     }
@@ -68,7 +68,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"v0000\":100.0\n" +
+                        "\t\"v0000\": 100.0\n" +
                         "}",
                 jw.toString());
     }
@@ -83,7 +83,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"id\":100\n" +
+                        "\t\"id\": 100\n" +
                         "}",
                 jw.toString());
     }
@@ -98,7 +98,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"id\":100\n" +
+                        "\t\"id\": 100\n" +
                         "}",
                 jw.toString());
     }
@@ -113,7 +113,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"id\":\"" + v.getId().toString() + "\"\n" +
+                        "\t\"id\": \"" + v.getId().toString() + "\"\n" +
                         "}",
                 jw.toString());
     }
@@ -126,9 +126,9 @@ public class PrettyTest {
         JSONWriter jw = JSONWriter.ofPretty(JSONWriter.ofUTF8());
         jw.writeAny(v);
 
-        System.out.println(jw);
+//        System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"v0000\":100\n" +
+                        "\t\"v0000\": 100\n" +
                         "}",
                 jw.toString());
     }
@@ -143,7 +143,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"v0000\":1234567890\n" +
+                        "\t\"v0000\": 1234567890\n" +
                         "}",
                 jw.toString());
     }
@@ -158,7 +158,7 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                        "\t\"v0000\":1234567890\n" +
+                        "\t\"v0000\": 1234567890\n" +
                         "}",
                 jw.toString());
     }
@@ -172,7 +172,7 @@ public class PrettyTest {
         jw.writeAny(v);
 
         assertEquals("{\n" +
-                        "\t\"v0000\":1000\n" +
+                        "\t\"v0000\": 1000\n" +
                         "}",
                 jw.toString());
     }
@@ -199,12 +199,12 @@ public class PrettyTest {
         jw.writeAny(map);
 
         assertEquals("{\n" +
-                        "\t\"id\":1001,\n" +
-                        "\t\"name\":\"DataWorks\",\n" +
-                        "\t\"array\":[\n" +
+                        "\t\"id\": 1001,\n" +
+                        "\t\"name\": \"DataWorks\",\n" +
+                        "\t\"array\": [\n" +
                         "\t\t\n" +
                         "\t],\n" +
-                        "\t\"object\":{\n" +
+                        "\t\"object\": {\n" +
                         "\t\t\n" +
                         "\t}\n" +
                         "}",

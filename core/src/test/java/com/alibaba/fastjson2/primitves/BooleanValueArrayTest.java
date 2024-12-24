@@ -94,7 +94,7 @@ public class BooleanValueArrayTest {
         bean.values = new boolean[] {true, false};
         byte[] bytes = JSONB.toBytes(bean);
         assertEquals("{\n" +
-                "\t\"values\":[\n" +
+                "\t\"values\": [\n" +
                 "\t\ttrue,\n" +
                 "\t\tfalse\n" +
                 "\t]\n" +
@@ -109,8 +109,8 @@ public class BooleanValueArrayTest {
         bean.values = new boolean[] {true, false};
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.primitves.BooleanValueArrayTest$Bean\",\n" +
-                "\t\"values\":[\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.primitves.BooleanValueArrayTest$Bean\",\n" +
+                "\t\"values\": [\n" +
                 "\t\ttrue,\n" +
                 "\t\tfalse\n" +
                 "\t]\n" +
@@ -129,7 +129,7 @@ public class BooleanValueArrayTest {
         bean.values = new boolean[] {true, false};
         byte[] bytes = JSONB.toBytes(bean);
         assertEquals("{\n" +
-                "\t\"values\":[\n" +
+                "\t\"values\": [\n" +
                 "\t\ttrue,\n" +
                 "\t\tfalse\n" +
                 "\t]\n" +
@@ -144,8 +144,8 @@ public class BooleanValueArrayTest {
         bean.values = new boolean[] {true, false};
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
         assertEquals("{\n" +
-                "\t\"@type\":\"com.alibaba.fastjson2.primitves.BooleanValueArrayTest$Bean1\",\n" +
-                "\t\"values\":[\n" +
+                "\t\"@type\": \"com.alibaba.fastjson2.primitves.BooleanValueArrayTest$Bean1\",\n" +
+                "\t\"values\": [\n" +
                 "\t\ttrue,\n" +
                 "\t\tfalse\n" +
                 "\t]\n" +

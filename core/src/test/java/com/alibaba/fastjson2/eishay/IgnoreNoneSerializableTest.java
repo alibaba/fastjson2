@@ -42,38 +42,38 @@ public class IgnoreNoneSerializableTest {
     }
 
     static final String jsonbDump = "{\n" +
-            "\t\"@type\":\"com.alibaba.fastjson2.eishay.vo.MediaContent#0\",\n" +
-            "\t\"@value\":{\n" +
-            "\t\t\"images#1\":[\n" +
+            "\t\"@type\": \"com.alibaba.fastjson2.eishay.vo.MediaContent#0\",\n" +
+            "\t\"@value\": {\n" +
+            "\t\t\"images#1\": [\n" +
             "\t\t\t{\n" +
-            "\t\t\t\t\"height#2\":768,\n" +
-            "\t\t\t\t\"size#3\":1,\n" +
-            "\t\t\t\t\"title#4\":\"Javaone Keynote\",\n" +
-            "\t\t\t\t\"uri#5\":\"http://javaone.com/keynote_large.jpg\",\n" +
-            "\t\t\t\t\"width#6\":1024\n" +
+            "\t\t\t\t\"height#2\": 768,\n" +
+            "\t\t\t\t\"size#3\": 1,\n" +
+            "\t\t\t\t\"title#4\": \"Javaone Keynote\",\n" +
+            "\t\t\t\t\"uri#5\": \"http://javaone.com/keynote_large.jpg\",\n" +
+            "\t\t\t\t\"width#6\": 1024\n" +
             "\t\t\t},\n" +
             "\t\t\t{\n" +
-            "\t\t\t\t\"#2\":240,\n" +
-            "\t\t\t\t\"#3\":0,\n" +
-            "\t\t\t\t\"#4\":\"Javaone Keynote\",\n" +
-            "\t\t\t\t\"#5\":\"http://javaone.com/keynote_small.jpg\",\n" +
-            "\t\t\t\t\"#6\":320\n" +
+            "\t\t\t\t\"#2\": 240,\n" +
+            "\t\t\t\t\"#3\": 0,\n" +
+            "\t\t\t\t\"#4\": \"Javaone Keynote\",\n" +
+            "\t\t\t\t\"#5\": \"http://javaone.com/keynote_small.jpg\",\n" +
+            "\t\t\t\t\"#6\": 320\n" +
             "\t\t\t}\n" +
             "\t\t],\n" +
-            "\t\t\"media#7\":{\n" +
-            "\t\t\t\"bitrate#8\":262144,\n" +
-            "\t\t\t\"duration#9\":18000000,\n" +
-            "\t\t\t\"format#10\":\"video/mpg4\",\n" +
-            "\t\t\t\"#2\":480,\n" +
-            "\t\t\t\"persons#11\":[\n" +
+            "\t\t\"media#7\": {\n" +
+            "\t\t\t\"bitrate#8\": 262144,\n" +
+            "\t\t\t\"duration#9\": 18000000,\n" +
+            "\t\t\t\"format#10\": \"video/mpg4\",\n" +
+            "\t\t\t\"#2\": 480,\n" +
+            "\t\t\t\"persons#11\": [\n" +
             "\t\t\t\t\"Bill Gates\",\n" +
             "\t\t\t\t\"Steve Jobs\"\n" +
             "\t\t\t],\n" +
-            "\t\t\t\"player#12\":0,\n" +
-            "\t\t\t\"#3\":58982400,\n" +
-            "\t\t\t\"#4\":\"Javaone Keynote\",\n" +
-            "\t\t\t\"#5\":\"http://javaone.com/keynote.mpg\",\n" +
-            "\t\t\t\"#6\":640\n" +
+            "\t\t\t\"player#12\": 0,\n" +
+            "\t\t\t\"#3\": 58982400,\n" +
+            "\t\t\t\"#4\": \"Javaone Keynote\",\n" +
+            "\t\t\t\"#5\": \"http://javaone.com/keynote.mpg\",\n" +
+            "\t\t\t\"#6\": 640\n" +
             "\t\t}\n" +
             "\t}\n" +
             "}";
