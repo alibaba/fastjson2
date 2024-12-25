@@ -345,6 +345,14 @@ public class ObjectWriterCreatorASM
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
                         fieldWriterMap.put(fieldName, fieldWriter);
                     }
+
+                    // the sameFieldName means only differ in first character that one is upper case the other is lower case
+                    if (origin == null) {
+                        String sameFieldName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                        if (fieldWriterMap.containsKey(sameFieldName)) {
+                            fieldWriterMap.remove(sameFieldName);
+                        }
+                    }
                 });
             }
         } else {
