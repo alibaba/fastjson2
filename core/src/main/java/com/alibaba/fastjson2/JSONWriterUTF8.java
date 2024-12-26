@@ -878,7 +878,7 @@ class JSONWriterUTF8
     }
 
     protected final void writeStringEscaped(byte[] values) {
-        int minCapacity = off + values.length * 4 + 2;
+        int minCapacity = off + values.length * 6 + 2;
         if (minCapacity >= this.bytes.length) {
             ensureCapacity(minCapacity);
         }
