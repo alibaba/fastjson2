@@ -482,8 +482,14 @@ public class ObjectWriterCreator {
 
                     // the sameFieldName means only differ in first character that one is upper case the other is lower case
                     if (origin == null) {
-                        String sameFieldName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-                        if (fieldWriterMap.containsKey(sameFieldName)) {
+                        String sameFieldName = null;
+                        char firstChar = fieldName.charAt(0);
+                        if (firstChar >= 'A' && firstChar <= 'Z') {
+                            sameFieldName = (firstChar + 32) + fieldName.substring(1);
+                        } else if (firstChar >= 'a' && firstChar <= 'z') {
+                            sameFieldName = (firstChar - 32) + fieldName.substring(1);
+                        }
+                        if (sameFieldName != null && fieldWriterMap.containsKey(sameFieldName)) {
                             fieldWriterMap.remove(sameFieldName);
                         }
                     }
