@@ -485,9 +485,9 @@ public class ObjectWriterCreator {
                         String sameFieldName = null;
                         char firstChar = fieldName.charAt(0);
                         if (firstChar >= 'A' && firstChar <= 'Z') {
-                            sameFieldName = (firstChar + 32) + fieldName.substring(1);
+                            sameFieldName = (char) (firstChar + 32) + fieldName.substring(1);
                         } else if (firstChar >= 'a' && firstChar <= 'z') {
-                            sameFieldName = (firstChar - 32) + fieldName.substring(1);
+                            sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
                         }
                         if (sameFieldName != null && fieldWriterMap.containsKey(sameFieldName)) {
                             fieldWriterMap.remove(sameFieldName);
