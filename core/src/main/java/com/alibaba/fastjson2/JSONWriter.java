@@ -52,7 +52,6 @@ public abstract class JSONWriter
     protected Path path;
     protected String lastReference;
     protected byte pretty;
-    protected int indent;
     protected Object attachment;
 
     protected JSONWriter(
@@ -2691,14 +2690,14 @@ public abstract class JSONWriter
      * @deprecated
      */
     public final void incrementIndent() {
-        indent++;
+        level++;
     }
 
     /**
      * @deprecated
      */
     public final void decrementIdent() {
-        indent--;
+        level--;
     }
 
     /**
@@ -2706,7 +2705,7 @@ public abstract class JSONWriter
      */
     public void println() {
         writeChar('\n');
-        for (int i = 0; i < indent; ++i) {
+        for (int i = 0; i < level; ++i) {
             writeChar('\t');
         }
     }

@@ -644,7 +644,7 @@ public class JSONWriterUTF16Test {
     @Test
     public void writeName8Pretty() {
         JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext(PrettyFormat));
-        jsonWriter.indent += 2;
+        jsonWriter.level += 2;
 
         char[] name = "a123".toCharArray();
         long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
