@@ -312,6 +312,10 @@ class JSONWriterUTF8
     }
 
     public final void writeString(List<String> list) {
+        if (pretty != PRETTY_NON) {
+            super.writeString(list);
+            return;
+        }
         // startArray();
         int off = this.off;
         if (off == bytes.length) {

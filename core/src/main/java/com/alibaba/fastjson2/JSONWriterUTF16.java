@@ -216,6 +216,10 @@ class JSONWriterUTF16
     }
 
     public final void writeString(List<String> list) {
+        if (pretty != PRETTY_NON) {
+            super.writeString(list);
+            return;
+        }
         // startArray();
         if (off == chars.length) {
             ensureCapacity(off + 1);

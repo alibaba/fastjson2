@@ -5,6 +5,9 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -166,5 +169,33 @@ public class PrettyFormatTest {
     public static class Bean2 {
         private int id;
         private String value;
+    }
+
+    @Test
+    public void test3() {
+        Bean3 bean = new Bean3();
+        bean.values.add("a01");
+        bean.values.add("a02");
+
+        assertEquals(
+                "{\n" +
+                        "\t\"values\":[\n" +
+                        "\t\t\"a01\",\n" +
+                        "\t\t\"a02\"\n" +
+                        "\t]\n" +
+                        "}",
+                JSON.toJSONString(bean, PrettyFormat));
+        assertEquals(
+                "{\n" +
+                        "\t\"values\":[\n" +
+                        "\t\t\"a01\",\n" +
+                        "\t\t\"a02\"\n" +
+                        "\t]\n" +
+                        "}",
+                JSON.toJSONString(bean, PrettyFormat, OptimizedForAscii));
+    }
+
+    public static class Bean3 {
+        public List<String> values = new ArrayList<>();
     }
 }
