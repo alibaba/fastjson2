@@ -2703,9 +2703,9 @@ public abstract class JSONWriter
      * @deprecated
      */
     public void println() {
-        writeChar('\n');
+        writeRaw('\n');
         for (int i = 0; i < level; ++i) {
-            writeChar('\t');
+            writeRaw('\t');
         }
     }
 

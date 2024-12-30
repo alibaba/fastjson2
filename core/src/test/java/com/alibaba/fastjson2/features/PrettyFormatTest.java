@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
@@ -197,5 +198,28 @@ public class PrettyFormatTest {
 
     public static class Bean3 {
         public List<String> values = new ArrayList<>();
+    }
+
+    @Test
+    public void ofPretty() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        jsonWriter = JSONWriter.ofPretty(jsonWriter);
+        jsonWriter.startObject();
+        jsonWriter.writeNameValue("id", 123);
+        jsonWriter.endObject();
+        jsonWriter.close();
+
+        assertEquals("{\n" +
+                "\t\"id\"123\n" +
+                "}", jsonWriter.toString());
+
+        jsonWriter.incrementIndent();
+        assertEquals(1, jsonWriter.level());
+        jsonWriter.println();
+        assertEquals("{\n" +
+                "\t\"id\"123\n" +
+                "}\n\t", jsonWriter.toString());
+        jsonWriter.decrementIdent();
+        assertEquals(0, jsonWriter.level());
     }
 }
