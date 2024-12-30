@@ -203,8 +203,32 @@ public class PrettyFormatTest {
     }
 
     @Test
-    public void ofPretty() {
-        JSONWriter jsonWriter = JSONWriter.of();
+    public void ofPrettyUTF16() {
+        JSONWriter jsonWriter = JSONWriter.ofUTF16();
+        jsonWriter = JSONWriter.ofPretty(jsonWriter);
+        jsonWriter = JSONWriter.ofPretty(jsonWriter);
+        jsonWriter.startObject();
+        jsonWriter.writeNameValue("id", 123);
+        jsonWriter.endObject();
+        jsonWriter.close();
+
+        assertEquals("{\n" +
+                "\t\"id\"123\n" +
+                "}", jsonWriter.toString());
+
+        jsonWriter.incrementIndent();
+        assertEquals(1, jsonWriter.level());
+        jsonWriter.println();
+        assertEquals("{\n" +
+                "\t\"id\"123\n" +
+                "}\n\t", jsonWriter.toString());
+        jsonWriter.decrementIdent();
+        assertEquals(0, jsonWriter.level());
+    }
+
+    @Test
+    public void ofPrettyUTF8() {
+        JSONWriter jsonWriter = JSONWriter.ofUTF8();
         jsonWriter = JSONWriter.ofPretty(jsonWriter);
         jsonWriter = JSONWriter.ofPretty(jsonWriter);
         jsonWriter.startObject();
@@ -235,17 +259,48 @@ public class PrettyFormatTest {
                     "f2", 102L,
                     "f3", new BigDecimal("103"),
                     "f4", new JSONObject(),
-                    "f5", new JSONArray()
+                    "f5", new JSONArray(),
+                    "f6", (short) 106,
+                    "f7", true
             );
             {
-                JSONWriter jsonWriter = JSONWriter.of(PrettyFormat);
+                JSONWriter jsonWriter = JSONWriter.ofUTF16(PrettyFormat);
                 jsonWriter.write(object);
                 assertEquals("{\n" +
                         "\t\"f1\":101,\n" +
                         "\t\"f2\":102,\n" +
                         "\t\"f3\":103,\n" +
                         "\t\"f4\":{},\n" +
-                        "\t\"f5\":[]\n" +
+                        "\t\"f5\":[],\n" +
+                        "\t\"f6\":106,\n" +
+                        "\t\"f7\":true\n" +
+                        "}", jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
+                jsonWriter.write(object);
+                assertEquals("{\n" +
+                        "\t\"f1\":101,\n" +
+                        "\t\"f2\":102,\n" +
+                        "\t\"f3\":103,\n" +
+                        "\t\"f4\":{},\n" +
+                        "\t\"f5\":[],\n" +
+                        "\t\"f6\":106,\n" +
+                        "\t\"f7\":true\n" +
+                        "}", jsonWriter.toString());
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.of(PrettyFormat, WriteNulls);
+                jsonWriter.write(object);
+                assertEquals("{\n" +
+                        "\t\"f0\":null,\n" +
+                        "\t\"f1\":101,\n" +
+                        "\t\"f2\":102,\n" +
+                        "\t\"f3\":103,\n" +
+                        "\t\"f4\":{},\n" +
+                        "\t\"f5\":[],\n" +
+                        "\t\"f6\":106,\n" +
+                        "\t\"f7\":true\n" +
                         "}", jsonWriter.toString());
             }
         }
