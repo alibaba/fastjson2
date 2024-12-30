@@ -2863,4 +2863,29 @@ public class JSONWriterTest {
         context.setFeatures(features);
         assertEquals(features, context.getFeatures());
     }
+
+
+    @Test
+    public void writeNull() {
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofPretty();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+    }
 }
