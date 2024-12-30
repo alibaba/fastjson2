@@ -206,6 +206,7 @@ public class PrettyFormatTest {
     public void ofPretty() {
         JSONWriter jsonWriter = JSONWriter.of();
         jsonWriter = JSONWriter.ofPretty(jsonWriter);
+        jsonWriter = JSONWriter.ofPretty(jsonWriter);
         jsonWriter.startObject();
         jsonWriter.writeNameValue("id", 123);
         jsonWriter.endObject();
@@ -236,15 +237,17 @@ public class PrettyFormatTest {
                     "f4", new JSONObject(),
                     "f5", new JSONArray()
             );
-            JSONWriter jsonWriter = JSONWriter.of(PrettyFormat);
-            jsonWriter.write(object);
-            assertEquals("{\n" +
-                    "\t\"f1\":101,\n" +
-                    "\t\"f2\":102,\n" +
-                    "\t\"f3\":103,\n" +
-                    "\t\"f4\":{},\n" +
-                    "\t\"f5\":[]\n" +
-                    "}", jsonWriter.toString());
+            {
+                JSONWriter jsonWriter = JSONWriter.of(PrettyFormat);
+                jsonWriter.write(object);
+                assertEquals("{\n" +
+                        "\t\"f1\":101,\n" +
+                        "\t\"f2\":102,\n" +
+                        "\t\"f3\":103,\n" +
+                        "\t\"f4\":{},\n" +
+                        "\t\"f5\":[]\n" +
+                        "}", jsonWriter.toString());
+            }
         }
         {
             JSONWriter jsonWriter = JSONWriter.of(PrettyFormat);
