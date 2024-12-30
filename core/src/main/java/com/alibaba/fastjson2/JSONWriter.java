@@ -1621,6 +1621,11 @@ public abstract class JSONWriter
             return;
         }
 
+        if (map.isEmpty()) {
+            writeRaw('{', '}');
+            return;
+        }
+
         final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
                 | PrettyFormat.mask
                 | NotWriteEmptyArray.mask
@@ -1653,6 +1658,11 @@ public abstract class JSONWriter
     public void write(JSONObject map) {
         if (map == null) {
             this.writeNull();
+            return;
+        }
+
+        if (map.isEmpty()) {
+            writeRaw('{', '}');
             return;
         }
 

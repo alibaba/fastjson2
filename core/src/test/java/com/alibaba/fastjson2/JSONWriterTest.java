@@ -2864,7 +2864,6 @@ public class JSONWriterTest {
         assertEquals(features, context.getFeatures());
     }
 
-
     @Test
     public void writeNull() {
         {

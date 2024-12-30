@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -221,5 +223,33 @@ public class PrettyFormatTest {
                 "}\n\t", jsonWriter.toString());
         jsonWriter.decrementIdent();
         assertEquals(0, jsonWriter.level());
+    }
+
+    @Test
+    public void testJSONObject() {
+        {
+            JSONObject object = JSONObject.of(
+                    "f0", null,
+                    "f1", 101,
+                    "f2", 102L,
+                    "f3", new BigDecimal("103"),
+                    "f4", new JSONObject(),
+                    "f5", new JSONArray()
+            );
+            JSONWriter jsonWriter = JSONWriter.of(PrettyFormat);
+            jsonWriter.write(object);
+            assertEquals("{\n" +
+                    "\t\"f1\":101,\n" +
+                    "\t\"f2\":102,\n" +
+                    "\t\"f3\":103,\n" +
+                    "\t\"f4\":{},\n" +
+                    "\t\"f5\":[]\n" +
+                    "}", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.of(PrettyFormat);
+            jsonWriter.write(JSONObject.of());
+            assertEquals("{}", jsonWriter.toString());
+        }
     }
 }
