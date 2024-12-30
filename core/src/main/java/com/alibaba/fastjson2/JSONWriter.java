@@ -31,7 +31,7 @@ public abstract class JSONWriter
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
     static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-    static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_SPACE_4 = 4;
+    static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_2_SPACE = 2, PRETTY_4_SPACE = 4;
 
     public final Context context;
     public final boolean utf8;
@@ -73,8 +73,10 @@ public abstract class JSONWriter
 
         // 64M or 1G
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
-        if ((context.features & PrettyFormatWithSpace.mask) != 0) {
-            pretty = PRETTY_SPACE_4;
+        if ((context.features & PrettyFormatWith4Space.mask) != 0) {
+            pretty = PRETTY_4_SPACE;
+        } else if ((context.features & PrettyFormatWith2Space.mask) != 0) {
+            pretty = PRETTY_2_SPACE;
         } else if ((context.features & PrettyFormat.mask) != 0) {
             pretty = PRETTY_TAB;
         } else {
@@ -2310,10 +2312,16 @@ public abstract class JSONWriter
         SortMapEntriesByKeys(1L << 41),
 
         /**
-         * JSON formatting support using spaces for indentation
+         * JSON formatting support using 4 spaces for indentation
          * @since 2.0.54
          */
-        PrettyFormatWithSpace(1L << 42);
+        PrettyFormatWith2Space(1L << 42),
+
+        /**
+         * JSON formatting support using 4 spaces for indentation
+         * @since 2.0.54
+         */
+        PrettyFormatWith4Space(1L << 43);
 
         public final long mask;
 

@@ -31,14 +31,29 @@ public class PrettyFormatTest {
                         "    \"value\":\"abc\"\n" +
                         "}",
                 JSONObject.of("id", 123, "value", "abc")
-                        .toString(PrettyFormatWithSpace));
+                        .toString(PrettyFormatWith4Space));
         assertEquals(
                 "{\n" +
                         "    \"id\":123,\n" +
                         "    \"value\":\"abc\"\n" +
                         "}",
                 JSONObject.of("id", 123, "value", "abc")
-                        .toString(PrettyFormatWithSpace, OptimizedForAscii));
+                        .toString(PrettyFormatWith4Space, OptimizedForAscii));
+
+        assertEquals(
+                "{\n" +
+                        "  \"id\":123,\n" +
+                        "  \"value\":\"abc\"\n" +
+                        "}",
+                JSONObject.of("id", 123, "value", "abc")
+                        .toString(PrettyFormatWith2Space));
+        assertEquals(
+                "{\n" +
+                        "  \"id\":123,\n" +
+                        "  \"value\":\"abc\"\n" +
+                        "}",
+                JSONObject.of("id", 123, "value", "abc")
+                        .toString(PrettyFormatWith2Space, OptimizedForAscii));
     }
 
     @Test
@@ -64,13 +79,13 @@ public class PrettyFormatTest {
                         "    \"id\":123,\n" +
                         "    \"value\":\"abc\"\n" +
                         "}",
-                JSON.toJSONString(bean, PrettyFormatWithSpace));
+                JSON.toJSONString(bean, PrettyFormatWith4Space));
         assertEquals(
                 "{\n" +
                         "    \"id\":123,\n" +
                         "    \"value\":\"abc\"\n" +
                         "}",
-                JSON.toJSONString(bean, PrettyFormatWithSpace, OptimizedForAscii));
+                JSON.toJSONString(bean, PrettyFormatWith4Space, OptimizedForAscii));
 
         Bean1[] array = new Bean1[] {bean};
         assertEquals(
@@ -88,7 +103,7 @@ public class PrettyFormatTest {
                         "        \"value\":\"abc\"\n" +
                         "    }\n" +
                         "]",
-                JSON.toJSONString(array, PrettyFormatWithSpace));
+                JSON.toJSONString(array, PrettyFormatWith4Space));
     }
 
     @Data
@@ -120,13 +135,13 @@ public class PrettyFormatTest {
                         "    \"id\":123,\n" +
                         "    \"value\":\"abc\"\n" +
                         "}",
-                JSON.toJSONString(bean, PrettyFormatWithSpace));
+                JSON.toJSONString(bean, PrettyFormatWith4Space));
         assertEquals(
                 "{\n" +
                         "    \"id\":123,\n" +
                         "    \"value\":\"abc\"\n" +
                         "}",
-                JSON.toJSONString(bean, PrettyFormatWithSpace, OptimizedForAscii));
+                JSON.toJSONString(bean, PrettyFormatWith4Space, OptimizedForAscii));
 
         Bean2[] array = new Bean2[] {bean};
         assertEquals(
@@ -144,7 +159,7 @@ public class PrettyFormatTest {
                         "        \"value\":\"abc\"\n" +
                         "    }\n" +
                         "]",
-                JSON.toJSONString(array, PrettyFormatWithSpace));
+                JSON.toJSONString(array, PrettyFormatWith4Space));
     }
 
     @Data
