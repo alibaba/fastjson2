@@ -712,13 +712,14 @@ public class JSONWriterUTF16Test {
 
         char[] name = "a123".toCharArray();
         long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+        byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_SPACE = 3;
 
         final int initOffset = 8183;
         for (int i = 0; i < 16; i++) {
             int initSize = 8196 - i;
             {
                 jsonWriter.startObject = true;
-                jsonWriter.pretty = false;
+                jsonWriter.pretty = PRETTY_NON;
 
                 jsonWriter.chars = new char[initSize];
                 jsonWriter.off = initOffset;
@@ -726,7 +727,7 @@ public class JSONWriterUTF16Test {
             }
             {
                 jsonWriter.startObject = false;
-                jsonWriter.pretty = false;
+                jsonWriter.pretty = PRETTY_NON;
 
                 jsonWriter.chars = new char[initSize];
                 jsonWriter.off = initOffset;
@@ -734,7 +735,7 @@ public class JSONWriterUTF16Test {
             }
             {
                 jsonWriter.startObject = false;
-                jsonWriter.pretty = true;
+                jsonWriter.pretty = PRETTY_TAB;
 
                 jsonWriter.chars = new char[initSize];
                 jsonWriter.off = initOffset;

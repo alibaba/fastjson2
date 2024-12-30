@@ -25,9 +25,16 @@ public class Issue1591 {
             );
         }
 
-        String str = JSON.toJSONString(array, JSONWriter.Feature.PrettyFormat);
-        assertNotNull(str);
-        assertEquals(array, JSON.parseArray(str));
+        {
+            String str = JSON.toJSONString(array, JSONWriter.Feature.PrettyFormat);
+            assertNotNull(str);
+            assertEquals(array, JSON.parseArray(str));
+        }
+        {
+            String str = JSON.toJSONString(array, JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.OptimizedForAscii);
+            assertNotNull(str);
+            assertEquals(array, JSON.parseArray(str));
+        }
     }
 
     @Test
@@ -49,8 +56,15 @@ public class Issue1591 {
             );
         }
 
-        String str = JSON.toJSONString(array, JSONWriter.Feature.PrettyFormat);
-        assertNotNull(str);
-        assertEquals(array, JSON.parseArray(str));
+        {
+            String str = JSON.toJSONString(array, JSONWriter.Feature.PrettyFormat);
+            assertNotNull(str);
+            assertEquals(array, JSON.parseArray(str));
+        }
+        {
+            String str = JSON.toJSONString(array, JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.OptimizedForAscii);
+            assertNotNull(str);
+            assertEquals(array, JSON.parseArray(str));
+        }
     }
 }

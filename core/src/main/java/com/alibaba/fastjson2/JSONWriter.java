@@ -31,6 +31,8 @@ public abstract class JSONWriter
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
     static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
+    static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_SPACE_4 = 4;
+
     public final Context context;
     public final boolean utf8;
     public final boolean utf16;
@@ -49,7 +51,7 @@ public abstract class JSONWriter
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
-    protected boolean pretty;
+    protected byte pretty;
     protected int indent;
     protected Object attachment;
 
@@ -71,7 +73,13 @@ public abstract class JSONWriter
 
         // 64M or 1G
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
-        pretty = (context.features & PrettyFormat.mask) != 0;
+        if ((context.features & PrettyFormatWithSpace.mask) != 0) {
+            pretty = PRETTY_SPACE_4;
+        } else if ((context.features & PrettyFormat.mask) != 0) {
+            pretty = PRETTY_TAB;
+        } else {
+            pretty = PRETTY_NON;
+        }
     }
 
     public final Charset getCharset() {
@@ -682,8 +690,8 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofPretty(JSONWriter writer) {
-        if (!writer.pretty) {
-            writer.pretty = true;
+        if (writer.pretty == PRETTY_NON) {
+            writer.pretty = PRETTY_TAB;
             writer.context.features |= PrettyFormat.mask;
         }
         return writer;
@@ -1642,7 +1650,93 @@ public abstract class JSONWriter
         write0('}');
     }
 
-    public abstract void write(JSONObject map);
+    public void write(JSONObject map) {
+        if (map == null) {
+            this.writeNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
+            objectWriter.write(this, map, null, null, 0);
+            return;
+        }
+
+        startObject();
+
+        boolean first = true;
+        for (Map.Entry entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value == null && (context.features & WriteMapNullValue.mask) == 0) {
+                continue;
+            }
+
+            if (!first) {
+                writeComma();
+            }
+
+            first = false;
+            Object key = entry.getKey();
+            if (key instanceof String) {
+                writeString((String) key);
+            } else {
+                writeAny(key);
+            }
+
+            writeColon();
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value, 0, null);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+
+        endObject();
+    }
 
     public void writeAny(Object value) {
         if (value == null) {
@@ -2213,7 +2307,13 @@ public abstract class JSONWriter
          * SortedMap and derived classes do not need to do this.
          * @since 2.0.48
          */
-        SortMapEntriesByKeys(1L << 41);
+        SortMapEntriesByKeys(1L << 41),
+
+        /**
+         * JSON formatting support using spaces for indentation
+         * @since 2.0.54
+         */
+        PrettyFormatWithSpace(1L << 42);
 
         public final long mask;
 
