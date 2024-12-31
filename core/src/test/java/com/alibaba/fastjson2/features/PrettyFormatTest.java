@@ -16,34 +16,63 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PrettyFormatTest {
     @Test
+    public void testArray() {
+        JSONArray array = JSONArray.of(1, 2, 3);
+        assertEquals("[1,2,3]", array.toString());
+        assertEquals("[1,2,3]", array.toString(OptimizedForAscii));
+
+        assertEquals(
+                "[\n" +
+                        "\t1,\n" +
+                        "\t2,\n" +
+                        "\t3\n" +
+                        "]",
+                array
+                        .toString(PrettyFormat));
+        assertEquals(
+                "[\n" +
+                        "\t1,\n" +
+                        "\t2,\n" +
+                        "\t3\n" +
+                        "]",
+                array
+                        .toString(PrettyFormat, OptimizedForAscii));
+    }
+
+    @Test
     public void test() {
+        JSONObject jsonObject = JSONObject.of("id", 123, "value", "abc");
+
+        assertEquals("{\"id\":123,\"value\":\"abc\"}", jsonObject.toString());
+        assertEquals("{\"id\":123,\"value\":\"abc\"}", jsonObject.toString(OptimizedForAscii));
+
         assertEquals(
                 "{\n" +
                         "\t\"id\":123,\n" +
                         "\t\"value\":\"abc\"\n" +
                         "}",
-                JSONObject.of("id", 123, "value", "abc")
+                jsonObject
                         .toString(PrettyFormat));
         assertEquals(
                 "{\n" +
                         "\t\"id\":123,\n" +
                         "\t\"value\":\"abc\"\n" +
                         "}",
-                JSONObject.of("id", 123, "value", "abc")
+                jsonObject
                         .toString(PrettyFormat, OptimizedForAscii));
         assertEquals(
                 "{\n" +
                         "    \"id\":123,\n" +
                         "    \"value\":\"abc\"\n" +
                         "}",
-                JSONObject.of("id", 123, "value", "abc")
+                jsonObject
                         .toString(PrettyFormatWith4Space));
         assertEquals(
                 "{\n" +
                         "    \"id\":123,\n" +
                         "    \"value\":\"abc\"\n" +
                         "}",
-                JSONObject.of("id", 123, "value", "abc")
+                jsonObject
                         .toString(PrettyFormatWith4Space, OptimizedForAscii));
 
         assertEquals(
@@ -51,14 +80,14 @@ public class PrettyFormatTest {
                         "  \"id\":123,\n" +
                         "  \"value\":\"abc\"\n" +
                         "}",
-                JSONObject.of("id", 123, "value", "abc")
+                jsonObject
                         .toString(PrettyFormatWith2Space));
         assertEquals(
                 "{\n" +
                         "  \"id\":123,\n" +
                         "  \"value\":\"abc\"\n" +
                         "}",
-                JSONObject.of("id", 123, "value", "abc")
+                jsonObject
                         .toString(PrettyFormatWith2Space, OptimizedForAscii));
     }
 
