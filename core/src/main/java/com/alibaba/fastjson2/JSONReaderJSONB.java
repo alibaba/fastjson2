@@ -2993,6 +2993,7 @@ final class JSONReaderJSONB
                     offset += strlen;
                 } else if (STRING_CREATOR_JDK8 != null) {
                     str = readStringJDK8(strlen, bytes);
+                    offset += strlen;
                 }
             }
 
@@ -3016,7 +3017,6 @@ final class JSONReaderJSONB
         for (int i = 0; i < strlen; ++i) {
             chars[i] = (char) (bytes[offset + i] & 0xff);
         }
-        offset += strlen;
         return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
     }
 
