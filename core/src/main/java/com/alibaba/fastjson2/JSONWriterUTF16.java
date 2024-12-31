@@ -70,7 +70,6 @@ class JSONWriterUTF16
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
         }
-
         UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), NULL_64);
         this.off = off + 4;
     }
