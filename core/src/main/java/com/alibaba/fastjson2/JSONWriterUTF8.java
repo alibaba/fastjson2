@@ -25,7 +25,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 
 class JSONWriterUTF8
         extends JSONWriter {
-    static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.ISO_8859_1);
+    static final long REF;
     static final short QUOTE2_COLON, QUOTE_COLON;
     static final short[] HEX256;
 
@@ -42,10 +42,12 @@ class JSONWriterUTF8
         }
 
         HEX256 = digits;
-        byte[] chars = new byte[] {'\"', ':'};
-        QUOTE2_COLON = UNSAFE.getShort(chars, ARRAY_BYTE_BASE_OFFSET);
-        chars[0] = '\'';
-        QUOTE_COLON = UNSAFE.getShort(chars, ARRAY_BYTE_BASE_OFFSET);
+
+        byte[] chars = {'{', '"', '$', 'r', 'e', 'f', '"', ':'};
+        REF = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
+        QUOTE2_COLON = UNSAFE.getShort(chars, ARRAY_CHAR_BASE_OFFSET + 6);
+        chars[6] = '\'';
+        QUOTE_COLON = UNSAFE.getShort(chars, ARRAY_CHAR_BASE_OFFSET + 6);
     }
 
     final CacheItem cacheItem;
@@ -75,12 +77,17 @@ class JSONWriterUTF8
     @Override
     public final void writeReference(String path) {
         this.lastReference = path;
-
-        writeRaw(REF_PREF);
-        writeString(path);
         int off = this.off;
+        byte[] bytes = this.bytes;
+        if (off + 8 > bytes.length) {
+            bytes = grow(off + 8);
+        }
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, REF);
+        this.off = off + 8;
+        writeString(path);
+        off = this.off;
         if (off == bytes.length) {
-            grow(off + 1);
+            bytes = grow(off + 1);
         }
         bytes[off] = '}';
         this.off = off + 1;
