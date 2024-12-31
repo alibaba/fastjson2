@@ -26,6 +26,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 class JSONWriterUTF8
         extends JSONWriter {
     static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.ISO_8859_1);
+    static final short QUOTE2_COLON, QUOTE_COLON;
     static final short[] HEX256;
 
     static {
@@ -41,6 +42,10 @@ class JSONWriterUTF8
         }
 
         HEX256 = digits;
+        byte[] chars = new byte[] {'\"', ':'};
+        QUOTE2_COLON = UNSAFE.getShort(chars, ARRAY_BYTE_BASE_OFFSET);
+        chars[0] = '\'';
+        QUOTE_COLON = UNSAFE.getShort(chars, ARRAY_BYTE_BASE_OFFSET);
     }
 
     final CacheItem cacheItem;
@@ -1826,8 +1831,7 @@ class JSONWriterUTF8
 
         bytes[off] = (byte) quote;
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, name);
-        bytes[off + 9] = (byte) quote;
-        bytes[off + 10] = ':';
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 11;
     }
 
@@ -1983,8 +1987,7 @@ class JSONWriterUTF8
 
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
-        bytes[off + 16] = (byte) quote;
-        bytes[off + 17] = ':';
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 18;
     }
 
@@ -2008,8 +2011,7 @@ class JSONWriterUTF8
         bytes[off++] = (byte) quote;
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
-        bytes[off + 16] = (byte) quote;
-        bytes[off + 17] = ':';
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 18;
     }
 

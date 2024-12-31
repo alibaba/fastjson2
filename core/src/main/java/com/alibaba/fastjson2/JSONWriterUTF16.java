@@ -27,6 +27,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 class JSONWriterUTF16
         extends JSONWriter {
     static final char[] REF_PREF = "{\"$ref\":".toCharArray();
+    static final int QUOTE2_COLON, QUOTE_COLON;
     static final int[] HEX256;
     static {
         int[] digits = new int[16 * 16];
@@ -47,6 +48,10 @@ class JSONWriterUTF16
         }
 
         HEX256 = digits;
+        char[] chars = new char[] {'\"', ':'};
+        QUOTE2_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET);
+        chars[0] = '\'';
+        QUOTE_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET);
     }
 
     protected char[] chars;
@@ -1682,8 +1687,7 @@ class JSONWriterUTF16
         }
 
         putLong(chars, off, name);
-        chars[off + 8] = quote;
-        chars[off + 9] = ':';
+        putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 10;
     }
 
@@ -1707,8 +1711,7 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
         putLong(chars, off, name);
-        chars[off + 8] = quote;
-        chars[off + 9] = ':';
+        putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 10;
     }
 
@@ -1864,8 +1867,7 @@ class JSONWriterUTF16
         }
 
         putLong(chars, off, name0, name1);
-        chars[off + 16] = quote;
-        chars[off + 17] = ':';
+        putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 18;
     }
 
@@ -1889,8 +1891,7 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
         putLong(chars, off, name0, name1);
-        chars[off + 16] = quote;
-        chars[off + 17] = ':';
+        putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 18;
     }
 
