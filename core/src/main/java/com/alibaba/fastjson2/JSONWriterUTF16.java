@@ -1239,8 +1239,11 @@ class JSONWriterUTF16
         int charsLen = bytes.length * 2 + 3;
 
         int off = this.off;
-        ensureCapacity(off + charsLen + 2);
-        final char[] chars = this.chars;
+        char[] chars = this.chars;
+        int minCapacity = off + charsLen + 2;
+        if (minCapacity > chars.length) {
+            chars = grow(minCapacity);
+        }
         chars[off] = 'x';
         chars[off + 1] = '\'';
         off += 2;
@@ -2937,11 +2940,8 @@ class JSONWriterUTF16
             }
         }
 
-        String str = new String(chars, 0, off);
-        if (charset == null) {
-            charset = StandardCharsets.UTF_8;
-        }
-        return str.getBytes(charset);
+        return new String(chars, 0, off)
+                .getBytes(charset != null ? charset : StandardCharsets.UTF_8);
     }
 
     @Override
@@ -2960,11 +2960,6 @@ class JSONWriterUTF16
             this.writeNull();
             return;
         }
-
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
             ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
