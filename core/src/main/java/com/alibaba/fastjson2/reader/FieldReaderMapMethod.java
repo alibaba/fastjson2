@@ -70,7 +70,7 @@ public class FieldReaderMapMethod<T>
                     array,
                     arrayToMapKey,
                     namingStrategy,
-                    JSONFactory.getObjectReader(valueType, this.features | features),
+                    JSONFactory.getObjectReader(valueType, features),
                     arrayToMapDuplicateHandler);
             accept(object, map);
             return;

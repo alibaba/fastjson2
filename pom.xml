@@ -663,7 +663,8 @@
                                 com/alibaba/fastjson2/issues_1000/Issue1395.java,
                                 com/alibaba/fastjson2/issues_2100/Issue2164.java,
                                 com/alibaba/fastjson2/issues_2100/Issue2181.java,
-                                com/alibaba/fastjson/v2issues/Issue1432.java
+                                com/alibaba/fastjson/v2issues/Issue1432.java,
+                                com/alibaba/fastjson2/issues_3200/Issue3220.java
                             </excludes>
                         </configuration>
                     </execution>

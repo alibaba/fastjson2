@@ -34,7 +34,7 @@ final class FieldReaderNumberFunc<T, V>
         }
 
         if (value instanceof Boolean) {
-            value = ((Boolean) value).booleanValue() ? 1 : 0;
+            value = (Boolean) value ? 1 : 0;
         }
 
         function.accept(object, (V) value);

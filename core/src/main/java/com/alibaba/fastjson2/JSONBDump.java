@@ -15,7 +15,6 @@ import java.util.Map;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.BIG_ENDIAN;
 
 final class JSONBDump {
     static Charset GB18030;

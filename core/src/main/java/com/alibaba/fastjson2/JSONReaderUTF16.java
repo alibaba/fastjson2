@@ -1015,7 +1015,7 @@ class JSONReaderUTF16
             for (int i = 0; ; ++i) {
                 if (ch == '\\') {
                     nameEscape = true;
-                    ch = (char) chars[offset++];
+                    ch = chars[offset++];
                     switch (ch) {
                         case 'u': {
                             ch = char4(chars[offset], chars[offset + 1], chars[offset + 2], chars[offset + 3]);
@@ -3279,7 +3279,7 @@ class JSONReaderUTF16
                 ch = chars[offset];
             }
             offset++;
-        } else if (ch != EOI && ch != '}' && ch != ']' && ch != EOI) {
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
             throw error(offset, ch);
         }
 
@@ -4165,7 +4165,7 @@ class JSONReaderUTF16
         Date date = null;
         final char[] chars = this.chars;
         int offset = this.offset;
-        char ch = this.ch;
+        char ch;
         if (offset + 2 < end
                 && chars[offset] == 'u'
                 && chars[offset + 1] == 'l'
@@ -4317,7 +4317,7 @@ class JSONReaderUTF16
             ch = chars[offset++];
 
             if (ch == quote) {
-                this.ch = offset == end ? EOI : (char) chars[offset++];
+                this.ch = offset == end ? EOI : chars[offset++];
                 this.offset = offset;
                 nextIfComma();
                 return null;

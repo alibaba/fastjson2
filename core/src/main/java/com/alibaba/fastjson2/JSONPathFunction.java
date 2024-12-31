@@ -603,10 +603,7 @@ final class JSONPathFunction
             }
 
             if (o.getClass().isArray()) {
-                int len = Array.getLength(o);
-                for (int i = 0; i < len; i++) {
-                    return Array.get(o, i);
-                }
+                return Array.get(o, index);
             }
 
             return null;

@@ -42,7 +42,7 @@ final class ObjectWriterImplInt64Array
                 continue;
             }
 
-            long longValue = item.longValue();
+            long longValue = item;
             if (writeAsString) {
                 jsonWriter.writeString(longValue);
             } else {
@@ -74,7 +74,7 @@ final class ObjectWriterImplInt64Array
                 continue;
             }
 
-            long longValue = item.longValue();
+            long longValue = item;
             if (writeAsString) {
                 jsonWriter.writeString(longValue);
             } else {

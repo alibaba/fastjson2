@@ -41,7 +41,7 @@ public class DateUtils {
     static {
         final long timeMillis = System.currentTimeMillis();
         ZoneId zoneId = DEFAULT_ZONE_ID;
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -53,7 +53,7 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        LOCAL_EPOCH_DAY = (int) Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        LOCAL_EPOCH_DAY = (int) Math.floorDiv(localSecond, SECONDS_PER_DAY);
     }
 
     static class CacheDate8 {
@@ -10924,7 +10924,7 @@ public class DateUtils {
             zoneId = DEFAULT_ZONE_ID;
         }
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -10939,8 +10939,8 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;
@@ -11029,7 +11029,7 @@ public class DateUtils {
     }
 
     public static String formatYMD8(long timeMillis, ZoneId zoneId) {
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11045,7 +11045,7 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
 
         int off = (int) (localEpochDay - LOCAL_EPOCH_DAY + 128);
 
@@ -11199,7 +11199,7 @@ public class DateUtils {
             zoneId = DEFAULT_ZONE_ID;
         }
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11211,7 +11211,7 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
 
         int off = (int) (localEpochDay - LOCAL_EPOCH_DAY + 128);
         final String[] cache = CacheDate10.CACHE;
@@ -11572,7 +11572,7 @@ public class DateUtils {
 
     public static String format(long timeMillis, DateTimeFormatPattern pattern) {
         ZoneId zoneId = DEFAULT_ZONE_ID;
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11584,8 +11584,8 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;
@@ -11733,7 +11733,7 @@ public class DateUtils {
     }
 
     public static String toString(long timeMillis, boolean timeZone, ZoneId zoneId) {
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
@@ -11745,8 +11745,8 @@ public class DateUtils {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;

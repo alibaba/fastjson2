@@ -404,18 +404,20 @@ public final class ObjectWriterImplMap
             writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
+        Map map = (Map) object;
 
         boolean refDetect = jsonWriter.isRefDetect();
-
-        jsonWriter.startObject();
-
-        if ((fieldType == this.objectType && jsonWriter.isWriteMapTypeInfo(object, objectClass, features))
-                || jsonWriter.isWriteTypeInfo(object, fieldType, features)
-        ) {
-            writeTypeInfo(jsonWriter);
+        boolean writeTypeInfo = (fieldType == this.objectType && jsonWriter.isWriteMapTypeInfo(object, objectClass, features))
+                || jsonWriter.isWriteTypeInfo(object, fieldType, features);
+        if (!writeTypeInfo && map.isEmpty()) {
+            jsonWriter.writeRaw('{', '}');
+            return;
         }
 
-        Map map = (Map) object;
+        jsonWriter.startObject();
+        if (writeTypeInfo) {
+            writeTypeInfo(jsonWriter);
+        }
 
         features |= jsonWriter.getFeatures();
         if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
@@ -619,9 +621,8 @@ public final class ObjectWriterImplMap
                 key = entryKey.toString();
             }
 
-            String refPath = null;
             if (refDetect) {
-                refPath = jsonWriter.setPath(key, value);
+                String refPath = jsonWriter.setPath(key, value);
                 if (refPath != null) {
                     jsonWriter.writeName(key);
                     jsonWriter.writeColon();

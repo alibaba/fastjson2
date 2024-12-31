@@ -436,7 +436,7 @@ public class ObjectReaderAdapter<T>
         if (fieldReader == null
                 && jsonReader.isSupportSmartMatch(this.features | features)) {
             long hashCodeL = jsonReader.getNameHashCodeLCase();
-            fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);
+            fieldReader = getFieldReaderLCase(hashCodeL);
         }
         return fieldReader;
     }
@@ -446,7 +446,7 @@ public class ObjectReaderAdapter<T>
         if (fieldReader == null
                 && jsonReader.isSupportSmartMatch(this.features | features)) {
             long hashCodeL = jsonReader.getNameHashCodeLCase();
-            fieldReader = getFieldReaderLCase(hashCodeL == hashCode ? hashCode : hashCodeL);
+            fieldReader = getFieldReaderLCase(hashCodeL);
         }
 
         if (fieldReader != null) {

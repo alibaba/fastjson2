@@ -378,7 +378,7 @@ class JSONPathSegmentName
                 ObjectReader objectReader = provider.getObjectReader(item.getClass());
                 FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
                 if (fieldReader != null) {
-                    fieldReader.accept(item, null);
+                    fieldReader.accept(item, value);
                 }
             }
             return;

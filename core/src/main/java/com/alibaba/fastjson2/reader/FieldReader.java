@@ -613,9 +613,6 @@ public abstract class FieldReader<T>
     }
 
     private boolean needCompareToActualFieldClass(Class clazz) {
-        if (clazz.isEnum() || clazz.isInterface()) {
-            return true;
-        }
-        return false;
+        return clazz.isEnum() || clazz.isInterface();
     }
 }

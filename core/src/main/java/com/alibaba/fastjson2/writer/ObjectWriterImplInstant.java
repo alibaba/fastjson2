@@ -43,7 +43,7 @@ final class ObjectWriterImplInstant
 
         boolean yyyyMMddhhmmss19 = this.yyyyMMddhhmmss19 || (context.isFormatyyyyMMddhhmmss19() && this.format == null);
         if (yyyyMMddhhmmss14 || yyyyMMddhhmmss19 || yyyyMMdd8 || yyyyMMdd10) {
-            final int SECONDS_PER_DAY = 60 * 60 * 24;
+            final long SECONDS_PER_DAY = 60 * 60 * 24;
             ZoneId zoneId = context.getZoneId();
             long epochSecond = instant.getEpochSecond();
             int offsetTotalSeconds;
@@ -54,8 +54,8 @@ final class ObjectWriterImplInstant
             }
 
             long localSecond = epochSecond + offsetTotalSeconds;
-            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+            int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;

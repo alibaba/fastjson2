@@ -1285,10 +1285,7 @@ abstract class JSONPathSegment {
                     context.value = values;
                 }
                 context.eval = true;
-                return;
             }
-
-            throw new JSONException("TODO");
         }
     }
 

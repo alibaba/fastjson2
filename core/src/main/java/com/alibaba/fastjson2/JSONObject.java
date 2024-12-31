@@ -23,8 +23,6 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.BeanUtils.getAnnotations;
@@ -542,31 +540,7 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to long value
      */
     public long getLongValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            if (str.indexOf('.') != -1) {
-                return (long) Double.parseDouble(str);
-            }
-
-            return Long.parseLong(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to long value");
+        return getLongValue(key, 0);
     }
 
     /**
@@ -659,31 +633,7 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to int value
      */
     public int getIntValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            if (str.indexOf('.') != -1) {
-                return (int) Double.parseDouble(str);
-            }
-
-            return Integer.parseInt(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to int value");
+        return getIntValue(key, 0);
     }
 
     /**
@@ -756,7 +706,7 @@ public class JSONObject
             return Short.parseShort(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Short");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to short");
     }
 
     /**
@@ -768,27 +718,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to short value
      */
     public short getShortValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).shortValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            return Short.parseShort(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to short value");
+        Short value = getShort(key);
+        return value == null ? 0 : value;
     }
 
     /**
@@ -820,7 +751,7 @@ public class JSONObject
             return Byte.parseByte(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Byte");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to byte");
     }
 
     /**
@@ -832,27 +763,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to byte value
      */
     public byte getByteValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).byteValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            return Byte.parseByte(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
+        Byte value = getByte(key);
+        return value == null ? 0 : value;
     }
 
     public byte[] getBytes(String key) {
@@ -903,7 +815,7 @@ public class JSONObject
             return "true".equalsIgnoreCase(str) || "1".equals(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean");
     }
 
     /**
@@ -914,26 +826,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to boolean value
      */
     public boolean getBooleanValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return false;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue() == 1;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            return "true".equalsIgnoreCase(str) || "1".equals(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
+        Boolean value = getBoolean(key);
+        return value != null && value;
     }
 
     /**
@@ -945,26 +839,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to boolean value
      */
     public boolean getBooleanValue(String key, boolean defaultValue) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return defaultValue;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue() == 1;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            return "true".equalsIgnoreCase(str) || "1".equals(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
+        Boolean value = getBoolean(key);
+        return value == null ? defaultValue : value;
     }
 
     /**
@@ -2075,29 +1951,35 @@ public class JSONObject
      * @param kvArray key-value
      * @since 2.0.53
      */
-    private static JSONObject of(JSONObject object, Object... kvArray) {
-        if (kvArray == null || kvArray.length <= 0) {
+    private static JSONObject of(JSONObject jsonObject, Object... kvArray) {
+        if (kvArray == null || kvArray.length == 0) {
             throw new JSONException("The kvArray cannot be empty");
         }
-        int kvArrayLength = kvArray.length;
+        final int kvArrayLength = kvArray.length;
         if ((kvArrayLength & 1) == 1) {
             throw new JSONException("The length of kvArray cannot be odd");
         }
-        List<Object> keyList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 == 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
-        keyList.forEach(key -> {
-            if (key == null || !(key instanceof String)) {
+        boolean valueMaybeNull = false;
+        for (int i = 0; i < kvArrayLength; i++) {
+            Object keyObj = kvArray[i++];
+            if (!(keyObj instanceof String)) {
                 throw new JSONException("The value corresponding to the even bit index of kvArray is key, which cannot be null and must be of type string");
             }
-        });
-        List<Object> distinctKeyList = keyList.stream().distinct().collect(Collectors.toList());
-        if (keyList.size() != distinctKeyList.size()) {
-            throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
+            String key = (String) keyObj;
+            if (valueMaybeNull) {
+                if (jsonObject.containsKey(key)) {
+                    throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
+                }
+                jsonObject.put(key, kvArray[i]);
+            } else {
+                Object old = jsonObject.put(key, kvArray[i]);
+                if (old != null) {
+                    throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
+                }
+                valueMaybeNull = kvArray[i] == null;
+            }
         }
-        List<Object> valueList = IntStream.range(0, kvArrayLength).filter(i -> i % 2 != 0).mapToObj(i -> kvArray[i]).collect(Collectors.toList());
-        for (int i = 0; i < keyList.size(); i++) {
-            object.put(keyList.get(i).toString(), valueList.get(i));
-        }
-        return object;
+        return jsonObject;
     }
 
     /**

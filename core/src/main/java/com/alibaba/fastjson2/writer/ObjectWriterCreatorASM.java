@@ -179,7 +179,8 @@ public class ObjectWriterCreatorASM
             beanFeatures &= ~JSONWriter.Feature.WriteClassName.mask;
         }
 
-        long writerFieldFeatures = features | beanFeatures;
+        boolean record = BeanUtils.isRecord(objectClass);
+        long writerFieldFeatures = features | beanFeatures | (record ? FieldInfo.RECORD : 0);
         final boolean fieldBased = ((writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0 && !objectClass.isInterface())
                 || !beanInfo.alphabetic;
 
@@ -189,8 +190,6 @@ public class ObjectWriterCreatorASM
         ) {
             return super.createObjectWriter(objectClass, features, provider);
         }
-
-        boolean record = BeanUtils.isRecord(objectClass);
 
         List<FieldWriter> fieldWriters;
         Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
@@ -345,6 +344,20 @@ public class ObjectWriterCreatorASM
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
                         fieldWriterMap.put(fieldName, fieldWriter);
+                    }
+
+                    // the sameFieldName means only differ in first character that one is upper case the other is lower case
+                    if (origin == null) {
+                        String sameFieldName = null;
+                        char firstChar = fieldName.charAt(0);
+                        if (firstChar >= 'A' && firstChar <= 'Z') {
+                            sameFieldName = (char) (firstChar + 32) + fieldName.substring(1);
+                        } else if (firstChar >= 'a' && firstChar <= 'z') {
+                            sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
+                        }
+                        if (sameFieldName != null && fieldWriterMap.containsKey(sameFieldName)) {
+                            fieldWriterMap.remove(sameFieldName);
+                        }
                     }
                 });
             }
@@ -1089,7 +1102,7 @@ public class ObjectWriterCreatorASM
         int REF_PATH = mwc.var("REF_PATH");
 
         boolean listSimple = false;
-        Type itemType = null;
+        Type itemType;
         Class itemClass = null;
         if (fieldType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;

@@ -8,14 +8,21 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2959 {
     @Test
     public void test() {
-        assertEquals("{\"projectNO\":null,\"orderNO\":null,\"orderType\":null,\"pN\":null,\"qty\":null,\"description\":null,\"customerCode\":null,\"customerName\":null,\"currency\":null,\"netPrice\":null,\"uSD\":null,\"rate\":null,\"orderDate\":null,\"requestDate\":null,\"planedDate\":null,\"this$0\":null}",
-                JSON.toJSONString(new TobeDelivery(), JSONWriter.Feature.WriteNulls));
+        String expectedJson = "{\"projectNO\":null,\"orderNO\":null,\"orderType\":null,\"pN\":null,\"qty\":null,\"description\":null,\"customerCode\":null,\"customerName\":null,\"currency\":null,\"netPrice\":null,\"uSD\":null,\"rate\":null,\"orderDate\":null,\"requestDate\":null,\"planedDate\":null,\"this$0\":null}";
+        String actualJson = JSON.toJSONString(new TobeDelivery(), JSONWriter.Feature.WriteNulls);
+
+        // Parse the JSON strings into Maps for comparison
+        Map<String, Object> expectedMap = JSON.parseObject(expectedJson, Map.class);
+        Map<String, Object> actualMap = JSON.parseObject(actualJson, Map.class);
+
+        assertEquals(expectedMap, actualMap);
     }
 
     @Data

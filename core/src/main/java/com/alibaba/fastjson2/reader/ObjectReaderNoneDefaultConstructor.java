@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -471,9 +468,16 @@ public class ObjectReaderNoneDefaultConstructor<T>
                     Class<?> valueClass = fieldValue.getClass();
                     Class fieldClass = fieldReader.fieldClass;
                     if (valueClass != fieldClass) {
-                        Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                        if (typeConvert != null) {
-                            fieldValue = typeConvert.apply(fieldValue);
+                        if (fieldValue instanceof JSONObject) {
+                            ObjectReader fieldObjectReader = provider.getObjectReader(fieldReader.fieldType);
+                            fieldValue = fieldObjectReader.createInstance((Map) fieldValue, features);
+                        } else if (fieldValue instanceof JSONArray) {
+                            fieldValue = ((JSONArray) fieldValue).to(fieldReader.fieldType, features);
+                        } else {
+                            Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                            if (typeConvert != null) {
+                                fieldValue = typeConvert.apply(fieldValue);
+                            }
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.JSONWriter.Context;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -670,6 +671,20 @@ public class JSONWriterUTF8Test {
         String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
         Object parse = JSON.parse(json);
         assertEquals(str, parse);
+    }
+
+    @Test
+    public void writeStringEscaped() {
+        byte[] bytes = new byte[1024 * 128];
+        Arrays.fill(bytes, (byte) 1);
+        Context context = JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat);
+        try (JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(context)) {
+            jsonWriter.writeStringEscaped(bytes);
+            String json = jsonWriter.toString();
+            String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            Object parse = JSON.parse(json);
+            assertEquals(str, parse);
+        }
     }
 
     @Test

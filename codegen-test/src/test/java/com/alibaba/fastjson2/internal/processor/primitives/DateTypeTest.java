@@ -4,11 +4,14 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import org.junit.jupiter.api.Test;
 
+import java.util.TimeZone;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTypeTest {
     @Test
     public void test() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
         Bean bean = new Bean();
         bean.v01 = new java.util.Date();
         bean.v02 = java.util.Calendar.getInstance();

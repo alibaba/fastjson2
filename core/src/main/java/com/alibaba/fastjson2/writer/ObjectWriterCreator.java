@@ -479,6 +479,20 @@ public class ObjectWriterCreator {
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
                         fieldWriterMap.put(fieldName, fieldWriter);
                     }
+
+                    // the sameFieldName means only differ in first character that one is upper case the other is lower case
+                    if (origin == null) {
+                        String sameFieldName = null;
+                        char firstChar = fieldName.charAt(0);
+                        if (firstChar >= 'A' && firstChar <= 'Z') {
+                            sameFieldName = (char) (firstChar + 32) + fieldName.substring(1);
+                        } else if (firstChar >= 'a' && firstChar <= 'z') {
+                            sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
+                        }
+                        if (sameFieldName != null && fieldWriterMap.containsKey(sameFieldName)) {
+                            fieldWriterMap.remove(sameFieldName);
+                        }
+                    }
                 });
 
                 fieldWriters = new ArrayList<>(fieldWriterMap.values());
@@ -927,7 +941,9 @@ public class ObjectWriterCreator {
             fieldName = BeanUtils.getterName(method, false, null);
         }
 
-        Field field = BeanUtils.getField(objectType, method);
+        Field field = (features & FieldInfo.RECORD) != 0
+                ? null
+                : BeanUtils.getField(objectType, method);
 
         if (fieldClass == boolean.class || fieldClass == Boolean.class) {
             return new FieldWriterBoolMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);
@@ -1307,6 +1323,13 @@ public class ObjectWriterCreator {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
                 ObjectWriter objectWriter = provider.cache.get(fieldClass);
                 if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                    return objectWriter;
+                }
+            }
+        } else if (fieldClass == int.class || fieldClass == Integer.class) {
+            if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT32_MASK) != 0) {
+                ObjectWriter objectWriter = provider.cache.get(Integer.class);
+                if (objectWriter != ObjectWriterImplInt32.INSTANCE) {
                     return objectWriter;
                 }
             }

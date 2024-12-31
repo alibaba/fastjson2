@@ -1011,6 +1011,17 @@ public class JSONWriterTest {
     }
 
     @Test
+    public void writeObjectNonStringKey() {
+        JSONObject object = new JSONObject();
+        ((Map) object).put(123, "123");
+        JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
+        jsonWriter.write(object);
+        assertEquals("{\n" +
+                "\t123:\"123\"\n" +
+                "}", jsonWriter.toString());
+    }
+
+    @Test
     public void writeString1() {
         char[] chars = "01234567890".toCharArray();
 
@@ -2862,5 +2873,34 @@ public class JSONWriterTest {
         long features = 123456L;
         context.setFeatures(features);
         assertEquals(features, context.getFeatures());
+    }
+
+    @Test
+    public void writeNull() {
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofPretty();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofPretty();
+            jsonWriter.write((Map) null);
+            assertEquals("null", jsonWriter.toString());
+        }
     }
 }
