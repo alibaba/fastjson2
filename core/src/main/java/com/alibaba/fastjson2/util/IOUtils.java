@@ -1408,15 +1408,19 @@ public class IOUtils {
     public static void putInt(char[] buf, int pos, int v) {
         UNSAFE.putInt(
                 buf,
-                ARRAY_CHAR_BASE_OFFSET + (pos << 1),
+                ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1),
                 BIG_ENDIAN ? Integer.reverseBytes(v) : v
         );
+    }
+
+    public static void putIntUnaligned(char[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
     public static void putLong(char[] buf, int pos, long v) {
         UNSAFE.putLong(
                 buf,
-                ARRAY_CHAR_BASE_OFFSET + (pos << 1),
+                ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1),
                 BIG_ENDIAN ? Long.reverseBytes(v) : v
         );
     }
