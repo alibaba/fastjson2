@@ -26,7 +26,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 class JSONWriterUTF16
         extends JSONWriter {
-    static final char[] REF_PREF = "{\"$ref\":".toCharArray();
+    static final long REF_0, REF_1;
     static final int QUOTE2_COLON, QUOTE_COLON;
     static final int[] HEX256;
     static {
@@ -48,10 +48,14 @@ class JSONWriterUTF16
         }
 
         HEX256 = digits;
-        char[] chars = new char[] {'\"', ':'};
-        QUOTE2_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET);
-        chars[0] = '\'';
-        QUOTE_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET);
+
+        // char[] chars = new char[] {'\"', ':'};
+        char[] chars = {'{', '"', '$', 'r', 'e', 'f', '"', ':'};
+        REF_0 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
+        REF_1 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + 8);
+        QUOTE2_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + 12);
+        chars[6] = '\'';
+        QUOTE_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + 12);
     }
 
     protected char[] chars;
@@ -1160,11 +1164,17 @@ class JSONWriterUTF16
     @Override
     public final void writeReference(String path) {
         this.lastReference = path;
-
-        writeRaw(REF_PREF, 0, REF_PREF.length);
-        writeString(path);
         int off = this.off;
         char[] chars = this.chars;
+        if (off + 8 > chars.length) {
+            chars = grow(off + 8);
+        }
+        long address = ARRAY_BYTE_BASE_OFFSET + ((long) off << 1);
+        UNSAFE.putLong(chars, address, REF_0);
+        UNSAFE.putLong(chars, address + 8, REF_1);
+        this.off = off + 8;
+        writeString(path);
+        off = this.off;
         if (off == chars.length) {
             chars = grow(off + 1);
         }
