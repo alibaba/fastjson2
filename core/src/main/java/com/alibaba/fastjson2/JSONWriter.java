@@ -2734,6 +2734,21 @@ public abstract class JSONWriter
         }
     }
 
+    protected final int newCapacity(int minCapacity, int oldCapacity) {
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        if (newCapacity > maxArraySize) {
+            if (minCapacity < maxArraySize) {
+                newCapacity = maxArraySize;
+            } else {
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
+            }
+        }
+        return newCapacity;
+    }
+
     public Object getAttachment() {
         return attachment;
     }
