@@ -388,4 +388,15 @@ public class JSONReaderJSONBTest {
         JSONReader jsonReader = JSONReader.ofJSONB(jsonBytes);
         jsonReader.reset(jsonReader.mark());
     }
+
+    @Test
+    public void unsupport() {
+        JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(JSONB.toBytes("abc"));
+        jsonReader.notSupportType(JSONB.Constants.BC_ARRAY);
+        assertThrows(JSONException.class, () -> jsonReader.notSupportString());
+        assertThrows(JSONException.class, () -> jsonReader.readInt32ValueError(JSONB.Constants.BC_ARRAY));
+        assertThrows(JSONException.class, () -> jsonReader.readInt64ValueError(JSONB.Constants.BC_ARRAY));
+        assertThrows(JSONException.class, () -> jsonReader.readStringError());
+        assertThrows(JSONException.class, () -> jsonReader.typeRefNotFound(-1));
+    }
 }

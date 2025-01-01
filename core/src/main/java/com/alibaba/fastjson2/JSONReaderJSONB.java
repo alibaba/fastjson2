@@ -2624,23 +2624,23 @@ final class JSONReaderJSONB
         throw notSupportType(strtype);
     }
 
-    private static JSONException notSupportType(byte type) {
+    static JSONException notSupportType(byte type) {
         return new JSONException("name not support input : " + typeName(type));
     }
 
-    private JSONException notSupportString() {
+    JSONException notSupportString() {
         throw new JSONException("readString not support type " + typeName(strtype) + ", offset " + offset + "/" + bytes.length);
     }
 
-    private JSONException readInt32ValueError(byte type) {
+    JSONException readInt32ValueError(byte type) {
         throw new JSONException("readInt32Value not support " + typeName(type) + ", offset " + offset + "/" + bytes.length);
     }
 
-    private JSONException readInt64ValueError(byte type) {
+    JSONException readInt64ValueError(byte type) {
         throw new JSONException("readInt64Value not support " + typeName(type) + ", offset " + offset + "/" + bytes.length);
     }
 
-    private JSONException readStringError() {
+    JSONException readStringError() {
         throw new JSONException("string value not support input " + typeName(type) + " offset " + offset + "/" + bytes.length);
     }
 
