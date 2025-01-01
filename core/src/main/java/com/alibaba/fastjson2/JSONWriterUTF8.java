@@ -2751,7 +2751,7 @@ class JSONWriterUTF8
         }
 
         int off = this.off;
-        int minCapacity = off + 45;
+        int minCapacity = off + 28;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);

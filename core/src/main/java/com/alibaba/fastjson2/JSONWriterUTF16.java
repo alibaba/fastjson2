@@ -2816,7 +2816,7 @@ class JSONWriterUTF16
 
         ZoneOffset offset = time.getOffset();
         int off = this.off;
-        int minCapacity = off + 25;
+        int minCapacity = off + 28;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
