@@ -150,8 +150,9 @@ final class CSVWriterUTF16
         for (int i = 0; i < len; ) {
             char ch = str.charAt(i++);
             if (ch == '"') {
-                chars[off++] = '"';
-                chars[off++] = '"';
+                chars[off] = '"';
+                chars[off + 1] = '"';
+                off += 2;
             } else {
                 chars[off++] = ch;
             }
@@ -160,8 +161,8 @@ final class CSVWriterUTF16
                 off = this.off;
             }
         }
-        chars[off++] = '"';
-        this.off = off;
+        chars[off] = '"';
+        this.off = off + 1;
     }
 
     public void writeInt32(int intValue) {
@@ -227,9 +228,13 @@ final class CSVWriterUTF16
             return;
         }
 
-        checkCapacity(24);
-
-        off = IOUtils.writeDecimal(chars, off, unscaledVal, scale);
+        int off = this.off;
+        char[] chars = this.chars;
+        if (off + 24 > chars.length) {
+            flush();
+            off = 0;
+        }
+        this.off = IOUtils.writeDecimal(chars, off, unscaledVal, scale);
     }
 
     void writeRaw(char[] chars) {
@@ -253,11 +258,15 @@ final class CSVWriterUTF16
         }
 
         // "yyyy-MM-dd HH:mm:ss"
-        checkCapacity(19);
-
+        int off = this.off;
+        char[] chars = this.chars;
+        if (off + 19 > chars.length) {
+            flush();
+            off = 0;
+        }
         off = IOUtils.writeLocalDate(chars, off, ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth());
         chars[off++] = ' ';
-        off = IOUtils.writeLocalTime(chars, off, ldt.toLocalTime());
+        this.off = IOUtils.writeLocalTime(chars, off, ldt.toLocalTime());
     }
 
     protected void writeRaw(String str) {

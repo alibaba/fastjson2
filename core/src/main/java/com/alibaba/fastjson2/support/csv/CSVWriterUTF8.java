@@ -184,8 +184,9 @@ final class CSVWriterUTF8
         bytes[off++] = '"';
         for (byte ch : utf8) {
             if (ch == '"') {
-                bytes[off++] = '"';
-                bytes[off++] = '"';
+                bytes[off] = '"';
+                bytes[off + 1] = '"';
+                off += 2;
             } else {
                 bytes[off++] = ch;
             }
@@ -223,9 +224,13 @@ final class CSVWriterUTF8
             return;
         }
 
-        checkCapacity(24);
-
-        off = IOUtils.writeDecimal(bytes, off, unscaledVal, scale);
+        int off = this.off;
+        byte[] bytes = this.bytes;
+        if (off + 24 > bytes.length) {
+            flush();
+            off = 0;
+        }
+        this.off = IOUtils.writeDecimal(bytes, off, unscaledVal, scale);
     }
 
     private void writeRaw(byte[] strBytes) {
@@ -258,11 +263,15 @@ final class CSVWriterUTF8
         }
 
         // "yyyy-MM-dd HH:mm:ss"
-        checkCapacity(19);
-
+        int off = this.off;
+        byte[] bytes = this.bytes;
+        if (off + 19 > bytes.length) {
+            flush();
+            off = 0;
+        }
         off = IOUtils.writeLocalDate(bytes, off, ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth());
         bytes[off++] = ' ';
-        off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
+        this.off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
     }
 
     void checkCapacity(int incr) {

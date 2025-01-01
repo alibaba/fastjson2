@@ -1153,17 +1153,7 @@ final class JSONWriterJSONB
     }
 
     private void grow0(int minCapacity) {
-        int oldCapacity = bytes.length;
-        int newCapacity = oldCapacity + (oldCapacity >> 1);
-        if (newCapacity - minCapacity < 0) {
-            newCapacity = minCapacity;
-        }
-        if (newCapacity > maxArraySize) {
-            throw new OutOfMemoryError("try enabling LargeObject feature instead");
-        }
-
-        // minCapacity is usually close to size, so this is a win:
-        bytes = Arrays.copyOf(bytes, newCapacity);
+        bytes = Arrays.copyOf(bytes, newCapacity(minCapacity, bytes.length));
     }
 
     @Override

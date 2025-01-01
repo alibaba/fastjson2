@@ -2084,17 +2084,8 @@ class JSONWriterUTF8
     }
 
     private void grow0(int minCapacity) {
-        int oldCapacity = bytes.length;
-        int newCapacity = oldCapacity + (oldCapacity >> 1);
-        if (newCapacity - minCapacity < 0) {
-            newCapacity = minCapacity;
-        }
-        if (newCapacity - maxArraySize > 0) {
-            throw new OutOfMemoryError("try enabling LargeObject feature instead");
-        }
-
         // minCapacity is usually close to size, so this is a win:
-        bytes = Arrays.copyOf(bytes, newCapacity);
+        bytes = Arrays.copyOf(bytes, newCapacity(minCapacity, bytes.length));
     }
 
     public final void writeInt32(int[] values) {
