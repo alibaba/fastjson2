@@ -86,6 +86,7 @@ class JSONWriterUTF8
         this.off = off + 8;
         writeString(path);
         off = this.off;
+        bytes = this.bytes;
         if (off == bytes.length) {
             bytes = grow(off + 1);
         }
@@ -148,6 +149,7 @@ class JSONWriterUTF8
 
         int off = this.off;
         int minCapacity = off + charsLen + 2;
+        byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
@@ -195,8 +197,8 @@ class JSONWriterUTF8
             return Arrays.copyOf(bytes, off);
         }
 
-        String str = toString();
-        return str.getBytes(charset);
+        return toString()
+                .getBytes(charset);
     }
 
     @Override
@@ -331,7 +333,7 @@ class JSONWriterUTF8
         // startArray();
         int off = this.off;
         if (off == bytes.length) {
-            grow(off + 1);
+            grow0(off + 1);
         }
         bytes[off] = '[';
         this.off = off + 1;
@@ -340,19 +342,19 @@ class JSONWriterUTF8
             if (i != 0) {
                 off = this.off;
                 if (off == bytes.length) {
-                    grow(off + 1);
+                    grow0(off + 1);
                 }
                 bytes[off] = ',';
                 this.off = off + 1;
             }
 
-            String str = list.get(i);
-            writeString(str);
+            writeString(
+                    list.get(i));
         }
 
         off = this.off;
         if (off == bytes.length) {
-            ensureCapacity(off + 1);
+            grow0(off + 1);
         }
         bytes[off] = ']';
         this.off = off + 1;
@@ -2072,11 +2074,16 @@ class JSONWriterUTF8
 
     final void ensureCapacity(int minCapacity) {
         if (minCapacity > bytes.length) {
-            grow(minCapacity);
+            grow0(minCapacity);
         }
     }
 
     private byte[] grow(int minCapacity) {
+        grow0(minCapacity);
+        return bytes;
+    }
+
+    private void grow0(int minCapacity) {
         int oldCapacity = bytes.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);
         if (newCapacity - minCapacity < 0) {
@@ -2087,7 +2094,7 @@ class JSONWriterUTF8
         }
 
         // minCapacity is usually close to size, so this is a win:
-        return bytes = Arrays.copyOf(bytes, newCapacity);
+        bytes = Arrays.copyOf(bytes, newCapacity);
     }
 
     public final void writeInt32(int[] values) {
@@ -2744,7 +2751,7 @@ class JSONWriterUTF8
         }
 
         int off = this.off;
-        int minCapacity = off + 45;
+        int minCapacity = off + 28;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
@@ -2942,11 +2949,6 @@ class JSONWriterUTF8
             this.writeNull();
             return;
         }
-
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
             ObjectWriter objectWriter = context.getObjectWriter(map.getClass());

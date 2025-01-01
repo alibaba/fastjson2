@@ -195,32 +195,27 @@ final class JSONReaderJSONB
     }
 
     public int readLength() {
-        byte type = bytes[offset++];
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int type = bytes[offset++];
         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
-            return type;
-        }
-
-        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            return ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-        }
-
-        if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            int len = getInt3(bytes, offset, type);
+            // noop
+        } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+            type = ((type - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset++] & 0xFF);
+        } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+            type = getInt3(bytes, offset, type);
             offset += 2;
-            return len;
-        }
-
-        if (type == BC_INT32) {
-            int len = getInt(bytes, offset);
+        } else if (type == BC_INT32) {
+            type = getInt(bytes, offset);
             offset += 4;
-            if (len > 1024 * 1024 * 256) {
+            if (type > 1024 * 1024 * 256) {
                 throw new JSONException("input length overflow");
             }
-            return len;
+        } else {
+            throw notSupportType((byte) type);
         }
-
-        throw notSupportType(type);
+        this.offset = offset;
+        return type;
     }
 
     static int getInt3(byte[] bytes, int offset, int type) {
@@ -231,12 +226,10 @@ final class JSONReaderJSONB
 
     @Override
     public boolean isArray() {
-        if (offset >= bytes.length) {
-            return false;
-        }
-
-        byte type = bytes[offset];
-        return type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY;
+        byte type;
+        return offset < end
+                && (type = bytes[offset]) >= BC_ARRAY_FIX_MIN
+                && type <= BC_ARRAY;
     }
 
     @Override
@@ -252,7 +245,7 @@ final class JSONReaderJSONB
 
     @Override
     public boolean isString() {
-        return offset < bytes.length
+        return offset < end
                 && (type = bytes[offset]) >= BC_STR_ASCII_FIX_MIN;
     }
 
@@ -278,33 +271,32 @@ final class JSONReaderJSONB
 
     @Override
     public boolean nextIfObjectStart() {
+        int offset = this.offset;
         if (bytes[offset] != BC_OBJECT) {
             return false;
         }
-        offset++;
+        this.offset = offset + 1;
         return true;
     }
 
     @Override
     public boolean nextIfObjectEnd() {
+        int offset = this.offset;
         if (bytes[offset] != BC_OBJECT_END) {
             return false;
         }
-        offset++;
+        this.offset = offset + 1;
         return true;
     }
 
     @Override
     public boolean nextIfNullOrEmptyString() {
-        if (bytes[offset] == BC_NULL) {
-            offset++;
-            return true;
-        }
-
-        if (bytes[offset] != BC_STR_ASCII_FIX_MIN) {
+        int offset = this.offset;
+        byte bc = bytes[offset];
+        if (bc != BC_NULL && bc != BC_STR_ASCII_FIX_MIN) {
             return false;
         }
-        offset += 1;
+        this.offset = offset + 1;
         return true;
     }
 
@@ -2632,23 +2624,23 @@ final class JSONReaderJSONB
         throw notSupportType(strtype);
     }
 
-    private static JSONException notSupportType(byte type) {
+    static JSONException notSupportType(byte type) {
         return new JSONException("name not support input : " + typeName(type));
     }
 
-    private JSONException notSupportString() {
+    JSONException notSupportString() {
         throw new JSONException("readString not support type " + typeName(strtype) + ", offset " + offset + "/" + bytes.length);
     }
 
-    private JSONException readInt32ValueError(byte type) {
+    JSONException readInt32ValueError(byte type) {
         throw new JSONException("readInt32Value not support " + typeName(type) + ", offset " + offset + "/" + bytes.length);
     }
 
-    private JSONException readInt64ValueError(byte type) {
+    JSONException readInt64ValueError(byte type) {
         throw new JSONException("readInt64Value not support " + typeName(type) + ", offset " + offset + "/" + bytes.length);
     }
 
-    private JSONException readStringError() {
+    JSONException readStringError() {
         throw new JSONException("string value not support input " + typeName(type) + " offset " + offset + "/" + bytes.length);
     }
 
@@ -2994,17 +2986,13 @@ final class JSONReaderJSONB
             this.strlen = strlen;
 
             if (strlen >= 0) {
-                if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[strlen];
-                    for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) (bytes[offset + i] & 0xff);
-                    }
-                    offset += strlen;
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                } else if (STRING_CREATOR_JDK11 != null) {
+                if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
+                    offset += strlen;
+                } else if (STRING_CREATOR_JDK8 != null) {
+                    str = readStringJDK8(strlen, bytes);
                     offset += strlen;
                 }
             }
@@ -3022,6 +3010,14 @@ final class JSONReaderJSONB
         }
 
         return readStringNonAscii();
+    }
+
+    private String readStringJDK8(int strlen, byte[] bytes) {
+        char[] chars = new char[strlen];
+        for (int i = 0; i < strlen; ++i) {
+            chars[i] = (char) (bytes[offset + i] & 0xff);
+        }
+        return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
     }
 
     private String readStringNonAscii() {
@@ -3596,32 +3592,30 @@ final class JSONReaderJSONB
     public int readInt32Value() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        final byte type = bytes[offset++];
-
-        int int32Value;
+        int type = bytes[offset++]; // reuse type as value
         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
-            int32Value = type;
+            // noop
         } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            int32Value = ((type - BC_INT32_BYTE_ZERO) << 8)
+            type = ((type - BC_INT32_BYTE_ZERO) << 8)
                     + (bytes[offset] & 0xFF);
             offset += 1;
         } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            int32Value = ((type - BC_INT32_SHORT_ZERO) << 16)
+            type = ((type - BC_INT32_SHORT_ZERO) << 16)
                     + ((bytes[offset] & 0xFF) << 8)
                     + (bytes[offset + 1] & 0xFF);
             offset += 2;
         } else if (type == BC_INT32) {
-            int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+            type = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
             if (!BIG_ENDIAN) {
-                int32Value = Integer.reverseBytes(int32Value);
+                type = Integer.reverseBytes(type);
             }
             offset += 4;
         } else {
             this.offset = offset;
-            return readInt32Value0(bytes, type);
+            return readInt32Value0(bytes, (byte) type);
         }
         this.offset = offset;
-        return int32Value;
+        return type;
     }
 
     private int readInt32Value0(byte[] bytes, byte type) {
@@ -3854,12 +3848,7 @@ final class JSONReaderJSONB
                     (char) (bytes[offset + 1] & 0xff)
             );
         } else if (STRING_CREATOR_JDK8 != null) {
-            char[] chars = new char[strlen];
-            for (int i = 0; i < strlen; ++i) {
-                chars[i] = (char) (bytes[offset + i] & 0xff);
-            }
-
-            str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            str = readStringJDK8(strlen, bytes);
         } else {
             str = new String(bytes, offset, strlen, ISO_8859_1);
         }
@@ -4999,14 +4988,17 @@ final class JSONReaderJSONB
 
     @Override
     public ZonedDateTime readZonedDateTime() {
+        byte[] bytes = this.bytes;
         int type = bytes[offset++];
         if (type == BC_TIMESTAMP_WITH_TIMEZONE) {
-            int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
-            int month = bytes[offset++];
-            int dayOfMonth = bytes[offset++];
-            int hour = bytes[offset++];
-            int minute = bytes[offset++];
-            int second = bytes[offset++];
+            int offset = this.offset;
+            int year = (bytes[offset] << 8) + (bytes[offset + 1] & 0xFF);
+            int month = bytes[offset + 2];
+            int dayOfMonth = bytes[offset + 3];
+            int hour = bytes[offset + 4];
+            int minute = bytes[offset + 5];
+            int second = bytes[offset + 6];
+            this.offset = offset + 7;
             int nano = readInt32Value();
             LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
 

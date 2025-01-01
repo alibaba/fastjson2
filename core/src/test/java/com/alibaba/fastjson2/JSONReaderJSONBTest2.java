@@ -436,4 +436,49 @@ public class JSONReaderJSONBTest2 {
             }
         }
     }
+
+    @Test
+    public void readLength() {
+        StringBuilder buf = new StringBuilder(1024 * 1024);
+        int[] lengths = new int[10];
+        for (int i = 0, x = 1; i < lengths.length; i++, x *= 4) {
+            lengths[i] = x;
+        }
+        for (int length : lengths) {
+            for (int i = 0; i < length; i++) {
+                buf.append('0');
+            }
+            String str = buf.toString();
+            byte[] jsonBytes = JSONB.toBytes(str);
+            JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(jsonBytes);
+            if (jsonReader.nextIfMatch(JSONB.Constants.BC_STR_ASCII)) {
+                assertEquals(
+                        str.length(),
+                        jsonReader.readLength());
+            }
+            assertFalse(jsonReader.isArray());
+        }
+
+        for (int length : lengths) {
+            int[] array = new int[length];
+            byte[] jsonBytes = JSONB.toBytes(array);
+            JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(jsonBytes);
+            if (jsonReader.nextIfMatch(JSONB.Constants.BC_ARRAY)) {
+                assertEquals(
+                        length,
+                        jsonReader.readLength());
+            }
+        }
+
+        {
+            byte[] jsonBytes = JSONB.toBytes(1024 * 1024 * 512);
+            JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(jsonBytes);
+            assertThrows(JSONException.class, () -> jsonReader.readLength());
+        }
+        {
+            byte[] jsonBytes = JSONB.toBytes("xxx");
+            JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(jsonBytes);
+            assertThrows(JSONException.class, () -> jsonReader.readLength());
+        }
+    }
 }

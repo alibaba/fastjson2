@@ -33,7 +33,7 @@ final class JSONWriterJSONB
     static final long WRITE_ENUM_USING_STRING_MASK = WriteEnumUsingToString.mask | WriteEnumsUsingName.mask;
 
     private final CacheItem cacheItem;
-    private byte[] bytes;
+    byte[] bytes;
     private TLongIntHashMap symbols;
     private int symbolIndex;
 
@@ -2087,10 +2087,14 @@ final class JSONWriterJSONB
             return;
         }
 
+        String zoneIdStr = dateTime.getOffset().getId();
+        int strlen = zoneIdStr.length();
+
         int off = this.off;
         byte[] bytes = this.bytes;
-        if (off + 13 > bytes.length) {
-            bytes = grow(off + 13);
+        int minCapacity = off + 14 + strlen;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
         }
 
         bytes[off] = BC_TIMESTAMP_WITH_TIMEZONE;
@@ -2104,15 +2108,11 @@ final class JSONWriterJSONB
         bytes[off + 7] = (byte) dateTime.getSecond();
         off += 8;
 
-        this.off = off + writeInt32(bytes, off, dateTime.getNano());
+        off += writeInt32(bytes, off, dateTime.getNano());
 
-        ZoneId zoneId = dateTime.getOffset();
-        String zoneIdStr = zoneId.getId();
-        if (zoneIdStr.equals(OFFSET_8_ZONE_ID_NAME)) {
-            writeRaw(OFFSET_8_ZONE_ID_NAME_BYTES);
-        } else {
-            writeString(zoneIdStr);
-        }
+        bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+        zoneIdStr.getBytes(0, strlen, bytes, off);
+        this.off = off + strlen;
     }
 
     @Override
@@ -2310,18 +2310,13 @@ final class JSONWriterJSONB
     @Override
     public void writeReference(String path) {
         int off = this.off;
+        byte[] bytes = this.bytes;
         if (off == bytes.length) {
-            ensureCapacity(off + 1);
+            bytes = grow(off + 1);
         }
         bytes[off] = BC_REFERENCE;
         this.off = off + 1;
-
-        if (path == this.lastReference) {
-            writeString("#-1");
-        } else {
-            writeString(path);
-        }
-
+        writeString(path == this.lastReference ? "#-1" : path);
         this.lastReference = path;
     }
 
@@ -2718,7 +2713,7 @@ final class JSONWriterJSONB
 
     @Override
     public String toString() {
-        if (bytes.length == 0) {
+        if (off == 0) {
             return "<empty>";
         }
 
