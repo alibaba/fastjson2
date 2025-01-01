@@ -2246,6 +2246,7 @@ public abstract class JSONReader
             throw new JSONException("level too large : " + level);
         }
 
+        Map innerMap = null;
         Map object;
         if (context.objectSupplier == null) {
             if ((context.features & Feature.UseNativeObject.mask) != 0) {
@@ -2255,6 +2256,7 @@ public abstract class JSONReader
             }
         } else {
             object = context.objectSupplier.get();
+            innerMap = TypeUtils.getInnerMap(object);
         }
 
         for (int i = 0; ; ++i) {
@@ -2354,7 +2356,12 @@ public abstract class JSONReader
                 continue;
             }
 
-            Object origin = object.put(name, val);
+            Object origin;
+            if (innerMap != null) {
+                origin = innerMap.put(name, val);
+            } else {
+                origin = object.put(name, val);
+            }
             if (origin != null) {
                 if ((context.features & Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
