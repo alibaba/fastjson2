@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.flink;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import org.apache.flink.types.Row;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class JsonRowDeserializationSchemaTest {
     @Test
     public void test() {
+        if (JDKUtils.JVM_VERSION < 11) {
+            return;
+        }
         long id = 1238123899121L;
         String name = "asdlkjasjkdla998y1122";
         byte[] bytes = new byte[1024];
