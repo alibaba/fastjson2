@@ -3231,6 +3231,13 @@ public class ObjectReaderCreator {
             String name = e.name();
             long hashLCase = Fnv.hashCode64LCase(name);
             enumMap.putIfAbsent(hashLCase, e);
+
+            String str = e.toString();
+            if (name.equals(str)) {
+                continue;
+            }
+            long hashLCaseStr = Fnv.hashCode64LCase(str);
+            enumMap.putIfAbsent(hashLCaseStr, e);
         }
 
         long[] enumNameHashCodes = new long[enumMap.size()];
