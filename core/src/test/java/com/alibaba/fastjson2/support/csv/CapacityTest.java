@@ -67,14 +67,14 @@ public class CapacityTest {
         }
     }
 
-
     static String repeat(char c, int count) {
         char[] chars = new char[count];
         Arrays.fill(chars, c);
         return new String(chars);
     }
 
-    static class NoopWriter extends Writer {
+    static class NoopWriter
+            extends Writer {
         @Override
         public void write(@NotNull char[] cbuf, int off, int len) throws IOException {
         }
@@ -88,7 +88,8 @@ public class CapacityTest {
         }
     }
 
-    static class NoopOutputStream extends java.io.OutputStream {
+    static class NoopOutputStream
+            extends java.io.OutputStream {
         @Override
         public void write(int b) throws IOException {
         }
