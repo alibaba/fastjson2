@@ -18,7 +18,10 @@ public class AwtWriterModule
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         if (objectType == Color.class) {
             return objectWriter(Color.class,
-                    fieldWriter("rgb", Color::getRGB)
+                    fieldWriter("r", Color::getRed),
+                    fieldWriter("g", Color::getGreen),
+                    fieldWriter("b", Color::getBlue),
+                    fieldWriter("alpha", Color::getAlpha)
             );
         }
 
