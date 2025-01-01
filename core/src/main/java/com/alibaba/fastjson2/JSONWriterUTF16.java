@@ -1166,8 +1166,8 @@ class JSONWriterUTF16
         this.lastReference = path;
         int off = this.off;
         char[] chars = this.chars;
-        if (off + 8 > chars.length) {
-            chars = grow(off + 8);
+        if (off + 9 > chars.length) {
+            chars = grow(off + 9);
         }
         long address = ARRAY_BYTE_BASE_OFFSET + ((long) off << 1);
         UNSAFE.putLong(chars, address, REF_0);
@@ -1175,6 +1175,7 @@ class JSONWriterUTF16
         this.off = off + 8;
         writeString(path);
         off = this.off;
+        chars = this.chars;
         if (off == chars.length) {
             chars = grow(off + 1);
         }

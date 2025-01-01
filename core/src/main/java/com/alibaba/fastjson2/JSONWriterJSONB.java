@@ -33,7 +33,7 @@ final class JSONWriterJSONB
     static final long WRITE_ENUM_USING_STRING_MASK = WriteEnumUsingToString.mask | WriteEnumsUsingName.mask;
 
     private final CacheItem cacheItem;
-    private byte[] bytes;
+    byte[] bytes;
     private TLongIntHashMap symbols;
     private int symbolIndex;
 
@@ -2087,10 +2087,14 @@ final class JSONWriterJSONB
             return;
         }
 
+        String zoneIdStr = dateTime.getOffset().getId();
+        int strlen = zoneIdStr.length();
+
         int off = this.off;
         byte[] bytes = this.bytes;
-        if (off + 13 > bytes.length) {
-            bytes = grow(off + 13);
+        int minCapacity = off + 14 + strlen;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
         }
 
         bytes[off] = BC_TIMESTAMP_WITH_TIMEZONE;
@@ -2106,8 +2110,6 @@ final class JSONWriterJSONB
 
         off += writeInt32(bytes, off, dateTime.getNano());
 
-        String zoneIdStr = dateTime.getOffset().getId();
-        int strlen = zoneIdStr.length();
         bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
         zoneIdStr.getBytes(0, strlen, bytes, off);
         this.off = off + strlen;
@@ -2711,7 +2713,7 @@ final class JSONWriterJSONB
 
     @Override
     public String toString() {
-        if (bytes.length == 0) {
+        if (off == 0) {
             return "<empty>";
         }
 

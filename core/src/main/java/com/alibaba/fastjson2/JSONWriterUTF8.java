@@ -86,6 +86,7 @@ class JSONWriterUTF8
         this.off = off + 8;
         writeString(path);
         off = this.off;
+        bytes = this.bytes;
         if (off == bytes.length) {
             bytes = grow(off + 1);
         }

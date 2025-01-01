@@ -314,4 +314,466 @@ public class NameTest {
             }
         }
     }
+
+    @Test
+    public void growNameUTF8() {
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name1());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name2());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name3());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name4());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name5());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name6());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name7());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name8());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name9());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name10());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name11());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name12());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name13());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name14());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name15());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name16());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name17());
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name18());
+            }
+        }
+    }
+
+    @Test
+    public void growNameUTF16() {
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name1());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name2());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name3());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name4());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name5());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name6());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name7());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name8());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name9());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name10());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name11());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name12());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name13());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name14());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name15());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name16());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name17());
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name18());
+            }
+        }
+    }
+
+    @Test
+    public void growNameJSONB() {
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name1());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name2());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name3());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name4());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name5());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name6());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name7());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name8());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name9());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name10());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name11());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name12());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name13());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name14());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name15());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name16());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name17());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeAny(new Name18());
+            }
+        }
+    }
+
+    public static class Name1 {
+        public int n;
+    }
+
+    public static class Name2 {
+        public int n1;
+    }
+
+    public static class Name3 {
+        public int n12;
+    }
+
+    public static class Name4 {
+        public int n123;
+    }
+
+    public static class Name5 {
+        public int n1234;
+    }
+
+    public static class Name6 {
+        public int n12345;
+    }
+
+    public static class Name7 {
+        public int n123456;
+    }
+
+    public static class Name8 {
+        public int n1234567;
+    }
+
+    public static class Name9 {
+        public int n12345678;
+    }
+
+    public static class Name10 {
+        public int n123456789;
+    }
+
+    public static class Name11 {
+        public int n1234567890;
+    }
+
+    public static class Name12 {
+        public int n12345678901;
+    }
+
+    public static class Name13 {
+        public int n123456789012;
+    }
+
+    public static class Name14 {
+        public int n1234567890123;
+    }
+
+    public static class Name15 {
+        public int n12345678901234;
+    }
+
+    public static class Name16 {
+        public int n123456789012345;
+    }
+
+    public static class Name17 {
+        public int n1234567890123456;
+    }
+
+    public static class Name18 {
+        public int n12345678901234567;
+    }
 }
