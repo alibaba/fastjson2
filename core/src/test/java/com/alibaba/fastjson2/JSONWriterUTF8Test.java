@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.JSONWriter.Context;
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.writer.ObjectWriter;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -762,7 +761,7 @@ public class JSONWriterUTF8Test {
             JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
             jsonWriter.writeInt8(null);
             jsonWriter.writeComma();
-            jsonWriter.writeInt8(new byte[]{1, 2,3});
+            jsonWriter.writeInt8(new byte[]{1, 2, 3});
             jsonWriter.close();
             assertEquals("null,[1,2,3]", jsonWriter.toString());
         }

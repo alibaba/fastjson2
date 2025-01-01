@@ -2903,4 +2903,38 @@ public class JSONWriterTest {
             assertEquals("null", jsonWriter.toString());
         }
     }
+
+    @Test
+    public void startArrayN() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        assertThrows(JSONException.class, () -> jsonWriter.startArray(0));
+        assertThrows(JSONException.class, () -> jsonWriter.startArray0());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray1());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray2());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray3());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray4());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray5());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray6());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray7());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray8());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray9());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray10());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray11());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray12());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray13());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray14());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray15());
+    }
+
+    @Test
+    public void test() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        assertFalse(jsonWriter.hasFilter());
+        assertFalse(jsonWriter.removeReference(new Object()));
+        assertEquals("$", jsonWriter.getPath(new Object()));
+        assertNull(jsonWriter.getPath());
+        jsonWriter.writeReference(new Object());
+        jsonWriter.setAttachment(new Object());
+        jsonWriter.getAttachment();
+    }
 }
