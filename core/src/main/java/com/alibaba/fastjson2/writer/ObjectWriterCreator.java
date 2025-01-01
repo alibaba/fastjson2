@@ -175,6 +175,9 @@ public class ObjectWriterCreator {
                 }
             }
         }
+        if (fieldInfo.ordinal == 0 && fieldName.equals(beanInfo.typeKey)) {
+            fieldInfo.ordinal = -1;
+        }
 
         if (beanInfo.includes != null && beanInfo.includes.length > 0) {
             boolean match = false;

@@ -239,6 +239,9 @@ final class ObjectReaderSeeAlso<T>
 
             if (object == null) {
                 object = createInstance(jsonReader.getContext().getFeatures() | features);
+                if (object == null) {
+                    throw new JSONException("create instance error, objectClass : " + objectClass);
+                }
             }
 
             if (fieldReader == null) {
