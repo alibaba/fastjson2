@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.*;
 
@@ -306,8 +307,18 @@ public abstract class FieldWriter<T>
             return nameCompare;
         }
 
-        Member thisMember = this.field != null ? this.field : this.method;
-        Member otherMember = other.field != null ? other.field : other.method;
+        Member thisMember;
+        Member otherMember;
+        if (this.method == null || (this.field != null && Modifier.isPublic(this.field.getModifiers()))) {
+            thisMember = this.field;
+        } else {
+            thisMember = this.method;
+        }
+        if (other.method == null || (other.field != null && Modifier.isPublic(other.field.getModifiers()))) {
+            otherMember = other.field;
+        } else {
+            otherMember = other.method;
+        }
 
         if (thisMember != null && otherMember != null) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
@@ -319,13 +330,39 @@ public abstract class FieldWriter<T>
                     return -1;
                 }
             }
+
+            JSONField thisField = null;
+            JSONField otherField = null;
+            if (thisMember instanceof Field) {
+                thisField = ((Field) thisMember).getAnnotation(JSONField.class);
+            } else if (thisMember instanceof Method) {
+                thisField = ((Method) thisMember).getAnnotation(JSONField.class);
+            }
+            if (otherMember instanceof Field) {
+                otherField = ((Field) otherMember).getAnnotation(JSONField.class);
+            } else if (thisMember instanceof Method) {
+                otherField = ((Method) otherMember).getAnnotation(JSONField.class);
+            }
+
+            if (thisField != null && otherField == null) {
+                return -1;
+            }
+            if (thisField == null && otherField != null) {
+                return 1;
+            }
         }
 
-        if (thisMember instanceof Field && otherMember instanceof Method) {
+        if (thisMember instanceof Field
+                && otherMember instanceof Method
+                && ((Field) thisMember).getType() == ((Method) otherMember).getReturnType()
+        ) {
             return -1;
         }
 
-        if (thisMember instanceof Method && otherMember instanceof Field) {
+        if (thisMember instanceof Method
+                && otherMember instanceof Field
+                && ((Method) thisMember).getReturnType() == ((Field) otherMember).getType()
+        ) {
             return 1;
         }
 
@@ -371,6 +408,30 @@ public abstract class FieldWriter<T>
                     return -1;
                 }
             }
+        }
+
+        if (thisFieldClass.isPrimitive() && !otherFieldClass.isPrimitive()) {
+            return -1;
+        }
+
+        if (!thisFieldClass.isPrimitive() && otherFieldClass.isPrimitive()) {
+            return 1;
+        }
+
+        if (thisFieldClass.getName().startsWith("java.") && !otherFieldClass.getName().startsWith("java.")) {
+            return -1;
+        }
+
+        if (!thisFieldClass.getName().startsWith("java.") && otherFieldClass.getName().startsWith("java.")) {
+            return 1;
+        }
+
+        if (this.method != null && other.method == null) {
+            return -1;
+        }
+
+        if (this.method == null && other.method != null) {
+            return 1;
         }
 
         return nameCompare;

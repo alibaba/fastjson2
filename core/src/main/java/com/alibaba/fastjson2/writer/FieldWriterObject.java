@@ -197,6 +197,15 @@ public class FieldWriterObject<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        JSONWriter.Context context = jsonWriter.context;
+        long oldFeatures = context.getFeatures();
+        context.setFeatures(this.features | oldFeatures);
+        boolean result = writeInternal(jsonWriter, object);
+        context.setFeatures(oldFeatures);
+        return result;
+    }
+
+    private boolean writeInternal(JSONWriter jsonWriter, T object) {
         long features = this.features | jsonWriter.getFeatures();
 
         if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {

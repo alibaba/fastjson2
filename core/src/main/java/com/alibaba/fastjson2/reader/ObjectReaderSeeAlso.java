@@ -7,6 +7,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -99,8 +101,6 @@ final class ObjectReaderSeeAlso<T>
                     Enum e = null;
                     if (seeAlsoTypeReader instanceof ObjectReaderImplEnum) {
                         e = ((ObjectReaderImplEnum) seeAlsoTypeReader).getEnumByHashCode(valueHashCode);
-                    } else if (seeAlsoTypeReader instanceof ObjectReaderImplEnum2X4) {
-                        e = ((ObjectReaderImplEnum2X4) seeAlsoTypeReader).getEnumByHashCode(valueHashCode);
                     }
 
                     if (e != null) {
@@ -139,6 +139,7 @@ final class ObjectReaderSeeAlso<T>
             }
         }
 
+        Map<Long, Object> fieldValues = null;
         for (int i = 0; ; i++) {
             if (jsonReader.nextIfObjectEnd()) {
                 if (object == null) {
@@ -240,7 +241,22 @@ final class ObjectReaderSeeAlso<T>
                 continue;
             }
 
-            fieldReader.readFieldValue(jsonReader, object);
+            if (object == null) {
+                Object fieldValue = fieldReader.readFieldValue(jsonReader);
+                if (fieldValues == null) {
+                    fieldValues = new LinkedHashMap<>();
+                }
+                fieldValues.put(hash, fieldValue);
+            } else {
+                fieldReader.readFieldValue(jsonReader, object);
+            }
+        }
+
+        if (fieldValues != null) {
+            for (Map.Entry<Long, Object> entry : fieldValues.entrySet()) {
+                FieldReader fieldReader = getFieldReader(entry.getKey());
+                fieldReader.accept(object, entry.getValue());
+            }
         }
 
         jsonReader.nextIfComma();

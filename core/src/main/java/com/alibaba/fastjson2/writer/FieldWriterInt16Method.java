@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -13,10 +14,11 @@ final class FieldWriterInt16Method<T>
             long features,
             String format,
             String label,
+            Field field,
             Method method,
             Class fieldClass
     ) {
-        super(fieldName, ordinal, features, format, label, fieldClass, null, method);
+        super(fieldName, ordinal, features, format, label, fieldClass, field, method);
     }
 
     @Override

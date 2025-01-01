@@ -749,6 +749,9 @@ public class ObjectWriterProvider {
                 case "WriteBigDecimalAsPlain":
                     fieldInfo.features |= JSONWriter.Feature.WriteBigDecimalAsPlain.mask;
                     break;
+                case "DisableCircularReferenceDetect":
+                    fieldInfo.features |= FieldInfo.DISABLE_REFERENCE_DETECT;
+                    break;
                 default:
                     break;
             }

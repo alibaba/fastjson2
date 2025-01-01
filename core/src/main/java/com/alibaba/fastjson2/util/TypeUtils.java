@@ -1582,10 +1582,6 @@ public class TypeUtils {
                 if (objectReader instanceof ObjectReaderImplEnum) {
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
                 }
-
-                if (objectReader instanceof ObjectReaderImplEnum2X4) {
-                    return (T) ((ObjectReaderImplEnum2X4) objectReader).getEnumByOrdinal(intValue);
-                }
             }
         }
 
@@ -1604,6 +1600,10 @@ public class TypeUtils {
                     return (T) new java.sql.Timestamp(millis);
                 case "java.sql.Time":
                     return (T) new java.sql.Time(millis);
+                case "java.time.LocalDateTime":
+                    return (T) LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(millis),
+                            DateUtils.DEFAULT_ZONE_ID);
                 default:
                     break;
             }

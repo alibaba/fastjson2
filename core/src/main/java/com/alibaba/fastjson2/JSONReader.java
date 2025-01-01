@@ -1841,6 +1841,7 @@ public abstract class JSONReader
             throw new JSONException("level too large : " + level);
         }
 
+        Map innerMap = null;
         Map object;
         if (context.objectSupplier == null) {
             if ((context.features & Feature.UseNativeObject.mask) != 0) {
@@ -1850,10 +1851,15 @@ public abstract class JSONReader
             }
         } else {
             object = context.objectSupplier.get();
+            innerMap = TypeUtils.getInnerMap(object);
         }
 
         for_:
         for (int i = 0; ; ++i) {
+            if (ch == '/') {
+                skipComment();
+            }
+
             if (ch == '}') {
                 next();
                 break;
@@ -1947,7 +1953,11 @@ public abstract class JSONReader
                 continue;
             }
 
-            object.put(name, val);
+            if (innerMap != null) {
+                innerMap.put(name, val);
+            } else {
+                object.put(name, val);
+            }
         }
 
         if (comma = (ch == ',')) {

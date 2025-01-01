@@ -270,8 +270,14 @@ final class ObjectWriterImplList
         JSONWriter.Context context = jsonWriter.context;
         ObjectWriterProvider provider = context.provider;
 
+        int size = list.size();
+        if (size == 0) {
+            jsonWriter.writeRaw('[', ']');
+            return;
+        }
+
         jsonWriter.startArray();
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < size; i++) {
             if (i != 0) {
                 jsonWriter.writeComma();
             }

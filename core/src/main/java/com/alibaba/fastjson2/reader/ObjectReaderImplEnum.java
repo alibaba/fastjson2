@@ -20,11 +20,11 @@ public final class ObjectReaderImplEnum
 
     final Class enumClass;
     final long typeNameHash;
-    protected final Enum[] enums;
-    protected final Enum[] ordinalEnums;
-    protected long[] enumNameHashCodes;
-    protected String[] stringValues;
-    protected long[] intValues;
+    private final Enum[] enums;
+    private final Enum[] ordinalEnums;
+    private final long[] enumNameHashCodes;
+    private String[] stringValues;
+    private long[] intValues;
 
     public ObjectReaderImplEnum(
             Class enumClass,
@@ -49,9 +49,8 @@ public final class ObjectReaderImplEnum
         this.valueFieldType = valueFieldType;
 
         if (valueFieldType != null) {
-            if (valueFieldType == String.class) {
-                stringValues = new String[enums.length];
-            } else {
+            stringValues = new String[enums.length];
+            if (valueFieldType != String.class) {
                 intValues = new long[enums.length];
             }
 
@@ -67,8 +66,11 @@ public final class ObjectReaderImplEnum
 
                     if (valueFieldType == String.class) {
                         stringValues[i] = (String) fieldValue;
-                    } else if (fieldValue instanceof Number) {
-                        intValues[i] = ((Number) fieldValue).longValue();
+                    } else {
+                        stringValues[i] = fieldValue == null ? null : fieldValue.toString();
+                        if (fieldValue instanceof Number) {
+                            intValues[i] = ((Number) fieldValue).longValue();
+                        }
                     }
                 } catch (Exception ignored) {
                     // ignored
@@ -77,11 +79,8 @@ public final class ObjectReaderImplEnum
         }
 
         Type createMethodParamType = null;
-        if (createMethod != null) {
-            Class<?>[] parameterTypes = createMethod.getParameterTypes();
-            if (parameterTypes.length == 1) {
-                createMethodParamType = parameterTypes[0];
-            }
+        if (createMethod != null && createMethod.getParameterCount() == 1) {
+            createMethodParamType = createMethod.getParameterTypes()[0];
         }
         this.createMethodParamType = createMethodParamType;
 
@@ -127,33 +126,39 @@ public final class ObjectReaderImplEnum
     public Enum of(int intValue) {
         Enum enumValue = null;
         if (valueField == null) {
-            enumValue = getEnumByOrdinal(intValue);
-        } else {
-            try {
-                if (valueField instanceof Field) {
-                    for (Enum e : enums) {
-                        if (((Field) valueField).getInt(e) == intValue) {
-                            enumValue = e;
-                            break;
-                        }
-                    }
-                } else {
-                    Method valueMethod = (Method) valueField;
-                    for (Enum e : enums) {
-                        if (((Number) valueMethod.invoke(e)).intValue() == intValue) {
-                            enumValue = e;
-                            break;
-                        }
+            if (intValue >= 0 && intValue < ordinalEnums.length) {
+                enumValue = ordinalEnums[intValue];
+            }
+            return enumValue;
+        }
+
+        try {
+            if (valueField instanceof Field) {
+                for (int i = 0; i < enums.length; i++) {
+                    Enum e = enums[i];
+                    if (((Field) valueField).getInt(e) == intValue) {
+                        enumValue = e;
+                        break;
                     }
                 }
-            } catch (Exception error) {
-                throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + intValue, error);
+            } else {
+                Method valueMethod = (Method) valueField;
+                for (int i = 0; i < enums.length; i++) {
+                    Enum e = enums[i];
+                    if (((Number) valueMethod.invoke(e)).intValue() == intValue) {
+                        enumValue = e;
+                        break;
+                    }
+                }
             }
+        } catch (Exception error) {
+            throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + intValue, error);
         }
 
         if (enumValue == null) {
             throw new JSONException("None enum ordinal or value " + intValue);
         }
+
         return enumValue;
     }
 
@@ -204,6 +209,15 @@ public final class ObjectReaderImplEnum
         }
 
         return fieldValue;
+    }
+
+    private void oomCheck(Type fieldType) {
+        if (fieldType instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) fieldType).getRawType();
+            if (List.class.isAssignableFrom((Class<?>) rawType)) {
+                throw new JSONException(this.getClass().getSimpleName() + " parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+            }
+        }
     }
 
     @Override
@@ -299,14 +313,5 @@ public final class ObjectReaderImplEnum
         }
 
         return fieldValue;
-    }
-
-    private void oomCheck(Type fieldType) {
-        if (fieldType instanceof ParameterizedType) {
-            Type rawType = ((ParameterizedType) fieldType).getRawType();
-            if (List.class.isAssignableFrom((Class<?>) rawType)) {
-                throw new JSONException(this.getClass().getSimpleName() + " parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
-            }
-        }
     }
 }
