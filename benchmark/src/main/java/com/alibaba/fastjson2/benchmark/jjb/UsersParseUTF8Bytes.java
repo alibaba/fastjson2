@@ -42,6 +42,11 @@ public class UsersParseUTF8Bytes {
     }
 
     @Benchmark
+    public void wast(Blackhole bh) {
+        bh.consume(io.github.wycst.wast.json.JSON.parseObject(utf8Bytes, Users.class));
+    }
+
+//    @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
         bh.consume(dslJson.deserialize(Users.class, utf8Bytes, utf8Bytes.length));
         // zulu17.40.19 : 3560
