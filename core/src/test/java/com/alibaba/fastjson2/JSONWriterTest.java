@@ -352,7 +352,7 @@ public class JSONWriterTest {
     @Test
     public void writeInt64() {
         JSONWriter jsonWriter = JSONWriter.of();
-        jsonWriter.writeInt64(null);
+        jsonWriter.writeInt64((Long) null);
         assertEquals("null", jsonWriter.toString());
 
         StringWriter writer = new StringWriter();
@@ -478,7 +478,7 @@ public class JSONWriterTest {
     @Test
     public void writeInt32() {
         JSONWriter jsonWriter = JSONWriter.of();
-        jsonWriter.writeInt32(null);
+        jsonWriter.writeInt32((Integer) null);
         assertEquals("null", jsonWriter.toString());
     }
 

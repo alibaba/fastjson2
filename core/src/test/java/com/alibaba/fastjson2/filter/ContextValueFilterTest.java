@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ContextValueFilterTest {
     @Test
@@ -63,7 +62,8 @@ public class ContextValueFilterTest {
         assertEquals(int.class, context.getFieldClass());
         assertEquals(int.class, context.getFieldType());
         assertEquals(Bean1.class.getMethod("getId"), context.getMethod());
-        assertEquals(null, context.getField());
+        assertNotNull(context.getField());
+        assertNotNull("id", context.getField().getName());
         assertEquals("userId", context.getAnnotation(JSONField.class).name());
         assertEquals(null, context.getFormat());
         assertEquals(null, context.getLabel());

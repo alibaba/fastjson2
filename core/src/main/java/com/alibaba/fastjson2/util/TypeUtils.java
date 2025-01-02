@@ -1575,10 +1575,6 @@ public class TypeUtils {
                 if (objectReader instanceof ObjectReaderImplEnum) {
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
                 }
-
-                if (objectReader instanceof ObjectReaderImplEnum2X4) {
-                    return (T) ((ObjectReaderImplEnum2X4) objectReader).getEnumByOrdinal(intValue);
-                }
             }
         }
 

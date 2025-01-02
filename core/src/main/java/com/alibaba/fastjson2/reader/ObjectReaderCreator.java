@@ -2618,6 +2618,13 @@ public class ObjectReaderCreator {
             String name = e.name();
             long hashLCase = Fnv.hashCode64LCase(name);
             enumMap.put(hashLCase, e);
+
+            String str = e.toString();
+            if (name.equals(str)) {
+                continue;
+            }
+            long hashLCaseStr = Fnv.hashCode64LCase(str);
+            enumMap.putIfAbsent(hashLCaseStr, e);
         }
 
         long[] enumNameHashCodes = new long[enumMap.size()];
@@ -2666,10 +2673,6 @@ public class ObjectReaderCreator {
                     if (enums[i] == first) {
                         matchCount++;
                     }
-                }
-
-                if (matchCount == 2) {
-                    return new ObjectReaderImplEnum2X4(objectClass, enums, ordinalEnums, enumNameHashCodes);
                 }
             }
         }

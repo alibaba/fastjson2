@@ -72,4 +72,46 @@ public class Issue2820 {
             return this.value;
         }
     }
+
+    public enum CityGMLVersion1 {
+        v3_0("3.0"),
+        v2_0("2.0"),
+        v1_0("1.0");
+
+        private final String value;
+
+        CityGMLVersion1(String value) {
+            this.value = value;
+        }
+
+        public String toValue() {
+            return this.value;
+        }
+
+        public static CityGMLVersion1 fromValue(String value) {
+            for (CityGMLVersion1 v : values()) {
+                if (v.value.equals(value)) {
+                    return v;
+                }
+            }
+            return null;
+        }
+
+        public String toString() {
+            return this.value;
+        }
+    }
+
+    @Test
+    public void test1() {
+        Foo1 foo = JSON.parseObject("{\n" +
+                "  \"version\": \"2.0\"\n" +
+                "}", Foo1.class);
+
+        assertEquals(CityGMLVersion1.v2_0, foo.version);
+    }
+
+    public static class Foo1 {
+        public CityGMLVersion1 version;
+    }
 }

@@ -1,7 +1,10 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
-import com.alibaba.fastjson2.time.*;
+import com.alibaba.fastjson2.time.DateTimeFormatter;
+import com.alibaba.fastjson2.time.LocalDateTime;
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -25,6 +28,8 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 public abstract class JSONWriter
         implements Closeable {
     static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_2_SPACE = 2, PRETTY_4_SPACE = 4;
+    static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask | NotWriteEmptyArray.mask | NotWriteDefaultValue.mask;
 
     public final Context context;
     public final boolean utf8;
@@ -44,7 +49,7 @@ public abstract class JSONWriter
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
-    protected boolean pretty;
+    protected byte pretty;
     protected int indent;
 
     protected JSONWriter(
@@ -65,7 +70,15 @@ public abstract class JSONWriter
 
         // 64M or 1G
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
-        pretty = (context.features & PrettyFormat.mask) != 0;
+        if ((context.features & PrettyFormatWith4Space.mask) != 0) {
+            pretty = PRETTY_4_SPACE;
+        } else if ((context.features & PrettyFormatWith2Space.mask) != 0) {
+            pretty = PRETTY_2_SPACE;
+        } else if ((context.features & PrettyFormat.mask) != 0) {
+            pretty = PRETTY_TAB;
+        } else {
+            pretty = PRETTY_NON;
+        }
     }
 
     public final Charset getCharset() {
@@ -229,7 +242,8 @@ public abstract class JSONWriter
     }
 
     public final boolean isRefDetect() {
-        return (context.features & Feature.ReferenceDetection.mask) != 0;
+        return (context.features & ReferenceDetection.mask) != 0
+                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0;
     }
 
     public final boolean isUseSingleQuotes() {
@@ -237,7 +251,8 @@ public abstract class JSONWriter
     }
 
     public final boolean isRefDetect(Object object) {
-        return (context.features & ReferenceDetection.mask) != 0
+        return (context.features & Feature.ReferenceDetection.mask) != 0
+                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
@@ -587,8 +602,8 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofPretty(JSONWriter writer) {
-        if (!writer.pretty) {
-            writer.pretty = true;
+        if (writer.pretty == PRETTY_NON) {
+            writer.pretty = PRETTY_TAB;
             writer.context.features |= PrettyFormat.mask;
         }
         return writer;
@@ -806,7 +821,23 @@ public abstract class JSONWriter
 
     public abstract void writeInt32(int value);
 
+    public void writeInt64(Long i) {
+        if (i == null) {
+            writeInt64Null();
+            return;
+        }
+        writeInt64(i.longValue());
+    }
+
     public abstract void writeInt64(long i);
+
+    public void writeInt32(Integer i) {
+        if (i == null) {
+            writeNull();
+            return;
+        }
+        writeInt32(i.intValue());
+    }
 
     public final void writeInt32(int value, String format) {
         if (format == null || jsonb) {
@@ -1307,8 +1338,9 @@ public abstract class JSONWriter
                 writeComma();
             }
 
-            String str = list.get(i);
-            writeString(str);
+            writeString(
+                    list.get(i)
+            );
         }
         endArray();
     }
@@ -1399,10 +1431,11 @@ public abstract class JSONWriter
             return;
         }
 
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
+        if (map.isEmpty()) {
+            writeRaw('{', '}');
+            startObject = false;
+            return;
+        }
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
             ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
@@ -1410,23 +1443,26 @@ public abstract class JSONWriter
             return;
         }
 
-        write0('{');
+        startObject();
         boolean first = true;
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry next = it.next();
+            Object key = next.getKey();
+            Object value = next.getValue();
+            if (value == null && (context.features & WriteMapNullValue.mask) == 0) {
+                continue;
+            }
             if (!first) {
-                write0(',');
+                writeComma();
             }
 
-            Map.Entry next = it.next();
-            writeAny(
-                    next.getKey());
-            write0(':');
-            writeAny(
-                    next.getValue());
+            writeAny(key);
+            writeColon();
+            writeAny(value);
 
             first = false;
         }
-        write0('}');
+        endObject();
     }
 
     public void write(JSONObject map) {
@@ -1496,7 +1532,7 @@ public abstract class JSONWriter
         boolean formatHasHour;
         long features;
         ZoneId zoneId;
-
+        int maxLevel = 2048;
         boolean hasFilter;
         PropertyPreFilter propertyPreFilter;
         PropertyFilter propertyFilter;
@@ -1956,7 +1992,6 @@ public abstract class JSONWriter
          * @since 2.0.51
          */
         IgnoreEmpty(1L << 26),
-
         WriteNonStringKeyAsString(1 << 27),
         /**
          * @since 2.0.11
@@ -2027,7 +2062,19 @@ public abstract class JSONWriter
          * SortedMap and derived classes do not need to do this.
          * @since 2.0.48
          */
-        SortMapEntriesByKeys(1L << 41);
+        SortMapEntriesByKeys(1L << 41),
+
+        /**
+         * JSON formatting support using 4 spaces for indentation
+         * @since 2.0.54
+         */
+        PrettyFormatWith2Space(1L << 42),
+
+        /**
+         * JSON formatting support using 4 spaces for indentation
+         * @since 2.0.54
+         */
+        PrettyFormatWith4Space(1L << 43);
 
         public final long mask;
 
@@ -2244,5 +2291,24 @@ public abstract class JSONWriter
 
             return fullPath = new String(buf, 0, off, ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
         }
+    }
+
+    protected final int newCapacity(int minCapacity, int oldCapacity) {
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        if (newCapacity > maxArraySize) {
+            if (minCapacity < maxArraySize) {
+                newCapacity = maxArraySize;
+            } else {
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
+            }
+        }
+        return newCapacity;
+    }
+
+    protected final void overflowLevel() {
+        throw new JSONException("level too large : " + level);
     }
 }

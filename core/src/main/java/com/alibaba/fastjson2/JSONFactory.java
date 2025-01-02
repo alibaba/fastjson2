@@ -325,7 +325,9 @@ public final class JSONFactory {
             implements Function {
         @Override
         public Object apply(Object o) {
-            return ((com.alibaba.fastjson.JSONObject) o).getInnerMap();
+            return o instanceof com.alibaba.fastjson.JSONObject
+                    ? ((com.alibaba.fastjson.JSONObject) o).getInnerMap()
+                    : null;
         }
     }
 

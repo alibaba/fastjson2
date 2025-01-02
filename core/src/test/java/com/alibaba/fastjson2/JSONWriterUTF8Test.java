@@ -156,7 +156,9 @@ public class JSONWriterUTF8Test {
     @Test
     public void startObject() {
         final int COUNT = 100_000;
-        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.maxLevel = COUNT;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(writeContext);
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startObject();
         }
@@ -184,7 +186,9 @@ public class JSONWriterUTF8Test {
     @Test
     public void startArray() {
         final int COUNT = 100_000;
-        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.maxLevel = COUNT;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(writeContext);
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startArray();
         }
@@ -206,6 +210,20 @@ public class JSONWriterUTF8Test {
         assertEquals(COUNT, string.length());
         for (int i = 0; i < string.length(); i++) {
             assertEquals(']', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void writeStringEscaped() {
+        byte[] bytes = new byte[1024 * 128];
+        Arrays.fill(bytes, (byte) 1);
+        JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat);
+        try (JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(context)) {
+            jsonWriter.writeStringEscaped(bytes);
+            String json = jsonWriter.toString();
+            String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            Object parse = JSON.parse(json);
+            assertEquals(str, parse);
         }
     }
 

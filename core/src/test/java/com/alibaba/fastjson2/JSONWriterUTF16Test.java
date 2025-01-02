@@ -77,7 +77,9 @@ public class JSONWriterUTF16Test {
     @Test
     public void writeColon() {
         final int COUNT = 100_000;
-        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.maxLevel = 100_000;
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(writeContext);
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.writeColon();
         }
@@ -91,7 +93,9 @@ public class JSONWriterUTF16Test {
     @Test
     public void write0() {
         final int COUNT = 100_000;
-        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.maxLevel = 100_000;
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(writeContext);
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.write0(':');
         }
@@ -105,7 +109,9 @@ public class JSONWriterUTF16Test {
     @Test
     public void startObject() {
         final int COUNT = 100_000;
-        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.maxLevel = COUNT;
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(writeContext);
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startObject();
         }
@@ -133,7 +139,9 @@ public class JSONWriterUTF16Test {
     @Test
     public void startArray() {
         final int COUNT = 100_000;
-        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.maxLevel = COUNT;
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(writeContext);
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startArray();
         }

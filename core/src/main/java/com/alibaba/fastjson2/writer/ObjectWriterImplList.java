@@ -12,6 +12,7 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
 import static com.alibaba.fastjson2.JSONFactory.getClassJSONArray1x;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 final class ObjectWriterImplList
         extends ObjectWriterPrimitiveImpl {
@@ -193,7 +194,6 @@ final class ObjectWriterImplList
             } else if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
             } else {
-//                refDetect = jsonWriter.isRefDetect();
                 if (itemClass == JSONObject.class) {
                     itemObjectWriter = ObjectWriterImplMap.INSTANCE;
                 } else if (itemClass == JSONFactory.getClassJSONObject1x()) {
@@ -270,8 +270,14 @@ final class ObjectWriterImplList
         JSONWriter.Context context = jsonWriter.context;
         ObjectWriterProvider provider = context.provider;
 
+        int size = list.size();
+        if (size == 0) {
+            jsonWriter.writeRaw('[', ']');
+            return;
+        }
+
         jsonWriter.startArray();
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < size; i++) {
             if (i != 0) {
                 jsonWriter.writeComma();
             }
