@@ -4,23 +4,20 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue3824 {
     @Test
     public void test_for_issue3824() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new LinkedHashMap<>();
         XX a = new XX();
         a.a = 100;
         List<XX> t = Arrays.asList(a);
-        Map<String, Object> y = new HashMap<>();
+        Map<String, Object> y = new LinkedHashMap<>();
         y.put("2_wdk", t);
-        Map<String, Object> x = new HashMap<>();
+        Map<String, Object> x = new LinkedHashMap<>();
         x.put("y", y);
         result.put("a.b.c", x);
         result.put("x", a);
