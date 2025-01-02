@@ -1430,16 +1430,15 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Long.reverseBytes(x);
         }
-        if ((x & 0xF000F000F000F0L) != 0x30003000300030L) {
+        long d;
+        if ((x & 0xF000F000F000F0L) != 0x30003000300030L
+                || (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L) != 0
+        ) {
             return -1;
         }
-        long d = x & 0x0F000F000F000FL;
-        if (((d + 0x06000600060006L) & 0xF000F000F000F0L) != 0) {
-            return -1;
-        }
-        return (int) (((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5)
-                + ((d & 0xF0000) >> 10) + ((d & 0xF0000) >> 11) + ((d & 0xF0000) >> 14)
-                + ((d & 0xF00000000L) >> 29) + ((d & 0xF00000000L) >> 31)
+        return (int) (((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5) // (d & 0xF) * 1000
+                + ((d & 0xF0000) >> 10) + ((d & 0xF0000) >> 11) + ((d & 0xF0000) >> 14) // (d & 0xF0000) * 100
+                + ((d & 0xF00000000L) >> 29) + ((d & 0xF00000000L) >> 31) // (d & 0xF00000000L) * 10
                 + (d >> 48));
     }
 
@@ -1448,17 +1447,53 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
-        if ((x & 0xF0F0F0F0) != 0x30303030) {
+        int d;
+        if ((x & 0xF0F0F0F0) != 0x30303030
+                || (((d = x & 0x0F0F0F0F) + 0x06060606) & 0xF0F0F0F0) != 0
+        ) {
             return -1;
         }
-        int d = x & 0x0F0F0F0F;
-        if (((d + 0x06060606) & 0xF0F0F0F0) != 0) {
-            return -1;
-        }
-        return ((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5)
-                + ((d & 0xF00) >> 2) + ((d & 0xF00) >> 3) + ((d & 0xF00) >> 6)
-                + ((d & 0xF0000) >> 13) + ((d & 0xF0000) >> 15)
+        return ((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5) // (d & 0xF) * 1000
+                + ((d & 0xF00) >> 2) + ((d & 0xF00) >> 3) + ((d & 0xF00) >> 6) // (d & 0xF00) * 100
+                + ((d & 0xF0000) >> 13) + ((d & 0xF0000) >> 15) // (d & 0xF0000) * 10
                 + (d >> 24);
+    }
+
+    public static int digit3(char[] chars, int off) {
+        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
+        int i = UNSAFE.getInt(chars, address);
+        short s = UNSAFE.getShort(chars, address + 4);
+        if (BIG_ENDIAN) {
+            i = Integer.reverseBytes(i);
+            s = Short.reverseBytes(s);
+        }
+        long x = (((long) s) << 32) | i; // reuse
+        long d;
+        if ((x & 0xF000F000F0L) != 0x3000300030L
+                || (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L) != 0
+        ) {
+            return -1;
+        }
+        return (int) (((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xF) * 100
+                + ((d & 0xF0000L) >> 13) + ((d & 0xF0000L) >> 15) // ((d & 0xF0000) >> 16) * 10
+                + (d >> 32));
+    }
+
+    public static int digit3(byte[] bytes, int off) {
+        int x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            x = Short.reverseBytes((short) x);
+        }
+        x |= UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16;
+        int d;
+        if ((x & 0xF0F0F0) != 0x303030
+                || (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0) != 0
+        ) {
+            return -1;
+        }
+        return ((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xff) * 100
+                + ((d & 0xF00) >> 5) + ((d & 0xF00) >> 7) // ((d & 0xF00) >> 8) * 10
+                + (d >> 16);
     }
 
     public static int digit2(char[] chars, int off) {
@@ -1466,14 +1501,13 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
-        if ((x & 0xF000F0) != 0x300030) {
+        int d;
+        if ((x & 0xF000F0) != 0x300030
+                || (((d = x & 0x0F000F) + 0x060006) & 0xF000F0) != 0
+        ) {
             return -1;
         }
-        int d = x & 0x0F000F;
-        if (((d + 0x060006) & 0xF000F0) != 0) {
-            return -1;
-        }
-        return ((d & 0xF) << 3) + ((d & 0xF) << 1)
+        return ((d & 0xF) << 3) + ((d & 0xF) << 1) // (d & 0xF) * 10
                 + (d >> 16);
     }
 
@@ -1482,14 +1516,14 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Short.reverseBytes(x);
         }
-        if ((x & 0xF0F0) != 0x3030) {
+        int d;
+        if ((x & 0xF0F0) != 0x3030
+                || (((d = x & 0x0F0F) + 0x0606) & 0xF0F0) != 0
+        ) {
             return -1;
         }
-        int d = x & 0x0F0F;
-        if (((d + 0x0606) & 0xF0F0) != 0) {
-            return -1;
-        }
-        return ((d & 0xF) << 3) + ((d & 0xF) << 1) + (d >> 8);
+        return ((d & 0xF) << 3) + ((d & 0xF) << 1)  // (d & 0xF) * 10
+                + (d >> 8);
     }
 
     public static int digit1(char[] chars, int off) {

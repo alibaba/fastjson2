@@ -199,6 +199,58 @@ public class IOUtilsTest {
     }
 
     @Test
+    public void digit3_chars() {
+        assertEquals(197,
+                IOUtils.digit3(
+                        "1972".toCharArray(), 0));
+
+        char[] chars = new char[4];
+        for (int x0 = -1; x0 <= 10; x0++) {
+            chars[0] = (char) (x0 + '0');
+            for (int x1 = -1; x1 <= 10; x1++) {
+                chars[1] = (char) (x1 + '0');
+                for (int x2 = -1; x2 <= 10; x2++) {
+                    chars[2] = (char) (x2 + '0');
+                    int d3 = IOUtils.digit3(chars, 0);
+                    int expect;
+                    if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9) {
+                        expect = -1;
+                    } else {
+                        expect = x0 * 100 + x1 * 10 + x2;
+                    }
+                    assertEquals(expect, d3);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void digit3() {
+        assertEquals(197,
+                IOUtils.digit3(
+                        "1972".getBytes(StandardCharsets.UTF_8), 0));
+
+        byte[] bytes = new byte[4];
+        for (int x0 = -1; x0 <= 10; x0++) {
+            bytes[0] = (byte) (x0 + '0');
+            for (int x1 = -1; x1 <= 10; x1++) {
+                bytes[1] = (byte) (x1 + '0');
+                for (int x2 = -1; x2 <= 10; x2++) {
+                    bytes[2] = (byte) (x2 + '0');
+                    int d3 = IOUtils.digit3(bytes, 0);
+                    int expect;
+                    if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9) {
+                        expect = -1;
+                    } else {
+                        expect = x0 * 100 + x1 * 10 + x2;
+                    }
+                    assertEquals(expect, d3);
+                }
+            }
+        }
+    }
+
+    @Test
     public void digit2() {
         byte[] bytes = new byte[2];
         for (int x0 = -1; x0 <= 10; x0++) {

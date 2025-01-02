@@ -293,410 +293,169 @@ public class DateUtils {
         }
     }
 
-    public static LocalTime parseLocalTime5(byte[] bytes, int off) {
-        if (off + 5 > bytes.length) {
+    public static LocalTime parseLocalTime5(byte[] str, int off) {
+        if (off + 5 > str.length) {
             return null;
         }
 
-        byte c0 = bytes[off];
-        byte c1 = bytes[off + 1];
-        byte c2 = bytes[off + 2];
-        byte c3 = bytes[off + 3];
-        byte c4 = bytes[off + 4];
-
-        byte h0, h1, i0, i1;
+        int hour, minute;
         int second = 0;
-        if (c2 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-        } else if (c1 == ':' && c3 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = '0';
-            i1 = c2;
-            second = c4 - '0';
+        if (str[off + 2] == ':') {
+            hour = digit2(str, off);
+            minute = digit2(str, off + 3);
+        } else if (str[off + 1] == ':' && str[off + 3] == ':') {
+            hour = digit1(str, off);
+            minute = digit1(str, off + 2);
+            second = digit1(str, off + 4);
         } else {
             return null;
         }
 
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second);
+        return localTime(hour, minute, second);
     }
 
-    public static LocalTime parseLocalTime5(char[] chars, int off) {
-        if (off + 5 > chars.length) {
+    public static LocalTime parseLocalTime5(char[] str, int off) {
+        if (off + 5 > str.length) {
             return null;
         }
 
-        char c0 = chars[off];
-        char c1 = chars[off + 1];
-        char c2 = chars[off + 2];
-        char c3 = chars[off + 3];
-        char c4 = chars[off + 4];
-
-        char h0, h1, i0, i1;
-        int second = 0;
-        if (c2 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-        } else if (c1 == ':' && c3 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = '0';
-            i1 = c2;
-            second = c4 - '0';
+        int hour, minute, second = 0;
+        if (str[off + 2] == ':') {
+            hour = digit2(str, off);
+            minute = digit2(str, off + 3);
+        } else if (str[off + 1] == ':' && str[off + 3] == ':') {
+            hour = digit1(str, off);
+            minute = digit1(str, off + 2);
+            second = digit1(str, off + 4);
         } else {
             return null;
         }
 
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second);
+        return localTime(hour, minute, second);
     }
 
-    public static LocalTime parseLocalTime6(byte[] bytes, int off) {
-        if (off + 5 > bytes.length) {
+    public static LocalTime parseLocalTime6(byte[] str, int off) {
+        if (off + 5 > str.length) {
             return null;
         }
 
-        byte c0 = bytes[off];
-        byte c1 = bytes[off + 1];
-        byte c2 = bytes[off + 2];
-        byte c3 = bytes[off + 3];
-        byte c4 = bytes[off + 4];
-        byte c5 = bytes[off + 5];
+        byte c1 = str[off + 1];
+        byte c4 = str[off + 4];
 
-        byte h0, h1, i0, i1, s0, s1;
-        if (c2 == ':' && c4 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = '0';
-            i1 = c3;
-            s0 = '0';
-            s1 = c5;
+        int hour, minute, second;
+        if (str[off + 2] == ':' && c4 == ':') {
+            hour = digit2(str, off);
+            minute = digit1(str, off + 3);
+            second = digit1(str, off + 5);
         } else if (c1 == ':' && c4 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = c2;
-            i1 = c3;
-            s0 = '0';
-            s1 = c5;
-        } else if (c1 == ':' && c3 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = '0';
-            i1 = c2;
-            s0 = c4;
-            s1 = c5;
+            hour = digit1(str, off);
+            minute = digit2(str, off + 2);
+            second = digit1(str, off + 5);
+        } else if (c1 == ':' && str[off + 3] == ':') {
+            hour = digit1(str, off);
+            minute = digit1(str, off + 2);
+            second = digit2(str, off + 4);
         } else {
             return null;
         }
 
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second);
+        return localTime(hour, minute, second);
     }
 
-    public static LocalTime parseLocalTime6(char[] chars, int off) {
-        if (off + 5 > chars.length) {
+    public static LocalTime parseLocalTime6(char[] str, int off) {
+        if (off + 5 > str.length) {
             return null;
         }
 
-        char c0 = chars[off];
-        char c1 = chars[off + 1];
-        char c2 = chars[off + 2];
-        char c3 = chars[off + 3];
-        char c4 = chars[off + 4];
-        char c5 = chars[off + 5];
+        char c1 = str[off + 1];
+        char c4 = str[off + 4];
 
-        char h0, h1, i0, i1, s0, s1;
-        if (c2 == ':' && c4 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = '0';
-            i1 = c3;
-            s0 = '0';
-            s1 = c5;
+        int hour, minute, second;
+        if (str[off + 2] == ':' && c4 == ':') {
+            hour = digit2(str, off);
+            minute = digit1(str, off + 3);
+            second = digit1(str, off + 5);
         } else if (c1 == ':' && c4 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = c2;
-            i1 = c3;
-            s0 = '0';
-            s1 = c5;
-        } else if (c1 == ':' && c3 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = '0';
-            i1 = c2;
-            s0 = c4;
-            s1 = c5;
+            hour = digit1(str, off);
+            minute = digit2(str, off + 2);
+            second = digit1(str, off + 5);
+        } else if (c1 == ':' && str[off + 3] == ':') {
+            hour = digit1(str, off);
+            minute = digit1(str, off + 2);
+            second = digit2(str, off + 4);
         } else {
             return null;
         }
 
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second);
+        return localTime(hour, minute, second);
     }
 
-    public static LocalTime parseLocalTime7(byte[] bytes, int off) {
-        if (off + 5 > bytes.length) {
+    public static LocalTime parseLocalTime7(byte[] str, int off) {
+        if (off + 5 > str.length) {
             return null;
         }
 
-        byte c0 = bytes[off];
-        byte c1 = bytes[off + 1];
-        byte c2 = bytes[off + 2];
-        byte c3 = bytes[off + 3];
-        byte c4 = bytes[off + 4];
-        byte c5 = bytes[off + 5];
-        byte c6 = bytes[off + 6];
+        byte c2 = str[off + 2];
+        byte c4 = str[off + 4];
 
-        byte h0, h1, i0, i1, s0, s1;
-        if (c1 == ':' && c4 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = c2;
-            i1 = c3;
-            s0 = c5;
-            s1 = c6;
+        int hour, minute, second;
+        if (str[off + 1] == ':' && c4 == ':') {
+            hour = digit1(str, off);
+            minute = digit2(str, off + 2);
+            second = digit2(str, off + 5);
         } else if (c2 == ':' && c4 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = '0';
-            i1 = c3;
-            s0 = c5;
-            s1 = c6;
-        } else if (c2 == ':' && c5 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = '0';
-            s1 = c6;
+            hour = digit2(str, off);
+            minute = digit1(str, off + 3);
+            second = digit2(str, off + 5);
+        } else if (c2 == ':' && str[off + 5] == ':') {
+            hour = digit2(str, off);
+            minute = digit2(str, off + 3);
+            second = digit1(str, off + 6);
         } else {
             return null;
         }
 
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second);
+        return localTime(hour, minute, second);
     }
 
-    public static LocalTime parseLocalTime7(char[] chars, int off) {
-        if (off + 5 > chars.length) {
+    public static LocalTime parseLocalTime7(char[] str, int off) {
+        if (off + 5 > str.length) {
             return null;
         }
 
-        char c0 = chars[off];
-        char c1 = chars[off + 1];
-        char c2 = chars[off + 2];
-        char c3 = chars[off + 3];
-        char c4 = chars[off + 4];
-        char c5 = chars[off + 5];
-        char c6 = chars[off + 6];
+        char c2 = str[off + 2];
+        char c4 = str[off + 4];
 
-        char h0, h1, i0, i1, s0, s1;
-        if (c1 == ':' && c4 == ':') {
-            h0 = '0';
-            h1 = c0;
-            i0 = c2;
-            i1 = c3;
-            s0 = c5;
-            s1 = c6;
+        int hour, minute, second;
+        if (str[off + 1] == ':' && c4 == ':') {
+            hour = digit1(str, off);
+            minute = digit2(str, off + 2);
+            second = digit2(str, off + 5);
         } else if (c2 == ':' && c4 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = '0';
-            i1 = c3;
-            s0 = c5;
-            s1 = c6;
-        } else if (c2 == ':' && c5 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = '0';
-            s1 = c6;
+            hour = digit2(str, off);
+            minute = digit1(str, off + 3);
+            second = digit2(str, off + 5);
+        } else if (c2 == ':' && str[off + 5] == ':') {
+            hour = digit2(str, off);
+            minute = digit2(str, off + 3);
+            second = digit1(str, off + 6);
         } else {
             return null;
         }
 
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second);
+        return localTime(hour, minute, second);
     }
 
     public static LocalTime parseLocalTime8(byte[] bytes, int off) {
-        if (off + 8 > bytes.length) {
-            return null;
-        }
-
-        char c0 = (char) bytes[off];
-        char c1 = (char) bytes[off + 1];
-        char c2 = (char) bytes[off + 2];
-        char c3 = (char) bytes[off + 3];
-        char c4 = (char) bytes[off + 4];
-        char c5 = (char) bytes[off + 5];
-        char c6 = (char) bytes[off + 6];
-        char c7 = (char) bytes[off + 7];
-
-        return parseLocalTime(c0, c1, c2, c3, c4, c5, c6, c7);
+        return off + 8 > bytes.length || bytes[off + 2] != ':' || bytes[off + 5] != ':'
+                ? null
+                : localTime(digit2(bytes, off), digit2(bytes, off + 3), digit2(bytes, off + 6));
     }
 
     public static LocalTime parseLocalTime8(char[] bytes, int off) {
-        if (off + 8 > bytes.length) {
-            return null;
-        }
-
-        char c0 = bytes[off];
-        char c1 = bytes[off + 1];
-        char c2 = bytes[off + 2];
-        char c3 = bytes[off + 3];
-        char c4 = bytes[off + 4];
-        char c5 = bytes[off + 5];
-        char c6 = bytes[off + 6];
-        char c7 = bytes[off + 7];
-
-        return parseLocalTime(c0, c1, c2, c3, c4, c5, c6, c7);
+        return off + 8 > bytes.length || bytes[off + 2] != ':' || bytes[off + 5] != ':'
+                ? null
+                : localTime(digit2(bytes, off), digit2(bytes, off + 3), digit2(bytes, off + 6));
     }
 
     public static LocalTime parseLocalTime(
@@ -751,625 +510,138 @@ public class DateUtils {
         return LocalTime.of(hour, minute, second);
     }
 
-    public static LocalTime parseLocalTime10(byte[] bytes, int off) {
-        if (off + 10 > bytes.length) {
+    public static LocalTime parseLocalTime10(byte[] str, int off) {
+        if (off + 10 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
-        }
-
-        byte c0 = bytes[off];
-        byte c1 = bytes[off + 1];
-        byte c2 = bytes[off + 2];
-        byte c3 = bytes[off + 3];
-        byte c4 = bytes[off + 4];
-        byte c5 = bytes[off + 5];
-        byte c6 = bytes[off + 6];
-        byte c7 = bytes[off + 7];
-        byte c8 = bytes[off + 8];
-        byte c9 = bytes[off + 9];
-
-        byte h0, h1, i0, i1, s0, s1, m0;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
         } else {
-            return null;
+            int hour = digit2(str, off);
+            int minute = digit2(str, off + 3);
+            int second = digit2(str, off + 6);
+            int millis = digit1(str, off + 9);
+            if (millis > 0) {
+                millis *= 100000000;
+            }
+            return ((hour | minute | second | minute) < 0)
+                    ? null
+                    : LocalTime.of(hour, minute, second, millis);
         }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9') {
-            millis = (m0 - '0') * 100;
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
     }
 
-    public static LocalTime parseLocalTime10(char[] bytes, int off) {
-        if (off + 10 > bytes.length) {
+    public static LocalTime parseLocalTime10(char[] str, int off) {
+        if (off + 10 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
-        }
-
-        char c0 = bytes[off];
-        char c1 = bytes[off + 1];
-        char c2 = bytes[off + 2];
-        char c3 = bytes[off + 3];
-        char c4 = bytes[off + 4];
-        char c5 = bytes[off + 5];
-        char c6 = bytes[off + 6];
-        char c7 = bytes[off + 7];
-        char c8 = bytes[off + 8];
-        char c9 = bytes[off + 9];
-
-        char h0, h1, i0, i1, s0, s1, m0;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
         } else {
-            return null;
+            int hour = digit2(str, off);
+            int minute = digit2(str, off + 3);
+            int second = digit2(str, off + 6);
+            int millis = digit1(str, off + 9);
+            if (millis > 0) {
+                millis *= 100000000;
+            }
+            return ((hour | minute | second | minute) < 0)
+                    ? null
+                    : LocalTime.of(hour, minute, second, millis);
         }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9') {
-            millis = (m0 - '0') * 100;
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
     }
 
-    public static LocalTime parseLocalTime11(byte[] bytes, int off) {
-        if (off + 11 > bytes.length) {
+    public static LocalTime parseLocalTime11(byte[] str, int off) {
+        if (off + 11 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
-        }
-
-        byte c0 = bytes[off];
-        byte c1 = bytes[off + 1];
-        byte c2 = bytes[off + 2];
-        byte c3 = bytes[off + 3];
-        byte c4 = bytes[off + 4];
-        byte c5 = bytes[off + 5];
-        byte c6 = bytes[off + 6];
-        byte c7 = bytes[off + 7];
-        byte c8 = bytes[off + 8];
-        byte c9 = bytes[off + 9];
-        byte c10 = bytes[off + 10];
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
         } else {
-            return null;
+            int hour = digit2(str, off);
+            int minute = digit2(str, off + 3);
+            int second = digit2(str, off + 6);
+            int millis = digit2(str, off + 9);
+            if (millis > 0) {
+                millis *= 10000000;
+            }
+            return ((hour | minute | second | minute) < 0)
+                    ? null
+                    : LocalTime.of(hour, minute, second, millis);
         }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10;
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
     }
 
-    public static LocalTime parseLocalTime11(char[] bytes, int off) {
-        if (off + 11 > bytes.length) {
+    public static LocalTime parseLocalTime11(char[] str, int off) {
+        if (off + 11 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
-        }
-
-        char c0 = bytes[off];
-        char c1 = bytes[off + 1];
-        char c2 = bytes[off + 2];
-        char c3 = bytes[off + 3];
-        char c4 = bytes[off + 4];
-        char c5 = bytes[off + 5];
-        char c6 = bytes[off + 6];
-        char c7 = bytes[off + 7];
-        char c8 = bytes[off + 8];
-        char c9 = bytes[off + 9];
-        char c10 = bytes[off + 10];
-
-        char h0, h1, i0, i1, s0, s1, m0, m1;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
         } else {
-            return null;
+            int hour = digit2(str, off);
+            int minute = digit2(str, off + 3);
+            int second = digit2(str, off + 6);
+            int millis = digit2(str, off + 9);
+            if (millis > 0) {
+                millis *= 10000000;
+            }
+            return ((hour | minute | second | minute) < 0)
+                    ? null
+                    : LocalTime.of(hour, minute, second, millis);
         }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9') {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10;
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
     }
 
-    public static LocalTime parseLocalTime12(byte[] bytes, int off) {
-        if (off + 12 > bytes.length) {
+    public static LocalTime parseLocalTime12(byte[] str, int off) {
+        if (off + 12 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
-        }
-
-        byte c0 = bytes[off];
-        byte c1 = bytes[off + 1];
-        byte c2 = bytes[off + 2];
-        byte c3 = bytes[off + 3];
-        byte c4 = bytes[off + 4];
-        byte c5 = bytes[off + 5];
-        byte c6 = bytes[off + 6];
-        byte c7 = bytes[off + 7];
-        byte c8 = bytes[off + 8];
-        byte c9 = bytes[off + 9];
-        byte c10 = bytes[off + 10];
-        byte c11 = bytes[off + 11];
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
         } else {
-            return null;
+            int hour = digit2(str, off);
+            int minute = digit2(str, off + 3);
+            int second = digit2(str, off + 6);
+            int millis = digit3(str, off + 9);
+            if (millis > 0) {
+                millis *= 1000000;
+            }
+            return ((hour | minute | second | minute) < 0)
+                    ? null
+                    : LocalTime.of(hour, minute, second, millis);
         }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
     }
 
-    public static LocalTime parseLocalTime12(char[] bytes, int off) {
-        if (off + 12 > bytes.length) {
+    public static LocalTime parseLocalTime12(char[] str, int off) {
+        if (off + 12 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
-        }
-
-        char c0 = bytes[off];
-        char c1 = bytes[off + 1];
-        char c2 = bytes[off + 2];
-        char c3 = bytes[off + 3];
-        char c4 = bytes[off + 4];
-        char c5 = bytes[off + 5];
-        char c6 = bytes[off + 6];
-        char c7 = bytes[off + 7];
-        char c8 = bytes[off + 8];
-        char c9 = bytes[off + 9];
-        char c10 = bytes[off + 10];
-        char c11 = bytes[off + 11];
-
-        char h0, h1, i0, i1, s0, s1, m0, m1, m2;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
         } else {
-            return null;
+            int hour = digit2(str, off);
+            int minute = digit2(str, off + 3);
+            int second = digit2(str, off + 6);
+            int millis = digit3(str, off + 9);
+            if (millis > 0) {
+                millis *= 1000000;
+            }
+            return ((hour | minute | second | minute) < 0)
+                    ? null
+                    : LocalTime.of(hour, minute, second, millis);
         }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
     }
 
-    public static LocalTime parseLocalTime18(byte[] bytes, int off) {
-        if (off + 18 > bytes.length) {
+    public static LocalTime parseLocalTime18(byte[] str, int off) {
+        if (off + 18 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         }
-
-        byte c0 = bytes[off];
-        byte c1 = bytes[off + 1];
-        byte c2 = bytes[off + 2];
-        byte c3 = bytes[off + 3];
-        byte c4 = bytes[off + 4];
-        byte c5 = bytes[off + 5];
-        byte c6 = bytes[off + 6];
-        byte c7 = bytes[off + 7];
-        byte c8 = bytes[off + 8];
-        byte c9 = bytes[off + 9];
-        byte c10 = bytes[off + 10];
-        byte c11 = bytes[off + 11];
-        byte c12 = bytes[off + 12];
-        byte c13 = bytes[off + 13];
-        byte c14 = bytes[off + 14];
-        byte c15 = bytes[off + 15];
-        byte c16 = bytes[off + 16];
-        byte c17 = bytes[off + 17];
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2, m3, m4, m5, m6, m7, m8;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
-            m3 = c12;
-            m4 = c13;
-            m5 = c14;
-            m6 = c15;
-            m7 = c16;
-            m8 = c17;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-                && m3 >= '0' && m3 <= '9'
-                && m4 >= '0' && m4 <= '9'
-                && m5 >= '0' && m5 <= '9'
-                && m6 >= '0' && m6 <= '9'
-                && m7 >= '0' && m7 <= '9'
-                && m8 >= '0' && m8 <= '9'
-        ) {
-            millis = (m0 - '0') * 1000_000_00
-                    + (m1 - '0') * 1000_000_0
-                    + (m2 - '0') * 1000_000
-                    + (m3 - '0') * 1000_00
-                    + (m4 - '0') * 1000_0
-                    + (m5 - '0') * 1000
-                    + (m6 - '0') * 100
-                    + (m7 - '0') * 10
-                    + (m8 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
+        int hour = digit2(str, off);
+        int minute = digit2(str, off + 3);
+        int second = digit2(str, off + 6);
+        int nanos = readNanos(str, 9, off + 9);
+        return (hour | minute | second | nanos) < 0
+                ? null
+                : LocalTime.of(hour, minute, second, nanos);
     }
 
-    public static LocalTime parseLocalTime18(char[] bytes, int off) {
-        if (off + 18 > bytes.length) {
+    public static LocalTime parseLocalTime18(char[] str, int off) {
+        if (off + 18 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         }
+        int hour = digit2(str, off);
+        int minute = digit2(str, off + 3);
+        int second = digit2(str, off + 6);
+        int nanos = readNanos(str, 9, off + 9);
+        return (hour | minute | second | nanos) < 0
+                ? null
+                : LocalTime.of(hour, minute, second, nanos);
+    }
 
-        char c0 = bytes[off];
-        char c1 = bytes[off + 1];
-        char c2 = bytes[off + 2];
-        char c3 = bytes[off + 3];
-        char c4 = bytes[off + 4];
-        char c5 = bytes[off + 5];
-        char c6 = bytes[off + 6];
-        char c7 = bytes[off + 7];
-        char c8 = bytes[off + 8];
-        char c9 = bytes[off + 9];
-        char c10 = bytes[off + 10];
-        char c11 = bytes[off + 11];
-        char c12 = bytes[off + 12];
-        char c13 = bytes[off + 13];
-        char c14 = bytes[off + 14];
-        char c15 = bytes[off + 15];
-        char c16 = bytes[off + 16];
-        char c17 = bytes[off + 17];
-
-        char h0, h1, i0, i1, s0, s1, m0, m1, m2, m3, m4, m5, m6, m7, m8;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
-            m3 = c12;
-            m4 = c13;
-            m5 = c14;
-            m6 = c15;
-            m7 = c16;
-            m8 = c17;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-                && m3 >= '0' && m3 <= '9'
-                && m4 >= '0' && m4 <= '9'
-                && m5 >= '0' && m5 <= '9'
-                && m6 >= '0' && m6 <= '9'
-                && m7 >= '0' && m7 <= '9'
-                && m8 >= '0' && m8 <= '9'
-        ) {
-            millis = (m0 - '0') * 1000_000_00
-                    + (m1 - '0') * 1000_000_0
-                    + (m2 - '0') * 1000_000
-                    + (m3 - '0') * 1000_00
-                    + (m4 - '0') * 1000_0
-                    + (m5 - '0') * 1000
-                    + (m6 - '0') * 100
-                    + (m7 - '0') * 10
-                    + (m8 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalTime.of(hour, minute, second, millis);
+    private static LocalTime localTime(int hour, int minute, int second) {
+        return (hour | minute | second) < 0
+                ? null
+                : LocalTime.of(hour, minute, second);
     }
 
     public static LocalDateTime parseLocalDateTime(byte[] str, int off, int len) {
@@ -1775,7 +1047,7 @@ public class DateUtils {
             dom = digit2(str, off + 6);
         }
 
-        if ((year == 0 && month == 0 && dom == 0) || (year | month | dom) < 0) {
+        if ((year | month | dom) <= 0) {
             return null;
         }
 
@@ -1819,7 +1091,7 @@ public class DateUtils {
             dom = digit2(str, off + 6);
         }
 
-        if ((year == 0 && month == 0 && dom == 0) || (year | month | dom) < 0) {
+        if ((year | month | dom) <= 0) {
             return null;
         }
 
@@ -1836,180 +1108,62 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
         char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
         char c6 = (char) str[off + 6];
         char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c7 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '-' && c6 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c4 == '/' && c7 == '/') { // tw : yyyy/mm/d
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '/' && c6 == '/') { // tw : yyyy/m/dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
+        int year, month, dom;
+        if ((c4 == '-' && c7 == '-')
+                || (c4 == '/' && c7 == '/') // tw : yyyy/mm/d
+        ) {
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit1(str, off + 8);
+        } else if ((c4 == '-' && c6 == '-')
+                || (c4 == '/' && c6 == '/') // tw : yyyy/m/dd
+        ) {
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit2(str, off + 7);
         } else if (c1 == '.' && c4 == '.') {
-            d0 = '0';
-            d1 = c0;
-
-            m0 = c2;
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c2 == '.' && c4 == '.') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = '0';
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            dom = digit1(str, off);
+            month = digit2(str, off + 2);
+            year = digit4(str, off + 5);
+        } else if ((c2 == '.' && c4 == '.')
+                || (c2 == '-' && c4 == '-')
+        ) {
+            dom = digit2(str, off);
+            month = digit1(str, off + 3);
+            year = digit4(str, off + 5);
         } else if (c1 == '-' && c4 == '-') {
-            d0 = '0';
-            d1 = c0;
-
-            m0 = c2;
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c2 == '-' && c4 == '-') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = '0';
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            dom = digit1(str, off);
+            month = digit2(str, off + 2);
+            year = digit4(str, off + 5);
         } else if (c2 == '-' && c6 == '-') {
             // dd-MMM-yy
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
+            dom = digit2(str, off);
+            month = DateUtils.month((char) str[off + 3], c4, (char) str[off + 5]);
+            year = digit2(str, off + 7);
+            if (year != -1) {
+                year += 2000;
             }
-
-            y0 = '2';
-            y1 = '0';
-            y2 = c7;
-            y3 = c8;
         } else if (c1 == '/' && c4 == '/') {
             // M/dd/dddd
-            m0 = '0';
-            m1 = c0;
-
-            d0 = c2;
-            d1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            month = digit1(str, off);
+            dom = digit2(str, off + 2);
+            year = digit4(str, off + 5);
         } else if (c2 == '/' && c4 == '/') {
             // MM/d/dddd
-            m0 = c0;
-            m1 = c1;
-
-            d0 = '0';
-            d1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            month = digit2(str, off);
+            dom = digit1(str, off + 3);
+            year = digit4(str, off + 5);
         } else {
             return null;
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
+        if ((year | month | dom) <= 0) {
             return null;
         }
 
@@ -2026,202 +1180,69 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
-        char c3 = str[off + 3];
         char c4 = str[off + 4];
-        char c5 = str[off + 5];
         char c6 = str[off + 6];
         char c7 = str[off + 7];
         char c8 = str[off + 8];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c7 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '-' && c6 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c4 == '/' && c7 == '/') { // tw : yyyy/mm/d
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '/' && c6 == '/') { // tw : yyyy/m/dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
+        int year, month, dom;
+        if ((c4 == '-' && c7 == '-')
+                || (c4 == '/' && c7 == '/') // tw : yyyy/mm/d
+        ) {
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit1(str, off + 8);
+        } else if ((c4 == '-' && c6 == '-')
+                || (c4 == '/' && c6 == '/') // tw : yyyy/m/dd
+        ) {
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit2(str, off + 7);
+        } else if ((c4 == '年' && c6 == '月' && c8 == '日')
+                || (c4 == '년' && c6 == '월' && c8 == '일')
+        ) {
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit1(str, off + 7);
         } else if (c1 == '.' && c4 == '.') {
-            d0 = '0';
-            d1 = c0;
-
-            m0 = c2;
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c2 == '.' && c4 == '.') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = '0';
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            dom = digit1(str, off);
+            month = digit2(str, off + 2);
+            year = digit4(str, off + 5);
+        } else if ((c2 == '.' && c4 == '.')
+                || (c2 == '-' && c4 == '-')
+        ) {
+            dom = digit2(str, off);
+            month = digit1(str, off + 3);
+            year = digit4(str, off + 5);
         } else if (c1 == '-' && c4 == '-') {
-            d0 = '0';
-            d1 = c0;
-
-            m0 = c2;
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c2 == '-' && c4 == '-') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = '0';
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c4 == '年' && c6 == '月' && c8 == '日') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = '0';
-            d1 = c7;
-        } else if (c4 == '년' && c6 == '월' && c8 == '일') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = '0';
-            d1 = c7;
+            dom = digit1(str, off);
+            month = digit2(str, off + 2);
+            year = digit4(str, off + 5);
         } else if (c2 == '-' && c6 == '-') {
             // dd-MMM-yy
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
+            dom = digit2(str, off);
+            month = DateUtils.month(str[off + 3], c4, str[off + 5]);
+            year = digit2(str, off + 7);
+            if (year != -1) {
+                year += 2000;
             }
-
-            y0 = '2';
-            y1 = '0';
-            y2 = c7;
-            y3 = c8;
         } else if (c1 == '/' && c4 == '/') {
             // M/dd/dddd
-            m0 = '0';
-            m1 = c0;
-
-            d0 = c2;
-            d1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            month = digit1(str, off);
+            dom = digit2(str, off + 2);
+            year = digit4(str, off + 5);
         } else if (c2 == '/' && c4 == '/') {
             // MM/d/dddd
-            m0 = c0;
-            m1 = c1;
-
-            d0 = '0';
-            d1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            month = digit2(str, off);
+            dom = digit1(str, off + 3);
+            year = digit4(str, off + 5);
         } else {
             return null;
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
+        if ((year | month | dom) <= 0) {
             return null;
         }
 
@@ -2242,133 +1263,38 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
         char c4 = (char) str[off + 4];
         char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
         char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c7 == '-') {
+        int year, month, dom;
+        if ((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/')) {
             // yyyy-MM-dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c4 == '/' && c7 == '/') {
-            // tw : yyyy/mm/dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c2 == '.' && c5 == '.') {
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+        } else if ((c2 == '.' && c5 == '.') || (c2 == '-' && c5 == '-')) {
             // dd.MM.yyyy
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c2 == '-' && c5 == '-') {
-            // dd-MM-yyyy
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
+            dom = digit2(str, off);
+            month = digit2(str, off + 3);
+            year = digit4(str, off + 6);
         } else if (c2 == '/' && c5 == '/') {
             // MM/dd/yyyy
-            m0 = c0;
-            m1 = c1;
-
-            d0 = c3;
-            d1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c1 == ' ' && c5 == ' ') {
-            // yyyy MMM d
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            d0 = '0';
-            d1 = c0;
+            month = digit2(str, off);
+            dom = digit2(str, off + 3);
+            year = digit4(str, off + 6);
+        } else if (str[off + 1] == ' ' && c5 == ' ') {
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, (char) str[off + 3], c4);
+            year = digit4(str, off + 6);
         } else {
             return null;
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
-            return null;
-        }
-
-        return LocalDate.of(year, month, dom);
+        return (year | month | dom) <= 0
+                ? null
+                : LocalDate.of(year, month, dom);
     }
 
     /**
@@ -2385,181 +1311,57 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
-        char c3 = str[off + 3];
         char c4 = str[off + 4];
         char c5 = str[off + 5];
         char c6 = str[off + 6];
         char c7 = str[off + 7];
-        char c8 = str[off + 8];
         char c9 = str[off + 9];
 
+        int year, month, dom;
         char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c7 == '-') {
+        if ((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/')) {
             // yyyy-MM-dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c4 == '/' && c7 == '/') {
-            // tw : yyyy/mm/dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c2 == '.' && c5 == '.') {
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+        } else if ((c2 == '.' && c5 == '.') || (c2 == '-' && c5 == '-')) {
             // dd.MM.yyyy
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c2 == '-' && c5 == '-') {
-            // dd-MM-yyyy
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
+            dom = digit2(str, off);
+            month = digit2(str, off + 3);
+            year = digit4(str, off + 6);
         } else if (c2 == '/' && c5 == '/') {
             // MM/dd/yyyy
-            m0 = c0;
-            m1 = c1;
-
-            d0 = c3;
-            d1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c4 == '年' && c6 == '月' && c9 == '日') {
+            month = digit2(str, off);
+            dom = digit2(str, off + 3);
+            year = digit4(str, off + 6);
+        } else if ((c4 == '年' && c6 == '月' && c9 == '日')
+                || (c4 == '년' && c6 == '월' && c9 == '일')
+        ) {
             // yyyy年M月dd日
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c4 == '년' && c6 == '월' && c9 == '일') {
-            // yyyy년M월dd일
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c4 == '年' && c7 == '月' && c9 == '日') {
-            // // yyyy年MM月d日
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '년' && c7 == '월' && c9 == '일') {
-            // yyyy년MM월d일
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit2(str, off + 7);
+        } else if ((c4 == '年' && c7 == '月' && c9 == '日')
+                || (c4 == '년' && c7 == '월' && c9 == '일')
+        ) {
+            // yyyy年M月dd日
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit1(str, off + 8);
         } else if (c1 == ' ' && c5 == ' ') {
-            // yyyy MMM d
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            d0 = '0';
-            d1 = c0;
+            // d MMM yyyy
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, (char) str[off + 3], c4);
+            year = digit4(str, off + 6);
         } else {
             return null;
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
-            return null;
-        }
-
-        return LocalDate.of(year, month, dom);
+        return (year | month | dom) <= 0
+                ? null
+                : LocalDate.of(year, month, dom);
     }
 
     /**
@@ -2576,7 +1378,9 @@ public class DateUtils {
         char c10 = str[off + 10];
 
         int year, month, dom;
-        if ((c4 == '年' && c7 == '月' && c10 == '日') || (c4 == '-' && c7 == '-' && c10 == 'Z') || (c4 == '년' && c7 == '월' && c10 == '일')) {
+        if ((c4 == '年' && c7 == '月' && c10 == '日')
+                || (c4 == '-' && c7 == '-' && c10 == 'Z')
+                || (c4 == '년' && c7 == '월' && c10 == '일')) {
             year = digit4(str, off);
             month = digit2(str, off + 5);
             dom = digit2(str, off + 8);
@@ -2682,78 +1486,16 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = str[off];
-        char y1 = str[off + 1];
-        char y2 = str[off + 2];
-        char y3 = str[off + 3];
-        char m0 = str[off + 4];
-        char m1 = str[off + 5];
-        char d0 = str[off + 6];
-        char d1 = str[off + 7];
-        char h0 = str[off + 8];
-        char h1 = str[off + 9];
-        char i0 = str[off + 10];
-        char i1 = str[off + 11];
-        char s0 = str[off + 12];
-        char s1 = str[off + 13];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 4);
+        int dom = digit2(str, off + 6);
+        int hour = digit2(str, off + 8);
+        int minute = digit2(str, off + 10);
+        int second = digit2(str, off + 12);
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second);
+        return (year | month | dom | hour | minute | second) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     /**
@@ -2764,78 +1506,16 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = (char) str[off];
-        char y1 = (char) str[off + 1];
-        char y2 = (char) str[off + 2];
-        char y3 = (char) str[off + 3];
-        char m0 = (char) str[off + 4];
-        char m1 = (char) str[off + 5];
-        char d0 = (char) str[off + 6];
-        char d1 = (char) str[off + 7];
-        char h0 = (char) str[off + 8];
-        char h1 = (char) str[off + 9];
-        char i0 = (char) str[off + 10];
-        char i1 = (char) str[off + 11];
-        char s0 = (char) str[off + 12];
-        char s1 = (char) str[off + 13];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 4);
+        int dom = digit2(str, off + 6);
+        int hour = digit2(str, off + 8);
+        int minute = digit2(str, off + 10);
+        int second = digit2(str, off + 12);
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second);
+        return (year | month | dom | hour | minute | second) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     /**
@@ -2850,184 +1530,60 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
         char c4 = str[off + 4];
         char c5 = str[off + 5];
-        char c6 = str[off + 6];
         char c7 = str[off + 7];
-        char c8 = str[off + 8];
-        char c9 = str[off + 9];
         char c10 = str[off + 10];
-        char c11 = str[off + 11];
         char c12 = str[off + 12];
         char c13 = str[off + 13];
         char c14 = str[off + 14];
-        char c15 = str[off + 15];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0 = '0', s1 = '0';
+        int year, month, dom, hour, minute, second = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-        } else if (c8 == 'T' && c15 == 'Z') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-            m0 = c4;
-            m1 = c5;
-            d0 = c6;
-            d1 = c7;
-            h0 = c9;
-            h1 = c10;
-            i0 = c11;
-            i1 = c12;
-            s0 = c13;
-            s1 = c14;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+        } else if (str[off + 8] == 'T' && str[off + 15] == 'Z') {
+            year = digit4(str, off);
+            month = digit2(str, off + 4);
+            dom = digit2(str, off + 6);
+            hour = digit2(str, off + 9);
+            minute = digit2(str, off + 11);
+            second = digit2(str, off + 13);
         } else if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c12 == ':' && c14 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = '0';
-            i1 = c13;
-
-            s1 = c15;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit1(str, off + 11);
+            minute = digit1(str, off + 13);
+            second = digit1(str, off + 15);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            d0 = '0';
-            d1 = c0;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 2:3:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = '0';
-            i1 = c13;
-
-            s1 = c15;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit1(str, off + 13);
+            second = digit1(str, off + 15);
         } else {
             return null;
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second);
+        return (year | month | dom | hour | minute | second) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     /**
@@ -3042,7 +1598,6 @@ public class DateUtils {
             return null;
         }
 
-        byte c0 = str[off];
         byte c1 = str[off + 1];
         byte c2 = str[off + 2];
         byte c3 = str[off + 3];
@@ -3059,207 +1614,67 @@ public class DateUtils {
         byte c14 = str[off + 14];
         byte c15 = str[off + 15];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0 = '0', s1 = '0';
+        int year, month, dom, hour, minute, second = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c5;
-            m1 = (char) c6;
-
-            d0 = (char) c8;
-            d1 = (char) c9;
-
-            h0 = (char) c11;
-            h1 = (char) c12;
-
-            i0 = (char) c14;
-            i1 = (char) c15;
-        } else if (c8 == 'T' && c15 == 'Z') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-            m0 = (char) c4;
-            m1 = (char) c5;
-            d0 = (char) c6;
-            d1 = (char) c7;
-            h0 = (char) c9;
-            h1 = (char) c10;
-            i0 = (char) c11;
-            i1 = (char) c12;
-            s0 = (char) c13;
-            s1 = (char) c14;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+        } else if (str[off + 8] == 'T' && str[off + 15] == 'Z') {
+            year = digit4(str, off);
+            month = digit2(str, off + 4);
+            dom = digit2(str, off + 6);
+            hour = digit2(str, off + 9);
+            minute = digit2(str, off + 11);
+            second = digit2(str, off + 13);
+        } else if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c12 == ':' && c14 == ':') {
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit1(str, off + 11);
+            minute = digit1(str, off + 13);
+            second = digit1(str, off + 15);
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
+            // d MMM yyyy H:m:ss
+            // 6 DEC 2020 2:3:14
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit1(str, off + 13);
+            second = digit1(str, off + 15);
         } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
                 && c8 == -26 && c9 == -100 && c10 == -120 // 月
                 && c13 == -26 && c14 == -105 && c15 == -91 // 日
         ) {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = '0';
-            m1 = (char) c7;
-
-            d0 = (char) c11;
-            d1 = (char) c12;
-
-            h0 = '0';
-            h1 = '0';
-
-            i0 = '0';
-            i1 = '0';
+            year = digit4(str, off);
+            month = digit1(str, off + 7);
+            dom = digit2(str, off + 11);
+            hour = 0;
+            minute = 0;
         } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
                 && c9 == -26 && c10 == -100 && c11 == -120 // 月
                 && c13 == -26 && c14 == -105 && c15 == -91 // 日
         ) {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c7;
-            m1 = (char) c8;
-
-            d0 = '0';
-            d1 = (char) c12;
-
-            h0 = '0';
-            h1 = '0';
-
-            i0 = '0';
-            i1 = '0';
-        } else if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c12 == ':' && c14 == ':') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c5;
-            m1 = (char) c6;
-
-            d0 = (char) c8;
-            d1 = (char) c9;
-
-            h0 = '0';
-            h1 = (char) c11;
-
-            i0 = '0';
-            i1 = (char) c13;
-
-            s1 = (char) c15;
-        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
-            y0 = (char) c6;
-            y1 = (char) c7;
-            y2 = (char) c8;
-            y3 = (char) c9;
-
-            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            d0 = '0';
-            d1 = (char) c0;
-
-            h0 = (char) c11;
-            h1 = (char) c12;
-
-            i0 = (char) c14;
-            i1 = (char) c15;
-        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
-            // d MMM yyyy H:m:ss
-            // 6 DEC 2020 2:3:14
-            d0 = '0';
-            d1 = (char) c0;
-
-            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            y0 = (char) c6;
-            y1 = (char) c7;
-            y2 = (char) c8;
-            y3 = (char) c9;
-
-            h0 = '0';
-            h1 = (char) c11;
-
-            i0 = '0';
-            i1 = (char) c13;
-
-            s1 = (char) c15;
+            year = digit4(str, off);
+            month = digit2(str, off + 7);
+            dom = digit1(str, off + 12);
+            hour = 0;
+            minute = 0;
         } else {
             return null;
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second);
+        return (year | month | dom | hour | minute | second) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     /**
@@ -3274,7 +1689,6 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -3283,7 +1697,6 @@ public class DateUtils {
         char c6 = str[off + 6];
         char c7 = str[off + 7];
         char c8 = str[off + 8];
-        char c9 = str[off + 9];
         char c10 = str[off + 10];
         char c11 = str[off + 11];
         char c12 = str[off + 12];
@@ -3292,269 +1705,77 @@ public class DateUtils {
         char c15 = str[off + 15];
         char c16 = str[off + 16];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
-        int nanoOfSecond = 0;
+        int year, month, dom, hour, minute, second = 0, nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = '0';
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = 0;
         } else if (c4 == '-' && c6 == '-' && (c8 == ' ' || c8 == 'T') && c11 == ':' && c14 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = '0';
-            d1 = c7;
-
-            h0 = c9;
-            h1 = c10;
-
-            i0 = c12;
-            i1 = c13;
-
-            s0 = c15;
-            s1 = c16;
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit1(str, off + 7);
+            hour = digit2(str, off + 9);
+            minute = digit2(str, off + 12);
+            second = digit2(str, off + 15);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':') {
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            d0 = c0;
-            d1 = c1;
-
-            h0 = c12;
-            h1 = c13;
-
-            i0 = c15;
-            i1 = c16;
-
-            s0 = '0';
-            s1 = '0';
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit2(str, off + 12);
+            minute = digit2(str, off + 15);
+            second = 0;
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 1:3:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = '0';
-            i1 = c13;
-
-            s0 = c15;
-            s1 = c16;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit1(str, off + 13);
+            second = digit2(str, off + 15);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
             // d MMM yyyy H:mm:s
             // 6 DEC 2020 1:13:4
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = '0';
-            s1 = c16;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit2(str, off + 13);
+            second = digit1(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
             // d MMM yyyy HH:m:s
             // 6 DEC 2020 11:3:4
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = '0';
-            s1 = c16;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit1(str, off + 14);
+            second = digit1(str, off + 16);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
             // dd MMM yyyy H:m:s
             // 16 DEC 2020 1:3:4
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                return null;
-            }
-
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            h0 = '0';
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = '0';
-            s1 = c16;
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit1(str, off + 12);
+            minute = digit1(str, off + 14);
+            second = digit1(str, off + 16);
         } else {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c4;
-            m1 = c5;
-
-            d0 = c6;
-            d1 = c7;
-
-            h0 = c8;
-            h1 = c9;
-
-            i0 = c10;
-            i1 = c11;
-
-            s0 = c12;
-            s1 = c13;
-
-            if (c14 >= '0' && c14 <= '9'
-                    && c15 >= '0' && c15 <= '9'
-                    && c16 >= '0' && c16 <= '9'
-            ) {
-                nanoOfSecond = ((c14 - '0') * 100 + (c15 - '0') * 10 + (c16 - '0')) * 1_000_000;
-            } else {
-                return null;
-            }
+            year = digit4(str, off);
+            month = digit2(str, off + 4);
+            dom = digit2(str, off + 6);
+            hour = digit2(str, off + 8);
+            minute = digit2(str, off + 10);
+            second = digit2(str, off + 12);
+            nanoOfSecond = readNanos(str, 3, off + 14);
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
+        return (year | month | dom | hour | minute | second | nanoOfSecond) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
     }
 
     /**
@@ -3569,7 +1790,6 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        byte c0 = str[off];
         byte c1 = str[off + 1];
         byte c2 = str[off + 2];
         byte c3 = str[off + 3];
@@ -3587,303 +1807,86 @@ public class DateUtils {
         byte c15 = str[off + 15];
         byte c16 = str[off + 16];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
-        int nanoOfSecond = 0;
+        int year, month, dom, hour, minute, second = 0, nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c5;
-            m1 = (char) c6;
-
-            d0 = (char) c8;
-            d1 = (char) c9;
-
-            h0 = (char) c11;
-            h1 = (char) c12;
-
-            i0 = (char) c14;
-            i1 = (char) c15;
-
-            s0 = '0';
-            s1 = '0';
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = 0;
         } else if (c4 == '-' && c6 == '-' && (c8 == ' ' || c8 == 'T') && c11 == ':' && c14 == ':') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = '0';
-            m1 = (char) c5;
-
-            d0 = '0';
-            d1 = (char) c7;
-
-            h0 = (char) c9;
-            h1 = (char) c10;
-
-            i0 = (char) c12;
-            i1 = (char) c13;
-
-            s0 = (char) c15;
-            s1 = (char) c16;
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit1(str, off + 7);
+            hour = digit2(str, off + 9);
+            minute = digit2(str, off + 12);
+            second = digit2(str, off + 15);
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':') {
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit2(str, off + 12);
+            minute = digit2(str, off + 15);
+            second = 0;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
+            // d MMM yyyy H:m:ss
+            // 6 DEC 2020 1:3:14
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit1(str, off + 13);
+            second = digit2(str, off + 15);
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
+            // d MMM yyyy H:mm:s
+            // 6 DEC 2020 1:13:4
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit2(str, off + 13);
+            second = digit1(str, off + 16);
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
+            // d MMM yyyy HH:m:s
+            // 6 DEC 2020 11:3:4
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit1(str, off + 14);
+            second = digit1(str, off + 16);
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
+            // dd MMM yyyy H:m:s
+            // 16 DEC 2020 1:3:4
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit1(str, off + 12);
+            minute = digit1(str, off + 14);
+            second = digit1(str, off + 16);
         } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
                 && c9 == -26 && c10 == -100 && c11 == -120 // 月
                 && c14 == -26 && c15 == -105 && c16 == -91 // 日
         ) {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c7;
-            m1 = (char) c8;
-
-            d0 = (char) c12;
-            d1 = (char) c13;
-
-            h0 = '0';
-            h1 = '0';
-
-            i0 = '0';
-            i1 = '0';
-
-            s0 = '0';
-            s1 = '0';
-        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':') {
-            y0 = (char) c7;
-            y1 = (char) c8;
-            y2 = (char) c9;
-            y3 = (char) c10;
-
-            int month = DateUtils.month((char) c3, (char) c4, (char) c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 17);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            d0 = (char) c0;
-            d1 = (char) c1;
-
-            h0 = (char) c12;
-            h1 = (char) c13;
-
-            i0 = (char) c15;
-            i1 = (char) c16;
-
-            s0 = '0';
-            s1 = '0';
-        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
-            // d MMM yyyy H:m:ss
-            // 6 DEC 2020 1:3:14
-            d0 = '0';
-            d1 = (char) c0;
-
-            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 17);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = (char) c6;
-            y1 = (char) c7;
-            y2 = (char) c8;
-            y3 = (char) c9;
-
-            h0 = '0';
-            h1 = (char) c11;
-
-            i0 = '0';
-            i1 = (char) c13;
-
-            s0 = (char) c15;
-            s1 = (char) c16;
-        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
-            // d MMM yyyy H:mm:s
-            // 6 DEC 2020 1:13:4
-            d0 = '0';
-            d1 = (char) c0;
-
-            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 17);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = (char) c6;
-            y1 = (char) c7;
-            y2 = (char) c8;
-            y3 = (char) c9;
-
-            h0 = '0';
-            h1 = (char) c11;
-
-            i0 = (char) c13;
-            i1 = (char) c14;
-
-            s0 = '0';
-            s1 = (char) c16;
-        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
-            // d MMM yyyy HH:m:s
-            // 6 DEC 2020 11:3:4
-            d0 = '0';
-            d1 = (char) c0;
-
-            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 17);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = (char) c6;
-            y1 = (char) c7;
-            y2 = (char) c8;
-            y3 = (char) c9;
-
-            h0 = (char) c11;
-            h1 = (char) c12;
-
-            i0 = '0';
-            i1 = (char) c14;
-
-            s0 = '0';
-            s1 = (char) c16;
-        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
-            // dd MMM yyyy H:m:s
-            // 16 DEC 2020 1:3:4
-            d0 = (char) c0;
-            d1 = (char) c1;
-
-            int month = DateUtils.month((char) c3, (char) c4, (char) c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 17);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = (char) c7;
-            y1 = (char) c8;
-            y2 = (char) c9;
-            y3 = (char) c10;
-
-            h0 = '0';
-            h1 = (char) c12;
-
-            i0 = '0';
-            i1 = (char) c14;
-
-            s0 = '0';
-            s1 = (char) c16;
+            year = digit4(str, off);
+            month = digit2(str, off + 7);
+            dom = digit2(str, off + 12);
+            hour = 0;
+            minute = 0;
         } else {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c4;
-            m1 = (char) c5;
-
-            d0 = (char) c6;
-            d1 = (char) c7;
-
-            h0 = (char) c8;
-            h1 = (char) c9;
-
-            i0 = (char) c10;
-            i1 = (char) c11;
-
-            s0 = (char) c12;
-            s1 = (char) c13;
-
-            if (c14 >= '0' && c14 <= '9'
-                    && c15 >= '0' && c15 <= '9'
-                    && c16 >= '0' && c16 <= '9'
-            ) {
-                nanoOfSecond = ((c14 - '0') * 100 + (c15 - '0') * 10 + (c16 - '0')) * 1_000_000;
-            } else {
-                return null;
-            }
+            year = digit4(str, off);
+            month = digit2(str, off + 4);
+            dom = digit2(str, off + 6);
+            hour = digit2(str, off + 8);
+            minute = digit2(str, off + 10);
+            second = digit2(str, off + 12);
+            nanoOfSecond = readNanos(str, 3, off + 14);
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            String input = new String(str, off, 17);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            String input = new String(str, off, 17);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            String input = new String(str, off, 17);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            String input = new String(str, off, 17);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            String input = new String(str, off, 17);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            String input = new String(str, off, 17);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
+        return (year | month | dom | hour | minute | second | nanoOfSecond) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
     }
 
     /**
@@ -3904,7 +1907,6 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -3912,7 +1914,6 @@ public class DateUtils {
         char c5 = str[off + 5];
         char c6 = str[off + 6];
         char c7 = str[off + 7];
-        char c8 = str[off + 8];
         char c9 = str[off + 9];
         char c10 = str[off + 10];
         char c11 = str[off + 11];
@@ -3921,345 +1922,105 @@ public class DateUtils {
         char c14 = str[off + 14];
         char c15 = str[off + 15];
         char c16 = str[off + 16];
-        char c17 = str[off + 17];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        int year, month, dom, hour, minute, second;
         if (c4 == '-' && c6 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-
-            h0 = c10;
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit2(str, off + 7);
+            hour = digit2(str, off + 10);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-
-            h0 = c10;
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit1(str, off + 8);
+            hour = digit2(str, off + 10);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit1(str, off + 11);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit1(str, off + 14);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit1(str, off + 17);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
             // d MMM yyyy H:mm:ss
             // 6 DEC 2020 2:13:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit1(str, off + 14);
+            second = digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c16 == ':') {
             // dd MMM yyyy HH:m:s
             // 16 DEC 2020 12:3:4
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            h0 = c12;
-            h1 = c13;
-
-            i0 = '0';
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit2(str, off + 12);
+            minute = digit1(str, off + 15);
+            second = digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c16 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            h0 = '0';
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit1(str, off + 12);
+            minute = digit2(str, off + 14);
+            second = digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            h0 = '0';
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit1(str, off + 12);
+            minute = digit1(str, off + 14);
+            second = digit2(str, off + 16);
         } else {
             String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second);
+        return (year | month | dom | hour | minute | second) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     /**
@@ -4280,362 +2041,120 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
-        char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
-        char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
-        char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
-        char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
-        char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
-        char c16 = (char) str[off + 16];
-        char c17 = (char) str[off + 17];
+        byte c1 = str[off + 1];
+        byte c2 = str[off + 2];
+        byte c3 = str[off + 3];
+        byte c4 = str[off + 4];
+        byte c5 = str[off + 5];
+        byte c6 = str[off + 6];
+        byte c7 = str[off + 7];
+        byte c9 = str[off + 9];
+        byte c10 = str[off + 10];
+        byte c11 = str[off + 11];
+        byte c12 = str[off + 12];
+        byte c13 = str[off + 13];
+        byte c14 = str[off + 14];
+        byte c15 = str[off + 15];
+        byte c16 = str[off + 16];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        int year, month, dom, hour, minute, second;
         if (c4 == '-' && c6 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-
-            h0 = c10;
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit1(str, off + 5);
+            dom = digit2(str, off + 7);
+            hour = digit2(str, off + 10);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-
-            h0 = c10;
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit1(str, off + 8);
+            hour = digit2(str, off + 10);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit1(str, off + 11);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit1(str, off + 14);
+            second = digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit1(str, off + 17);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
             // d MMM yyyy H:mm:ss
             // 6 DEC 2020 2:13:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit1(str, off + 11);
+            minute = digit2(str, off + 13);
+            second = digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit1(str, off + 14);
+            second = digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c16 == ':') {
             // dd MMM yyyy HH:m:s
             // 16 DEC 2020 12:3:4
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            h0 = c12;
-            h1 = c13;
-
-            i0 = '0';
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit2(str, off + 12);
+            minute = digit1(str, off + 15);
+            second = digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c16 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            h0 = '0';
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit1(str, off + 12);
+            minute = digit2(str, off + 14);
+            second = digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            d0 = c0;
-            d1 = c1;
-
-            int month = DateUtils.month(c3, c4, c5);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = new String(str, off, 18);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = c7;
-            y1 = c8;
-            y2 = c9;
-            y3 = c10;
-
-            h0 = '0';
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
+            dom = digit2(str, off);
+            month = DateUtils.month(c3, c4, c5);
+            year = digit4(str, off + 7);
+            hour = digit1(str, off + 12);
+            minute = digit1(str, off + 14);
+            second = digit2(str, off + 16);
         } else {
             String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            String input = new String(str, off, 18);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second);
+        return (year | month | dom | hour | minute | second) < 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     /**
@@ -4649,118 +2168,48 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
         char c4 = str[off + 4];
         char c5 = str[off + 5];
-        char c6 = str[off + 6];
         char c7 = str[off + 7];
-        char c8 = str[off + 8];
-        char c9 = str[off + 9];
         char c10 = str[off + 10];
-        char c11 = str[off + 11];
-        char c12 = str[off + 12];
         char c13 = str[off + 13];
-        char c14 = str[off + 14];
-        char c15 = str[off + 15];
         char c16 = str[off + 16];
-        char c17 = str[off + 17];
-        char c18 = str[off + 18];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
-        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
+        int year, month, dom, hour, minute, second;
+        if (((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/'))
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':'
+        ) {
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit2(str, off + 17);
         } else if (c2 == '/' && c5 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
+            dom = digit2(str, off);
+            month = digit2(str, off + 3);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit2(str, off + 17);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                m0 = '0';
-                m1 = '0';
-            }
-
-            d0 = '0';
-            d1 = c0;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit2(str, off + 17);
         } else {
             return null;
         }
 
-        return localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1);
+        return (year | month | dom | hour | minute | second) <= 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     public static LocalDateTime parseLocalDateTime19(String str, int off) {
@@ -4794,118 +2243,48 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
-        char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
-        char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
-        char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
-        char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
-        char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
-        char c16 = (char) str[off + 16];
-        char c17 = (char) str[off + 17];
-        char c18 = (char) str[off + 18];
+        byte c1 = str[off + 1];
+        byte c2 = str[off + 2];
+        byte c3 = str[off + 3];
+        byte c4 = str[off + 4];
+        byte c5 = str[off + 5];
+        byte c7 = str[off + 7];
+        byte c10 = str[off + 10];
+        byte c13 = str[off + 13];
+        byte c16 = str[off + 16];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
-        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
+        int year, month, dom, hour, minute, second;
+        if (((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/'))
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':'
+        ) {
+            year = digit4(str, off);
+            month = digit2(str, off + 5);
+            dom = digit2(str, off + 8);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit2(str, off + 17);
         } else if (c2 == '/' && c5 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
+            dom = digit2(str, off);
+            month = digit2(str, off + 3);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit2(str, off + 17);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                m0 = '0';
-                m1 = '0';
-            }
-
-            d0 = '0';
-            d1 = c0;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
+            dom = digit1(str, off);
+            month = DateUtils.month(c2, c3, c4);
+            year = digit4(str, off + 6);
+            hour = digit2(str, off + 11);
+            minute = digit2(str, off + 14);
+            second = digit2(str, off + 17);
         } else {
             return null;
         }
 
-        return localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1);
+        return (year | month | dom | hour | minute | second) <= 0
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     public static LocalDateTime parseLocalDateTime20(char[] str, int off) {
@@ -11557,6 +8936,10 @@ public class DateUtils {
         }
 
         return new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+    }
+
+    private static int month(byte c0, byte c1, byte c2) {
+        return month((char) c0, (char) c1, (char) c2);
     }
 
     public static int month(char c0, char c1, char c2) {

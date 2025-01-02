@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
@@ -2037,13 +2038,30 @@ public class DateUtilsTest {
 
     @Test
     public void parseLocalDateTime16_2() {
+        LocalDateTime expected = LocalDateTime.of(2021, 7, 8, 4, 5, 6);
         assertEquals(
-                LocalDateTime.of(2021, 7, 8, 4, 5, 6),
+                expected,
                 DateUtils.parseLocalDateTime("2021-07-08T4:5:6", 0, 16)
         );
         assertEquals(
-                LocalDateTime.of(2021, 7, 8, 4, 5, 6),
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08T4:5:6".getBytes(StandardCharsets.UTF_8), 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08T4:5:6".toCharArray(), 0, 16)
+        );
+        assertEquals(
+                expected,
                 DateUtils.parseLocalDateTime("2021-07-08 4:5:6", 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08 4:5:6".toCharArray(), 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08 4:5:6".getBytes(StandardCharsets.UTF_8), 0, 16)
         );
     }
 
