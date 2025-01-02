@@ -5,6 +5,7 @@ import com.alibaba.fastjson2_vo.Integer1;
 import com.alibaba.fastjson2_vo.Long1;
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -168,6 +169,13 @@ public class JSONArrayTest {
         assertEquals("123", jsonArray.getString(0));
         assertEquals(Integer.valueOf(123), jsonArray.getInteger(0));
         assertEquals(Long.valueOf(123), jsonArray.getLong(0));
+    }
+
+    @Test
+    public void test_parse_from_reader() {
+        String str = "[12,34]";
+        JSONArray jsonArray = JSON.parseArray(new StringReader(str));
+        assertEquals(34, jsonArray.getInteger(1));
     }
 
     @Test
