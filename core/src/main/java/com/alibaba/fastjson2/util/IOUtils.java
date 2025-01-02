@@ -1430,7 +1430,7 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Long.reverseBytes(x);
         }
-        if ((x & 0x30003000300030L) == 0) {
+        if ((x & 0xF000F000F000F0L) != 0x30003000300030L) {
             return -1;
         }
         long d = x & 0x0F000F000F000FL;
@@ -1448,7 +1448,7 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
-        if ((x & 0x30303030) == 0) {
+        if ((x & 0xF0F0F0F0) != 0x30303030) {
             return -1;
         }
         int d = x & 0x0F0F0F0F;
@@ -1466,7 +1466,7 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
-        if ((x & 0x300030) == 0) {
+        if ((x & 0xF000F0) != 0x300030) {
             return -1;
         }
         int d = x & 0x0F000F;
@@ -1482,7 +1482,7 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             x = Short.reverseBytes(x);
         }
-        if ((x & 0x3030) == 0) {
+        if ((x & 0xF0F0) != 0x3030) {
             return -1;
         }
         int d = x & 0x0F0F;
