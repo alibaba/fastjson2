@@ -233,11 +233,10 @@ class JSONWriterUTF8
 
     @Override
     public final void startObject() {
-        if (level >= context.maxLevel) {
-            throw new JSONException("level too large : " + level);
+        if (++level > context.maxLevel) {
+            overflowLevel();
         }
 
-        level++;
         startObject = true;
 
         int off = this.off;
@@ -290,11 +289,10 @@ class JSONWriterUTF8
 
     @Override
     public final void startArray() {
-        if (level >= context.maxLevel) {
-            throw new JSONException("level too large : " + level);
+        if (++level > context.maxLevel) {
+            overflowLevel();
         }
 
-        level++;
         int off = this.off;
         int minCapacity = off + 3 + pretty * level;
         byte[] bytes = this.bytes;
@@ -2930,7 +2928,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public final void write(JSONObject map) {
+    public final void write(Map<?, ?> map) {
         if (pretty != PRETTY_NON) {
             super.write(map);
             return;

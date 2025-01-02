@@ -2659,21 +2659,6 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void write(JSONObject object) {
-        if (object == null) {
-            writeNull();
-            return;
-        }
-
-        startObject();
-        for (Map.Entry entry : object.entrySet()) {
-            writeAny(entry.getKey());
-            writeAny(entry.getValue());
-        }
-        endObject();
-    }
-
-    @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
     }
