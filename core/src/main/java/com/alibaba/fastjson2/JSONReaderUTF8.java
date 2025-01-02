@@ -6106,79 +6106,13 @@ class JSONReaderUTF8
                         && bytes[offset + 13] == ':'
                         && bytes[offset + 16] == ':'
                 ) {
-                    byte y0 = bytes[offset];
-                    byte y1 = bytes[offset + 1];
-                    byte y2 = bytes[offset + 2];
-                    byte y3 = bytes[offset + 3];
-                    byte m0 = bytes[offset + 5];
-                    byte m1 = bytes[offset + 6];
-                    byte d0 = bytes[offset + 8];
-                    byte d1 = bytes[offset + 9];
-                    byte h0 = bytes[offset + 11];
-                    byte h1 = bytes[offset + 12];
-                    byte i0 = bytes[offset + 14];
-                    byte i1 = bytes[offset + 15];
-                    byte s0 = bytes[offset + 17];
-                    byte s1 = bytes[offset + 18];
-
-                    int year;
-                    int month;
-                    if (y0 >= '0' && y0 <= '9'
-                            && y1 >= '0' && y1 <= '9'
-                            && y2 >= '0' && y2 <= '9'
-                            && y3 >= '0' && y3 <= '9'
-                    ) {
-                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    if (m0 >= '0' && m0 <= '9'
-                            && m1 >= '0' && m1 <= '9'
-                    ) {
-                        month = (m0 - '0') * 10 + (m1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int dom;
-                    if (d0 >= '0' && d0 <= '9'
-                            && d1 >= '0' && d1 <= '9'
-                    ) {
-                        dom = (d0 - '0') * 10 + (d1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int hour;
-                    if (h0 >= '0' && h0 <= '9'
-                            && h1 >= '0' && h1 <= '9'
-                    ) {
-                        hour = (h0 - '0') * 10 + (h1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int minute;
-                    if (i0 >= '0' && i0 <= '9'
-                            && i1 >= '0' && i1 <= '9'
-                    ) {
-                        minute = (i0 - '0') * 10 + (i1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int second;
-                    if (s0 >= '0' && s0 <= '9'
-                            && s1 >= '0' && s1 <= '9'
-                    ) {
-                        second = (s0 - '0') * 10 + (s1 - '0');
-                    } else {
+                    int year = IOUtils.digit4(bytes, offset);
+                    int month = IOUtils.digit2(bytes, offset + 5);
+                    int dom = IOUtils.digit2(bytes, offset + 8);
+                    int hour = IOUtils.digit2(bytes, offset + 11);
+                    int minute = IOUtils.digit2(bytes, offset + 14);
+                    int second = IOUtils.digit2(bytes, offset + 17);
+                    if ((year | month | dom | minute | second) < 0) {
                         ZonedDateTime zdt = readZonedDateTime();
                         return zdt == null ? null : zdt.toOffsetDateTime();
                     }

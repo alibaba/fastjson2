@@ -12386,119 +12386,47 @@ public class DateUtils {
     }
 
     public static int readNanos(final char[] chars, final int len, final int offset) {
-        switch (len) {
-            case 1:
-                return 100000000 * (chars[offset] - 48);
-            case 2:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48);
-            case 3:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48)
-                        + 1000000 * (chars[offset + 2] - 48);
-            case 4:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48)
-                        + 1000000 * (chars[offset + 2] - 48)
-                        + 100000 * (chars[offset + 3] - 48);
-            case 5:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48)
-                        + 1000000 * (chars[offset + 2] - 48)
-                        + 100000 * (chars[offset + 3] - 48)
-                        + 10000 * (chars[offset + 4] - 48);
-            case 6:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48)
-                        + 1000000 * (chars[offset + 2] - 48)
-                        + 100000 * (chars[offset + 3] - 48)
-                        + 10000 * (chars[offset + 4] - 48)
-                        + 1000 * (chars[offset + 5] - 48);
-            case 7:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48)
-                        + 1000000 * (chars[offset + 2] - 48)
-                        + 100000 * (chars[offset + 3] - 48)
-                        + 10000 * (chars[offset + 4] - 48)
-                        + 1000 * (chars[offset + 5] - 48)
-                        + 100 * (chars[offset + 6] - 48);
-            case 8:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48)
-                        + 1000000 * (chars[offset + 2] - 48)
-                        + 100000 * (chars[offset + 3] - 48)
-                        + 10000 * (chars[offset + 4] - 48)
-                        + 1000 * (chars[offset + 5] - 48)
-                        + 100 * (chars[offset + 6] - 48)
-                        + 10 * (chars[offset + 7] - 48);
-            default:
-                return 100000000 * (chars[offset] - 48)
-                        + 10000000 * (chars[offset + 1] - 48)
-                        + 1000000 * (chars[offset + 2] - 48)
-                        + 100000 * (chars[offset + 3] - 48)
-                        + 10000 * (chars[offset + 4] - 48)
-                        + 1000 * (chars[offset + 5] - 48)
-                        + 100 * (chars[offset + 6] - 48)
-                        + 10 * (chars[offset + 7] - 48)
-                        + chars[offset + 8] - 48;
+        int v = 0;
+        for (int i = 0, power = 100_000_000; i < len; i++, power /= 10) {
+            int d = chars[offset + i] - '0';
+            if (d < 0 | d > 9) {
+                return -1;
+            }
+            v = v + d * power;
         }
+        return v;
     }
 
     public static int readNanos(final byte[] bytes, final int len, final int offset) {
-        switch (len) {
-            case 1:
-                return 100000000 * (bytes[offset] - 48);
-            case 2:
-                return 100000000 * (bytes[offset] - 48) + 10000000 * (bytes[offset + 1] - 48);
-            case 3:
-                return 100000000 * (bytes[offset] - 48)
-                        + 10000000 * (bytes[offset + 1] - 48)
-                        + 1000000 * (bytes[offset + 2] - 48);
-            case 4:
-                return 100000000 * (bytes[offset] - 48)
-                        + 10000000 * (bytes[offset + 1] - 48)
-                        + 1000000 * (bytes[offset + 2] - 48)
-                        + 100000 * (bytes[offset + 3] - 48);
-            case 5:
-                return 100000000 * (bytes[offset] - 48)
-                        + 10000000 * (bytes[offset + 1] - 48)
-                        + 1000000 * (bytes[offset + 2] - 48)
-                        + 100000 * (bytes[offset + 3] - 48)
-                        + 10000 * (bytes[offset + 4] - 48);
-            case 6:
-                return 100000000 * (bytes[offset] - 48)
-                        + 10000000 * (bytes[offset + 1] - 48)
-                        + 1000000 * (bytes[offset + 2] - 48)
-                        + 100000 * (bytes[offset + 3] - 48)
-                        + 10000 * (bytes[offset + 4] - 48)
-                        + 1000 * (bytes[offset + 5] - 48);
-            case 7:
-                return 100000000 * (bytes[offset] - 48)
-                        + 10000000 * (bytes[offset + 1] - 48)
-                        + 1000000 * (bytes[offset + 2] - 48)
-                        + 100000 * (bytes[offset + 3] - 48)
-                        + 10000 * (bytes[offset + 4] - 48)
-                        + 1000 * (bytes[offset + 5] - 48)
-                        + 100 * (bytes[offset + 6] - 48);
-            case 8:
-                return 100000000 * (bytes[offset] - 48)
-                        + 10000000 * (bytes[offset + 1] - 48)
-                        + 1000000 * (bytes[offset + 2] - 48)
-                        + 100000 * (bytes[offset + 3] - 48)
-                        + 10000 * (bytes[offset + 4] - 48)
-                        + 1000 * (bytes[offset + 5] - 48)
-                        + 100 * (bytes[offset + 6] - 48)
-                        + 10 * (bytes[offset + 7] - 48);
-            default:
-                return 100000000 * (bytes[offset] - 48)
-                        + 10000000 * (bytes[offset + 1] - 48)
-                        + 1000000 * (bytes[offset + 2] - 48)
-                        + 100000 * (bytes[offset + 3] - 48)
-                        + 10000 * (bytes[offset + 4] - 48)
-                        + 1000 * (bytes[offset + 5] - 48)
-                        + 100 * (bytes[offset + 6] - 48)
-                        + 10 * (bytes[offset + 7] - 48)
-                        + bytes[offset + 8] - 48;
+        int v = 0;
+        long address = ARRAY_BYTE_BASE_OFFSET + offset;
+        for (int i = 0; i < len; i++) {
+            int d = UNSAFE.getByte(bytes, address + i) - '0';
+            if (d < 0 | d > 9) {
+                return -1;
+            }
+            v = v * 10 + d;
         }
+        v *= POWERS[(9 - len) & 0xF];
+        return v;
     }
+
+    private static final int[] POWERS = {
+            1,
+            10,
+            100,
+            1000,
+            10000,
+            100000,
+            1000000,
+            10000000,
+            100000000,
+            1000000000,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+    };
 }

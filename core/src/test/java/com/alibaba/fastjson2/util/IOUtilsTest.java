@@ -143,4 +143,70 @@ public class IOUtilsTest {
             assertEquals(str_n, new String(chars_n));
         }
     }
+
+    @Test
+    public void digit4() {
+        byte[] bytes = new byte[4];
+        for (int x0 = -1; x0 <= 10; x0++) {
+            bytes[0] = (byte) (x0 + '0');
+            for (int x1 = -1; x1 <= 10; x1++) {
+                bytes[1] = (byte) (x1 + '0');
+                for (int x2 = -1; x2 <= 10; x2++) {
+                    bytes[2] = (byte) (x2 + '0');
+                    for (int x3 = -1; x3 <= 10; x3++) {
+                        bytes[3] = (byte) (x3 + '0');
+                        int d4 = IOUtils.digit4(bytes, 0);
+                        int expect;
+                        if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9 || x3 < 0 || x3 > 9) {
+                            expect = -1;
+                        } else {
+                            expect = x0 * 1000 + x1 * 100 + x2 * 10 + x3;
+                        }
+                        assertEquals(expect, d4);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void digit3() {
+        byte[] bytes = new byte[4];
+        for (int x0 = -1; x0 <= 10; x0++) {
+            bytes[0] = (byte) (x0 + '0');
+            for (int x1 = -1; x1 <= 10; x1++) {
+                bytes[1] = (byte) (x1 + '0');
+                for (int x2 = -1; x2 <= 10; x2++) {
+                    bytes[2] = (byte) (x2 + '0');
+                    int d3 = IOUtils.digit3(bytes, 0);
+                    int expect;
+                    if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9) {
+                        expect = -1;
+                    } else {
+                        expect = x0 * 100 + x1 * 10 + x2;
+                    }
+                    assertEquals(expect, d3);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void digit2() {
+        byte[] bytes = new byte[2];
+        for (int x0 = -1; x0 <= 10; x0++) {
+            bytes[0] = (byte) (x0 + '0');
+            for (int x1 = -1; x1 <= 10; x1++) {
+                bytes[1] = (byte) (x1 + '0');
+                int d2 = IOUtils.digit2(bytes, 0);
+                int expect;
+                if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9) {
+                    expect = -1;
+                } else {
+                    expect = x0 * 10 + x1;
+                }
+                assertEquals(expect, d2);
+            }
+        }
+    }
 }
