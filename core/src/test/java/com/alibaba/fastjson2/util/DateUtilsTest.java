@@ -2625,27 +2625,27 @@ public class DateUtilsTest {
 
     @Test
     public void month() {
-        assertEquals(0, DateUtils.month('J', 'u', 'a'));
-        assertEquals(0, DateUtils.month('J', 'a', 'a'));
-        assertEquals(0, DateUtils.month('F', 'a', 'a'));
-        assertEquals(0, DateUtils.month('F', 'e', 'a'));
-        assertEquals(0, DateUtils.month('A', 'e', 'a'));
-        assertEquals(0, DateUtils.month('A', 'p', 'a'));
-        assertEquals(0, DateUtils.month('M', 'p', 'a'));
-        assertEquals(0, DateUtils.month('M', 'a', 'a'));
-        assertEquals(0, DateUtils.month('J', 'a', 'a'));
-        assertEquals(0, DateUtils.month('J', 'u', 'a'));
-        assertEquals(0, DateUtils.month('A', 'a', 'a'));
-        assertEquals(0, DateUtils.month('A', 'u', 'a'));
-        assertEquals(0, DateUtils.month('S', 'u', 'a'));
-        assertEquals(0, DateUtils.month('S', 'e', 'a'));
-        assertEquals(0, DateUtils.month('O', 'e', 'a'));
-        assertEquals(0, DateUtils.month('O', 'c', 'a'));
-        assertEquals(0, DateUtils.month('N', 'c', 'a'));
-        assertEquals(0, DateUtils.month('N', 'o', 'a'));
-        assertEquals(0, DateUtils.month('D', 'o', 'a'));
-        assertEquals(0, DateUtils.month('D', 'e', 'a'));
-        assertEquals(0, DateUtils.month('K', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('F', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('F', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'p', 'a'));
+        assertEquals(-1, DateUtils.month('M', 'p', 'a'));
+        assertEquals(-1, DateUtils.month('M', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('S', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('S', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('O', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('O', 'c', 'a'));
+        assertEquals(-1, DateUtils.month('N', 'c', 'a'));
+        assertEquals(-1, DateUtils.month('N', 'o', 'a'));
+        assertEquals(-1, DateUtils.month('D', 'o', 'a'));
+        assertEquals(-1, DateUtils.month('D', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('K', 'e', 'a'));
 
         String[] strings = new String[]{
                 "Jan",
