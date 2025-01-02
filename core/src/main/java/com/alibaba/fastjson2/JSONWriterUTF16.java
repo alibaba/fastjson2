@@ -130,11 +130,10 @@ class JSONWriterUTF16
 
     @Override
     public final void startObject() {
-        if (level >= context.maxLevel) {
-            throw new JSONException("level too large : " + level);
+        if (++level > context.maxLevel) {
+            overflowLevel();
         }
 
-        level++;
         startObject = true;
 
         int off = this.off;
@@ -190,11 +189,10 @@ class JSONWriterUTF16
 
     @Override
     public final void startArray() {
-        if (level >= context.maxLevel) {
-            throw new JSONException("level too large : " + level);
+        if (++level > context.maxLevel) {
+            overflowLevel();
         }
 
-        level++;
         int off = this.off;
         int minCapacity = off + 3 + pretty * level;
         char[] chars = this.chars;
@@ -1533,7 +1531,7 @@ class JSONWriterUTF16
     @Override
     public final void writeRaw(char ch) {
         if (off == chars.length) {
-            ensureCapacity(off + 1);
+            grow0(off + 1);
         }
         chars[off++] = ch;
     }
@@ -1996,12 +1994,17 @@ class JSONWriterUTF16
 
     final void ensureCapacity(int minCapacity) {
         if (minCapacity > chars.length) {
-            grow(minCapacity);
+            grow0(minCapacity);
         }
     }
 
     private char[] grow(int minCapacity) {
-        return chars = Arrays.copyOf(chars, newCapacity(minCapacity, chars.length));
+        grow0(minCapacity);
+        return chars;
+    }
+
+    private void grow0(int minCapacity) {
+        chars = Arrays.copyOf(chars, newCapacity(minCapacity, chars.length));
     }
 
     public final void writeInt32(int[] value) {
@@ -2941,7 +2944,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public final void write(JSONObject map) {
+    public final void write(Map<?, ?> map) {
         if (pretty != PRETTY_NON) {
             super.write(map);
             return;
@@ -2958,10 +2961,7 @@ class JSONWriterUTF16
             return;
         }
 
-        if (off == chars.length) {
-            grow(off + 1);
-        }
-        chars[off++] = '{';
+        writeRaw('{');
 
         boolean first = true;
         for (Map.Entry entry : map.entrySet()) {
@@ -2971,10 +2971,7 @@ class JSONWriterUTF16
             }
 
             if (!first) {
-                if (off == chars.length) {
-                    grow(off + 1);
-                }
-                chars[off++] = ',';
+                writeRaw(',');
             }
 
             first = false;
@@ -2985,10 +2982,7 @@ class JSONWriterUTF16
                 writeAny(key);
             }
 
-            if (off == chars.length) {
-                grow(off + 1);
-            }
-            chars[off++] = ':';
+            writeRaw(':');
 
             if (value == null) {
                 writeNull();
@@ -3035,7 +3029,7 @@ class JSONWriterUTF16
             objectWriter.write(this, value, null, null, 0);
         }
 
-        endObject();
+        writeRaw('}');
     }
 
     @Override

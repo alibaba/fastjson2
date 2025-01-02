@@ -265,7 +265,7 @@ public class ObjectReaderCreatorASM
                 }
 
                 Class fieldClass = fieldReader.fieldClass;
-                if (!Modifier.isPublic(fieldClass.getModifiers())) {
+                if (fieldClass != null && !Modifier.isPublic(fieldClass.getModifiers())) {
                     match = false;
                     break;
                 }

@@ -1616,47 +1616,11 @@ public abstract class JSONWriter
 
     public abstract void write(List array);
 
-    public void write(Map map) {
-        if (map == null) {
-            this.writeNull();
-            return;
-        }
-
-        if (map.isEmpty()) {
-            writeRaw('{', '}');
-            return;
-        }
-
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
-
-        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
-            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
-            objectWriter.write(this, map, null, null, 0);
-            return;
-        }
-
-        write0('{');
-        boolean first = true;
-        for (Map.Entry o : (Iterable<Map.Entry>) map.entrySet()) {
-            if (!first) {
-                write0(',');
-            }
-
-            writeAny(
-                    o.getKey());
-            write0(':');
-            writeAny(
-                    o.getValue());
-
-            first = false;
-        }
-        write0('}');
+    public final void write(JSONObject map) {
+        write((Map) map);
     }
 
-    public void write(JSONObject map) {
+    public void write(Map<?, ?> map) {
         if (map == null) {
             this.writeNull();
             return;
@@ -1666,10 +1630,6 @@ public abstract class JSONWriter
             writeRaw('{', '}');
             return;
         }
-
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
             ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
@@ -2755,5 +2715,9 @@ public abstract class JSONWriter
 
     public void setAttachment(Object attachment) {
         this.attachment = attachment;
+    }
+
+    protected final void overflowLevel() {
+        throw new JSONException("level too large : " + level);
     }
 }

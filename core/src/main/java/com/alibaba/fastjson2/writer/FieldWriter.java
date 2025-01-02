@@ -483,6 +483,14 @@ public abstract class FieldWriter<T>
             return 1;
         }
 
+        if (this.method != null && other.method == null) {
+            return -1;
+        }
+
+        if (this.method == null && other.method != null) {
+            return 1;
+        }
+
         return nameCompare;
     }
 
