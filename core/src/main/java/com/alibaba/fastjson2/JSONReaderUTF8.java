@@ -6957,30 +6957,16 @@ class JSONReaderUTF8
                 && bytes[offset + 18] == '-'
                 && bytes[offset + 23] == '-'
         ) {
-            for (int i = 0; i < 8; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 9; i < 13; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 14; i < 18; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-
-            for (int i = 19; i < 23; i++) {
-                lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 24; i < 36; i++) {
-                lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
+            hi = (IOUtils.hexDigit8(bytes, offset) << 32)
+                    + (((long) IOUtils.hexDigit4(bytes, offset + 9)) << 16)
+                    + IOUtils.hexDigit4(bytes, offset + 14);
+            lo = (((long) IOUtils.hexDigit4(bytes, offset + 19)) << 48)
+                    | (((long) IOUtils.hexDigit4(bytes, offset + 24)) << 32)
+                    | IOUtils.hexDigit8(bytes, offset + 28);
             offset += 37;
         } else if (offset + 32 < bytes.length && bytes[offset + 32] == quote) {
-            for (int i = 0; i < 16; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 16; i < 32; i++) {
-                lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
+            hi = (IOUtils.hexDigit8(bytes, offset) << 32) | IOUtils.hexDigit8(bytes, offset + 8);
+            lo = (IOUtils.hexDigit8(bytes, offset + 16) << 32) | IOUtils.hexDigit8(bytes, offset + 24);
             offset += 33;
         } else {
             String str = readString();

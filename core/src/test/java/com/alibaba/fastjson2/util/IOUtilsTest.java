@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
+import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -315,6 +317,47 @@ public class IOUtilsTest {
                     + ") & " + Integer.toBinaryString(0xF0)
                     + " = " + Integer.toBinaryString(((c & 0xF) + 0x60) & 0xF0));
         }
+    }
+
+    @Test
+    public void printDigitHex() {
+        char[] chars = "0123456789abcdefABCDEF".toCharArray();
+        System.out.println("0xF " + Integer.toBinaryString(0xF));
+        System.out.println("0xF0 " + Integer.toBinaryString(0xF0));
+        System.out.println("0x60" + Integer.toBinaryString(0x60));
+        System.out.println();
+
+        long X = 0xA_000A_0000_0000L;
+        for (char c : chars) {
+            System.out.println(c + "\t" + ((int) c)
+                    + "\t" + Long.toBinaryString(c)
+                    + "\t" + Long.toHexString((c & 0xF0) >> 4)
+                    + "\t" + Long.toHexString(c & 0xF)
+                    + "\t" + Long.toHexString(((c & 0xF0) >> 1))
+                    + "\t" + Long.toHexString(((X >> ((c & 0xF0) >> 1))) & 0xFF)
+                    + "\t" + Long.toHexString(((c & 0xF) + ((X >> ((c & 0xF0) >> 1))) & 0xFF))
+            );
+        }
+    }
+
+    @Test
+    public void hexDigit4() {
+        byte[] bytes = "1234ABcd".getBytes(StandardCharsets.UTF_8);
+        System.out.println(Integer.toHexString(IOUtils.hexDigit4(bytes, 0)));
+    }
+
+    static int hexDigit4(byte[] bytes, int offset) {
+        long v = Long.reverseBytes(UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        v = (v & 0x0F0F0F0F_0F0F0F0FL) + ((((v & 0x40404040_40404040L) >> 2) | ((v & 0x40404040_40404040L) << 1)) >>> 4);
+        v = ((v >>> 28) & 0xF0000000L)
+                + ((v >>> 24) & 0xF000000)
+                + ((v >>> 20) & 0xF00000)
+                + ((v >>> 16) & 0xF0000)
+                + ((v >>> 12) & 0xF000)
+                + ((v >>> 8) & 0xF00)
+                + ((v >>> 4) & 0xF0)
+                + (v & 0xF);
+        return (int) v;
     }
 
     @Test
