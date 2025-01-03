@@ -291,4 +291,29 @@ public class IOUtilsTest {
             }
         }
     }
+
+    @Test
+    public void printDigit() {
+        System.out.println("0xF " + Integer.toBinaryString(0xF));
+        System.out.println("0xF0 " + Integer.toBinaryString(0xF0));
+        System.out.println("0x60" + Integer.toBinaryString(0x60));
+        System.out.println();
+
+        for (int i = 0; i < 10; i++) {
+            char c = (char) ('0' + i);
+            System.out.println(c + " " + Integer.toBinaryString(c)
+                    + " & " + Integer.toBinaryString(0xF0)
+                    + " = " + Integer.toBinaryString(c & 0xF0));
+        }
+
+        System.out.println();
+        for (int i = 0; i < 10; i++) {
+            char c = (char) ('0' + i);
+            System.out.println(c + " ((" + Integer.toBinaryString(c)
+                    + ") & " + Integer.toBinaryString(0xF)
+                    + " + " + Integer.toBinaryString(0x60)
+                    + ") & " + Integer.toBinaryString(0xF0)
+                    + " = " + Integer.toBinaryString(((c & 0xF) + 0x60) & 0xF0));
+        }
+    }
 }

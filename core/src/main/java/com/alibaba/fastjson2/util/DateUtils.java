@@ -2288,494 +2288,257 @@ public class DateUtils {
     }
 
     public static LocalDateTime parseLocalDateTime20(char[] str, int off) {
-        if (off + 19 > str.length) {
+        if (off + 19 > str.length
+                || str[off + 2] != ' '
+                || str[off + 6] != ' '
+                || str[off + 11] != ' '
+                || str[off + 14] != ':'
+                || str[off + 17] != ':'
+        ) {
             return null;
         }
 
-        char c0 = str[off];
-        char c1 = str[off + 1];
-        char c2 = str[off + 2];
-        char c3 = str[off + 3];
-        char c4 = str[off + 4];
-        char c5 = str[off + 5];
-        char c6 = str[off + 6];
-        char c7 = str[off + 7];
-        char c8 = str[off + 8];
-        char c9 = str[off + 9];
-        char c10 = str[off + 10];
-        char c11 = str[off + 11];
-        char c12 = str[off + 12];
-        char c13 = str[off + 13];
-        char c14 = str[off + 14];
-        char c15 = str[off + 15];
-        char c16 = str[off + 16];
-        char c17 = str[off + 17];
-        char c18 = str[off + 18];
-        char c19 = str[off + 19];
+        int dom = digit2(str, off);
+        int month = DateUtils.month(str[off + 3], str[off + 4], str[off + 5]);
+        int year = digit4(str, off + 7);
+        int hour = digit2(str, off + 12);
+        int minute = digit2(str, off + 15);
+        int second = digit2(str, off + 18);
 
-        if (c2 != ' ' || c6 != ' ' || c11 != ' ' || c14 != ':' || c17 != ':') {
-            return null;
-        }
-
-        char m0, m1;
-
-        int month = DateUtils.month(c3, c4, c5);
-        if (month > 0) {
-            m0 = (char) ('0' + month / 10);
-            m1 = (char) ('0' + (month % 10));
-        } else {
-            m0 = '0';
-            m1 = '0';
-        }
-
-        return localDateTime(
-                c7, c8, c9, c10, // yyyy
-                m0, m1,
-                c0, c1, // dd
-                c12, c13, // HH
-                c15, c16, // mm
-                c18, c19 // ss
-        );
+        return (year | month | dom | hour | minute | second) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     public static LocalDateTime parseLocalDateTime20(byte[] str, int off) {
-        if (off + 19 > str.length) {
+        if (off + 19 > str.length
+                || str[off + 2] != ' '
+                || str[off + 6] != ' '
+                || str[off + 11] != ' '
+                || str[off + 14] != ':'
+                || str[off + 17] != ':'
+        ) {
             return null;
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
-        char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
-        char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
-        char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
-        char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
-        char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
-        char c16 = (char) str[off + 16];
-        char c17 = (char) str[off + 17];
-        char c18 = (char) str[off + 18];
-        char c19 = (char) str[off + 19];
+        int dom = digit2(str, off);
+        int month = DateUtils.month(str[off + 3], str[off + 4], str[off + 5]);
+        int year = digit4(str, off + 7);
+        int hour = digit2(str, off + 12);
+        int minute = digit2(str, off + 15);
+        int second = digit2(str, off + 18);
 
-        if (c2 != ' ' || c6 != ' ' || c11 != ' ' || c14 != ':' || c17 != ':') {
-            return null;
-        }
-
-        char m0, m1;
-
-        int month = DateUtils.month(c3, c4, c5);
-        if (month > 0) {
-            m0 = (char) ('0' + month / 10);
-            m1 = (char) ('0' + (month % 10));
-        } else {
-            m0 = '0';
-            m1 = '0';
-        }
-
-        return localDateTime(
-                c7, c8, c9, c10, // yyyy
-                m0, m1,
-                c0, c1, // dd
-                c12, c13, // HH
-                c15, c16, // mm
-                c18, c19 // ss
-        );
+        return (year | month | dom | hour | minute | second) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     public static LocalDateTime parseLocalDateTime26(byte[] str, int off) {
-        if (off + 26 > str.length) {
+        byte c10;
+        if (off + 26 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
-        char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
-        char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
-        char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
-        char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
-        char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
-        char c16 = (char) str[off + 16];
-        char c17 = (char) str[off + 17];
-        char c18 = (char) str[off + 18];
-        char c19 = (char) str[off + 19];
-        char c20 = (char) str[off + 20];
-        char c21 = (char) str[off + 21];
-        char c22 = (char) str[off + 22];
-        char c23 = (char) str[off + 23];
-        char c24 = (char) str[off + 24];
-        char c25 = (char) str[off + 25];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 6, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // HH
-                c14, c15, // mm
-                c17, c18, // ss
-                c20, c21, c22, c23, c24, c25, '0', '0', '0'
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTime26(char[] str, int off) {
-        if (off + 26 > str.length) {
+        char c10;
+        if (off + 26 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = str[off];
-        char c1 = str[off + 1];
-        char c2 = str[off + 2];
-        char c3 = str[off + 3];
-        char c4 = str[off + 4];
-        char c5 = str[off + 5];
-        char c6 = str[off + 6];
-        char c7 = str[off + 7];
-        char c8 = str[off + 8];
-        char c9 = str[off + 9];
-        char c10 = str[off + 10];
-        char c11 = str[off + 11];
-        char c12 = str[off + 12];
-        char c13 = str[off + 13];
-        char c14 = str[off + 14];
-        char c15 = str[off + 15];
-        char c16 = str[off + 16];
-        char c17 = str[off + 17];
-        char c18 = str[off + 18];
-        char c19 = str[off + 19];
-        char c20 = str[off + 20];
-        char c21 = str[off + 21];
-        char c22 = str[off + 22];
-        char c23 = str[off + 23];
-        char c24 = str[off + 24];
-        char c25 = str[off + 25];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 6, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // HH
-                c14, c15, // mm
-                c17, c18, // SS
-                c20, c21, c22, c23, c24, c25,
-                '0', '0', '0'
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTime27(byte[] str, int off) {
-        if (off + 27 > str.length) {
+        byte c10;
+        if (off + 27 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
-        char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
-        char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
-        char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
-        char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
-        char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
-        char c16 = (char) str[off + 16];
-        char c17 = (char) str[off + 17];
-        char c18 = (char) str[off + 18];
-        char c19 = (char) str[off + 19];
-        char c20 = (char) str[off + 20];
-        char c21 = (char) str[off + 21];
-        char c22 = (char) str[off + 22];
-        char c23 = (char) str[off + 23];
-        char c24 = (char) str[off + 24];
-        char c25 = (char) str[off + 25];
-        char c26 = (char) str[off + 26];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 7, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // HH
-                c14, c15, // mm
-                c17, c18, // ss
-                c20, c21, c22, c23, c24, c25, c26, '0', '0'
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTime27(char[] str, int off) {
-        if (off + 27 > str.length) {
+        char c10;
+        if (off + 27 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = str[off];
-        char c1 = str[off + 1];
-        char c2 = str[off + 2];
-        char c3 = str[off + 3];
-        char c4 = str[off + 4];
-        char c5 = str[off + 5];
-        char c6 = str[off + 6];
-        char c7 = str[off + 7];
-        char c8 = str[off + 8];
-        char c9 = str[off + 9];
-        char c10 = str[off + 10];
-        char c11 = str[off + 11];
-        char c12 = str[off + 12];
-        char c13 = str[off + 13];
-        char c14 = str[off + 14];
-        char c15 = str[off + 15];
-        char c16 = str[off + 16];
-        char c17 = str[off + 17];
-        char c18 = str[off + 18];
-        char c19 = str[off + 19];
-        char c20 = str[off + 20];
-        char c21 = str[off + 21];
-        char c22 = str[off + 22];
-        char c23 = str[off + 23];
-        char c24 = str[off + 24];
-        char c25 = str[off + 25];
-        char c26 = str[off + 26];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 7, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // hh
-                c14, c15, // mm
-                c17, c18, // ss
-                c20, c21, c22, c23, c24, c25, c26, '0', '0'
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTime28(char[] str, int off) {
-        if (off + 28 > str.length) {
+        char c10;
+        if (off + 28 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = str[off];
-        char c1 = str[off + 1];
-        char c2 = str[off + 2];
-        char c3 = str[off + 3];
-        char c4 = str[off + 4];
-        char c5 = str[off + 5];
-        char c6 = str[off + 6];
-        char c7 = str[off + 7];
-        char c8 = str[off + 8];
-        char c9 = str[off + 9];
-        char c10 = str[off + 10];
-        char c11 = str[off + 11];
-        char c12 = str[off + 12];
-        char c13 = str[off + 13];
-        char c14 = str[off + 14];
-        char c15 = str[off + 15];
-        char c16 = str[off + 16];
-        char c17 = str[off + 17];
-        char c18 = str[off + 18];
-        char c19 = str[off + 19];
-        char c20 = str[off + 20];
-        char c21 = str[off + 21];
-        char c22 = str[off + 22];
-        char c23 = str[off + 23];
-        char c24 = str[off + 24];
-        char c25 = str[off + 25];
-        char c26 = str[off + 26];
-        char c27 = str[off + 27];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 8, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // HH
-                c14, c15, // mm
-                c17, c18, // ss
-                c20, c21, c22, c23, c24, c25, c26, c27, '0'
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTime28(byte[] str, int off) {
-        if (off + 28 > str.length) {
+        byte c10;
+        if (off + 28 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
-        char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
-        char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
-        char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
-        char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
-        char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
-        char c16 = (char) str[off + 16];
-        char c17 = (char) str[off + 17];
-        char c18 = (char) str[off + 18];
-        char c19 = (char) str[off + 19];
-        char c20 = (char) str[off + 20];
-        char c21 = (char) str[off + 21];
-        char c22 = (char) str[off + 22];
-        char c23 = (char) str[off + 23];
-        char c24 = (char) str[off + 24];
-        char c25 = (char) str[off + 25];
-        char c26 = (char) str[off + 26];
-        char c27 = (char) str[off + 27];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 8, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // HH
-                c14, c15, // mm
-                c17, c18, // ss
-                c20, c21, c22, c23, c24, c25, c26, c27, '0'
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTime29(byte[] str, int off) {
-        if (off + 29 > str.length) {
+        byte c10;
+        if (off + 29 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = (char) str[off];
-        char c1 = (char) str[off + 1];
-        char c2 = (char) str[off + 2];
-        char c3 = (char) str[off + 3];
-        char c4 = (char) str[off + 4];
-        char c5 = (char) str[off + 5];
-        char c6 = (char) str[off + 6];
-        char c7 = (char) str[off + 7];
-        char c8 = (char) str[off + 8];
-        char c9 = (char) str[off + 9];
-        char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
-        char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
-        char c16 = (char) str[off + 16];
-        char c17 = (char) str[off + 17];
-        char c18 = (char) str[off + 18];
-        char c19 = (char) str[off + 19];
-        char c20 = (char) str[off + 20];
-        char c21 = (char) str[off + 21];
-        char c22 = (char) str[off + 22];
-        char c23 = (char) str[off + 23];
-        char c24 = (char) str[off + 24];
-        char c25 = (char) str[off + 25];
-        char c26 = (char) str[off + 26];
-        char c27 = (char) str[off + 27];
-        char c28 = (char) str[off + 28];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 9, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // HH
-                c14, c15, // mm
-                c17, c18, // ss
-                c20, c21, c22, c23, c24, c25, c26, c27, c28
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTime29(char[] str, int off) {
-        if (off + 29 > str.length) {
+        char c10;
+        if (off + 29 > str.length
+                || str[off + 4] != '-'
+                || str[off + 7] != '-'
+                || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
+                || str[off + 13] != ':'
+                || str[off + 16] != ':'
+                || str[off + 19] != '.'
+        ) {
             return null;
         }
 
-        char c0 = str[off];
-        char c1 = str[off + 1];
-        char c2 = str[off + 2];
-        char c3 = str[off + 3];
-        char c4 = str[off + 4];
-        char c5 = str[off + 5];
-        char c6 = str[off + 6];
-        char c7 = str[off + 7];
-        char c8 = str[off + 8];
-        char c9 = str[off + 9];
-        char c10 = str[off + 10];
-        char c11 = str[off + 11];
-        char c12 = str[off + 12];
-        char c13 = str[off + 13];
-        char c14 = str[off + 14];
-        char c15 = str[off + 15];
-        char c16 = str[off + 16];
-        char c17 = str[off + 17];
-        char c18 = str[off + 18];
-        char c19 = str[off + 19];
-        char c20 = str[off + 20];
-        char c21 = str[off + 21];
-        char c22 = str[off + 22];
-        char c23 = str[off + 23];
-        char c24 = str[off + 24];
-        char c25 = str[off + 25];
-        char c26 = str[off + 26];
-        char c27 = str[off + 27];
-        char c28 = str[off + 28];
+        int year = digit4(str, off);
+        int month = digit2(str, off + 5);
+        int dom = digit2(str, off + 8);
+        int hour = digit2(str, off + 11);
+        int minute = digit2(str, off + 14);
+        int second = digit2(str, off + 17);
+        int nano = readNanos(str, 9, off + 20);
 
-        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
-            return null;
-        }
-
-        return localDateTime(
-                c0, c1, c2, c3, // yyyy
-                c5, c6, // MM
-                c8, c9, // dd
-                c11, c12, // HH
-                c14, c15, // mm
-                c17, c18, // ss
-                c20, c21, c22, c23, c24, c25, c26, c27, c28 // S0 - S9
-        );
+        return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
+                ? null
+                : LocalDateTime.of(year, month, dom, hour, minute, second, nano);
     }
 
     public static LocalDateTime parseLocalDateTimeX(char[] str, int offset, int len) {
