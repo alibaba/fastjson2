@@ -1448,6 +1448,8 @@ public class IOUtils {
             x = Integer.reverseBytes(x);
         }
         /*
+            Here we are doing a 4-Byte Vector operation on the Int type.
+
             x & 0xF0 != 0xC0
             ---------------
             0 0b0011_0000 & 0b1111_0000 = 0b0011_0000
