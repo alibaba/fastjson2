@@ -51,7 +51,7 @@ public class IOUtilsTest {
 
     @Test
     public void getChars() {
-        int[] values = new int[] {
+        int[] values = new int[]{
                 1,
                 10,
                 100,
@@ -94,7 +94,7 @@ public class IOUtilsTest {
 
     @Test
     public void getCharsLong() {
-        long[] values = new long[] {
+        long[] values = new long[]{
                 1,
                 10,
                 100,
@@ -315,5 +315,19 @@ public class IOUtilsTest {
                     + ") & " + Integer.toBinaryString(0xF0)
                     + " = " + Integer.toBinaryString(((c & 0xF) + 0x60) & 0xF0));
         }
+    }
+
+    @Test
+    public void indexOf() throws Throwable {
+        byte[] bytes = "abcda".getBytes(StandardCharsets.UTF_8);
+        assertEquals(2,
+                IOUtils.indexOfChar(
+                        bytes, 'c', 0));
+        assertEquals(0,
+                IOUtils.indexOfChar(
+                        bytes, 'a', 0));
+        assertEquals(4,
+                IOUtils.indexOfChar(
+                        bytes, 'a', 1));
     }
 }

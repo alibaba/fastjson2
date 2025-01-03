@@ -59,8 +59,8 @@ public class ClientsParseUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-        wast();
-//        fastjson2();
+//        wast();
+        fastjson2();
 //        dsljson();
 //        jackson();
     }

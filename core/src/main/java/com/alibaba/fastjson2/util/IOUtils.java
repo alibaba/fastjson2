@@ -1569,4 +1569,28 @@ public class IOUtils {
         int d = UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
+
+    public static int indexOfChar(byte[] value, int ch, int fromIndex) {
+        return indexOfChar(value, ch, fromIndex, value.length);
+    }
+
+    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfChar0(value, ch, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, ch, fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+
+    private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
+        for (int i = fromIndex; i < max; i++) {
+            if (value[i] == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
