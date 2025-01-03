@@ -3699,6 +3699,7 @@ class JSONReaderUTF8
             return getInt64Value();
         }
 
+        int end = this.end;
         if (quote != 0) {
             ch = offset == end ? EOI : bytes[offset++];
         }
