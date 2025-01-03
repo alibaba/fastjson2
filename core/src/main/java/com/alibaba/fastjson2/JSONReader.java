@@ -4650,6 +4650,10 @@ public abstract class JSONReader
         return new JSONException(info("illegal value"));
     }
 
+    final JSONException error(String message) {
+        return new JSONException(info(message));
+    }
+
     final JSONException error(int offset, int ch) {
         throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
     }

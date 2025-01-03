@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -1424,115 +1425,44 @@ class JSONReaderASCII
             int valueLength;
             boolean valueEscape = false;
 
-            _for:
-            {
-                int i = 0;
-                byte c0 = 0, c1 = 0, c2 = 0, c3;
+            int index = IOUtils.indexOfChar(bytes, quote, offset, end);
+            if (index == -1) {
+                throw error("invalid escape character EOI");
+            }
+            int slashIndex = IOUtils.indexOfChar(bytes, '\\', offset, index);
+            if (slashIndex == -1) {
+                valueLength = index - offset;
+                offset = index;
+            } else {
+                valueEscape = true;
+                valueLength = slashIndex - offset;
+                offset = slashIndex;
 
-                // vector optimize
-                boolean quoted = false;
-                int upperBound = offset + ((end - offset) & ~3);
-                while (offset < upperBound) {
-                    c0 = bytes[offset];
-                    c1 = bytes[offset + 1];
-                    c2 = bytes[offset + 2];
-                    c3 = bytes[offset + 3];
-                    if (c0 == slash || c1 == slash || c2 == slash || c3 == slash) {
+                for (;;) {
+                    if (offset >= end) {
+                        throw error("invalid escape character EOI");
+                    }
+
+                    byte c = bytes[offset];
+                    if (c == slash) {
+                        valueLength++;
+                        c = bytes[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
+                        continue;
+                    }
+
+                    if (c == quote) {
                         break;
                     }
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
-                        quoted = true;
-                        break;
-                    }
-                    offset += 4;
-                    i += 4;
-                }
-
-                if (quoted) {
-                    if (c0 == quote) {
-                        // skip
-                    } else if (c1 == quote) {
-                        offset++;
-                        i++;
-                    } else if (c2 == quote) {
-                        offset += 2;
-                        i += 2;
-                    } else {
-                        offset += 3;
-                        i += 3;
-                    }
-                    valueLength = i;
-                } else {
-                    for (; ; ++i) {
-                        if (offset >= end) {
-                            throw new JSONException("invalid escape character EOI");
-                        }
-
-                        byte c = bytes[offset];
-                        if (c == slash) {
-                            valueEscape = true;
-                            c = bytes[offset + 1];
-                            offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
-                            continue;
-                        }
-
-                        if (c == quote) {
-                            valueLength = i;
-                            break _for;
-                        }
-                        offset++;
-                    }
+                    offset++;
+                    valueLength++;
                 }
             }
 
             String str;
             if (valueEscape) {
                 char[] buf = new char[valueLength];
-                offset = start;
-                for (int i = 0; ; ++i) {
-                    char c = (char) (bytes[offset] & 0xff);
-                    if (c == '\\') {
-                        c = (char) bytes[++offset];
-                        switch (c) {
-                            case 'u': {
-                                c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
-                                offset += 4;
-                                break;
-                            }
-                            case 'x': {
-                                c = char2(bytes[offset + 1], bytes[offset + 2]);
-                                offset += 2;
-                                break;
-                            }
-                            case '\\':
-                            case '"':
-                                break;
-                            case 'b':
-                                c = '\b';
-                                break;
-                            case 't':
-                                c = '\t';
-                                break;
-                            case 'n':
-                                c = '\n';
-                                break;
-                            case 'f':
-                                c = '\f';
-                                break;
-                            case 'r':
-                                c = '\r';
-                                break;
-                            default:
-                                c = char1(c);
-                                break;
-                        }
-                    } else if (c == quote) {
-                        break;
-                    }
-                    buf[i] = c;
-                    offset++;
-                }
-
+                offset = readEscaped(bytes, start, quote, buf);
                 str = new String(buf);
             } else {
                 if (this.str != null) {
@@ -1572,5 +1502,52 @@ class JSONReaderASCII
         }
 
         return readStringNotMatch();
+    }
+
+    private int readEscaped(byte[] bytes, int offset, byte quote, char[] buf) {
+        for (int i = 0; ; ++i) {
+            char c = (char) (bytes[offset] & 0xff);
+            if (c == '\\') {
+                c = (char) bytes[++offset];
+                switch (c) {
+                    case 'u': {
+                        c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        offset += 4;
+                        break;
+                    }
+                    case 'x': {
+                        c = char2(bytes[offset + 1], bytes[offset + 2]);
+                        offset += 2;
+                        break;
+                    }
+                    case '\\':
+                    case '"':
+                        break;
+                    case 'b':
+                        c = '\b';
+                        break;
+                    case 't':
+                        c = '\t';
+                        break;
+                    case 'n':
+                        c = '\n';
+                        break;
+                    case 'f':
+                        c = '\f';
+                        break;
+                    case 'r':
+                        c = '\r';
+                        break;
+                    default:
+                        c = char1(c);
+                        break;
+                }
+            } else if (c == quote) {
+                break;
+            }
+            buf[i] = c;
+            offset++;
+        }
+        return offset;
     }
 }

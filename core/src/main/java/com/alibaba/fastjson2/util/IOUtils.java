@@ -1424,4 +1424,197 @@ public class IOUtils {
                 BIG_ENDIAN ? Long.reverseBytes(v) : v
         );
     }
+
+    public static int digit4(char[] chars, int off) {
+        long x = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+        if (BIG_ENDIAN) {
+            x = Long.reverseBytes(x);
+        }
+        long d;
+        if ((x & 0xF000F000F000F0L) != 0x30003000300030L
+                || (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L) != 0
+        ) {
+            return -1;
+        }
+        return (int) (((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5) // (d & 0xF) * 1000
+                + ((d & 0xF0000) >> 10) + ((d & 0xF0000) >> 11) + ((d & 0xF0000) >> 14) // ((d & 0xF0000) >> 16) * 100
+                + ((d & 0xF00000000L) >> 29) + ((d & 0xF00000000L) >> 31) // ((d & 0xF00000000L) >> 32) * 10
+                + (d >> 48));
+    }
+
+    public static int digit4(byte[] bytes, int off) {
+        int x = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            x = Integer.reverseBytes(x);
+        }
+        /*
+            Here we are doing a 4-Byte Vector operation on the Int type.
+
+            x & 0xF0 != 0xC0
+            ---------------
+            0 0b0011_0000 & 0b1111_0000 = 0b0011_0000
+            1 0b0011_0001 & 0b1111_0000 = 0b0011_0000
+            2 0b0011_0010 & 0b1111_0000 = 0b0011_0000
+            3 0b0011_0011 & 0b1111_0000 = 0b0011_0000
+            4 0b0011_0100 & 0b1111_0000 = 0b0011_0000
+            5 0b0011_0101 & 0b1111_0000 = 0b0011_0000
+            6 0b0011_0110 & 0b1111_0000 = 0b0011_0000
+            7 0b0011_0111 & 0b1111_0000 = 0b0011_0000
+            8 0b0011_1000 & 0b1111_0000 = 0b0011_0000
+            9 0b0011_1001 & 0b1111_0000 = 0b0011_0000
+
+            (((d = x & 0x0F) + 0x06) & 0xF0) != 0
+            ---------------
+            0 ((0b0011_0000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            1 ((0b0011_0001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            2 ((0b0011_0010) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            3 ((0b0011_0011) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            4 ((0b0011_0100) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            5 ((0b0011_0101) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            6 ((0b0011_0110) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            7 ((0b0011_0111) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            8 ((0b0011_1000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            9 ((0b0011_1001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+         */
+        int d;
+        if ((x & 0xF0F0F0F0) != 0x30303030
+                || (((d = x & 0x0F0F0F0F) + 0x06060606) & 0xF0F0F0F0) != 0
+        ) {
+            return -1;
+        }
+        /*
+            10   = (1 << 3 ) + (1 << 1)
+            100  = (1 << 6 ) + (1 << 5) + (1 << 2)
+            1000 = (1 << 10) + (1 << 3) - (1 << 5)
+         */
+        return ((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5) // (d & 0xF) * 1000
+                + ((d & 0xF00) >> 2) + ((d & 0xF00) >> 3) + ((d & 0xF00) >> 6) // ((d & 0xF00) >> 8) * 100
+                + ((d & 0xF0000) >> 13) + ((d & 0xF0000) >> 15) // ((d & 0xF0000) >> 16) * 10
+                + (d >> 24);
+    }
+
+    public static int digit3(char[] chars, int off) {
+        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
+        int i = UNSAFE.getInt(chars, address);
+        short s = UNSAFE.getShort(chars, address + 4);
+        if (BIG_ENDIAN) {
+            i = Integer.reverseBytes(i);
+            s = Short.reverseBytes(s);
+        }
+        long x = (((long) s) << 32) | i; // reuse
+        long d;
+        if ((x & 0xF000F000F0L) != 0x3000300030L
+                || (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L) != 0
+        ) {
+            return -1;
+        }
+        return (int) (((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xF) * 100
+                + ((d & 0xF0000L) >> 13) + ((d & 0xF0000L) >> 15) // ((d & 0xF0000) >> 16) * 10
+                + (d >> 32));
+    }
+
+    public static int digit3(byte[] bytes, int off) {
+        int x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            x = Short.reverseBytes((short) x);
+        }
+        x |= UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16;
+        int d;
+        if ((x & 0xF0F0F0) != 0x303030
+                || (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0) != 0
+        ) {
+            return -1;
+        }
+        return ((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xff) * 100
+                + ((d & 0xF00) >> 5) + ((d & 0xF00) >> 7) // ((d & 0xF00) >> 8) * 10
+                + (d >> 16);
+    }
+
+    public static int digit2(char[] chars, int off) {
+        int x = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+        if (BIG_ENDIAN) {
+            x = Integer.reverseBytes(x);
+        }
+        int d;
+        if ((x & 0xF000F0) != 0x300030
+                || (((d = x & 0x0F000F) + 0x060006) & 0xF000F0) != 0
+        ) {
+            return -1;
+        }
+        return ((d & 0xF) << 3) + ((d & 0xF) << 1) // (d & 0xF) * 10
+                + (d >> 16);
+    }
+
+    public static int digit2(byte[] bytes, int off) {
+        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            x = Short.reverseBytes(x);
+        }
+        int d;
+        if ((x & 0xF0F0) != 0x3030
+                || (((d = x & 0x0F0F) + 0x0606) & 0xF0F0) != 0
+        ) {
+            return -1;
+        }
+        return ((d & 0xF) << 3) + ((d & 0xF) << 1)  // (d & 0xF) * 10
+                + (d >> 8);
+    }
+
+    public static int digit1(char[] chars, int off) {
+        int d = UNSAFE.getByte(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
+        return d >= 0 && d <= 9 ? d : -1;
+    }
+
+    public static int digit1(byte[] bytes, int off) {
+        int d = UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off) - '0';
+        return d >= 0 && d <= 9 ? d : -1;
+    }
+
+    public static int indexOfChar(byte[] value, int ch, int fromIndex) {
+        return indexOfChar(value, ch, fromIndex, value.length);
+    }
+
+    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfChar0(value, ch, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, ch, fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+
+    private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
+        for (int i = fromIndex; i < max; i++) {
+            if (value[i] == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static long hexDigit8(byte[] bytes, int offset) {
+        long v = Long.reverseBytes(UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        v = (v & 0x0F0F0F0F_0F0F0F0FL) + ((((v & 0x40404040_40404040L) >> 2) | ((v & 0x40404040_40404040L) << 1)) >>> 4);
+        v = ((v >>> 28) & 0xF0000000L)
+                + ((v >>> 24) & 0xF000000)
+                + ((v >>> 20) & 0xF00000)
+                + ((v >>> 16) & 0xF0000)
+                + ((v >>> 12) & 0xF000)
+                + ((v >>> 8) & 0xF00)
+                + ((v >>> 4) & 0xF0)
+                + (v & 0xF);
+        return v;
+    }
+
+    public static int hexDigit4(byte[] bytes, int offset) {
+        int v = Integer.reverseBytes(UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
+        v = ((v >>> 12) & 0xF000)
+                + ((v >>> 8) & 0xF00)
+                + ((v >>> 4) & 0xF0)
+                + (v & 0xF);
+        return v;
+    }
 }

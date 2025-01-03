@@ -75,6 +75,8 @@ public class UUIDTest {
     public void test_utf8_1() {
         String str = "d9ac58be-c854-496b-b550-56f0b773d241";
         UUID uuid = UUID.fromString(str);
+        UUID parsed = JSON.parseObject("\"" + str + "\"", UUID.class);
+        assertEquals(uuid, parsed);
         byte[] utf8Bytes = JSON.toJSONBytes(uuid);
         assertEquals("\"d9ac58be-c854-496b-b550-56f0b773d241\"", new String(utf8Bytes));
     }
