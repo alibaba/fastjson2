@@ -2960,7 +2960,6 @@ public interface JSON {
         }
     }
 
-
     /**
      * Parses the json byte array as a list of {@link T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
