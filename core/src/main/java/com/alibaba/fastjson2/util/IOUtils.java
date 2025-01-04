@@ -1617,4 +1617,8 @@ public class IOUtils {
                 + (v & 0xF);
         return v;
     }
+
+    public static boolean isDigit(int c) {
+        return c >= '0' && c <= '9';
+    }
 }

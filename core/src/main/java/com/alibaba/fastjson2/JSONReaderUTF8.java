@@ -12,6 +12,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.IOUtils.ALSE;
+import static com.alibaba.fastjson2.util.IOUtils.isDigit;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -3652,8 +3653,6 @@ class JSONReaderUTF8
         int offset = this.offset;
         final byte[] bytes = this.bytes;
 
-        long longValue = 0;
-
         int quote = '\0';
         if (ch == '"' || ch == '\'') {
             quote = ch;
@@ -3669,12 +3668,26 @@ class JSONReaderUTF8
             throw numberError();
         }
 
+        int end = this.end;
+        byte b1;
         boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            long intValue10 = longValue * 10 + (ch - '0');
+        long longValue = ch - '0';
+        long intValue10;
+        while (offset + 1 < end && (isDigit(ch = bytes[offset])) && isDigit(b1 = bytes[offset + 1])) {
+            intValue10 = longValue * 100 + ch * 10 + b1 - 528;
             if (intValue10 < longValue) {
                 overflow = true;
                 break;
+            } else {
+                longValue = intValue10;
+            }
+            offset += 2;
+        }
+        ch = offset == end ? EOI : bytes[offset++];
+        if (isDigit(ch)) {
+            intValue10 = longValue * 10 + ch - '0';
+            if (intValue10 < longValue) {
+                overflow = true;
             } else {
                 longValue = intValue10;
             }
@@ -3699,7 +3712,6 @@ class JSONReaderUTF8
             return getInt64Value();
         }
 
-        int end = this.end;
         if (quote != 0) {
             ch = offset == end ? EOI : bytes[offset++];
         }
@@ -3732,8 +3744,6 @@ class JSONReaderUTF8
         int offset = this.offset;
         final byte[] bytes = this.bytes;
 
-        long longValue = 0;
-
         int quote = '\0';
         if (ch == '"' || ch == '\'') {
             quote = ch;
@@ -3749,12 +3759,26 @@ class JSONReaderUTF8
             throw numberError();
         }
 
+        int end = this.end;
+        byte b1;
         boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            long intValue10 = longValue * 10 + (ch - '0');
+        long longValue = ch - '0';
+        long intValue10;
+        while (offset + 1 < end && (isDigit(ch = bytes[offset])) && isDigit(b1 = bytes[offset + 1])) {
+            intValue10 = longValue * 100 + ch * 10 + b1 - 528;
             if (intValue10 < longValue) {
                 overflow = true;
                 break;
+            } else {
+                longValue = intValue10;
+            }
+            offset += 2;
+        }
+        ch = offset == end ? EOI : bytes[offset++];
+        if (isDigit(ch)) {
+            intValue10 = longValue * 10 + ch - '0';
+            if (intValue10 < longValue) {
+                overflow = true;
             } else {
                 longValue = intValue10;
             }

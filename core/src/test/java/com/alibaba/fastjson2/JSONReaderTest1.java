@@ -1270,6 +1270,129 @@ public class JSONReaderTest1 {
     }
 
     @Test
+    public void test_readDoubleValue() {
+        long[] values = new long[] {
+                1,
+                12,
+                123,
+                1234,
+                12345,
+                123456,
+                1234567,
+                12345678,
+                123456789,
+                1234567890,
+                12345678901L,
+                12345678902L,
+                123456789023L,
+                1234567890234L,
+                12345678902345L,
+                123456789023456L,
+                1234567890234567L,
+                12345678902345678L,
+                123456789023456789L
+        };
+        for (long value : values) {
+            String str = "0." + value;
+            double doubleValue = Double.parseDouble(str);
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertFalse(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertFalse(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str.concat(", "))) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertTrue(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str.concat(", "))) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertTrue(jsonReader.comma);
+            }
+        }
+
+        for (long value : values) {
+            String str = value + ".0";
+            double doubleValue = Double.parseDouble(str);
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertFalse(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertFalse(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str.concat(", "))) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertTrue(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str.concat(", "))) {
+                assertEquals(doubleValue, jsonReader.readDoubleValue());
+                assertTrue(jsonReader.isEnd());
+                assertTrue(jsonReader.comma);
+            }
+        }
+    }
+
+    @Test
+    public void test_readInt64Value2() {
+        long[] values = new long[] {
+                1,
+                12,
+                123,
+                1234,
+                12345,
+                123456,
+                1234567,
+                12345678,
+                123456789,
+                1234567890,
+                12345678901L,
+                12345678902L,
+                123456789023L,
+                1234567890234L,
+                12345678902345L,
+                123456789023456L,
+                1234567890234567L,
+                12345678902345678L,
+                123456789023456789L,
+                1234567890234567890L,
+        };
+        for (long value : values) {
+            String str = Long.toString(value);
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertEquals(value, jsonReader.readInt64Value());
+                assertTrue(jsonReader.isEnd());
+                assertFalse(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertEquals(value, jsonReader.readInt64());
+                assertTrue(jsonReader.isEnd());
+                assertFalse(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str.concat(", "))) {
+                assertEquals(value, jsonReader.readInt64Value());
+                assertTrue(jsonReader.isEnd());
+                assertTrue(jsonReader.comma);
+            }
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str.concat(", "))) {
+                assertEquals(value, jsonReader.readInt64());
+                assertTrue(jsonReader.isEnd());
+                assertTrue(jsonReader.comma);
+            }
+        }
+    }
+
+    @Test
     public void test_readInt64Value() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("123")) {
             assertEquals(123, jsonReader.readInt64Value());
