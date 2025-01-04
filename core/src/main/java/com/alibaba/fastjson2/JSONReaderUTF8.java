@@ -3862,7 +3862,7 @@ class JSONReaderUTF8
             }
         }
 
-        final int start = offset;
+        final int start = offset, end = this.end;
         if (ch == '-') {
             negative = true;
             ch = bytes[offset++];
@@ -3875,50 +3875,62 @@ class JSONReaderUTF8
 
         valueType = JSON_TYPE_INT;
         boolean overflow = false;
-        long longValue = 0;
-        while (ch >= '0' && ch <= '9') {
+        long longValue = 0, intValue10;
+        byte b0, b1;
+        if (isDigit(ch)) {
             valid = true;
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
+            longValue = ch - '0';
+            while (offset + 1 < end && (isDigit(b0 = bytes[offset])) && isDigit(b1 = bytes[offset + 1])) {
+                offset += 2;
+                intValue10 = longValue * 100 + b0 * 10 + b1 - 528;
                 if (intValue10 < longValue) {
                     overflow = true;
                 } else {
                     longValue = intValue10;
                 }
             }
-
-            if (offset == end) {
-                ch = EOI;
-                offset++;
-                break;
+            ch = offset == end ? EOI : bytes[offset++];
+            if (isDigit(ch)) {
+                intValue10 = longValue * 10 + ch - '0';
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
+                }
+                ch = offset == end ? EOI : bytes[offset++];
             }
-            ch = bytes[offset++];
+        } else {
+            overflow = ch != '.';
         }
 
-        this.scale = 0;
+        int scale = 0;
         if (ch == '.') {
+            valid = true;
             valueType = JSON_TYPE_DEC;
-            ch = bytes[offset++];
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                this.scale++;
-                if (!overflow) {
-                    long intValue10 = longValue * 10 + (ch - '0');
-                    if (intValue10 < longValue) {
-                        overflow = true;
-                    } else {
-                        longValue = intValue10;
-                    }
+            while (offset + 1 < end && (isDigit(b0 = bytes[offset])) && isDigit(b1 = bytes[offset + 1])) {
+                offset += 2;
+                scale += 2;
+                intValue10 = longValue * 100 + b0
+                        * 10 + b1 - 528;
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
                 }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
+            }
+            ch = offset == end ? EOI : bytes[offset++];
+            if (isDigit(ch)) {
+                intValue10 = longValue * 10 + ch - '0';
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
                 }
-                ch = bytes[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
+                scale++;
             }
         }
+        this.scale = (short) scale;
 
         int expValue = 0;
         if (ch == 'e' || ch == 'E') {
@@ -4034,7 +4046,7 @@ class JSONReaderUTF8
                         value = true;
                     }
                 } else {
-                    int scale = this.scale - expValue;
+                    scale = this.scale - expValue;
                     if (scale == 0) {
                         doubleValue = (double) longValue;
                         if (negative) {

@@ -2729,8 +2729,8 @@ class JSONReaderUTF16
         double doubleValue = 0;
 
         final char[] chars = this.chars;
-        char quote = '\0';
-        char ch = this.ch;
+        int quote = '\0';
+        int ch = this.ch;
         int offset = this.offset;
         if (ch == '"' || ch == '\'') {
             quote = ch;
@@ -2741,7 +2741,7 @@ class JSONReaderUTF16
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     ch = offset == end ? EOI : chars[offset++];
                 }
-                this.ch = ch;
+                this.ch = (char) ch;
                 this.offset = offset;
                 nextIfComma();
                 wasNull = true;
@@ -2749,7 +2749,7 @@ class JSONReaderUTF16
             }
         }
 
-        final int start = offset;
+        final int start = offset, end = this.end;
         if (ch == '-') {
             negative = true;
             ch = chars[offset++];
@@ -2762,50 +2762,62 @@ class JSONReaderUTF16
 
         valueType = JSON_TYPE_INT;
         boolean overflow = false;
-        long longValue = 0;
-        while (ch >= '0' && ch <= '9') {
+        long longValue = 0, intValue10;
+        char b0, b1;
+        if (isDigit(ch)) {
             valid = true;
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
+            longValue = ch - '0';
+            while (offset + 1 < end && (isDigit(b0 = chars[offset])) && isDigit(b1 = chars[offset + 1])) {
+                offset += 2;
+                intValue10 = longValue * 100 + b0 * 10 + b1 - 528;
                 if (intValue10 < longValue) {
                     overflow = true;
                 } else {
                     longValue = intValue10;
                 }
             }
-
-            if (offset == end) {
-                ch = EOI;
-                offset++;
-                break;
+            ch = offset == end ? EOI : chars[offset++];
+            if (isDigit(ch)) {
+                intValue10 = longValue * 10 + ch - '0';
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
+                }
+                ch = offset == end ? EOI : chars[offset++];
             }
-            ch = chars[offset++];
+        } else {
+            overflow = ch != '.';
         }
 
-        this.scale = 0;
+        int scale = 0;
         if (ch == '.') {
+            valid = true;
             valueType = JSON_TYPE_DEC;
-            ch = chars[offset++];
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                this.scale++;
-                if (!overflow) {
-                    long intValue10 = longValue * 10 + (ch - '0');
-                    if (intValue10 < longValue) {
-                        overflow = true;
-                    } else {
-                        longValue = intValue10;
-                    }
+            while (offset + 1 < end && (isDigit(b0 = chars[offset])) && isDigit(b1 = chars[offset + 1])) {
+                offset += 2;
+                scale += 2;
+                intValue10 = longValue * 100 + b0
+                        * 10 + b1 - 528;
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
                 }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
+            }
+            ch = offset == end ? EOI : chars[offset++];
+            if (isDigit(ch)) {
+                intValue10 = longValue * 10 + ch - '0';
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
                 }
-                ch = chars[offset++];
+                ch = offset == end ? EOI : chars[offset++];
+                scale++;
             }
         }
+        this.scale = (short) scale;
 
         int expValue = 0;
         if (ch == 'e' || ch == 'E') {
@@ -2874,7 +2886,7 @@ class JSONReaderUTF16
                 ch = offset == end ? EOI : chars[offset++];
             } else if (ch == '{' && quote == 0) {
                 valid = true;
-                this.ch = ch;
+                this.ch = (char) ch;
                 this.offset = offset;
                 Map<String, Object> obj = readObject();
                 if (!obj.isEmpty()) {
@@ -2886,7 +2898,7 @@ class JSONReaderUTF16
                 wasNull = true;
             } else if (ch == '[' && quote == 0) {
                 valid = true;
-                this.ch = ch;
+                this.ch = (char) ch;
                 this.offset = offset;
                 List array = readArray();
                 if (!array.isEmpty()) {
@@ -2905,7 +2917,7 @@ class JSONReaderUTF16
         if (quote != 0) {
             if (ch != quote) {
                 this.offset = offset - 1;
-                this.ch = quote;
+                this.ch = (char) quote;
                 str = readString();
                 offset = this.offset;
             }
@@ -2921,7 +2933,7 @@ class JSONReaderUTF16
                         value = true;
                     }
                 } else {
-                    int scale = this.scale - expValue;
+                    scale = this.scale - expValue;
                     if (scale == 0) {
                         doubleValue = (double) longValue;
                         if (negative) {
@@ -2983,7 +2995,7 @@ class JSONReaderUTF16
             throw new JSONException(info("illegal input error"));
         }
 
-        this.ch = ch;
+        this.ch = (char) ch;
         this.offset = offset;
         return doubleValue;
     }
