@@ -1431,9 +1431,8 @@ public class IOUtils {
             x = Long.reverseBytes(x);
         }
         long d;
-        if ((x & 0xF000F000F000F0L) != 0x30003000300030L
-                || (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L) != 0
-        ) {
+        if ((((x & 0xF000F000F000F0L) - 0x30003000300030L)
+                | (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L)) != 0) {
             return -1;
         }
         return (int) (((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5) // (d & 0xF) * 1000
@@ -1477,9 +1476,7 @@ public class IOUtils {
             9 ((0b0011_1001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
          */
         int d;
-        if ((x & 0xF0F0F0F0) != 0x30303030
-                || (((d = x & 0x0F0F0F0F) + 0x06060606) & 0xF0F0F0F0) != 0
-        ) {
+        if ((((x & 0xF0F0F0F0) - 0x30303030) | (((d = x & 0x0F0F0F0F) + 0x06060606) & 0xF0F0F0F0)) != 0) {
             return -1;
         }
         /*
@@ -1503,9 +1500,7 @@ public class IOUtils {
         }
         long x = (((long) s) << 32) | i; // reuse
         long d;
-        if ((x & 0xF000F000F0L) != 0x3000300030L
-                || (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L) != 0
-        ) {
+        if ((((x & 0xF000F000F0L) - 0x3000300030L) | (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L)) != 0) {
             return -1;
         }
         return (int) (((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xF) * 100
@@ -1520,9 +1515,7 @@ public class IOUtils {
         }
         x |= UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16;
         int d;
-        if ((x & 0xF0F0F0) != 0x303030
-                || (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0) != 0
-        ) {
+        if ((((x & 0xF0F0F0) - 0x303030) | (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0)) != 0) {
             return -1;
         }
         return ((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xff) * 100
@@ -1536,9 +1529,7 @@ public class IOUtils {
             x = Integer.reverseBytes(x);
         }
         int d;
-        if ((x & 0xF000F0) != 0x300030
-                || (((d = x & 0x0F000F) + 0x060006) & 0xF000F0) != 0
-        ) {
+        if ((((x & 0xF000F0) - 0x300030) | (((d = x & 0x0F000F) + 0x060006) & 0xF000F0)) != 0) {
             return -1;
         }
         return ((d & 0xF) << 3) + ((d & 0xF) << 1) // (d & 0xF) * 10
@@ -1551,8 +1542,7 @@ public class IOUtils {
             x = Short.reverseBytes(x);
         }
         int d;
-        if ((x & 0xF0F0) != 0x3030
-                || (((d = x & 0x0F0F) + 0x0606) & 0xF0F0) != 0
+        if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0
         ) {
             return -1;
         }
