@@ -180,14 +180,21 @@ final class ConstructorFunction<T>
         if (marker) {
             int i = 0, flag = 0;
             for (int n; i < size; i = n) {
+                Parameter parameter = parameters[i];
+                Class<?> paramClass = parameter.getType();
+                Type paramType = parameter.getParameterizedType();
                 Object arg = values.get(hashCodes[i]);
                 if (arg != null) {
+                    if (!paramClass.isInstance(arg)) {
+                        arg = TypeUtils.cast(arg, paramClass);
+                    } else if (paramType instanceof ParameterizedType) {
+                        arg = TypeUtils.cast(arg, paramType);
+                    }
                     args[i] = arg;
                 } else {
                     flag |= (1 << i);
-                    Class<?> paramType = parameters[i].getType();
-                    if (paramType.isPrimitive()) {
-                        args[i] = TypeUtils.getDefaultValue(paramType);
+                    if (paramClass.isPrimitive()) {
+                        args[i] = TypeUtils.getDefaultValue(paramClass);
                     }
                 }
                 n = i + 1;
