@@ -49,7 +49,7 @@ public class Issue1821 {
                         new TypeReference<List<Float>>() {})
         );
         assertThrows(
-                NumberFormatException.class, () -> JSON.parseObject(
+                JSONException.class, () -> JSON.parseObject(
                         str0,
                         new TypeReference<List<Double>>() {})
         );
@@ -150,7 +150,7 @@ public class Issue1821 {
                         new TypeReference<List<Float>>() {})
         );
         assertThrows(
-                NumberFormatException.class, () -> JSON.parseObject(
+                JSONException.class, () -> JSON.parseObject(
                         str2,
                         new TypeReference<List<Double>>() {})
         );

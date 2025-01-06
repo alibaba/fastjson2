@@ -27,8 +27,7 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
-import static com.alibaba.fastjson2.util.TypeUtils.toDate;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 public abstract class JSONReader
         implements Closeable {
@@ -48,6 +47,7 @@ public abstract class JSONReader
     static final byte JSON_TYPE_INT64 = 11;
     static final byte JSON_TYPE_FLOAT = 12;
     static final byte JSON_TYPE_DOUBLE = 13;
+    static final byte JSON_TYPE_NaN = 14;
 
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
@@ -924,6 +924,76 @@ public abstract class JSONReader
                 try {
                     return getBigDecimal()
                             .longValueExact();
+                } catch (ArithmeticException e) {
+                    throw numberError();
+                }
+            default:
+                throw new JSONException("TODO : " + valueType);
+        }
+    }
+
+    public final double getDoubleValue() {
+        switch (valueType) {
+            case JSON_TYPE_NaN:
+                return Double.NaN;
+            case JSON_TYPE_INT8:
+            case JSON_TYPE_INT16:
+            case JSON_TYPE_INT:
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                    return negative ? -mag3 : mag3;
+                }
+                Number number = getNumber();
+                if (number instanceof BigInteger) {
+                    BigInteger bigInt = (BigInteger) number;
+                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
+                        return bigInt.longValue();
+                    }
+                    try {
+                        return bigInt.longValueExact();
+                    } catch (ArithmeticException e) {
+                        throw numberError();
+                    }
+                }
+                return number.doubleValue();
+            case JSON_TYPE_DEC:
+            case JSON_TYPE_INT64:
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE:
+                return getNumber().doubleValue();
+            case JSON_TYPE_BOOL:
+                return boolValue ? 1 : 0;
+            case JSON_TYPE_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("long value not support input null"));
+                }
+                return 0;
+            case JSON_TYPE_STRING: {
+                try {
+                    return toDoubleValue(stringValue);
+                } catch (NumberFormatException e) {
+                    throw new JSONException(info(e.getMessage()));
+                }
+            }
+            case JSON_TYPE_OBJECT: {
+                Map map = (Map) complex;
+                if (map == null || map.isEmpty()) {
+                    wasNull = true;
+                    return 0;
+                }
+                return toDoubleValue(map);
+            }
+            case JSON_TYPE_ARRAY: {
+                Collection list = (Collection) complex;
+                if (list == null || list.isEmpty()) {
+                    wasNull = true;
+                    return 0;
+                }
+                return toDoubleValue(complex);
+            }
+            case JSON_TYPE_BIG_DEC:
+                try {
+                    return getBigDecimal()
+                            .doubleValue();
                 } catch (ArithmeticException e) {
                     throw numberError();
                 }
