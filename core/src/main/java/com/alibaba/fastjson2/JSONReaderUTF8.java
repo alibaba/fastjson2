@@ -3487,12 +3487,9 @@ class JSONReaderUTF8
 
     @Override
     public final int readInt32Value() {
-        boolean negative = false;
         int ch = this.ch;
         int offset = this.offset, end = this.end;
         final byte[] bytes = this.bytes;
-
-        int intValue = 0;
 
         int quote = '\0';
         if (ch == '"' || ch == '\'') {
@@ -3500,25 +3497,39 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else if (ch == '+') {
-            ch = bytes[offset++];
+        int result = 0;
+        boolean inRange, negative;
+        if ((negative = (ch == '-')) || ch == '+') {
+            ch = offset == end ? EOI : bytes[offset++];
         } else if (ch == ',') {
             throw numberError();
         }
-
-        boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            int intValue10 = intValue * 10 + (ch - '0');
-            if (intValue10 < intValue) {
-                overflow = true;
-                break;
-            } else {
-                intValue = intValue10;
+        if (inRange = IOUtils.isDigit(ch)) {
+            result = '0' - ch;
+        }
+        int limit = Integer.MIN_VALUE + (negative ? 0 : 1);
+        int digit;
+        while (inRange
+                && offset + 1 < end
+                && (digit = IOUtils.digit2(bytes, offset)) != -1
+        ) {
+            // max digits is 19, no need to check inRange (result == MULT_MIN_100 && digit <= (MULT_MIN_100 * 100 - limit))
+            if (inRange = (result > INT_32_MULT_MIN_100)) {
+                result = result * 100 - digit;
+                offset += 2;
             }
-            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (inRange) {
+            if (offset < end && IOUtils.isDigit((ch = bytes[offset]))) {
+                digit = ch - '0';
+                if (inRange = (result > INT_32_MULT_MIN_10 || (result == INT_32_MULT_MIN_10 && digit <= (INT_32_MULT_MIN_10 * 10 - limit)))) {
+                    result = result * 10 - digit;
+                    offset++;
+                }
+            }
+            if (inRange) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
         }
 
         if (ch == '.'
@@ -3531,10 +3542,10 @@ class JSONReaderUTF8
                 || ch == '['
                 || (quote != 0 && ch != quote)
         ) {
-            overflow = true;
+            inRange = false;
         }
 
-        if (overflow) {
+        if (!inRange) {
             readNumber0();
             return getInt32Value();
         }
@@ -3552,7 +3563,7 @@ class JSONReaderUTF8
         }
 
         if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
+            ch = offset == end ? EOI : (char) bytes[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : bytes[offset++];
             }
@@ -3561,7 +3572,7 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
 
-        return negative ? -intValue : intValue;
+        return negative ? result : -result;
     }
 
     @Override
@@ -3668,14 +3679,13 @@ class JSONReaderUTF8
         if (inRange = IOUtils.isDigit(ch)) {
             result = '0' - ch;
         }
-        long limit = MIN_VALUE + (negative ? 1L : 0L);
+        long limit = MIN_VALUE + (negative ? 0L : 1L);
         int digit;
         while (inRange
                 && offset + 1 < end
                 && (digit = IOUtils.digit2(bytes, offset)) != -1
         ) {
-            // max digits is 19, no need to check inRange (result == MULT_MIN_100 && digit <= (MULT_MIN_100 * 100 - limit))
-            if (inRange = (result > INT_64_MULT_MIN_100)) {
+            if (inRange = (result > INT_64_MULT_MIN_100 || (result == INT_64_MULT_MIN_100 && digit <= (INT_64_MULT_MIN_100 * 100 - limit)))) {
                 result = result * 100 - digit;
                 offset += 2;
             }
@@ -3683,7 +3693,7 @@ class JSONReaderUTF8
         if (inRange) {
             if (offset < end && IOUtils.isDigit((ch = bytes[offset]))) {
                 digit = ch - '0';
-                if (inRange = (result > INT_64_MULT_MIN_10 || (result == INT_64_MULT_MIN_10 && digit <= (INT_64_MULT_MIN_10 * 10 - limit)))) {
+                if (inRange = (result > INT_64_MULT_MIN_10) || (result == INT_64_MULT_MIN_10 && digit <= (INT_64_MULT_MIN_10 * 10 - limit))) {
                     result = result * 10 - digit;
                     offset++;
                 }
@@ -5090,12 +5100,11 @@ class JSONReaderUTF8
 
         final int start = offset;
 
-        final int multmin;
+        final int multmin = INT_32_MULT_MIN_10;
         if (ch == '-') {
             if (offset == end) {
                 throw new JSONException(info("illegal input"));
             }
-            multmin = -214748364; // limit / 10;
             negative = true;
             ch = bytes[offset++];
         } else {
@@ -5105,7 +5114,6 @@ class JSONReaderUTF8
                 }
                 ch = bytes[offset++];
             }
-            multmin = -214748364; // limit / 10;
         }
 
         // if (result < limit + digit) {

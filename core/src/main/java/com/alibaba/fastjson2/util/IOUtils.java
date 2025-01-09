@@ -21,6 +21,9 @@ public class IOUtils {
     public static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
     public static final long DOT_X0 = BIG_ENDIAN ? 0x2e00L : 0x2eL;
 
+    public static final int INT_32_MULT_MIN_10 = Integer.MIN_VALUE / 10;
+    public static final int INT_32_MULT_MIN_100 = Integer.MIN_VALUE / 100;
+
     public static final long INT_64_MULT_MIN_10 = Long.MIN_VALUE / 10;
     public static final long INT_64_MULT_MIN_100 = Long.MIN_VALUE / 100;
 
