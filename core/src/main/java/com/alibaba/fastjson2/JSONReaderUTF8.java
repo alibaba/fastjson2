@@ -3577,84 +3577,11 @@ class JSONReaderUTF8
 
     @Override
     public final Integer readInt32() {
-        boolean negative = false;
         int ch = this.ch;
-        int offset = this.offset;
-        final byte[] bytes = this.bytes;
-
-        int intValue = 0;
-
-        int quote = '\0';
-        if (ch == '"' || ch == '\'') {
-            quote = ch;
-            ch = bytes[offset++];
+        if ((ch == '"' || ch == '\'' || ch == 'n') && nextIfNullOrEmptyString()) {
+            return null;
         }
-
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else if (ch == '+') {
-            ch = bytes[offset++];
-        } else if (ch == ',') {
-            throw numberError();
-        }
-
-        boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            int intValue10 = intValue * 10 + (ch - '0');
-            if (intValue10 < intValue) {
-                overflow = true;
-                break;
-            } else {
-                intValue = intValue10;
-            }
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || (quote != 0 && ch != quote)
-        ) {
-            overflow = true;
-        }
-
-        if (overflow) {
-            readNumber0();
-            if (wasNull) {
-                return null;
-            }
-            return getInt32Value();
-        }
-
-        if (quote != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-
-        return negative ? -intValue : intValue;
+        return readInt32Value();
     }
 
     @Override
