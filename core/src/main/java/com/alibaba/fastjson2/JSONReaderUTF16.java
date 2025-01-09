@@ -14,6 +14,8 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.NULL_32;
+import static com.alibaba.fastjson2.util.IOUtils.NULL_64;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONReaderUTF16
@@ -606,8 +608,17 @@ class JSONReaderUTF16
                 && chars[offset + 2] == 'l'
         ) {
             offset += 3;
-        } else if ((first == '"' || first == '\'') && offset < end && chars[offset] == first) {
-            offset++;
+        } else if (first == '"' || first == '\'') {
+            if (offset < end && chars[offset] == first) {
+                offset++;
+            } else if (offset + 4 < end
+                    && UNSAFE.getLong(chars, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1)) == NULL_64
+                    && chars[offset + 4] == first
+            ) {
+                offset += 5;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
