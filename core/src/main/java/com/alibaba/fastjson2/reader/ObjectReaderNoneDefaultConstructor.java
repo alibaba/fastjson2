@@ -468,16 +468,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
                     Class<?> valueClass = fieldValue.getClass();
                     Class fieldClass = fieldReader.fieldClass;
                     if (valueClass != fieldClass) {
-                        if (fieldValue instanceof JSONObject) {
-                            ObjectReader fieldObjectReader = provider.getObjectReader(fieldReader.fieldType);
-                            fieldValue = fieldObjectReader.createInstance((Map) fieldValue, features);
-                        } else if (fieldValue instanceof JSONArray) {
-                            fieldValue = ((JSONArray) fieldValue).to(fieldReader.fieldType, features);
-                        } else {
-                            Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                            if (typeConvert != null) {
-                                fieldValue = typeConvert.apply(fieldValue);
-                            }
+                        Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                        if (typeConvert != null) {
+                            fieldValue = typeConvert.apply(fieldValue);
                         }
                     }
                 }
