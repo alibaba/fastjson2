@@ -1403,6 +1403,8 @@ public class JSONReaderTest {
             for (String str : strings) {
                 assertEquals(Integer.parseInt(str),
                         JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value());
+                assertEquals(Integer.parseInt(str),
+                        JSONReader.of(str.toCharArray()).readInt32Value());
             }
         }
 
@@ -1413,6 +1415,9 @@ public class JSONReaderTest {
         for (String str : strings) {
             assertThrows(JSONException.class,
                     () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt32Value(),
                     str);
         }
     }
@@ -1427,6 +1432,8 @@ public class JSONReaderTest {
             for (String str : strings) {
                 assertEquals(Long.parseLong(str),
                         JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value());
+                assertEquals(Long.parseLong(str),
+                        JSONReader.of(str.toCharArray()).readInt64Value());
             }
         }
 
@@ -1437,6 +1444,9 @@ public class JSONReaderTest {
         for (String str : strings) {
             assertThrows(JSONException.class,
                     () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt64Value(),
                     str);
         }
     }
