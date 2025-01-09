@@ -809,8 +809,17 @@ public abstract class JSONReader
             case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0) {
-                    if (mag3 != Integer.MIN_VALUE + (negative ? 1 : 0)) {
-                        return negative ? -mag3 : mag3;
+                    if (negative) {
+                        if (mag3 == Integer.MIN_VALUE) {
+                            return mag3;
+                        }
+                        if (mag3 >= 0) {
+                            return -mag3;
+                        }
+                    } else {
+                        if (mag3 >= 0) {
+                            return mag3;
+                        }
                     }
                 }
                 Number number = getNumber();
@@ -885,8 +894,19 @@ public abstract class JSONReader
             case JSON_TYPE_INT8:
             case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE + (negative ? 1 : 0)) {
-                    return negative ? -mag3 : mag3;
+                if (mag1 == 0 && mag2 == 0) {
+                    if (negative) {
+                        if (mag3 == Integer.MIN_VALUE) {
+                            return mag3;
+                        }
+                        if (mag3 >= 0) {
+                            return -mag3;
+                        }
+                    } else {
+                        if (mag3 >= 0) {
+                            return mag3;
+                        }
+                    }
                 }
                 Number number = getNumber();
                 if (number instanceof BigInteger) {
