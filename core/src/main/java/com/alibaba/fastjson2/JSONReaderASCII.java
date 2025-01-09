@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.NULL_32;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONReaderASCII
@@ -79,8 +80,17 @@ class JSONReaderASCII
                 && bytes[offset + 2] == 'l'
         ) {
             offset += 3;
-        } else if ((first == '"' || first == '\'') && offset < end && bytes[offset] == first) {
-            offset++;
+        } else if (first == '"' || first == '\'') {
+            if (offset < end && bytes[offset] == first) {
+                offset++;
+            } else if (offset + 4 < end
+                    && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == NULL_32
+                    && bytes[offset + 4] == first
+            ) {
+                offset += 5;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -1390,5 +1391,63 @@ public class JSONReaderTest {
                     }
                 }, false);
         assertEquals("123", ref.get());
+    }
+
+    @Test
+    public void intOverFlow() {
+        {
+            String[] strings = new String[]{
+                    Integer.toString(Integer.MIN_VALUE),
+                    Integer.toString(Integer.MAX_VALUE)
+            };
+            for (String str : strings) {
+                assertEquals(Integer.parseInt(str),
+                        JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value());
+                assertEquals(Integer.parseInt(str),
+                        JSONReader.of(str.toCharArray()).readInt32Value());
+            }
+        }
+
+        String[] strings = new String[]{
+                Long.toString(Integer.MIN_VALUE - 1L),
+                Long.toString(Integer.MAX_VALUE + 1L)
+        };
+        for (String str : strings) {
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt32Value(),
+                    str);
+        }
+    }
+
+    @Test
+    public void int64OverFlow() {
+        {
+            String[] strings = new String[]{
+                    Long.toString(Long.MIN_VALUE),
+                    Long.toString(Long.MAX_VALUE)
+            };
+            for (String str : strings) {
+                assertEquals(Long.parseLong(str),
+                        JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value());
+                assertEquals(Long.parseLong(str),
+                        JSONReader.of(str.toCharArray()).readInt64Value());
+            }
+        }
+
+        String[] strings = new String[]{
+                BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE).toString(),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE).toString()
+        };
+        for (String str : strings) {
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt64Value(),
+                    str);
+        }
     }
 }

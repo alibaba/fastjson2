@@ -3156,6 +3156,11 @@ public class TypeUtils {
             return Double.parseDouble(str);
         }
 
+        if ((value instanceof Collection && ((Collection<?>) value).isEmpty())
+                || (value instanceof Map && ((Map<?, ?>) value).isEmpty())) {
+            return 0;
+        }
+
         throw new JSONException("can not cast to decimal");
     }
 
