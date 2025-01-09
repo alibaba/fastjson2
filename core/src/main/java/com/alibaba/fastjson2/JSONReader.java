@@ -1002,6 +1002,10 @@ public abstract class JSONReader
         }
     }
 
+    public final float getFloatValue() {
+        return (float) getDoubleValue();
+    }
+
     public long[] readInt64ValueArray() {
         if (nextIfNull()) {
             return null;

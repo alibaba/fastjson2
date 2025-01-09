@@ -3982,263 +3982,159 @@ class JSONReaderUTF8
 
     @Override
     public final float readFloatValue() {
-        boolean valid = false;
-        this.wasNull = false;
-
         boolean value = false;
         float floatValue = 0;
-        final byte[] chars = this.bytes;
 
+        final byte[] bytes = this.bytes;
         int quote = '\0';
         int ch = this.ch;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         if (ch == '"' || ch == '\'') {
             quote = ch;
-            ch = chars[offset++];
-
-            if (ch == quote) {
-                ch = offset == end ? EOI : chars[offset++];
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : chars[offset++];
-                }
-                this.ch = (char) ch;
-                this.offset = offset;
-                nextIfComma();
-                wasNull = true;
-                return 0;
-            }
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
-        final int start = offset;
-        if (ch == '-') {
-            negative = true;
-            ch = chars[offset++];
+        boolean inRange, negative;
+        boolean wasNull = false;
+        if (quote != 0 && ch == quote) {
+            ch = offset == end ? EOI : bytes[offset++];
+            wasNull = true;
+            inRange = true;
         } else {
-            negative = false;
-            if (ch == '+') {
-                ch = chars[offset++];
-            }
-        }
-
-        valueType = JSON_TYPE_INT;
-        boolean overflow = false;
-        long longValue = 0;
-
-        while (ch >= '0' && ch <= '9') {
-            valid = true;
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                } else {
-                    longValue = intValue10;
-                }
+            long result = 0;
+            if ((negative = (ch == '-')) || ch == '+') {
+                ch = offset == end ? EOI : bytes[offset++];
+            } else if (ch == ',') {
+                throw numberError();
             }
 
-            if (offset == end) {
-                ch = EOI;
-                offset++;
-                break;
-            }
-            ch = chars[offset++];
-        }
+            long limit = MIN_VALUE + (negative ? 1L : 0L);
+            int digit;
 
-        this.scale = 0;
-        if (ch == '.') {
-            valueType = JSON_TYPE_DEC;
-            ch = chars[offset++];
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                this.scale++;
-                if (!overflow) {
-                    long intValue10 = longValue * 10 + (ch - '0');
-                    if (intValue10 < longValue) {
-                        overflow = true;
-                    } else {
-                        longValue = intValue10;
+            if (ch == '.') {
+                inRange = true;
+            } else if (inRange = IOUtils.isDigit(ch)) {
+                result = '0' - ch;
+
+                while (inRange
+                        && offset + 1 < end
+                        && (digit = IOUtils.digit2(bytes, offset)) != -1
+                ) {
+                    if (inRange = (result > INT_64_MULT_MIN_100)) {
+                        result = result * 100 - digit;
+                        offset += 2;
                     }
                 }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = chars[offset++];
-            }
-        }
-
-        int expValue = 0;
-        if (ch == 'e' || ch == 'E') {
-            boolean negativeExp = false;
-            ch = chars[offset++];
-
-            if (ch == '-') {
-                negativeExp = true;
-                ch = chars[offset++];
-            } else if (ch == '+') {
-                ch = chars[offset++];
-            }
-
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                int byteVal = (ch - '0');
-                expValue = expValue * 10 + byteVal;
-                if (expValue > MAX_EXP) {
-                    throw new JSONException("too large exp value : " + expValue);
-                }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = chars[offset++];
-            }
-
-            if (negativeExp) {
-                expValue = -expValue;
-            }
-
-            this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
-        }
-
-        if (offset == start) {
-            if (ch == 'n' && chars[offset] == 'u' && chars[offset + 1] == 'l' && chars[offset + 2] == 'l') {
-                offset += 3;
-                valid = true;
-                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
-                    throw new JSONException(info("long value not support input null"));
-                }
-                wasNull = true;
-                value = true;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == 't' && chars[offset] == 'r' && chars[offset + 1] == 'u' && chars[offset + 2] == 'e') {
-                offset += 3;
-                valid = true;
-                value = true;
-                floatValue = 1;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == 'f'
-                    && chars[offset] == 'a'
-                    && chars[offset + 1] == 'l'
-                    && chars[offset + 2] == 's'
-                    && chars[offset + 3] == 'e') {
-                offset += 4;
-                valid = true;
-                floatValue = 0;
-                value = true;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == 'N' && chars[offset] == 'a' && chars[offset + 1] == 'N') {
-                offset += 2;
-                valid = true;
-                value = true;
-                floatValue = Float.NaN;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == '{' && quote == 0) {
-                valid = true;
-                this.ch = (char) ch;
-                this.offset = offset;
-                Map<String, Object> obj = readObject();
-                if (!obj.isEmpty()) {
-                    throw new JSONException(info());
-                }
-                ch = this.ch;
-                offset = this.offset;
-                value = true;
-                wasNull = true;
-            } else if (ch == '[' && quote == 0) {
-                this.ch = (char) ch;
-                this.offset = offset;
-                valid = true;
-                List array = readArray();
-                if (!array.isEmpty()) {
-                    throw new JSONException(info());
-                }
-                ch = this.ch;
-                offset = this.offset;
-                value = true;
-                wasNull = true;
-            }
-        }
-
-        int len = offset - start;
-
-        String str = null;
-        if (quote != 0) {
-            if (ch != quote) {
-                overflow = true;
-                this.offset = offset - 1;
-                this.ch = (char) quote;
-                str = readString();
-                offset = this.offset;
-            }
-
-            ch = offset >= end ? EOI : chars[offset++];
-        }
-
-        if (!value) {
-            if (!overflow) {
-                int scale = this.scale - expValue;
-                if (scale == 0) {
-                    floatValue = (float) longValue;
-                    if (negative) {
-                        floatValue = -floatValue;
-                    }
-                    value = true;
-                } else if ((long) (float) longValue == longValue) {
-                    if (0 < scale && scale < FLOAT_10_POW.length) {
-                        floatValue = (float) longValue / FLOAT_10_POW[scale];
-                        if (negative) {
-                            floatValue = -floatValue;
-                        }
-                    } else if (0 > scale && scale > -FLOAT_10_POW.length) {
-                        floatValue = (float) longValue * FLOAT_10_POW[-scale];
-                        if (negative) {
-                            floatValue = -floatValue;
-                        }
+                if (offset < end && IOUtils.isDigit((ch = bytes[offset]))) {
+                    digit = ch - '0';
+                    if (inRange = (result > INT_64_MULT_MIN_10 || (result == INT_64_MULT_MIN_10 && digit <= (INT_64_MULT_MIN_10 * 10 - limit)))) {
+                        result = result * 10 - digit;
+                        offset++;
                     }
                 }
-
-                if (!value && scale > -128 && scale < 128) {
-                    floatValue = TypeUtils.floatValue(negative ? -1 : 1, longValue, scale);
-                    value = true;
-                }
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
-            if (!value) {
-                if (str != null) {
-                    try {
-                        floatValue = Float.parseFloat(str);
-                    } catch (NumberFormatException ex) {
-                        throw new JSONException(info(), ex);
-                    }
-                } else {
-                    floatValue = TypeUtils.parseFloat(chars, start - 1, len);
-                }
-            }
-
+            int scale = 0;
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-                ch = offset >= end ? EOI : chars[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
+            } else if (ch == '.') {
+                while (inRange
+                        && offset + 1 < end
+                        && (digit = IOUtils.digit2(bytes, offset)) != -1
+                ) {
+                    if (inRange = (result > INT_64_MULT_MIN_100 || (result == INT_64_MULT_MIN_100 && digit <= (INT_64_MULT_MIN_100 * 100 - limit)))) {
+                        result = result * 100 - digit;
+                        offset += 2;
+                        scale += 2;
+                    }
+                }
+                if (inRange && offset < end && IOUtils.isDigit((ch = bytes[offset]))) {
+                    digit = ch - '0';
+                    if (inRange = (result > INT_64_MULT_MIN_10 || (result == INT_64_MULT_MIN_10 && digit <= (INT_64_MULT_MIN_10 * 10 - limit)))) {
+                        result = result * 10 - digit;
+                        offset++;
+                        scale++;
+                    }
+                }
+
+                ch = offset == end ? EOI : bytes[offset++];
             }
+
+            int expValue = 0;
+            if (ch == 'e' || ch == 'E') {
+                boolean negativeExp;
+                ch = offset == end ? EOI : bytes[offset++];
+                if ((negativeExp = (ch == '-')) || ch == '+') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                } else if (ch == ',') {
+                    throw numberError();
+                }
+                if (inRange = IOUtils.isDigit(ch)) {
+                    expValue = ch - '0';
+                }
+
+                while (offset < end && IOUtils.isDigit((ch = bytes[offset]))) {
+                    digit = ch - '0';
+                    expValue = expValue * 10 + digit;
+                    if (expValue > MAX_EXP) {
+                        throw new JSONException("too large exp value : " + expValue);
+                    }
+                    offset++;
+                }
+                if (negativeExp) {
+                    expValue = -expValue;
+                }
+                scale -= expValue;
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if (inRange && quote != 0 && (inRange = (ch == quote))) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if (inRange) {
+                if (!negative) {
+                    result = -result;
+                }
+                if (scale == 0) {
+                    floatValue = (float) result;
+                } else if ((long) (float) result == result) {
+                    if (0 < scale && scale < FLOAT_10_POW.length) {
+                        floatValue = (float) result / FLOAT_10_POW[scale];
+                        value = true;
+                    } else if (0 > scale && scale > -FLOAT_10_POW.length) {
+                        floatValue = (float) result * FLOAT_10_POW[-scale];
+                        value = true;
+                    }
+                }
+                if (!value) {
+                    if (scale > -128 && scale < 128) {
+                        floatValue = TypeUtils.floatValue(negative ? -1 : 1, Math.abs(result), scale);
+                    } else {
+                        inRange = false;
+                    }
+                }
+            }
+        }
+
+        if (!inRange) {
+            readNumber0();
+            return getFloatValue();
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset >= end ? EOI : chars[offset++];
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
-        if (this.comma = ch == ',') {
-            ch = offset >= end ? EOI : chars[offset++];
+        if (comma = (ch == ',')) {
+            ch = offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset >= end ? EOI : chars[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
             }
         }
 
-        if (!valid) {
-            throw new JSONException(info("illegal input error"));
-        }
-
+        this.wasNull = wasNull;
         this.ch = (char) ch;
         this.offset = offset;
         return floatValue;
