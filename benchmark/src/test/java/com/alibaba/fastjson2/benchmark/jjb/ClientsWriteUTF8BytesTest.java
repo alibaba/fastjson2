@@ -98,8 +98,8 @@ public class ClientsWriteUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        wast();
+        fastjson2();
+//        wast();
 //        jsonb();
 //        jsonb_beanToArray();
 //        fastjson2_str();

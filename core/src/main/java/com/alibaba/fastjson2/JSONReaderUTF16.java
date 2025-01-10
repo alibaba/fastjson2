@@ -4132,7 +4132,7 @@ class JSONReaderUTF16
 
     @Override
     public final UUID readUUID() {
-        char ch = this.ch;
+        int ch = this.ch, end = this.end;
         if (ch == 'n') {
             readNull();
             return null;
@@ -4144,38 +4144,33 @@ class JSONReaderUTF16
         final int quote = ch;
         final char[] chars = this.chars;
         int offset = this.offset;
-        long hi = 0, lo = 0;
-        if (offset + 36 < chars.length
+        long msb1, msb2, msb3, msb4;
+        long lsb1, lsb2, lsb3, lsb4;
+        if (offset + 36 < end
                 && chars[offset + 36] == quote
                 && chars[offset + 8] == '-'
                 && chars[offset + 13] == '-'
                 && chars[offset + 18] == '-'
                 && chars[offset + 23] == '-'
         ) {
-            for (int i = 0; i < 8; i++) {
-                hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
-            }
-            for (int i = 9; i < 13; i++) {
-                hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
-            }
-            for (int i = 14; i < 18; i++) {
-                hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
-            }
-
-            for (int i = 19; i < 23; i++) {
-                lo = (lo << 4) + UUID_VALUES[chars[offset + i] - '0'];
-            }
-            for (int i = 24; i < 36; i++) {
-                lo = (lo << 4) + UUID_VALUES[chars[offset + i] - '0'];
-            }
+            msb1 = parse4Nibbles(chars, offset);
+            msb2 = parse4Nibbles(chars, offset + 4);
+            msb3 = parse4Nibbles(chars, offset + 9);
+            msb4 = parse4Nibbles(chars, offset + 14);
+            lsb1 = parse4Nibbles(chars, offset + 19);
+            lsb2 = parse4Nibbles(chars, offset + 24);
+            lsb3 = parse4Nibbles(chars, offset + 28);
+            lsb4 = parse4Nibbles(chars, offset + 32);
             offset += 37;
-        } else if (offset + 32 < chars.length && chars[offset + 32] == quote) {
-            for (int i = 0; i < 16; i++) {
-                hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
-            }
-            for (int i = 16; i < 32; i++) {
-                lo = (lo << 4) + UUID_VALUES[chars[offset + i] - '0'];
-            }
+        } else if (offset + 32 < end && chars[offset + 32] == quote) {
+            msb1 = parse4Nibbles(chars, offset);
+            msb2 = parse4Nibbles(chars, offset + 4);
+            msb3 = parse4Nibbles(chars, offset + 8);
+            msb4 = parse4Nibbles(chars, offset + 12);
+            lsb1 = parse4Nibbles(chars, offset + 16);
+            lsb2 = parse4Nibbles(chars, offset + 20);
+            lsb3 = parse4Nibbles(chars, offset + 24);
+            lsb4 = parse4Nibbles(chars, offset + 28);
             offset += 33;
         } else {
             String str = readString();
@@ -4194,10 +4189,22 @@ class JSONReaderUTF16
         if (comma = (ch == ',')) {
             next();
         } else {
-            this.ch = ch;
+            this.ch = (char) ch;
         }
 
-        return new UUID(hi, lo);
+        return new UUID(
+                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
+                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+    }
+
+    private static long parse4Nibbles(char[] chars, int offset) {
+        byte[] ns = NIBBLES;
+        char ch1 = chars[offset];
+        char ch2 = chars[offset + 1];
+        char ch3 = chars[offset + 2];
+        char ch4 = chars[offset + 3];
+        return (ch1 | ch2 | ch3 | ch4) > 0xff ?
+                -1 : ns[ch1] << 12 | ns[ch2] << 8 | ns[ch3] << 4 | ns[ch4];
     }
 
     @Override

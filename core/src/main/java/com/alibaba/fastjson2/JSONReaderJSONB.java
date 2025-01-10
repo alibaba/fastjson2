@@ -5100,10 +5100,10 @@ final class JSONReaderJSONB
                 break;
             case BC_STR_ASCII_FIX_32: {
                 for (int i = 0; i < 16; i++) {
-                    hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                    hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                 }
                 for (int i = 16; i < 32; i++) {
-                    lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                    lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
                 }
 
                 offset += 32;
@@ -5116,20 +5116,20 @@ final class JSONReaderJSONB
                 byte ch4 = bytes[offset + 23];
                 if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
                     for (int i = 0; i < 8; i++) {
-                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                     }
                     for (int i = 9; i < 13; i++) {
-                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                     }
                     for (int i = 14; i < 18; i++) {
-                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                     }
 
                     for (int i = 19; i < 23; i++) {
-                        lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
                     }
                     for (int i = 24; i < 36; i++) {
-                        lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
                     }
 
                     offset += 36;
@@ -5142,10 +5142,10 @@ final class JSONReaderJSONB
                 int strlen = readLength();
                 if (strlen == 32) {
                     for (int i = 0; i < 16; i++) {
-                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                     }
                     for (int i = 16; i < 32; i++) {
-                        lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
                     }
 
                     offset += 32;
@@ -5156,20 +5156,20 @@ final class JSONReaderJSONB
                     byte ch4 = bytes[offset + 23];
                     if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
                         for (int i = 0; i < 8; i++) {
-                            hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                            hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                         }
                         for (int i = 9; i < 13; i++) {
-                            hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                            hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                         }
                         for (int i = 14; i < 18; i++) {
-                            hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                            hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
                         }
 
                         for (int i = 19; i < 23; i++) {
-                            lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                            lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
                         }
                         for (int i = 24; i < 36; i++) {
-                            lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                            lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
                         }
 
                         offset += 36;

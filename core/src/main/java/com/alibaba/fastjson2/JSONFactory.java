@@ -396,19 +396,34 @@ public final class JSONFactory {
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
-    static final byte[] UUID_VALUES;
+    static final byte[] NIBBLES;
 
     static {
-        UUID_VALUES = new byte['f' + 1 - '0'];
-        for (char c = '0'; c <= '9'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - '0');
-        }
-        for (char c = 'a'; c <= 'f'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - 'a' + 10);
-        }
-        for (char c = 'A'; c <= 'F'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - 'A' + 10);
-        }
+        byte[] ns = new byte[256];
+        Arrays.fill(ns, (byte) -1);
+        ns['0'] = 0;
+        ns['1'] = 1;
+        ns['2'] = 2;
+        ns['3'] = 3;
+        ns['4'] = 4;
+        ns['5'] = 5;
+        ns['6'] = 6;
+        ns['7'] = 7;
+        ns['8'] = 8;
+        ns['9'] = 9;
+        ns['A'] = 10;
+        ns['B'] = 11;
+        ns['C'] = 12;
+        ns['D'] = 13;
+        ns['E'] = 14;
+        ns['F'] = 15;
+        ns['a'] = 10;
+        ns['b'] = 11;
+        ns['c'] = 12;
+        ns['d'] = 13;
+        ns['e'] = 14;
+        ns['f'] = 15;
+        NIBBLES = ns;
     }
 
     /**

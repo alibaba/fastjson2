@@ -1617,4 +1617,20 @@ public class IOUtils {
     public static boolean isDigit(int ch) {
         return ch >= '0' && ch <= '9';
     }
+
+    public static long getLongLittleEndian(byte[] bytes, int offset) {
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
+    }
+
+    public static int getIntLittleEndian(byte[] bytes, int offset) {
+        int v = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
+    }
 }
