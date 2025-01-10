@@ -5680,47 +5680,30 @@ class JSONReaderUTF8
                         && bytes[offset + 7] == '-'
                         && bytes[offset + 10] == quote
                 ) {
-                    byte y0 = bytes[offset];
-                    byte y1 = bytes[offset + 1];
-                    byte y2 = bytes[offset + 2];
-                    byte y3 = bytes[offset + 3];
-                    byte m0 = bytes[offset + 5];
-                    byte m1 = bytes[offset + 6];
-                    byte d0 = bytes[offset + 8];
-                    byte d1 = bytes[offset + 9];
+                    int year = IOUtils.digit4(bytes, offset);
+                    int month = IOUtils.digit2(bytes, offset + 5);
+                    int dom = IOUtils.digit2(bytes, offset + 8);
 
-                    int year;
-                    int month;
-                    if (y0 >= '0' && y0 <= '9'
-                            && y1 >= '0' && y1 <= '9'
-                            && y2 >= '0' && y2 <= '9'
-                            && y3 >= '0' && y3 <= '9'
-                    ) {
-                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-                        if (m0 >= '0' && m0 <= '9' && m1 >= '0' && m1 <= '9') {
-                            month = (m0 - '0') * 10 + (m1 - '0');
-                            int dom;
-                            if (d0 >= '0' && d0 <= '9' && d1 >= '0' && d1 <= '9') {
-                                dom = (d0 - '0') * 10 + (d1 - '0');
 
-                                LocalDate ldt;
-                                try {
-                                    ldt = year == 0 && month == 0 && dom == 0
-                                            ? null
-                                            : LocalDate.of(year, month, dom);
-                                } catch (DateTimeException ex) {
-                                    throw new JSONException(info("read date error"), ex);
-                                }
-
-                                this.offset = offset + 11;
-                                next();
-                                if (comma = (this.ch == ',')) {
-                                    next();
-                                }
-                                return ldt;
-                            }
-                        }
+                    if ((year | month | dom) < 0) {
+                        throw new JSONException(info("read date error"));
                     }
+
+                    LocalDate ldt;
+                    try {
+                        ldt = year == 0 && month == 0 && dom == 0
+                                ? null
+                                : LocalDate.of(year, month, dom);
+                    } catch (DateTimeException ex) {
+                        throw new JSONException(info("read date error"), ex);
+                    }
+
+                    this.offset = offset + 11;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return ldt;
                 }
 
                 int nextQuoteOffset = -1;
