@@ -16,8 +16,9 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONReaderUTF8.char2_utf8;
+import static com.alibaba.fastjson2.JSONReaderUTF8.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
+import static com.alibaba.fastjson2.util.IOUtils.getLongBigEndian;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -5083,55 +5084,31 @@ final class JSONReaderJSONB
     public UUID readUUID() {
         final byte[] bytes = this.bytes;
         byte type = bytes[offset++];
-        long hi = 0, lo = 0;
+        UUID uuid;
         switch (type) {
             case BC_NULL:
                 return null;
             case BC_BINARY:
-                int len = readLength();
+                int len = bytes[offset++];
                 if (len != 16) {
                     throw new JSONException("uuid not support " + len);
                 }
-                long msb = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-                long lsb = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 8);
+                uuid = new UUID(
+                        getLongBigEndian(bytes, offset),
+                        getLongBigEndian(bytes, offset + 8));
                 offset += 16;
-                hi = BIG_ENDIAN ? msb : Long.reverseBytes(msb);
-                lo = BIG_ENDIAN ? lsb : Long.reverseBytes(lsb);
                 break;
             case BC_STR_ASCII_FIX_32: {
-                for (int i = 0; i < 16; i++) {
-                    hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                }
-                for (int i = 16; i < 32; i++) {
-                    lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
-                }
-
+                uuid = readUUID32(bytes, offset);
                 offset += 32;
                 break;
             }
             case BC_STR_ASCII_FIX_36: {
-                byte ch1 = bytes[offset + 8];
-                byte ch2 = bytes[offset + 13];
-                byte ch3 = bytes[offset + 18];
-                byte ch4 = bytes[offset + 23];
-                if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                    for (int i = 0; i < 8; i++) {
-                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                    }
-                    for (int i = 9; i < 13; i++) {
-                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                    }
-                    for (int i = 14; i < 18; i++) {
-                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                    }
-
-                    for (int i = 19; i < 23; i++) {
-                        lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
-                    }
-                    for (int i = 24; i < 36; i++) {
-                        lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
-                    }
-
+                if (bytes[offset + 8] == '-'
+                        && bytes[offset + 13] == '-'
+                        && bytes[offset + 18] == '-'
+                        && bytes[offset + 23] == '-') {
+                    uuid = readUUID36(bytes, offset);
                     offset += 36;
                     break;
                 }
@@ -5141,50 +5118,27 @@ final class JSONReaderJSONB
             case BC_STR_UTF8: {
                 int strlen = readLength();
                 if (strlen == 32) {
-                    for (int i = 0; i < 16; i++) {
-                        hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                    }
-                    for (int i = 16; i < 32; i++) {
-                        lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
-                    }
-
+                    uuid = readUUID32(bytes, offset);
                     offset += 32;
+                    break;
                 } else if (strlen == 36) {
-                    byte ch1 = bytes[offset + 8];
-                    byte ch2 = bytes[offset + 13];
-                    byte ch3 = bytes[offset + 18];
-                    byte ch4 = bytes[offset + 23];
-                    if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                        for (int i = 0; i < 8; i++) {
-                            hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                        }
-                        for (int i = 9; i < 13; i++) {
-                            hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                        }
-                        for (int i = 14; i < 18; i++) {
-                            hi = (hi << 4) + NIBBLES[bytes[offset + i] - '0'];
-                        }
-
-                        for (int i = 19; i < 23; i++) {
-                            lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
-                        }
-                        for (int i = 24; i < 36; i++) {
-                            lo = (lo << 4) + NIBBLES[bytes[offset + i] - '0'];
-                        }
-
+                    if (bytes[offset + 8] == '-'
+                            && bytes[offset + 13] == '-'
+                            && bytes[offset + 18] == '-'
+                            && bytes[offset + 23] == '-') {
+                        uuid = readUUID36(bytes, offset);
                         offset += 36;
+                        break;
                     }
-                } else {
-                    String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
-                    offset += strlen;
-                    throw new JSONException("Invalid UUID string:  " + str);
                 }
-                break;
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                offset += strlen;
+                throw new JSONException("Invalid UUID string:  " + str);
             }
             default:
                 throw notSupportType(type);
         }
-        return new UUID(hi, lo);
+        return uuid;
     }
 
     @Override
