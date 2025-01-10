@@ -1590,20 +1590,6 @@ public class IOUtils {
         return -1;
     }
 
-    public static long hexDigit8(byte[] bytes, int offset) {
-        long v = Long.reverseBytes(UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
-        v = (v & 0x0F0F0F0F_0F0F0F0FL) + ((((v & 0x40404040_40404040L) >> 2) | ((v & 0x40404040_40404040L) << 1)) >>> 4);
-        v = ((v >>> 28) & 0xF0000000L)
-                + ((v >>> 24) & 0xF000000)
-                + ((v >>> 20) & 0xF00000)
-                + ((v >>> 16) & 0xF0000)
-                + ((v >>> 12) & 0xF000)
-                + ((v >>> 8) & 0xF00)
-                + ((v >>> 4) & 0xF0)
-                + (v & 0xF);
-        return v;
-    }
-
     public static int hexDigit4(byte[] bytes, int offset) {
         int v = Integer.reverseBytes(UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
@@ -1616,5 +1602,21 @@ public class IOUtils {
 
     public static boolean isDigit(int ch) {
         return ch >= '0' && ch <= '9';
+    }
+
+    public static int getIntLittleEndian(byte[] bytes, int offset) {
+        int v = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
+    }
+
+    public static long getLongBigEndian(byte[] bytes, int offset) {
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (!BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
     }
 }

@@ -6602,7 +6602,7 @@ class JSONReaderUTF8
 
     @Override
     public final UUID readUUID() {
-        int ch = this.ch;
+        int ch = this.ch, end = this.end;
         if (ch == 'n') {
             readNull();
             return null;
@@ -6614,24 +6614,18 @@ class JSONReaderUTF8
         final int quote = ch;
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        long hi = 0, lo = 0;
-        if (offset + 36 < bytes.length
+        UUID uuid;
+        if (offset + 36 < end
                 && bytes[offset + 36] == quote
                 && bytes[offset + 8] == '-'
                 && bytes[offset + 13] == '-'
                 && bytes[offset + 18] == '-'
                 && bytes[offset + 23] == '-'
         ) {
-            hi = (IOUtils.hexDigit8(bytes, offset) << 32)
-                    + (((long) IOUtils.hexDigit4(bytes, offset + 9)) << 16)
-                    + IOUtils.hexDigit4(bytes, offset + 14);
-            lo = (((long) IOUtils.hexDigit4(bytes, offset + 19)) << 48)
-                    | (((long) IOUtils.hexDigit4(bytes, offset + 24)) << 32)
-                    | IOUtils.hexDigit8(bytes, offset + 28);
+            uuid = readUUID36(bytes, offset);
             offset += 37;
-        } else if (offset + 32 < bytes.length && bytes[offset + 32] == quote) {
-            hi = (IOUtils.hexDigit8(bytes, offset) << 32) | IOUtils.hexDigit8(bytes, offset + 8);
-            lo = (IOUtils.hexDigit8(bytes, offset + 16) << 32) | IOUtils.hexDigit8(bytes, offset + 24);
+        } else if (offset + 32 < end && bytes[offset + 32] == quote) {
+            uuid = readUUID32(bytes, offset);
             offset += 33;
         } else {
             String str = readString();
@@ -6653,7 +6647,51 @@ class JSONReaderUTF8
             this.ch = (char) ch;
         }
 
-        return new UUID(hi, lo);
+        return uuid;
+    }
+
+    static UUID readUUID32(byte[] bytes, int offset) {
+        long msb1 = parse4Nibbles(bytes, offset);
+        long msb2 = parse4Nibbles(bytes, offset + 4);
+        long msb3 = parse4Nibbles(bytes, offset + 8);
+        long msb4 = parse4Nibbles(bytes, offset + 12);
+        long lsb1 = parse4Nibbles(bytes, offset + 16);
+        long lsb2 = parse4Nibbles(bytes, offset + 20);
+        long lsb3 = parse4Nibbles(bytes, offset + 24);
+        long lsb4 = parse4Nibbles(bytes, offset + 28);
+
+        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) < 0) {
+            throw new JSONException("Invalid UUID string:  ".concat(new String(bytes, offset, 32, ISO_8859_1)));
+        }
+
+        return new UUID(
+                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
+                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+    }
+
+    static UUID readUUID36(byte[] bytes, int offset) {
+        long msb1 = parse4Nibbles(bytes, offset);
+        long msb2 = parse4Nibbles(bytes, offset + 4);
+        long msb3 = parse4Nibbles(bytes, offset + 9);
+        long msb4 = parse4Nibbles(bytes, offset + 14);
+        long lsb1 = parse4Nibbles(bytes, offset + 19);
+        long lsb2 = parse4Nibbles(bytes, offset + 24);
+        long lsb3 = parse4Nibbles(bytes, offset + 28);
+        long lsb4 = parse4Nibbles(bytes, offset + 32);
+
+        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) < 0) {
+            throw new JSONException("Invalid UUID string:  ".concat(new String(bytes, offset, 36, ISO_8859_1)));
+        }
+
+        return new UUID(
+                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
+                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+    }
+
+    static long parse4Nibbles(byte[] bytes, int offset) {
+        int x = getIntLittleEndian(bytes, offset);
+        byte[] ns = NIBBLES;
+        return ns[x & 0xFF] << 12 | ns[(x >> 8) & 0xFF] << 8 | ns[(x >> 16) & 0xFF] << 4 | ns[(x >> 24) & 0xFF];
     }
 
     @Override
