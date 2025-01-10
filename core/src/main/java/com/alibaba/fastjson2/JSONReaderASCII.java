@@ -17,7 +17,8 @@ class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
     boolean checkEscapeFlag = true;
-    int nextEscapeIndex = -1;
+    static final int ESCAPE_INDEX_NOT_SET = -2;
+    protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, str, bytes, offset, length);
@@ -1441,21 +1442,11 @@ class JSONReaderASCII
             if (index == -1) {
                 throw error("invalid escape character EOI");
             }
-            int slashIndex = -1;
-            if (checkEscapeFlag) {
-                if (index > nextEscapeIndex) {
-                    if (offset > nextEscapeIndex) {
-                        // scan the nearest '\\'
-                        nextEscapeIndex = IOUtils.indexOfChar(bytes, '\\', offset, end);  // use end
-                        if ((checkEscapeFlag = nextEscapeIndex > -1) && index > nextEscapeIndex) {
-                            slashIndex = nextEscapeIndex;
-                        }
-                    } else {
-                        slashIndex = nextEscapeIndex;
-                    }
-                }
+            int slashIndex = nextEscapeIndex;
+            if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
+                nextEscapeIndex = slashIndex = IOUtils.indexOfChar(bytes, '\\', offset, end);
             }
-            if (slashIndex == -1) {
+            if (slashIndex == -1 || slashIndex > index) {
                 valueLength = index - offset;
                 offset = index;
             } else {
