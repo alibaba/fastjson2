@@ -16,6 +16,8 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
+    boolean checkEscapeFlag = true;
+    int nextEscapeIndex = -1;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, str, bytes, offset, length);
@@ -1439,7 +1441,20 @@ class JSONReaderASCII
             if (index == -1) {
                 throw error("invalid escape character EOI");
             }
-            int slashIndex = IOUtils.indexOfChar(bytes, '\\', offset, index);
+            int slashIndex = -1; // = IOUtils.indexOfChar(bytes, '\\', offset, index);
+            if(checkEscapeFlag) {
+                if(index > nextEscapeIndex) {
+                    if(offset > nextEscapeIndex) {
+                        // scan the nearest '\\'
+                        nextEscapeIndex = IOUtils.indexOfChar(bytes, '\\', offset, end);  // use end
+                        if((checkEscapeFlag = nextEscapeIndex > -1) && index > nextEscapeIndex) {
+                            slashIndex = nextEscapeIndex;
+                        }
+                    } else {
+                        slashIndex = nextEscapeIndex;
+                    }
+                }
+            }
             if (slashIndex == -1) {
                 valueLength = index - offset;
                 offset = index;
