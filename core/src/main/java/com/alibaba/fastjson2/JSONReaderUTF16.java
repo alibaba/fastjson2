@@ -4577,8 +4577,8 @@ class JSONReaderUTF16
                         && chars[nextQuoteOffset - 3] == '-'
                 ) {
                     int year = TypeUtils.parseInt(chars, offset, nextQuoteOffset - offset - 6);
-                    int month = TypeUtils.parseInt(chars, nextQuoteOffset - 5, 2);
-                    int dayOfMonth = TypeUtils.parseInt(chars, nextQuoteOffset - 2, 2);
+                    int month = IOUtils.digit2(chars, nextQuoteOffset - 5);
+                    int dayOfMonth = IOUtils.digit2(chars, nextQuoteOffset - 2);
                     LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
                     this.offset = nextQuoteOffset + 1;
                     next();
