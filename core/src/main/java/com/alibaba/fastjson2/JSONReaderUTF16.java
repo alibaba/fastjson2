@@ -4543,7 +4543,6 @@ class JSONReaderUTF16
                     int month = IOUtils.digit2(chars, offset + 5);
                     int dom = IOUtils.digit2(chars, offset + 8);
 
-
                     if ((year | month | dom) < 0) {
                         throw new JSONException(info("read date error"));
                     }
