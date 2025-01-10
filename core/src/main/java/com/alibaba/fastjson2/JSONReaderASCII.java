@@ -16,7 +16,6 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
-    boolean checkEscapeFlag = true;
     static final int ESCAPE_INDEX_NOT_SET = -2;
     protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
