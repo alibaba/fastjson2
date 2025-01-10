@@ -17,7 +17,7 @@ class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
 //    boolean checkEscapeFlag = true;
-    final static int ESCAPE_INDEX_NOT_SET = -2;
+    static final int ESCAPE_INDEX_NOT_SET = -2;
     int nextEscapeIndex = -1;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
