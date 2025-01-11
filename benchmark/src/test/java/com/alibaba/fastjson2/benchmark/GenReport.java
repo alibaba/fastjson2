@@ -282,6 +282,7 @@ public class GenReport {
     static class DocReader
             implements Closeable {
         BufferedReader reader;
+        int lines;
 
         public DocReader(File file) throws IOException {
             this.reader = new BufferedReader(new FileReader(file));
@@ -294,8 +295,10 @@ public class GenReport {
 
         public Block readBlock() throws Exception {
             String line = reader.readLine();
+            lines++;
             while (line != null && line.trim().isEmpty()) {
                 line = reader.readLine();
+                lines++;
             }
 
             if (line == null || !line.startsWith("#")) {
@@ -306,12 +309,14 @@ public class GenReport {
             block.jdk = line.substring(1).trim();
 
             line = reader.readLine();
+            lines++;
             if (!line.startsWith("```")) {
                 return null;
             }
 
             do {
                 line = reader.readLine();
+                lines++;
             } while (line.isEmpty());
 
             if (line.startsWith("```")) {
@@ -324,6 +329,7 @@ public class GenReport {
 
             while (true) {
                 line = reader.readLine();
+                lines++;
                 if (line.startsWith("```")) {
                     break;
                 }
