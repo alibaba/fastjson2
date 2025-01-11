@@ -523,7 +523,6 @@ class JSONWriterUTF8
     }
 
     static boolean containsEscaped(long data, long quote) {
-        // c == quote || c == '\\' || c < ' '
         /*
           for (int i = 0; i < 8; ++i) {
             byte c = (byte) data;
