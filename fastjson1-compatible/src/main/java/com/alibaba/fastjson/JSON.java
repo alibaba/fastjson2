@@ -2169,9 +2169,8 @@ public abstract class JSON
                 JSONFactory.getDefaultObjectReaderProvider(),
                 DEFAULT_PARSER_FEATURE
         );
-        JSONReader reader = JSONReader.of(str, context);
 
-        try {
+        try (JSONReader reader = JSONReader.of(str, context)) {
             if (reader.nextIfNullOrEmptyString()) {
                 return null;
             }
