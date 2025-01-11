@@ -338,7 +338,7 @@ public final class JSONFactory {
         CACHE_ITEMS = items;
     }
 
-    static final int CACHE_THRESHOLD = 1024 * 1024 * 4;
+    static final int CACHE_THRESHOLD = 1024 * 1024 * 8;
     static final AtomicReferenceFieldUpdater<CacheItem, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, char[].class, "chars");
     static final AtomicReferenceFieldUpdater<CacheItem, byte[]> BYTES_UPDATER
