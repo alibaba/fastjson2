@@ -328,6 +328,10 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
+    public static void setUseGsonAnnotation(boolean useGsonAnnotation) {
+        JSONFactory.useGsonAnnotation = useGsonAnnotation;
+    }
+
     static final CacheItem[] CACHE_ITEMS;
 
     static {
