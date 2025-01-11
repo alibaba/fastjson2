@@ -506,23 +506,24 @@ class JSONWriterUTF8
         }
 
         int off = this.off;
-        if (!escape) {
-            int minCapacity = off + value.length + 2;
-            byte[] bytes = this.bytes;
-            if (minCapacity > bytes.length) {
-                bytes = grow(minCapacity);
-            }
-            bytes[off] = quote;
-            System.arraycopy(value, 0, bytes, off + 1, value.length);
-            off += value.length + 1;
-            bytes[off] = quote;
-            this.off = off + 1;
+        if (escape) {
+            writeStringEscaped(value);
             return;
         }
-        writeStringEscaped(value);
+
+        int minCapacity = off + value.length + 2;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        bytes[off] = quote;
+        System.arraycopy(value, 0, bytes, off + 1, value.length);
+        off += value.length + 1;
+        bytes[off] = quote;
+        this.off = off + 1;
     }
 
-    static boolean containsEscaped(long data, long quote) {
+    static boolean containsEscaped(long v, long quote) {
         /*
           for (int i = 0; i < 8; ++i) {
             byte c = (byte) data;
@@ -533,13 +534,13 @@ class JSONWriterUTF8
           }
           return false;
          */
-        long xed = data ^ quote;
-        long xf0 = data ^ 0x5c5c5c5c5c5c5c5cL;
+        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
+        long x5c = v ^ 0x5c5c5c5c5c5c5c5cL;
 
-        xed = (xed - 0x0101010101010101L) & ~xed;
-        xf0 = (xf0 - 0x0101010101010101L) & ~xf0;
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x5c = (x5c - 0x0101010101010101L) & ~x5c;
 
-        return ((xed | xf0 | (0x7F7F_7F7F_7F7F_7F7FL - data + 0x1010_1010_1010_1010L) | data) & 0x8080808080808080L) != 0;
+        return ((x22 | x5c | (0x7F7F_7F7F_7F7F_7F7FL - v + 0x1010_1010_1010_1010L) | v) & 0x8080808080808080L) != 0;
     }
 
     protected final void writeStringLatin1BrowserSecure(byte[] values) {
