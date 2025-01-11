@@ -898,6 +898,18 @@ class JSONReaderUTF16
     }
 
     @Override
+    public final void nextWithoutComment() {
+        int offset = this.offset;
+        final char[] chars = this.chars;
+        char ch = offset >= end ? EOI : chars[offset++];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
+        this.offset = offset;
+        this.ch = ch;
+    }
+
+    @Override
     public final long readFieldNameHashCodeUnquote() {
         this.nameEscape = false;
         int offset = this.offset, end = this.end;
@@ -3420,7 +3432,7 @@ class JSONReaderUTF16
         } else if (ch == '/') {
             multi = false;
         } else {
-            return;
+            throw new JSONException(info("parse comment error"));
         }
 
         ch = chars[offset++];

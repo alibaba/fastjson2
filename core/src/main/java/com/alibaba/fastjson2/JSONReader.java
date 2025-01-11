@@ -627,6 +627,10 @@ public abstract class JSONReader
 
     public abstract void next();
 
+    public void nextWithoutComment() {
+        next();
+    }
+
     public abstract long readValueHashCode();
 
     public long readTypeHashCode() {

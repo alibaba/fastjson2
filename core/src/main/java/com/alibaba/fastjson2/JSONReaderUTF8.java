@@ -458,6 +458,23 @@ class JSONReaderUTF8
         }
     }
 
+    public final void nextWithoutComment() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = offset >= end ? EOI : bytes[offset++];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch < 0) {
+            char_utf8(ch, offset);
+            return;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+    }
+
     @Override
     public long readFieldNameHashCodeUnquote() {
         this.nameEscape = false;
@@ -4734,6 +4751,7 @@ class JSONReaderUTF8
 
         final byte[] bytes = this.bytes;
         byte ch = bytes[offset++];
+        byte start = ch;
 
         boolean multi;
         if (ch == '*') {
@@ -4741,7 +4759,7 @@ class JSONReaderUTF8
         } else if (ch == '/') {
             multi = false;
         } else {
-            return;
+            throw new JSONException(info("parse comment error"));
         }
 
         ch = bytes[offset++];

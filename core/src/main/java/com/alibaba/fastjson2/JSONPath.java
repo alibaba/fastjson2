@@ -878,7 +878,7 @@ public abstract class JSONPath {
             case '=':
                 jsonReader.next();
                 if (jsonReader.ch == '~') {
-                    jsonReader.next();
+                    jsonReader.nextWithoutComment();
                     operator = JSONPathFilter.Operator.REG_MATCH;
                 } else if (jsonReader.ch == '=') {
                     jsonReader.next();
