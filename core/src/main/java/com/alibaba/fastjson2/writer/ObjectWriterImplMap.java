@@ -617,8 +617,10 @@ public final class ObjectWriterImplMap
             String key;
             if (entryKey == null) {
                 key = null;
+            } else if (entryKey instanceof String) {
+                key = (String) entryKey;
             } else {
-                key = entryKey.toString();
+                key = JSON.toJSONString(entryKey, jsonWriter.getContext());
             }
 
             if (refDetect) {
