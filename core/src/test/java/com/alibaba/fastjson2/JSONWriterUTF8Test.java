@@ -1103,4 +1103,13 @@ public class JSONWriterUTF8Test {
             }
         }
     }
+
+    @Test
+    public void testSpecial() {
+        assertEquals("'\\'01234567890123456789'", new String(JSON.toJSONBytes("'01234567890123456789", UseSingleQuotes)));
+        assertEquals("\"'01234567890123456789\"", new String(JSON.toJSONBytes("'01234567890123456789")));
+
+        assertEquals("\"\\\"01234567890123456789\"", new String(JSON.toJSONBytes("\"01234567890123456789")));
+        assertEquals("'\"01234567890123456789'", new String(JSON.toJSONBytes("\"01234567890123456789", UseSingleQuotes)));
+    }
 }

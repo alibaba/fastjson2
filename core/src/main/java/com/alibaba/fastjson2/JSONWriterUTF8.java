@@ -52,6 +52,7 @@ class JSONWriterUTF8
 
     final CacheItem cacheItem;
     protected byte[] bytes;
+    protected final long byteVectorQuote;
 
     JSONWriterUTF8(Context ctx) {
         super(ctx, null, false, StandardCharsets.UTF_8);
@@ -62,6 +63,7 @@ class JSONWriterUTF8
             bytes = new byte[8192];
         }
         this.bytes = bytes;
+        this.byteVectorQuote = this.useSingleQuote ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
     }
 
     public final void writeNull() {
@@ -479,16 +481,24 @@ class JSONWriterUTF8
         this.bytes[this.off++] = (byte) quote;
     }
 
-    public void writeStringLatin1(byte[] values) {
+    public void writeStringLatin1(byte[] value) {
         boolean escape = false;
         if ((context.features & BrowserSecure.mask) != 0) {
-            writeStringLatin1BrowserSecure(values);
+            writeStringLatin1BrowserSecure(value);
             return;
         }
 
         final byte quote = (byte) this.quote;
-        for (int i = 0; i < values.length; i++) {
-            byte c = values[i];
+        final long vecQuote = this.byteVectorQuote;
+        int i = 0;
+        final int upperBound = (value.length - i) & ~7;
+        for (; i < upperBound; i += 8) {
+            if (containsEscaped(IOUtils.getLongLittleEndian(value, i), vecQuote)) {
+                break;
+            }
+        }
+        for (; i < value.length; i++) {
+            byte c = value[i];
             if (c == quote || c == '\\' || c < ' ') {
                 escape = true;
                 break;
@@ -497,19 +507,40 @@ class JSONWriterUTF8
 
         int off = this.off;
         if (!escape) {
-            int minCapacity = off + values.length + 2;
+            int minCapacity = off + value.length + 2;
             byte[] bytes = this.bytes;
             if (minCapacity > bytes.length) {
                 bytes = grow(minCapacity);
             }
             bytes[off] = quote;
-            System.arraycopy(values, 0, bytes, off + 1, values.length);
-            off += values.length + 1;
+            System.arraycopy(value, 0, bytes, off + 1, value.length);
+            off += value.length + 1;
             bytes[off] = quote;
             this.off = off + 1;
             return;
         }
-        writeStringEscaped(values);
+        writeStringEscaped(value);
+    }
+
+    private static boolean containsEscaped(long data, long quote) {
+        // c == quote || c == '\\' || c < ' '
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) data;
+            if (c == quote || c == '\\' || c < ' ') {
+                return true;
+            }
+            data >>>= 8;
+          }
+          return false;
+         */
+        long xed = data ^ quote;
+        long xf0 = data ^ 0x5c5c5c5c5c5c5c5cL;
+
+        xed = (xed - 0x0101010101010101L) & ~xed;
+        xf0 = (xf0 - 0x0101010101010101L) & ~xf0;
+
+        return ((xed | xf0 | (0x7F7F_7F7F_7F7F_7F7FL - data + 0x1010_1010_1010_1010L) | data) & 0x8080808080808080L) != 0;
     }
 
     protected final void writeStringLatin1BrowserSecure(byte[] values) {

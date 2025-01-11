@@ -1619,4 +1619,12 @@ public class IOUtils {
         }
         return v;
     }
+
+    public static long getLongLittleEndian(byte[] bytes, int offset) {
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
+    }
 }

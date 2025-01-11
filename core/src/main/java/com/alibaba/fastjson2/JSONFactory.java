@@ -93,7 +93,6 @@ public final class JSONFactory {
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
-    static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF8;
     static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF16;
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_ASCII;
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
@@ -231,20 +230,12 @@ public final class JSONFactory {
 
         boolean readerVector = getPropertyBool(properties, "fastjson2.readerVector", false);
 
-        Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF8 = null;
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF16 = null;
         JSONReaderUTF8Creator readerCreatorASCII = null;
         JSONReaderUTF8Creator readerCreatorUTF8 = null;
         JSONReaderUTF16Creator readerCreatorUTF16 = null;
         if (JDKUtils.VECTOR_SUPPORT) {
             if (VECTOR_BIT_LENGTH >= 64) {
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
-                    incubatorVectorCreatorUTF8 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-                } catch (Throwable e) {
-                    initErrorLast = e;
-                }
-
                 try {
                     Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF16Vector$Factory");
                     incubatorVectorCreatorUTF16 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
@@ -278,7 +269,6 @@ public final class JSONFactory {
                 }
             }
         }
-        INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 = incubatorVectorCreatorUTF8;
         INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 = incubatorVectorCreatorUTF16;
         INCUBATOR_VECTOR_READER_CREATOR_ASCII = readerCreatorASCII;
         INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
+import org.apache.arrow.flatbuf.Int;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -372,5 +373,125 @@ public class IOUtilsTest {
         assertEquals(4,
                 IOUtils.indexOfChar(
                         bytes, 'a', 1));
+    }
+
+    @Test
+    public void x0() {
+        for (int i = 0; i < 256; i++) {
+            byte b = (byte) i;
+            if (b < ' ') {
+                System.out.println(i + "\t" + Integer.toHexString(i));
+            }
+        }
+    }
+
+    @Test
+    public void xor() {
+        for (int i = 0; i < 256; i++) {
+            byte b = (byte) i;
+//            if ((b ^ 0x22) != 0 && (b ^ 0x27) != 0 && (b ^ 0x5c) != 0) {
+//                continue;
+//            }
+//            if (((i & 0x80) != 0)) {
+//                continue;
+//            }
+////
+//            System.out.println(i + "\t" + Integer.toHexString(i) + "\t" + Integer.toHexString((0x70 - i + 0x30) & 0x80) + "\t" + (char) i);
+//
+//            if (contains(i, 0x22)) {
+//                System.out.println(i + "\t" + Integer.toHexString(i) + "\t" + (char) i);
+//            }
+//            if ((b ^ 0x22) == 0) {
+//                System.out.println(i + "\t" + Integer.toHexString(i) + "\t" + (char) i);
+//                continue;
+//            }
+            if (isSpecial(i)) {
+                continue;
+            }
+
+            System.out.println(i + "\t" + Integer.toHexString(i) + "\t" + (char) i);
+        }
+    }
+
+    @Test
+    public void xor_0() {
+        for (int i = 0; i < 256; i++) {
+            if (((i & 0x80) != 0)) {
+                continue;
+            }
+
+            int x = i >> 4;
+
+            System.out.println(i + "\t" + Integer.toHexString(x) + "\t" + Integer.toHexString((((0x7 - x + 0x3) & 0x8))) + "\t" + (char) i);
+        }
+    }
+
+    public static boolean isSpecial(long data) {
+        long xed = data ^ 0x2222_2222_2222_2222L;
+        long xf0 = data ^ 0x5c5c5c5c5c5c5c5cL;
+
+        xed = (xed - 0x0101010101010101L) & ~xed;
+        xf0 = (xf0 - 0x0101010101010101L) & ~xf0;
+
+        return ((xed | xf0 | (0x7F7F_7F7F_7F7F_7F7FL - data + 0x1010_1010_1010_1010L) | data) & 0x8080808080808080L) != 0;
+    }
+
+    public static boolean isSpecial1(long data) {
+        // 在Java中，long是有符号的，所以我们需要确保我们正确处理高字节。
+        long xed = data ^ 0xededededededededL;
+        long xf0 = (data | 0x1010101010101010L) ^ 0xf0f0f0f0f0f0f0f0L;
+        long xf4 = data ^ 0xf4f4f4f4f4f4f4f4L;
+
+        // Java没有&^运算符，所以用~和&来模拟
+        xed = (xed - 0x0101010101010101L) & ~xed;
+        xf0 = (xf0 - 0x0101010101010101L) & ~xf0;
+        xf4 = (xf4 - 0x0101010101010101L) & ~xf4;
+
+        return ((xed | xf0 | xf4) & 0x8080808080808080L) != 0;
+    }
+
+
+    public static boolean contains(long data, long mask) {
+        // Perform XOR on data and mask
+        data ^= mask;
+
+        // Subtract the magic number from data
+        // Use a mask to emulate unsigned behavior for the highest bit
+        long magic = 0x0101010101010101L;
+        long highBitMask = 0x8080808080808080L;
+        long result = (data - magic) & ~data & highBitMask;
+
+        // Return true if any byte in the result is non-zero
+        return result != 0;
+    }
+
+
+
+    @Test
+    public void xor_1() {
+        long MASK = 0x2222_2222_2222_2222L;
+        long[] values = {
+                0x1522_1314_1522_1314L,
+                0x1534_1534_1534_1534L,
+                MASK,
+         };
+        for (long i : values) {
+            System.out.println(Long.toHexString(i) + "\t" + isSpecial(i));
+        }
+    }
+
+    @Test
+    public void x6() {
+        for (int i = 0; i < 6; i++) {
+            int x = i << 4;
+            System.out.println(i + "\t" + x + "\t" + (x ^ 0x70) + "\t" + (((x ^ 0x70) + 0x20) & 0x80));
+        }
+    }
+
+    @Test
+    public void hex() {
+        for (int i = 0; i < 16; i++) {
+            System.out.println(i + "\t" + Integer.toHexString(i) + "\t" + Integer.toBinaryString(i));
+        }
     }
 }
