@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriterUTF8.containsEscaped;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -60,6 +61,7 @@ class JSONWriterUTF16
 
     protected char[] chars;
     final CacheItem cacheItem;
+    protected final long byteVectorQuote;
 
     JSONWriterUTF16(Context ctx) {
         super(ctx, null, false, StandardCharsets.UTF_16);
@@ -70,6 +72,7 @@ class JSONWriterUTF16
             chars = new char[8192];
         }
         this.chars = chars;
+        this.byteVectorQuote = this.useSingleQuote ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
     }
 
     public final void writeNull() {
@@ -271,13 +274,29 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = quote;
 
-        for (byte c : value) {
-            if (c == '\\' || c == quote || c < ' ') {
+        int i = 0;
+        final long vecQuote = this.byteVectorQuote;
+        final int upperBound = (value.length - i) & ~7;
+        for (; i < upperBound; i += 8) {
+            long vec64 = getLongLittleEndian(value, i);
+            if (containsEscaped(vec64, vecQuote)) {
                 escape = true;
                 break;
             }
+            IOUtils.putLong(chars, off, expand(vec64));
+            IOUtils.putLong(chars, off + 4, expand(vec64 >>> 32));
+            off += 8;
+        }
+        if (!escape) {
+            for (; i < value.length; i++) {
+                byte c = value[i];
+                if (c == '\\' || c == quote || c < ' ') {
+                    escape = true;
+                    break;
+                }
 
-            chars[off++] = (char) c;
+                chars[off++] = (char) c;
+            }
         }
 
         if (!escape) {
@@ -288,6 +307,10 @@ class JSONWriterUTF16
 
         this.off = start;
         writeStringEscape(value);
+    }
+
+    static long expand(long i) {
+        return (i & 0xFFL) | ((i & 0xFF00L) << 8) | ((i & 0xFF0000L) << 16) | ((i & 0xFF000000L) << 24);
     }
 
     protected final void writeStringLatin1BrowserSecure(byte[] value) {

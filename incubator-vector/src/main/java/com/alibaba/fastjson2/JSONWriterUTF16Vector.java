@@ -19,10 +19,6 @@ final class JSONWriterUTF16Vector
     static final Vector<Byte> V_BYTE_64_SLASH = ByteVector.SPECIES_64.broadcast('\\');
     static final Vector<Byte> V_BYTE_64_DOUBLE_QUOTE = ByteVector.SPECIES_64.broadcast('"');
     static final Vector<Byte> V_BYTE_64_SINGLE_QUOTE = ByteVector.SPECIES_64.broadcast('\'');
-    static final Vector<Byte> V_BYTE_64_LT = ByteVector.SPECIES_64.broadcast('<');
-    static final Vector<Byte> V_BYTE_64_GT = ByteVector.SPECIES_64.broadcast('>');
-    static final Vector<Byte> V_BYTE_64_LB = ByteVector.SPECIES_64.broadcast('(');
-    static final Vector<Byte> V_BYTE_64_RB = ByteVector.SPECIES_64.broadcast(')');
 
     static final Vector<Short> V_SHORT_128_SLASH = ShortVector.SPECIES_128.broadcast('\\');
     static final Vector<Short> V_SHORT_128_DOUBLE_QUOTE = ShortVector.SPECIES_128.broadcast('"');
