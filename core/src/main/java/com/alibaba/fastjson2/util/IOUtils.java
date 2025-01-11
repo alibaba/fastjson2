@@ -1395,6 +1395,10 @@ public class IOUtils {
         return pos + 6;
     }
 
+    public static void putChar(char[] buf, int pos, char v) {
+        UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
+    }
+
     public static void putShort(byte[] buf, int pos, short v) {
         UNSAFE.putShort(
                 buf,

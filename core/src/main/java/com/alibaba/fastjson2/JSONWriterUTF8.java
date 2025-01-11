@@ -522,7 +522,7 @@ class JSONWriterUTF8
         writeStringEscaped(value);
     }
 
-    private static boolean containsEscaped(long data, long quote) {
+    static boolean containsEscaped(long data, long quote) {
         // c == quote || c == '\\' || c < ' '
         /*
           for (int i = 0; i < 8; ++i) {
