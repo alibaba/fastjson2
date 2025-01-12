@@ -600,15 +600,11 @@ class JSONWriterUTF8
         }
         bytes[off++] = (byte) quote;
 
-        int valueOffset = 0;
-        while (valueOffset < value.length) {
-            byte b0 = value[valueOffset];
-            byte b1 = value[valueOffset + 1];
-            valueOffset += 2;
-
-            if (b1 == 0 && b0 >= 0) {
-//                bytes[off++] = b0;
-                switch (b0) {
+        int coff = 0, char_len = value.length >> 1;
+        while (coff < char_len) {
+            char c = IOUtils.getChar(value, coff++);
+            if (c < 0x80) {
+                switch (c) {
                     case '\\':
                         bytes[off] = (byte) '\\';
                         bytes[off + 1] = (byte) '\\';
@@ -652,7 +648,7 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('0' + (int) b0);
+                        bytes[off + 5] = (byte) ('0' + c);
                         off += 6;
                         break;
                     case 11:
@@ -663,7 +659,7 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('a' + (b0 - 10));
+                        bytes[off + 5] = (byte) ('a' + (c - 10));
                         off += 6;
                         break;
                     case 16:
@@ -681,7 +677,7 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('0' + (b0 - 16));
+                        bytes[off + 5] = (byte) ('0' + (c - 16));
                         off += 6;
                         break;
                     case 26:
@@ -695,7 +691,7 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('a' + (b0 - 26));
+                        bytes[off + 5] = (byte) ('a' + (c - 26));
                         off += 6;
                         break;
                     case '<':
@@ -707,25 +703,24 @@ class JSONWriterUTF8
                             bytes[off + 1] = 'u';
                             bytes[off + 2] = '0';
                             bytes[off + 3] = '0';
-                            bytes[off + 4] = (byte) DIGITS[(b0 >>> 4) & 15];
-                            bytes[off + 5] = (byte) DIGITS[b0 & 15];
+                            bytes[off + 4] = (byte) DIGITS[(c >>> 4) & 15];
+                            bytes[off + 5] = (byte) DIGITS[c & 15];
                             off += 6;
                         } else {
-                            bytes[off++] = b0;
+                            bytes[off++] = (byte) c;
                         }
                         break;
                     default:
-                        if (b0 == quote) {
+                        if (c == quote) {
                             bytes[off] = (byte) '\\';
                             bytes[off + 1] = (byte) quote;
                             off += 2;
                         } else {
-                            bytes[off++] = b0;
+                            bytes[off++] = (byte) c;
                         }
                         break;
                 }
             } else {
-                char c = (char) ((b0 & 0xff) | ((b1 & 0xff) << 8));
                 if (c < 0x800) {
                     // 2 bytes, 11 bits
                     bytes[off] = (byte) (0xc0 | (c >> 6));
@@ -741,17 +736,14 @@ class JSONWriterUTF8
                     off += 6;
                 } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                     final int uc;
-                    int ip = valueOffset - 1;
                     if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
-                        if (value.length - ip < 2) {
+                        if (coff + 1 > char_len) {
                             uc = -1;
                         } else {
-                            b0 = value[ip + 1];
-                            b1 = value[ip + 2];
-                            char d = (char) ((b0 & 0xff) | ((b1 & 0xff) << 8));
+                            char d = getChar(value, coff);
                             // d >= '\uDC00' && d < ('\uDFFF' + 1)
                             if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
-                                valueOffset += 2;
+                                coff++;
                                 uc = ((c << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
                             } else {
                                 bytes[off++] = '?';
