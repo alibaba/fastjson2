@@ -789,20 +789,23 @@ public class IOUtils {
             chars[off++] = '+';
         }
 
+        long address;
         if (year < 10000) {
             int y01 = year / 100;
             int y23 = year - y01 * 100;
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), PACKED_DIGITS_UTF16[y01]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 2) << 1), PACKED_DIGITS_UTF16[y23]);
+            address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
+            UNSAFE.putInt(chars, address, PACKED_DIGITS_UTF16[y01]);
+            UNSAFE.putInt(chars, address + 4, PACKED_DIGITS_UTF16[y23]);
             off += 4;
         } else {
             off = IOUtils.writeInt32(chars, off, year);
         }
 
         chars[off] = '-';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[month]);
+        address = ARRAY_CHAR_BASE_OFFSET + ((long) (off + 1) << 1);
+        UNSAFE.putInt(chars, address, PACKED_DIGITS_UTF16[month]);
         chars[off + 3] = '-';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
+        UNSAFE.putInt(chars, address + 6, PACKED_DIGITS_UTF16[dayOfMonth]);
         return off + 6;
     }
 
@@ -887,11 +890,12 @@ public class IOUtils {
     }
 
     public static void writeLocalTime(char[] chars, int off, int hour, int minute, int second) {
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), PACKED_DIGITS_UTF16[hour]);
+        long address = ARRAY_CHAR_BASE_OFFSET + (((long) off) << 1);
+        UNSAFE.putInt(chars, address, PACKED_DIGITS_UTF16[hour]);
         chars[off + 2] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 3) << 1), PACKED_DIGITS_UTF16[minute]);
+        UNSAFE.putInt(chars, address + 6, PACKED_DIGITS_UTF16[minute]);
         chars[off + 5] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 6) << 1), PACKED_DIGITS_UTF16[second]);
+        UNSAFE.putInt(chars, address + 12, PACKED_DIGITS_UTF16[second]);
     }
 
     public static int writeLocalTime(char[] chars, int off, LocalTime time) {
@@ -1399,6 +1403,10 @@ public class IOUtils {
         UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    public static char getChar(char[] buf, int pos) {
+        return UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
+    }
+
     public static void putShort(byte[] buf, int pos, short v) {
         UNSAFE.putShort(
                 buf,
@@ -1436,26 +1444,23 @@ public class IOUtils {
     }
 
     public static int digit4(char[] chars, int off) {
-        long x = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
-        if (BIG_ENDIAN) {
-            x = Long.reverseBytes(x);
-        }
-        long d;
-        if ((((x & 0xF000F000F000F0L) - 0x30003000300030L)
-                | (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L)) != 0) {
+        char c0 = getChar(chars, off),
+                c1 = getChar(chars, off + 1),
+                c2 = getChar(chars, off + 2),
+                c3 = getChar(chars, off + 3);
+        if ((c0 | c1 | c2 | c3) > 0x7f) {
             return -1;
         }
-        return (int) (((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5) // (d & 0xF) * 1000
-                + ((d & 0xF0000) >> 10) + ((d & 0xF0000) >> 11) + ((d & 0xF0000) >> 14) // ((d & 0xF0000) >> 16) * 100
-                + ((d & 0xF00000000L) >> 29) + ((d & 0xF00000000L) >> 31) // ((d & 0xF00000000L) >> 32) * 10
-                + (d >> 48));
+        return digit4(c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
     }
 
     public static int digit4(byte[] bytes, int off) {
-        int x = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            x = Integer.reverseBytes(x);
-        }
+        return digit4(
+                getIntLittleEndian(bytes, off)
+        );
+    }
+
+    private static int digit4(int x) {
         /*
             Here we are doing a 4-Byte Vector operation on the Int type.
 
@@ -1501,29 +1506,23 @@ public class IOUtils {
     }
 
     public static int digit3(char[] chars, int off) {
-        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
-        int i = UNSAFE.getInt(chars, address);
-        short s = UNSAFE.getShort(chars, address + 4);
-        if (BIG_ENDIAN) {
-            i = Integer.reverseBytes(i);
-            s = Short.reverseBytes(s);
-        }
-        long x = (((long) s) << 32) | i; // reuse
-        long d;
-        if ((((x & 0xF000F000F0L) - 0x3000300030L) | (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L)) != 0) {
+        char c0 = getChar(chars, off), c1 = getChar(chars, off + 1), c2 = getChar(chars, off + 2);
+        if ((c0 | c1 | c2) > 0x7F) {
             return -1;
         }
-        return (int) (((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xF) * 100
-                + ((d & 0xF0000L) >> 13) + ((d & 0xF0000L) >> 15) // ((d & 0xF0000) >> 16) * 10
-                + (d >> 32));
+        return digit3(
+                c0 | (c1 << 8) | (c2 << 16)
+        );
     }
 
     public static int digit3(byte[] bytes, int off) {
-        int x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            x = Short.reverseBytes((short) x);
-        }
-        x |= UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16;
+        return digit3(
+                getShortLittleEndian(bytes, off)
+                        | (UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16)
+        );
+    }
+
+    private static int digit3(int x) {
         int d;
         if ((((x & 0xF0F0F0) - 0x303030) | (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0)) != 0) {
             return -1;
@@ -1534,23 +1533,20 @@ public class IOUtils {
     }
 
     public static int digit2(char[] chars, int off) {
-        int x = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
-        if (BIG_ENDIAN) {
-            x = Integer.reverseBytes(x);
-        }
-        int d;
-        if ((((x & 0xF000F0) - 0x300030) | (((d = x & 0x0F000F) + 0x060006) & 0xF000F0)) != 0) {
+        char c0 = getChar(chars, off), c1 = getChar(chars, off + 1);
+        if ((c0 | c1) > 0x7f) {
             return -1;
         }
-        return ((d & 0xF) << 3) + ((d & 0xF) << 1) // (d & 0xF) * 10
-                + (d >> 16);
+        return digit2(c0 | (c1 << 8));
     }
 
     public static int digit2(byte[] bytes, int off) {
-        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            x = Short.reverseBytes(x);
-        }
+        return digit2(
+                getShortLittleEndian(bytes, off)
+        );
+    }
+
+    private static int digit2(int x) {
         int d;
         if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0
         ) {
@@ -1606,6 +1602,14 @@ public class IOUtils {
 
     public static boolean isDigit(int ch) {
         return ch >= '0' && ch <= '9';
+    }
+
+    public static short getShortLittleEndian(byte[] bytes, int offset) {
+        short v = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Short.reverseBytes(v);
+        }
+        return v;
     }
 
     public static int getIntLittleEndian(byte[] bytes, int offset) {
