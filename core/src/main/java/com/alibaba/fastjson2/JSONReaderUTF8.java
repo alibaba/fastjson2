@@ -3060,11 +3060,7 @@ class JSONReaderUTF8
         if (!nameEscape) {
             if (nameAscii) {
                 if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[length];
-                    for (int i = 0; i < length; ++i) {
-                        chars[i] = (char) bytes[offset + i];
-                    }
-                    return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    return JDKUtils.asciiStringJDK8(bytes, offset, length);
                 } else if (STRING_CREATOR_JDK11 != null) {
                     return STRING_CREATOR_JDK11.apply(
                             Arrays.copyOfRange(bytes, offset, nameEnd),
@@ -3434,11 +3430,7 @@ class JSONReaderUTF8
                         if (entry == null) {
                             String name;
                             if (STRING_CREATOR_JDK8 != null) {
-                                char[] chars = new char[length];
-                                for (int i = 0; i < length; ++i) {
-                                    chars[i] = (char) bytes[nameBegin + i];
-                                }
-                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                                name = asciiStringJDK8(bytes, nameBegin, length);
                             } else if (ANDROID) {
                                 name = getLatin1String(nameBegin, length);
                             } else {
@@ -3456,11 +3448,7 @@ class JSONReaderUTF8
                         if (entry == null) {
                             String name;
                             if (STRING_CREATOR_JDK8 != null) {
-                                char[] chars = new char[length];
-                                for (int i = 0; i < length; ++i) {
-                                    chars[i] = (char) bytes[nameBegin + i];
-                                }
-                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                                name = asciiStringJDK8(bytes, nameBegin, length);
                             } else if (ANDROID) {
                                 name = getLatin1String(nameBegin, length);
                             } else {
@@ -3476,11 +3464,7 @@ class JSONReaderUTF8
                 }
 
                 if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[length];
-                    for (int i = 0; i < length; ++i) {
-                        chars[i] = (char) bytes[nameBegin + i];
-                    }
-                    return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    return asciiStringJDK8(bytes, nameBegin, length);
                 } else if (ANDROID) {
                     return getLatin1String(nameBegin, nameEnd - nameBegin);
                 } else if (STRING_CREATOR_JDK11 != null) {
