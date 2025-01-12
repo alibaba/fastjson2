@@ -606,33 +606,12 @@ class JSONWriterUTF8
             if (c < 0x80) {
                 switch (c) {
                     case '\\':
-                        bytes[off] = (byte) '\\';
-                        bytes[off + 1] = (byte) '\\';
-                        off += 2;
-                        break;
                     case '\n':
-                        bytes[off] = (byte) '\\';
-                        bytes[off + 1] = (byte) 'n';
-                        off += 2;
-                        break;
                     case '\r':
-                        bytes[off] = (byte) '\\';
-                        bytes[off + 1] = (byte) 'r';
-                        off += 2;
-                        break;
                     case '\f':
-                        bytes[off] = (byte) '\\';
-                        bytes[off + 1] = (byte) 'f';
-                        off += 2;
-                        break;
                     case '\b':
-                        bytes[off] = (byte) '\\';
-                        bytes[off + 1] = (byte) 'b';
-                        off += 2;
-                        break;
                     case '\t':
-                        bytes[off] = (byte) '\\';
-                        bytes[off + 1] = (byte) 't';
+                        writeEscapedChar(bytes, off, c);
                         off += 2;
                         break;
                     case 0:
@@ -643,25 +622,9 @@ class JSONWriterUTF8
                     case 5:
                     case 6:
                     case 7:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('0' + c);
-                        off += 6;
-                        break;
                     case 11:
                     case 14:
                     case 15:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('a' + (c - 10));
-                        off += 6;
-                        break;
                     case 16:
                     case 17:
                     case 18:
@@ -672,26 +635,13 @@ class JSONWriterUTF8
                     case 23:
                     case 24:
                     case 25:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('0' + (c - 16));
-                        off += 6;
-                        break;
                     case 26:
                     case 27:
                     case 28:
                     case 29:
                     case 30:
                     case 31:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('a' + (c - 26));
+                        writeU4Hex2(bytes, off, c);
                         off += 6;
                         break;
                     case '<':
@@ -699,12 +649,7 @@ class JSONWriterUTF8
                     case '(':
                     case ')':
                         if (browserSecure) {
-                            bytes[off] = '\\';
-                            bytes[off + 1] = 'u';
-                            bytes[off + 2] = '0';
-                            bytes[off + 3] = '0';
-                            bytes[off + 4] = (byte) DIGITS[(c >>> 4) & 15];
-                            bytes[off + 5] = (byte) DIGITS[c & 15];
+                            writeU4HexU(bytes, off, c);
                             off += 6;
                         } else {
                             bytes[off++] = (byte) c;
@@ -727,12 +672,7 @@ class JSONWriterUTF8
                     bytes[off + 1] = (byte) (0x80 | (c & 0x3f));
                     off += 2;
                 } else if (escapeNoneAscii) {
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = (byte) DIGITS[(c >>> 12) & 15];
-                    bytes[off + 3] = (byte) DIGITS[(c >>> 8) & 15];
-                    bytes[off + 4] = (byte) DIGITS[(c >>> 4) & 15];
-                    bytes[off + 5] = (byte) DIGITS[c & 15];
+                    writeU4HexU(bytes, off, c);
                     off += 6;
                 } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                     final int uc;
@@ -895,33 +835,12 @@ class JSONWriterUTF8
             byte ch = values[i];
             switch (ch) {
                 case '\\':
-                    bytes[off] = (byte) '\\';
-                    bytes[off + 1] = (byte) '\\';
-                    off += 2;
-                    break;
                 case '\n':
-                    bytes[off] = (byte) '\\';
-                    bytes[off + 1] = (byte) 'n';
-                    off += 2;
-                    break;
                 case '\r':
-                    bytes[off] = (byte) '\\';
-                    bytes[off + 1] = (byte) 'r';
-                    off += 2;
-                    break;
                 case '\f':
-                    bytes[off] = (byte) '\\';
-                    bytes[off + 1] = (byte) 'f';
-                    off += 2;
-                    break;
                 case '\b':
-                    bytes[off] = (byte) '\\';
-                    bytes[off + 1] = (byte) 'b';
-                    off += 2;
-                    break;
                 case '\t':
-                    bytes[off] = (byte) '\\';
-                    bytes[off + 1] = (byte) 't';
+                    writeEscapedChar(bytes, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -932,25 +851,9 @@ class JSONWriterUTF8
                 case 5:
                 case 6:
                 case 7:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '0';
-                    bytes[off + 5] = (byte) ('0' + (int) ch);
-                    off += 6;
-                    break;
                 case 11:
                 case 14:
                 case 15:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '0';
-                    bytes[off + 5] = (byte) ('a' + (ch - 10));
-                    off += 6;
-                    break;
                 case 16:
                 case 17:
                 case 18:
@@ -961,26 +864,13 @@ class JSONWriterUTF8
                 case 23:
                 case 24:
                 case 25:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '1';
-                    bytes[off + 5] = (byte) ('0' + (ch - 16));
-                    off += 6;
-                    break;
                 case 26:
                 case 27:
                 case 28:
                 case 29:
                 case 30:
                 case 31:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '1';
-                    bytes[off + 5] = (byte) ('a' + (ch - 26));
+                    writeU4Hex2(bytes, off, ch);
                     off += 6;
                     break;
                 case '<':
@@ -988,12 +878,7 @@ class JSONWriterUTF8
                 case '(':
                 case ')':
                     if (browserSecure) {
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = (byte) DIGITS[(ch >>> 4) & 15];
-                        bytes[off + 5] = (byte) DIGITS[ch & 15];
+                        writeU4HexU(bytes, off, ch);
                         off += 6;
                     } else {
                         bytes[off++] = ch;
@@ -1077,25 +962,9 @@ class JSONWriterUTF8
                     case 5:
                     case 6:
                     case 7:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('0' + (int) ch);
-                        off += 6;
-                        break;
                     case 11:
                     case 14:
                     case 15:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('a' + (ch - 10));
-                        off += 6;
-                        break;
                     case 16:
                     case 17:
                     case 18:
@@ -1106,26 +975,13 @@ class JSONWriterUTF8
                     case 23:
                     case 24:
                     case 25:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('0' + (ch - 16));
-                        off += 6;
-                        break;
                     case 26:
                     case 27:
                     case 28:
                     case 29:
                     case 30:
                     case 31:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('a' + (ch - 26));
+                        writeU4Hex2(bytes, off, ch);
                         off += 6;
                         break;
                     case '<':
@@ -1133,12 +989,7 @@ class JSONWriterUTF8
                     case '(':
                     case ')':
                         if (browserSecure) {
-                            bytes[off] = '\\';
-                            bytes[off + 1] = 'u';
-                            bytes[off + 2] = '0';
-                            bytes[off + 3] = '0';
-                            bytes[off + 4] = (byte) DIGITS[(ch >>> 4) & 15];
-                            bytes[off + 5] = (byte) DIGITS[ch & 15];
+                            writeU4HexU(bytes, off, ch);
                             off += 6;
                         } else {
                             bytes[off++] = (byte) ch;
@@ -1155,12 +1006,7 @@ class JSONWriterUTF8
                         break;
                 }
             } else if (escapeNoneAscii) {
-                bytes[off] = '\\';
-                bytes[off + 1] = 'u';
-                bytes[off + 2] = (byte) DIGITS[(ch >>> 12) & 15];
-                bytes[off + 3] = (byte) DIGITS[(ch >>> 8) & 15];
-                bytes[off + 4] = (byte) DIGITS[(ch >>> 4) & 15];
-                bytes[off + 5] = (byte) DIGITS[ch & 15];
+                writeU4HexU(bytes, off, ch);
                 off += 6;
             } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                 final int uc;
@@ -1296,25 +1142,9 @@ class JSONWriterUTF8
                     case 5:
                     case 6:
                     case 7:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('0' + (int) ch);
-                        off += 6;
-                        break;
                     case 11:
                     case 14:
                     case 15:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('a' + (ch - 10));
-                        off += 6;
-                        break;
                     case 16:
                     case 17:
                     case 18:
@@ -1325,26 +1155,13 @@ class JSONWriterUTF8
                     case 23:
                     case 24:
                     case 25:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('0' + (ch - 16));
-                        off += 6;
-                        break;
                     case 26:
                     case 27:
                     case 28:
                     case 29:
                     case 30:
                     case 31:
-                        bytes[off] = '\\';
-                        bytes[off + 1] = 'u';
-                        bytes[off + 2] = '0';
-                        bytes[off + 3] = '0';
-                        bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('a' + (ch - 26));
+                        writeU4Hex2(bytes, off, ch);
                         off += 6;
                         break;
                     default:
@@ -1358,12 +1175,7 @@ class JSONWriterUTF8
                         break;
                 }
             } else if (escapeNoneAscii) {
-                bytes[off] = '\\';
-                bytes[off + 1] = 'u';
-                bytes[off + 2] = (byte) DIGITS[(ch >>> 12) & 15];
-                bytes[off + 3] = (byte) DIGITS[(ch >>> 8) & 15];
-                bytes[off + 4] = (byte) DIGITS[(ch >>> 4) & 15];
-                bytes[off + 5] = (byte) DIGITS[ch & 15];
+                writeU4HexU(bytes, off, ch);
                 off += 6;
             } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                 final int uc;
@@ -1491,25 +1303,9 @@ class JSONWriterUTF8
                 case 5:
                 case 6:
                 case 7:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '0';
-                    bytes[off + 5] = (byte) ('0' + (int) ch);
-                    off += 6;
-                    break;
                 case 11:
                 case 14:
                 case 15:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '0';
-                    bytes[off + 5] = (byte) ('a' + (ch - 10));
-                    off += 6;
-                    break;
                 case 16:
                 case 17:
                 case 18:
@@ -1520,26 +1316,13 @@ class JSONWriterUTF8
                 case 23:
                 case 24:
                 case 25:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '1';
-                    bytes[off + 5] = (byte) ('0' + (ch - 16));
-                    off += 6;
-                    break;
                 case 26:
                 case 27:
                 case 28:
                 case 29:
                 case 30:
                 case 31:
-                    bytes[off] = '\\';
-                    bytes[off + 1] = 'u';
-                    bytes[off + 2] = '0';
-                    bytes[off + 3] = '0';
-                    bytes[off + 4] = '1';
-                    bytes[off + 5] = (byte) ('a' + (ch - 26));
+                    writeU4Hex2(bytes, off, ch);
                     off += 6;
                     break;
                 default:
@@ -3193,5 +2976,41 @@ class JSONWriterUTF8
         byte[] encodedBytes = str.getBytes(charset);
         out.write(encodedBytes);
         return encodedBytes.length;
+    }
+
+    private static final short U2;
+    private static final int U4;
+    private static final short[] ESCAPED_CHARS;
+    static {
+        {
+            byte[] bytes = "\\u00".getBytes(StandardCharsets.UTF_8);
+            U2 = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET);
+            U4 = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET);
+        }
+        {
+            char slash = '\\';
+            short[] shorts = new short[128];
+            shorts['\\'] = (short) (slash | ('\\' << 8));
+            shorts['\n'] = (short) (slash | ('n' << 8));
+            shorts['\r'] = (short) (slash | ('r' << 8));
+            shorts['\f'] = (short) (slash | ('f' << 8));
+            shorts['\b'] = (short) (slash | ('b' << 8));
+            shorts['\t'] = (short) (slash | ('t' << 8));
+            ESCAPED_CHARS = shorts;
+        }
+    }
+
+    static void writeEscapedChar(byte[] bytes, int off, int c0) {
+        putShort(bytes, off, ESCAPED_CHARS[c0 & 0x7f]);
+    }
+
+    static void writeU4Hex2(byte[] bytes, int off, int c) {
+        putIntUnaligned(bytes, off, U4);
+        putShortUnaligned(bytes, off + 4, hex2(c));
+    }
+
+    static void writeU4HexU(byte[] bytes, int off, int c) {
+        putShortUnaligned(bytes, off, U2);
+        putIntUnaligned(bytes, off + 2, hex4U(c));
     }
 }

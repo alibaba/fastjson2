@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.JSONWriter.Context;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.util.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -1111,5 +1112,23 @@ public class JSONWriterUTF8Test {
 
         assertEquals("\"\\\"01234567890123456789\"", new String(JSON.toJSONBytes("\"01234567890123456789")));
         assertEquals("'\"01234567890123456789'", new String(JSON.toJSONBytes("\"01234567890123456789", UseSingleQuotes)));
+    }
+
+    @Test
+    public void write2() {
+        byte[] bytes = new byte[4];
+        JSONWriterUTF8.writeEscapedChar(bytes, 0, '\r');
+        JSONWriterUTF8.writeEscapedChar(bytes, 2, '\n');
+        assertEquals("\\r\\n", new String(bytes));
+    }
+
+    @Test
+    public void writeU4() {
+        byte[] bytes = new byte[6];
+        JSONWriterUTF8.writeU4Hex2(bytes, 0, 1);
+        assertEquals("\\u0001", new String(bytes));
+
+        IOUtils.putIntUnaligned(bytes, 2, IOUtils.hex4U(1));
+        assertEquals("\\u0001", new String(bytes));
     }
 }

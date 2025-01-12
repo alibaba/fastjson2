@@ -1435,8 +1435,16 @@ public class IOUtils {
         );
     }
 
+    public static void putShortUnaligned(byte[] buf, int pos, short v) {
+        UNSAFE.putShort(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
+    }
+
     public static void putIntUnaligned(char[] buf, int pos, int v) {
         UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
+    }
+
+    public static void putIntUnaligned(byte[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
     }
 
     public static void putLong(char[] buf, int pos, long v) {
@@ -1638,5 +1646,66 @@ public class IOUtils {
             v = Long.reverseBytes(v);
         }
         return v;
+    }
+
+    public static short hex2(int i) {
+        i = ((i & 0xF0) >> 4) | ((i & 0xF) << 8);
+        int m = (i + 0x06060606) & 0x10101010;
+        return (short) (((m << 1) + (m >> 1) - (m >> 4))
+                + 0x30303030 + i);
+    }
+
+    public static int hex4(int i) {
+        i = reverseBytesExpand(i);
+        /*
+            0  = 0b0000_0000 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 0
+            1  = 0b0000_0001 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 1
+            2  = 0b0000_0010 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 2
+            3  = 0b0000_0011 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 3
+            4  = 0b0000_0100 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 4
+            5  = 0b0000_0101 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 5
+            6  = 0b0000_0110 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 6
+            7  = 0b0000_0111 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 7
+            8  = 0b0000_1000 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 8
+            9  = 0b0000_1001 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 9
+            10 = 0b0000_1010 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (x & 0xF) => a
+            11 = 0b0000_1011 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (x & 0xF) => b
+         */
+        int m = (i + 0x06060606) & 0x10101010;
+        return ((m << 1) + (m >> 1) - (m >> 4))
+                + 0x30303030
+                + i;
+    }
+
+    public static int hex4U(int i) {
+        i = reverseBytesExpand(i);
+        /*
+            0  = 0b0000_0000 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 0
+            1  = 0b0000_0001 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 1
+            2  = 0b0000_0010 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 2
+            3  = 0b0000_0011 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 3
+            4  = 0b0000_0100 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 4
+            5  = 0b0000_0101 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 5
+            6  = 0b0000_0110 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 6
+            7  = 0b0000_0111 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 7
+            8  = 0b0000_1000 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 8
+            9  = 0b0000_1001 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 9
+            10 = 0b0000_1010 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => A
+            11 = 0b0000_1011 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => B
+            12 = 0b0000_1100 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => C
+            13 = 0b0000_1101 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => D
+            14 = 0b0000_1110 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => E
+            15 = 0b0000_1111 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => F
+         */
+        int m = (i + 0x06060606) & 0x10101010;
+        return ((m >> 1) - (m >> 4))
+                + 0x30303030
+                + i;
+    }
+
+    private static int reverseBytesExpand(int i) {
+        // i = Integer.reverseBytes(Integer.expand(i, 0xF0F0F0F0));
+        i = ((i & 0xF000) >> 12) | (i & 0xF00) | ((i & 0xF0) << 12) | ((i & 0xF) << 24);
+        return i;
     }
 }
