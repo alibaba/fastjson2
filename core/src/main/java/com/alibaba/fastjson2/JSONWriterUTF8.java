@@ -535,12 +535,12 @@ class JSONWriterUTF8
           return false;
          */
         long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
-        long x5c = v ^ 0x5c5c5c5c5c5c5c5cL;
+        long x5c = v ^ 0x5C5C5C5C5C5C5C5CL;
 
         x22 = (x22 - 0x0101010101010101L) & ~x22;
         x5c = (x5c - 0x0101010101010101L) & ~x5c;
 
-        return ((x22 | x5c | (0x7F7F_7F7F_7F7F_7F7FL - v + 0x1010_1010_1010_1010L) | v) & 0x8080808080808080L) != 0;
+        return ((x22 | x5c | (0x7F7F7F7F7F7F7F7FL - v + 0x1010101010101010L) | v) & 0x8080808080808080L) != 0;
     }
 
     protected final void writeStringLatin1BrowserSecure(byte[] values) {
