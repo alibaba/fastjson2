@@ -165,11 +165,7 @@ final class JSONReaderJSONB
             charset = ISO_8859_1;
         } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             if (STRING_CREATOR_JDK8 != null) {
-                char[] chars = new char[strlen];
-                for (int i = 0; i < strlen; ++i) {
-                    chars[i] = (char) (bytes[strBegin + i] & 0xff);
-                }
-                return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                return latin1StringJDK8(bytes, strBegin, strlen);
             } else if (STRING_CREATOR_JDK11 != null) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, strBegin, chars, 0, strlen);
@@ -962,13 +958,8 @@ final class JSONReaderJSONB
                     }
 
                     if (STRING_CREATOR_JDK8 != null) {
-                        char[] chars = new char[strlen];
-                        for (int i = 0; i < strlen; ++i) {
-                            chars[i] = (char) (bytes[offset + i] & 0xff);
-                        }
+                        String str = latin1StringJDK8(bytes, offset, strlen);
                         offset += strlen;
-
-                        String str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         if ((context.features & Feature.TrimString.mask) != 0) {
                             str = str.trim();
                         }
@@ -2800,11 +2791,7 @@ final class JSONReaderJSONB
                     if (entry == null) {
                         String name;
                         if (STRING_CREATOR_JDK8 != null) {
-                            char[] chars = new char[strlen];
-                            for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) (bytes[offset + i] & 0xff);
-                            }
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            name = latin1StringJDK8(bytes, offset, strlen);
                         } else {
                             name = new String(bytes, offset, strlen, ISO_8859_1);
                         }
@@ -2822,11 +2809,7 @@ final class JSONReaderJSONB
                     if (entry == null) {
                         String name;
                         if (STRING_CREATOR_JDK8 != null) {
-                            char[] chars = new char[strlen];
-                            for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) (bytes[offset + i] & 0xff);
-                            }
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            name = latin1StringJDK8(bytes, offset, strlen);
                         } else {
                             name = new String(bytes, offset, strlen, ISO_8859_1);
                         }
@@ -2844,12 +2827,8 @@ final class JSONReaderJSONB
             if (str == null) {
                 if (strlen >= 0) {
                     if (STRING_CREATOR_JDK8 != null) {
-                        char[] chars = new char[strlen];
-                        for (int i = 0; i < strlen; ++i) {
-                            chars[i] = (char) (bytes[offset + i] & 0xff);
-                        }
+                        str = latin1StringJDK8(bytes, offset, strlen);
                         offset += strlen;
-                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                     } else if (STRING_CREATOR_JDK11 != null) {
                         byte[] chars = new byte[strlen];
                         System.arraycopy(bytes, offset, chars, 0, strlen);
@@ -2969,7 +2948,7 @@ final class JSONReaderJSONB
         }
 
         strBegin = offset;
-        String str = null;
+
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             final int strlen;
             if (strtype == BC_STR_ASCII) {
@@ -2986,19 +2965,19 @@ final class JSONReaderJSONB
             }
             this.strlen = strlen;
 
+            String str = null;
             if (strlen >= 0) {
                 if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
-                    offset += strlen;
                 } else if (STRING_CREATOR_JDK8 != null) {
-                    str = readStringJDK8(strlen, bytes);
-                    offset += strlen;
+                    str = latin1StringJDK8(bytes, offset, strlen);
                 }
             }
 
             if (str != null) {
+                offset += strlen;
                 if ((context.features & Feature.TrimString.mask) != 0) {
                     str = str.trim();
                 }
@@ -3011,14 +2990,6 @@ final class JSONReaderJSONB
         }
 
         return readStringNonAscii();
-    }
-
-    private String readStringJDK8(int strlen, byte[] bytes) {
-        char[] chars = new char[strlen];
-        for (int i = 0; i < strlen; ++i) {
-            chars[i] = (char) (bytes[offset + i] & 0xff);
-        }
-        return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
     }
 
     private String readStringNonAscii() {
@@ -3849,7 +3820,7 @@ final class JSONReaderJSONB
                     (char) (bytes[offset + 1] & 0xff)
             );
         } else if (STRING_CREATOR_JDK8 != null) {
-            str = readStringJDK8(strlen, bytes);
+            str = latin1StringJDK8(bytes, offset, strlen);
         } else {
             str = new String(bytes, offset, strlen, ISO_8859_1);
         }
