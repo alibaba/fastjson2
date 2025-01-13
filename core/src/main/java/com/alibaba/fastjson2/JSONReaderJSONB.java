@@ -376,7 +376,7 @@ final class JSONReaderJSONB
                 } else if (valueType == BC_OBJECT) {
                     value = readObject();
                 } else if (valueType == BC_INT64) {
-                    value= IOUtils.getLongBE(bytes, offset + 1);
+                    value = IOUtils.getLongBE(bytes, offset + 1);
                     offset += 9;
                 } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
                     offset++;
