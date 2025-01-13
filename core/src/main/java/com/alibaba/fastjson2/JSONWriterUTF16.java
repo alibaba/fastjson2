@@ -27,8 +27,8 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 class JSONWriterUTF16
         extends JSONWriter {
-    final static long BYTE_VEC_64_SINGLE_QUOTE = 0x00270027_00270027L;
-    final static long BYTE_VEC_64_DOUBLE_QUOTE = 0x00220022_00220022L;
+    static final long BYTE_VEC_64_SINGLE_QUOTE = 0x00270027_00270027L;
+    static final long BYTE_VEC_64_DOUBLE_QUOTE = 0x00220022_00220022L;
 
     static final long REF_0, REF_1;
     static final int QUOTE2_COLON, QUOTE_COLON;
