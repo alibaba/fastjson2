@@ -350,7 +350,40 @@ class JSONWriterUTF16
             return;
         }
 
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        if ((context.features & (BrowserSecure.mask | EscapeNoneAscii.mask)) != 0) {
+            writeStringUTF16BrowserSecure(value);
+            return;
+        }
+
+        boolean escape = false;
+        int off = this.off;
+        int minCapacity = off + value.length + 2;
+        if (minCapacity >= chars.length) {
+            grow(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        chars[off++] = quote;
+        for (int i = 0, char_len = value.length >> 1; i < char_len; i++) {
+            char c = getChar(value, i);
+            if (c == '\\' || c == quote || c < ' ') {
+                escape = true;
+                break;
+            }
+
+            chars[off++] = c;
+        }
+
+        if (!escape) {
+            chars[off] = quote;
+            this.off = off + 1;
+            return;
+        }
+
+        writeStringEscapeUTF16(value);
+    }
+
+    final void writeStringUTF16BrowserSecure(byte[] value) {
         boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
 
         boolean escape = false;
@@ -362,13 +395,15 @@ class JSONWriterUTF16
 
         final char[] chars = this.chars;
         chars[off++] = quote;
-
-        for (int i = 0; i < value.length; i += 2) {
-            char c = UNSAFE.getChar(value, (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i);
+        for (int i = 0, char_len = value.length >> 1; i < char_len; i++) {
+            char c = getChar(value, i);
             if (c == '\\'
                     || c == quote
                     || c < ' '
-                    || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
+                    || c == '<'
+                    || c == '>'
+                    || c == '('
+                    || c == ')'
                     || (escapeNoneAscii && c > 0x007F)
             ) {
                 escape = true;
