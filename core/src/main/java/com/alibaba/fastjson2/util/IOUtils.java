@@ -1668,28 +1668,6 @@ public class IOUtils {
                 + 0x00300030 + i;
     }
 
-    public static int hex4(int i) {
-        i = reverseBytesExpand(i);
-        /*
-            0  = 0b0000_0000 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 0
-            1  = 0b0000_0001 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 1
-            2  = 0b0000_0010 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 2
-            3  = 0b0000_0011 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 3
-            4  = 0b0000_0100 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 4
-            5  = 0b0000_0101 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 5
-            6  = 0b0000_0110 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 6
-            7  = 0b0000_0111 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 7
-            8  = 0b0000_1000 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 8
-            9  = 0b0000_1001 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 9
-            10 = 0b0000_1010 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (x & 0xF) => a
-            11 = 0b0000_1011 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (x & 0xF) => b
-         */
-        int m = (i + 0x06060606) & 0x10101010;
-        return ((m << 1) + (m >> 1) - (m >> 4))
-                + 0x30303030
-                + i;
-    }
-
     public static int hex4U(int i) {
         i = reverseBytesExpand(i);
         /*
@@ -1753,15 +1731,15 @@ public class IOUtils {
         return ((i & 0xF000L) >> 12) | ((i & 0xF00L) << 8) | ((i & 0xF0L) << 28) | ((i & 0xFL) << 48);
     }
 
-    private static int convEndian(boolean big, int n) {
+    static int convEndian(boolean big, int n) {
         return big == BIG_ENDIAN ? n : Integer.reverseBytes(n);
     }
 
-    private static long convEndian(boolean big, long n) {
+    static long convEndian(boolean big, long n) {
         return big == BIG_ENDIAN ? n : Long.reverseBytes(n);
     }
 
-    private static short convEndian(boolean big, short n) {
+    static short convEndian(boolean big, short n) {
         return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
     }
 }

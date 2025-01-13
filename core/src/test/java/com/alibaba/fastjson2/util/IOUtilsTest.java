@@ -4,11 +4,11 @@ import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class IOUtilsTest {
     @Test
@@ -372,5 +372,22 @@ public class IOUtilsTest {
         assertEquals(4,
                 IOUtils.indexOfChar(
                         bytes, 'a', 1));
+    }
+
+    @Test
+    public void convEndian() throws Throwable {
+        Random r = new Random();
+        long i64 = r.nextLong();
+        int i32 = r.nextInt();
+        short i16 = (short) r.nextInt();
+
+        assertEquals(i64, IOUtils.convEndian(false, i64));
+        assertEquals(Long.reverseBytes(i64), IOUtils.convEndian(true, i64));
+
+        assertEquals(i32, IOUtils.convEndian(false, i32));
+        assertEquals(Integer.reverseBytes(i32), IOUtils.convEndian(true, i32));
+
+        assertEquals(i16, IOUtils.convEndian(false, i16));
+        assertEquals(Short.reverseBytes(i16), IOUtils.convEndian(true, i16));
     }
 }
