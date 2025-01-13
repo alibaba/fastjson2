@@ -1115,7 +1115,7 @@ public class JSONWriterUTF16Test {
         char[] chars = str.toCharArray();
         byte[] bytes = toBytes(chars);
 
-        long v = IOUtils.getLongLittleEndian(bytes, 0);
+        long v = IOUtils.getLongLE(bytes, 0);
         assertFalse(
                 JSONWriterUTF16.containsEscapedUTF16(
                         v,
@@ -1134,7 +1134,7 @@ public class JSONWriterUTF16Test {
         {
             Arrays.fill(chars, 'A');
             {
-                long v = IOUtils.getLongLittleEndian(
+                long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
                 assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
@@ -1142,7 +1142,7 @@ public class JSONWriterUTF16Test {
 
             {
                 chars[0] = '"';
-                long v = IOUtils.getLongLittleEndian(
+                long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
                 assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
@@ -1150,7 +1150,7 @@ public class JSONWriterUTF16Test {
             }
             {
                 chars[0] = '\'';
-                long v = IOUtils.getLongLittleEndian(
+                long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
                 assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
@@ -1160,7 +1160,7 @@ public class JSONWriterUTF16Test {
         {
             Arrays.fill(chars, '中');
             {
-                long v = IOUtils.getLongLittleEndian(
+                long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
                 assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
@@ -1169,7 +1169,7 @@ public class JSONWriterUTF16Test {
         {
             Arrays.fill(chars, '®');
             {
-                long v = IOUtils.getLongLittleEndian(
+                long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
                 assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
@@ -1180,14 +1180,14 @@ public class JSONWriterUTF16Test {
             Arrays.fill(chars, 'A');
             for (char c : specials_double) {
                 chars[i] = c;
-                long v = IOUtils.getLongLittleEndian(
+                long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
                 assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
             }
             for (char c : specials_single) {
                 chars[i] = c;
-                long v = IOUtils.getLongLittleEndian(
+                long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
                 assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
@@ -1195,7 +1195,7 @@ public class JSONWriterUTF16Test {
         }
         {
             chars = new char[]{'a', 'b', 'c', 'd'};
-            long v = IOUtils.getLongLittleEndian(
+            long v = IOUtils.getLongLE(
                     toBytes(chars),
                     0);
             assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
@@ -1203,7 +1203,7 @@ public class JSONWriterUTF16Test {
         }
         {
             chars = new char[]{'A', 'B', 'C', 'D'};
-            long v = IOUtils.getLongLittleEndian(
+            long v = IOUtils.getLongLE(
                     toBytes(chars),
                     0);
             assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
@@ -1216,8 +1216,8 @@ public class JSONWriterUTF16Test {
             throw new UnsupportedOperationException();
         }
         byte[] bytes = new byte[chars.length << 1];
-        long x = IOUtils.getLongLittleEndian(chars, 0);
-        IOUtils.putLong(bytes, 0, x);
+        long x = IOUtils.getLongLE(chars, 0);
+        IOUtils.putLongLE(bytes, 0, x);
         return bytes;
     }
 

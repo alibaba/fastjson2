@@ -281,13 +281,13 @@ class JSONWriterUTF16
         final long vecQuote = this.byteVectorQuote;
         final int upperBound = (value.length - i) & ~7;
         for (; i < upperBound; i += 8) {
-            long vec64 = getLongLittleEndian(value, i);
+            long vec64 = getLongLE(value, i);
             if (containsEscaped(vec64, vecQuote)) {
                 escape = true;
                 break;
             }
-            IOUtils.putLong(chars, off, expand(vec64));
-            IOUtils.putLong(chars, off + 4, expand(vec64 >>> 32));
+            IOUtils.putLongLE(chars, off, expand(vec64));
+            IOUtils.putLongLE(chars, off + 4, expand(vec64 >>> 32));
             off += 8;
         }
         if (!escape) {
@@ -372,11 +372,11 @@ class JSONWriterUTF16
 
         final int upperBound = (char_len - i) & ~3;
         for (; i < upperBound; i += 4) {
-            long v = getLongLittleEndian(value, i << 1);
+            long v = getLongLE(value, i << 1);
             if (containsEscapedUTF16(v, vecQuote)) {
                 break;
             }
-            IOUtils.putLong(chars, off, v);
+            IOUtils.putLongLE(chars, off, v);
             off += 4;
         }
         for (; i < char_len;) {
@@ -2395,7 +2395,7 @@ class JSONWriterUTF16
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                IOUtils.putLong(chars, off, (DIGITS_K_64[millis] & 0xffffffffffff0000L) | DOT_X0);
+                IOUtils.putLongLE(chars, off, (DIGITS_K_64[millis] & 0xffffffffffff0000L) | DOT_X0);
                 off += 4;
             } else {
                 chars[off++] = '.';
@@ -3094,11 +3094,11 @@ class JSONWriterUTF16
 
     static void writeU4Hex2(char[] chars, int off, int c) {
         IOUtils.putLongUnaligned(chars, off, U4);
-        IOUtils.putInt(chars, off + 4, utf16Hex2(c));
+        IOUtils.putIntLE(chars, off + 4, utf16Hex2(c));
     }
 
     static void writeU4HexU(char[] chars, int off, int c) {
         IOUtils.putIntUnaligned(chars, off, U2);
-        IOUtils.putLong(chars, off + 2, utf16Hex4U(c));
+        IOUtils.putLongLE(chars, off + 2, utf16Hex4U(c));
     }
 }

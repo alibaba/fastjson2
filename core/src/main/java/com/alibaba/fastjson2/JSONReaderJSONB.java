@@ -18,7 +18,7 @@ import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReaderUTF8.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
-import static com.alibaba.fastjson2.util.IOUtils.getLongBigEndian;
+import static com.alibaba.fastjson2.util.IOUtils.getLongBE;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -5065,8 +5065,8 @@ final class JSONReaderJSONB
                     throw new JSONException("uuid not support " + len);
                 }
                 uuid = new UUID(
-                        getLongBigEndian(bytes, offset),
-                        getLongBigEndian(bytes, offset + 8));
+                        getLongBE(bytes, offset),
+                        getLongBE(bytes, offset + 8));
                 offset += 16;
                 break;
             case BC_STR_ASCII_FIX_32: {
