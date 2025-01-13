@@ -1750,8 +1750,7 @@ public class IOUtils {
 
     private static long utf16ReverseBytesExpand(long i) {
         // i = Long.reverseBytes(Long.expand(i, 0x00F000F0_00F000F0));
-        i = ((i & 0xF000L) >> 12) | ((i & 0xF00L) << 8) | ((i & 0xF0L) << 28) | ((i & 0xFL) << 48);
-        return i;
+        return ((i & 0xF000L) >> 12) | ((i & 0xF00L) << 8) | ((i & 0xF0L) << 28) | ((i & 0xFL) << 48);
     }
 
     private static int convEndian(boolean big, int n) {
