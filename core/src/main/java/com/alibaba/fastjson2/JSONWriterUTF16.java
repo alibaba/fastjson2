@@ -27,6 +27,9 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 class JSONWriterUTF16
         extends JSONWriter {
+    final static long BYTE_VEC_64_SINGLE_QUOTE = 0x00270027_00270027L;
+    final static long BYTE_VEC_64_DOUBLE_QUOTE = 0x00220022_00220022L;
+
     static final long REF_0, REF_1;
     static final int QUOTE2_COLON, QUOTE_COLON;
     static final int[] HEX256;
@@ -362,10 +365,22 @@ class JSONWriterUTF16
             grow(minCapacity);
         }
 
+        final long vecQuote = this.useSingleQuote ? BYTE_VEC_64_SINGLE_QUOTE : BYTE_VEC_64_DOUBLE_QUOTE;
         final char[] chars = this.chars;
         chars[off++] = quote;
-        for (int i = 0, char_len = value.length >> 1; i < char_len; i++) {
-            char c = getChar(value, i);
+        int i = 0, char_len = value.length >> 1;
+
+        final int upperBound = (char_len - i) & ~3;
+        for (; i < upperBound; i += 4) {
+            long v = getLongLittleEndian(value, i << 1);
+            if (containsEscapedUTF16(v, vecQuote)) {
+                break;
+            }
+            IOUtils.putLong(chars, off, v);
+            off += 4;
+        }
+        for (; i < char_len;) {
+            char c = getChar(value, i++);
             if (c == '\\' || c == quote || c < ' ') {
                 escape = true;
                 break;
@@ -381,6 +396,26 @@ class JSONWriterUTF16
         }
 
         writeStringEscapeUTF16(value);
+    }
+
+    static boolean containsEscapedUTF16(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) data;
+            if (c == quote || c == '\\' || c < ' ') {
+                return true;
+            }
+            data >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
+        long x5c = v ^ 0x005C005C_005C005CL;
+
+        x22 = (x22 - 0x00010001_00010001L) & ~x22;
+        x5c = (x5c - 0x00010001_00010001L) & ~x5c;
+
+        return ((x22 | x5c | (0x007F007F_007F007FL - v + 0x00100010_00100010L) | v) & 0x00800080_00800080L) != 0;
     }
 
     final void writeStringUTF16BrowserSecure(byte[] value) {

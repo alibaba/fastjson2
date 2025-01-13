@@ -1455,6 +1455,14 @@ public class IOUtils {
         );
     }
 
+    public static void putLong(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(
+                buf,
+                ARRAY_CHAR_BASE_OFFSET + pos,
+                BIG_ENDIAN ? Long.reverseBytes(v) : v
+        );
+    }
+
     public static int digit4(char[] chars, int off) {
         char c0 = getChar(chars, off),
                 c1 = getChar(chars, off + 1),
@@ -1642,6 +1650,14 @@ public class IOUtils {
 
     public static long getLongLittleEndian(byte[] bytes, int offset) {
         long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
+    }
+
+    public static long getLongLittleEndian(char[] bytes, int offset) {
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
         if (BIG_ENDIAN) {
             v = Long.reverseBytes(v);
         }
