@@ -6673,7 +6673,7 @@ class JSONReaderUTF8
     }
 
     static long parse4Nibbles(byte[] bytes, int offset) {
-        int x = getIntLittleEndian(bytes, offset);
+        int x = getIntLE(bytes, offset);
         byte[] ns = NIBBLES;
         return ns[x & 0xFF] << 12 | ns[(x >> 8) & 0xFF] << 8 | ns[(x >> 16) & 0xFF] << 4 | ns[(x >> 24) & 0xFF];
     }

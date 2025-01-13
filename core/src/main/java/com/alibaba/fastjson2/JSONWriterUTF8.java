@@ -493,7 +493,7 @@ class JSONWriterUTF8
         int i = 0;
         final int upperBound = (value.length - i) & ~7;
         for (; i < upperBound; i += 8) {
-            if (containsEscaped(IOUtils.getLongLittleEndian(value, i), vecQuote)) {
+            if (containsEscaped(IOUtils.getLongLE(value, i), vecQuote)) {
                 break;
             }
         }
@@ -2638,7 +2638,7 @@ class JSONWriterUTF8
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                putInt(bytes, off, DIGITS_K_32[millis] & 0xffffff00 | '.');
+                putIntLE(bytes, off, DIGITS_K_32[millis] & 0xffffff00 | '.');
                 off += 4;
             } else {
                 bytes[off++] = '.';
@@ -3001,16 +3001,16 @@ class JSONWriterUTF8
     }
 
     static void writeEscapedChar(byte[] bytes, int off, int c0) {
-        putShort(bytes, off, ESCAPED_CHARS[c0 & 0x7f]);
+        IOUtils.putShortLE(bytes, off, ESCAPED_CHARS[c0 & 0x7f]);
     }
 
     static void writeU4Hex2(byte[] bytes, int off, int c) {
-        putIntUnaligned(bytes, off, U4);
-        putShortUnaligned(bytes, off + 4, hex2(c));
+        IOUtils.putIntUnaligned(bytes, off, U4);
+        IOUtils.putShortLE(bytes, off + 4, hex2(c));
     }
 
     static void writeU4HexU(byte[] bytes, int off, int c) {
-        putShortUnaligned(bytes, off, U2);
-        putIntUnaligned(bytes, off + 2, hex4U(c));
+        IOUtils.putShortUnaligned(bytes, off, U2);
+        IOUtils.putIntLE(bytes, off + 2, hex4U(c));
     }
 }

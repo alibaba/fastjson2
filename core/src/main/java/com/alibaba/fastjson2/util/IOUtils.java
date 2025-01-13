@@ -830,7 +830,7 @@ public class IOUtils {
         final int div2 = div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putInt(bytes, off, DIGITS_K_32[div2] & 0xffffff00 | '.');
+        putIntLE(bytes, off, DIGITS_K_32[div2] & 0xffffff00 | '.');
         off += 4;
 
         int v;
@@ -853,7 +853,7 @@ public class IOUtils {
             return off + 1;
         }
 
-        putInt(bytes, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
+        putIntLE(bytes, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
         return off + 4;
     }
 
@@ -862,7 +862,7 @@ public class IOUtils {
         final int div2 = div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putLong(chars, off, DIGITS_K_64[div2] & 0xffffffffffff0000L | DOT_X0);
+        putLongLE(chars, off, DIGITS_K_64[div2] & 0xffffffffffff0000L | DOT_X0);
         off += 4;
 
         long v;
@@ -885,7 +885,7 @@ public class IOUtils {
             return off + 1;
         }
 
-        putLong(chars, off, DIGITS_K_64[rem1] & 0xffffffffffff0000L | (v >> 48));
+        putLongLE(chars, off, DIGITS_K_64[rem1] & 0xffffffffffff0000L | (v >> 48));
         return off + 4;
     }
 
@@ -947,7 +947,7 @@ public class IOUtils {
             } else if (start == 1) {
                 buf[pos++] = (byte) (v2 >> 16);
             }
-            putInt(buf, pos, v1 & 0xffffff00 | (v2 >> 24));
+            putIntLE(buf, pos, v1 & 0xffffff00 | (v2 >> 24));
             return pos + 4;
         }
 
@@ -968,7 +968,7 @@ public class IOUtils {
             buf[pos] = (byte) (v3 >> 24);
             buf[pos + 1] = (byte) (v2 >> 8);
             buf[pos + 2] = (byte) (v2 >> 16);
-            putInt(buf, pos + 3, v1 & 0xffffff00 | (v2 >> 24));
+            putIntLE(buf, pos + 3, v1 & 0xffffff00 | (v2 >> 24));
             return pos + 7;
         }
         final int r3 = (int) (q2 - q3 * 1000);
@@ -986,8 +986,8 @@ public class IOUtils {
             }
             buf[pos] = (byte) (v4 >> 24);
             buf[pos + 1] = (byte) (v3 >> 8);
-            putInt(buf, pos + 2, ((v2 & 0x00ffff00) << 8) | (v3 >> 16));
-            putInt(buf, pos + 6, v1 & 0xffffff00 | (v2 >> 24));
+            putIntLE(buf, pos + 2, ((v2 & 0x00ffff00) << 8) | (v3 >> 16));
+            putIntLE(buf, pos + 6, v1 & 0xffffff00 | (v2 >> 24));
             return pos + 10;
         }
         final int r4 = (int) (q3 - q4 * 1000);
@@ -1004,10 +1004,10 @@ public class IOUtils {
             } else if (start == 1) {
                 buf[pos++] = (byte) (v5 >> 16);
             }
-            putInt(buf, pos, v4 & 0xffffff00 | (v5 >> 24));
+            putIntLE(buf, pos, v4 & 0xffffff00 | (v5 >> 24));
             buf[pos + 4] = (byte) (v3 >> 8);
-            putInt(buf, pos + 5, ((v2 & 0x00ffff00) << 8) | (v3 >> 16));
-            putInt(buf, pos + 9, v1 & 0xffffff00 | (v2 >> 24));
+            putIntLE(buf, pos + 5, ((v2 & 0x00ffff00) << 8) | (v3 >> 16));
+            putIntLE(buf, pos + 9, v1 & 0xffffff00 | (v2 >> 24));
             return pos + 13;
         }
         final int r5 = q4 - q5 * 1000;
@@ -1025,16 +1025,16 @@ public class IOUtils {
             }
             buf[pos++] = (byte) (v >> 24);
         } else {
-            putInt(buf, pos, DIGITS_K_32[q5 - q6 * 1000] & 0xffffff00 | (q6 + '0'));
+            putIntLE(buf, pos, DIGITS_K_32[q5 - q6 * 1000] & 0xffffff00 | (q6 + '0'));
             pos += 4;
         }
 
         buf[pos] = (byte) (v5 >> 8);
-        putInt(buf, pos + 1, ((v4 & 0x00ffff00) << 8) | (v5 >> 16));
-        putInt(buf, pos + 5, v3 & 0xffffff00 | (v4 >> 24));
+        putIntLE(buf, pos + 1, ((v4 & 0x00ffff00) << 8) | (v5 >> 16));
+        putIntLE(buf, pos + 5, v3 & 0xffffff00 | (v4 >> 24));
         buf[pos + 9] = (byte) (v2 >> 8);
         buf[pos + 10] = (byte) (v2 >> 16);
-        putInt(buf, pos + 11, v1 & 0xffffff00 | (v2 >> 24));
+        putIntLE(buf, pos + 11, v1 & 0xffffff00 | (v2 >> 24));
         return pos + 15;
     }
 
@@ -1057,7 +1057,7 @@ public class IOUtils {
             long v = DIGITS_K_64[(int) i];
             int start = (byte) v;
             if (start == 0) {
-                putInt(buf, pos, (int) (v >> 16));
+                putIntLE(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v >> 32);
@@ -1073,12 +1073,12 @@ public class IOUtils {
             final long v2 = DIGITS_K_64[(int) q1];
             int start = (byte) v2;
             if (start == 0) {
-                putInt(buf, pos, (int) (v2 >> 16));
+                putIntLE(buf, pos, (int) (v2 >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v2 >> 32);
             }
-            putLong(buf, pos, v1 & 0xffffffffffff0000L | (v2 >> 48));
+            putLongLE(buf, pos, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 4;
         }
 
@@ -1090,14 +1090,14 @@ public class IOUtils {
             final long v3 = DIGITS_K_64[(int) q2];
             int start = (byte) v3;
             if (start == 0) {
-                putInt(buf, pos, (int) (v3 >> 16));
+                putIntLE(buf, pos, (int) (v3 >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v3 >> 32);
             }
             buf[pos] = (char) (v3 >> 48);
-            putInt(buf, pos + 1, (int) (v2 >> 16));
-            putLong(buf, pos + 3, v1 & 0xffffffffffff0000L | (v2 >> 48));
+            putIntLE(buf, pos + 1, (int) (v2 >> 16));
+            putLongLE(buf, pos + 3, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 7;
         }
         final int r3 = (int) (q2 - q3 * 1000);
@@ -1107,15 +1107,15 @@ public class IOUtils {
             final long v4 = DIGITS_K_64[(int) q3];
             final int start = (byte) v4;
             if (start == 0) {
-                putInt(buf, pos, (int) (v4 >> 16));
+                putIntLE(buf, pos, (int) (v4 >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v4 >> 32);
             }
             buf[pos] = (char) (v4 >> 48);
             buf[pos + 1] = (char) (v3 >> 16);
-            putLong(buf, pos + 2, ((v2 & 0x0000ffffffff0000L) << 16) | (v3 >> 32));
-            putLong(buf, pos + 6, v1 & 0xffffffffffff0000L | (v2 >> 48));
+            putLongLE(buf, pos + 2, ((v2 & 0x0000ffffffff0000L) << 16) | (v3 >> 32));
+            putLongLE(buf, pos + 6, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 10;
         }
         final int r4 = (int) (q3 - q4 * 1000);
@@ -1125,16 +1125,16 @@ public class IOUtils {
             final long v5 = DIGITS_K_64[q4];
             int start = (byte) v5;
             if (start == 0) {
-                putInt(buf, pos, (int) (v5 >> 16));
+                putIntLE(buf, pos, (int) (v5 >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v5 >> 32);
             }
             buf[pos] = (char) (v5 >> 48);
-            putInt(buf, pos + 1, (int) (v4 >> 16));
-            putLong(buf, pos + 3, v3 & 0xffffffffffff0000L | (v4 >> 48));
-            putInt(buf, pos + 7, (int) (v2 >> 16));
-            putLong(buf, pos + 9, v1 & 0xffffffffffff0000L | (v2 >> 48));
+            putIntLE(buf, pos + 1, (int) (v4 >> 16));
+            putLongLE(buf, pos + 3, v3 & 0xffffffffffff0000L | (v4 >> 48));
+            putIntLE(buf, pos + 7, (int) (v2 >> 16));
+            putLongLE(buf, pos + 9, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 13;
         }
         final int r5 = q4 - q5 * 1000;
@@ -1152,17 +1152,17 @@ public class IOUtils {
             }
             buf[pos++] = (char) (v >> 24);
         } else {
-            putLong(buf, pos, DIGITS_K_64[q5 - q6 * 1000]);
+            putLongLE(buf, pos, DIGITS_K_64[q5 - q6 * 1000]);
             buf[pos] = (char) (q6 + '0');
             pos += 4;
         }
 
-        putInt(buf, pos, (int) (v5 >> 16));
-        putLong(buf, pos + 2, v4 & 0xffffffffffff0000L | (v5 >> 48));
+        putIntLE(buf, pos, (int) (v5 >> 16));
+        putLongLE(buf, pos + 2, v4 & 0xffffffffffff0000L | (v5 >> 48));
 
         buf[pos + 6] = (char) (v3 >> 16);
-        putLong(buf, pos + 7, ((v2 & 0x0000ffffffff0000L) << 16) | (v3 >> 32));
-        putLong(buf, pos + 11, v1 & 0xffffffffffff0000L | (v2 >> 48));
+        putLongLE(buf, pos + 7, ((v2 & 0x0000ffffffff0000L) << 16) | (v3 >> 32));
+        putLongLE(buf, pos + 11, v1 & 0xffffffffffff0000L | (v2 >> 48));
         return pos + 15;
     }
 
@@ -1178,7 +1178,7 @@ public class IOUtils {
         int v = DIGITS_K_32[i];
         final int start = (byte) v;
         if (start == 0) {
-            putShort(buf, pos, (short) (v >> 8));
+            putShortLE(buf, pos, (short) (v >> 8));
             pos += 2;
         } else if (start == 1) {
             buf[pos++] = (byte) (v >> 16);
@@ -1199,7 +1199,7 @@ public class IOUtils {
         long v = DIGITS_K_64[i];
         final int start = (byte) v;
         if (start == 0) {
-            putInt(buf, pos, (int) (v >> 16));
+            putIntLE(buf, pos, (int) (v >> 16));
             pos += 2;
         } else if (start == 1) {
             buf[pos++] = (char) (v >> 32);
@@ -1221,7 +1221,7 @@ public class IOUtils {
             int v = DIGITS_K_32[i];
             final int start = (byte) v;
             if (start == 0) {
-                putShort(buf, pos, (short) (v >> 8));
+                putShortLE(buf, pos, (short) (v >> 8));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (byte) (v >> 16);
@@ -1235,7 +1235,7 @@ public class IOUtils {
         if ((byte) v2 == 1) {
             buf[pos++] = (byte) (v2 >> 16);
         }
-        putInt(buf, pos, (DIGITS_K_32[i - q1 * 1000]) & 0xffffff00 | (v2 >> 24));
+        putIntLE(buf, pos, (DIGITS_K_32[i - q1 * 1000]) & 0xffffff00 | (v2 >> 24));
         return pos + 4;
     }
 
@@ -1252,7 +1252,7 @@ public class IOUtils {
             long v = DIGITS_K_64[i];
             final int start = (byte) v;
             if (start == 0) {
-                putInt(buf, pos, (int) (v >> 16));
+                putIntLE(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v >> 32);
@@ -1266,7 +1266,7 @@ public class IOUtils {
         if ((byte) v2 == 1) {
             buf[pos++] = (char) (v2 >> 32);
         }
-        putLong(buf, pos, DIGITS_K_64[i - q1 * 1000] & 0xffffffffffff0000L | (v2 >> 48));
+        putLongLE(buf, pos, DIGITS_K_64[i - q1 * 1000] & 0xffffffffffff0000L | (v2 >> 48));
         return pos + 4;
     }
 
@@ -1287,7 +1287,7 @@ public class IOUtils {
             int v = DIGITS_K_32[i];
             final int start = (byte) v;
             if (start == 0) {
-                putShort(buf, pos, (short) (v >> 8));
+                putShortLE(buf, pos, (short) (v >> 8));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (byte) (v >> 16);
@@ -1303,12 +1303,12 @@ public class IOUtils {
             final int v2 = DIGITS_K_32[q1];
             int start = (byte) v2;
             if (start == 0) {
-                putShort(buf, pos, (short) (v2 >> 8));
+                putShortLE(buf, pos, (short) (v2 >> 8));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (byte) (v2 >> 16);
             }
-            putInt(buf, pos, v1 & 0xffffff00 | (v2 >> 24));
+            putIntLE(buf, pos, v1 & 0xffffff00 | (v2 >> 24));
             return pos + 4;
         }
         final int q2 = q1 / 1000;
@@ -1319,19 +1319,19 @@ public class IOUtils {
             int v = DIGITS_K_32[q2];
             final int start = (byte) v;
             if (start == 0) {
-                putShort(buf, pos, (short) (v >> 8));
+                putShortLE(buf, pos, (short) (v >> 8));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (byte) (v >> 16);
             }
             buf[pos++] = (byte) (v >> 24);
         } else {
-            putInt(buf, pos, DIGITS_K_32[q2 - q3 * 1000] & 0xffffff00 | (q3 + '0'));
+            putIntLE(buf, pos, DIGITS_K_32[q2 - q3 * 1000] & 0xffffff00 | (q3 + '0'));
             pos += 4;
         }
 
-        putShort(buf, pos, (short) (v2 >> 8));
-        putInt(buf, pos + 2, v1 & 0xffffff00 | (v2 >> 24));
+        putShortLE(buf, pos, (short) (v2 >> 8));
+        putIntLE(buf, pos + 2, v1 & 0xffffff00 | (v2 >> 24));
         return pos + 6;
     }
 
@@ -1351,7 +1351,7 @@ public class IOUtils {
             long v = DIGITS_K_64[i];
             final int start = (byte) v;
             if (start == 0) {
-                putInt(buf, pos, (int) (v >> 16));
+                putIntLE(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v >> 32);
@@ -1366,12 +1366,12 @@ public class IOUtils {
             final long v2 = DIGITS_K_64[q1];
             int start = (byte) v2;
             if (start == 0) {
-                putInt(buf, pos, (int) (v2 >> 16));
+                putIntLE(buf, pos, (int) (v2 >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v2 >> 32);
             }
-            putLong(buf, pos, v1 & 0xffffffffffff0000L | (v2 >> 48));
+            putLongLE(buf, pos, v1 & 0xffffffffffff0000L | (v2 >> 48));
             return pos + 4;
         }
         final int q2 = q1 / 1000;
@@ -1382,25 +1382,21 @@ public class IOUtils {
             long v = DIGITS_K_64[q2];
             final int start = (byte) v;
             if (start == 0) {
-                putInt(buf, pos, (int) (v >> 16));
+                putIntLE(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
                 buf[pos++] = (char) (v >> 32);
             }
             buf[pos++] = (char) (v >> 48);
         } else {
-            putLong(buf, pos, DIGITS_K_64[q2 - q3 * 1000]);
+            putLongLE(buf, pos, DIGITS_K_64[q2 - q3 * 1000]);
             buf[pos] = (char) (q3 + '0');
             pos += 4;
         }
 
-        putInt(buf, pos, (int) (v2 >> 16));
-        putLong(buf, pos + 2, v1 & 0xffffffffffff0000L | (v2 >> 48));
+        putIntLE(buf, pos, (int) (v2 >> 16));
+        putLongLE(buf, pos + 2, v1 & 0xffffffffffff0000L | (v2 >> 48));
         return pos + 6;
-    }
-
-    public static void putChar(char[] buf, int pos, char v) {
-        UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
     public static char getChar(char[] buf, int pos) {
@@ -1411,28 +1407,20 @@ public class IOUtils {
         return UNSAFE.getChar(str, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
     }
 
-    public static void putShort(byte[] buf, int pos, short v) {
-        UNSAFE.putShort(
-                buf,
-                ARRAY_BYTE_BASE_OFFSET + pos,
-                BIG_ENDIAN ? Short.reverseBytes(v) : v
-        );
+    public static void putShortLE(byte[] buf, int pos, short v) {
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
 
-    public static void putInt(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(
-                buf,
-                ARRAY_BYTE_BASE_OFFSET + pos,
-                BIG_ENDIAN ? Integer.reverseBytes(v) : v
-        );
+    public static void putIntBE(byte[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
     }
 
-    public static void putInt(char[] buf, int pos, int v) {
-        UNSAFE.putInt(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1),
-                BIG_ENDIAN ? Integer.reverseBytes(v) : v
-        );
+    public static void putIntLE(byte[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
+    }
+
+    public static void putIntLE(char[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
     }
 
     public static void putShortUnaligned(byte[] buf, int pos, short v) {
@@ -1447,12 +1435,20 @@ public class IOUtils {
         UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
     }
 
-    public static void putLong(char[] buf, int pos, long v) {
-        UNSAFE.putLong(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1),
-                BIG_ENDIAN ? Long.reverseBytes(v) : v
-        );
+    public static void putLongLE(char[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
+    }
+
+    public static void putLongUnaligned(char[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
+    }
+
+    public static void putLongBE(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + pos, convEndian(true, v));
+    }
+
+    public static void putLongLE(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + pos, convEndian(false, v));
     }
 
     public static int digit4(char[] chars, int off) {
@@ -1468,7 +1464,7 @@ public class IOUtils {
 
     public static int digit4(byte[] bytes, int off) {
         return digit4(
-                getIntLittleEndian(bytes, off)
+                getIntLE(bytes, off)
         );
     }
 
@@ -1529,7 +1525,7 @@ public class IOUtils {
 
     public static int digit3(byte[] bytes, int off) {
         return digit3(
-                getShortLittleEndian(bytes, off)
+                getShortE(bytes, off)
                         | (UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16)
         );
     }
@@ -1554,7 +1550,7 @@ public class IOUtils {
 
     public static int digit2(byte[] bytes, int off) {
         return digit2(
-                getShortLittleEndian(bytes, off)
+                getShortE(bytes, off)
         );
     }
 
@@ -1616,36 +1612,42 @@ public class IOUtils {
         return ch >= '0' && ch <= '9';
     }
 
-    public static short getShortLittleEndian(byte[] bytes, int offset) {
-        short v = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (BIG_ENDIAN) {
-            v = Short.reverseBytes(v);
-        }
-        return v;
+    public static short getShortE(byte[] bytes, int offset) {
+        return convEndian(false,
+                UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static int getIntLittleEndian(byte[] bytes, int offset) {
-        int v = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        return v;
+    public static int getIntBE(byte[] bytes, int offset) {
+        return convEndian(true,
+                UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static long getLongBigEndian(byte[] bytes, int offset) {
-        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (!BIG_ENDIAN) {
-            v = Long.reverseBytes(v);
-        }
-        return v;
+    public static int getIntLE(byte[] bytes, int offset) {
+        return convEndian(false,
+                UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static long getLongLittleEndian(byte[] bytes, int offset) {
-        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (BIG_ENDIAN) {
-            v = Long.reverseBytes(v);
-        }
-        return v;
+    public static int getIntUnaligned(char[] bytes, int offset) {
+        return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
+    }
+
+    public static long getLongBE(byte[] bytes, int offset) {
+        return convEndian(true,
+                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public static long getLongUnaligned(char[] bytes, int offset) {
+        return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
+    }
+
+    public static long getLongLE(byte[] bytes, int offset) {
+        return convEndian(false,
+                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public static long getLongLE(char[] bytes, int offset) {
+        return convEndian(false,
+                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1)));
     }
 
     public static short hex2(int i) {
@@ -1655,26 +1657,12 @@ public class IOUtils {
                 + 0x30303030 + i);
     }
 
-    public static int hex4(int i) {
-        i = reverseBytesExpand(i);
-        /*
-            0  = 0b0000_0000 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 0
-            1  = 0b0000_0001 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 1
-            2  = 0b0000_0010 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 2
-            3  = 0b0000_0011 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 3
-            4  = 0b0000_0100 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 4
-            5  = 0b0000_0101 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 5
-            6  = 0b0000_0110 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 6
-            7  = 0b0000_0111 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 7
-            8  = 0b0000_1000 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 8
-            9  = 0b0000_1001 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (x & 0xF) => 9
-            10 = 0b0000_1010 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (x & 0xF) => a
-            11 = 0b0000_1011 => m = ((x + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (x & 0xF) => b
-         */
-        int m = (i + 0x06060606) & 0x10101010;
+    public static int utf16Hex2(int i) {
+        // 0x000F000F
+        i = ((i & 0xF0) >> 4) | ((i & 0xF) << 16);
+        int m = (i + 0x00060006) & 0x00100010;
         return ((m << 1) + (m >> 1) - (m >> 4))
-                + 0x30303030
-                + i;
+                + 0x00300030 + i;
     }
 
     public static int hex4U(int i) {
@@ -1703,9 +1691,52 @@ public class IOUtils {
                 + i;
     }
 
+    public static long utf16Hex4U(long i) {
+        i = utf16ReverseBytesExpand(i);
+        /*
+            0  = 0b0000_0000 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 0
+            1  = 0b0000_0001 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 1
+            2  = 0b0000_0010 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 2
+            3  = 0b0000_0011 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 3
+            4  = 0b0000_0100 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 4
+            5  = 0b0000_0101 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 5
+            6  = 0b0000_0110 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 6
+            7  = 0b0000_0111 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 7
+            8  = 0b0000_1000 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 8
+            9  = 0b0000_1001 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 0 + 0x30 + (x & 0xF) => 9
+            10 = 0b0000_1010 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => A
+            11 = 0b0000_1011 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => B
+            12 = 0b0000_1100 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => C
+            13 = 0b0000_1101 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => D
+            14 = 0b0000_1110 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => E
+            15 = 0b0000_1111 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => F
+         */
+        long m = (i + 0x00060006_00060006L) & 0x00100010_00100010L;
+        return ((m >> 1) - (m >> 4))
+                + 0x00300030_00300030L
+                + i;
+    }
+
     private static int reverseBytesExpand(int i) {
         // i = Integer.reverseBytes(Integer.expand(i, 0xF0F0F0F0));
         i = ((i & 0xF000) >> 12) | (i & 0xF00) | ((i & 0xF0) << 12) | ((i & 0xF) << 24);
         return i;
+    }
+
+    private static long utf16ReverseBytesExpand(long i) {
+        // i = Long.reverseBytes(Long.expand(i, 0x00F000F0_00F000F0));
+        return ((i & 0xF000L) >> 12) | ((i & 0xF00L) << 8) | ((i & 0xF0L) << 28) | ((i & 0xFL) << 48);
+    }
+
+    static int convEndian(boolean big, int n) {
+        return big == BIG_ENDIAN ? n : Integer.reverseBytes(n);
+    }
+
+    static long convEndian(boolean big, long n) {
+        return big == BIG_ENDIAN ? n : Long.reverseBytes(n);
+    }
+
+    static short convEndian(boolean big, short n) {
+        return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
     }
 }
