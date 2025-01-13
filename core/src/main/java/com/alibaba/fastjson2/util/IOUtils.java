@@ -1439,6 +1439,10 @@ public class IOUtils {
         UNSAFE.putShort(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
     }
 
+    public static void putShortUnaligned(char[] buf, int pos, short v) {
+        UNSAFE.putShort(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
+    }
+
     public static void putIntUnaligned(char[] buf, int pos, int v) {
         UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
@@ -1453,6 +1457,10 @@ public class IOUtils {
                 ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1),
                 BIG_ENDIAN ? Long.reverseBytes(v) : v
         );
+    }
+
+    public static void putLongUnaligned(char[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
     public static void putLong(byte[] buf, int pos, long v) {
@@ -1638,6 +1646,10 @@ public class IOUtils {
             v = Integer.reverseBytes(v);
         }
         return v;
+    }
+
+    public static int getIntUnaligned(char[] bytes, int offset) {
+        return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
     }
 
     public static long getLongBigEndian(byte[] bytes, int offset) {

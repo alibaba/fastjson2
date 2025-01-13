@@ -1220,4 +1220,12 @@ public class JSONWriterUTF16Test {
         IOUtils.putLong(bytes, 0, x);
         return bytes;
     }
+
+    @Test
+    public void write2() {
+        char[] chars = new char[4];
+        JSONWriterUTF16.writeEscapedChar(chars, 0, '\r');
+        JSONWriterUTF16.writeEscapedChar(chars, 2, '\n');
+        assertEquals("\\r\\n", new String(chars));
+    }
 }

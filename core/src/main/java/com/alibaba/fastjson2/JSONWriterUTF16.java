@@ -524,33 +524,12 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off] = '\\';
-                    chars[off + 1] = ch;
-                    off += 2;
-                    break;
                 case '\r':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'r';
-                    off += 2;
-                    break;
                 case '\n':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'n';
-                    off += 2;
-                    break;
                 case '\b':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'b';
-                    off += 2;
-                    break;
                 case '\f':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'f';
-                    off += 2;
-                    break;
                 case '\t':
-                    chars[off] = '\\';
-                    chars[off + 1] = 't';
+                    writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -669,33 +648,12 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off] = '\\';
-                    chars[off + 1] = ch;
-                    off += 2;
-                    break;
                 case '\r':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'r';
-                    off += 2;
-                    break;
                 case '\n':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'n';
-                    off += 2;
-                    break;
                 case '\b':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'b';
-                    off += 2;
-                    break;
                 case '\f':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'f';
-                    off += 2;
-                    break;
                 case '\t':
-                    chars[off] = '\\';
-                    chars[off + 1] = 't';
+                    writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -814,33 +772,12 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off] = '\\';
-                    chars[off + 1] = ch;
-                    off += 2;
-                    break;
                 case '\r':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'r';
-                    off += 2;
-                    break;
                 case '\n':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'n';
-                    off += 2;
-                    break;
                 case '\b':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'b';
-                    off += 2;
-                    break;
                 case '\f':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'f';
-                    off += 2;
-                    break;
                 case '\t':
-                    chars[off] = '\\';
-                    chars[off + 1] = 't';
+                    writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -960,33 +897,12 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off] = '\\';
-                    chars[off + 1] = ch;
-                    off += 2;
-                    break;
                 case '\r':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'r';
-                    off += 2;
-                    break;
                 case '\n':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'n';
-                    off += 2;
-                    break;
                 case '\b':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'b';
-                    off += 2;
-                    break;
                 case '\f':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'f';
-                    off += 2;
-                    break;
                 case '\t':
-                    chars[off] = '\\';
-                    chars[off + 1] = 't';
+                    writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -1116,33 +1032,12 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off] = '\\';
-                    chars[off + 1] = ch;
-                    off += 2;
-                    break;
                 case '\r':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'r';
-                    off += 2;
-                    break;
                 case '\n':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'n';
-                    off += 2;
-                    break;
                 case '\b':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'b';
-                    off += 2;
-                    break;
                 case '\f':
-                    chars[off] = '\\';
-                    chars[off + 1] = 'f';
-                    off += 2;
-                    break;
                 case '\t':
-                    chars[off] = '\\';
-                    chars[off + 1] = 't';
+                    writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -1525,33 +1420,12 @@ class JSONWriterUTF16
                 chars[off++] = ch;
                 break;
             case '\\':
-                chars[off] = '\\';
-                chars[off + 1] = ch;
-                off += 2;
-                break;
             case '\r':
-                chars[off] = '\\';
-                chars[off + 1] = 'r';
-                off += 2;
-                break;
             case '\n':
-                chars[off] = '\\';
-                chars[off + 1] = 'n';
-                off += 2;
-                break;
             case '\b':
-                chars[off] = '\\';
-                chars[off + 1] = 'b';
-                off += 2;
-                break;
             case '\f':
-                chars[off] = '\\';
-                chars[off + 1] = 'f';
-                off += 2;
-                break;
             case '\t':
-                chars[off] = '\\';
-                chars[off + 1] = 't';
+                writeEscapedChar(chars, off, ch);
                 off += 2;
                 break;
             case 0:
@@ -3374,5 +3248,47 @@ class JSONWriterUTF16
             }
         }
         this.off = off;
+    }
+
+    private static final int U2;
+    private static final long U4;
+    private static final int[] ESCAPED_CHARS;
+    static {
+        {
+            char[] bytes = "\\u00".toCharArray();
+            U2 = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET);
+            U4 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+        }
+        {
+            char[] mapping = new char[] {
+                    '\\', '\\',
+                    '\n', 'n',
+                    '\r', 'r',
+                    '\f', 'f',
+                    '\b', 'b',
+                    '\t', 't'
+            };
+            char[] buf = {'\\', '\0'};
+            int[] shorts = new int[128];
+            for (int i = 0; i < mapping.length; i += 2) {
+                buf[1] = mapping[i + 1];
+                shorts[mapping[i]] = IOUtils.getIntUnaligned(buf, 0);
+            }
+            ESCAPED_CHARS = shorts;
+        }
+    }
+
+    static void writeEscapedChar(char[] bytes, int off, int c0) {
+        putIntUnaligned(bytes, off, ESCAPED_CHARS[c0 & 0x7f]);
+    }
+
+    static void writeU4Hex2(char[] bytes, int off, int c) {
+        putLongUnaligned(bytes, off, U4);
+        putIntUnaligned(bytes, off + 4, hex2(c));
+    }
+
+    static void writeU4HexU(char[] bytes, int off, int c) {
+        putIntUnaligned(bytes, off, U2);
+        putLongUnaligned(bytes, off + 2, hex4U(c));
     }
 }
