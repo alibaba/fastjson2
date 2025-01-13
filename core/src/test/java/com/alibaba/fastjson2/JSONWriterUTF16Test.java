@@ -1228,4 +1228,14 @@ public class JSONWriterUTF16Test {
         JSONWriterUTF16.writeEscapedChar(chars, 2, '\n');
         assertEquals("\\r\\n", new String(chars));
     }
+
+    @Test
+    public void writeU4() {
+        char[] chars = new char[6];
+        JSONWriterUTF16.writeU4Hex2(chars, 0, 1);
+        assertEquals("\\u0001", new String(chars));
+
+        IOUtils.putLongUnaligned(chars, 2, IOUtils.utf16Hex4U(1));
+        assertEquals("\\u0001", new String(chars));
+    }
 }
