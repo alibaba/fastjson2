@@ -3001,16 +3001,16 @@ class JSONWriterUTF8
     }
 
     static void writeEscapedChar(byte[] bytes, int off, int c0) {
-        putShortLE(bytes, off, ESCAPED_CHARS[c0 & 0x7f]);
+        IOUtils.putShortLE(bytes, off, ESCAPED_CHARS[c0 & 0x7f]);
     }
 
     static void writeU4Hex2(byte[] bytes, int off, int c) {
-        putIntUnaligned(bytes, off, U4);
-        putShortUnaligned(bytes, off + 4, hex2(c));
+        IOUtils.putIntUnaligned(bytes, off, U4);
+        IOUtils.putShortLE(bytes, off + 4, hex2(c));
     }
 
     static void writeU4HexU(byte[] bytes, int off, int c) {
-        putShortUnaligned(bytes, off, U2);
-        putIntUnaligned(bytes, off + 2, hex4U(c));
+        IOUtils.putShortUnaligned(bytes, off, U2);
+        IOUtils.putIntLE(bytes, off + 2, hex4U(c));
     }
 }
