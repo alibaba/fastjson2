@@ -5162,7 +5162,7 @@ class JSONReaderUTF16
     }
 
     static int getInt(char[] chars, int offset) {
-        long int64Val = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + (offset << 1));
+        long int64Val = IOUtils.getLongUnaligned(chars, offset);
 
         if ((int64Val & CHAR_MASK) != 0) {
             return 0;
@@ -5187,9 +5187,8 @@ class JSONReaderUTF16
     }
 
     static long getLong(char[] chars, int offset) {
-        long arrayOffset = ARRAY_CHAR_BASE_OFFSET + (offset << 1);
-        long int64Val0 = UNSAFE.getLong(chars, arrayOffset);
-        long int64Val1 = UNSAFE.getLong(chars, arrayOffset + 8);
+        long int64Val0 = IOUtils.getLongUnaligned(chars, offset);
+        long int64Val1 = IOUtils.getLongUnaligned(chars, offset + 4);
 
         if (((int64Val0 | int64Val1) & CHAR_MASK) != 0) {
             return 0;

@@ -1408,27 +1408,19 @@ public class IOUtils {
     }
 
     public static void putShortLE(byte[] buf, int pos, short v) {
-        UNSAFE.putShort(
-                buf,
-                ARRAY_BYTE_BASE_OFFSET + pos,
-                convEndian(false, v)
-        );
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
+    }
+
+    public static void putIntBE(byte[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
     }
 
     public static void putIntLE(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(
-                buf,
-                ARRAY_BYTE_BASE_OFFSET + pos,
-                convEndian(false, v)
-        );
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
 
     public static void putIntLE(char[] buf, int pos, int v) {
-        UNSAFE.putInt(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1),
-                convEndian(false, v)
-        );
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
     }
 
     public static void putShortUnaligned(byte[] buf, int pos, short v) {
@@ -1444,23 +1436,19 @@ public class IOUtils {
     }
 
     public static void putLongLE(char[] buf, int pos, long v) {
-        UNSAFE.putLong(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1),
-                convEndian(false, v)
-        );
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
     }
 
     public static void putLongUnaligned(char[] buf, int pos, long v) {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    public static void putLongBE(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + pos, convEndian(true, v));
+    }
+
     public static void putLongLE(byte[] buf, int pos, long v) {
-        UNSAFE.putLong(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET + pos,
-                BIG_ENDIAN ? Long.reverseBytes(v) : v
-        );
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + pos, convEndian(false, v));
     }
 
     public static int digit4(char[] chars, int off) {
@@ -1629,6 +1617,11 @@ public class IOUtils {
                 UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
+    public static int getIntBE(byte[] bytes, int offset) {
+        return convEndian(true,
+                UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
     public static int getIntLE(byte[] bytes, int offset) {
         return convEndian(false,
                 UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
@@ -1641,6 +1634,10 @@ public class IOUtils {
     public static long getLongBE(byte[] bytes, int offset) {
         return convEndian(true,
                 UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public static long getLongUnaligned(char[] bytes, int offset) {
+        return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
     }
 
     public static long getLongLE(byte[] bytes, int offset) {

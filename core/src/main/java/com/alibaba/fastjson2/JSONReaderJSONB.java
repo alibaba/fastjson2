@@ -376,9 +376,8 @@ final class JSONReaderJSONB
                 } else if (valueType == BC_OBJECT) {
                     value = readObject();
                 } else if (valueType == BC_INT64) {
-                    long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
+                    value= IOUtils.getLongBE(bytes, offset + 1);
                     offset += 9;
-                    value = BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value);
                 } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
                     offset++;
                     int len;
@@ -562,9 +561,9 @@ final class JSONReaderJSONB
                 return (long) int32Value;
             }
             case BC_INT64: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value);
+                return int64Value;
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
@@ -582,9 +581,9 @@ final class JSONReaderJSONB
                 return (float) readInt32Value();
             }
             case BC_DOUBLE: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return Double.longBitsToDouble(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return Double.longBitsToDouble(int64Value);
             }
             case BC_DOUBLE_LONG: {
                 return (double) readInt64Value();
@@ -728,9 +727,9 @@ final class JSONReaderJSONB
                 return Instant.ofEpochSecond(epochSeconds, nano);
             }
             case BC_TIMESTAMP_MILLIS: {
-                long millis = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long millis = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return new Date(BIG_ENDIAN ? millis : Long.reverseBytes(millis));
+                return new Date(millis);
             }
             case BC_BIGINT_LONG: {
                 return BigInteger.valueOf(
@@ -1075,9 +1074,8 @@ final class JSONReaderJSONB
                 value = readObject();
             } else if (valueType == BC_INT64) {
                 offset++;
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                value = BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value);
             } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
                 offset++;
                 int len = valueType == BC_ARRAY
@@ -1136,9 +1134,8 @@ final class JSONReaderJSONB
                 offset += 3;
                 value = int3;
             } else if (valueType == BC_INT32) {
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
+                value = IOUtils.getIntBE(bytes, offset + 1);
                 offset += 5;
-                value = BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
             } else if (valueType == BC_REFERENCE) {
                 String reference = readReference();
                 if ("..".equals(reference)) {
@@ -3223,49 +3220,52 @@ final class JSONReaderJSONB
                 return "1.0";
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                int int32Value = IOUtils.getIntBE(bytes, offset);
                 offset += 4;
-                return Long.toString(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
+                return Long.toString(int32Value);
             }
             case BC_FLOAT_INT:
                 return Float.toString(
                         readInt32Value());
             case BC_FLOAT: {
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                int int32Value = IOUtils.getIntBE(bytes, offset);
                 offset += 4;
-                float floatValue = Float.intBitsToFloat(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
-                return Float.toString(floatValue);
+                return Float.toString(
+                        Float.intBitsToFloat(int32Value)
+                );
             }
             case BC_DOUBLE: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                double doubleValue = Double.longBitsToDouble(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
-                return Double.toString(doubleValue);
+                return Double.toString(
+                        Double.longBitsToDouble(int64Value)
+                );
             }
             case BC_TIMESTAMP_SECONDS: {
-                int seconds = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long millis = IOUtils.getIntBE(bytes, offset) * 1000L;
                 offset += 4;
-                long millis = (BIG_ENDIAN ? seconds : Integer.reverseBytes(seconds)) * 1000L;
-                Date date = new Date(millis);
-                return DateUtils.toString(date);
+                return DateUtils.toString(
+                        new Date(millis)
+                );
             }
             case BC_TIMESTAMP_MINUTES: {
-                int minutes = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long millis = IOUtils.getIntBE(bytes, offset) * 60000L;
                 offset += 4;
-                long millis = (BIG_ENDIAN ? minutes : Integer.reverseBytes(minutes)) * 60000L;
-                Date date = new Date(millis);
-                return DateUtils.toString(date);
+                return DateUtils.toString(
+                        new Date(millis)
+                );
             }
             case BC_TIMESTAMP_MILLIS: {
-                long millis = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long millis = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                Date date = new Date(BIG_ENDIAN ? millis : Long.reverseBytes(millis));
-                return DateUtils.toString(date);
+                return DateUtils.toString(
+                        new Date(millis)
+                );
             }
             case BC_INT64:
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return Long.toString(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return Long.toString(int64Value);
             case BC_BIGINT: {
                 int len = readInt32Value();
                 byte[] bytes = new byte[len];
@@ -3416,14 +3416,10 @@ final class JSONReaderJSONB
                     + (bytes[offset + 1] & 0xFF);
             offset += 2;
         } else if (type == BC_INT64_INT) {
-            int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-            int64Value = BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
+            int64Value = IOUtils.getIntBE(bytes, offset);
             offset += 4;
         } else if (type == BC_INT64) {
-            int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-            if (!BIG_ENDIAN) {
-                int64Value = Long.reverseBytes(int64Value);
-            }
+            int64Value = IOUtils.getLongBE(bytes, offset);
             offset += 8;
         } else {
             this.offset = offset;
@@ -3471,14 +3467,14 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT32: {
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                int int32Value = IOUtils.getIntBE(bytes, offset);
                 offset += 4;
-                return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
+                return int32Value;
             }
             case BC_FLOAT: {
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                int int32Value = IOUtils.getIntBE(bytes, offset);
                 offset += 4;
-                float floatValue = Float.intBitsToFloat(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
+                float floatValue = Float.intBitsToFloat(int32Value);
                 return (long) floatValue;
             }
             case BC_DOUBLE: {
@@ -3500,9 +3496,9 @@ final class JSONReaderJSONB
                 return seconds * 1000;
             }
             case BC_TIMESTAMP_MILLIS:
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value);
+                return int64Value;
             case BC_DECIMAL: {
                 int scale = readInt32Value();
                 BigInteger unscaledValue = readBigInteger();
@@ -3577,10 +3573,7 @@ final class JSONReaderJSONB
                     + (bytes[offset + 1] & 0xFF);
             offset += 2;
         } else if (type == BC_INT32) {
-            type = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-            if (!BIG_ENDIAN) {
-                type = Integer.reverseBytes(type);
-            }
+            type = IOUtils.getIntBE(bytes, offset);
             offset += 4;
         } else {
             this.offset = offset;
@@ -3632,9 +3625,9 @@ final class JSONReaderJSONB
                 return (int) readInt64Value();
             }
             case BC_INT64: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return (int) (BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return (int) int64Value;
             }
             case BC_FLOAT_INT:
                 return (int) (float) readInt32Value();
@@ -3754,10 +3747,7 @@ final class JSONReaderJSONB
                     + (bytes[offset + 1] & 0xFF);
             offset += 2;
         } else if (type == BC_INT32) {
-            int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-            if (!BIG_ENDIAN) {
-                int32Value = Integer.reverseBytes(int32Value);
-            }
+            int32Value = IOUtils.getIntBE(bytes, offset);
             offset += 4;
         } else {
             this.offset = offset;
@@ -3791,14 +3781,10 @@ final class JSONReaderJSONB
                     + (bytes[offset + 1] & 0xFF);
             offset += 2;
         } else if (type == BC_INT64_INT) {
-            int int32Val = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-            int64Value = BIG_ENDIAN ? int32Val : Integer.reverseBytes(int32Val);
+            int64Value = IOUtils.getIntBE(bytes, offset);
             offset += 4;
         } else if (type == BC_INT64) {
-            int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-            if (!BIG_ENDIAN) {
-                int64Value = Long.reverseBytes(int64Value);
-            }
+            int64Value = IOUtils.getLongBE(bytes, offset);
             offset += 8;
         } else {
             this.offset = offset;
@@ -3851,9 +3837,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset;
         if (bytes[offset] == BC_FLOAT) {
-            int int32Val = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
+            int int32Val = IOUtils.getIntBE(bytes, offset + 1);
             this.offset = offset + 5;
-            return Float.intBitsToFloat(BIG_ENDIAN ? int32Val : Integer.reverseBytes(int32Val));
+            return Float.intBitsToFloat(int32Val);
         }
 
         return readFloat0();
@@ -3878,9 +3864,9 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT64: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return (float) (BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return (float) int64Value;
             }
             case BC_INT64_INT:
             case BC_INT32: {
@@ -3889,9 +3875,9 @@ final class JSONReaderJSONB
                 return int32Value;
             }
             case BC_DOUBLE: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return (float) Double.longBitsToDouble(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return (float) Double.longBitsToDouble(int64Value);
             }
             case BC_FLOAT_INT: {
                 return (float) readInt32Value();
@@ -4033,20 +4019,20 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT64: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return (double) (BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return (double) int64Value;
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                int int32Value = IOUtils.getIntBE(bytes, offset);
                 offset += 4;
-                return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
+                return int32Value;
             }
             case BC_FLOAT:
-                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                int int32Value = IOUtils.getIntBE(bytes, offset);
                 offset += 4;
-                return Float.intBitsToFloat(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
+                return Float.intBitsToFloat(int32Value);
             case BC_FLOAT_INT: {
                 return (float) readInt32Value();
             }
@@ -4214,9 +4200,9 @@ final class JSONReaderJSONB
                 return (long) int32Value;
             }
             case BC_INT64: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value);
+                return int64Value;
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
@@ -4239,9 +4225,9 @@ final class JSONReaderJSONB
                 return (float) readInt32Value();
             }
             case BC_DOUBLE:
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return Double.longBitsToDouble(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return Double.longBitsToDouble(int64Value);
             case BC_DOUBLE_LONG:
                 return (double) readInt64Value();
             case BC_DECIMAL: {
@@ -4301,12 +4287,9 @@ final class JSONReaderJSONB
                 decimal = BigDecimal.valueOf(getInt(bytes, offset + 1), scale);
                 offset += 5;
             } else if (bytes[offset] == BC_INT64) {
-                long unscaledValue = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
                 decimal = BigDecimal.valueOf(
-                        BIG_ENDIAN
-                                ? unscaledValue
-                                : Long.reverseBytes(unscaledValue), scale
-                );
+                        IOUtils.getLongBE(bytes, offset + 1),
+                        scale);
                 offset += 9;
             } else {
                 BigInteger unscaledValue = readBigInteger();
@@ -4359,16 +4342,16 @@ final class JSONReaderJSONB
                 return BigDecimal.valueOf((long) floatValue);
             }
             case BC_DOUBLE: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                double doubleValue = Double.longBitsToDouble(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                double doubleValue = Double.longBitsToDouble(int64Value);
                 return BigDecimal.valueOf(
                         (long) doubleValue);
             }
             case BC_INT64: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return BigDecimal.valueOf(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return BigDecimal.valueOf(int64Value);
             }
             case BC_BIGINT: {
                 BigInteger bigInt = readBigInteger();
@@ -4500,16 +4483,16 @@ final class JSONReaderJSONB
                         (long) floatValue);
             }
             case BC_DOUBLE: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                double doubleValue = Double.longBitsToDouble(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                double doubleValue = Double.longBitsToDouble(int64Value);
                 return BigInteger.valueOf(
                         (long) doubleValue);
             }
             case BC_INT64: {
-                long int64Value = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long int64Value = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return BigInteger.valueOf(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
+                return BigInteger.valueOf(int64Value);
             }
             case BC_BINARY: {
                 int len = readInt32Value();
@@ -4936,9 +4919,9 @@ final class JSONReaderJSONB
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
-                long millis = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long millis = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                return Instant.ofEpochMilli(BIG_ENDIAN ? millis : Long.reverseBytes(millis));
+                return Instant.ofEpochMilli(millis);
             }
             default:
                 break;
@@ -5036,9 +5019,9 @@ final class JSONReaderJSONB
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
-                long millis = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+                long millis = IOUtils.getLongBE(bytes, offset);
                 offset += 8;
-                Instant instant = Instant.ofEpochMilli(BIG_ENDIAN ? millis : Long.reverseBytes(millis));
+                Instant instant = Instant.ofEpochMilli(millis);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             default:
@@ -5327,9 +5310,9 @@ final class JSONReaderJSONB
                         null);
                 break;
             case BC_TIMESTAMP_MILLIS: {
-                long millis = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
+                long millis = IOUtils.getLongBE(bytes, offset + 1);
                 this.offset += 9;
-                return new Date(BIG_ENDIAN ? millis : Long.reverseBytes(millis));
+                return new Date(millis);
             }
             case BC_TIMESTAMP_MINUTES: {
                 long minutes = getInt(bytes, offset + 1);
@@ -6303,7 +6286,6 @@ final class JSONReaderJSONB
     }
 
     static int getInt(byte[] bytes, int offset) {
-        int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-        return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
+        return IOUtils.getIntBE(bytes, offset);
     }
 }
