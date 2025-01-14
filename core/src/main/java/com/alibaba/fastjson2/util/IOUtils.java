@@ -1452,11 +1452,11 @@ public class IOUtils {
     }
 
     public static boolean isALSE(byte[] buf, int pos) {
-        return pos + 3 < buf.length && getIntUnaligned(buf, pos) == ALSE;
+        return getIntUnaligned(buf, pos) == ALSE;
     }
 
     public static boolean isALSE(char[] buf, int pos) {
-        return pos + 3 < buf.length && getLongUnaligned(buf, pos) == ALSE_64;
+        return getLongUnaligned(buf, pos) == ALSE_64;
     }
 
     public static void putTrue(char[] buf, int pos) {
@@ -1469,11 +1469,11 @@ public class IOUtils {
     }
 
     public static boolean isNULL(byte[] buf, int pos) {
-        return pos + 3 < buf.length && getIntUnaligned(buf, pos) == NULL_32;
+        return getIntUnaligned(buf, pos) == NULL_32;
     }
 
     public static boolean isNULL(char[] buf, int pos) {
-        return pos + 3 < buf.length && getLongUnaligned(buf, pos) == NULL_64;
+        return getLongUnaligned(buf, pos) == NULL_64;
     }
 
     public static void putNULL(byte[] buf, int pos) {
