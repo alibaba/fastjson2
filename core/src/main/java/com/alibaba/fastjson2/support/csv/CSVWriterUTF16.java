@@ -12,15 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static com.alibaba.fastjson2.util.IOUtils.PACKED_DIGITS_UTF16;
-import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 
 final class CSVWriterUTF16
         extends CSVWriter {
-    static final char[] BYTES_TRUE = "true".toCharArray();
-    static final char[] BYTES_FALSE = "false".toCharArray();
-
     final Writer out;
     final char[] chars;
 
@@ -58,8 +53,16 @@ final class CSVWriterUTF16
     }
 
     public void writeBoolean(boolean booleanValue) {
-        char[] valueBytes = booleanValue ? BYTES_TRUE : BYTES_FALSE;
-        writeRaw(valueBytes);
+        int size = booleanValue ? 4 : 5;
+        checkCapacity(size);
+        char[] chars = this.chars;
+        int off = this.off;
+        if (booleanValue) {
+            IOUtils.putTrue(chars, off);
+        } else {
+            IOUtils.putFalse(chars, off);
+        }
+        this.off = off + size;
     }
 
     public void writeInt64(long longValue) {
@@ -85,11 +88,11 @@ final class CSVWriterUTF16
         int off = this.off;
         off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
         chars[off] = ' ';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[hour]);
+        writeDigitPair(chars, off + 1, hour);
         chars[off + 3] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[minute]);
+        writeDigitPair(chars, off + 4, minute);
         chars[off + 6] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 7) << 1), PACKED_DIGITS_UTF16[second]);
+        writeDigitPair(chars, off + 7, second);
         this.off = off + 9;
     }
 

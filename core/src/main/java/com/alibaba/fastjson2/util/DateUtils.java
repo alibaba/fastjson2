@@ -7870,17 +7870,17 @@ public class DateUtils {
         String str;
         if (STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[8];
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET, PACKED_DIGITS[y01]);
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, PACKED_DIGITS[y23]);
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4, PACKED_DIGITS[month]);
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6, PACKED_DIGITS[dayOfMonth]);
+            writeDigitPair(bytes, 0, y01);
+            writeDigitPair(bytes, 2, y23);
+            writeDigitPair(bytes, 4, month);
+            writeDigitPair(bytes, 6, dayOfMonth);
             str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
         } else {
             char[] chars = new char[8];
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET, PACKED_DIGITS_UTF16[y01]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 4, PACKED_DIGITS_UTF16[y23]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 8, PACKED_DIGITS_UTF16[month]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 12, PACKED_DIGITS_UTF16[dayOfMonth]);
+            writeDigitPair(chars, 0, y01);
+            writeDigitPair(chars, 2, y23);
+            writeDigitPair(chars, 4, month);
+            writeDigitPair(chars, 6, dayOfMonth);
             if (STRING_CREATOR_JDK8 != null) {
                 str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
             } else {
@@ -7941,17 +7941,17 @@ public class DateUtils {
         String str;
         if (STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[8];
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET, PACKED_DIGITS[y01]);
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, PACKED_DIGITS[y23]);
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4, PACKED_DIGITS[month]);
-            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6, PACKED_DIGITS[dayOfMonth]);
+            writeDigitPair(bytes, 0, y01);
+            writeDigitPair(bytes, 2, y23);
+            writeDigitPair(bytes, 4, month);
+            writeDigitPair(bytes, 6, dayOfMonth);
             str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
         } else {
             char[] chars = new char[8];
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET, PACKED_DIGITS_UTF16[y01]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 4, PACKED_DIGITS_UTF16[y23]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 8, PACKED_DIGITS_UTF16[month]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 12, PACKED_DIGITS_UTF16[dayOfMonth]);
+            writeDigitPair(chars, 0, y01);
+            writeDigitPair(chars, 2, y23);
+            writeDigitPair(chars, 4, month);
+            writeDigitPair(chars, 6, dayOfMonth);
             if (STRING_CREATOR_JDK8 != null) {
                 str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
             } else {
@@ -8283,20 +8283,20 @@ public class DateUtils {
         if (STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[10];
             if (pattern == DATE_FORMAT_10_DOT) {
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET, PACKED_DIGITS[dayOfMonth]);
+                writeDigitPair(bytes, 0, dayOfMonth);
                 bytes[2] = '.';
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 3, PACKED_DIGITS[month]);
+                writeDigitPair(bytes, 3, month);
                 bytes[5] = '.';
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6, PACKED_DIGITS[y01]);
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, PACKED_DIGITS[y23]);
+                writeDigitPair(bytes, 6, y01);
+                writeDigitPair(bytes, 8, y23);
             } else {
                 byte separator = (byte) (pattern == DATE_FORMAT_10_DASH ? '-' : '/');
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET, PACKED_DIGITS[y01]);
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, PACKED_DIGITS[y23]);
+                writeDigitPair(bytes, 0, y01);
+                writeDigitPair(bytes, 2, y23);
                 bytes[4] = separator;
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 5, PACKED_DIGITS[month]);
+                writeDigitPair(bytes, 5, month);
                 bytes[7] = separator;
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, PACKED_DIGITS[dayOfMonth]);
+                writeDigitPair(bytes, 8, dayOfMonth);
             }
 
             return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
@@ -8304,20 +8304,20 @@ public class DateUtils {
 
         char[] chars = new char[10];
         if (pattern == DATE_FORMAT_10_DOT) {
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET, PACKED_DIGITS_UTF16[dayOfMonth]);
+            writeDigitPair(chars, 0, dayOfMonth);
             chars[2] = '.';
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 6, PACKED_DIGITS_UTF16[month]);
+            writeDigitPair(chars, 3, month);
             chars[5] = '.';
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 12, PACKED_DIGITS_UTF16[y01]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 16, PACKED_DIGITS_UTF16[y23]);
+            writeDigitPair(chars, 6, y01);
+            writeDigitPair(chars, 8, y23);
         } else {
             char separator = (pattern == DATE_FORMAT_10_DASH ? '-' : '/');
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET, PACKED_DIGITS_UTF16[y01]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 4, PACKED_DIGITS_UTF16[y23]);
+            writeDigitPair(chars, 0, y01);
+            writeDigitPair(chars, 2, y23);
             chars[4] = separator;
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 10, PACKED_DIGITS_UTF16[month]);
+            writeDigitPair(chars, 5, month);
             chars[7] = separator;
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 16, PACKED_DIGITS_UTF16[dayOfMonth]);
+            writeDigitPair(chars, 8, dayOfMonth);
         }
 
         if (STRING_CREATOR_JDK8 != null) {
@@ -8446,22 +8446,22 @@ public class DateUtils {
         if (STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[19];
             if (pattern == DATE_TIME_FORMAT_19_DOT) {
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET, PACKED_DIGITS[dayOfMonth]);
+                writeDigitPair(bytes, 0, dayOfMonth);
                 bytes[2] = '.';
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 3, PACKED_DIGITS[month]);
+                writeDigitPair(bytes, 3, month);
                 bytes[5] = '.';
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6, PACKED_DIGITS[y01]);
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, PACKED_DIGITS[y23]);
-                bytes[10] = (byte) ' ';
+                writeDigitPair(bytes, 6, y01);
+                writeDigitPair(bytes, 8, y23);
+                bytes[10] = ' ';
             } else {
                 char separator = pattern == DATE_TIME_FORMAT_19_DASH ? ' ' : 'T';
                 byte dateSeparator = (byte) (pattern == DATE_TIME_FORMAT_19_SLASH ? '/' : '-');
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET, PACKED_DIGITS[y01]);
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, PACKED_DIGITS[y23]);
+                writeDigitPair(bytes, 0, y01);
+                writeDigitPair(bytes, 2, y23);
                 bytes[4] = dateSeparator;
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 5, PACKED_DIGITS[month]);
+                writeDigitPair(bytes, 5, month);
                 bytes[7] = dateSeparator;
-                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, PACKED_DIGITS[dayOfMonth]);
+                writeDigitPair(bytes, 8, dayOfMonth);
                 bytes[10] = (byte) separator;
             }
             IOUtils.writeLocalTime(bytes, 11, hour, minute, second);
@@ -8471,22 +8471,22 @@ public class DateUtils {
 
         char[] chars = new char[19];
         if (pattern == DATE_TIME_FORMAT_19_DOT) {
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET, PACKED_DIGITS_UTF16[dayOfMonth]);
+            writeDigitPair(chars, 0, dayOfMonth);
             chars[2] = '.';
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 6, PACKED_DIGITS_UTF16[month]);
+            writeDigitPair(chars, 3, month);
             chars[5] = '.';
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 12, PACKED_DIGITS_UTF16[y01]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 16, PACKED_DIGITS_UTF16[y23]);
+            writeDigitPair(chars, 6, y01);
+            writeDigitPair(chars, 8, y23);
             chars[10] = ' ';
         } else {
             char separator = pattern == DATE_TIME_FORMAT_19_DASH ? ' ' : 'T';
             char dateSeparator = pattern == DATE_TIME_FORMAT_19_SLASH ? '/' : '-';
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET, PACKED_DIGITS_UTF16[y01]);
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 4, PACKED_DIGITS_UTF16[y23]);
+            writeDigitPair(chars, 0, y01);
+            writeDigitPair(chars, 2, y23);
             chars[4] = dateSeparator;
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 10, PACKED_DIGITS_UTF16[month]);
+            writeDigitPair(chars, 5, month);
             chars[7] = dateSeparator;
-            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + 16, PACKED_DIGITS_UTF16[dayOfMonth]);
+            writeDigitPair(chars, 8, dayOfMonth);
             chars[10] = separator;
         }
         IOUtils.writeLocalTime(chars, 11, hour, minute, second);

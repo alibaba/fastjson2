@@ -613,7 +613,7 @@ class JSONReaderUTF16
             if (offset < end && chars[offset] == first) {
                 offset++;
             } else if (offset + 4 < end
-                    && UNSAFE.getLong(chars, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1)) == NULL_64
+                    && IOUtils.isNULL(chars, offset)
                     && chars[offset + 4] == first
             ) {
                 offset += 5;
@@ -3498,6 +3498,7 @@ class JSONReaderUTF16
         this.scale = 0;
         int firstOffset = offset;
 
+        final int end = this.end;
         final char[] chars = this.chars;
         char ch = this.ch;
         int offset = this.offset;
@@ -3663,12 +3664,7 @@ class JSONReaderUTF16
                 boolValue = true;
                 valueType = JSON_TYPE_BOOL;
                 ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == 'f'
-                    && chars[offset] == 'a'
-                    && chars[offset + 1] == 'l'
-                    && chars[offset + 2] == 's'
-                    && chars[offset + 3] == 'e'
-            ) {
+            } else if (ch == 'f' && offset + 3 < end && isALSE(chars, offset)) {
                 valid = true;
                 offset += 4;
                 boolValue = false;
@@ -5016,13 +5012,7 @@ class JSONReaderUTF16
         ) {
             offset += 3;
             val = true;
-        } else if (ch == 'f'
-                && offset + 3 < chars.length
-                && chars[offset] == 'a'
-                && chars[offset + 1] == 'l'
-                && chars[offset + 2] == 's'
-                && chars[offset + 3] == 'e'
-        ) {
+        } else if (ch == 'f' && offset + 3 < end && isALSE(chars, offset)) {
             offset += 4;
             val = false;
         } else if (ch == '-' || (ch >= '0' && ch <= '9')) {

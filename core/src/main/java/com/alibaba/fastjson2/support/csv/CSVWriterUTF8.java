@@ -13,14 +13,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class CSVWriterUTF8
         extends CSVWriter {
-    static final byte[] BYTES_TRUE = "true".getBytes();
-    static final byte[] BYTES_FALSE = "false".getBytes();
-    static final byte[] BYTES_LONG_MIN = "-9223372036854775808".getBytes();
-
     final OutputStream out;
     final Charset charset;
     final byte[] bytes;
@@ -61,8 +56,16 @@ final class CSVWriterUTF8
     }
 
     public void writeBoolean(boolean booleanValue) {
-        byte[] valueBytes = booleanValue ? BYTES_TRUE : BYTES_FALSE;
-        writeRaw(valueBytes);
+        int size = booleanValue ? 4 : 5;
+        checkCapacity(size);
+        byte[] chars = this.bytes;
+        int off = this.off;
+        if (booleanValue) {
+            IOUtils.putTrue(chars, off);
+        } else {
+            IOUtils.putFalse(chars, off);
+        }
+        this.off = off + size;
     }
 
     public void writeInt64(long longValue) {
@@ -91,11 +94,11 @@ final class CSVWriterUTF8
         int off = this.off;
         off = IOUtils.writeLocalDate(bytes, off, year, month, dayOfMonth);
         bytes[off] = ' ';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[hour]);
+        writeDigitPair(bytes, off + 1, hour);
         bytes[off + 3] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[minute]);
+        writeDigitPair(bytes, off + 4, minute);
         bytes[off + 6] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[second]);
+        writeDigitPair(bytes, off + 7, second);
         this.off = off + 9;
     }
 

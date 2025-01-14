@@ -85,7 +85,7 @@ class JSONWriterUTF16
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
         }
-        UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), NULL_64);
+        putNULL(chars, off);
         this.off = off + 4;
     }
 
@@ -2280,13 +2280,13 @@ class JSONWriterUTF16
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 1) << 1), PACKED_DIGITS_UTF16[y01]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 3) << 1), PACKED_DIGITS_UTF16[y23]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 5) << 1), PACKED_DIGITS_UTF16[month]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 7) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 9) << 1), PACKED_DIGITS_UTF16[hour]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 11) << 1), PACKED_DIGITS_UTF16[minute]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 13) << 1), PACKED_DIGITS_UTF16[second]);
+        writeDigitPair(chars, off + 1, y01);
+        writeDigitPair(chars, off + 3, y23);
+        writeDigitPair(chars, off + 5, month);
+        writeDigitPair(chars, off + 7, dayOfMonth);
+        writeDigitPair(chars, off + 9, hour);
+        writeDigitPair(chars, off + 11, minute);
+        writeDigitPair(chars, off + 13, second);
         chars[off + 15] = quote;
         this.off = off + 16;
     }
@@ -2395,13 +2395,13 @@ class JSONWriterUTF16
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                IOUtils.putLongLE(chars, off, (DIGITS_K_64[millis] & 0xffffffffffff0000L) | DOT_X0);
+                IOUtils.putLongLE(chars, off, (DIGITS_K_64[millis & 0x3ff] & 0xffffffffffff0000L) | DOT_X0);
                 off += 4;
             } else {
                 chars[off++] = '.';
                 final int rem2 = div - div2 * 10;
                 if (rem2 != 0) {
-                    UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), PACKED_DIGITS_UTF16[div]);
+                    writeDigitPair(chars, off, div);
                     off += 2;
                 } else {
                     chars[off++] = (char) (byte) (div2 + '0');
@@ -2416,13 +2416,13 @@ class JSONWriterUTF16
             } else {
                 int offsetAbs = Math.abs(offset);
                 chars[off] = offset >= 0 ? '+' : '-';
-                UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 1) << 1), PACKED_DIGITS_UTF16[offsetAbs]);
+                writeDigitPair(chars, off + 1, offsetAbs);
                 chars[off + 3] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 4) << 1), PACKED_DIGITS_UTF16[offsetMinutes]);
+                writeDigitPair(chars, off + 4, offsetMinutes);
                 off += 6;
             }
         }
@@ -2444,10 +2444,10 @@ class JSONWriterUTF16
         }
         int y01 = year / 100;
         int y23 = year - y01 * 100;
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 1) << 1), PACKED_DIGITS_UTF16[y01]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 3) << 1), PACKED_DIGITS_UTF16[y23]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 5) << 1), PACKED_DIGITS_UTF16[month]);
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 7) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
+        writeDigitPair(chars, off + 1, y01);
+        writeDigitPair(chars, off + 3, y23);
+        writeDigitPair(chars, off + 5, month);
+        writeDigitPair(chars, off + 7, dayOfMonth);
         chars[off + 9] = quote;
         this.off = off + 10;
     }
@@ -2475,11 +2475,11 @@ class JSONWriterUTF16
             chars = grow(minCapacity);
         }
         chars[off] = (char) (byte) quote;
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 1) << 1), PACKED_DIGITS_UTF16[hour]);
+        writeDigitPair(chars, off + 1, hour);
         chars[off + 3] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 4) << 1), PACKED_DIGITS_UTF16[minute]);
+        writeDigitPair(chars, off + 4, minute);
         chars[off + 6] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) (off + 7) << 1), PACKED_DIGITS_UTF16[second]);
+        writeDigitPair(chars, off + 7, second);
         chars[off + 9] = (char) (byte) quote;
         this.off = off + 10;
     }
