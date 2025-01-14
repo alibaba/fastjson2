@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.IOUtils.NULL_32;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONReaderASCII
@@ -86,7 +85,7 @@ class JSONReaderASCII
             if (offset < end && bytes[offset] == first) {
                 offset++;
             } else if (offset + 4 < end
-                    && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == NULL_32
+                    && IOUtils.isNULL(bytes, offset)
                     && bytes[offset + 4] == first
             ) {
                 offset += 5;

@@ -5005,6 +5005,7 @@ class JSONReaderUTF8
         int firstOffset = offset;
 
         final byte[] bytes = this.bytes;
+        final int end = this.end;
         int ch = this.ch;
         int offset = this.offset;
         int quote = '\0';
@@ -5167,14 +5168,12 @@ class JSONReaderUTF8
                 boolValue = true;
                 valueType = JSON_TYPE_BOOL;
                 ch = offset == end ? EOI : bytes[offset++];
-            } else if (ch == 'f') {
-                if (offset + 4 <= end && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == ALSE) {
-                    valid = true;
-                    offset += 4;
-                    boolValue = false;
-                    valueType = JSON_TYPE_BOOL;
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
+            } else if (ch == 'f' && offset + 3 < end && IOUtils.isALSE(bytes, offset)) {
+                valid = true;
+                offset += 4;
+                boolValue = false;
+                valueType = JSON_TYPE_BOOL;
+                ch = offset == end ? EOI : bytes[offset++];
             } else if (ch == 'N' && bytes[offset] == 'a' && bytes[offset + 1] == 'N') {
                 offset += 2;
                 valid = true;
@@ -5269,6 +5268,7 @@ class JSONReaderUTF8
         this.exponent = 0;
         this.scale = 0;
 
+        final int end = this.end;
         final byte[] bytes = this.bytes;
         char quote = '\0';
         if (ch == '"' || ch == '\'') {
@@ -5374,14 +5374,12 @@ class JSONReaderUTF8
                     valueType = JSON_TYPE_BOOL;
                     ch = (char) bytes[offset++];
                 }
-            } else if (ch == 'f') {
-                if (offset + 4 <= end && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == ALSE) {
-                    valid = true;
-                    offset += 4;
-                    boolValue = false;
-                    valueType = JSON_TYPE_BOOL;
-                    ch = (char) bytes[offset++];
-                }
+            } else if (ch == 'f' && offset + 3 < end && IOUtils.isALSE(bytes, offset)) {
+                valid = true;
+                offset += 4;
+                boolValue = false;
+                valueType = JSON_TYPE_BOOL;
+                ch = (char) bytes[offset++];
             } else if (ch == '{' && quote == 0) {
                 this.complex = readObject();
                 valueType = JSON_TYPE_OBJECT;
@@ -6728,7 +6726,7 @@ class JSONReaderUTF8
             if (offset < end && bytes[offset] == first) {
                 offset++;
             } else if (offset + 4 < end
-                    && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == NULL_32
+                    && IOUtils.isNULL(bytes, offset)
                     && bytes[offset + 4] == first
             ) {
                 offset += 5;
@@ -7095,10 +7093,7 @@ class JSONReaderUTF8
         ) {
             offset += 3;
             val = true;
-        } else if (ch == 'f'
-                && offset + 4 <= bytes.length
-                && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == ALSE
-        ) {
+        } else if (ch == 'f' && offset + 3 < end && isALSE(bytes, offset)) {
             offset += 4;
             val = false;
         } else if (ch == '-' || (ch >= '0' && ch <= '9')) {
