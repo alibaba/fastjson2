@@ -1385,7 +1385,6 @@ public class IOUtils {
         return UNSAFE.getByte(str, ARRAY_CHAR_BASE_OFFSET + pos);
     }
 
-
     public static char getChar(char[] buf, int pos) {
         return UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
     }
