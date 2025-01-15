@@ -1214,40 +1214,41 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
         int off = this.off;
-        int size;
         if (i == null) {
-            bytes[off] = (this.context.features & WRITE_NUM_NULL_MASK) == 0
+            bytes[off++] = (this.context.features & WRITE_NUM_NULL_MASK) == 0
                     ? BC_NULL
                     : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE);
-            size = 1;
         } else {
-            long val = i;
-            if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
-                bytes[off] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
-                size = 1;
-            } else if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
-                bytes[off] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
-                bytes[off + 1] = (byte) (val);
-                size = 2;
-            } else if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
-                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
-                bytes[off + 1] = (byte) (val >> 8);
-                bytes[off + 2] = (byte) (val);
-                size = 3;
-            } else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
-                bytes[off] = BC_INT64_INT;
-                IOUtils.putIntBE(
-                        bytes,
-                        off + 1,
-                        (int) val
-                );
-                size = 5;
-            } else {
-                size = writeInt64Large8(bytes, off, val);
-            }
+            off = writeInt64(bytes, off, i);
         }
 
-        this.off = off + size;
+        this.off = off;
+    }
+
+    private static int writeInt64(byte[] bytes, int off, long i) {
+        if (i >= INT64_NUM_LOW_VALUE && i <= INT64_NUM_HIGH_VALUE) {
+            bytes[off++] = (byte) (BC_INT64_NUM_MIN + (i - INT64_NUM_LOW_VALUE));
+        } else if (i >= INT64_BYTE_MIN && i <= INT64_BYTE_MAX) {
+            IOUtils.putShortBE(bytes, off, (short) ((BC_INT64_BYTE_ZERO << 8) + i));
+            off += 2;
+        } else if (i >= INT64_SHORT_MIN && i <= INT64_SHORT_MAX) {
+            bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (i >> 16));
+            IOUtils.putShortBE(bytes, off + 1, (short) i);
+            off += 3;
+        } else if (i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE) {
+            bytes[off] = BC_INT64_INT;
+            IOUtils.putIntBE(
+                    bytes,
+                    off + 1,
+                    (int) i
+            );
+            off += 5;
+        } else {
+            bytes[off] = BC_INT64;
+            IOUtils.putLongBE(bytes, off + 1, i);
+            off += 9;
+        }
+        return off;
     }
 
     @Override
@@ -1257,30 +1258,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        int off = this.off;
-        int size;
-        if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
-            bytes[off] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
-            size = 1;
-        } else if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
-            bytes[off] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
-            bytes[off + 1] = (byte) (val);
-            size = 2;
-        } else if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
-            bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
-            bytes[off + 1] = (byte) (val >> 8);
-            bytes[off + 2] = (byte) (val);
-            size = 3;
-        } else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
-            bytes[off] = BC_INT64_INT;
-            IOUtils.putIntBE(bytes, off + 1, (int) val);
-            size = 5;
-        } else {
-            bytes[off] = BC_INT64;
-            IOUtils.putLongBE(bytes, off + 1, val);
-            size = 9;
-        }
-        this.off = off + size;
+        this.off = writeInt64(bytes, this.off, val);
     }
 
     @Override
@@ -1306,37 +1284,7 @@ final class JSONWriterJSONB
         }
 
         for (int i = 0; i < value.length; i++) {
-            long val = value[i];
-            if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
-                bytes[off++] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
-                continue;
-            }
-
-            if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
-                bytes[off] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
-                bytes[off + 1] = (byte) (val);
-                off += 2;
-                continue;
-            }
-
-            if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
-                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
-                bytes[off + 1] = (byte) (val >> 8);
-                bytes[off + 2] = (byte) (val);
-                off += 3;
-                continue;
-            }
-
-            if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
-                bytes[off] = BC_INT64_INT;
-                IOUtils.putIntBE(bytes, off + 1, (int) val);
-                off += 5;
-                continue;
-            }
-
-            bytes[off] = BC_INT64;
-            IOUtils.putLongBE(bytes, off + 1, val);
-            off += 9;
+            off = writeInt64(bytes, off, value[i]);
         }
         this.off = off;
     }
@@ -1369,47 +1317,9 @@ final class JSONWriterJSONB
                 bytes[off++] = BC_NULL;
                 continue;
             }
-
-            long val = item;
-            if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
-                bytes[off++] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
-                continue;
-            }
-
-            if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
-                bytes[off] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
-                bytes[off + 1] = (byte) (val);
-                off += 2;
-                continue;
-            }
-
-            if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
-                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
-                bytes[off + 1] = (byte) (val >> 8);
-                bytes[off + 2] = (byte) (val);
-                off += 3;
-                continue;
-            }
-
-            off += writeInt64Large(bytes, off, val);
+            off = writeInt64(bytes, off, item);
         }
         this.off = off;
-    }
-
-    private static int writeInt64Large(byte[] bytes, int off, long val) {
-        if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
-            bytes[off] = BC_INT64_INT;
-            IOUtils.putIntBE(bytes, off + 1, (int) val);
-            return 5;
-        }
-
-        return writeInt64Large8(bytes, off, val);
-    }
-
-    private static int writeInt64Large8(byte[] bytes, int off, long val) {
-        bytes[off] = BC_INT64;
-        IOUtils.putLongBE(bytes, off + 1, val);
-        return 9;
     }
 
     @Override
@@ -1777,30 +1687,6 @@ final class JSONWriterJSONB
         }
     }
 
-    public static int writeInt64(byte[] bytes, int off, long val) {
-        if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
-            bytes[off] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
-            return 1;
-        } else if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
-            bytes[off] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
-            bytes[off + 1] = (byte) (val);
-            return 2;
-        } else if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
-            bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
-            bytes[off + 1] = (byte) (val >> 8);
-            bytes[off + 2] = (byte) (val);
-            return 3;
-        } else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
-            bytes[off] = BC_INT64_INT;
-            IOUtils.putIntBE(bytes, off + 1, (int) val);
-            return 5;
-        } else {
-            bytes[off] = BC_INT64;
-            IOUtils.putLongBE(bytes, off + 1, val);
-            return 9;
-        }
-    }
-
     @Override
     public void writeArrayNull() {
         if (off == bytes.length) {
@@ -2070,8 +1956,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 15);
         }
 
-        bytes[off++] = BC_TIMESTAMP;
-        off += writeInt64(bytes, off, instant.getEpochSecond());
+        bytes[off] = BC_TIMESTAMP;
+        off = writeInt64(bytes, off + 1, instant.getEpochSecond());
         this.off = off + writeInt32(bytes, off, instant.getNano());
     }
 
@@ -2108,8 +1994,8 @@ final class JSONWriterJSONB
             if (off + 10 > bytes.length) {
                 bytes = grow(off + 10);
             }
-            bytes[off++] = BC_BIGINT_LONG;
-            this.off = off + writeInt64(bytes, off, value.longValue());
+            bytes[off] = BC_BIGINT_LONG;
+            this.off = writeInt64(bytes, off + 1, value.longValue());
             return;
         }
 
@@ -2164,8 +2050,8 @@ final class JSONWriterJSONB
         if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
             long intCompact = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
             if (scale == 0) {
-                bytes[off++] = BC_DECIMAL_LONG;
-                this.off = off + writeInt64(bytes, off, intCompact);
+                bytes[off] = BC_DECIMAL_LONG;
+                this.off = writeInt64(bytes, off + 1, intCompact);
                 return;
             }
 
@@ -2174,7 +2060,7 @@ final class JSONWriterJSONB
             if (intCompact >= Integer.MIN_VALUE && intCompact <= Integer.MAX_VALUE) {
                 off += writeInt32(bytes, off, (int) intCompact);
             } else {
-                off += writeInt64(bytes, off, intCompact);
+                off = writeInt64(bytes, off, intCompact);
             }
             this.off = off;
             return;
@@ -2183,8 +2069,8 @@ final class JSONWriterJSONB
         BigInteger unscaledValue = value.unscaledValue();
         if (scale == 0
                 && isInt64(unscaledValue)) {
-            bytes[off++] = BC_DECIMAL_LONG;
-            this.off = off + writeInt64(bytes, off, unscaledValue.longValue());
+            bytes[off] = BC_DECIMAL_LONG;
+            this.off = writeInt64(bytes, off + 1, unscaledValue.longValue());
             return;
         }
 
@@ -2194,7 +2080,7 @@ final class JSONWriterJSONB
         if (isInt32(unscaledValue)) {
             off += writeInt32(bytes, off, unscaledValue.intValue());
         } else if (isInt64(unscaledValue)) {
-            off += writeInt64(bytes, off, unscaledValue.longValue());
+            off = writeInt64(bytes, off, unscaledValue.longValue());
         } else {
             this.off = off;
             writeBigInt(unscaledValue, 0);
