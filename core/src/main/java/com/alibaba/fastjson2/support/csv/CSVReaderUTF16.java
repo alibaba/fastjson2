@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.support.csv.CSVReaderUTF8.containsQuoteOrLineSeparator;
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 final class CSVReaderUTF16<T>
@@ -97,19 +98,11 @@ final class CSVReaderUTF16<T>
         for (int k = 0; k < 3; ++k) {
             lineTerminated = false;
 
-            for (int i = off; i < end; i++) {
-                if (i + 4 < end) {
-                    char b0 = buf[i];
-                    char b1 = buf[i + 1];
-                    char b2 = buf[i + 2];
-                    char b3 = buf[i + 3];
-                    if (b0 > '"' && b1 > '"' && b2 > '"' && b3 > '"') {
-                        lineSize += 4;
-                        i += 3;
-                        continue;
-                    }
-                }
-
+            int i = off, end = this.end;
+            while (i + 4 < end && !containsQuoteOrLineSeparator(IOUtils.getLongUnaligned(buf, i))) {
+                i += 4;
+            }
+            for (; i < end; i++) {
                 char ch = buf[i];
                 if (ch == '"') {
                     lineSize++;
@@ -194,6 +187,7 @@ final class CSVReaderUTF16<T>
                         }
                     } else {
                         end += cnt;
+                        this.end = end;
                         continue;
                     }
                 }

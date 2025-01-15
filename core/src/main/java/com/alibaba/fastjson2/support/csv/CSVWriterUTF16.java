@@ -12,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static com.alibaba.fastjson2.util.IOUtils.*;
-
 final class CSVWriterUTF16
         extends CSVWriter {
     final Writer out;
@@ -52,17 +50,9 @@ final class CSVWriterUTF16
         chars[off++] = '\n';
     }
 
-    public void writeBoolean(boolean booleanValue) {
-        int size = booleanValue ? 4 : 5;
-        checkCapacity(size);
-        char[] chars = this.chars;
-        int off = this.off;
-        if (booleanValue) {
-            IOUtils.putTrue(chars, off);
-        } else {
-            IOUtils.putFalse(chars, off);
-        }
-        this.off = off + size;
+    public void writeBoolean(boolean v) {
+        checkCapacity(5);
+        this.off = IOUtils.putBoolean(chars, off, v);
     }
 
     public void writeInt64(long longValue) {
@@ -88,11 +78,7 @@ final class CSVWriterUTF16
         int off = this.off;
         off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
         chars[off] = ' ';
-        writeDigitPair(chars, off + 1, hour);
-        chars[off + 3] = ':';
-        writeDigitPair(chars, off + 4, minute);
-        chars[off + 6] = ':';
-        writeDigitPair(chars, off + 7, second);
+        IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
         this.off = off + 9;
     }
 

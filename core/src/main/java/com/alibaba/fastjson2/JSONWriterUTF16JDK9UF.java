@@ -78,13 +78,7 @@ final class JSONWriterUTF16JDK9UF
         if ((context.features & WriteBooleanAsNumber.mask) != 0) {
             chars[off++] = value ? '1' : '0';
         } else {
-            if (value) {
-                IOUtils.putTrue(chars, off);
-                off += 4;
-            } else {
-                IOUtils.putFalse(chars, off);
-                off += 5;
-            }
+            off = IOUtils.putBoolean(chars, off, value);
         }
         this.off = off;
     }

@@ -1381,6 +1381,11 @@ public class IOUtils {
         return pos + 6;
     }
 
+    public static byte getByte(byte[] str, int pos) {
+        return UNSAFE.getByte(str, ARRAY_CHAR_BASE_OFFSET + pos);
+    }
+
+
     public static char getChar(char[] buf, int pos) {
         return UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
     }
@@ -1441,13 +1446,28 @@ public class IOUtils {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + pos, convEndian(false, v));
     }
 
-    public static void putTrue(byte[] buf, int pos) {
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + pos, TRUE);
+    public static int putBoolean(byte[] bytes, int off, boolean v) {
+        long address = ARRAY_CHAR_BASE_OFFSET + off;
+        if (v) {
+            UNSAFE.putInt(bytes, address, TRUE);
+            return off + 4;
+        } else {
+            UNSAFE.putByte(bytes, address, (byte) 'f');
+            UNSAFE.putInt(bytes, address + 1, ALSE);
+            return off + 5;
+        }
     }
 
-    public static void putFalse(byte[] buf, int pos) {
-        UNSAFE.putByte(buf, ARRAY_CHAR_BASE_OFFSET + pos, (byte) 'f');
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + pos + 1, ALSE);
+    public static int putBoolean(char[] chars, int off, boolean v) {
+        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
+        if (v) {
+            UNSAFE.putLong(chars, address, TRUE_64);
+            return off + 4;
+        } else {
+            UNSAFE.putChar(chars, address, 'f');
+            UNSAFE.putLong(chars, address + 2, ALSE_64);
+            return off + 5;
+        }
     }
 
     public static boolean isALSE(byte[] buf, int pos) {
@@ -1456,15 +1476,6 @@ public class IOUtils {
 
     public static boolean isALSE(char[] buf, int pos) {
         return getLongUnaligned(buf, pos) == ALSE_64;
-    }
-
-    public static void putTrue(char[] buf, int pos) {
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), TRUE_64);
-    }
-
-    public static void putFalse(char[] buf, int pos) {
-        UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), 'f');
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((pos + 1L) << 1), ALSE_64);
     }
 
     public static boolean isNULL(byte[] buf, int pos) {
@@ -1558,7 +1569,7 @@ public class IOUtils {
 
     public static int digit3(byte[] bytes, int off) {
         return digit3(
-                getShortE(bytes, off)
+                getShortLE(bytes, off)
                         | (UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16)
         );
     }
@@ -1583,7 +1594,7 @@ public class IOUtils {
 
     public static int digit2(byte[] bytes, int off) {
         return digit2(
-                getShortE(bytes, off)
+                getShortLE(bytes, off)
         );
     }
 
@@ -1645,9 +1656,14 @@ public class IOUtils {
         return ch >= '0' && ch <= '9';
     }
 
-    public static short getShortE(byte[] bytes, int offset) {
+    public static short getShortLE(byte[] bytes, int offset) {
         return convEndian(false,
                 UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public static boolean isUTF8BOM(byte[] bytes, int off) {
+        // EF BB BF
+        return ((getIntLE(bytes, 0)) & 0xFFFFFF) == 0xBFBBEF;
     }
 
     public static int getIntBE(byte[] bytes, int offset) {
@@ -1671,6 +1687,10 @@ public class IOUtils {
     public static long getLongBE(byte[] bytes, int offset) {
         return convEndian(true,
                 UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public static long getLongUnaligned(byte[] bytes, int offset) {
+        return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
     public static long getLongUnaligned(char[] bytes, int offset) {
