@@ -2927,13 +2927,7 @@ class JSONWriterUTF8
         if ((context.features & WriteBooleanAsNumber.mask) != 0) {
             bytes[off++] = (byte) (value ? '1' : '0');
         } else {
-            if (value) {
-                IOUtils.putTrue(bytes, off);
-                off += 4;
-            } else {
-                IOUtils.putFalse(bytes, off);
-                off += 5;
-            }
+            off = IOUtils.putBoolean(bytes, off, value);
         }
         this.off = off;
     }

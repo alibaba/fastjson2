@@ -87,6 +87,26 @@ final class CSVReaderUTF8<T>
         this.valueConsumer = valueConsumer;
     }
 
+    static boolean containsQuoteOrLineSeparator(long v) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) v;
+            if (c == '"' || c == '\n' || c == '\r') {
+                return true;
+            }
+            v >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ 0x2222222222222222L; // " -> 0x22
+        long x0a = v ^ 0x0A0A0A0A0A0A0A0AL; // \n -> 0x0a
+        long x0d = v ^ 0x0D0D0D0D0D0D0D0DL; // \r -> 0x0d
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x0a = (x0a - 0x0101010101010101L) & ~x0a;
+        x0d = (x0d - 0x0101010101010101L) & ~x0d;
+        return ((x22 | x0a | x0d) & 0x8080808080808080L) != 0;
+    }
+
     protected boolean seekLine() throws IOException {
         byte[] buf = this.buf;
         int off = this.off;
@@ -100,12 +120,9 @@ final class CSVReaderUTF8<T>
                 }
                 this.end = cnt;
 
-                if (end > 3) {
-                    // UTF8-BOM EF BB BF
-                    if (buf[0] == -17 && buf[1] == -69 && buf[2] == -65) {
-                        off = 3;
-                        lineNextStart = off;
-                    }
+                if (end > 4 && IOUtils.isUTF8BOM(buf, 0)) {
+                    off = 3;
+                    lineNextStart = off;
                 }
             }
         }
@@ -113,7 +130,11 @@ final class CSVReaderUTF8<T>
         for (int k = 0; k < 3; ++k) {
             lineTerminated = false;
 
-            for (int i = off; i < end; i++) {
+            int i = off, end = this.end;
+            while (i + 8 < end && !containsQuoteOrLineSeparator(IOUtils.getLongUnaligned(buf, i))) {
+                i += 8;
+            }
+            for (; i < end; i++) {
                 byte ch = buf[i];
                 if (ch == '"') {
                     lineSize++;
@@ -198,6 +219,7 @@ final class CSVReaderUTF8<T>
                         }
                     } else {
                         end += cnt;
+                        this.end = end;
                         continue;
                     }
                 }
