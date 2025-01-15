@@ -1655,6 +1655,10 @@ public class IOUtils {
         return ch >= '0' && ch <= '9';
     }
 
+    public static short getShortUnaligned(byte[] bytes, int offset) {
+        return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
     public static short getShortLE(byte[] bytes, int offset) {
         return convEndian(false,
                 UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));

@@ -16,6 +16,7 @@ final class CSVWriterUTF16
         extends CSVWriter {
     final Writer out;
     final char[] chars;
+    private static final int DOUBLE_QUOTE_2_UTF16 = '"' | ('"' << 16);
 
     CSVWriterUTF16(
             Writer out,
@@ -139,8 +140,7 @@ final class CSVWriterUTF16
         for (int i = 0; i < len; ) {
             char ch = str.charAt(i++);
             if (ch == '"') {
-                chars[off] = '"';
-                chars[off + 1] = '"';
+                IOUtils.putIntUnaligned(chars, off, DOUBLE_QUOTE_2_UTF16);
                 off += 2;
             } else {
                 chars[off++] = ch;
