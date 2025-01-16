@@ -1401,6 +1401,10 @@ public class IOUtils {
         UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    public static void putShortBE(byte[] buf, int pos, short v) {
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
+    }
+
     public static void putShortLE(byte[] buf, int pos, short v) {
         UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
@@ -1657,6 +1661,11 @@ public class IOUtils {
 
     public static short getShortUnaligned(byte[] bytes, int offset) {
         return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
+    public static short getShortBE(byte[] bytes, int offset) {
+        return convEndian(true,
+                UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
     public static short getShortLE(byte[] bytes, int offset) {
