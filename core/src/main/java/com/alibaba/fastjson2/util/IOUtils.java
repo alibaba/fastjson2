@@ -1663,6 +1663,11 @@ public class IOUtils {
         return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
+    public static short getShortBE(byte[] bytes, int offset) {
+        return convEndian(true,
+                UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
     public static short getShortLE(byte[] bytes, int offset) {
         return convEndian(false,
                 UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));

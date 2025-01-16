@@ -13,12 +13,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 
+import static com.alibaba.fastjson2.JSONB.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReaderUTF8.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
-import static com.alibaba.fastjson2.util.IOUtils.getLongBE;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -193,17 +193,17 @@ final class JSONReaderJSONB
 
     public int readLength() {
         byte[] bytes = this.bytes;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         int type = bytes[offset++];
-        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+        if (isInt32Num(type)) {
             // noop
-        } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            type = ((type - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset++] & 0xFF);
-        } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+        } else if (isInt32Byte(type)) {
+            type = getIntByte(bytes, offset++, type);
+        } else if (isInt32Short(type) && offset + 1 < end) {
             type = getInt3(bytes, offset, type);
             offset += 2;
-        } else if (type == BC_INT32) {
-            type = getInt(bytes, offset);
+        } else if (type == BC_INT32 && offset + 3 < end) {
+            type = getIntBE(bytes, offset);
             offset += 4;
             if (type > 1024 * 1024 * 256) {
                 throw new JSONException("input length overflow");
@@ -215,10 +215,20 @@ final class JSONReaderJSONB
         return type;
     }
 
-    static int getInt3(byte[] bytes, int offset, int type) {
-        return ((type - BC_INT32_SHORT_ZERO) << 16)
-                + ((bytes[offset] & 0xFF) << 8)
-                + (bytes[offset + 1] & 0xFF);
+    private static int getIntByte(byte[] bytes, int offset, int type) {
+        return ((type - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset] & 0xFF);
+    }
+
+    private static int getInt3(byte[] bytes, int offset, int type) {
+        return ((type - BC_INT32_SHORT_ZERO) << 16) + (getShortBE(bytes, offset) & 0xFFFF);
+    }
+
+    private static int getLongByte(byte[] bytes, int offset, int type) {
+        return ((type - BC_INT64_BYTE_ZERO) << 8) + (bytes[offset] & 0xFF);
+    }
+
+    private static int getLong3(byte[] bytes, int offset, int type) {
+        return (((type - BC_INT64_SHORT_ZERO) << 16) + (getShortBE(bytes, offset) & 0xFFFF));
     }
 
     @Override
@@ -313,6 +323,7 @@ final class JSONReaderJSONB
 
     @Override
     public Map<String, Object> readObject() {
+        final int end = this.end;
         final byte[] bytes = this.bytes;
         final long features = context.features;
         type = bytes[offset++];
@@ -364,7 +375,7 @@ final class JSONReaderJSONB
                 Object value;
                 if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
                     value = readString();
-                } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+                } else if (isInt32Num(valueType)) {
                     offset++;
                     value = (int) valueType;
                 } else if (valueType == BC_TRUE) {
@@ -376,14 +387,14 @@ final class JSONReaderJSONB
                 } else if (valueType == BC_OBJECT) {
                     value = readObject();
                 } else if (valueType == BC_INT64) {
-                    value = IOUtils.getLongBE(bytes, offset + 1);
+                    value = IOUtils.getLongBE(bytes, check7(offset + 1, end));
                     offset += 9;
                 } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
                     offset++;
                     int len;
                     if (valueType == BC_ARRAY) {
                         byte itemType = bytes[offset];
-                        if (itemType >= BC_INT32_NUM_MIN && itemType <= BC_INT32_NUM_MAX) {
+                        if (isInt32Num(itemType)) {
                             offset++;
                             len = itemType;
                         } else {
@@ -436,16 +447,16 @@ final class JSONReaderJSONB
                         }
                         value = list;
                     }
-                } else if (valueType >= BC_INT32_BYTE_MIN && valueType <= BC_INT32_BYTE_MAX) {
-                    value = ((valueType - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset + 1] & 0xFF);
+                    //
+                } else if (isInt32Byte(valueType)) {
+                    value = getIntByte(bytes, offset + 1, valueType);
                     offset += 2;
-                } else if (valueType >= BC_INT32_SHORT_MIN && valueType <= BC_INT32_SHORT_MAX) {
+                } else if (isInt32Short(valueType) && offset + 1 < end) {
                     int int32Value = getInt3(bytes, offset + 1, valueType);
                     offset += 3;
                     value = int32Value;
-                } else if (valueType == BC_INT32) {
-                    int int32Value = getInt(bytes, offset + 1);
+                } else if (valueType == BC_INT32 && offset + 3 < end) {
+                    int int32Value = getIntBE(bytes, offset + 1);
                     offset += 5;
                     value = int32Value;
                 } else {
@@ -508,7 +519,7 @@ final class JSONReaderJSONB
             Object value;
             if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
                 value = readString();
-            } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+            } else if (isInt32Num(valueType)) {
                 offset++;
                 value = (int) valueType;
             } else if (valueType == BC_TRUE) {
@@ -533,6 +544,8 @@ final class JSONReaderJSONB
 
     @Override
     public Object readAny() {
+        int end = this.end;
+        byte[] bytes = this.bytes;
         if (offset >= bytes.length) {
             throw new JSONException("readAny overflow : " + offset + "/" + bytes.length);
         }
@@ -551,29 +564,29 @@ final class JSONReaderJSONB
                 return (short) ((bytes[offset++] << 8)
                         + (bytes[offset++] & 0xFF));
             case BC_INT32: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_INT64_INT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return (long) int32Value;
             }
             case BC_INT64: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return int64Value;
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
-                byte[] bytes = new byte[len];
-                System.arraycopy(this.bytes, offset, bytes, 0, len);
+                byte[] buf = new byte[len];
+                System.arraycopy(bytes, offset, buf, 0, len);
                 offset += len;
-                return new BigInteger(bytes);
+                return new BigInteger(buf);
             }
             case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             }
@@ -581,7 +594,7 @@ final class JSONReaderJSONB
                 return (float) readInt32Value();
             }
             case BC_DOUBLE: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return Double.longBitsToDouble(int64Value);
             }
@@ -686,12 +699,12 @@ final class JSONReaderJSONB
                 return binary;
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getInt(bytes, offset);
+                long minutes = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return new Date(minutes * 60L * 1000L);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getInt(bytes, offset);
+                long seconds = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return new Date(seconds * 1000);
             }
@@ -727,7 +740,7 @@ final class JSONReaderJSONB
                 return Instant.ofEpochSecond(epochSeconds, nano);
             }
             case BC_TIMESTAMP_MILLIS: {
-                long millis = IOUtils.getLongBE(bytes, offset);
+                long millis = IOUtils.getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return new Date(millis);
             }
@@ -844,7 +857,7 @@ final class JSONReaderJSONB
                     Object value;
                     if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
                         value = readString();
-                    } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+                    } else if (isInt32Num(valueType)) {
                         offset++;
                         value = (int) valueType;
                     } else if (valueType == BC_TRUE) {
@@ -876,34 +889,33 @@ final class JSONReaderJSONB
                 return map;
             }
             default:
-                if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                final byte type = this.type;
+                if (isInt32Num(type)) {
                     return (int) type;
                 }
 
-                if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-                    return ((type - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt32Byte(type)) {
+                    return getIntByte(bytes, offset++, type);
                 }
 
-                if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                if (isInt32Short(type) && offset + 1 < end) {
                     int int3 = getInt3(bytes, offset, type);
                     offset += 2;
                     return int3;
                 }
 
-                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+                if (isInt64Num(type)) {
                     return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
                 }
 
-                if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-                    return (long) ((type - BC_INT64_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt64Byte(type)) {
+                    return (long) getLongByte(bytes, offset++, type);
                 }
 
-                if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-                    return (long) (((type - BC_INT64_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF));
+                if (isInt64Short(type) && offset + 1 < end) {
+                    long value = getLong3(bytes, offset, type);
+                    offset += 2;
+                    return value;
                 }
 
                 if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
@@ -1061,7 +1073,7 @@ final class JSONReaderJSONB
             Object value;
             if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
                 value = readString();
-            } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+            } else if (isInt32Num(valueType)) {
                 offset++;
                 value = (int) valueType;
             } else if (valueType == BC_TRUE) {
@@ -1074,7 +1086,7 @@ final class JSONReaderJSONB
                 value = readObject();
             } else if (valueType == BC_INT64) {
                 offset++;
-                value = IOUtils.getLongBE(bytes, offset);
+                value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
             } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
                 offset++;
@@ -1125,16 +1137,16 @@ final class JSONReaderJSONB
                     }
                     value = list;
                 }
-            } else if (valueType >= BC_INT32_BYTE_MIN && valueType <= BC_INT32_BYTE_MAX) {
-                value = ((valueType - BC_INT32_BYTE_ZERO) << 8)
-                        + (bytes[offset + 1] & 0xFF);
+                //
+            } else if (isInt32Byte(valueType)) {
+                value = getIntByte(bytes, offset + 1, valueType);
                 offset += 2;
-            } else if (valueType >= BC_INT32_SHORT_MIN && valueType <= BC_INT32_SHORT_MAX) {
-                int int3 = getInt3(bytes, offset + 1, valueType);
+            } else if (isInt64Short(valueType) && offset + 2 < end) {
+                int int3 = getLong3(bytes, offset + 1, valueType);
                 offset += 3;
                 value = int3;
             } else if (valueType == BC_INT32) {
-                value = IOUtils.getIntBE(bytes, offset + 1);
+                value = getIntBE(bytes, check3(offset + 1, end));
                 offset += 5;
             } else if (valueType == BC_REFERENCE) {
                 String reference = readReference();
@@ -1471,7 +1483,7 @@ final class JSONReaderJSONB
 
         if (typeSymbol) {
             strtype = this.strtype = bytes[offset];
-            if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
+            if (isInt32(strtype)) {
                 int symbol;
                 if (strtype <= BC_INT32_NUM_MAX) {
                     offset++;
@@ -1574,7 +1586,7 @@ final class JSONReaderJSONB
 
         if (typeSymbol) {
             int symbol;
-            if ((symbol = bytes[offset]) >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+            if (isInt32Num(symbol = bytes[offset])) {
                 offset++;
             } else {
                 symbol = readInt32Value();
@@ -1722,7 +1734,7 @@ final class JSONReaderJSONB
         if (strtype == BC_SYMBOL) {
             offset++;
             strtype = this.strtype = bytes[offset];
-            if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
+            if (isInt32(strtype)) {
                 int symbol;
                 if (strtype <= BC_INT32_NUM_MAX) {
                     offset++;
@@ -1759,7 +1771,7 @@ final class JSONReaderJSONB
             }
         }
 
-        if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
+        if (isInt32(strtype)) {
             int typeIndex;
             if (strtype <= BC_INT32_NUM_MAX) {
                 offset++;
@@ -1813,13 +1825,12 @@ final class JSONReaderJSONB
                 || strtype == BC_STR_UTF16BE
         ) {
             byte type = bytes[offset];
-            if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+            if (isInt32Num(type)) {
                 offset++;
                 strlen = type;
-            } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+            } else if (isInt32Byte(type)) { // type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX
                 offset++;
-                strlen = ((type - BC_INT32_BYTE_ZERO) << 8)
-                        + (bytes[offset++] & 0xFF);
+                strlen = getIntByte(bytes, offset++, type);
             } else {
                 strlen = readLength();
             }
@@ -1936,7 +1947,7 @@ final class JSONReaderJSONB
         }
 
         int symbol;
-        if ((type = bytes[offset]) >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+        if (isInt32Num((type = bytes[offset]))) {
             symbol = type;
             offset++;
         } else {
@@ -2519,37 +2530,22 @@ final class JSONReaderJSONB
             }
             default:
                 // [-16, 47]
-                if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                if (isInt32Num(type) || isInt64Num(type)) {
                     return;
                 }
 
-                // [-40, -17]
-                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
-                    return;
-                }
-
-                if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+                if (isInt32Byte(type) || isInt64Byte(type)) {
                     offset++;
                     return;
                 }
 
-                if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                if (isInt32Short(type) || isInt64Short(type)) {
                     offset += 2;
                     return;
                 }
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     offset += (type - BC_STR_ASCII_FIX_MIN);
-                    return;
-                }
-
-                if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-                    offset++;
-                    return;
-                }
-
-                if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-                    offset += 2;
                     return;
                 }
 
@@ -2648,7 +2644,7 @@ final class JSONReaderJSONB
         boolean typeSymbol = strtype == BC_SYMBOL;
         if (typeSymbol) {
             strtype = this.strtype = bytes[offset];
-            if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
+            if (isInt32(strtype)) {
                 int symbol = readInt32Value();
                 if (symbol < 0) {
                     return symbolTable.getName(-symbol);
@@ -2950,7 +2946,7 @@ final class JSONReaderJSONB
             final int strlen;
             if (strtype == BC_STR_ASCII) {
                 byte strType = bytes[offset];
-                if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+                if (isInt32Num(strType)) {
                     offset++;
                     strlen = strType;
                 } else {
@@ -3104,13 +3100,12 @@ final class JSONReaderJSONB
 
     private String readUTF16LE() {
         byte strType = bytes[offset];
-        if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+        if (isInt32Num(strType)) {
             offset++;
             strlen = strType;
-        } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
-            offset++;
-            strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
+        } else if (isInt32Byte(strType)) { // strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX
+            strlen = getIntByte(bytes, offset + 1, strType);
+            offset += 2;
         } else {
             strlen = readLength();
         }
@@ -3140,13 +3135,12 @@ final class JSONReaderJSONB
 
     private String readStringUTF8() {
         byte strType = bytes[offset];
-        if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+        if (isInt32Num(strType)) {
             offset++;
             strlen = strType;
-        } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
-            offset++;
-            strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
+        } else if (isInt32Byte(strType)) {
+            strlen = getIntByte(bytes, offset + 1, strType);
+            offset += 2;
         } else {
             strlen = readLength();
         }
@@ -3187,27 +3181,25 @@ final class JSONReaderJSONB
     }
 
     private String readStringTypeNotMatch() {
-        if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+        int end = this.end;
+        final byte strtype = this.strtype;
+        if (isInt32Num(strtype)) {
             return Byte.toString(strtype);
-        } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {
-            int intValue = ((strtype - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return Integer.toString(intValue);
-        } else if (strtype >= BC_INT32_SHORT_MIN && strtype <= BC_INT32_SHORT_MAX) {
+        } else if (isInt32Byte(strtype)) {
+            return Integer.toString(getIntByte(bytes, offset++, strtype));
+        } else if (isInt32Short(strtype) && offset + 1 < end) {
             int int3 = getInt3(bytes, offset, strtype);
             offset += 2;
             return Integer.toString(int3);
-        } else if (strtype >= BC_INT64_NUM_MIN && strtype <= BC_INT64_NUM_MAX) {
+        } else if (isInt64Num(strtype)) {
             int intValue = INT64_NUM_LOW_VALUE + (strtype - BC_INT64_NUM_MIN);
             return Integer.toString(intValue);
-        } else if (strtype >= BC_INT64_BYTE_MIN && strtype <= BC_INT64_BYTE_MAX) {
-            int intValue = ((strtype - BC_INT64_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return Integer.toString(intValue);
-        } else if (strtype >= BC_INT64_SHORT_MIN && strtype <= BC_INT64_SHORT_MAX) {
-            int intValue = ((strtype - BC_INT64_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+        } else if (isInt64Byte(strtype)) {
+            return Integer.toString(
+                    getLongByte(bytes, offset++, strtype));
+        } else if (isInt64Short(strtype) && offset + 1 < end) {
+            int intValue = getLong3(bytes, offset, strtype);
+            offset += 2;
             return Integer.toString(intValue);
         }
 
@@ -3220,7 +3212,7 @@ final class JSONReaderJSONB
                 return "1.0";
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = IOUtils.getIntBE(bytes, offset);
+                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Long.toString(int32Value);
             }
@@ -3228,42 +3220,42 @@ final class JSONReaderJSONB
                 return Float.toString(
                         readInt32Value());
             case BC_FLOAT: {
-                int int32Value = IOUtils.getIntBE(bytes, offset);
+                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.toString(
                         Float.intBitsToFloat(int32Value)
                 );
             }
             case BC_DOUBLE: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return Double.toString(
                         Double.longBitsToDouble(int64Value)
                 );
             }
             case BC_TIMESTAMP_SECONDS: {
-                long millis = IOUtils.getIntBE(bytes, offset) * 1000L;
+                long millis = getIntBE(bytes, check3(offset, end)) * 1000L;
                 offset += 4;
                 return DateUtils.toString(
                         new Date(millis)
                 );
             }
             case BC_TIMESTAMP_MINUTES: {
-                long millis = IOUtils.getIntBE(bytes, offset) * 60000L;
+                long millis = getIntBE(bytes, check3(offset, end)) * 60000L;
                 offset += 4;
                 return DateUtils.toString(
                         new Date(millis)
                 );
             }
             case BC_TIMESTAMP_MILLIS: {
-                long millis = IOUtils.getLongBE(bytes, offset);
+                long millis = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return DateUtils.toString(
                         new Date(millis)
                 );
             }
             case BC_INT64:
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return Long.toString(int64Value);
             case BC_BIGINT: {
@@ -3400,26 +3392,22 @@ final class JSONReaderJSONB
         wasNull = false;
 
         final byte[] bytes = this.bytes;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         byte type = bytes[offset++];
 
         long int64Value;
-        if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+        if (isInt64Num(type)) {
             int64Value = INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
-        } else if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-            int64Value = ((type - BC_INT64_BYTE_ZERO) << 8)
-                    + (bytes[offset] & 0xFF);
-            offset += 1;
-        } else if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-            int64Value = ((type - BC_INT64_SHORT_ZERO) << 16)
-                    + ((bytes[offset] & 0xFF) << 8)
-                    + (bytes[offset + 1] & 0xFF);
+        } else if (isInt64Byte(type)) {
+            int64Value = getLongByte(bytes, offset++, type);
+        } else if (isInt64Short(type) && offset + 1 < end) {
+            int64Value = getLong3(bytes, offset, type);
             offset += 2;
-        } else if (type == BC_INT64_INT) {
-            int64Value = IOUtils.getIntBE(bytes, offset);
+        } else if (type == BC_INT64_INT && offset + 3 < end) {
+            int64Value = getIntBE(bytes, offset);
             offset += 4;
-        } else if (type == BC_INT64) {
-            int64Value = IOUtils.getLongBE(bytes, offset);
+        } else if (type == BC_INT64 && offset + 7 < end) {
+            int64Value = getLongBE(bytes, offset);
             offset += 8;
         } else {
             this.offset = offset;
@@ -3430,19 +3418,22 @@ final class JSONReaderJSONB
     }
 
     private long readInt64Value0(byte[] bytes, byte type) {
-        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            return ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-        }
+        {
+            int offset = this.offset;
+            if (isInt32Num(type)) {
+                return type;
+            }
 
-        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
-            return type;
-        }
+            if (isInt32Byte(type)) {
+                long value = getIntByte(bytes, offset, type);
+                this.offset = offset + 1;
+                return value;
+            }
 
-        if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            int int3 = getInt3(bytes, offset, type);
-            offset += 2;
-            return int3;
+            if (isInt32Short(type) && offset + 1 < this.end) {
+                this.offset = offset + 2;
+                return getInt3(bytes, offset, type);
+            }
         }
 
         switch (type) {
@@ -3467,12 +3458,12 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT32: {
-                int int32Value = IOUtils.getIntBE(bytes, offset);
+                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_FLOAT: {
-                int int32Value = IOUtils.getIntBE(bytes, offset);
+                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return (long) floatValue;
@@ -3486,17 +3477,17 @@ final class JSONReaderJSONB
             case BC_DOUBLE_LONG:
                 return (long) ((double) readInt64Value());
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getInt(bytes, offset);
+                long minutes = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return minutes * 60 * 1000;
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getInt(bytes, offset);
+                long seconds = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return seconds * 1000;
             }
             case BC_TIMESTAMP_MILLIS:
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return int64Value;
             case BC_DECIMAL: {
@@ -3559,21 +3550,18 @@ final class JSONReaderJSONB
     @Override
     public int readInt32Value() {
         final byte[] bytes = this.bytes;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         int type = bytes[offset++]; // reuse type as value
-        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+        if (isInt32Num(type)) {
             // noop
-        } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            type = ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset] & 0xFF);
-            offset += 1;
-        } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            type = ((type - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset] & 0xFF) << 8)
-                    + (bytes[offset + 1] & 0xFF);
+        } else if (isInt32Byte(type)) {
+            type = getIntByte(bytes, offset, type);
+            offset++;
+        } else if (isInt32Short(type) && offset + 1 < end) {
+            type = getInt3(bytes, offset, type);
             offset += 2;
-        } else if (type == BC_INT32) {
-            type = IOUtils.getIntBE(bytes, offset);
+        } else if (type == BC_INT32 && offset + 3 < end) {
+            type = getIntBE(bytes, offset);
             offset += 4;
         } else {
             this.offset = offset;
@@ -3584,19 +3572,19 @@ final class JSONReaderJSONB
     }
 
     private int readInt32Value0(byte[] bytes, byte type) {
-        if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+        if (isInt64Num(type)) {
             return INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
         }
 
-        if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-            return ((type - BC_INT64_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
+        if (isInt64Byte(type)) {
+            return getLongByte(bytes, offset++, type);
         }
 
-        if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-            return ((type - BC_INT64_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+        int end = this.end;
+        if (isInt64Short(type) && offset + 1 < end) {
+            int value = getLong3(bytes, offset, type);
+            offset += 2;
+            return value;
         }
 
         switch (type) {
@@ -3625,14 +3613,14 @@ final class JSONReaderJSONB
                 return (int) readInt64Value();
             }
             case BC_INT64: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return (int) int64Value;
             }
             case BC_FLOAT_INT:
                 return (int) (float) readInt32Value();
             case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return (int) floatValue;
@@ -3644,7 +3632,7 @@ final class JSONReaderJSONB
             case BC_TIMESTAMP_MINUTES:
             case BC_TIMESTAMP_SECONDS:
             case BC_INT64_INT:
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             case BC_STR_ASCII: {
@@ -3726,7 +3714,7 @@ final class JSONReaderJSONB
     @Override
     public Integer readInt32() {
         final byte[] bytes = this.bytes;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         byte type = bytes[offset++];
 
         if (type == BC_NULL) {
@@ -3735,19 +3723,15 @@ final class JSONReaderJSONB
         }
 
         int int32Value;
-        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+        if (isInt32Num(type)) {
             int32Value = type;
-        } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            int32Value = ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset] & 0xFF);
-            offset += 1;
-        } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            int32Value = ((type - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset] & 0xFF) << 8)
-                    + (bytes[offset + 1] & 0xFF);
+        } else if (isInt32Byte(type)) {
+            int32Value = getIntByte(bytes, offset++, type);
+        } else if (isInt32Short(type) && offset + 1 < end) {
+            int32Value = getInt3(bytes, offset, type);
             offset += 2;
-        } else if (type == BC_INT32) {
-            int32Value = IOUtils.getIntBE(bytes, offset);
+        } else if (type == BC_INT32 && offset + 3 < end) {
+            int32Value = getIntBE(bytes, offset);
             offset += 4;
         } else {
             this.offset = offset;
@@ -3760,7 +3744,7 @@ final class JSONReaderJSONB
     @Override
     public Long readInt64() {
         final byte[] bytes = this.bytes;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         byte type = bytes[offset++];
 
         if (type == BC_NULL) {
@@ -3769,22 +3753,18 @@ final class JSONReaderJSONB
         }
 
         long int64Value;
-        if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+        if (isInt64Num(type)) {
             int64Value = INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
-        } else if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-            int64Value = ((type - BC_INT64_BYTE_ZERO) << 8)
-                    + (bytes[offset] & 0xFF);
-            offset += 1;
-        } else if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-            int64Value = ((type - BC_INT64_SHORT_ZERO) << 16)
-                    + ((bytes[offset] & 0xFF) << 8)
-                    + (bytes[offset + 1] & 0xFF);
+        } else if (isInt64Byte(type)) {
+            int64Value = getLongByte(bytes, offset++, type);
+        } else if (isInt64Short(type) && offset + 1 < end) {
+            int64Value = getLong3(bytes, offset, type);
             offset += 2;
-        } else if (type == BC_INT64_INT) {
-            int64Value = IOUtils.getIntBE(bytes, offset);
+        } else if (type == BC_INT64_INT && offset + 3 < end) {
+            int64Value = getIntBE(bytes, offset);
             offset += 4;
-        } else if (type == BC_INT64) {
-            int64Value = IOUtils.getLongBE(bytes, offset);
+        } else if (type == BC_INT64 && offset + 7 < end) {
+            int64Value = getLongBE(bytes, offset);
             offset += 8;
         } else {
             this.offset = offset;
@@ -3837,7 +3817,7 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset;
         if (bytes[offset] == BC_FLOAT) {
-            int int32Val = IOUtils.getIntBE(bytes, offset + 1);
+            int int32Val = getIntBE(bytes, check3(offset + 1, end));
             this.offset = offset + 5;
             return Float.intBitsToFloat(int32Val);
         }
@@ -3846,6 +3826,7 @@ final class JSONReaderJSONB
     }
 
     private float readFloat0() {
+        int end = this.end;
         final byte[] bytes = this.bytes;
         byte type = bytes[offset++];
         switch (type) {
@@ -3864,18 +3845,18 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT64: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return (float) int64Value;
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_DOUBLE: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return (float) Double.longBitsToDouble(int64Value);
             }
@@ -3935,34 +3916,32 @@ final class JSONReaderJSONB
             case BC_DOUBLE_NUM_1:
                 return 1;
             default:
-                if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                if (isInt32Num(type)) {
                     return type;
                 }
 
-                if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-                    return ((type - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt32Byte(type)) {
+                    return getIntByte(bytes, offset++, type);
                 }
 
-                if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                if (isInt32Short(type) && offset + 1 < end) {
                     int int3 = getInt3(bytes, offset, type);
                     this.offset = offset + 2;
                     return int3;
                 }
 
-                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+                if (isInt64Num(type)) {
                     return (float) (INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN));
                 }
 
-                if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-                    return ((type - BC_INT64_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt64Byte(type)) {
+                    return getLongByte(bytes, offset++, type);
                 }
 
-                if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-                    return ((type - BC_INT64_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt64Short(type) && offset + 1 < end) {
+                    int value = getLong3(bytes, offset, type);
+                    offset += 2;
+                    return value;
                 }
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
@@ -4003,6 +3982,7 @@ final class JSONReaderJSONB
     private double readDoubleValue0() {
         final byte[] bytes = this.bytes;
         byte type = bytes[offset++];
+        int end = this.end;
         switch (type) {
             case BC_NULL:
                 if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
@@ -4019,18 +3999,18 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT64: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return (double) int64Value;
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = IOUtils.getIntBE(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_FLOAT:
-                int int32Value = IOUtils.getIntBE(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             case BC_FLOAT_INT: {
@@ -4088,34 +4068,32 @@ final class JSONReaderJSONB
             case BC_TRUE:
                 return 1;
             default:
-                if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                if (isInt32Num(type)) {
                     return type;
                 }
 
-                if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-                    return ((type - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt32Byte(type)) {
+                    return getIntByte(bytes, offset++, type);
                 }
 
-                if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                if (isInt32Short(type) && offset + 1 < end) {
                     int int3 = getInt3(bytes, offset, type);
                     this.offset = offset + 2;
                     return int3;
                 }
 
-                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+                if (isInt64Num(type)) {
                     return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
                 }
 
-                if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-                    return ((type - BC_INT64_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt64Byte(type)) {
+                    return getLongByte(bytes, offset++, type);
                 }
 
-                if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-                    return ((type - BC_INT64_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt64Short(type) && offset + 1 < end) {
+                    int value = getLong3(bytes, offset, type);
+                    offset += 2;
+                    return value;
                 }
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
@@ -4141,34 +4119,33 @@ final class JSONReaderJSONB
     @Override
     public Number readNumber() {
         byte type = bytes[offset++];
-        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+        if (isInt32Num(type)) {
             return (int) type;
         }
 
-        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            return ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
+        if (isInt32Byte(type)) {
+            return getIntByte(bytes, offset++, type);
         }
 
-        if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+        int end = this.end;
+        if (isInt32Short(type) && offset + 1 < end) {
             int int3 = getInt3(bytes, offset, type);
             this.offset = offset + 2;
             return int3;
         }
 
-        if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+        if (isInt64Num(type)) {
             return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
         }
 
-        if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-            return ((type - BC_INT64_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
+        if (isInt64Byte(type)) {
+            return (long) getLongByte(bytes, offset++, type);
         }
 
-        if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-            return ((type - BC_INT64_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+        if (isInt64Short(type) && offset + 1 < end) {
+            int value = getLong3(bytes, offset, type);
+            offset += 2;
+            return value;
         }
 
         switch (type) {
@@ -4190,17 +4167,17 @@ final class JSONReaderJSONB
                 return (short) int16Value;
             }
             case BC_INT32: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_INT64_INT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return (long) int32Value;
             }
             case BC_INT64: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = IOUtils.getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return int64Value;
             }
@@ -4217,7 +4194,7 @@ final class JSONReaderJSONB
                 );
             }
             case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             }
@@ -4225,7 +4202,7 @@ final class JSONReaderJSONB
                 return (float) readInt32Value();
             }
             case BC_DOUBLE:
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return Double.longBitsToDouble(int64Value);
             case BC_DOUBLE_LONG:
@@ -4284,11 +4261,11 @@ final class JSONReaderJSONB
                 long unscaledLongValue = readInt64Value();
                 decimal = BigDecimal.valueOf(unscaledLongValue, scale);
             } else if (bytes[offset] == BC_INT32) {
-                decimal = BigDecimal.valueOf(getInt(bytes, offset + 1), scale);
+                decimal = BigDecimal.valueOf(getIntBE(bytes, check3(offset + 1, end)), scale);
                 offset += 5;
             } else if (bytes[offset] == BC_INT64) {
                 decimal = BigDecimal.valueOf(
-                        IOUtils.getLongBE(bytes, offset + 1),
+                        IOUtils.getLongBE(bytes, check7(offset + 1, end)),
                         scale);
                 offset += 9;
             } else {
@@ -4308,6 +4285,7 @@ final class JSONReaderJSONB
     }
 
     private BigDecimal readDecimal0(byte type) {
+        int end = this.end;
         switch (type) {
             case BC_NULL:
                 return null;
@@ -4327,7 +4305,7 @@ final class JSONReaderJSONB
                 return BigDecimal.valueOf(int16Value);
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return BigDecimal.valueOf(int32Value);
             }
@@ -4336,20 +4314,20 @@ final class JSONReaderJSONB
                 return BigDecimal.valueOf((long) floatValue);
             }
             case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return BigDecimal.valueOf((long) floatValue);
             }
             case BC_DOUBLE: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 double doubleValue = Double.longBitsToDouble(int64Value);
                 return BigDecimal.valueOf(
                         (long) doubleValue);
             }
             case BC_INT64: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return BigDecimal.valueOf(int64Value);
             }
@@ -4380,37 +4358,36 @@ final class JSONReaderJSONB
                 return toBigDecimal(str);
             }
             default:
-                if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                if (isInt32Num(type)) {
                     return BigDecimal.valueOf(type);
                 }
 
-                if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-                    int intValue = ((type - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
-                    return BigDecimal.valueOf(intValue);
+                if (isInt32Byte(type)) {
+                    return BigDecimal.valueOf(
+                            getIntByte(bytes, offset++, type)
+                    );
                 }
 
-                if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                if (isInt32Short(type) && offset + 1 < end) {
                     int int3 = getInt3(bytes, offset, type);
                     this.offset = offset + 2;
                     return BigDecimal.valueOf(int3);
                 }
 
-                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+                if (isInt64Num(type)) {
                     int intValue = INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
                     return BigDecimal.valueOf(intValue);
                 }
 
-                if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-                    int intValue = ((type - BC_INT64_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
-                    return BigDecimal.valueOf(intValue);
+                if (isInt64Byte(type)) {
+                    return BigDecimal.valueOf(
+                            getLongByte(bytes, offset++, type)
+                    );
                 }
 
-                if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-                    int intValue = ((type - BC_INT64_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt64Short(type) && offset + 1 < end) {
+                    int intValue = getLong3(bytes, offset, type);
+                    offset += 2;
                     return BigDecimal.valueOf(intValue);
                 }
 
@@ -4447,6 +4424,7 @@ final class JSONReaderJSONB
 
     private BigInteger readBigInteger0(byte type) {
         final byte[] bytes = this.bytes;
+        int end = this.end;
         switch (type) {
             case BC_NULL:
                 return null;
@@ -4466,7 +4444,7 @@ final class JSONReaderJSONB
                 return BigInteger.valueOf(int16Value);
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return BigInteger.valueOf(int32Value);
             }
@@ -4476,21 +4454,21 @@ final class JSONReaderJSONB
                         (long) floatValue);
             }
             case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return BigInteger.valueOf(
                         (long) floatValue);
             }
             case BC_DOUBLE: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 double doubleValue = Double.longBitsToDouble(int64Value);
                 return BigInteger.valueOf(
                         (long) doubleValue);
             }
             case BC_INT64: {
-                long int64Value = IOUtils.getLongBE(bytes, offset);
+                long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return BigInteger.valueOf(int64Value);
             }
@@ -4547,37 +4525,36 @@ final class JSONReaderJSONB
                 }
             }
             default:
-                if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                if (isInt32Num(type)) {
                     return BigInteger.valueOf(type);
                 }
 
-                if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-                    int intValue = ((type - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
-                    return BigInteger.valueOf(intValue);
+                if (isInt32Byte(type)) {
+                    return BigInteger.valueOf(
+                            getIntByte(bytes, offset++, type)
+                    );
                 }
 
-                if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                if (isInt32Short(type) && offset + 1 < end) {
                     int int3 = getInt3(bytes, offset, type);
                     this.offset = offset + 2;
                     return BigInteger.valueOf(int3);
                 }
 
-                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+                if (isInt64Num(type)) {
                     int intValue = INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
                     return BigInteger.valueOf(intValue);
                 }
 
-                if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-                    int intValue = ((type - BC_INT64_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
-                    return BigInteger.valueOf(intValue);
+                if (isInt64Byte(type)) {
+                    return BigInteger.valueOf(
+                            getLongByte(bytes, offset++, type)
+                    );
                 }
 
-                if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-                    int intValue = ((type - BC_INT64_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                if (isInt64Short(type) && offset + 1 < end) {
+                    int intValue = getLong3(bytes, offset, type);
+                    offset += 2;
                     return BigInteger.valueOf(intValue);
                 }
 
@@ -4594,17 +4571,19 @@ final class JSONReaderJSONB
 
     @Override
     public LocalDate readLocalDate() {
-        int type = bytes[offset];
-        if (type == BC_LOCAL_DATE) {
-            offset++;
-            int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
-            int month = bytes[offset++];
-            int dayOfMonth = bytes[offset++];
+        int offset = this.offset;
+        byte[] bytes = this.bytes;
+        int type = bytes[offset++];
+        if (type == BC_LOCAL_DATE && offset + 3 < this.end) {
+            int year = getShortBE(bytes, offset);
+            int month = getByte(bytes, offset + 2);
+            int dayOfMonth = getByte(bytes, offset + 3);
+            this.offset = offset + 4;
             return LocalDate.of(year, month, dayOfMonth);
         }
 
         if (type == BC_NULL) {
-            offset++;
+            this.offset = offset;
             return null;
         }
 
@@ -4908,18 +4887,18 @@ final class JSONReaderJSONB
                 );
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getInt(bytes, offset);
+                long minutes = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Instant.ofEpochSecond(minutes * 60, 0);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getInt(bytes, offset);
+                long seconds = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Instant.ofEpochSecond(seconds, 0);
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
-                long millis = IOUtils.getLongBE(bytes, offset);
+                long millis = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 return Instant.ofEpochMilli(millis);
             }
@@ -4988,13 +4967,13 @@ final class JSONReaderJSONB
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getInt(bytes, offset);
+                long minutes = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(minutes * 60);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getInt(bytes, offset);
+                long seconds = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(seconds);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
@@ -5019,7 +4998,7 @@ final class JSONReaderJSONB
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
-                long millis = IOUtils.getLongBE(bytes, offset);
+                long millis = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 Instant instant = Instant.ofEpochMilli(millis);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
@@ -5041,10 +5020,11 @@ final class JSONReaderJSONB
         UUID uuid;
         switch (type) {
             case BC_NULL:
-                return null;
+                uuid = null;
+                break;
             case BC_BINARY:
                 int len = bytes[offset++];
-                if (len != 16) {
+                if (len != 16 && offset + 15 >= end) {
                     throw new JSONException("uuid not support " + len);
                 }
                 uuid = new UUID(
@@ -5086,7 +5066,6 @@ final class JSONReaderJSONB
                     }
                 }
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
-                offset += strlen;
                 throw new JSONException("Invalid UUID string:  " + str);
             }
             default:
@@ -5315,12 +5294,12 @@ final class JSONReaderJSONB
                 return new Date(millis);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getInt(bytes, offset + 1);
+                long minutes = getIntBE(bytes, check3(offset + 1, end));
                 this.offset += 5;
                 return new Date(minutes * 60L * 1000L);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getInt(bytes, offset + 1);
+                long seconds = getIntBE(bytes, check3(offset + 1, end));
                 this.offset += 5;
                 return new Date(seconds * 1000);
             }
@@ -6285,7 +6264,21 @@ final class JSONReaderJSONB
         return true;
     }
 
-    static int getInt(byte[] bytes, int offset) {
-        return IOUtils.getIntBE(bytes, offset);
+    static int check3(int off, int end) {
+        if (off + 3 >= end) {
+            throw outOfBoundsCheckFromToIndex(off, end);
+        }
+        return off;
+    }
+
+    static int check7(int off, int end) {
+        if (off + 7 >= end) {
+            throw outOfBoundsCheckFromToIndex(off, end);
+        }
+        return off;
+    }
+
+    static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
+        return new JSONException("offset overflow, offset " + offset + ", end " + end);
     }
 }
