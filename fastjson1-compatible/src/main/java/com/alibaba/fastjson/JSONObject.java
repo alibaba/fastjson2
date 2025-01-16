@@ -78,9 +78,9 @@ public class JSONObject
 
     public JSONObject(int initialCapacity, boolean ordered) {
         if (ordered) {
-            map = new LinkedHashMap<String, Object>(initialCapacity);
+            map = new LinkedHashMap<>(initialCapacity);
         } else {
-            map = new HashMap<String, Object>(initialCapacity);
+            map = new HashMap<>(initialCapacity);
         }
     }
 

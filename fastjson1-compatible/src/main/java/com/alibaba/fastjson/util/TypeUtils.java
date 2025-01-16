@@ -35,8 +35,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author wenshao[szujobs@hotmail.com]
@@ -59,14 +57,10 @@ public class TypeUtils {
     private static volatile boolean kotlin_error;
     private static volatile Map<Class, String[]> kotlinIgnores;
     private static volatile boolean kotlinIgnores_error;
-    private static ConcurrentMap<String, Class<?>> mappings = new ConcurrentHashMap<String, Class<?>>(256, 0.75f, 1);
-    private static Class<?> pathClass;
-    private static boolean PATH_CLASS_ERROR;
 
     private static boolean transientClassInited;
     private static Class<? extends Annotation> transientClass;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> T cast(Object obj, Class<T> clazz, ParserConfig config) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(obj, clazz, config.getProvider());
     }
@@ -715,7 +709,7 @@ public class TypeUtils {
 
     public static List<FieldInfo> computeGetters(Class<?> clazz, Map<String, String> aliasMap, boolean sorted) {
         JSONType jsonType = TypeUtils.getAnnotation(clazz, JSONType.class);
-        Map<String, Field> fieldCacheMap = new HashMap<String, Field>();
+        Map<String, Field> fieldCacheMap = new HashMap<>();
         ParserConfig.parserAllFieldToCache(clazz, fieldCacheMap);
         return computeGetters(clazz, jsonType, aliasMap, fieldCacheMap, sorted, PropertyNamingStrategy.CamelCase);
     }
@@ -727,7 +721,7 @@ public class TypeUtils {
                                                  boolean sorted, //
                                                  PropertyNamingStrategy propertyNamingStrategy //
     ) {
-        Map<String, FieldInfo> fieldInfoMap = new LinkedHashMap<String, FieldInfo>();
+        Map<String, FieldInfo> fieldInfoMap = new LinkedHashMap<>();
         boolean kotlin = TypeUtils.isKotlin(clazz);
         // for kotlin
         Constructor[] constructors = null;
@@ -1114,14 +1108,14 @@ public class TypeUtils {
     }
 
     private static List<FieldInfo> getFieldInfos(Class<?> clazz, boolean sorted, Map<String, FieldInfo> fieldInfoMap) {
-        List<FieldInfo> fieldInfoList = new ArrayList<FieldInfo>();
+        List<FieldInfo> fieldInfoList = new ArrayList<>();
         String[] orders = null;
         JSONType annotation = TypeUtils.getAnnotation(clazz, JSONType.class);
         if (annotation != null) {
             orders = annotation.orders();
         }
         if (orders != null && orders.length > 0) {
-            LinkedHashMap<String, FieldInfo> map = new LinkedHashMap<String, FieldInfo>(fieldInfoMap.size());
+            LinkedHashMap<String, FieldInfo> map = new LinkedHashMap<>(fieldInfoMap.size());
             for (FieldInfo field : fieldInfoMap.values()) {
                 map.put(field.name, field);
             }
@@ -1268,7 +1262,7 @@ public class TypeUtils {
     static boolean isKotlinIgnore(Class clazz, String methodName) {
         if (kotlinIgnores == null && !kotlinIgnores_error) {
             try {
-                Map<Class, String[]> map = new HashMap<Class, String[]>();
+                Map<Class, String[]> map = new HashMap<>();
                 Class charRangeClass = Class.forName("kotlin.ranges.CharRange");
                 map.put(charRangeClass, new String[]{"getEndInclusive", "isEmpty"});
                 Class intRangeClass = Class.forName("kotlin.ranges.IntRange");
@@ -1431,7 +1425,7 @@ public class TypeUtils {
             Constructor mixInConstructor = null;
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             // 构建参数列表，因为内部类的构造函数需要传入外部类的引用
-            List<Class<?>> enclosingClasses = new ArrayList<Class<?>>(2);
+            List<Class<?>> enclosingClasses = new ArrayList<>(2);
             for (Class<?> enclosingClass = mixInClass.getEnclosingClass(); enclosingClass != null; enclosingClass = enclosingClass.getEnclosingClass()) {
                 enclosingClasses.add(enclosingClass);
             }
