@@ -40,9 +40,24 @@ public class ClientsWriteUTF8BytesTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-fastjson2 millis : " + millis);
             // zulu8.70.0.23 : 1533 1493 1374 1353
-            // zulu17.40.19 : 1419 1361 1356 1356 1317 1224 1212 1202 1182
+            // zulu17.40.19 : 1419 1361 1356 1356 1317 1224 1212 1202 1182 979
             // zulu17.40.19_vec : 1116
             // zulu17.40.19_reflect : 1427
+        }
+    }
+
+    public static void wast() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.wast(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-wast millis : " + millis);
+            // zulu8.70.0.23 :
+            // zulu17.40.19 : 1364
+            // zulu17.40.19_vec :
+            // zulu17.40.19_reflect :
         }
     }
 
@@ -55,7 +70,7 @@ public class ClientsWriteUTF8BytesTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-fastjson2 millis : " + millis);
             // zulu17.40.19 :
-            // zulu17.40.19_vec : 1139 1313 1307
+            // zulu17.40.19_vec : 1139 1313 1307 1206
         }
     }
 
@@ -84,6 +99,7 @@ public class ClientsWriteUTF8BytesTest {
 
     public static void main(String[] args) throws Exception {
         fastjson2();
+//        wast();
 //        jsonb();
 //        jsonb_beanToArray();
 //        fastjson2_str();

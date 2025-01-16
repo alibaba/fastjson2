@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.54-SNAPSHOT</version>
+    <version>2.0.55-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -53,7 +53,7 @@
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
         <kotlin.compiler.apiVersion>1.9</kotlin.compiler.apiVersion>
 
-        <junit5.version>5.11.0</junit5.version>
+        <junit5.version>5.11.4</junit5.version>
         <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.37</jmh.version>
 
@@ -294,7 +294,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
-                <version>3.6.9</version>
+                <version>3.7.1</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -374,7 +374,7 @@
             <dependency>
                 <groupId>org.gitlab4j</groupId>
                 <artifactId>gitlab4j-api</artifactId>
-                <version>5.6.0</version>
+                <version>5.8.0</version>
             </dependency>
 
             <dependency>
@@ -663,7 +663,8 @@
                                 com/alibaba/fastjson2/issues_1000/Issue1395.java,
                                 com/alibaba/fastjson2/issues_2100/Issue2164.java,
                                 com/alibaba/fastjson2/issues_2100/Issue2181.java,
-                                com/alibaba/fastjson/v2issues/Issue1432.java
+                                com/alibaba/fastjson/v2issues/Issue1432.java,
+                                com/alibaba/fastjson2/issues_3200/Issue3220.java
                             </excludes>
                         </configuration>
                     </execution>
@@ -760,11 +761,11 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>3.11.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.5.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -772,7 +773,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.20.0</version>
+                    <version>3.21.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-gpg-plugin</artifactId>

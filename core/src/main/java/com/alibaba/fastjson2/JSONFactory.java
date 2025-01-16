@@ -93,7 +93,6 @@ public final class JSONFactory {
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
-    static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF8;
     static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF16;
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_ASCII;
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
@@ -231,20 +230,12 @@ public final class JSONFactory {
 
         boolean readerVector = getPropertyBool(properties, "fastjson2.readerVector", false);
 
-        Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF8 = null;
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF16 = null;
         JSONReaderUTF8Creator readerCreatorASCII = null;
         JSONReaderUTF8Creator readerCreatorUTF8 = null;
         JSONReaderUTF16Creator readerCreatorUTF16 = null;
         if (JDKUtils.VECTOR_SUPPORT) {
             if (VECTOR_BIT_LENGTH >= 64) {
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
-                    incubatorVectorCreatorUTF8 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-                } catch (Throwable e) {
-                    initErrorLast = e;
-                }
-
                 try {
                     Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF16Vector$Factory");
                     incubatorVectorCreatorUTF16 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
@@ -278,7 +269,6 @@ public final class JSONFactory {
                 }
             }
         }
-        INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 = incubatorVectorCreatorUTF8;
         INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 = incubatorVectorCreatorUTF16;
         INCUBATOR_VECTOR_READER_CREATOR_ASCII = readerCreatorASCII;
         INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;
@@ -338,6 +328,10 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
+    public static void setUseGsonAnnotation(boolean useGsonAnnotation) {
+        JSONFactory.useGsonAnnotation = useGsonAnnotation;
+    }
+
     static final CacheItem[] CACHE_ITEMS;
 
     static {
@@ -348,7 +342,7 @@ public final class JSONFactory {
         CACHE_ITEMS = items;
     }
 
-    static final int CACHE_THRESHOLD = 1024 * 1024 * 4;
+    static final int CACHE_THRESHOLD = 1024 * 1024 * 8;
     static final AtomicReferenceFieldUpdater<CacheItem, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, char[].class, "chars");
     static final AtomicReferenceFieldUpdater<CacheItem, byte[]> BYTES_UPDATER
@@ -396,19 +390,34 @@ public final class JSONFactory {
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
-    static final byte[] UUID_VALUES;
+    static final byte[] NIBBLES;
 
     static {
-        UUID_VALUES = new byte['f' + 1 - '0'];
-        for (char c = '0'; c <= '9'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - '0');
-        }
-        for (char c = 'a'; c <= 'f'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - 'a' + 10);
-        }
-        for (char c = 'A'; c <= 'F'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - 'A' + 10);
-        }
+        byte[] ns = new byte[256];
+        Arrays.fill(ns, (byte) -1);
+        ns['0'] = 0;
+        ns['1'] = 1;
+        ns['2'] = 2;
+        ns['3'] = 3;
+        ns['4'] = 4;
+        ns['5'] = 5;
+        ns['6'] = 6;
+        ns['7'] = 7;
+        ns['8'] = 8;
+        ns['9'] = 9;
+        ns['A'] = 10;
+        ns['B'] = 11;
+        ns['C'] = 12;
+        ns['D'] = 13;
+        ns['E'] = 14;
+        ns['F'] = 15;
+        ns['a'] = 10;
+        ns['b'] = 11;
+        ns['c'] = 12;
+        ns['d'] = 13;
+        ns['e'] = 14;
+        ns['f'] = 15;
+        NIBBLES = ns;
     }
 
     /**

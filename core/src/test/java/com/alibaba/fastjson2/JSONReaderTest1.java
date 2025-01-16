@@ -943,20 +943,20 @@ public class JSONReaderTest1 {
     @Test
     public void test_readPattern() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/")) {
-            jsonReader.next();
+            jsonReader.nextWithoutComment();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/ , ")) {
-            jsonReader.next();
+            jsonReader.nextWithoutComment();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/ , 1")) {
-            jsonReader.next();
+            jsonReader.nextWithoutComment();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);

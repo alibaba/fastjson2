@@ -37,7 +37,7 @@ public interface JSON {
     /**
      * fastjson2 version name
      */
-    String VERSION = "2.0.54";
+    String VERSION = "2.0.55";
 
     /**
      * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
@@ -2629,6 +2629,37 @@ public interface JSON {
     }
 
     /**
+     * Parses the json reader as a {@link JSONArray}. Returns {@code null}
+     * if received {@link Reader} is {@code null} or its content is null.
+     *
+     * @param input the specified reader to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     */
+    static JSONArray parseArray(Reader input, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
+        final JSONReader.Context context = JSONFactory.createReadContext(features);
+        try (JSONReader reader = JSONReader.of(input, context)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            JSONArray array = new JSONArray();
+            reader.read(array);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return array;
+        }
+    }
+
+    /**
      * Parses the json stream as a {@link JSONArray}. Returns {@code null}
      * if received {@link InputStream} is {@code null} or its content is null.
      *
@@ -2897,6 +2928,35 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return array;
+        }
+    }
+
+    /**
+     * Parses the json reader as a list of {@link T}. Returns
+     * {@code null} if received {@link Reader} is {@code null} or empty.
+     *
+     * @param input the specified reader to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> List<T> parseArray(Reader input, Type type, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
+        final JSONReader.Context context = JSONFactory.createReadContext(features);
+        try (JSONReader reader = JSONReader.of(input, context)) {
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
         }
     }
 
@@ -3859,7 +3919,9 @@ public interface JSON {
                 JSONFactory.createWriteContext() : JSONFactory.createWriteContext(features);
         Class<?> valueClass = object.getClass();
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
-        if (objectWriter instanceof ObjectWriterAdapter && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)) {
+        if (objectWriter instanceof ObjectWriterAdapter
+                && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)
+                && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
             ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
             return objectWriterAdapter.toJSONObject(object, writeContext.features);
         }

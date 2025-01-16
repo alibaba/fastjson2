@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.internal.processor.primitives;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -9,6 +10,11 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UtilTypeTest {
+    @BeforeAll
+    static void setUp() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
+
     @Test
     public void test() {
         Bean bean = new Bean();

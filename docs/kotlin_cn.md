@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.53</version>
+    <version>2.0.54</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.53")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.54")
 }
 ```
 
@@ -127,14 +127,14 @@ val data = text.into<Map<String, User>>() // Map<String, User>
 
 ```kotlin
 val data = "..." // Any
-val text = text.toJSONString() // String
+val text = data.toJSONString() // String
 ```
 
 序列化为字节数组:
 
 ```kotlin
 val data = "..." // Any
-val bytes = text.toJSONByteArray() // ByteArray
+val bytes = data.toJSONByteArray() // ByteArray
 ```
 
 ### 2.5 使用`JSONObject`、`JSONArray`

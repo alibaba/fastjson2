@@ -483,6 +483,14 @@ public abstract class FieldWriter<T>
             return 1;
         }
 
+        if (this.method != null && other.method == null) {
+            return -1;
+        }
+
+        if (this.method == null && other.method != null) {
+            return 1;
+        }
+
         return nameCompare;
     }
 
@@ -707,7 +715,7 @@ public abstract class FieldWriter<T>
             return;
         }
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         JSONWriter.Context ctx = jsonWriter.context;
         if (isDateFormatMillis() || ctx.isDateFormatMillis()) {

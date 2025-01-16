@@ -10,7 +10,7 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.53</version>
+    <version>2.0.54</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ If the data class is used or the parameters are passed in through constructor, t
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.53")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.54")
 }
 ```
 
@@ -127,14 +127,14 @@ Serialization as a string:
 
 ```kotlin
 val data = "..." // Any
-val text = text.toJSONString() // String
+val text = data.toJSONString() // String
 ```
 
 Serialization as a ByteArray:
 
 ```kotlin
 val data = "..." // Any
-val bytes = text.toJSONByteArray() // ByteArray
+val bytes = data.toJSONByteArray() // ByteArray
 ```
 
 ### 2.5 Use `JSONObject`、`JSONArray`

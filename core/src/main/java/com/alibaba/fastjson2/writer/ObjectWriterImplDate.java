@@ -111,7 +111,7 @@ final class ObjectWriterImplDate
         }
 
         if (dateFormat == null) {
-            final int SECONDS_PER_DAY = 60 * 60 * 24;
+            final long SECONDS_PER_DAY = 60 * 60 * 24;
 
             long epochSecond = Math.floorDiv(millis, 1000L);
             int offsetTotalSeconds;

@@ -213,6 +213,8 @@ public class DoubleTest {
 
     @Test
     public void test_str_array2() {
+//        assertEquals(0.0, JSON.parseObject("0.0", Double.class));
+        assertEquals(-2.147483648E9, JSON.parseObject("-2.147483648E9", Double.class));
         double[] primitiveValues = new double[values.length];
         for (int i = 0; i < values.length; i++) {
             if (values[i] == null) {

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
@@ -2037,13 +2038,30 @@ public class DateUtilsTest {
 
     @Test
     public void parseLocalDateTime16_2() {
+        LocalDateTime expected = LocalDateTime.of(2021, 7, 8, 4, 5, 6);
         assertEquals(
-                LocalDateTime.of(2021, 7, 8, 4, 5, 6),
+                expected,
                 DateUtils.parseLocalDateTime("2021-07-08T4:5:6", 0, 16)
         );
         assertEquals(
-                LocalDateTime.of(2021, 7, 8, 4, 5, 6),
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08T4:5:6".getBytes(StandardCharsets.UTF_8), 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08T4:5:6".toCharArray(), 0, 16)
+        );
+        assertEquals(
+                expected,
                 DateUtils.parseLocalDateTime("2021-07-08 4:5:6", 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08 4:5:6".toCharArray(), 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08 4:5:6".getBytes(StandardCharsets.UTF_8), 0, 16)
         );
     }
 
@@ -2625,27 +2643,27 @@ public class DateUtilsTest {
 
     @Test
     public void month() {
-        assertEquals(0, DateUtils.month('J', 'u', 'a'));
-        assertEquals(0, DateUtils.month('J', 'a', 'a'));
-        assertEquals(0, DateUtils.month('F', 'a', 'a'));
-        assertEquals(0, DateUtils.month('F', 'e', 'a'));
-        assertEquals(0, DateUtils.month('A', 'e', 'a'));
-        assertEquals(0, DateUtils.month('A', 'p', 'a'));
-        assertEquals(0, DateUtils.month('M', 'p', 'a'));
-        assertEquals(0, DateUtils.month('M', 'a', 'a'));
-        assertEquals(0, DateUtils.month('J', 'a', 'a'));
-        assertEquals(0, DateUtils.month('J', 'u', 'a'));
-        assertEquals(0, DateUtils.month('A', 'a', 'a'));
-        assertEquals(0, DateUtils.month('A', 'u', 'a'));
-        assertEquals(0, DateUtils.month('S', 'u', 'a'));
-        assertEquals(0, DateUtils.month('S', 'e', 'a'));
-        assertEquals(0, DateUtils.month('O', 'e', 'a'));
-        assertEquals(0, DateUtils.month('O', 'c', 'a'));
-        assertEquals(0, DateUtils.month('N', 'c', 'a'));
-        assertEquals(0, DateUtils.month('N', 'o', 'a'));
-        assertEquals(0, DateUtils.month('D', 'o', 'a'));
-        assertEquals(0, DateUtils.month('D', 'e', 'a'));
-        assertEquals(0, DateUtils.month('K', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('F', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('F', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'p', 'a'));
+        assertEquals(-1, DateUtils.month('M', 'p', 'a'));
+        assertEquals(-1, DateUtils.month('M', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('S', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('S', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('O', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('O', 'c', 'a'));
+        assertEquals(-1, DateUtils.month('N', 'c', 'a'));
+        assertEquals(-1, DateUtils.month('N', 'o', 'a'));
+        assertEquals(-1, DateUtils.month('D', 'o', 'a'));
+        assertEquals(-1, DateUtils.month('D', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('K', 'e', 'a'));
 
         String[] strings = new String[]{
                 "Jan",

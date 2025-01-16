@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -28,7 +29,8 @@ import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
 public abstract class JSONWriter
         implements Closeable {
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
-    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_2_SPACE = 2, PRETTY_4_SPACE = 4;
+    static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask | NotWriteEmptyArray.mask | NotWriteDefaultValue.mask;
 
     public final Context context;
     public final boolean utf8;
@@ -48,8 +50,7 @@ public abstract class JSONWriter
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
-    protected boolean pretty;
-    protected int indent;
+    protected byte pretty;
     protected Object attachment;
 
     protected JSONWriter(
@@ -70,7 +71,15 @@ public abstract class JSONWriter
 
         // 64M or 1G
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
-        pretty = (context.features & PrettyFormat.mask) != 0;
+        if ((context.features & PrettyFormatWith4Space.mask) != 0) {
+            pretty = PRETTY_4_SPACE;
+        } else if ((context.features & PrettyFormatWith2Space.mask) != 0) {
+            pretty = PRETTY_2_SPACE;
+        } else if ((context.features & PrettyFormat.mask) != 0) {
+            pretty = PRETTY_TAB;
+        } else {
+            pretty = PRETTY_NON;
+        }
     }
 
     public final Charset getCharset() {
@@ -245,7 +254,8 @@ public abstract class JSONWriter
     }
 
     public final boolean isRefDetect() {
-        return (context.features & ReferenceDetection.mask) != 0;
+        return (context.features & ReferenceDetection.mask) != 0
+                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0;
     }
 
     public final boolean isUseSingleQuotes() {
@@ -254,6 +264,7 @@ public abstract class JSONWriter
 
     public final boolean isRefDetect(Object object) {
         return (context.features & ReferenceDetection.mask) != 0
+                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
@@ -535,15 +546,7 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
             }
         } else if ((defaultWriterFeatures & OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
+            jsonWriter = ofUTF8(writeContext);
         } else {
             if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
                 jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
@@ -576,11 +579,7 @@ public abstract class JSONWriter
             }
         } else if ((context.features & OptimizedForAscii.mask) != 0) {
             if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(context);
-                }
+                jsonWriter = new JSONWriterUTF8JDK9(context);
             } else {
                 jsonWriter = new JSONWriterUTF8(context);
             }
@@ -605,15 +604,7 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
             }
         } else if ((writeContext.features & OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
+            jsonWriter = ofUTF8(writeContext);
         } else {
             if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
                 jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
@@ -679,59 +670,29 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofPretty(JSONWriter writer) {
-        if (!writer.pretty) {
-            writer.pretty = true;
+        if (writer.pretty == PRETTY_NON) {
+            writer.pretty = PRETTY_TAB;
             writer.context.features |= PrettyFormat.mask;
         }
         return writer;
     }
 
     public static JSONWriter ofUTF8() {
-        Context context = createWriteContext();
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return ofUTF8(
+                createWriteContext()
+        );
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return STRING_VALUE != null
+                ? new JSONWriterUTF8JDK9(context)
+                : new JSONWriterUTF8(context);
     }
 
     public static JSONWriter ofUTF8(Feature... features) {
-        Context context = createWriteContext(features);
-
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return ofUTF8(
+                createWriteContext(features)
+        );
     }
 
     public void writeBinary(byte[] bytes) {
@@ -1604,16 +1565,20 @@ public abstract class JSONWriter
 
     public abstract void write(List array);
 
-    public void write(Map map) {
+    public final void write(JSONObject map) {
+        write((Map) map);
+    }
+
+    public void write(Map<?, ?> map) {
         if (map == null) {
             this.writeNull();
             return;
         }
 
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
+        if (map.isEmpty()) {
+            writeRaw('{', '}');
+            return;
+        }
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
             ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
@@ -1621,25 +1586,76 @@ public abstract class JSONWriter
             return;
         }
 
-        write0('{');
+        startObject();
+
         boolean first = true;
-        for (Map.Entry o : (Iterable<Map.Entry>) map.entrySet()) {
-            if (!first) {
-                write0(',');
+        for (Map.Entry entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value == null && (context.features & WriteMapNullValue.mask) == 0) {
+                continue;
             }
 
-            writeAny(
-                    o.getKey());
-            write0(':');
-            writeAny(
-                    o.getValue());
+            if (!first) {
+                writeComma();
+            }
 
             first = false;
-        }
-        write0('}');
-    }
+            Object key = entry.getKey();
+            if (key instanceof String) {
+                writeString((String) key);
+            } else {
+                writeAny(key);
+            }
 
-    public abstract void write(JSONObject map);
+            writeColon();
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value, 0, null);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+
+        endObject();
+    }
 
     public void writeAny(Object value) {
         if (value == null) {
@@ -2210,7 +2226,19 @@ public abstract class JSONWriter
          * SortedMap and derived classes do not need to do this.
          * @since 2.0.48
          */
-        SortMapEntriesByKeys(1L << 41);
+        SortMapEntriesByKeys(1L << 41),
+
+        /**
+         * JSON formatting support using 4 spaces for indentation
+         * @since 2.0.54
+         */
+        PrettyFormatWith2Space(1L << 42),
+
+        /**
+         * JSON formatting support using 4 spaces for indentation
+         * @since 2.0.54
+         */
+        PrettyFormatWith4Space(1L << 43);
 
         public final long mask;
 
@@ -2580,23 +2608,23 @@ public abstract class JSONWriter
      * @deprecated
      */
     public final void incrementIndent() {
-        indent++;
+        level++;
     }
 
     /**
      * @deprecated
      */
     public final void decrementIdent() {
-        indent--;
+        level--;
     }
 
     /**
      * @deprecated
      */
     public void println() {
-        writeChar('\n');
-        for (int i = 0; i < indent; ++i) {
-            writeChar('\t');
+        writeRaw('\n');
+        for (int i = 0; i < level; ++i) {
+            writeRaw('\t');
         }
     }
 
@@ -2615,11 +2643,30 @@ public abstract class JSONWriter
         }
     }
 
+    protected final int newCapacity(int minCapacity, int oldCapacity) {
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        if (newCapacity > maxArraySize) {
+            if (minCapacity < maxArraySize) {
+                newCapacity = maxArraySize;
+            } else {
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
+            }
+        }
+        return newCapacity;
+    }
+
     public Object getAttachment() {
         return attachment;
     }
 
     public void setAttachment(Object attachment) {
         this.attachment = attachment;
+    }
+
+    protected final void overflowLevel() {
+        throw new JSONException("level too large : " + level);
     }
 }

@@ -1149,6 +1149,10 @@ public class JSONObject
             return (T) this;
         }
 
+        if (clazz == Void.class || clazz == void.class) {
+            return null;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
         return objectReader.createInstance(this, featuresValue);

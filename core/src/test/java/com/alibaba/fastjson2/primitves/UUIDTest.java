@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
@@ -72,9 +69,48 @@ public class UUIDTest {
     }
 
     @Test
+    public void readUUID() {
+        UUID uuid = UUID.fromString("3eef3eee-eeee-f0ef-ef0e-f12eeeeef53f");
+        String str = uuid.toString();
+        assertEquals(
+                uuid,
+                JSONReader.ofJSONB(
+                        JSONB.toBytes(str)
+                ).readUUID()
+        );
+        assertEquals(
+                uuid,
+                JSONReader.ofJSONB(
+                        JSONB.toBytes(
+                                str.replaceAll("-", "")
+                        )
+                ).readUUID()
+        );
+    }
+
+    @Test
     public void test_utf8_1() {
         String str = "d9ac58be-c854-496b-b550-56f0b773d241";
         UUID uuid = UUID.fromString(str);
+
+        String jsonStr = "\"" + str + "\"";
+        {
+            UUID parsed = JSONB.parseObject(
+                    JSONB.toBytes(str), UUID.class);
+            assertEquals(uuid, parsed);
+        }
+        {
+            UUID parsed = JSON.parseObject(jsonStr, UUID.class);
+            assertEquals(uuid, parsed);
+        }
+        {
+            UUID parsed = JSON.parseObject(jsonStr.toCharArray(), UUID.class);
+            assertEquals(uuid, parsed);
+        }
+        {
+            UUID parsed = JSON.parseObject(jsonStr.getBytes(StandardCharsets.UTF_8), UUID.class);
+            assertEquals(uuid, parsed);
+        }
         byte[] utf8Bytes = JSON.toJSONBytes(uuid);
         assertEquals("\"d9ac58be-c854-496b-b550-56f0b773d241\"", new String(utf8Bytes));
     }

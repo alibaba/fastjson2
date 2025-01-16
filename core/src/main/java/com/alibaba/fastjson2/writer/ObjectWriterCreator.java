@@ -175,6 +175,9 @@ public class ObjectWriterCreator {
                 }
             }
         }
+        if (fieldInfo.ordinal == 0 && fieldName.equals(beanInfo.typeKey)) {
+            fieldInfo.ordinal = -1;
+        }
 
         if (beanInfo.includes != null && beanInfo.includes.length > 0) {
             boolean match = false;
@@ -478,6 +481,20 @@ public class ObjectWriterCreator {
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
                         fieldWriterMap.put(fieldName, fieldWriter);
+                    }
+
+                    // the sameFieldName means only differ in first character that one is upper case the other is lower case
+                    if (origin == null) {
+                        String sameFieldName = null;
+                        char firstChar = fieldName.charAt(0);
+                        if (firstChar >= 'A' && firstChar <= 'Z') {
+                            sameFieldName = (char) (firstChar + 32) + fieldName.substring(1);
+                        } else if (firstChar >= 'a' && firstChar <= 'z') {
+                            sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
+                        }
+                        if (sameFieldName != null && fieldWriterMap.containsKey(sameFieldName)) {
+                            fieldWriterMap.remove(sameFieldName);
+                        }
                     }
                 });
 
@@ -1309,6 +1326,13 @@ public class ObjectWriterCreator {
             if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
                 ObjectWriter objectWriter = provider.cache.get(fieldClass);
                 if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                    return objectWriter;
+                }
+            }
+        } else if (fieldClass == int.class || fieldClass == Integer.class) {
+            if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT32_MASK) != 0) {
+                ObjectWriter objectWriter = provider.cache.get(Integer.class);
+                if (objectWriter != ObjectWriterImplInt32.INSTANCE) {
                     return objectWriter;
                 }
             }
