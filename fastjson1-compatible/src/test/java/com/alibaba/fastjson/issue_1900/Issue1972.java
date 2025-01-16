@@ -19,7 +19,7 @@ public class Issue1972 {
         b.put("c", "2018-04");
         b.put("d", new JSONArray());
 
-        Integer obj = Integer.valueOf(123);
+        Integer obj = 123;
 
         jsonObject.put("a", a);
         JSONPath.arrayAdd(jsonObject, "$.a.b[?(@.c = '2018-04')].d", obj);

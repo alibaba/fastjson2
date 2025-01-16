@@ -11,7 +11,7 @@ public class ArrayListFloatFieldTest {
     @Test
     public void test_codec() throws Exception {
         User user = new User();
-        user.setValue(new ArrayList<Float>());
+        user.setValue(new ArrayList<>());
         user.getValue().add(1F);
 
         String text = JSON.toJSONString(user);

@@ -85,7 +85,7 @@ public class ValueFilterTest {
         serializer.getValueFilters().add(filter);
         serializer.config(SerializerFeature.WriteMapNullValue, true);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("name", null);
         serializer.write(map);
 
@@ -106,7 +106,7 @@ public class ValueFilterTest {
         JSONSerializer serializer = new JSONSerializer(out);
         serializer.getValueFilters().add(filter);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("name", "AA");
         serializer.write(map);
 

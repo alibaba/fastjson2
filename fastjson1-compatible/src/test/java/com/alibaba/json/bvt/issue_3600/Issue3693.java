@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class Issue3693 {
     @Test
     public void test_for_issue() throws Exception {
-        Model<ModelProperties> model = new Model<ModelProperties>("hello 世界", new ModelProperties("红色", 66));
+        Model<ModelProperties> model = new Model<>("hello 世界", new ModelProperties("红色", 66));
         String json = JSON.toJSONString(model);
         assertEquals("{\"name\":\"hello 世界\",\"properties\":\"{\\\"color\\\":\\\"红色\\\",\\\"size\\\":66}\"}", json);
 

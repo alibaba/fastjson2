@@ -11,7 +11,7 @@ public class Tigers {
     }
 
     public Tigers(Tiger tiger) {
-        this.map = new HashMap<String, Tiger>();
+        this.map = new HashMap<>();
         this.map.put("1st", tiger);
         this.tiger = tiger;
     }

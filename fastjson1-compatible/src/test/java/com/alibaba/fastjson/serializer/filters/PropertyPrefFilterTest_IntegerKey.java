@@ -12,11 +12,7 @@ import java.util.Map;
 public class PropertyPrefFilterTest_IntegerKey
         extends TestCase {
     public void test_namefilter() throws Exception {
-        PropertyPreFilter filter = new PropertyPreFilter() {
-            public boolean apply(JSONSerializer serializer, Object object, String name) {
-                return name.equals("1001");
-            }
-        };
+        PropertyPreFilter filter = (serializer, object, name) -> name.equals("1001");
 
         Map map = new HashMap();
         map.put(1001, 0);

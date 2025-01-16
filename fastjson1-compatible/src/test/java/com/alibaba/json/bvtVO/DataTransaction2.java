@@ -144,7 +144,7 @@ public class DataTransaction2
         class Param {
             private Limit limit = new Limit();
 
-            private Map<String, String> form = new HashMap<String, String>();
+            private Map<String, String> form = new HashMap<>();
 
             class Limit {
                 private String start;

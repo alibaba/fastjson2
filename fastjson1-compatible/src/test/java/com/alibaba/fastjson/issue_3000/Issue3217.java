@@ -12,7 +12,7 @@ public class Issue3217 {
     public void test_for_issue() throws Exception {
         RefAfterFilterTest refAfterFilterTest = new RefAfterFilterTest();
 
-        List<Item> items = new ArrayList<Item>(2);
+        List<Item> items = new ArrayList<>(2);
         Category category = new Category("category");
         items.add(new Item("item1", category));
         items.add(new Item("item2", category));

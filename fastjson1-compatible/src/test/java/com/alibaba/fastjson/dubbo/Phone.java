@@ -15,6 +15,8 @@
  */
 package com.alibaba.fastjson.dubbo;
 
+import java.util.Objects;
+
 /**
  * 电话号码
  *
@@ -73,56 +75,19 @@ public class Phone {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((area == null) ? 0 : area.hashCode());
-        result = prime * result + ((country == null) ? 0 : country.hashCode());
-        result = prime * result + ((extensionNumber == null) ? 0 : extensionNumber.hashCode());
-        result = prime * result + ((number == null) ? 0 : number.hashCode());
-        return result;
+        return Objects.hash(country, area, number, extensionNumber);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Phone other = (Phone) obj;
-        if (area == null) {
-            if (other.area != null) {
-                return false;
-            }
-        } else if (!area.equals(other.area)) {
-            return false;
-        }
-        if (country == null) {
-            if (other.country != null) {
-                return false;
-            }
-        } else if (!country.equals(other.country)) {
-            return false;
-        }
-        if (extensionNumber == null) {
-            if (other.extensionNumber != null) {
-                return false;
-            }
-        } else if (!extensionNumber.equals(other.extensionNumber)) {
-            return false;
-        }
-        if (number == null) {
-            if (other.number != null) {
-                return false;
-            }
-        } else if (!number.equals(other.number)) {
-            return false;
-        }
-        return true;
+        Phone phone = (Phone) o;
+        return Objects.equals(country, phone.country) && Objects.equals(area, phone.area) && Objects.equals(number, phone.number) && Objects.equals(extensionNumber, phone.extensionNumber);
     }
 
     @Override

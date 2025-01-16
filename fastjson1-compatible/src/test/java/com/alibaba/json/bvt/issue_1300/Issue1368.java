@@ -15,6 +15,6 @@ public class Issue1368 {
         ExtendedServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(new Object());
         String json = JSON.toJSONString(binder);
         System.out.println(json);
-        assertTrue(json.indexOf("$ref") >= 0);
+        assertTrue(json.contains("$ref"));
     }
 }

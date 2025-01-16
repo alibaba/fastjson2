@@ -100,16 +100,7 @@ public class PushMsg
         if (now > et) {
             return false;
         }// end if
-
-        if (msg == null) {
-            return false;
-        }// end if
-
-        if (!msg.isValid()) {
-            return false;
-        }// end if
-
-        return true;
+        return msg != null && msg.isValid();
     }
 
     /**
@@ -129,11 +120,8 @@ public class PushMsg
             return false;
         }// end if
 
-        if (!isImagesReady()) {
-            return false;
-        }// end if
-
-        return true;
+        // end if
+        return isImagesReady();
     }
 
     /**
@@ -142,21 +130,11 @@ public class PushMsg
      * @return true if exist.
      */
     public boolean hasUrl() {
-        boolean result = true;
-        if (msg == null) {
-            result = false;
-        }
-
-        return result;
+        return msg != null;
     }
 
     public boolean hasText() {
-        boolean result = true;
-        if (msg == null) {
-            result = false;
-        }
-
-        return result;
+        return msg != null;
     }
 
     /**
@@ -166,7 +144,7 @@ public class PushMsg
      */
     private boolean isImagesReady() {
         List<String> list = getNewImageUrlList();
-        boolean ret = null == list || 0 == list.size();
+        boolean ret = null == list || list.isEmpty();
         if (!ret) {
             preparedImages(list);
         }
@@ -323,15 +301,15 @@ public class PushMsg
          */
         public String debug() {
             StringBuilder sb = new StringBuilder();
-            sb.append("\n#gid=" + gid);
-            sb.append("\n#gtp=" + gtp);
-            sb.append("\n#ico=" + ico);
-            sb.append("\n#url=" + url);
-            sb.append("\n#txt=" + txt);
-            sb.append("\n#flags=" + flgs);
-            sb.append("\n#stxt=" + stxt);
-            sb.append("\n#surl=" + surl);
-            sb.append("\n#simg=" + simg);
+            sb.append("\n#gid=").append(gid);
+            sb.append("\n#gtp=").append(gtp);
+            sb.append("\n#ico=").append(ico);
+            sb.append("\n#url=").append(url);
+            sb.append("\n#txt=").append(txt);
+            sb.append("\n#flags=").append(flgs);
+            sb.append("\n#stxt=").append(stxt);
+            sb.append("\n#surl=").append(surl);
+            sb.append("\n#simg=").append(simg);
             if (null != controlFlags) {
                 sb.append(controlFlags.debug());
             }// end if
@@ -580,16 +558,15 @@ public class PushMsg
             public String debug() {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\n>>>>>>>>>>>");
-                sb.append("\nflag:" + text);
-                sb.append("\n(" + INDEX_TYPE.INDEX_POS.ordinal() + ")ctrlPos=" + ctrlPos);
-                sb.append("\n(" + INDEX_TYPE.INDEX_OPEN_URL.ordinal() + ")ctrlOpenUrl=" + ctrlOpenUrl);
-                sb.append("\n(" + INDEX_TYPE.INDEX_DIMISS.ordinal() + ")ctrlDismiss=" + ctrlDimiss);
-                sb.append("\n(" + INDEX_TYPE.INDEX_CANCEL_BTN.ordinal() + ")ctrlCancelBtn=" + ctrlCancelBtn);
-                sb.append("\n(" + INDEX_TYPE.INDEX_TEXT_EFFECTS.ordinal() + ")ctrlTextEffects=" + ctrlTextEffects);
-                sb.append("\n(" + INDEX_TYPE.INDEX_SHARE.ordinal() + ")ctrlShare=" + ctrlShare);
-                sb.append("\n(" + INDEX_TYPE.INDEX_ATTACH_IMAGE.ordinal() + ")ctrlAttachImage=" + ctrlAttachImage);
-                sb.append("\n(" + INDEX_TYPE.INDEX_LIMIT_SHOW_MAX_ONCE.ordinal() + ")ctrlLimitShowMaxOnce="
-                        + ctrlLimitShowMaxOnce);
+                sb.append("\nflag:").append(text);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_POS.ordinal()).append(")ctrlPos=").append(ctrlPos);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_OPEN_URL.ordinal()).append(")ctrlOpenUrl=").append(ctrlOpenUrl);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_DIMISS.ordinal()).append(")ctrlDismiss=").append(ctrlDimiss);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_CANCEL_BTN.ordinal()).append(")ctrlCancelBtn=").append(ctrlCancelBtn);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_TEXT_EFFECTS.ordinal()).append(")ctrlTextEffects=").append(ctrlTextEffects);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_SHARE.ordinal()).append(")ctrlShare=").append(ctrlShare);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_ATTACH_IMAGE.ordinal()).append(")ctrlAttachImage=").append(ctrlAttachImage);
+                sb.append("\n(").append(INDEX_TYPE.INDEX_LIMIT_SHOW_MAX_ONCE.ordinal()).append(")ctrlLimitShowMaxOnce=").append(ctrlLimitShowMaxOnce);
                 sb.append("\n>>>>>>>>>>>");
                 return sb.toString();
             }
@@ -604,11 +581,11 @@ public class PushMsg
     public String debug() {
         StringBuilder sb = new StringBuilder();
         sb.append("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        sb.append("\nid=" + id);
-        sb.append("\nst=" + st);
-        sb.append("\net=" + et);
-        sb.append("\ndr=" + dr);
-        sb.append("\nmsg=\n" + msg.debug());
+        sb.append("\nid=").append(id);
+        sb.append("\nst=").append(st);
+        sb.append("\net=").append(et);
+        sb.append("\ndr=").append(dr);
+        sb.append("\nmsg=\n").append(msg.debug());
         sb.append("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         return sb.toString();
     }

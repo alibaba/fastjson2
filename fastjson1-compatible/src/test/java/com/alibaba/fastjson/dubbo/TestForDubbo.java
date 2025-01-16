@@ -19,7 +19,7 @@ public class TestForDubbo {
         person.setPenName("pname");
         person.setStatus(PersonStatus.ENABLED);
 
-        ArrayList<Phone> phones = new ArrayList<Phone>();
+        ArrayList<Phone> phones = new ArrayList<>();
         Phone phone1 = new Phone("86", "0571", "87654321", "001");
         Phone phone2 = new Phone("86", "0571", "87654322", "002");
         phones.add(phone1);

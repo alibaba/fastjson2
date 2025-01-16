@@ -27,8 +27,8 @@ public class TestExternal4 {
     public void test_0() throws Exception {
         ExtClassLoader classLoader = new ExtClassLoader();
         Class<?> clazz = classLoader.loadClass("external.VO2");
-        Method method = clazz.getMethod("setName", new Class[]{String.class});
-        Method methodSetValue = clazz.getMethod("setValue", new Class[]{Serializable.class});
+        Method method = clazz.getMethod("setName", String.class);
+        Method methodSetValue = clazz.getMethod("setValue", Serializable.class);
 
         Object obj = clazz.newInstance();
         method.invoke(obj, "jobs");

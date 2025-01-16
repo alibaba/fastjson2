@@ -342,8 +342,8 @@ public class Base64X {
         // Count illegal characters (including '\r', '\n') to know what size the returned array will be,
         // so we don't have to reallocate & copy it later.
         int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a bonus...)
-        for (int i = 0; i < sLen; i++) {      // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
-            if (IA[sArr[i] & 0xff] < 0) {
+        for (byte b : sArr) {      // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
+            if (IA[b & 0xff] < 0) {
                 sepCnt++;
             }
         }

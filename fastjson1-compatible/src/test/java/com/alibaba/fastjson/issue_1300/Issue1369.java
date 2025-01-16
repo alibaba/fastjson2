@@ -17,7 +17,7 @@ public class Issue1369 {
         foo.bars.c = 3;
         String json = JSON.toJSONString(foo);
         System.out.println(json);
-        Assertions.assertTrue(json.indexOf("\\") < 0);
+        Assertions.assertFalse(json.contains("\\"));
     }
 
     public static class Foo {

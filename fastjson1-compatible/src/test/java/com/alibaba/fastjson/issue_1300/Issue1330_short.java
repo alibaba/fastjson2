@@ -19,7 +19,7 @@ public class Issue1330_short {
             error = e;
         }
         assertNotNull(error);
-        assertTrue(error.getMessage().indexOf("parseInt error") != -1);
+        assertTrue(error.getMessage().contains("parseInt error"));
     }
 
     @Test

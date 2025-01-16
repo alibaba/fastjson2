@@ -13,7 +13,7 @@ public class ArrayRefTest {
     public void test_0() throws Exception {
         String text;
         {
-            List<Group> groups = new ArrayList<Group>();
+            List<Group> groups = new ArrayList<>();
 
             Group g0 = new Group(0);
             Group g1 = new Group(1);

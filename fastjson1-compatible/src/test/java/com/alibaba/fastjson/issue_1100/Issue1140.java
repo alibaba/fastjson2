@@ -26,6 +26,6 @@ public class Issue1140 {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        JSON.writeJSONString(out, s, new SerializerFeature[0]);
+        JSON.writeJSONString(out, s, SerializerFeature.EMPTY);
     }
 }

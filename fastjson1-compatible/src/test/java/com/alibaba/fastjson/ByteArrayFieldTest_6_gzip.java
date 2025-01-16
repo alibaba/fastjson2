@@ -10,7 +10,7 @@ public class ByteArrayFieldTest_6_gzip {
     public void test_0() throws Exception {
         Model model = new Model();
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i = 0; i < 1000; ++i) {
             buf.append("0123456890");
             buf.append("ABCDEFGHIJ");

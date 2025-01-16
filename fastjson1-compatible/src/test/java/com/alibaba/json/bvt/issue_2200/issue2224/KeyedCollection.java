@@ -7,7 +7,7 @@ import java.util.Map;
 
 public abstract class KeyedCollection<TKey, TItem>
         implements CollectionEx<TItem>, Cloneable {
-    private transient Map<TKey, TItem> items = new LinkedHashMap<TKey, TItem>();
+    private transient Map<TKey, TItem> items = new LinkedHashMap<>();
 
     protected abstract TKey getKeyForItem(TItem item);
 

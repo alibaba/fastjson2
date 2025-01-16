@@ -13,11 +13,7 @@ import java.util.Map;
 public class PropertyFilterTest {
     @Test
     public void test_0() throws Exception {
-        PropertyFilter filter = new PropertyFilter() {
-            public boolean apply(Object source, String name, Object value) {
-                return false;
-            }
-        };
+        PropertyFilter filter = (source, name, value) -> false;
 
         SerializeWriter out = new SerializeWriter();
         JSONSerializer serializer = new JSONSerializer(out);
@@ -32,24 +28,18 @@ public class PropertyFilterTest {
 
     @Test
     public void test_toJSONString() throws Exception {
-        PropertyFilter filter = new PropertyFilter() {
-            public boolean apply(Object source, String name, Object value) {
-                return false;
-            }
-        };
+        PropertyFilter filter = (source, name, value) -> false;
 
         Assert.assertEquals("{}", JSON.toJSONString(new A(), filter));
     }
 
     @Test
     public void test_1() throws Exception {
-        PropertyFilter filter = new PropertyFilter() {
-            public boolean apply(Object source, String name, Object value) {
-                if ("id".equals(name)) {
-                    return true;
-                }
-                return false;
+        PropertyFilter filter = (source, name, value) -> {
+            if ("id".equals(name)) {
+                return true;
             }
+            return false;
         };
 
         SerializeWriter out = new SerializeWriter();
@@ -65,13 +55,11 @@ public class PropertyFilterTest {
 
     @Test
     public void test_2() throws Exception {
-        PropertyFilter filter = new PropertyFilter() {
-            public boolean apply(Object source, String name, Object value) {
-                if ("name".equals(name)) {
-                    return true;
-                }
-                return false;
+        PropertyFilter filter = (source, name, value) -> {
+            if ("name".equals(name)) {
+                return true;
             }
+            return false;
         };
 
         SerializeWriter out = new SerializeWriter();
@@ -88,20 +76,18 @@ public class PropertyFilterTest {
 
     @Test
     public void test_3() throws Exception {
-        PropertyFilter filter = new PropertyFilter() {
-            public boolean apply(Object source, String name, Object value) {
-                if ("name".equals(name)) {
-                    return true;
-                }
-                return false;
+        PropertyFilter filter = (source, name, value) -> {
+            if ("name".equals(name)) {
+                return true;
             }
+            return false;
         };
 
         SerializeWriter out = new SerializeWriter();
         JSONSerializer serializer = new JSONSerializer(out);
         serializer.getPropertyFilters().add(filter);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("name", "chennp2008");
         serializer.write(map);
 
@@ -111,20 +97,18 @@ public class PropertyFilterTest {
 
     @Test
     public void test_4() throws Exception {
-        PropertyFilter filter = new PropertyFilter() {
-            public boolean apply(Object source, String name, Object value) {
-                if ("name".equals(name)) {
-                    return false;
-                }
-                return true;
+        PropertyFilter filter = (source, name, value) -> {
+            if ("name".equals(name)) {
+                return false;
             }
+            return true;
         };
 
         SerializeWriter out = new SerializeWriter();
         JSONSerializer serializer = new JSONSerializer(out);
         serializer.getPropertyFilters().add(filter);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("id", 3);
         map.put("name", "chennp2008");
         serializer.write(map);

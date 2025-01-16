@@ -18,7 +18,7 @@ public class ArmoryTest {
 
     @Test
     public void test_0() throws Exception {
-        List<Object> message = new ArrayList<Object>();
+        List<Object> message = new ArrayList<>();
         MessageBody body = new MessageBody();
         Item item = new Item();
         body.getItems().add(item);
@@ -55,7 +55,7 @@ public class ArmoryTest {
     }
 
     public static class MessageBody {
-        private List<Object> items = new ArrayList<Object>();
+        private List<Object> items = new ArrayList<>();
 
         public List<Object> getItems() {
             return items;

@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WildcardTypeTest {
     @Test
     public void test_for_wildcardType() throws Exception {
-        TestType<B> b = new TestType<B>();
+        TestType<B> b = new TestType<>();
         b.value = new B(2001, "BBBB");
-        b.superType = new TestType<A>(new A(101));
+        b.superType = new TestType<>(new A(101));
 
         String json = JSON.toJSONString(b);
 

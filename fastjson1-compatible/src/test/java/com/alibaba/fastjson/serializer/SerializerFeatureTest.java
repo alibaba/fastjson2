@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SerializerFeatureTest {
     @Test
     public void of() {
-        assertEquals(0, SerializerFeature.of(new SerializerFeature[0]));
+        assertEquals(0, SerializerFeature.of(SerializerFeature.EMPTY));
         assertEquals(0, SerializerFeature.of(null));
         assertEquals(SerializerFeature.WriteClassName.mask,
                 SerializerFeature.of(new SerializerFeature[] {SerializerFeature.WriteClassName})

@@ -56,10 +56,7 @@ public class PropertyFilter_bool_field {
     public void test_2() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
             public boolean apply(Object source, String name, Object value) {
-                if ("name".equals(name)) {
-                    return true;
-                }
-                return false;
+                return "name".equals(name);
             }
         };
 
@@ -79,10 +76,7 @@ public class PropertyFilter_bool_field {
     public void test_3() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
             public boolean apply(Object source, String name, Object value) {
-                if ("name".equals(name)) {
-                    return true;
-                }
-                return false;
+                return "name".equals(name);
             }
         };
 
@@ -90,7 +84,7 @@ public class PropertyFilter_bool_field {
         JSONSerializer serializer = new JSONSerializer(out);
         serializer.getPropertyFilters().add(filter);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("name", "chennp2008");
         serializer.write(map);
 
@@ -102,10 +96,7 @@ public class PropertyFilter_bool_field {
     public void test_4() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
             public boolean apply(Object source, String name, Object value) {
-                if ("name".equals(name)) {
-                    return false;
-                }
-                return true;
+                return !"name".equals(name);
             }
         };
 
@@ -113,7 +104,7 @@ public class PropertyFilter_bool_field {
         JSONSerializer serializer = new JSONSerializer(out);
         serializer.getPropertyFilters().add(filter);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("id", 3);
         map.put("name", "chennp2008");
         serializer.write(map);

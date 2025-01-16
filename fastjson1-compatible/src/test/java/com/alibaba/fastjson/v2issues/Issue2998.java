@@ -132,63 +132,43 @@ public class Issue2998 {
     // 10. parseObject(InputStream, Type, Feature...) throws IOException
     @Test
     public void testParseObject_InputStream_Type() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(byteArray);
-        try {
+        try (InputStream inputStream = new ByteArrayInputStream(byteArray)) {
             JSON.parseObject(inputStream, Object.class, Feature.AllowComment);
-        } catch (JSONException e) {
-        } finally {
-            inputStream.close();
         }
     }
 
     // 11. parseObject(InputStream, Class<T>, Feature...) throws IOException
     @Test
     public void testParseObject_InputStream_Class() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(byteArray);
-        try {
+        try (InputStream inputStream = new ByteArrayInputStream(byteArray)) {
             JSON.parseObject(inputStream, Object.class, Feature.AllowComment);
-        } catch (JSONException e) {
-        } finally {
-            inputStream.close();
         }
     }
 
     // 12. parseObject(InputStream, Charset, Type, ParserConfig, ParseProcess, int, Feature...) throws IOException
     @Test
     public void testParseObject_InputStream_Charset_Config() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(byteArray);
-        ParserConfig config = ParserConfig.getGlobalInstance();
-        ParseProcess processor = null;
-        try {
+        try (InputStream inputStream = new ByteArrayInputStream(byteArray)) {
+            ParserConfig config = ParserConfig.getGlobalInstance();
+            ParseProcess processor = null;
             JSON.parseObject(inputStream, StandardCharsets.UTF_8, Object.class, config, processor, 0, Feature.AllowComment);
-        } catch (JSONException e) {
-        } finally {
-            inputStream.close();
         }
     }
 
     // 13. parseObject(InputStream, Charset, Type, ParserConfig, Feature...) throws IOException
     @Test
     public void testParseObject_InputStream_Charset() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(byteArray);
-        ParserConfig config = ParserConfig.getGlobalInstance();
-        try {
+        try (InputStream inputStream = new ByteArrayInputStream(byteArray)) {
+            ParserConfig config = ParserConfig.getGlobalInstance();
             JSON.parseObject(inputStream, StandardCharsets.UTF_8, Object.class, config, Feature.AllowComment);
-        } catch (JSONException e) {
-        } finally {
-            inputStream.close();
         }
     }
 
     // 14. parseObject(InputStream, Charset, Type, Feature...) throws IOException
     @Test
     public void testParseObject_InputStream_Charset_Feature() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(byteArray);
-        try {
+        try (InputStream inputStream = new ByteArrayInputStream(byteArray)) {
             JSON.parseObject(inputStream, StandardCharsets.UTF_8, Object.class, Feature.AllowComment);
-        } catch (JSONException e) {
-        } finally {
-            inputStream.close();
         }
     }
 }

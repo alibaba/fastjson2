@@ -11,7 +11,7 @@ public class IntegerArrayFieldTest {
     @Test
     public void test_codec() throws Exception {
         User user = new User();
-        user.setValue(new Integer[]{Integer.valueOf(1), Integer.valueOf(2)});
+        user.setValue(new Integer[]{ 1, 2 });
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(false);

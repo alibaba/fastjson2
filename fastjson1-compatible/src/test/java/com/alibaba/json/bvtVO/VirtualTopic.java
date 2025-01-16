@@ -6,7 +6,7 @@ import java.util.Map;
 public class VirtualTopic {
     private static final long serialVersionUID = 1115397330651723322L;
 
-    private Map<Integer, QueueEntity> queueMap = new HashMap<Integer, QueueEntity>();
+    private Map<Integer, QueueEntity> queueMap = new HashMap<>();
     private Integer queueCount;
 
     private int queueLimit;

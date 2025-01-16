@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1480 {
     @Test
     public void test_for_issue() throws Exception {
-        Map<Integer, Integer> map = new LinkedHashMap<Integer, Integer>();
+        Map<Integer, Integer> map = new LinkedHashMap<>();
         map.put(1, 10);
         map.put(2, 4);
         map.put(3, 5);
@@ -30,20 +30,20 @@ public class Issue1480 {
         Map<Integer, Integer> map1 = JSON.parseObject(json, new TypeReference<HashMap<Integer, Integer>>() {
         }.getType());
 
-        assertEquals(map1.get(Integer.valueOf(1)), Integer.valueOf(10));
-        assertEquals(map1.get(Integer.valueOf(2)), Integer.valueOf(4));
-        assertEquals(map1.get(Integer.valueOf(3)), Integer.valueOf(5));
-        assertEquals(map1.get(Integer.valueOf(4)), Integer.valueOf(5));
-        assertEquals(map1.get(Integer.valueOf(37306)), Integer.valueOf(98));
-        assertEquals(map1.get(Integer.valueOf(36796)), Integer.valueOf(9));
+        assertEquals(map1.get(1), Integer.valueOf(10));
+        assertEquals(map1.get(2), Integer.valueOf(4));
+        assertEquals(map1.get(3), Integer.valueOf(5));
+        assertEquals(map1.get(4), Integer.valueOf(5));
+        assertEquals(map1.get(37306), Integer.valueOf(98));
+        assertEquals(map1.get(36796), Integer.valueOf(9));
 
         JSONObject map2 = JSON.parseObject("{35504:1,1:10,2:4,3:5,4:5,37306:98,36796:9\n" + "}");
 
-        assertEquals(map2.get(Integer.valueOf(1)), Integer.valueOf(10));
-        assertEquals(map2.get(Integer.valueOf(2)), Integer.valueOf(4));
-        assertEquals(map2.get(Integer.valueOf(3)), Integer.valueOf(5));
-        assertEquals(map2.get(Integer.valueOf(4)), Integer.valueOf(5));
-        assertEquals(map2.get(Integer.valueOf(37306)), Integer.valueOf(98));
-        assertEquals(map2.get(Integer.valueOf(36796)), Integer.valueOf(9));
+        assertEquals(map2.get(1), 10);
+        assertEquals(map2.get(2), 4);
+        assertEquals(map2.get(3), 5);
+        assertEquals(map2.get(4), 5);
+        assertEquals(map2.get(37306), 98);
+        assertEquals(map2.get(36796), 9);
     }
 }

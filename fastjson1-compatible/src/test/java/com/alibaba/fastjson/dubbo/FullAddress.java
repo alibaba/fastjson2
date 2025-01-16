@@ -15,6 +15,8 @@
  */
 package com.alibaba.fastjson.dubbo;
 
+import java.util.Objects;
+
 /**
  * @author xk1430
  */
@@ -120,16 +122,7 @@ public class FullAddress {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((cityId == null) ? 0 : cityId.hashCode());
-        result = prime * result + ((cityName == null) ? 0 : cityName.hashCode());
-        result = prime * result + ((countryId == null) ? 0 : countryId.hashCode());
-        result = prime * result + ((countryName == null) ? 0 : countryName.hashCode());
-        result = prime * result + ((provinceName == null) ? 0 : provinceName.hashCode());
-        result = prime * result + ((streetAddress == null) ? 0 : streetAddress.hashCode());
-        result = prime * result + ((zipCode == null) ? 0 : zipCode.hashCode());
-        return result;
+        return Objects.hash(countryId, countryName, provinceName, cityId, cityName, streetAddress, zipCode);
     }
 
     @Override
@@ -144,56 +137,13 @@ public class FullAddress {
             return false;
         }
         FullAddress other = (FullAddress) obj;
-        if (cityId == null) {
-            if (other.cityId != null) {
-                return false;
-            }
-        } else if (!cityId.equals(other.cityId)) {
-            return false;
-        }
-        if (cityName == null) {
-            if (other.cityName != null) {
-                return false;
-            }
-        } else if (!cityName.equals(other.cityName)) {
-            return false;
-        }
-        if (countryId == null) {
-            if (other.countryId != null) {
-                return false;
-            }
-        } else if (!countryId.equals(other.countryId)) {
-            return false;
-        }
-        if (countryName == null) {
-            if (other.countryName != null) {
-                return false;
-            }
-        } else if (!countryName.equals(other.countryName)) {
-            return false;
-        }
-        if (provinceName == null) {
-            if (other.provinceName != null) {
-                return false;
-            }
-        } else if (!provinceName.equals(other.provinceName)) {
-            return false;
-        }
-        if (streetAddress == null) {
-            if (other.streetAddress != null) {
-                return false;
-            }
-        } else if (!streetAddress.equals(other.streetAddress)) {
-            return false;
-        }
-        if (zipCode == null) {
-            if (other.zipCode != null) {
-                return false;
-            }
-        } else if (!zipCode.equals(other.zipCode)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(cityId, other.cityId)
+                && Objects.equals(cityName, other.cityName)
+                && Objects.equals(countryId, other.countryId)
+                && Objects.equals(countryName, other.countryName)
+                && Objects.equals(provinceName, other.provinceName)
+                && Objects.equals(streetAddress, other.streetAddress)
+                && Objects.equals(zipCode, other.zipCode);
     }
 
     @Override

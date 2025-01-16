@@ -57,7 +57,7 @@ public class MappingFastJsonMessageConverterTest {
 
         @Override
         public T getPayload() {
-            return (T) payload;
+            return payload;
         }
 
         @Override

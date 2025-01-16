@@ -20,7 +20,7 @@ public class Issue1256 {
         a.name = "Mike";
         a.age = 39;
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("key_obj", a);
         map.put("key_string", "Hello");
         map.put("key_random", -1193959466L);

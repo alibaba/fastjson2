@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BigDecimal_BrowserCompatible {
     @Test
     public void test_for_issue() throws Exception {
-        Map<String, Object> map = new LinkedHashMap<String, Object>();
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put("id1", new BigDecimal("-9223370018640066466"));
         map.put("id2", new BigDecimal("9223370018640066466"));
         map.put("id3", new BigDecimal("100"));

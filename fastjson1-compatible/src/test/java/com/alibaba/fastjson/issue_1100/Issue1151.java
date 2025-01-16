@@ -29,7 +29,7 @@ public class Issue1151 {
     }
 
     public static class A {
-        public List<B> list = new ArrayList<B>();
+        public List<B> list = new ArrayList<>();
     }
 
     public static interface B {

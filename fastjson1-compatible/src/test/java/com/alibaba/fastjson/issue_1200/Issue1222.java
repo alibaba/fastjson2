@@ -26,7 +26,7 @@ public class Issue1222 {
         A, B;
 
         public String toString() {
-            return "Type" + this.name() + "";
+            return "Type" + this.name();
         }
     }
 }

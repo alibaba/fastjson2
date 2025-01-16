@@ -93,13 +93,9 @@ public class Issue577 {
                 return false;
             }
             if (topic == null) {
-                if (other.topic != null) {
-                    return false;
-                }
-            } else if (!topic.equals(other.topic)) {
-                return false;
-            }
-            return true;
+                return other.topic == null;
+            } else
+                return topic.equals(other.topic);
         }
 
         @Override
@@ -129,7 +125,7 @@ public class Issue577 {
 
     public static class OffsetSerializeWrapper {
         private ConcurrentMap<MessageQueue, AtomicLong> offsetTable =
-                new ConcurrentHashMap<MessageQueue, AtomicLong>();
+                new ConcurrentHashMap<>();
 
         public ConcurrentMap<MessageQueue, AtomicLong> getOffsetTable() {
             return offsetTable;

@@ -50,7 +50,7 @@ public class Issue2579 {
     }
 
     private static String getString(int batchNumber, String className) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("\"@type\":\"com.alibaba.json.bvt.issue_2500.Issue2579$" + className + "\"");
         list.add("\"date\":1563867975335");
         list.add("\"id\":\"0f075036-9e52-4821-800a-9c51761a7227b\"");
@@ -64,7 +64,7 @@ public class Issue2579 {
         list.add("\"batchNumber\":" + batchNumber);
 
         Iterator<String> it = list.iterator();
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         int len;
         int index;
         while (it.hasNext()) {

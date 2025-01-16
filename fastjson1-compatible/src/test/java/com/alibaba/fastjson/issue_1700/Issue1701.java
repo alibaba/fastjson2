@@ -57,14 +57,9 @@ public class Issue1701 {
         public @ResponseBody
         ResponseEntity<byte[]> download(@RequestBody TestBean testBean) {
             byte[] body = new byte[0];
-            InputStream in;
-            try {
-                in = Issue1701.class.getClassLoader().getResourceAsStream(testBean.getName());
+            try(InputStream in = Issue1701.class.getClassLoader().getResourceAsStream(testBean.getName())) {
                 body = new byte[in.available()];
                 in.read(body);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -72,9 +67,8 @@ public class Issue1701 {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Disposition", "attachment;filename=1.txt");
             HttpStatus statusCode = HttpStatus.OK;
-            ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(body, headers, statusCode);
 
-            return response;
+            return new ResponseEntity<>(body, headers, statusCode);
         }
     }
 

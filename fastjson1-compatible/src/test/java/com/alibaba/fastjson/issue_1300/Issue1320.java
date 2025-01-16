@@ -14,7 +14,6 @@ public class Issue1320 {
         JSON.toJSONString(token);
     }
 
-    @SuppressWarnings("serial")
     public static class SSOToken
             extends Token {
         /* 登录类型 */

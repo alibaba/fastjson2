@@ -41,7 +41,7 @@ public class HelloServiceImpl {
     }
 
     public Map<String, Collection<String>> eatTiger(String name, HashSet<String> tigers) {
-        HashMap<String, Collection<String>> tiger = new HashMap<String, Collection<String>>();
+        HashMap<String, Collection<String>> tiger = new HashMap<>();
         tiger.put(name, tigers);
         return tiger;
     }
@@ -80,10 +80,12 @@ public class HelloServiceImpl {
     }
 
     public String sayHello(String hello) {
+        /*
         for (int i = 0; i < 10000; i++) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(new Random().nextInt(5000));
         }
+        */
         return hello;
     }
 

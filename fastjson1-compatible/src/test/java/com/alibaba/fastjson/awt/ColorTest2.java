@@ -21,7 +21,7 @@ public class ColorTest2 {
         Color color3 = (Color) JSON.parse(text, Feature.SupportAutoType);
         Assertions.assertEquals(color, color3);
 
-        Color color4 = (Color) JSON.parseObject(text, Color.class, Feature.SupportAutoType);
+        Color color4 = JSON.parseObject(text, Color.class, Feature.SupportAutoType);
         Assertions.assertEquals(color, color4);
     }
 }

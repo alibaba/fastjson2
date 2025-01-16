@@ -14,7 +14,7 @@ public class MapDeserializerTest {
         DefaultJSONParser parser = new DefaultJSONParser("{\"id\":123}");
         HashMap map = new HashMap();
         MapDeserializer.parseMap(parser, map, String.class, Long.class, null);
-        assertEquals(Long.valueOf(123), map.get("id"));
+        assertEquals(123L, map.get("id"));
     }
 
     @Test
@@ -22,13 +22,13 @@ public class MapDeserializerTest {
         DefaultJSONParser parser = new DefaultJSONParser("{\"id\":123}");
         HashMap map = new HashMap();
         MapDeserializer.parseMap(parser, map, Long.class, null);
-        assertEquals(Long.valueOf(123), map.get("id"));
+        assertEquals(123L, map.get("id"));
     }
 
     @Test
     public void test2() {
         DefaultJSONParser parser = new DefaultJSONParser("{\"id\":123}");
-        Map map = (Map) MapDeserializer.instance.deserialze(parser, null, null);
+        Map map = MapDeserializer.instance.deserialze(parser, null, null);
         assertEquals(123, map.get("id"));
     }
 }

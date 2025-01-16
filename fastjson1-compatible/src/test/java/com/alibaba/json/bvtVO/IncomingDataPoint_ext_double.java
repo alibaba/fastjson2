@@ -171,6 +171,6 @@ public class IncomingDataPoint_ext_double {
 
         // 非常用的tag会放在这里，由于标识了unwrapped，序列化时会展开和上面字段并列，反序列化同样能识别
         @JSONField(unwrapped = true)
-        public Map<String, String> attributes = new HashMap<String, String>();
+        public Map<String, String> attributes = new HashMap<>();
     }
 }

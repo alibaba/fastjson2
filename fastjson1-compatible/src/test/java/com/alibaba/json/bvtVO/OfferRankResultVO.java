@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OfferRankResultVO {
-    private List<SearchCenterOfferModel> models = new ArrayList<SearchCenterOfferModel>();
+    private List<SearchCenterOfferModel> models = new ArrayList<>();
 
     public OfferRankResultVO() {
         models.add(new SearchCenterOfferModel());

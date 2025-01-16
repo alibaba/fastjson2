@@ -23,7 +23,7 @@ public class LongTest {
     @Test
     public void test_map() throws Exception {
         long[] values = new long[]{Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < values.length; ++i) {
             map.put(Long.toString(i), values[i]);
         }

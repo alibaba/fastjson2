@@ -26,8 +26,8 @@ public class SchemaResult {
     }
 
     public SchemaResult() {
-        data = new ArrayList<InstanceSchema>();
-        extra = new ArrayList<Map<String, Object>>();
+        data = new ArrayList<>();
+        extra = new ArrayList<>();
     }
 
     public int getCode() {

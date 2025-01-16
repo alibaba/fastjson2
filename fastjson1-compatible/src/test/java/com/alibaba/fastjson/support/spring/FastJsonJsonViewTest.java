@@ -19,7 +19,7 @@ public class FastJsonJsonViewTest {
     public void test_0() throws Exception {
         FastJsonView view = new FastJsonView();
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.render(model, request, response);
@@ -37,7 +37,7 @@ public class FastJsonJsonViewTest {
         view.setUpdateContentLength(false);
         view.render(model, request, response);
 
-        view.setRenderedAttributes(new HashSet<String>(Collections.singletonList("abc")));
+        view.setRenderedAttributes(new HashSet<>(Collections.singletonList("abc")));
         view.render(Collections.singletonMap("abc", "cde"), request, response);
     }
 
@@ -48,7 +48,7 @@ public class FastJsonJsonViewTest {
         Assertions.assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.render(model, request, response);
@@ -108,15 +108,13 @@ public class FastJsonJsonViewTest {
         Assertions.assertTrue(contentAsString.startsWith("{\"abc\":\"cde中文\"}"));
     }
 
-    private SerializeFilter serializeFilter = new ValueFilter() {
-        public Object process(Object object, String name, Object value) {
-            if (value == null) {
-                return "";
-            }
-            if (value instanceof Number) {
-                return String.valueOf(value);
-            }
-            return value;
+    private SerializeFilter serializeFilter = (ValueFilter) (object, name, value) -> {
+        if (value == null) {
+            return "";
         }
+        if (value instanceof Number) {
+            return String.valueOf(value);
+        }
+        return value;
     };
 }

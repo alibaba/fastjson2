@@ -309,7 +309,7 @@ public class JSONTest {
                                 Collections.emptyList(),
                                 SerializeConfig.global,
                                 new SerializeFilter[0],
-                                (String) null,
+                                null,
                                 JSON.DEFAULT_GENERATE_FEATURE,
                                 SerializerFeature.BrowserSecure)
                 )
@@ -455,7 +455,7 @@ public class JSONTest {
                         bytes,
                         StandardCharsets.UTF_8,
                         HashMap.class,
-                        ParserConfig.global, (ParseProcess) null,
+                        ParserConfig.global, null,
                         JSON.DEFAULT_PARSER_FEATURE,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -468,7 +468,7 @@ public class JSONTest {
                         bytes.length,
                         StandardCharsets.UTF_8,
                         HashMap.class,
-                        ParserConfig.global, (ParseProcess) null,
+                        ParserConfig.global, null,
                         JSON.DEFAULT_PARSER_FEATURE,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -479,7 +479,7 @@ public class JSONTest {
                         (byte[]) null,
                         StandardCharsets.UTF_8,
                         HashMap.class,
-                        ParserConfig.global, (ParseProcess) null,
+                        ParserConfig.global, null,
                         JSON.DEFAULT_PARSER_FEATURE,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -489,7 +489,7 @@ public class JSONTest {
                         new byte[0],
                         StandardCharsets.UTF_8,
                         HashMap.class,
-                        ParserConfig.global, (ParseProcess) null,
+                        ParserConfig.global, null,
                         JSON.DEFAULT_PARSER_FEATURE,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -497,12 +497,12 @@ public class JSONTest {
 
         assertNull(
                 JSON.parseObject(
-                        (byte[]) null,
+                        null,
                         0,
                         0,
                         StandardCharsets.UTF_8,
                         HashMap.class,
-                        ParserConfig.global, (ParseProcess) null,
+                        ParserConfig.global, null,
                         JSON.DEFAULT_PARSER_FEATURE,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -514,7 +514,7 @@ public class JSONTest {
                         0,
                         StandardCharsets.UTF_8,
                         HashMap.class,
-                        ParserConfig.global, (ParseProcess) null,
+                        ParserConfig.global, null,
                         JSON.DEFAULT_PARSER_FEATURE,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -536,7 +536,7 @@ public class JSONTest {
 
         assertNull(
                 JSON.parseObject(
-                        (char[]) null,
+                        null,
                         0,
                         HashMap.class,
                         Feature.ErrorOnNotSupportAutoType
@@ -569,7 +569,7 @@ public class JSONTest {
 
         assertNull(
                 JSON.parseObject(
-                        (String) null,
+                        null,
                         HashMap.class,
                         ParserConfig.global,
                         null,
@@ -604,7 +604,7 @@ public class JSONTest {
 
         assertNull(
                 JSON.parseObject(
-                        (String) null,
+                        null,
                         HashMap.class,
                         (ParseProcess) null,
                         Feature.ErrorOnNotSupportAutoType
@@ -660,8 +660,8 @@ public class JSONTest {
         );
         assertNull(
                 JSON.parseObject(
-                        (String) null,
-                        (Type) HashMap.class,
+                        null,
+                        HashMap.class,
                         ParserConfig.global,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -669,7 +669,7 @@ public class JSONTest {
         assertNull(
                 JSON.parseObject(
                         "",
-                        (Type) HashMap.class,
+                        HashMap.class,
                         ParserConfig.global,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -696,7 +696,7 @@ public class JSONTest {
                             StandardCharsets.UTF_8,
                             HashMap.class,
                             ParserConfig.global,
-                            (ParseProcess) null,
+                            null,
                             JSON.DEFAULT_PARSER_FEATURE,
                             Feature.ErrorOnNotSupportAutoType
                     )
@@ -711,8 +711,8 @@ public class JSONTest {
                             is,
                             StandardCharsets.UTF_8,
                             HashMap.class,
-                            (ParserConfig) null,
-                            (ParseProcess) null,
+                            null,
+                            null,
                             JSON.DEFAULT_PARSER_FEATURE,
                             Feature.ErrorOnNotSupportAutoType
                     )
@@ -724,22 +724,22 @@ public class JSONTest {
                         (InputStream) null,
                         StandardCharsets.UTF_8,
                         HashMap.class,
-                        (ParserConfig) null,
-                        (ParseProcess) null,
+                        null,
+                        null,
                         JSON.DEFAULT_PARSER_FEATURE,
                         Feature.ErrorOnNotSupportAutoType
                 )
         );
         assertNull(
                 JSON.parseObject(
-                        (InputStream) null,
+                        null,
                         StandardCharsets.UTF_8,
                         HashMap.class,
                         ParserConfig.global,
                         Feature.AllowArbitraryCommas
                 )
         );
-        assertNull(JSON.parseObject((String) null));
+        assertNull(JSON.parseObject(null));
         assertNull(JSON.parseObject(""));
         assertNull(
                 JSON.parseObject(
@@ -805,9 +805,9 @@ public class JSONTest {
                 JSONException.class,
                 () -> JSON.parseObject(
                         str,
-                        (Type) HashMap.class,
+                        HashMap.class,
                         ParserConfig.global,
-                        (ParseProcess) null,
+                        null,
                         0,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -818,7 +818,7 @@ public class JSONTest {
                 () -> JSON.parseObject(
                         chars,
                         chars.length,
-                        (Type) HashMap.class,
+                        HashMap.class,
                         Feature.ErrorOnNotSupportAutoType
                 )
         );
@@ -828,9 +828,9 @@ public class JSONTest {
                 () -> JSON.parseObject(
                         bytes,
                         StandardCharsets.UTF_8,
-                        (Type) HashMap.class,
-                        (ParserConfig) null,
-                        (ParseProcess) null,
+                        HashMap.class,
+                        null,
+                        null,
                         0,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -842,9 +842,9 @@ public class JSONTest {
                         0,
                         bytes.length,
                         StandardCharsets.UTF_8,
-                        (Type) HashMap.class,
-                        (ParserConfig) null,
-                        (ParseProcess) null,
+                        HashMap.class,
+                        null,
+                        null,
                         0,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -926,17 +926,17 @@ public class JSONTest {
     @Test
     public void parseArrayNull() {
         assertNull(JSON.parseArray(""));
-        assertNull(JSON.parseArray((String) null));
+        assertNull(JSON.parseArray(null));
 
         assertNull(JSON.parseArray("", Bean.class));
-        assertNull(JSON.parseArray((String) null, Bean.class));
+        assertNull(JSON.parseArray(null, Bean.class));
 
         assertNull(JSON.parseArray("", Bean.class, ParserConfig.global));
-        assertNull(JSON.parseArray((String) null, Bean.class, ParserConfig.global));
+        assertNull(JSON.parseArray(null, Bean.class, ParserConfig.global));
         assertNull(JSON.parseArray("null", Bean.class, (ParserConfig) null));
 
         assertNull(JSON.parseArray("", Bean.class, Feature.ErrorOnEnumNotMatch));
-        assertNull(JSON.parseArray((String) null, Bean.class, Feature.ErrorOnEnumNotMatch));
+        assertNull(JSON.parseArray(null, Bean.class, Feature.ErrorOnEnumNotMatch));
         assertNull(JSON.parseArray("null", Bean.class, Feature.ErrorOnEnumNotMatch));
         assertNull(JSON.parseArray("", new Type[]{Bean.class}));
         assertNull(JSON.parseArray(null, new Type[]{Bean.class}));

@@ -26,7 +26,7 @@ public class JSONReader_array {
         assertNull(reader.readString());
 
         {
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             reader.readObject(map);
             assertEquals("jobs", map.get("name"));
         }

@@ -110,11 +110,11 @@ public class FieldInfo
 
         nameHashCode = nameHashCode64(name, annotation);
 
-        boolean jsonDirect = false;
+        boolean jsonDirect;
         if (annotation != null) {
             format = annotation.format();
 
-            if (format.trim().length() == 0) {
+            if (format.trim().isEmpty()) {
                 format = null;
             }
             jsonDirect = annotation.jsonDirect();

@@ -12,8 +12,8 @@ public class Issue2240 {
     @Test
     public void test_for_issue() throws Exception {
         ResultMap resultMap = new ResultMap();
-        resultMap.setA(Collections.<Long, Integer>emptyMap());
-        resultMap.setB(Collections.<Long, Integer>emptyMap());
+        resultMap.setA(Collections.emptyMap());
+        resultMap.setB(Collections.emptyMap());
         String json = JSON.toJSONString(resultMap);
         System.out.println(json);
         assertTrue("{\"a\":{},\"b\":{}}".equals(json) || "{\"a\":{},\"b\":{\"$ref\":\"$.a\"}}".equals(json));

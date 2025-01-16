@@ -22,7 +22,7 @@ public class Issue2132 {
         objectArray[1] = screen;
         objectArray[2] = "2";
         objectArray[3] = "3";
-        List<Object> list1 = new ArrayList<Object>();
+        List<Object> list1 = new ArrayList<>();
         list1.add(objectArray);
         list1.add(computer);
         String s = JSON.toJSONString(list1);

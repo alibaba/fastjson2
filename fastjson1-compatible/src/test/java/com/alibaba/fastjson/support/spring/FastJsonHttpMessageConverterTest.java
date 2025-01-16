@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -56,8 +57,7 @@ public class FastJsonHttpMessageConverterTest {
         };
         converter.write(vo, MediaType.TEXT_PLAIN, out);
 
-        byte[] bytes = byteOut.toByteArray();
-        Assertions.assertEquals("{\"id\":123}", new String(bytes, "UTF-8"));
+        Assertions.assertEquals("{\"id\":123}", byteOut.toString("UTF-8"));
     }
 
     @Test
@@ -79,8 +79,7 @@ public class FastJsonHttpMessageConverterTest {
             }
 
             public InputStream getBody() throws IOException {
-                return new ByteArrayInputStream("{\"id\":123}".getBytes(Charset
-                        .forName("UTF-8")));
+                return new ByteArrayInputStream("{\"id\":123}".getBytes(StandardCharsets.UTF_8));
             }
         };
         VO vo = (VO) converter.read(VO.class, VO.class, input);
@@ -98,8 +97,7 @@ public class FastJsonHttpMessageConverterTest {
         };
         converter.write(vo, VO.class, MediaType.TEXT_PLAIN, out);
 
-        byte[] bytes = byteOut.toByteArray();
-        Assertions.assertEquals("{\"id\":123}", new String(bytes, "UTF-8"));
+        Assertions.assertEquals("{\"id\":123}", byteOut.toString("UTF-8"));
 
         converter.setSupportedMediaTypes(Collections
                 .singletonList(MediaType.APPLICATION_JSON));
@@ -133,17 +131,14 @@ public class FastJsonHttpMessageConverterTest {
         converter.write(vo, VO.class, MediaType.ALL, out2);
     }
 
-    private SerializeFilter serializeFilter = new ValueFilter() {
-        @Override
-        public Object process(Object object, String name, Object value) {
-            if (value == null) {
-                return "";
-            }
-            if (value instanceof Number) {
-                return String.valueOf(value);
-            }
-            return value;
+    private SerializeFilter serializeFilter = (ValueFilter) (object, name, value) -> {
+        if (value == null) {
+            return "";
         }
+        if (value instanceof Number) {
+            return String.valueOf(value);
+        }
+        return value;
     };
 
     public static class VO {

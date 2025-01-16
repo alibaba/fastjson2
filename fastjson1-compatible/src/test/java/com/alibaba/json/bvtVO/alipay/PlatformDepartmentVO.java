@@ -38,7 +38,7 @@ public class PlatformDepartmentVO {
     @JSONField(serialize = false)
     private PlatformDepartmentVO parent;
     @JSONField(ordinal = 6, name = "ChildNodes")
-    private List<PlatformDepartmentVO> childNodes = new ArrayList<PlatformDepartmentVO>();
+    private List<PlatformDepartmentVO> childNodes = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -260,9 +260,6 @@ public class PlatformDepartmentVO {
             return false;
         }
         final PlatformDepartmentVO other = (PlatformDepartmentVO) obj;
-        if (!this.getId().equals(other.getId())) {
-            return false;
-        }
-        return true;
+        return this.getId().equals(other.getId());
     }
 }

@@ -20,7 +20,7 @@ public class Issue1303 {
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject object = jsonArray.getJSONObject(i);
             assertEquals("衣架", object.getString("name"));
-            total = total + Double.valueOf(object.getString("prices"));
+            total = total + Double.parseDouble(object.getString("prices"));
         }
         assertEquals(1.0d, total);
     }

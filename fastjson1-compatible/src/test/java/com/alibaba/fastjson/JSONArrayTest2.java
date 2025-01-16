@@ -25,7 +25,7 @@ public class JSONArrayTest2 {
 //        assertEquals(new java.sql.Date(time), array.getSqlDate(2));
 //        assertEquals(new java.sql.Timestamp(time), array.getTimestamp(2));
 
-        JSONArray array2 = (JSONArray) array.clone();
+        JSONArray array2 = array.clone();
         assertEquals(0, array2.getByteValue(0));
         assertEquals(0, array2.getShortValue(0));
         assertTrue(0F == array2.getFloatValue(0));

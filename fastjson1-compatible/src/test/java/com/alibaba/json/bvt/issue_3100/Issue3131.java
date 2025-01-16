@@ -55,7 +55,7 @@ public class Issue3131 {
 
         public void add(T org) {
             if (orgs == null) {
-                orgs = new ArrayList<T>();
+                orgs = new ArrayList<>();
             }
             orgs.add(org);
         }

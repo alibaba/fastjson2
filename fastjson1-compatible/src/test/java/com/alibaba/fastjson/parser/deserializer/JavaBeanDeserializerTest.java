@@ -11,7 +11,7 @@ public class JavaBeanDeserializerTest {
     public void test() {
         JavaBeanDeserializer deserializer = new JavaBeanDeserializer(ParserConfig.global, Bean.class, Bean.class);
         DefaultJSONParser parser = new DefaultJSONParser("{\"id\":123}");
-        Bean bean = (Bean) deserializer.deserialze(parser, null, null);
+        Bean bean = deserializer.deserialze(parser, null, null);
         assertEquals(123, bean.id);
     }
 
@@ -19,7 +19,7 @@ public class JavaBeanDeserializerTest {
     public void test1() {
         JavaBeanDeserializer deserializer = new JavaBeanDeserializer(ParserConfig.global, Bean.class, null);
         DefaultJSONParser parser = new DefaultJSONParser("{\"id\":123}");
-        Bean bean = (Bean) deserializer.deserialze(parser, null, null);
+        Bean bean = deserializer.deserialze(parser, null, null);
         assertEquals(123, bean.id);
     }
 

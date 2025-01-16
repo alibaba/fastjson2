@@ -27,7 +27,7 @@ public class Issue1660 {
 
     public static class Model {
         @JSONField(format = "yyyy-MM-dd")
-        private List<Date> values = new ArrayList<Date>();
+        private List<Date> values = new ArrayList<>();
 
         public List<Date> getValues() {
             return values;

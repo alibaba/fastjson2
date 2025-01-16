@@ -19,7 +19,7 @@ public class Issue1363 {
         DataSimpleVO a = new DataSimpleVO("a", 1);
         DataSimpleVO b = new DataSimpleVO("b", 2);
         b.value = a;
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(a.name, a);
         b.value1 = map;
 
@@ -34,7 +34,7 @@ public class Issue1363 {
         DataSimpleVO a = new DataSimpleVO("a", 1);
         DataSimpleVO b = new DataSimpleVO("b", 2);
         b.value1 = a;
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(a.name, a);
         b.value = map;
 

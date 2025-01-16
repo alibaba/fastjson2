@@ -16,7 +16,7 @@ public class JSONReader_map {
 
         reader.startArray();
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         reader.readObject(map);
 
         assertEquals(123, map.get("id"));
@@ -27,7 +27,7 @@ public class JSONReader_map {
     @Test
     public void test_map() throws Exception {
         JSONReader reader = new JSONReader(new StringReader("{\"id\":123}"));
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         reader.readObject(map);
         assertEquals(123, map.get("id"));
         reader.close();

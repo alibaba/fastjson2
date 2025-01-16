@@ -24,11 +24,7 @@ public enum AuditStatusType implements IntEnum<AuditStatusType> {
     }
 
     public static AuditStatusType valuesOf(String enCode) {
-        AuditStatusType[] arr$ = values();
-        int len$ = arr$.length;
-
-        for (int i$ = 0; i$ < len$; ++i$) {
-            AuditStatusType temp = arr$[i$];
+        for (AuditStatusType temp : values()) {
             if (temp.getEnCode().equals(enCode)) {
                 return temp;
             }

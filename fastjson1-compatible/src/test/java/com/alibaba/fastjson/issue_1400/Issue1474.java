@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1474 {
     @Test
     public void test_for_issue() {
-        Map<String, Object> extraData = new HashMap<String, Object>();
+        Map<String, Object> extraData = new HashMap<>();
         extraData.put("ext_1", null);
         extraData.put("ext_2", null);
 

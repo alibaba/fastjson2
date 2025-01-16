@@ -71,7 +71,7 @@ public class QueryLoanOrderRsp {
         QueryLoanOrderRsp rsp = new QueryLoanOrderRsp();
 
         rsp.setLast_row_key("A");
-        List<TxnListItsm> txn_list = new ArrayList<TxnListItsm>();
+        List<TxnListItsm> txn_list = new ArrayList<>();
         TxnListItsm itsm = new TxnListItsm();
         itsm.setAssets_no("B");
         itsm.setCover_vol(new BigDecimal("300"));

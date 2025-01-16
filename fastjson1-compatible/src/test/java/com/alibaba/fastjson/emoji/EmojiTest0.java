@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by wenshao on 13/04/2017.
@@ -18,7 +19,7 @@ public class EmojiTest0 {
 
         JSON.writeJSONString(out, model);
 
-        String text = new String(out.toByteArray(), "UTF-8");
+        String text = new String(out.toByteArray(), StandardCharsets.UTF_8);
         System.out.println(text);
     }
 

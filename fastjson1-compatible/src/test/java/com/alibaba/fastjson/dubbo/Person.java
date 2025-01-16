@@ -16,6 +16,7 @@
 package com.alibaba.fastjson.dubbo;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * TODO Comment of Person
@@ -93,67 +94,24 @@ public class Person
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((email == null) ? 0 : email.hashCode());
-        result = prime * result + ((infoProfile == null) ? 0 : infoProfile.hashCode());
-        result = prime * result + ((loginName == null) ? 0 : loginName.hashCode());
-        result = prime * result + ((penName == null) ? 0 : penName.hashCode());
-        result = prime * result + ((personId == null) ? 0 : personId.hashCode());
-        result = prime * result + ((status == null) ? 0 : status.hashCode());
-        return result;
+        return Objects.hash(personId, loginName, status, email, penName, infoProfile);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Person other = (Person) obj;
-        if (email == null) {
-            if (other.email != null) {
-                return false;
-            }
-        } else if (!email.equals(other.email)) {
-            return false;
-        }
-        if (infoProfile == null) {
-            if (other.infoProfile != null) {
-                return false;
-            }
-        } else if (!infoProfile.equals(other.infoProfile)) {
-            return false;
-        }
-        if (loginName == null) {
-            if (other.loginName != null) {
-                return false;
-            }
-        } else if (!loginName.equals(other.loginName)) {
-            return false;
-        }
-        if (penName == null) {
-            if (other.penName != null) {
-                return false;
-            }
-        } else if (!penName.equals(other.penName)) {
-            return false;
-        }
-        if (personId == null) {
-            if (other.personId != null) {
-                return false;
-            }
-        } else if (!personId.equals(other.personId)) {
-            return false;
-        }
-        if (status != other.status) {
-            return false;
-        }
-        return true;
+        Person person = (Person) o;
+        return Objects.equals(personId, person.personId)
+                && Objects.equals(loginName, person.loginName)
+                && status == person.status
+                && Objects.equals(email, person.email)
+                && Objects.equals(penName, person.penName)
+                && Objects.equals(infoProfile, person.infoProfile);
     }
+
 }

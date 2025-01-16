@@ -24,26 +24,24 @@ public class HSFJSONUtilsTest_0 {
         method4 = Service.class.getMethod("f4", List.class);
         method5 = Service.class.getMethod("f4", User[].class);
 
-        methodLocator = new MethodLocator() {
-            public Method findMethod(String[] types) {
-                if (types == null) {
-                    return method2;
-                }
-
-                if (types.length == 1 && types[0].equals("java.util.List")) {
-                    return method4;
-                }
-
-                if (types.length == 1 && types[0].equals("com.alibaba.json.bvt.support.hsf.HSFJSONUtilsTest_0.User[]")) {
-                    return method5;
-                }
-
-                if (types[1].equals("java.util.List")) {
-                    return method3;
-                }
-
+        methodLocator = types -> {
+            if (types == null) {
                 return method2;
             }
+
+            if (types.length == 1 && types[0].equals("java.util.List")) {
+                return method4;
+            }
+
+            if (types.length == 1 && types[0].equals("com.alibaba.json.bvt.support.hsf.HSFJSONUtilsTest_0.User[]")) {
+                return method5;
+            }
+
+            if (types[1].equals("java.util.List")) {
+                return method3;
+            }
+
+            return method2;
         };
     }
 
@@ -186,8 +184,8 @@ public class HSFJSONUtilsTest_0 {
         assertEquals(1, values.length);
 
         User[] list = (User[]) values[0];
-        assertEquals("123", ((User) list[0]).name);
-        assertEquals("123", ((User) list[1]).name);
+        assertEquals("123", list[0].name);
+        assertEquals("123", list[1].name);
     }
 
     void perf() throws Exception {

@@ -8,9 +8,9 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Page<Bean> page = new Page<Bean>();
+        Page<Bean> page = new Page<>();
         page.setCount(1);
-        List<Bean> items = new ArrayList<Bean>();
+        List<Bean> items = new ArrayList<>();
         Bean item = new Bean();
         item.setId(1);
         item.setName("name");

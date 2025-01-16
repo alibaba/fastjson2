@@ -14,7 +14,7 @@ public class Issue1082 {
     public void test_for_issue() throws Exception {
         Throwable error = null;
         try {
-            Model_1082 m = (Model_1082) JSON.parseObject("{}", Model_1082.class);
+            Model_1082 m = JSON.parseObject("{}", Model_1082.class);
         } catch (JSONException | com.alibaba.fastjson2.JSONException | NullPointerException ex) {
             error = ex;
         }

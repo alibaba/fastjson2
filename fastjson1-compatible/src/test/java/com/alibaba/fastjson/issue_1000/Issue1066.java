@@ -10,8 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.CodingErrorAction;
+import java.nio.charset.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,25 +18,19 @@ import java.util.Map;
  * Created by wenshao on 25/03/2017.
  */
 public class Issue1066 {
-    private static final Charset CHARSET = Charset.forName("UTF-8");
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     @Test
     public void test_for_issue() throws Exception {
-        Map<EnumType, EnumType> map = new HashMap<EnumType, EnumType>();
+        Map<EnumType, EnumType> map = new HashMap<>();
         map.put(EnumType.ONE, EnumType.TWO);
 
         System.out.println("序列化前的参数为:" + map);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             serialize(map, bos);
 
             Object desRes = deserialize(bos.toByteArray());
             System.out.println("反序列化后的结果为:" + JSON.toJSONString(desRes));
-        } finally {
-            try {
-                bos.close();
-            } catch (IOException e) {
-            }
         }
     }
 

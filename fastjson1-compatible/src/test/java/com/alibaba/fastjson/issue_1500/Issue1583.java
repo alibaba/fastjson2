@@ -13,15 +13,15 @@ import java.util.Map;
 public class Issue1583 {
     @Test
     public void test_issue() throws Exception {
-        Map<String, List<String>> totalMap = new HashMap<String, List<String>>();
+        Map<String, List<String>> totalMap = new HashMap<>();
         for (int i = 0; i < 10; i++) {
-            List<String> list = new ArrayList<String>();
+            List<String> list = new ArrayList<>();
             for (int j = 0; j < 2; j++) {
                 list.add("list" + j);
             }
             totalMap.put("map" + i, list);
         }
-        List<Map.Entry<String, List<String>>> mapList = new ArrayList<Map.Entry<String, List<String>>>(totalMap.entrySet());
+        List<Map.Entry<String, List<String>>> mapList = new ArrayList<>(totalMap.entrySet());
         String jsonString = JSON.toJSONString(mapList, SerializerFeature.DisableCircularReferenceDetect);
 
         System.out.println(jsonString);

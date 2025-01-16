@@ -43,20 +43,20 @@ public class JSONArrayTest {
     @Test
     public void test_1() throws Exception {
         JSONArray array = new JSONArray(3);
-        assertEquals(true, array.isEmpty());
+        assertTrue(array.isEmpty());
         array.add(1);
-        assertEquals(false, array.isEmpty());
-        assertEquals(true, array.contains(1));
+        assertFalse(array.isEmpty());
+        assertTrue(array.contains(1));
         assertEquals(1, array.toArray()[0]);
         {
             Object[] items = new Object[1];
             array.toArray(items);
             assertEquals(1, items[0]);
         }
-        assertEquals(true, array.containsAll(Collections.singletonList(1)));
-        assertEquals(true, array.remove(Integer.valueOf(1)));
-        assertEquals(true, array.isEmpty());
-        array.addAll(Collections.singletonList(1));
+        assertTrue(array.contains(1));
+        assertTrue(array.remove(Integer.valueOf(1)));
+        assertTrue(array.isEmpty());
+        array.add(1);
         assertEquals(1, array.size());
         array.removeAll(Collections.singletonList(1));
         assertEquals(0, array.size());
@@ -64,9 +64,9 @@ public class JSONArrayTest {
         assertEquals(3, array.size());
         array.clear();
         array.addAll(0, Arrays.asList(1, 2, 3));
-        assertEquals(true, array.retainAll(Arrays.asList(1, 2)));
+        assertTrue(array.retainAll(Arrays.asList(1, 2)));
         assertEquals(2, array.size());
-        assertEquals(true, array.retainAll(Arrays.asList(2, 4)));
+        assertTrue(array.retainAll(Arrays.asList(2, 4)));
         assertEquals(1, array.size());
         array.set(0, 4);
         assertEquals(4, array.toArray()[0]);
@@ -113,11 +113,11 @@ public class JSONArrayTest {
         assertEquals(123, array.getShort(0).shortValue());
         assertEquals(123, array.getShortValue(0));
 
-        assertTrue(123F == array.getFloat(0).floatValue());
-        assertTrue(123F == array.getFloatValue(0));
+        assertEquals(123F, array.getFloat(0).floatValue());
+        assertEquals(123F, array.getFloatValue(0));
 
-        assertTrue(123D == array.getDouble(0).doubleValue());
-        assertTrue(123D == array.getDoubleValue(0));
+        assertEquals(123D, array.getDouble(0).doubleValue());
+        assertEquals(123D, array.getDoubleValue(0));
 
         assertEquals(123, array.getIntValue(0));
         assertEquals(123, array.getLongValue(0));
@@ -128,16 +128,16 @@ public class JSONArrayTest {
         assertEquals(new Long(222), array.getLong(1));
         assertEquals(new BigDecimal("222"), array.getBigDecimal(1));
 
-        assertEquals(true, array.getBooleanValue(4));
+        assertTrue(array.getBooleanValue(4));
         assertEquals(Boolean.TRUE, array.getBoolean(4));
 
         assertEquals(0, array.getIntValue(5));
         assertEquals(0, array.getLongValue(5));
-        assertEquals(null, array.getInteger(5));
-        assertEquals(null, array.getLong(5));
-        assertEquals(null, array.getBigDecimal(5));
-        assertEquals(null, array.getBoolean(5));
-        assertEquals(false, array.getBooleanValue(5));
+        assertNull(array.getInteger(5));
+        assertNull(array.getLong(5));
+        assertNull(array.getBigDecimal(5));
+        assertNull(array.getBoolean(5));
+        assertFalse(array.getBooleanValue(5));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class JSONArrayTest {
         JSONArray array = new JSONArray();
         array.add(null);
 
-        assertTrue(array.getJSONObject(0) == null);
+        assertNull(array.getJSONObject(0));
     }
 
     @Test
@@ -222,14 +222,14 @@ public class JSONArrayTest {
         JSONArray array = new JSONArray();
         array.add(null);
         assertEquals(0L, array.getLongValue(0));
-        assertEquals(null, array.getLong(0));
+        assertNull(array.getLong(0));
 
         assertEquals(0, array.getIntValue(0));
-        assertEquals(null, array.getInteger(0));
+        assertNull(array.getInteger(0));
 
-        assertEquals(null, array.getString(0));
-        assertEquals(null, array.getJSONArray(0));
-        assertEquals(null, array.getJSONObject(0));
+        assertNull(array.getString(0));
+        assertNull(array.getJSONArray(0));
+        assertNull(array.getJSONObject(0));
     }
 
     @Test
@@ -237,26 +237,26 @@ public class JSONArrayTest {
         JSONArray array = new JSONArray();
         array.add(null);
         assertEquals(0L, array.getLongValue(0));
-        assertEquals(null, array.getLong(0));
+        assertNull(array.getLong(0));
 
         assertEquals(0, array.getIntValue(0));
-        assertEquals(null, array.getInteger(0));
+        assertNull(array.getInteger(0));
 
-        assertEquals(null, array.getString(0));
-        assertEquals(null, array.getJSONArray(0));
-        assertEquals(null, array.getJSONObject(0));
-        assertEquals(null, array.getBigInteger(0));
-        assertEquals(null, array.getBigDecimal(0));
-        assertEquals(null, array.getDouble(0));
+        assertNull(array.getString(0));
+        assertNull(array.getJSONArray(0));
+        assertNull(array.getJSONObject(0));
+        assertNull(array.getBigInteger(0));
+        assertNull(array.getBigDecimal(0));
+        assertNull(array.getDouble(0));
         assertEquals(0D, array.getDoubleValue(0));
-        assertEquals(null, array.getFloat(0));
+        assertNull(array.getFloat(0));
         assertEquals(0F, array.getFloatValue(0));
-        assertEquals(false, array.getBooleanValue(0));
-        assertEquals(null, array.getBoolean(0));
+        assertFalse(array.getBooleanValue(0));
+        assertNull(array.getBoolean(0));
         assertEquals((short) 0, array.getShortValue(0));
-        assertEquals(null, array.getShort(0));
+        assertNull(array.getShort(0));
         assertEquals((byte) 0, array.getByteValue(0));
-        assertEquals(null, array.getByte(0));
+        assertNull(array.getByte(0));
     }
 
     @Test
@@ -264,20 +264,20 @@ public class JSONArrayTest {
         JSONArray object = new JSONArray();
         object.add("null");
         assertEquals(0L, object.getLongValue(0));
-        assertEquals(null, object.getLong(0));
+        assertNull(object.getLong(0));
 
         assertEquals(0, object.getIntValue(0));
-        assertEquals(null, object.getInteger(0));
+        assertNull(object.getInteger(0));
 
-        assertEquals(null, object.getJSONArray(0));
-        assertEquals(null, object.getJSONObject(0));
-        assertEquals(null, object.getBigInteger(0));
-        assertEquals(null, object.getBigDecimal(0));
-        assertEquals(null, object.getFloat(0));
-        assertEquals(null, object.getDouble(0));
-        assertEquals(null, object.getBoolean(0));
-        assertEquals(null, object.getByte(0));
-        assertEquals(null, object.getShort(0));
+        assertNull(object.getJSONArray(0));
+        assertNull(object.getJSONObject(0));
+        assertNull(object.getBigInteger(0));
+        assertNull(object.getBigDecimal(0));
+        assertNull(object.getFloat(0));
+        assertNull(object.getDouble(0));
+        assertNull(object.getBoolean(0));
+        assertNull(object.getByte(0));
+        assertNull(object.getShort(0));
         assertEquals(0, object.getByteValue(0));
         assertEquals(0, object.getShortValue(0));
     }
@@ -287,20 +287,20 @@ public class JSONArrayTest {
         JSONArray object = new JSONArray();
         object.add("");
         assertEquals(0L, object.getLongValue(0));
-        assertEquals(null, object.getLong(0));
+        assertNull(object.getLong(0));
 
         assertEquals(0, object.getIntValue(0));
-        assertEquals(null, object.getInteger(0));
+        assertNull(object.getInteger(0));
 
-        assertEquals(null, object.getJSONArray(0));
-        assertEquals(null, object.getJSONObject(0));
-        assertEquals(null, object.getBigInteger(0));
-        assertEquals(null, object.getBigDecimal(0));
-        assertEquals(null, object.getBoolean(0));
-        assertEquals(null, object.getFloat(0));
-        assertEquals(null, object.getDouble(0));
-        assertEquals(null, object.getByte(0));
-        assertEquals(null, object.getShort(0));
+        assertNull(object.getJSONArray(0));
+        assertNull(object.getJSONObject(0));
+        assertNull(object.getBigInteger(0));
+        assertNull(object.getBigDecimal(0));
+        assertNull(object.getBoolean(0));
+        assertNull(object.getFloat(0));
+        assertNull(object.getDouble(0));
+        assertNull(object.getByte(0));
+        assertNull(object.getShort(0));
         assertEquals(0, object.getByteValue(0));
         assertEquals(0, object.getShortValue(0));
     }
@@ -774,26 +774,18 @@ public class JSONArrayTest {
 
     @Test
     public void test_getBooleanValue() {
-        assertEquals(
-                true,
-                new JSONArray()
-                        .fluentAdd(1)
-                        .getBooleanValue(0));
-        assertEquals(
-                true,
-                new JSONArray()
-                        .fluentAdd("true")
-                        .getBooleanValue(0));
-        assertEquals(
-                false,
-                new JSONArray()
-                        .fluentAdd("FALSE")
-                        .getBooleanValue(0));
-        assertEquals(
-                false,
-                new JSONArray()
-                        .fluentAdd(Boolean.FALSE)
-                        .getBooleanValue(0));
+        assertTrue(new JSONArray()
+                .fluentAdd(1)
+                .getBooleanValue(0));
+        assertTrue(new JSONArray()
+                .fluentAdd("true")
+                .getBooleanValue(0));
+        assertFalse(new JSONArray()
+                .fluentAdd("FALSE")
+                .getBooleanValue(0));
+        assertFalse(new JSONArray()
+                .fluentAdd(Boolean.FALSE)
+                .getBooleanValue(0));
     }
 
     @Test
@@ -890,12 +882,12 @@ public class JSONArrayTest {
         assertEquals(
                 Short.valueOf((short) 12),
                 new JSONArray()
-                        .fluentAdd(Short.valueOf((short) 12))
+                        .fluentAdd((short) 12)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
                 new JSONArray()
-                        .fluentAdd(Byte.valueOf((byte) 12))
+                        .fluentAdd((byte) 12)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
@@ -998,12 +990,12 @@ public class JSONArrayTest {
         assertEquals(
                 Byte.valueOf((byte) 12),
                 new JSONArray()
-                        .fluentAdd(Short.valueOf((short) 12))
+                        .fluentAdd((short) 12)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
                 new JSONArray()
-                        .fluentAdd(Byte.valueOf((byte) 12))
+                        .fluentAdd((byte) 12)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),

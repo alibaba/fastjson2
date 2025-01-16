@@ -45,7 +45,7 @@ public class Issue1603_getter {
     }
 
     public static class Model_3 {
-        private final Collection<String> values = Collections.unmodifiableList(new ArrayList<String>());
+        private final Collection<String> values = Collections.unmodifiableList(new ArrayList<>());
 
         public Collection<String> getValues() {
             return values;

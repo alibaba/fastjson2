@@ -12,18 +12,16 @@ import java.util.Map;
 public class NameFilterTest_boolean {
     @Test
     public void test_namefilter() {
-        NameFilter filter = new NameFilter() {
-            public String process(Object source, String name, Object value) {
-                if (value != null) {
-                    Assert.assertTrue(value instanceof Boolean);
-                }
-
-                if (name.equals("id")) {
-                    return "ID";
-                }
-
-                return name;
+        NameFilter filter = (source, name, value) -> {
+            if (value != null) {
+                Assert.assertTrue(value instanceof Boolean);
             }
+
+            if (name.equals("id")) {
+                return "ID";
+            }
+
+            return name;
         };
 
         SerializeWriter out = new SerializeWriter();
@@ -39,21 +37,19 @@ public class NameFilterTest_boolean {
 
     @Test
     public void test_namefilter_1() throws Exception {
-        NameFilter filter = new NameFilter() {
-            public String process(Object source, String name, Object value) {
-                if (name.equals("id")) {
-                    return "ID";
-                }
-
-                return name;
+        NameFilter filter = (source, name, value) -> {
+            if (name.equals("id")) {
+                return "ID";
             }
+
+            return name;
         };
 
         SerializeWriter out = new SerializeWriter();
         JSONSerializer serializer = new JSONSerializer(out);
         serializer.getNameFilters().add(filter);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("id", true);
         serializer.write(map);
 

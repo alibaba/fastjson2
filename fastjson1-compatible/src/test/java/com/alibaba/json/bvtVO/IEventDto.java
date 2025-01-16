@@ -27,7 +27,7 @@ public class IEventDto
 
     private String source;
 
-    private ArrayList<IEvent> eventList = new ArrayList<IEvent>();
+    private ArrayList<IEvent> eventList = new ArrayList<>();
 
     public String getSource() {
         return source;

@@ -37,7 +37,7 @@ public class Issue3810 {
         JSONObject jo = JSONObject.parseObject(json);
         TestA<List<?>> ret = jo.toJavaObject(outer);
 
-        assertTrue(List.class.isInstance(ret.getA()));
+        assertTrue(ret.getA() instanceof List);
         assertEquals(TestB.class.getName(), ret.getA().get(0).getClass().getName());
     }
 }

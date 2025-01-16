@@ -26,10 +26,7 @@ public class Issue2590 {
         @Override
         public boolean apply(JSONSerializer serializer, Object object, String name) {
             SerialContext context = serializer.getContext();
-            if (context.toString().startsWith("$.item2")) {
-                return false;
-            }
-            return true;
+            return !context.toString().startsWith("$.item2");
         }
     }
 

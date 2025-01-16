@@ -42,9 +42,9 @@ public class Issue2617 {
         String str = "{ \"a\": { \"date\": 6, \"day\": 2, \"hours\": 18, \"minutes\": 37, \"month\": 7, \"seconds\": 1, \"time\": 1565087821607, \"timezoneOffset\": -480, \"year\": 119 } }";
 
         ParserConfig config = new ParserConfig();
-//		config.putDeserializer(Date.class, new MyDateDeserializer());
+//        config.putDeserializer(Date.class, new MyDateDeserializer());
 
-        Date date = ((A2) JSON.parseObject(str, A2.class)).getA();
+        Date date = JSON.parseObject(str, A2.class).getA();
 
         assertEquals(date.getDate(), date.getDate());
         assertEquals(date.getDay(), date.getDay());

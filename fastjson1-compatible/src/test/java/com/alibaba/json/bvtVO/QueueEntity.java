@@ -19,7 +19,7 @@ public class QueueEntity {
     private int id;
     private String description;
 
-    private Map<Integer, PhysicalQueue> pqMap = new HashMap<Integer, PhysicalQueue>();
+    private Map<Integer, PhysicalQueue> pqMap = new HashMap<>();
 
     /**
      * @return the pqMap

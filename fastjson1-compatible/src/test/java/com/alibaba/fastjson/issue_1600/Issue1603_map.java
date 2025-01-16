@@ -27,6 +27,6 @@ public class Issue1603_map {
     }
 
     public static class Model_2 {
-        public final Map<String, Object> values = Collections.unmodifiableMap(new HashMap<String, Object>());
+        public final Map<String, Object> values = Collections.unmodifiableMap(new HashMap<>());
     }
 }

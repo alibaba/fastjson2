@@ -28,24 +28,24 @@ public class StringDeserializerTest {
     }
 
     private boolean equals(StringBuffer sb1, StringBuffer sb2) {
-        if (sb1 == null && sb2 == null) {
+        if (sb1 == sb2) {
             return true;
         }
-        if ((sb1 == null && sb2 != null) || (sb1 != null && sb2 == null)) {
+        if (sb1 == null || sb2 == null) {
             return false;
         }
 
-        return sb1.toString().equals(sb2.toString());
+        return sb1.toString().contentEquals(sb2);
     }
 
     private boolean equals(StringBuilder sb1, StringBuilder sb2) {
-        if (sb1 == null && sb2 == null) {
+        if (sb1 == sb2) {
             return true;
         }
-        if ((sb1 == null && sb2 != null) || (sb1 != null && sb2 == null)) {
+        if (sb1 == null || sb2 == null) {
             return false;
         }
 
-        return sb1.toString().equals(sb2.toString());
+        return sb1.toString().contentEquals(sb2);
     }
 }

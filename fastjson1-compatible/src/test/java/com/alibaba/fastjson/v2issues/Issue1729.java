@@ -52,7 +52,6 @@ public class Issue1729 {
             return 0;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void write(JSONSerializer jsonSerializer, Object o, Object o1, Type type, int i) throws IOException {
         }

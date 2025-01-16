@@ -12,7 +12,7 @@ public class CastTest {
     public void test_0() throws Exception {
         String text;
         {
-            List<Object> list = new ArrayList<Object>();
+            List<Object> list = new ArrayList<>();
 
             list.add(new Header());
 
@@ -51,7 +51,7 @@ public class CastTest {
             this.name = name;
         }
 
-        private List<Item> items = new ArrayList<Item>();
+        private List<Item> items = new ArrayList<>();
 
         public List<Item> getItems() {
             return items;

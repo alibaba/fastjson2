@@ -42,7 +42,7 @@ public class Issue1903 {
 
     class MapHandler
             implements InvocationHandler {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         public Object invoke(Object proxy, Method method, Object[] args) {
             String name = method.getName().substring(3);

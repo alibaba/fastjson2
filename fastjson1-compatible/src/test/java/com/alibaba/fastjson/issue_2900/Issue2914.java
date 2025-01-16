@@ -13,7 +13,7 @@ public class Issue2914 {
     public void test_for_issue() throws Exception {
         ComplexInt complexInt = new ComplexInt();
 
-        Queue<Integer> blockQueueInt = new ArrayBlockingQueue<Integer>(5);
+        Queue<Integer> blockQueueInt = new ArrayBlockingQueue<>(5);
         blockQueueInt.offer(1);
         blockQueueInt.offer(2);
         blockQueueInt.offer(3);
@@ -29,7 +29,7 @@ public class Issue2914 {
 
         Complex complex = new Complex();
 
-        Queue<String> blockQueue = new ArrayBlockingQueue<String>(5);
+        Queue<String> blockQueue = new ArrayBlockingQueue<>(5);
         blockQueue.offer("BlockQueue 1");
         blockQueue.offer("BlockQueue 2");
         blockQueue.offer("BlockQueue 3");

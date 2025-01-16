@@ -24,7 +24,7 @@ public class IntTest {
     @Test
     public void test_map() throws Exception {
         int[] values = new int[]{Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE};
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < values.length; ++i) {
             map.put(Integer.toString(i), values[i]);
         }

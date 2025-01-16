@@ -13,7 +13,7 @@ public class DateTest_dotnet_4 {
         String text = "{\"date\":\"/Date(1461081600321+5000)/\"}";
 
         JSONObject model = JSON.parseObject(text);
-        Assertions.assertEquals(1461081600321L, ((Date) model.getObject("date", Date.class)).getTime());
+        Assertions.assertEquals(1461081600321L, model.getObject("date", Date.class).getTime());
     }
 
     private static class Model {

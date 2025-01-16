@@ -142,7 +142,7 @@ public class DataTransaction
         public static class Param {
             private Limit limit = new Limit();
 
-            private Map<String, String> form = new HashMap<String, String>();
+            private Map<String, String> form = new HashMap<>();
 
             /**
              * 分页信息
@@ -284,9 +284,9 @@ public class DataTransaction
     public static void main(String[] args) {
         DataTransaction dt = new DataTransaction();
 
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = new ArrayList<>();
 
-        Map<String, Object> m = new HashMap<String, Object>();
+        Map<String, Object> m = new HashMap<>();
         m.put("name", "tom");
         m.put("sex", "m");
         list.add(m);
@@ -297,7 +297,7 @@ public class DataTransaction
         dt.getHead().setSeqno("201010");
         dt.getHead().getUser().setId("root");
 
-        Map<String, String> m2 = new HashMap<String, String>();
+        Map<String, String> m2 = new HashMap<>();
         m2.put("name1", "tom");
         m2.put("name2", "tom");
         m2.put("name3", "tom");

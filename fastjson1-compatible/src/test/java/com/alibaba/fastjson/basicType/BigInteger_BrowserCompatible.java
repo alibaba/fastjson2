@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BigInteger_BrowserCompatible {
     @Test
     public void test_for_issue() throws Exception {
-        Map<String, Object> map = new LinkedHashMap<String, Object>();
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put("id1", 9223370018640066466L);
         map.put("id2", new BigInteger("9223370018640066466"));
         assertEquals("{\"id1\":\"9223370018640066466\",\"id2\":\"9223370018640066466\"}",
