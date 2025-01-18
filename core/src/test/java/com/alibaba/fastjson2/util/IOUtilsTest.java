@@ -390,4 +390,11 @@ public class IOUtilsTest {
         assertEquals(i16, IOUtils.convEndian(false, i16));
         assertEquals(Short.reverseBytes(i16), IOUtils.convEndian(true, i16));
     }
+
+    @Test
+    public void test_isASCII() {
+        char[] chars = new char[] {'0', '1', '2', '3', '4', '5', '6', 0x80};
+        assertTrue(IOUtils.isASCII(chars, 0, 4));
+        assertTrue(IOUtils.isASCII(chars, 4, 4));
+    }
 }

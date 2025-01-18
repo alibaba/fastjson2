@@ -1726,6 +1726,13 @@ public class IOUtils {
                 + 0x30303030 + i);
     }
 
+    public static short hex2U(int i) {
+        i = ((i & 0xF0) >> 4) | ((i & 0xF) << 8);
+        int m = (i + 0x06060606) & 0x10101010;
+        return (short) (((m >> 1) - (m >> 4))
+                + 0x30303030 + i);
+    }
+
     public static int utf16Hex2(int i) {
         // 0x000F000F
         i = ((i & 0xF0) >> 4) | ((i & 0xF) << 16);
@@ -1807,5 +1814,21 @@ public class IOUtils {
 
     static short convEndian(boolean big, short n) {
         return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
+    }
+
+    public static boolean isASCII(char[] chars, int coff, int strlen) {
+        int i = coff;
+        for (int upperBound = coff + (strlen & ~3); i < upperBound; i += 4) {
+            if ((getLongLE(chars, i) & 0xFF00FF00FF00FF00L) != 0) {
+                return false;
+            }
+        }
+
+        for (; i < strlen; ++i) {
+            if (chars[i] > 0x00FF) {
+                return false;
+            }
+        }
+        return true;
     }
 }

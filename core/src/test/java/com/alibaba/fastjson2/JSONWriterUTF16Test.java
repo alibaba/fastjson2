@@ -1237,5 +1237,11 @@ public class JSONWriterUTF16Test {
 
         IOUtils.putLongUnaligned(chars, 2, IOUtils.utf16Hex4U(1));
         assertEquals("\\u0001", new String(chars));
+
+        chars = new char[] {'0', '1', '2', '3'};
+        assertEquals(0, IOUtils.getLongLE(chars, 0) & 0xFF00FF00FF00FF00L);
+
+        chars = new char[] {'中', '1', '2', '3'};
+        assertNotEquals(0, IOUtils.getLongLE(chars, 0) & 0xFF00FF00FF00FF00L);
     }
 }
