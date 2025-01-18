@@ -871,7 +871,7 @@ class JSONWriterUTF8
                         putByte(bytes, off + 1, (byte) (0x80 | (c & 0x3f)));
                         off += 2;
                     } else {
-                        putByte(bytes, off++,  ch);
+                        putByte(bytes, off++, ch);
                     }
                     break;
             }
@@ -1100,7 +1100,7 @@ class JSONWriterUTF8
                     default:
                         if (ch == quote) {
                             putByte(bytes, off, (byte) '\\');
-                            putByte(bytes, off+ 1, (byte) quote);
+                            putByte(bytes, off + 1, (byte) quote);
                             off += 2;
                         } else {
                             putByte(bytes, off++, (byte) ch);
@@ -1260,7 +1260,7 @@ class JSONWriterUTF8
             off += 2;
         }
 
-        putByte(bytes, off, (byte)  quote);
+        putByte(bytes, off, (byte) quote);
         this.off = off + 1;
     }
 
