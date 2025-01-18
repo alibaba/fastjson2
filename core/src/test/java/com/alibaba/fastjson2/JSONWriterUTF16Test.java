@@ -1109,6 +1109,26 @@ public class JSONWriterUTF16Test {
         assertEquals("\"" + str + "\"", jsonWriter.toString());
     }
 
+    static boolean containsEscapedUTF16(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) data;
+            if (c == quote || c == '\\' || c < ' ') {
+                return true;
+            }
+            data >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
+        long x5c = v ^ 0x005C005C_005C005CL;
+
+        x22 = (x22 - 0x00010001_00010001L) & ~x22;
+        x5c = (x5c - 0x00010001_00010001L) & ~x5c;
+
+        return ((x22 | x5c | (0x007F007F_007F007FL - v + 0x00100010_00100010L) | v) & 0x00800080_00800080L) != 0;
+    }
+
     @Test
     public void testEscaped_2() {
         String str = "abcd";
@@ -1117,7 +1137,7 @@ public class JSONWriterUTF16Test {
 
         long v = IOUtils.getLongLE(bytes, 0);
         assertFalse(
-                JSONWriterUTF16.containsEscapedUTF16(
+                containsEscapedUTF16(
                         v,
                         BYTE_VEC_64_DOUBLE_QUOTE));
 
@@ -1137,7 +1157,7 @@ public class JSONWriterUTF16Test {
                 long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
-                assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
             }
 
             {
@@ -1145,16 +1165,16 @@ public class JSONWriterUTF16Test {
                 long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
-                assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
-                assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
             }
             {
                 chars[0] = '\'';
                 long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
-                assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
-                assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
             }
         }
         {
@@ -1163,7 +1183,7 @@ public class JSONWriterUTF16Test {
                 long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
-                assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
             }
         }
         {
@@ -1172,7 +1192,7 @@ public class JSONWriterUTF16Test {
                 long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
-                assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
             }
         }
 
@@ -1183,14 +1203,14 @@ public class JSONWriterUTF16Test {
                 long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
-                assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
             }
             for (char c : specials_single) {
                 chars[i] = c;
                 long v = IOUtils.getLongLE(
                         toBytes(chars),
                         0);
-                assertTrue(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
             }
         }
         {
@@ -1198,16 +1218,16 @@ public class JSONWriterUTF16Test {
             long v = IOUtils.getLongLE(
                     toBytes(chars),
                     0);
-            assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
-            assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
         }
         {
             chars = new char[]{'A', 'B', 'C', 'D'};
             long v = IOUtils.getLongLE(
                     toBytes(chars),
                     0);
-            assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
-            assertFalse(JSONWriterUTF16.containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
         }
     }
 
@@ -1243,5 +1263,35 @@ public class JSONWriterUTF16Test {
 
         chars = new char[] {'中', '1', '2', '3'};
         assertNotEquals(0, IOUtils.getLongLE(chars, 0) & 0xFF00FF00FF00FF00L);
+    }
+
+    @Test
+    public void testUTF16() {
+        char[] chars = new char[32];
+        for (int i = 0; i < chars.length; i++) {
+            {
+                Arrays.fill(chars, 'A');
+                chars[chars.length - 1] = '中';
+                String str = new String(chars);
+                String json = JSON.toJSONString(str);
+                assertEquals(str, JSON.parse(json));
+            }
+            {
+                Arrays.fill(chars, 'A');
+                chars[chars.length - 1] = '中';
+                chars[i] = '\r';
+                String str = new String(chars);
+                String json = JSON.toJSONString(str);
+                assertEquals(str, JSON.parse(json));
+            }
+
+            {
+                Arrays.fill(chars, '中');
+                chars[i] = '\r';
+                String str = new String(chars);
+                String json = JSON.toJSONString(str);
+                assertEquals(str, JSON.parse(json));
+            }
+        }
     }
 }
