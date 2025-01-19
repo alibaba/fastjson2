@@ -3240,13 +3240,8 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes) {
-        boolean ascii = false;
-        if (PREDICATE_IS_ASCII != null) {
-            ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
-        }
-
         Context context = createReadContext();
-        if (ascii) {
+        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -3255,12 +3250,7 @@ public abstract class JSONReader
 
     @Deprecated
     public static JSONReader of(Context context, byte[] utf8Bytes) {
-        boolean ascii = false;
-        if (PREDICATE_IS_ASCII != null) {
-            ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
-        }
-
-        if (ascii) {
+        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -3268,12 +3258,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes, Context context) {
-        boolean ascii = false;
-        if (PREDICATE_IS_ASCII != null) {
-            ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
-        }
-
-        if (ascii) {
+        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -3510,7 +3495,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (STRING_VALUE != null && STRING_CODER != null && PREDICATE_IS_ASCII != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
                 final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
