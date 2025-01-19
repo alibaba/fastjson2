@@ -171,7 +171,7 @@ class JSONReaderASCII
                 offset += 3;
             } else if ((c3 = bytes[offset + 3]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\'
-                    && c0 >= 0 && c1 >= 0 && c2 > 0
+                    && (c0 | c1) >= 0 && c2 > 0
             ) {
                 nameValue
                         = (c2 << 16)
@@ -182,7 +182,7 @@ class JSONReaderASCII
                 offset += 4;
             } else if ((c4 = bytes[offset + 4]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\'
-                    && c0 >= 0 && c1 >= 0 && c2 >= 0 && c3 > 0
+                    && (c0 | c1 | c2) >= 0 && c3 > 0
             ) {
                 nameValue
                         = (c3 << 24)
@@ -194,7 +194,7 @@ class JSONReaderASCII
                 offset += 5;
             } else if ((c5 = bytes[offset + 5]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\'
-                    && c0 >= 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 > 0
+                    && (c0 | c1 | c2 | c3) >= 0 && c4 > 0
             ) {
                 nameValue
                         = (((long) c4) << 32)
@@ -207,7 +207,7 @@ class JSONReaderASCII
                 offset += 6;
             } else if ((c6 = bytes[offset + 6]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\'
-                    && c0 >= 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 >= 0 && c5 > 0
+                    && (c0 | c1 | c2 | c3 | c4) >= 0 && c5 > 0
             ) {
                 nameValue
                         = (((long) c5) << 40)
@@ -221,7 +221,7 @@ class JSONReaderASCII
                 offset += 7;
             } else if ((c7 = bytes[offset + 7]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\'
-                    && c0 >= 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 >= 0 && c5 >= 0 && c6 > 0
+                    && (c0 | c1 | c2 | c3 | c4 | c5) >= 0 && c6 > 0
             ) {
                 nameValue
                         = (((long) c6) << 48)
@@ -236,7 +236,7 @@ class JSONReaderASCII
                 offset += 8;
             } else if (bytes[offset + 8] == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\' && c7 != '\\'
-                    && c0 >= 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 >= 0 && c5 >= 0 && c6 >= 0 && c7 > 0
+                    && (c0 | c1 | c2 | c3 | c4 | c5 | c6) >= 0 && c7 > 0
             ) {
                 nameValue
                         = (((long) c7) << 56)
