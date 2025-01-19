@@ -16,7 +16,7 @@ public class EishayWriteStringTest {
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.70.0.23 : 3001 2795
             // zulu11.62.17 : 3288 2549
-            // zulu17.32.13 : 3305 2909 2503
+            // zulu17.32.13 : 3305 2909 2503 2353
             // zulu17.40.91_vec : 2527 2536
         }
     }

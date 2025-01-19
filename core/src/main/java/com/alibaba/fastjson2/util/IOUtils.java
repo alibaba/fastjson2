@@ -1621,19 +1621,23 @@ public class IOUtils {
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int indexOfChar(byte[] value, int ch, int fromIndex) {
-        return indexOfChar(value, ch, fromIndex, value.length);
+    public static int indexOfQuote(byte[] value, int quote, int fromIndex, int max) {
+        int i = fromIndex;
+        int upperBound = fromIndex + ((max - fromIndex) & ~7);
+        long vectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+        while (i < upperBound && notContains(getLongLE(value, i), vectorQuote)) {
+            i += 8;
+        }
+        return indexOfChar0(value, quote, i, max);
     }
 
-    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
-        if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfChar0(value, ch, fromIndex, max);
+    public static int indexOfSlash(byte[] value, int fromIndex, int max) {
+        int i = fromIndex;
+        int upperBound = fromIndex + ((max - fromIndex) & ~7);
+        while (i < upperBound && notContains(getLongLE(value, i), 0x5C5C5C5C5C5C5C5CL)) {
+            i += 8;
         }
-        try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, ch, fromIndex, max);
-        } catch (Throwable e) {
-            throw new JSONException(e.getMessage());
-        }
+        return indexOfChar0(value, '\\', i, max);
     }
 
     private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
@@ -1645,22 +1649,35 @@ public class IOUtils {
         return -1;
     }
 
+    private static boolean notContains(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) v;
+            if (c == quote) {
+                return true;
+            }
+            v >>>= 8;
+          }
+          return false;
+         */
+        long x = v ^ quote;
+        return (((x - 0x0101010101010101L) & ~x) & 0x8080808080808080L) == 0;
+    }
+
     public static int hexDigit4(byte[] bytes, int offset) {
-        int v = Integer.reverseBytes(UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        int v = getIntLE(bytes, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
-        v = ((v >>> 12) & 0xF000)
-                + ((v >>> 8) & 0xF00)
-                + ((v >>> 4) & 0xF0)
-                + (v & 0xF);
-        return v;
+        return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
+    }
+
+    public static int hexDigit4(char[] bytes, int offset) {
+        long v = getLongLE(bytes, offset);
+        v = (v & 0x000F_000F_000F_000FL) + ((((v & 0x0004_0004_0004_00040L) >> 2) | ((v & 0x0004_0004_0004_00040L) << 1)) >>> 4);
+        return (int) (((v & 0xF_0000_0000_0000L) >>> 48) + ((v & 0xF_0000_0000L) >>> 28) + ((v & 0xF_0000) >> 8) + ((v & 0xF) << 12));
     }
 
     public static boolean isDigit(int ch) {
         return ch >= '0' && ch <= '9';
-    }
-
-    public static short getShortUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
     public static short getShortBE(byte[] bytes, int offset) {
@@ -1723,6 +1740,13 @@ public class IOUtils {
         i = ((i & 0xF0) >> 4) | ((i & 0xF) << 8);
         int m = (i + 0x06060606) & 0x10101010;
         return (short) (((m << 1) + (m >> 1) - (m >> 4))
+                + 0x30303030 + i);
+    }
+
+    public static short hex2U(int i) {
+        i = ((i & 0xF0) >> 4) | ((i & 0xF) << 8);
+        int m = (i + 0x06060606) & 0x10101010;
+        return (short) (((m >> 1) - (m >> 4))
                 + 0x30303030 + i);
     }
 
@@ -1807,5 +1831,21 @@ public class IOUtils {
 
     static short convEndian(boolean big, short n) {
         return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
+    }
+
+    public static boolean isASCII(char[] chars, int coff, int strlen) {
+        int i = coff;
+        for (int upperBound = coff + (strlen & ~3); i < upperBound; i += 4) {
+            if ((getLongLE(chars, i) & 0xFF00FF00FF00FF00L) != 0) {
+                return false;
+            }
+        }
+
+        for (; i < strlen; ++i) {
+            if (chars[i] > 0x00FF) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -59,7 +59,6 @@ public class JDKUtils {
 
     public static final MethodHandle METHOD_HANDLE_HAS_NEGATIVE;
     public static final Predicate<byte[]> PREDICATE_IS_ASCII;
-    public static final MethodHandle INDEX_OF_CHAR_LATIN1;
 
     static final MethodHandles.Lookup IMPL_LOOKUP;
     static volatile MethodHandle CONSTRUCTOR_LOOKUP;
@@ -317,6 +316,9 @@ public class JDKUtils {
                     initErrorLast = e;
                 }
             }
+            if (isAscii == null) {
+                isAscii = JDKUtils::isASCII;
+            }
 
             PREDICATE_IS_ASCII = isAscii;
         }
@@ -337,21 +339,6 @@ public class JDKUtils {
             }
             METHOD_HANDLE_HAS_NEGATIVE = handle;
         }
-
-        MethodHandle indexOfCharLatin1 = null;
-        if (JVM_VERSION > 9) {
-            try {
-                Class<?> cStringLatin1 = Class.forName("java.lang.StringLatin1");
-                MethodHandles.Lookup lookup = trustedLookup(cStringLatin1);
-                indexOfCharLatin1 = lookup.findStatic(
-                        cStringLatin1,
-                        "indexOfChar",
-                        MethodType.methodType(int.class, byte[].class, int.class, int.class, int.class));
-            } catch (Throwable ignored) {
-                // ignore
-            }
-        }
-        INDEX_OF_CHAR_LATIN1 = indexOfCharLatin1;
 
         Boolean compact_strings = null;
         try {
@@ -521,5 +508,22 @@ public class JDKUtils {
             chars[i] = (char) (bytes[offset + i] & 0xff);
         }
         return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+    }
+
+    public static boolean isASCII(byte[] chars) {
+        int i = 0;
+        int strlen = chars.length;
+        for (int upperBound = (strlen & ~7); i < upperBound; i += 8) {
+            if ((UNSAFE.getLong(chars, ARRAY_BYTE_BASE_OFFSET + i) & 0x8080808080808080L) != 0) {
+                return false;
+            }
+        }
+
+        for (; i < strlen; ++i) {
+            if (UNSAFE.getByte(chars, ARRAY_BYTE_BASE_OFFSET + i) < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }
