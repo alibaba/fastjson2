@@ -514,7 +514,6 @@ class JSONWriterUTF8
                 && ((v ^ 0xA3A3A3A3A3A3A3A3L) + 0x0101010101010101L & 0x8080808080808080L) == 0x8080808080808080L; // != '\\'
     }
 
-
     protected final void writeStringLatin1BrowserSecure(byte[] values) {
         boolean escape = false;
 
