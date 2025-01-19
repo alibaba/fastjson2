@@ -499,13 +499,6 @@ public abstract class JSONReader
                 + DIGITS2[c2]);
     }
 
-    static char char4(int c1, int c2, int c3, int c4) {
-        return (char) (DIGITS2[c1] * 0x1000
-                + DIGITS2[c2] * 0x100
-                + DIGITS2[c3] * 0x10
-                + DIGITS2[c4]);
-    }
-
     public abstract boolean nextIfObjectStart();
 
     public abstract boolean nextIfNullOrEmptyString();

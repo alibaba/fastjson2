@@ -156,8 +156,6 @@ public final class JSONFactory {
             1.0e20, 1.0e21, 1.0e22
     };
 
-    static final Double DOUBLE_ZERO = (double) 0;
-
     static {
         Properties properties = Conf.DEFAULT_PROPERTIES;
         {

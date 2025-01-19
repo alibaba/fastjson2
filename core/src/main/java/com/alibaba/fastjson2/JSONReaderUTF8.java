@@ -12,6 +12,7 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.Long.MIN_VALUE;
@@ -529,7 +530,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[offset++];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                        ch = hexDigit4(bytes, check3(offset, end));
                         offset += 4;
                         break;
                     }
@@ -642,7 +643,7 @@ class JSONReaderUTF8
                     ch = bytes[offset++];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                            ch = hexDigit4(bytes, check3(offset, end));
                             offset += 4;
                             break;
                         }
@@ -2494,7 +2495,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2568,7 +2569,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2682,7 +2683,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -2749,7 +2750,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2859,7 +2860,7 @@ class JSONReaderUTF8
     @Override
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
-        int offset = nameBegin;
+        int offset = nameBegin, end = this.end;
         final byte[] bytes = this.bytes;
 
         long nameValue = 0;
@@ -2870,7 +2871,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -2969,7 +2970,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -3076,7 +3077,7 @@ class JSONReaderUTF8
 
         char[] chars = new char[nameLength];
 
-        for (int i = 0; offset < nameEnd; ++i) {
+        for (int i = 0, end = this.end; offset < nameEnd; ++i) {
             int ch = bytes[offset];
             if (ch < 0) {
                 ch &= 0xFF;
@@ -3105,7 +3106,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -4069,13 +4070,13 @@ class JSONReaderUTF8
 
             char[] chars = new char[valueLength];
             offset = start;
-            for (int i = 0; ; ++i) {
+            for (int i = 0, end = this.end; ; ++i) {
                 int c = bytes[offset];
                 if (c == '\\') {
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            c = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -4192,7 +4193,7 @@ class JSONReaderUTF8
         char quote = this.ch;
         int valueLength;
         int offset = this.offset;
-        int start = offset;
+        int start = offset, end = this.end;
         boolean ascii = true;
         valueEscape = false;
         final byte[] bytes = this.bytes;
@@ -4251,7 +4252,7 @@ class JSONReaderUTF8
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            c = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -4617,7 +4618,7 @@ class JSONReaderUTF8
             return stringValue;
         }
         final byte[] bytes = this.bytes;
-        int offset = nameBegin;
+        int offset = nameBegin, end = this.end;
         int length = nameEnd - offset;
         if (!nameEscape) {
             if (ANDROID) {
@@ -4695,11 +4696,7 @@ class JSONReaderUTF8
                 c = (char) bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        int c1 = bytes[offset + 1];
-                        int c2 = bytes[offset + 2];
-                        int c3 = bytes[offset + 3];
-                        int c4 = bytes[offset + 4];
-                        c = char4(c1, c2, c3, c4);
+                        c = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -4898,7 +4895,7 @@ class JSONReaderUTF8
                         ch = bytes[++offset];
                         switch (ch) {
                             case 'u': {
-                                ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                                ch = hexDigit4(bytes, check3(offset + 1, end));
                                 offset += 4;
                                 break;
                             }

@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
+import static com.alibaba.fastjson2.util.IOUtils.hexDigit4;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONReaderASCII
@@ -141,7 +143,7 @@ class JSONReaderASCII
         }
 
         final int quote = ch;
-
+        final int end = this.end;
         this.nameAscii = true;
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
@@ -272,7 +274,7 @@ class JSONReaderASCII
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -346,7 +348,7 @@ class JSONReaderASCII
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -453,7 +455,7 @@ class JSONReaderASCII
                 ch = (char) bytes[offset++];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                        ch = hexDigit4(bytes, check3(offset, end));
                         offset += 4;
                         break;
                     }
@@ -534,7 +536,7 @@ class JSONReaderASCII
                     ch = bytes[offset++];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                            ch = hexDigit4(bytes, check3(offset, end));
                             offset += 4;
                             break;
                         }
@@ -665,7 +667,7 @@ class JSONReaderASCII
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -732,7 +734,7 @@ class JSONReaderASCII
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -787,7 +789,7 @@ class JSONReaderASCII
     @Override
     public final long getNameHashCodeLCase() {
         final byte[] bytes = this.bytes;
-        int offset = nameBegin;
+        int offset = nameBegin, end = this.end;
         long nameValue = 0;
         for (int i = 0; offset < end; offset++) {
             int c = bytes[offset];
@@ -796,7 +798,7 @@ class JSONReaderASCII
                 c = bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        c = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -875,7 +877,7 @@ class JSONReaderASCII
                 c = bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        c = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -930,14 +932,14 @@ class JSONReaderASCII
         if (JDKUtils.STRING_CREATOR_JDK11 != null) {
             byte[] chars = new byte[nameLength];
             forStmt:
-            for (int i = 0; offset < nameEnd; ++i) {
+            for (int i = 0, end = this.end; offset < nameEnd; ++i) {
                 byte b = bytes[offset];
 
                 if (b == '\\') {
                     b = bytes[++offset];
                     switch (b) {
                         case 'u': {
-                            char ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            int ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             if (ch > 0xFF) {
                                 chars = null;
@@ -994,7 +996,7 @@ class JSONReaderASCII
                 ch = (char) bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = (char) hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -1376,7 +1378,7 @@ class JSONReaderASCII
                     c = (char) (bytes[++offset]);
                     switch (c) {
                         case 'u': {
-                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            c = (char) hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -1525,7 +1527,7 @@ class JSONReaderASCII
                 c = (char) bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        c = (char) hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }

@@ -1646,13 +1646,15 @@ public class IOUtils {
     }
 
     public static int hexDigit4(byte[] bytes, int offset) {
-        int v = Integer.reverseBytes(UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        int v = getIntLE(bytes, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
-        v = ((v >>> 12) & 0xF000)
-                + ((v >>> 8) & 0xF00)
-                + ((v >>> 4) & 0xF0)
-                + (v & 0xF);
-        return v;
+        return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
+    }
+
+    public static int hexDigit4(char[] bytes, int offset) {
+        long v = getLongLE(bytes, offset);
+        v = (v & 0x000F_000F_000F_000FL) + ((((v & 0x0004_0004_0004_00040L) >> 2) | ((v & 0x0004_0004_0004_00040L) << 1)) >>> 4);
+        return (int) (((v & 0xF_0000_0000_0000L) >>> 48) + ((v & 0xF_0000_0000L) >>> 28) + ((v & 0xF_0000) >> 8) + ((v & 0xF) << 12));
     }
 
     public static boolean isDigit(int ch) {

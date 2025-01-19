@@ -342,7 +342,12 @@ public class IOUtilsTest {
     @Test
     public void hexDigit4() {
         byte[] bytes = "1234ABcd".getBytes(StandardCharsets.UTF_8);
-        System.out.println(Integer.toHexString(IOUtils.hexDigit4(bytes, 0)));
+        assertEquals("1234", Integer.toHexString(IOUtils.hexDigit4(bytes, 0)));
+        assertEquals("34ab", Integer.toHexString(IOUtils.hexDigit4(bytes, 2)));
+
+        char[] chars = "1234ABcd".toCharArray();
+        assertEquals("1234", Integer.toHexString(IOUtils.hexDigit4(chars, 0)));
+        assertEquals("34ab", Integer.toHexString(IOUtils.hexDigit4(chars, 2)));
     }
 
     static int hexDigit4(byte[] bytes, int offset) {
