@@ -468,7 +468,7 @@ class JSONWriterUTF8
         int i = 0;
         final int upperBound = (value.length - i) & ~7;
         for (; i < upperBound; i += 8) {
-            if (!noneEscaped(IOUtils.getLongLE(value, i), vecQuote)) {
+            if (!noneEscaped(getLongUnaligned(value, i), vecQuote)) {
                 break;
             }
         }
