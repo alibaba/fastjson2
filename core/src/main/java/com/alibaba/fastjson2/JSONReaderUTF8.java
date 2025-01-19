@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 
@@ -4816,56 +4817,72 @@ class JSONReaderUTF8
 
     @Override
     public String readString() {
-        final byte[] bytes = this.bytes;
         if (ch == '"' || ch == '\'') {
+            final byte[] bytes = this.bytes;
             char quote = this.ch;
             int valueLength;
             int offset = this.offset;
             final int start = offset, end = this.end;
+            final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
             boolean ascii = true;
             valueEscape = false;
 
-            for (int i = 0; ; ++i) {
-                if (offset >= end) {
-                    throw new JSONException("invalid escape character EOI");
-                }
-
-                int ch = bytes[offset];
-                if (ch == '\\') {
-                    valueEscape = true;
-                    ch = bytes[offset + 1];
-                    offset += (ch == 'u' ? 6 : (ch == 'x' ? 4 : 2));
-                    continue;
-                }
-
-                if (ch >= 0) {
-                    if (ch == quote) {
-                        valueLength = i;
+            {
+                int i = 0;
+                int upperBound = offset + ((end - offset) & ~7);
+                while (offset < upperBound) {
+                    long v = getLongLE(bytes, offset);
+                    if ((v & 0xFF00FF00FF00FF00L) != 0 || JSONReaderUTF8.containsSlashOrQuote(v, byteVectorQuote)) {
                         break;
                     }
-                    offset++;
-                } else {
-                    ascii = false;
-                    switch ((ch & 0xFF) >> 4) {
-                        case 12:
-                        case 13: {
-                            /* 110x xxxx   10xx xxxx*/
-                            offset += 2;
+
+                    offset += 8;
+                    i += 8;
+                }
+                // ...
+
+                for (; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
+                    }
+
+                    int c = bytes[offset];
+                    if (c == '\\') {
+                        valueEscape = true;
+                        c = bytes[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
+                        continue;
+                    }
+
+                    if (c >= 0) {
+                        if (c == quote) {
+                            valueLength = i;
                             break;
                         }
-                        case 14: {
-                            offset += 3;
-                            break;
-                        }
-                        default: {
-                            /* 10xx xxxx,  1111 xxxx */
-                            if ((ch >> 3) == -2) {
-                                offset += 4;
-                                i++;
+                        offset++;
+                    } else {
+                        ascii = false;
+                        switch ((c & 0xFF) >> 4) {
+                            case 12:
+                            case 13: {
+                                /* 110x xxxx   10xx xxxx*/
+                                offset += 2;
                                 break;
                             }
+                            case 14: {
+                                offset += 3;
+                                break;
+                            }
+                            default: {
+                                /* 10xx xxxx,  1111 xxxx */
+                                if ((c >> 3) == -2) {
+                                    offset += 4;
+                                    i++;
+                                    break;
+                                }
 
-                            throw new JSONException("malformed input around byte " + offset);
+                                throw new JSONException("malformed input around byte " + offset);
+                            }
                         }
                     }
                 }
@@ -4881,15 +4898,12 @@ class JSONReaderUTF8
                         ch = bytes[++offset];
                         switch (ch) {
                             case 'u': {
-                                ch = DIGITS2[bytes[offset + 1]] * 0x1000
-                                        + DIGITS2[bytes[offset + 2]] * 0x100
-                                        + DIGITS2[bytes[offset + 3]] * 0x10
-                                        + DIGITS2[bytes[offset + 4]];
+                                ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
                                 offset += 4;
                                 break;
                             }
                             case 'x': {
-                                ch = DIGITS2[bytes[offset + 1]] * 0x10 + DIGITS2[bytes[offset + 2]];
+                                ch = char2(bytes[offset + 1], bytes[offset + 2]);
                                 offset += 2;
                                 break;
                             }
@@ -4925,24 +4939,23 @@ class JSONReaderUTF8
                             offset++;
                         } else {
                             switch ((ch & 0xFF) >> 4) {
-                                case 0b1100:
-                                case 0b1101: {
+                                case 12:
+                                case 13: {
                                     /* 110x xxxx   10xx xxxx*/
-                                    int c2 = bytes[offset + 1];
-                                    chars[i] = (char) (
-                                            ((ch & 0x1F) << 6) | (c2 & 0x3F));
+                                    chars[i] = (char) (((ch & 0x1F) << 6) | (bytes[offset + 1] & 0x3F));
                                     offset += 2;
                                     break;
                                 }
-                                case 0b1110: {
+                                case 14: {
                                     chars[i] = (char)
                                             (((ch & 0x0F) << 12) |
                                                     ((bytes[offset + 1] & 0x3F) << 6) |
-                                                    ((bytes[offset + 2] & 0x3F)));
+                                                    ((bytes[offset + 2] & 0x3F) << 0));
                                     offset += 3;
                                     break;
                                 }
                                 default: {
+                                    /* 10xx xxxx,  1111 xxxx */
                                     char2_utf8(bytes, offset, ch, chars, i);
                                     offset += 4;
                                     i++;
@@ -4962,31 +4975,19 @@ class JSONReaderUTF8
                             (char) (bytes[start] & 0xff),
                             (char) (bytes[start + 1] & 0xff)
                     );
-                } else if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[strlen];
-                    for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[start + i];
-                    }
-
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] buf = Arrays.copyOfRange(bytes, start, offset);
-                    str = STRING_CREATOR_JDK11.apply(buf, LATIN1);
-                } else if (ANDROID) {
-                    str = getLatin1String(start, offset - start);
+                    str = STRING_CREATOR_JDK11.apply(
+                            Arrays.copyOfRange(this.bytes, this.offset, offset),
+                            LATIN1);
                 } else {
-                    str = new String(bytes, start, offset - start, ISO_8859_1);
+                    str = new String(bytes, start, offset - start, StandardCharsets.US_ASCII);
                 }
             } else {
-                str = new String(bytes, start, offset - start, UTF_8);
+                str = new String(bytes, start, offset - start, StandardCharsets.UTF_8);
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
@@ -5006,7 +5007,39 @@ class JSONReaderUTF8
             return str;
         }
 
-        return readStringNotMatch();
+        switch (ch) {
+            case '[':
+                return toString(
+                        readArray());
+            case '{':
+                return toString(
+                        readObject());
+            case '-':
+            case '+':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                readNumber0();
+                Number number = getNumber();
+                return number.toString();
+            case 't':
+            case 'f':
+                boolValue = readBoolValue();
+                return boolValue ? "true" : "false";
+            case 'n': {
+                readNull();
+                return null;
+            }
+            default:
+                throw new JSONException("TODO : " + ch);
+        }
     }
 
     @Override

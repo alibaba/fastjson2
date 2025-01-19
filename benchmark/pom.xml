@@ -32,13 +32,6 @@
             <artifactId>fastjson2-extension</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2-incubator-vector</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>

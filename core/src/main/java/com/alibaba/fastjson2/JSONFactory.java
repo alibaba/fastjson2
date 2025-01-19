@@ -21,8 +21,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.util.JDKUtils.VECTOR_BIT_LENGTH;
-
 public final class JSONFactory {
     public static final class Conf {
         static final Properties DEFAULT_PROPERTIES;
@@ -91,8 +89,6 @@ public final class JSONFactory {
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
-
-    static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
 
     static int defaultDecimalMaxScale = 2048;
 
@@ -223,23 +219,6 @@ public final class JSONFactory {
         useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
         useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
-
-        boolean readerVector = getPropertyBool(properties, "fastjson2.readerVector", false);
-
-        JSONReaderUTF8Creator readerCreatorUTF8 = null;
-        if (JDKUtils.VECTOR_SUPPORT) {
-            if (VECTOR_BIT_LENGTH >= 64) {
-                if (readerVector) {
-                    try {
-                        Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
-                        readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
-                    } catch (Throwable e) {
-                        initErrorLast = e;
-                    }
-                }
-            }
-        }
-        INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;
     }
 
     private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {

@@ -1425,7 +1425,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public String readString() {
+    public final String readString() {
         if (ch == '"' || ch == '\'') {
             final byte[] bytes = this.bytes;
             final byte quote = (byte) ch;

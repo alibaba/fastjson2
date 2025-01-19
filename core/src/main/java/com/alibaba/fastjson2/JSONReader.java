@@ -3257,11 +3257,7 @@ public abstract class JSONReader
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-        } else {
-            return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
-        }
+        return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
     }
 
     @Deprecated
@@ -3275,11 +3271,7 @@ public abstract class JSONReader
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-        } else {
-            return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
-        }
+        return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
     }
 
     public static JSONReader of(byte[] utf8Bytes, Context context) {
@@ -3292,11 +3284,7 @@ public abstract class JSONReader
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-        } else {
-            return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
-        }
+        return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
     }
 
     public static JSONReader of(char[] chars) {
@@ -3392,11 +3380,7 @@ public abstract class JSONReader
         Context context = JSONFactory.createReadContext();
 
         if (charset == StandardCharsets.UTF_8) {
-            if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-            } else {
-                return new JSONReaderUTF8(context, null, bytes, offset, length);
-            }
+            return new JSONReaderUTF8(context, null, bytes, offset, length);
         }
 
         if (charset == StandardCharsets.UTF_16) {
@@ -3429,11 +3413,7 @@ public abstract class JSONReader
                 return new JSONReaderASCII(context, null, bytes, offset, length);
             }
 
-            if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-            } else {
-                return new JSONReaderUTF8(context, null, bytes, offset, length);
-            }
+            return new JSONReaderUTF8(context, null, bytes, offset, length);
         }
 
         if (charset == StandardCharsets.UTF_16) {
@@ -3448,20 +3428,11 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length) {
-        Context context = createReadContext();
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-        } else {
-            return new JSONReaderUTF8(context, null, bytes, offset, length);
-        }
+        return new JSONReaderUTF8(createReadContext(), null, bytes, offset, length);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Context context) {
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-        } else {
-            return new JSONReaderUTF8(context, null, bytes, offset, length);
-        }
+        return new JSONReaderUTF8(context, null, bytes, offset, length);
     }
 
     public static JSONReader of(char[] chars, int offset, int length) {

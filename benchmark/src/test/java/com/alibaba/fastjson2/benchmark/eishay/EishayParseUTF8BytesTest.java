@@ -63,8 +63,8 @@ public class EishayParseUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        fastjson2_features();
+        fastjson2();
+//        fastjson2_features();
 //        dsljson();
 //        jackson();
     }
