@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriterUTF8.containsEscaped;
+import static com.alibaba.fastjson2.JSONWriterUTF8.noneEscaped;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -75,7 +75,7 @@ class JSONWriterUTF16
             chars = new char[8192];
         }
         this.chars = chars;
-        this.byteVectorQuote = this.useSingleQuote ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+        this.byteVectorQuote = this.useSingleQuote ? ~0x2727_2727_2727_2727L : ~0x2222_2222_2222_2222L;
     }
 
     public final void writeNull() {
@@ -280,12 +280,8 @@ class JSONWriterUTF16
         int i = 0;
         final long vecQuote = this.byteVectorQuote;
         final int upperBound = (value.length - i) & ~7;
-        for (; i < upperBound; i += 8) {
-            long vec64 = getLongLE(value, i);
-            if (containsEscaped(vec64, vecQuote)) {
-                escape = true;
-                break;
-            }
+        long vec64;
+        for (; i < upperBound && noneEscaped(vec64 = getLongLE(value, i), vecQuote); i += 8) {
             IOUtils.putLongLE(chars, off, expand(vec64));
             IOUtils.putLongLE(chars, off + 4, expand(vec64 >>> 32));
             off += 8;
@@ -372,7 +368,7 @@ class JSONWriterUTF16
             if (i + 8 < char_len) {
                 long v0 = getLongLE(value, i << 1);
                 long v1 = getLongLE(value, (i + 4) << 1);
-                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && !containsEscaped((v0 << 8) | v1, vecQuote)) {
+                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && noneEscaped((v0 << 8) | v1, vecQuote)) {
                     putLongLE(chars, off, v0);
                     putLongLE(chars, off + 4, v1);
                     i += 8;
@@ -2999,7 +2995,7 @@ class JSONWriterUTF16
             if (i + 8 < char_len) {
                 long v0 = getLongLE(value, i);
                 long v1 = getLongLE(value, i + 4);
-                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && !containsEscaped((v0 << 8) | v1, vecQuote)) {
+                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && noneEscaped((v0 << 8) | v1, vecQuote)) {
                     putLongLE(chars, off, v0);
                     putLongLE(chars, off + 4, v1);
                     i += 8;
