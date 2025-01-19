@@ -63,7 +63,7 @@ class JSONWriterUTF8
             bytes = new byte[8192];
         }
         this.bytes = bytes;
-        this.byteVectorQuote = this.useSingleQuote ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+        this.byteVectorQuote = this.useSingleQuote ? ~0x2727_2727_2727_2727L : ~0x2222_2222_2222_2222L;
     }
 
     public final void writeNull() {
@@ -468,7 +468,7 @@ class JSONWriterUTF8
         int i = 0;
         final int upperBound = (value.length - i) & ~7;
         for (; i < upperBound; i += 8) {
-            if (containsEscaped(IOUtils.getLongLE(value, i), vecQuote)) {
+            if (!noneEscaped(IOUtils.getLongLE(value, i), vecQuote)) {
                 break;
             }
         }
@@ -498,25 +498,12 @@ class JSONWriterUTF8
         this.off = off + 1;
     }
 
-    static boolean containsEscaped(long v, long quote) {
-        /*
-          for (int i = 0; i < 8; ++i) {
-            byte c = (byte) data;
-            if (c == quote || c == '\\' || c < ' ') {
-                return true;
-            }
-            data >>>= 8;
-          }
-          return false;
-         */
-        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
-        long x5c = v ^ 0x5C5C5C5C5C5C5C5CL;
-
-        x22 = (x22 - 0x0101010101010101L) & ~x22;
-        x5c = (x5c - 0x0101010101010101L) & ~x5c;
-
-        return ((x22 | x5c | (0x7F7F7F7F7F7F7F7FL - v + 0x2020202020202020L) | v) & 0x8080808080808080L) != 0;
+    static boolean noneEscaped(long v, long quote) {
+        return ((v + 0x6060606060606060L) & 0x8080808080808080L) == 0x8080808080808080L // all >= 32
+                && ((v ^ quote) + 0x0101010101010101L & 0x8080808080808080L) == 0x8080808080808080L // != quote
+                &&  ((v ^ 0xA3A3A3A3A3A3A3A3L) + 0x0101010101010101L & 0x8080808080808080L) == 0x8080808080808080L; // != '\\'
     }
+
 
     protected final void writeStringLatin1BrowserSecure(byte[] values) {
         boolean escape = false;
