@@ -499,6 +499,16 @@ class JSONWriterUTF8
     }
 
     static boolean noneEscaped(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) data;
+            if (c == (byte) quote || c == '\\' || c < ' ') {
+                return false;
+            }
+            data >>>= 8;
+          }
+          return true;
+         */
         return ((v + 0x6060606060606060L) & 0x8080808080808080L) == 0x8080808080808080L // all >= 32
                 && ((v ^ quote) + 0x0101010101010101L & 0x8080808080808080L) == 0x8080808080808080L // != quote
                 && ((v ^ 0xA3A3A3A3A3A3A3A3L) + 0x0101010101010101L & 0x8080808080808080L) == 0x8080808080808080L; // != '\\'
