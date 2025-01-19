@@ -1431,13 +1431,13 @@ class JSONReaderASCII
             int valueLength;
             boolean valueEscape = false;
 
-            int index = IOUtils.indexOfChar(bytes, quote, offset, end);
+            int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
             if (index == -1) {
                 throw error("invalid escape character EOI");
             }
             int slashIndex = nextEscapeIndex;
             if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
-                nextEscapeIndex = slashIndex = IOUtils.indexOfChar(bytes, '\\', offset, end);
+                nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
             }
             if (slashIndex == -1 || slashIndex > index) {
                 valueLength = index - offset;

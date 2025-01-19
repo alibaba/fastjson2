@@ -365,17 +365,45 @@ public class IOUtilsTest {
     }
 
     @Test
-    public void indexOf() throws Throwable {
-        byte[] bytes = "abcda".getBytes(StandardCharsets.UTF_8);
+    public void indexOf() {
+        byte[] bytes = "'b'd'".getBytes(StandardCharsets.UTF_8);
         assertEquals(2,
-                IOUtils.indexOfChar(
-                        bytes, 'c', 0));
+                IOUtils.indexOfQuote(
+                        bytes, '\'', 1, bytes.length));
         assertEquals(0,
-                IOUtils.indexOfChar(
-                        bytes, 'a', 0));
+                IOUtils.indexOfQuote(
+                        bytes, '\'', 0, bytes.length));
         assertEquals(4,
-                IOUtils.indexOfChar(
-                        bytes, 'a', 1));
+                IOUtils.indexOfQuote(
+                        bytes, '\'', 3, bytes.length));
+    }
+
+    @Test
+    public void indexOf1() {
+        byte[] bytes = "\"b\"d\"".getBytes(StandardCharsets.UTF_8);
+        assertEquals(2,
+                IOUtils.indexOfQuote(
+                        bytes, '"', 1, bytes.length));
+        assertEquals(0,
+                IOUtils.indexOfQuote(
+                        bytes, '"', 0, bytes.length));
+        assertEquals(4,
+                IOUtils.indexOfQuote(
+                        bytes, '"', 3, bytes.length));
+    }
+
+    @Test
+    public void indexOfSlash() {
+        byte[] bytes = "\\b\\d\\".getBytes(StandardCharsets.UTF_8);
+        assertEquals(2,
+                IOUtils.indexOfSlash(
+                        bytes, 1, bytes.length));
+        assertEquals(0,
+                IOUtils.indexOfSlash(
+                        bytes, 0, bytes.length));
+        assertEquals(4,
+                IOUtils.indexOfSlash(
+                        bytes, 3, bytes.length));
     }
 
     @Test

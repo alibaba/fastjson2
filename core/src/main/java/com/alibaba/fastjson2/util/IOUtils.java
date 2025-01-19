@@ -1621,19 +1621,23 @@ public class IOUtils {
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int indexOfChar(byte[] value, int ch, int fromIndex) {
-        return indexOfChar(value, ch, fromIndex, value.length);
+    public static int indexOfQuote(byte[] value, int quote, int fromIndex, int max) {
+        int i = fromIndex;
+        int upperBound = fromIndex + ((max - fromIndex) & ~7);
+        long vectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+        while (i < upperBound && notContains(getLongLE(value, i), vectorQuote)) {
+            i += 8;
+        }
+        return indexOfChar0(value, quote, i, max);
     }
 
-    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
-        if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfChar0(value, ch, fromIndex, max);
+    public static int indexOfSlash(byte[] value, int fromIndex, int max) {
+        int i = fromIndex;
+        int upperBound = fromIndex + ((max - fromIndex) & ~7);
+        while (i < upperBound && notContains(getLongLE(value, i), 0x5C5C5C5C5C5C5C5CL)) {
+            i += 8;
         }
-        try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, ch, fromIndex, max);
-        } catch (Throwable e) {
-            throw new JSONException(e.getMessage());
-        }
+        return indexOfChar0(value, '\\', i, max);
     }
 
     private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
@@ -1643,6 +1647,21 @@ public class IOUtils {
             }
         }
         return -1;
+    }
+
+    private static boolean notContains(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) v;
+            if (c == quote) {
+                return true;
+            }
+            v >>>= 8;
+          }
+          return false;
+         */
+        long x = v ^ quote;
+        return (((x - 0x0101010101010101L) & ~x) & 0x8080808080808080L) == 0;
     }
 
     public static int hexDigit4(byte[] bytes, int offset) {
@@ -1659,10 +1678,6 @@ public class IOUtils {
 
     public static boolean isDigit(int ch) {
         return ch >= '0' && ch <= '9';
-    }
-
-    public static short getShortUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
     public static short getShortBE(byte[] bytes, int offset) {
