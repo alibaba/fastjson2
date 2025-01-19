@@ -515,7 +515,7 @@ class JSONWriterUTF8
         x22 = (x22 - 0x0101010101010101L) & ~x22;
         x5c = (x5c - 0x0101010101010101L) & ~x5c;
 
-        return ((x22 | x5c | (0x7F7F7F7F7F7F7F7FL - v + 0x1010101010101010L) | v) & 0x8080808080808080L) != 0;
+        return ((x22 | x5c | (0x7F7F7F7F7F7F7F7FL - v + 0x2020202020202020L) | v) & 0x8080808080808080L) != 0;
     }
 
     protected final void writeStringLatin1BrowserSecure(byte[] values) {
