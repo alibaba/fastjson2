@@ -3045,72 +3045,49 @@ class JSONReaderUTF16
 
     @Override
     public String readString() {
+        final char[] chars = this.chars;
         if (ch == '"' || ch == '\'') {
-            char[] chars = this.chars;
             final char quote = ch;
+            final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
 
             int offset = this.offset;
-            final int start = offset;
+            final int start = offset, end = this.end;
             int valueLength;
             boolean valueEscape = false;
 
-            _for:
+            int upperBound = offset + ((end - offset) & ~7);
             {
                 int i = 0;
-                char c0 = 0, c1 = 0, c2 = 0, c3;
-
-                // vector optimize
-                boolean quoted = false;
-                int upperBound = offset + ((end - offset) & ~3);
                 while (offset < upperBound) {
-                    c0 = chars[offset];
-                    c1 = chars[offset + 1];
-                    c2 = chars[offset + 2];
-                    c3 = chars[offset + 3];
-                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
+                    long v0 = getLongLE(chars, offset);
+                    long v1 = getLongLE(chars, offset + 4);
+                    if (((v0 | v1) & 0xFF00FF00FF00FF00L) != 0
+                            || JSONReaderUTF8.containsSlashOrQuote((v0 << 8) | v1, byteVectorQuote)
+                    ) {
                         break;
                     }
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
-                        quoted = true;
-                        break;
-                    }
-                    offset += 4;
-                    i += 4;
+
+                    offset += 8;
+                    i += 8;
                 }
 
-                if (quoted) {
-                    if (c0 == quote) {
-                        // skip
-                    } else if (c1 == quote) {
-                        offset++;
-                        i++;
-                    } else if (c2 == quote) {
-                        offset += 2;
-                        i += 2;
-                    } else {
-                        offset += 3;
-                        i += 3;
+                for (; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException(info("invalid escape character EOI"));
                     }
-                    valueLength = i;
-                } else {
-                    for (; ; ++i) {
-                        if (offset >= end) {
-                            throw new JSONException(info("invalid escape character EOI"));
-                        }
-                        char c = chars[offset];
-                        if (c == '\\') {
-                            valueEscape = true;
-                            c = chars[offset + 1];
-                            offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
-                            continue;
-                        }
+                    char c = chars[offset];
+                    if (c == '\\') {
+                        valueEscape = true;
+                        c = chars[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
+                        continue;
+                    }
 
-                        if (c == quote) {
-                            valueLength = i;
-                            break _for;
-                        }
-                        offset++;
+                    if (c == quote) {
+                        valueLength = i;
+                        break;
                     }
+                    offset++;
                 }
             }
 
@@ -3162,11 +3139,7 @@ class JSONReaderUTF16
                     offset++;
                 }
 
-                if (STRING_CREATOR_JDK8 != null) {
-                    str = STRING_CREATOR_JDK8.apply(buf, Boolean.TRUE);
-                } else {
-                    str = new String(buf);
-                }
+                str = new String(buf);
             } else {
                 char c0, c1;
                 int strlen = offset - start;

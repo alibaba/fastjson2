@@ -93,7 +93,6 @@ public final class JSONFactory {
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
-    static final JSONReaderUTF16Creator INCUBATOR_VECTOR_READER_CREATOR_UTF16;
 
     static int defaultDecimalMaxScale = 2048;
 
@@ -228,7 +227,6 @@ public final class JSONFactory {
         boolean readerVector = getPropertyBool(properties, "fastjson2.readerVector", false);
 
         JSONReaderUTF8Creator readerCreatorUTF8 = null;
-        JSONReaderUTF16Creator readerCreatorUTF16 = null;
         if (JDKUtils.VECTOR_SUPPORT) {
             if (VECTOR_BIT_LENGTH >= 64) {
                 if (readerVector) {
@@ -240,18 +238,8 @@ public final class JSONFactory {
                     }
                 }
             }
-
-            if (VECTOR_BIT_LENGTH >= 128 && readerVector) {
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
-                    readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
-                } catch (Throwable e) {
-                    initErrorLast = e;
-                }
-            }
         }
         INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;
-        INCUBATOR_VECTOR_READER_CREATOR_UTF16 = readerCreatorUTF16;
     }
 
     private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {

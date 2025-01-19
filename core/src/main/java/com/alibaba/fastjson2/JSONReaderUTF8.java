@@ -4796,6 +4796,24 @@ class JSONReaderUTF8
         }
     }
 
+    static boolean containsSlashOrQuote(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) v;
+            if (c == '"' || c == '\\') {
+                return true;
+            }
+            v >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22
+        long x5c = v ^ 0x5C5C5C5C5C5C5C5CL; // \n -> 0x0a
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x5c = (x5c - 0x0101010101010101L) & ~x5c;
+        return ((x22 | x5c) & 0x8080808080808080L) != 0;
+    }
+
     @Override
     public String readString() {
         final byte[] bytes = this.bytes;
