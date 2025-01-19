@@ -624,13 +624,6 @@ class JSONReaderASCII
         return hashCode;
     }
 
-    public static long getLong(byte[] bytes, int off) {
-        return UNSAFE.getLong(
-                bytes,
-                ARRAY_BYTE_BASE_OFFSET + off
-        );
-    }
-
     @Override
     public final long readValueHashCode() {
         int ch = this.ch;
