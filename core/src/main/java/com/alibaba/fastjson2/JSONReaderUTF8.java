@@ -4733,7 +4733,6 @@ class JSONReaderUTF8
 
         final byte[] bytes = this.bytes;
         byte ch = bytes[offset++];
-        byte start = ch;
 
         boolean multi;
         if (ch == '*') {
