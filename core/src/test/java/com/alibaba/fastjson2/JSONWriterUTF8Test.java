@@ -1131,7 +1131,6 @@ public class JSONWriterUTF8Test {
         assertEquals("\\u0001", new String(bytes));
     }
 
-
     static boolean containsEscaped(long v, long quote) {
         /*
           for (int i = 0; i < 8; ++i) {
