@@ -510,20 +510,7 @@ public class JDKUtils {
         return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
     }
 
-    public static boolean isASCII(byte[] chars) {
-        int i = 0;
-        int strlen = chars.length;
-        for (int upperBound = (strlen & ~7); i < upperBound; i += 8) {
-            if ((UNSAFE.getLong(chars, ARRAY_BYTE_BASE_OFFSET + i) & 0x8080808080808080L) != 0) {
-                return false;
-            }
-        }
-
-        for (; i < strlen; ++i) {
-            if (UNSAFE.getByte(chars, ARRAY_BYTE_BASE_OFFSET + i) < 0) {
-                return false;
-            }
-        }
-        return true;
+    static boolean isASCII(byte[] chars) {
+        return IOUtils.isASCII(chars, 0, chars.length);
     }
 }
