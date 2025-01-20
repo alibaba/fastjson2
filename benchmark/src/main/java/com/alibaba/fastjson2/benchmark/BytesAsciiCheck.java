@@ -76,8 +76,18 @@ public class BytesAsciiCheck {
     }
 
     @Benchmark
+    public void isASCIIJDK(Blackhole bh) throws Throwable {
+        bh.consume(com.alibaba.fastjson2.util.JDKUtils.PREDICATE_IS_ASCII.test(bytes));
+    }
+
+    @Benchmark
     public void indexOfSlash(Blackhole bh) throws Throwable {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.indexOfSlash(bytes, 0, bytes.length));
+    }
+
+    @Benchmark
+    public void indexOfSlashV(Blackhole bh) throws Throwable {
+        bh.consume(com.alibaba.fastjson2.util.IOUtils.indexOfSlashV(bytes, 0, bytes.length));
     }
 
     @Benchmark
@@ -119,7 +129,7 @@ public class BytesAsciiCheck {
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
                 .threads(1)
-                .forks(3)
+                .forks(1)
                 .build();
         new Runner(options).run();
     }

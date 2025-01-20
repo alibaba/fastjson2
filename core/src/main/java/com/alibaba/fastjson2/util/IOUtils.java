@@ -1622,22 +1622,58 @@ public class IOUtils {
     }
 
     public static int indexOfQuote(byte[] value, int quote, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfQuote0(value, quote, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, quote, fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+    static int indexOfQuote0(byte[] value, int quote, int fromIndex, int max) {
         int i = fromIndex;
+        long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
         long vectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
-        while (i < upperBound && notContains(getLongLE(value, i), vectorQuote)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(value, address), vectorQuote)) {
             i += 8;
+            address += 8;
         }
         return indexOfChar0(value, quote, i, max);
     }
 
     public static int indexOfSlash(byte[] value, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfSlashV(value, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\\', fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+
+    public static int indexOfSlashV(byte[] value, int fromIndex, int max) {
         int i = fromIndex;
+        long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(getLongLE(value, i), 0x5C5C5C5C5C5C5C5CL)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x5C5C5C5C5C5C5C5CL)) {
             i += 8;
+            address += 8;
         }
         return indexOfChar0(value, '\\', i, max);
+    }
+
+    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfChar0(value, ch, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, ch, fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
     }
 
     private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
