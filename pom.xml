@@ -1022,7 +1022,7 @@
         <profile>
             <id>enable-codegen</id>
             <activation>
-                <jdk>(,21]</jdk>
+                <jdk>(,22]</jdk>
             </activation>
             <modules>
                 <module>codegen</module>
