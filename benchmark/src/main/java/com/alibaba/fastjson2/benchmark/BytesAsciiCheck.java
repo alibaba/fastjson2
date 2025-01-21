@@ -75,7 +75,6 @@ public class BytesAsciiCheck {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.isASCII(chars, 0, chars.length));
     }
 
-
     @Benchmark
     public void isASCII(Blackhole bh) throws Throwable {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.isASCII(bytes, 0, bytes.length));
