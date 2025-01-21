@@ -477,7 +477,7 @@ final class JSONWriterJSONB
 
             off = this.off;
         } else {
-            ascii = isASCII(chars, coff, strlen);
+            ascii = isLatin1(chars, coff, strlen);
         }
 
         int minCapacity = (ascii ? strlen : strlen * 3) + off + 6;

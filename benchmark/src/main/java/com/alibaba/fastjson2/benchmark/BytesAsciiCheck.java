@@ -71,13 +71,13 @@ public class BytesAsciiCheck {
     }
 
     @Benchmark
-    public void isASCIIChar(Blackhole bh) {
-        bh.consume(com.alibaba.fastjson2.util.IOUtils.isASCII(chars, 0, chars.length));
+    public void isASCII(Blackhole bh) throws Throwable {
+        bh.consume(com.alibaba.fastjson2.util.IOUtils.isASCII(bytes, 0, bytes.length));
     }
 
     @Benchmark
-    public void isASCII(Blackhole bh) throws Throwable {
-        bh.consume(com.alibaba.fastjson2.util.IOUtils.isASCII(bytes, 0, bytes.length));
+    public void isLatin1(Blackhole bh) throws Throwable {
+        bh.consume(com.alibaba.fastjson2.util.IOUtils.isLatin1(chars, 0, chars.length));
     }
 
     @Benchmark
@@ -111,11 +111,6 @@ public class BytesAsciiCheck {
         } catch (Throwable ignored) {
             throw new JSONException("");
         }
-    }
-
-//    @Benchmark
-    public void isASCII_chars(Blackhole bh) throws Throwable {
-        bh.consume(com.alibaba.fastjson2.util.IOUtils.isASCII(chars, 0, chars.length));
     }
 
     public static boolean hasNegatives(byte[] ba, int off, int len) {

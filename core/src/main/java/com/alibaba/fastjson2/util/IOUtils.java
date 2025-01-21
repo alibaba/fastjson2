@@ -1869,19 +1869,19 @@ public class IOUtils {
         return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
     }
 
-    public static boolean isASCII(char[] chars, int off, int len) {
+    public static boolean isLatin1(char[] chars, int off, int len) {
         int upperBound = off + (len & ~7);
         int end = off + len;
         long address = ARRAY_BYTE_BASE_OFFSET + ((long) off << 1);
         while (off < upperBound
-                && (convEndian(false, UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8)) & 0xFF80FF80FF80FF80L) == 0
+                && (convEndian(false, UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8)) & 0xFF00FF00FF00FF00L) == 0
         ) {
             address += 16;
             off += 8;
         }
 
         while (off < end) {
-            if (chars[off++] >= 0x7F) {
+            if (chars[off++] > 0xFF) {
                 return false;
             }
         }
