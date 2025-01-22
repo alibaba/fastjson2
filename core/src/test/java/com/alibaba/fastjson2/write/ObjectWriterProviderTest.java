@@ -150,8 +150,8 @@ public class ObjectWriterProviderTest {
     public static class Bean {
     }
 
-    public static class BeanMethodInterceptor
-            implements MethodInterceptor {
+    public static class BeanMethodInterceptor implements MethodInterceptor {
+
         @Override
         public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
             return methodProxy.invokeSuper(o, objects);
