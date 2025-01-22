@@ -1665,17 +1665,6 @@ public class IOUtils {
         return indexOfChar0(value, '\\', i, max);
     }
 
-    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
-        if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfChar0(value, ch, fromIndex, max);
-        }
-        try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, ch, fromIndex, max);
-        } catch (Throwable e) {
-            throw new JSONException(e.getMessage());
-        }
-    }
-
     private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
         for (int i = fromIndex; i < max; i++) {
             if (value[i] == ch) {
