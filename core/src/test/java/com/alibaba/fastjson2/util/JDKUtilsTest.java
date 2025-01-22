@@ -4,11 +4,11 @@ import com.alibaba.fastjson2.function.ToByteFunction;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.*;
+import java.util.Arrays;
 import java.util.function.ToIntFunction;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JDKUtilsTest {
     @Test
@@ -133,6 +133,13 @@ public class JDKUtilsTest {
         MethodHandle target = callSite.getTarget();
         ToIntFunction<PrivateBeanInt> func = (ToIntFunction<PrivateBeanInt>) target.invokeExact();
         assertNotNull(func);
+    }
+
+    @Test
+    public void test_isASCII() {
+        byte[] bytes = new byte[127];
+        Arrays.fill(bytes, (byte) 'a');
+        assertTrue(isASCII(bytes));
     }
 
     private static class PrivateBeanInt {

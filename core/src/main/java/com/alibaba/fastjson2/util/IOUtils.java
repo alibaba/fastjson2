@@ -118,7 +118,7 @@ public class IOUtils {
             DIGITS_K_64[i] = c0 + v;
         }
         ZERO_DOT_LATIN1 = UNSAFE.getShort(new byte[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
-        ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
+        ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_CHAR_BASE_OFFSET);
     }
 
     public static void writeDigitPair(byte[] buf, int charPos, int value) {
@@ -1622,20 +1622,45 @@ public class IOUtils {
     }
 
     public static int indexOfQuote(byte[] value, int quote, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfQuote0(value, quote, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, quote, fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+    static int indexOfQuote0(byte[] value, int quote, int fromIndex, int max) {
         int i = fromIndex;
+        long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
         long vectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
-        while (i < upperBound && notContains(getLongLE(value, i), vectorQuote)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(value, address), vectorQuote)) {
             i += 8;
+            address += 8;
         }
         return indexOfChar0(value, quote, i, max);
     }
 
     public static int indexOfSlash(byte[] value, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfSlashV(value, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\\', fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+
+    public static int indexOfSlashV(byte[] value, int fromIndex, int max) {
         int i = fromIndex;
+        long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(getLongLE(value, i), 0x5C5C5C5C5C5C5C5CL)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x5C5C5C5C5C5C5C5CL)) {
             i += 8;
+            address += 8;
         }
         return indexOfChar0(value, '\\', i, max);
     }
@@ -1710,7 +1735,7 @@ public class IOUtils {
     }
 
     public static int getIntUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
+        return UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
     }
 
     public static long getLongBE(byte[] bytes, int offset) {
@@ -1723,7 +1748,7 @@ public class IOUtils {
     }
 
     public static long getLongUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
+        return UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
     }
 
     public static long getLongLE(byte[] bytes, int offset) {
@@ -1733,7 +1758,7 @@ public class IOUtils {
 
     public static long getLongLE(char[] bytes, int offset) {
         return convEndian(false,
-                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1)));
+                UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
     }
 
     public static short hex2(int i) {
@@ -1833,19 +1858,36 @@ public class IOUtils {
         return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
     }
 
-    public static boolean isASCII(char[] chars, int coff, int strlen) {
-        int i = coff;
-        for (int upperBound = coff + (strlen & ~3); i < upperBound; i += 4) {
-            if ((getLongLE(chars, i) & 0xFF00FF00FF00FF00L) != 0) {
-                return false;
-            }
+    public static boolean isLatin1(char[] chars, int off, int len) {
+        int upperBound = off + (len & ~7);
+        int end = off + len;
+        long address = ARRAY_CHAR_BASE_OFFSET + off;
+        long value = 0;
+        while (off < upperBound) {
+            value |= UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8);
+            address += 16;
+            off += 8;
         }
+        while (off++ < end) {
+            value |= UNSAFE.getShort(chars, address);
+            address += 2;
+        }
+        return (convEndian(false, value) & 0xFF00FF00FF00FF00L) == 0;
+    }
 
-        for (; i < strlen; ++i) {
-            if (chars[i] > 0x00FF) {
-                return false;
-            }
+    public static boolean isASCII(byte[] bytes, int off, int len) {
+        int upperBound = off + (len & ~7);
+        int end = off + len;
+        long address = ARRAY_BYTE_BASE_OFFSET + off;
+        long value = 0;
+        while (off < upperBound) {
+            value |= UNSAFE.getLong(bytes, address);
+            address += 8;
+            off += 8;
         }
-        return true;
+        while (off < end) {
+            value |= bytes[off++];
+        }
+        return (value & 0x8080808080808080L) == 0;
     }
 }
