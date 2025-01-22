@@ -355,7 +355,7 @@ public class ObjectWriterCreatorASM
                         } else if (firstChar >= 'a' && firstChar <= 'z') {
                             sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
                         }
-                        if (sameFieldName != null && fieldWriterMap.containsKey(sameFieldName)) {
+                        if (sameFieldName != null) {
                             fieldWriterMap.remove(sameFieldName);
                         }
                     }
