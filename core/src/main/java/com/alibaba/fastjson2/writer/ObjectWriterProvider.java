@@ -397,11 +397,6 @@ public class ObjectWriterProvider
                 if (objectWriter != null) {
                     return objectWriter;
                 }
-            } else {
-                objectWriter = cache.get(objectType);
-                if (objectWriter != null) {
-                    return objectWriter;
-                }
             }
         }
 

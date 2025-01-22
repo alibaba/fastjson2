@@ -6,13 +6,8 @@ import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.Test;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -136,26 +131,7 @@ public class ObjectWriterProviderTest {
         assertSame(writer1, JSON.registerIfAbsent(Bean.class, writer, false));
     }
 
-    @Test
-    public void testWriterProxy() throws InterruptedException {
-        Enhancer enhancer = new Enhancer();
-        enhancer.setSuperclass(Bean.class);
-        enhancer.setCallback(new BeanMethodInterceptor());
-        Object proxy1 = enhancer.create();
-        JSON.toJSONString(proxy1);
-        JSON.toJSONString(proxy1);
-        TimeUnit.MINUTES.sleep(60);
-    }
-
     public static class Bean {
-    }
-
-    public static class BeanMethodInterceptor implements MethodInterceptor {
-
-        @Override
-        public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
-            return methodProxy.invokeSuper(o, objects);
-        }
     }
 
     public static class BeanWriter
