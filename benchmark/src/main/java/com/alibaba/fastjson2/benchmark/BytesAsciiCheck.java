@@ -65,12 +65,12 @@ public class BytesAsciiCheck {
         );
     }
 
-    // @Benchmark
+     @Benchmark
     public void direct(Blackhole bh) throws Throwable {
         bh.consume(hasNegatives(bytes, 0, bytes.length));
     }
 
-//    @Benchmark
+    @Benchmark
     public void isASCII(Blackhole bh) throws Throwable {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.isASCII(bytes, 0, bytes.length));
     }
