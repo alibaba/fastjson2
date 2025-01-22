@@ -60,11 +60,11 @@ public class BytesAsciiCheckTest {
         }
     }
 
-    public static void isASCII_chars() throws Throwable {
+    public static void isLatin1() throws Throwable {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP_COUNT; ++i) {
-                benchmark.isASCII_chars(BH);
+                benchmark.isLatin1(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("BytesAsciiCheck-isASCII_chars : " + millis);
@@ -88,7 +88,7 @@ public class BytesAsciiCheckTest {
 //        handler();
 //        lambda();
 //        direct();
-        isASCII_chars();
+        isLatin1();
 //        isASCII();
     }
 }
