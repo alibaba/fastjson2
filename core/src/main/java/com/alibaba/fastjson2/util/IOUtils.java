@@ -1717,7 +1717,7 @@ public class IOUtils {
 
     public static boolean isUTF8BOM(byte[] bytes, int off) {
         // EF BB BF
-        return ((getIntLE(bytes, 0)) & 0xFFFFFF) == 0xBFBBEF;
+        return ((getIntLE(bytes, off)) & 0xFFFFFF) == 0xBFBBEF;
     }
 
     public static int getIntBE(byte[] bytes, int offset) {
