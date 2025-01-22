@@ -65,7 +65,7 @@ public class BytesAsciiCheck {
         );
     }
 
-     @Benchmark
+    @Benchmark
     public void direct(Blackhole bh) throws Throwable {
         bh.consume(hasNegatives(bytes, 0, bytes.length));
     }
