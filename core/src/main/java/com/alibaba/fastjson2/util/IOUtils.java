@@ -118,7 +118,7 @@ public class IOUtils {
             DIGITS_K_64[i] = c0 + v;
         }
         ZERO_DOT_LATIN1 = UNSAFE.getShort(new byte[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
-        ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
+        ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_CHAR_BASE_OFFSET);
     }
 
     public static void writeDigitPair(byte[] buf, int charPos, int value) {
@@ -1735,7 +1735,7 @@ public class IOUtils {
     }
 
     public static int getIntUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
+        return UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
     }
 
     public static long getLongBE(byte[] bytes, int offset) {
@@ -1748,7 +1748,7 @@ public class IOUtils {
     }
 
     public static long getLongUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1));
+        return UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
     }
 
     public static long getLongLE(byte[] bytes, int offset) {
@@ -1758,7 +1758,7 @@ public class IOUtils {
 
     public static long getLongLE(char[] bytes, int offset) {
         return convEndian(false,
-                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) offset << 1)));
+                UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
     }
 
     public static short hex2(int i) {
