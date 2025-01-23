@@ -2250,41 +2250,35 @@ public class DateUtils {
         byte c5 = str[off + 5];
         byte c7 = str[off + 7];
         byte c10 = str[off + 10];
-        byte c13 = str[off + 13];
-        byte c16 = str[off + 16];
 
-        int year, month, dom, hour, minute, second;
+        int year, month, dom;
         if (((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/'))
-                && (c10 == ' ' || c10 == 'T')
-                && c13 == ':' && c16 == ':'
-        ) {
+                && (c10 == ' ' || c10 == 'T')) {
             year = digit4(str, off);
             month = digit2(str, off + 5);
             dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit2(str, off + 17);
-        } else if (c2 == '/' && c5 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+        } else if (c2 == '/' && c5 == '/' && (c10 == ' ' || c10 == 'T')) {
             dom = digit2(str, off);
             month = digit2(str, off + 3);
             year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit2(str, off + 17);
-        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ') {
             dom = digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
             year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit2(str, off + 17);
         } else {
             return null;
         }
 
-        return (year | month | dom | hour | minute | second) <= 0
-                ? null
-                : LocalDateTime.of(year, month, dom, hour, minute, second);
+        long hms = hms(str, off + 11);
+        if ((year | month | dom | hms) <= 0) {
+            return null;
+        }
+
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
+
+        return LocalDateTime.of(year, month, dom, hour, minute, second);
     }
 
     public static LocalDateTime parseLocalDateTime20(char[] str, int off) {
@@ -2311,12 +2305,12 @@ public class DateUtils {
     }
 
     public static LocalDateTime parseLocalDateTime20(byte[] str, int off) {
+        long hms;
         if (off + 19 > str.length
                 || str[off + 2] != ' '
                 || str[off + 6] != ' '
                 || str[off + 11] != ' '
-                || str[off + 14] != ':'
-                || str[off + 17] != ':'
+                || (hms = hms(str, off + 12)) == -1L
         ) {
             return null;
         }
@@ -2324,9 +2318,9 @@ public class DateUtils {
         int dom = digit2(str, off);
         int month = DateUtils.month(str[off + 3], str[off + 4], str[off + 5]);
         int year = digit4(str, off + 7);
-        int hour = digit2(str, off + 12);
-        int minute = digit2(str, off + 15);
-        int second = digit2(str, off + 18);
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
 
         return (year | month | dom | hour | minute | second) <= 0 || hour > 24 || minute > 59 || second > 60
                 ? null
@@ -2334,13 +2328,13 @@ public class DateUtils {
     }
 
     public static LocalDateTime parseLocalDateTime26(byte[] str, int off) {
+        long hms;
         byte c10;
         if (off + 26 > str.length
                 || str[off + 4] != '-'
                 || str[off + 7] != '-'
                 || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
-                || str[off + 13] != ':'
-                || str[off + 16] != ':'
+                || (hms = hms(str, off + 11)) == -1L
                 || str[off + 19] != '.'
         ) {
             return null;
@@ -2349,9 +2343,9 @@ public class DateUtils {
         int year = digit4(str, off);
         int month = digit2(str, off + 5);
         int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
         int nano = readNanos(str, 6, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
@@ -2386,13 +2380,13 @@ public class DateUtils {
     }
 
     public static LocalDateTime parseLocalDateTime27(byte[] str, int off) {
+        long hms;
         byte c10;
         if (off + 27 > str.length
                 || str[off + 4] != '-'
                 || str[off + 7] != '-'
                 || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
-                || str[off + 13] != ':'
-                || str[off + 16] != ':'
+                || (hms = hms(str, off + 11)) == -1L
                 || str[off + 19] != '.'
         ) {
             return null;
@@ -2401,9 +2395,9 @@ public class DateUtils {
         int year = digit4(str, off);
         int month = digit2(str, off + 5);
         int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
         int nano = readNanos(str, 7, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
@@ -2464,13 +2458,13 @@ public class DateUtils {
     }
 
     public static LocalDateTime parseLocalDateTime28(byte[] str, int off) {
+        long hms;
         byte c10;
         if (off + 28 > str.length
                 || str[off + 4] != '-'
                 || str[off + 7] != '-'
                 || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
-                || str[off + 13] != ':'
-                || str[off + 16] != ':'
+                || (hms = hms(str, off + 11)) == -1L
                 || str[off + 19] != '.'
         ) {
             return null;
@@ -2479,9 +2473,9 @@ public class DateUtils {
         int year = digit4(str, off);
         int month = digit2(str, off + 5);
         int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
         int nano = readNanos(str, 8, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
@@ -2490,13 +2484,13 @@ public class DateUtils {
     }
 
     public static LocalDateTime parseLocalDateTime29(byte[] str, int off) {
+        long hms;
         byte c10;
         if (off + 29 > str.length
                 || str[off + 4] != '-'
                 || str[off + 7] != '-'
                 || ((c10 = str[off + 10]) != ' ' && c10 != 'T')
-                || str[off + 13] != ':'
-                || str[off + 16] != ':'
+                || (hms = hms(str, off + 11)) == -1L
                 || str[off + 19] != '.'
         ) {
             return null;
@@ -2505,9 +2499,9 @@ public class DateUtils {
         int year = digit4(str, off);
         int month = digit2(str, off + 5);
         int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
         int nano = readNanos(str, 9, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
