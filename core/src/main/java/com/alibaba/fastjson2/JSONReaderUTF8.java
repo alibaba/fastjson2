@@ -5795,20 +5795,20 @@ class JSONReaderUTF8
                 byte c10;
                 int off21 = offset + 19;
                 int yy;
-                long ymd, timeV;
+                long ymd, hms;
                 if (off21 < bytes.length
                         && off21 < end
                         && (yy = yy(bytes, offset)) != -1
                         && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
-                        && ((timeV = hms(bytes, offset + 11))) != -1L
+                        && ((hms = hms(bytes, offset + 11))) != -1L
                 ) {
                     int year = yy + ((int) ymd & 0xFF);
                     int month = (int) (ymd >> 24) & 0xFF;
                     int dom = (int) (ymd >> 48) & 0xFF;
-                    int hour = (int) timeV & 0xFF;
-                    int minute = (int) (timeV >> 24) & 0xFF;
-                    int second = (int) (timeV >> 48) & 0xFF;
+                    int hour = (int) hms & 0xFF;
+                    int minute = (int) (hms >> 24) & 0xFF;
+                    int second = (int) (hms >> 48) & 0xFF;
 
                     LocalDate localDate;
                     try {
