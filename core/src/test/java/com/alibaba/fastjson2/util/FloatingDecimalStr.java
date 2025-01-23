@@ -31,7 +31,6 @@ public class FloatingDecimalStr {
             int nLeadZero = 0;
             int nTrailZero = 0;
 
-            skipLeadingZerosLoop:
             while (i < end) {
                 c = in.charAt(i);
                 if (c == '0') {
@@ -46,11 +45,10 @@ public class FloatingDecimalStr {
                     }
                     decSeen = true;
                 } else {
-                    break skipLeadingZerosLoop;
+                    break;
                 }
                 i++;
             }
-            digitLoop:
             while (i < end) {
                 c = in.charAt(i);
                 if (c >= '1' && c <= '9') {
@@ -69,7 +67,7 @@ public class FloatingDecimalStr {
                     }
                     decSeen = true;
                 } else {
-                    break digitLoop;
+                    break;
                 }
                 i++;
             }
@@ -97,7 +95,6 @@ public class FloatingDecimalStr {
                         i++;
                 }
                 int expAt = i;
-                expLoop:
                 while (i < end) {
                     if (expVal >= reallyBig) {
                         expOverflow = true;
@@ -107,7 +104,7 @@ public class FloatingDecimalStr {
                         expVal = expVal * 10 + ((int) c - (int) '0');
                     } else {
                         i--;           // back up.
-                        break expLoop; // stop parsing exponent.
+                        break; // stop parsing exponent.
                     }
                 }
                 final int BIG_DECIMAL_EXPONENT = 324;
@@ -181,7 +178,7 @@ public class FloatingDecimalStr {
                     }
                     decSeen = true;
                 } else {
-                    break skipLeadingZerosLoop;
+                    break;
                 }
                 i++;
             }
@@ -204,7 +201,7 @@ public class FloatingDecimalStr {
                     }
                     decSeen = true;
                 } else {
-                    break digitLoop;
+                    break;
                 }
                 i++;
             }
@@ -242,7 +239,7 @@ public class FloatingDecimalStr {
                         expVal = expVal * 10 + ((int) c - (int) '0');
                     } else {
                         i--;           // back up.
-                        break expLoop; // stop parsing exponent.
+                        break; // stop parsing exponent.
                     }
                 }
                 final int BIG_DECIMAL_EXPONENT = 324;
