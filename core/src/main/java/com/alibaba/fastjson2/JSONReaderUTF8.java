@@ -5712,29 +5712,21 @@ class JSONReaderUTF8
     public final LocalDate readLocalDate() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        if (ch == '"' || ch == '\'') {
-            Context context = this.context;
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = ch;
+        char quote = ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
+                int yy;
+                long ymd;
                 int c10 = offset + 10;
                 if (c10 < bytes.length
                         && c10 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && bytes[offset + 10] == quote
                 ) {
-                    int year = IOUtils.digit4(bytes, offset);
-                    int month = IOUtils.digit2(bytes, offset + 5);
-                    int dom = IOUtils.digit2(bytes, offset + 8);
-
-                    if ((year | month | dom) < 0) {
-                        throw new JSONException(info("read date error"));
-                    }
+                    int year = yy + ((int) ymd & 0xFF);
+                    int month = (int) (ymd >> 24) & 0xFF;
+                    int dom = (int) (ymd >> 48) & 0xFF;
 
                     LocalDate ldt;
                     try {
@@ -5783,15 +5775,9 @@ class JSONReaderUTF8
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
         final int offset = this.offset;
-        final Context context = this.context;
-        if (this.ch == '"' || this.ch == '\'') {
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = this.ch;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
                 byte c10;
                 int off21 = offset + 19;
                 int yy;
