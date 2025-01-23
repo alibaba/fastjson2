@@ -735,7 +735,14 @@ public class IOUtils {
             if (len == -1) {
                 break;
             }
-            for (int i = 0; i < len; i++) {
+            int i = 0;
+            long address = ARRAY_BYTE_BASE_OFFSET;
+            int upperBound = (len & ~7);
+            while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x0A0A0A0A0A0A0A0AL)) {
+                i += 8;
+                address += 8;
+            }
+            for (; i < len; i++) {
                 byte b = buf[i];
                 if (b == '\n') {
                     lines++;
