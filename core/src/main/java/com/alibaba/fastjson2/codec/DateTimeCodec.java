@@ -30,7 +30,7 @@ public abstract class DateTimeCodec {
 
     public DateTimeCodec(String format, Locale locale) {
         if (format != null) {
-            format = format.replaceAll("aa", "a");
+            format = format.replace("aa", "a");
         }
 
         this.format = format;
