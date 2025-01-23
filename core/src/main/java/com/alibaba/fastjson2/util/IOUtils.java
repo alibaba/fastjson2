@@ -1862,32 +1862,35 @@ public class IOUtils {
         int upperBound = off + (len & ~7);
         int end = off + len;
         long address = ARRAY_CHAR_BASE_OFFSET + off;
-        long value = 0;
-        while (off < upperBound) {
-            value |= UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8);
+        while (off < upperBound
+                && (convEndian(false, (UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8))) & 0xFF00FF00FF00FF00L) == 0
+        ) {
             address += 16;
             off += 8;
         }
         while (off++ < end) {
-            value |= UNSAFE.getShort(chars, address);
+            if ((convEndian(false, UNSAFE.getShort(chars, address)) & 0xFF00) != 0) {
+                return false;
+            }
             address += 2;
         }
-        return (convEndian(false, value) & 0xFF00FF00FF00FF00L) == 0;
+        return true;
     }
 
     public static boolean isASCII(byte[] bytes, int off, int len) {
         int upperBound = off + (len & ~7);
         int end = off + len;
         long address = ARRAY_BYTE_BASE_OFFSET + off;
-        long value = 0;
-        while (off < upperBound) {
-            value |= UNSAFE.getLong(bytes, address);
+        while (off < upperBound && (UNSAFE.getLong(bytes, address) & 0x8080808080808080L) == 0) {
             address += 8;
             off += 8;
         }
-        while (off < end) {
-            value |= bytes[off++];
+
+        while (off++ < end) {
+            if ((UNSAFE.getByte(bytes, address++) & 0x80) != 0) {
+                return false;
+            }
         }
-        return (value & 0x8080808080808080L) == 0;
+        return true;
     }
 }
