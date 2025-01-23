@@ -4506,13 +4506,7 @@ class JSONReaderUTF16
         final char[] chars = this.chars;
         int offset = this.offset;
         if (ch == '"' || ch == '\'') {
-            Context context = this.context;
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
+            if (!context.formatComplex) {
                 char quote = ch;
                 int c10 = offset + 10;
                 if (c10 < chars.length
@@ -4576,14 +4570,8 @@ class JSONReaderUTF16
     public final OffsetDateTime readOffsetDateTime() {
         final char[] chars = this.chars;
         final int offset = this.offset;
-        final Context context = this.context;
         if (this.ch == '"' || this.ch == '\'') {
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
+            if (!context.formatComplex) {
                 char quote = this.ch;
                 char c10;
                 int off21 = offset + 19;

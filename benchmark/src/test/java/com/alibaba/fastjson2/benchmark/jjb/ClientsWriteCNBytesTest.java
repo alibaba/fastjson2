@@ -40,7 +40,7 @@ public class ClientsWriteCNBytesTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-fastjson2 millis : " + millis);
             // zulu8.70.0.23 :
-            // zulu17.40.19 : 1027
+            // zulu17.40.19 : 1027 970
             // zulu17.40.19_vec :
             // zulu17.40.19_reflect :
         }

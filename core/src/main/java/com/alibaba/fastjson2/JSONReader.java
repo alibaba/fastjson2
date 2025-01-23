@@ -3906,6 +3906,7 @@ public abstract class JSONReader
 
     public static final class Context {
         String dateFormat;
+        boolean formatComplex;
         boolean formatyyyyMMddhhmmss19;
         boolean formatyyyyMMddhhmmssT19;
         boolean yyyyMMddhhmm16;
@@ -4240,6 +4241,7 @@ public abstract class JSONReader
                         break;
                 }
 
+                this.formatComplex = !(formatyyyyMMddhhmmss19 | formatyyyyMMddhhmmssT19 | formatyyyyMMdd8 | formatISO8601);
                 // this.yyyyMMddhhmm16 = "yyyy-MM-dd HH:mm".equals(format);
             }
 

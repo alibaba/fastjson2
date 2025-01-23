@@ -13,6 +13,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
+import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.Long.MIN_VALUE;
@@ -5711,29 +5712,21 @@ class JSONReaderUTF8
     public final LocalDate readLocalDate() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        if (ch == '"' || ch == '\'') {
-            Context context = this.context;
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = ch;
+        char quote = ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
+                int yy;
+                long ymd;
                 int c10 = offset + 10;
                 if (c10 < bytes.length
                         && c10 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && bytes[offset + 10] == quote
                 ) {
-                    int year = IOUtils.digit4(bytes, offset);
-                    int month = IOUtils.digit2(bytes, offset + 5);
-                    int dom = IOUtils.digit2(bytes, offset + 8);
-
-                    if ((year | month | dom) < 0) {
-                        throw new JSONException(info("read date error"));
-                    }
+                    int year = yy + ((int) ymd & 0xFF);
+                    int month = (int) (ymd >> 24) & 0xFF;
+                    int dom = (int) (ymd >> 48) & 0xFF;
 
                     LocalDate ldt;
                     try {
@@ -5782,35 +5775,26 @@ class JSONReaderUTF8
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
         final int offset = this.offset;
-        final Context context = this.context;
-        if (this.ch == '"' || this.ch == '\'') {
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = this.ch;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
                 byte c10;
                 int off21 = offset + 19;
+                int yy;
+                long ymd, hms;
                 if (off21 < bytes.length
                         && off21 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
-                        && bytes[offset + 13] == ':'
-                        && bytes[offset + 16] == ':'
+                        && ((hms = hms(bytes, offset + 11))) != -1L
                 ) {
-                    int year = IOUtils.digit4(bytes, offset);
-                    int month = IOUtils.digit2(bytes, offset + 5);
-                    int dom = IOUtils.digit2(bytes, offset + 8);
-                    int hour = IOUtils.digit2(bytes, offset + 11);
-                    int minute = IOUtils.digit2(bytes, offset + 14);
-                    int second = IOUtils.digit2(bytes, offset + 17);
-                    if ((year | month | dom | minute | second) < 0) {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
+                    int year = yy + ((int) ymd & 0xFF);
+                    int month = (int) (ymd >> 24) & 0xFF;
+                    int dom = (int) (ymd >> 48) & 0xFF;
+                    int hour = (int) hms & 0xFF;
+                    int minute = (int) (hms >> 24) & 0xFF;
+                    int second = (int) (hms >> 48) & 0xFF;
 
                     LocalDate localDate;
                     try {

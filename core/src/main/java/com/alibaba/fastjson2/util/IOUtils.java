@@ -93,15 +93,6 @@ public class IOUtils {
                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 -1, -1, -1, -1, -1, -1, -1, -1
         };
-
-        if (BIG_ENDIAN) {
-            for (int i = 0; i < shorts.length; i++) {
-                shorts[i] = Short.reverseBytes(shorts[i]);
-            }
-            for (int i = 0; i < digits.length; i++) {
-                digits[i] = Integer.reverseBytes(digits[i] << 8);
-            }
-        }
         PACKED_DIGITS = shorts;
         PACKED_DIGITS_UTF16 = digits;
 
@@ -112,24 +103,25 @@ public class IOUtils {
             int c3 = i % 10 + '0';
             DIGITS_K_32[i] = c0 + (c1 << 8) + (c2 << 16) + (c3 << 24);
             long v = (c1 << 16) + (((long) c2) << 32) + (((long) c3) << 48);
-            if (BIG_ENDIAN) {
-                v <<= 8;
-            }
             DIGITS_K_64[i] = c0 + v;
         }
         ZERO_DOT_LATIN1 = UNSAFE.getShort(new byte[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
         ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_CHAR_BASE_OFFSET);
     }
 
+    private static short digitPair(int value) {
+        return PACKED_DIGITS[value & 0x7f];
+    }
+
     public static void writeDigitPair(byte[] buf, int charPos, int value) {
-        putShortUnaligned(
+        putShortLE(
                 buf,
                 charPos,
                 PACKED_DIGITS[value & 0x7f]);
     }
 
     public static void writeDigitPair(char[] buf, int charPos, int value) {
-        putIntUnaligned(
+        putIntLE(
                 buf,
                 charPos,
                 PACKED_DIGITS_UTF16[value & 0x7f]);
@@ -743,7 +735,14 @@ public class IOUtils {
             if (len == -1) {
                 break;
             }
-            for (int i = 0; i < len; i++) {
+            int i = 0;
+            long address = ARRAY_BYTE_BASE_OFFSET;
+            int upperBound = (len & ~7);
+            while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x0A0A0A0A0A0A0A0AL)) {
+                i += 8;
+                address += 8;
+            }
+            for (; i < len; i++) {
                 byte b = buf[i];
                 if (b == '\n') {
                     lines++;
@@ -754,23 +753,29 @@ public class IOUtils {
     }
 
     public static int writeLocalDate(byte[] bytes, int off, int year, int month, int dayOfMonth) {
+        if (year >= 0 && year < 10000) {
+            int y01 = year / 100;
+            writeDigitPair(bytes, off, y01);
+            putLongLE(
+                    bytes,
+                    off + 2,
+                    0x2d00002d0000L
+                            | digitPair(year - y01 * 100)
+                            | ((long) digitPair(month) << 24)
+                            | ((long) digitPair(dayOfMonth) << 48));
+            return off + 10;
+        }
+        return writeLocalDate0(bytes, off, year, month, dayOfMonth);
+    }
+
+    private static int writeLocalDate0(byte[] bytes, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
             putByte(bytes, off++, (byte) '-');
             year = -year;
         } else if (year > 9999) {
             putByte(bytes, off++, (byte) '+');
         }
-
-        if (year < 10000) {
-            int y01 = year / 100;
-            int y23 = year - y01 * 100;
-            writeDigitPair(bytes, off, y01);
-            writeDigitPair(bytes, off + 2, y23);
-            off += 4;
-        } else {
-            off = IOUtils.writeInt32(bytes, off, year);
-        }
-
+        off = IOUtils.writeInt32(bytes, off, year);
         putByte(bytes, off, (byte) '-');
         writeDigitPair(bytes, off + 1, month);
         putByte(bytes, off + 3, (byte) '-');
@@ -779,23 +784,29 @@ public class IOUtils {
     }
 
     public static int writeLocalDate(char[] chars, int off, int year, int month, int dayOfMonth) {
+        if (year >= 0 && year < 10000) {
+            int y01 = year / 100;
+            int y23 = year - y01 * 100;
+            writeDigitPair(chars, off, y01);
+            writeDigitPair(chars, off + 2, y23);
+            putChar(chars, off + 4, '-');
+            writeDigitPair(chars, off + 5, month);
+            putChar(chars, off + 7, '-');
+            writeDigitPair(chars, off + 8, dayOfMonth);
+            return off + 10;
+        }
+
+        return writeLocalDate0(chars, off, year, month, dayOfMonth);
+    }
+
+    public static int writeLocalDate0(char[] chars, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
             putChar(chars, off++, '-');
             year = -year;
         } else if (year > 9999) {
             putChar(chars, off++, '+');
         }
-
-        if (year < 10000) {
-            int y01 = year / 100;
-            int y23 = year - y01 * 100;
-            writeDigitPair(chars, off, y01);
-            writeDigitPair(chars, off + 2, y23);
-            off += 4;
-        } else {
-            off = IOUtils.writeInt32(chars, off, year);
-        }
-
+        off = IOUtils.writeInt32(chars, off, year);
         putChar(chars, off, '-');
         writeDigitPair(chars, off + 1, month);
         putChar(chars, off + 3, '-');
@@ -804,17 +815,18 @@ public class IOUtils {
     }
 
     public static void writeLocalTime(byte[] bytes, int off, int hour, int minute, int second) {
-        writeDigitPair(bytes, off, hour);
-        putByte(bytes, off + 2, (byte) ':');
-        writeDigitPair(bytes, off + 3, minute);
-        putByte(bytes, off + 5, (byte) ':');
-        writeDigitPair(bytes, off + 6, second);
+        putLongLE(
+                bytes,
+                off,
+                0x3a00003a0000L
+                        | digitPair(hour)
+                        | ((long) digitPair(minute) << 24)
+                        | ((long) digitPair(second) << 48));
     }
 
     public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
         writeLocalTime(bytes, off, time.getHour(), time.getMinute(), time.getSecond());
         off += 8;
-
         int nano = time.getNano();
         return nano != 0 ? writeNano(bytes, off, nano) : off;
     }
@@ -1859,35 +1871,38 @@ public class IOUtils {
     }
 
     public static boolean isLatin1(char[] chars, int off, int len) {
-        int upperBound = off + (len & ~7);
         int end = off + len;
+        int upperBound = off + (len & ~7);
         long address = ARRAY_CHAR_BASE_OFFSET + off;
-        long value = 0;
-        while (off < upperBound) {
-            value |= UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8);
+        while (off < upperBound
+                && (convEndian(false, (UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8))) & 0xFF00FF00FF00FF00L) == 0
+        ) {
             address += 16;
             off += 8;
         }
         while (off++ < end) {
-            value |= UNSAFE.getShort(chars, address);
+            if ((convEndian(false, UNSAFE.getShort(chars, address)) & 0xFF00) != 0) {
+                return false;
+            }
             address += 2;
         }
-        return (convEndian(false, value) & 0xFF00FF00FF00FF00L) == 0;
+        return true;
     }
 
     public static boolean isASCII(byte[] bytes, int off, int len) {
-        int upperBound = off + (len & ~7);
         int end = off + len;
+        int upperBound = off + (len & ~7);
         long address = ARRAY_BYTE_BASE_OFFSET + off;
-        long value = 0;
-        while (off < upperBound) {
-            value |= UNSAFE.getLong(bytes, address);
+        while (off < upperBound && (UNSAFE.getLong(bytes, address) & 0x8080808080808080L) == 0) {
             address += 8;
             off += 8;
         }
-        while (off < end) {
-            value |= bytes[off++];
+
+        while (off++ < end) {
+            if ((UNSAFE.getByte(bytes, address++) & 0x80) != 0) {
+                return false;
+            }
         }
-        return (value & 0x8080808080808080L) == 0;
+        return true;
     }
 }
