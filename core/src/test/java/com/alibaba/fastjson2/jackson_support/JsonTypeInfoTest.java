@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class JsonTypeInfoTest {
     @Test
     public void test() throws Exception {
-        Shape shape = new Circle("CustomCircle", 1);
+        Circle shape = new Circle("CustomCircle", 1);
         String str = JSON.toJSONString(shape, JSONWriter.Feature.PrettyFormat);
         assertEquals("{\n" +
                 "\t\"@type\":\"circle\",\n" +
@@ -23,10 +23,9 @@ public class JsonTypeInfoTest {
         Shape shape1 = JSON.parseObject(str, Shape.class);
         assertEquals(shape.getClass(), shape1.getClass());
 
-        Circle cycle = (Circle) shape;
         Circle cycle1 = (Circle) shape1;
-        assertEquals(cycle.name, cycle1.name);
-        assertEquals(cycle.radius, cycle1.radius);
+        assertEquals(shape.name, cycle1.name);
+        assertEquals(shape.radius, cycle1.radius);
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "@type")

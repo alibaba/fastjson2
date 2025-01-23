@@ -28,7 +28,7 @@ public class JSONBTest6 {
         }
         {
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            Bean bean1 = JSONB.parseObject(in, bytes.length, (Type) Bean.class, JSONFactory.createReadContext(jsonWriter.symbolTable, JSONReader.Feature.SupportArrayToBean));
+            Bean bean1 = JSONB.parseObject(in, bytes.length, Bean.class, JSONFactory.createReadContext(jsonWriter.symbolTable, JSONReader.Feature.SupportArrayToBean));
             assertEquals(bean.id, bean1.id);
         }
 
@@ -38,7 +38,7 @@ public class JSONBTest6 {
         }
         {
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            assertThrows(IllegalArgumentException.class, () -> JSONB.parseObject(in, bytes.length + 1, (Type) Bean.class, JSONReader.Feature.SupportArrayToBean));
+            assertThrows(IllegalArgumentException.class, () -> JSONB.parseObject(in, bytes.length + 1, Bean.class, JSONReader.Feature.SupportArrayToBean));
         }
     }
 
@@ -168,6 +168,6 @@ public class JSONBTest6 {
 
         assertThrows(
                 JSONException.class,
-                () -> dump.readLength());
+                dump::readLength);
     }
 }

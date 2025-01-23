@@ -86,7 +86,7 @@ public class JsonRowDeserializationSchemaTest {
                         names,
                         types,
                         () -> new Row(11),
-                        (r, i, v) -> r.setField(i, v)
+                        Row::setField
                 );
 
         byte[] serializedJson = JSON.toJSONBytes(root);
@@ -109,7 +109,7 @@ public class JsonRowDeserializationSchemaTest {
                 .createObjectWriter(
                         names,
                         types,
-                        (Row r, int i) -> r.getField(i)
+                        Row::getField
                 );
 
         JSONReader jsonReader = JSONReader.of(serializedJson);

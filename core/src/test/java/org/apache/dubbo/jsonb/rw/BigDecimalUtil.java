@@ -18,13 +18,13 @@ public class BigDecimalUtil {
         DecimalFormat decimalFormat = null;
         if (scale <= 2) {
             decimalFormat = DF_TWO;
-        } else if (scale > 2 && scale <= 4) {
+        } else if (scale <= 4) {
             // 保留四位小数
             decimalFormat = DF_FOUR;
-        } else if (scale > 4 && scale <= 6) {
+        } else if (scale <= 6) {
             // 保留六位小数
             decimalFormat = DF_SIX;
-        } else if (scale > 6 && scale <= 8) {
+        } else if (scale <= 8) {
             decimalFormat = EIGHT_SIX;
         } else {
             decimalFormat = null;
@@ -38,7 +38,7 @@ public class BigDecimalUtil {
     }
 
     public static BigDecimal castToBigDecimal(String value) {
-        if (null == value || value.length() < 1) {
+        if (null == value || value.isEmpty()) {
             return null;
         }
 
@@ -48,12 +48,12 @@ public class BigDecimalUtil {
         for (char c : charArr) {
             // 0-9
             if (c >= 48 && c <= 57) {
-                sb.append((char) c);
+                sb.append(c);
             }
 
             // .
             if (c == 46) {
-                sb.append((char) c);
+                sb.append(c);
             }
         }
 
@@ -62,7 +62,6 @@ public class BigDecimalUtil {
         }
 
         String decimal = sb.toString();
-        BigDecimal result = new BigDecimal(decimal);
-        return result;
+        return new BigDecimal(decimal);
     }
 }

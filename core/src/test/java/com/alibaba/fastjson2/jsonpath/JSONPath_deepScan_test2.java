@@ -30,7 +30,7 @@ public class JSONPath_deepScan_test2 {
     }
 
     public static class Company {
-        public List<Department> departs = new ArrayList<Department>();
+        public List<Department> departs = new ArrayList<>();
     }
 
     public static class Department {

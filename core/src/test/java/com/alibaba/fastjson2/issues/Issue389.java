@@ -69,7 +69,7 @@ public class Issue389 {
         assertNull(JSON.parseObject((Reader) null, Object.class));
         assertNull(JSON.parseObject((URL) null, Object.class));
         assertNull(JSON.parseObject((URL) null, (Type) Object.class));
-        assertNull(JSON.parseObject((URL) null, (Function) null));
+        assertNull(JSON.parseObject(null, (Function) null));
 
         assertNull(JSON.parseObject("", Object.class));
         assertNull(JSON.parseObject(new byte[0], Object.class));

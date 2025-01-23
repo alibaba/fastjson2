@@ -28,12 +28,12 @@ public class ClientsWriteCNBytes {
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
     static final DslJson<Object> dslJson = new DslJson<>(Settings.withRuntime().includeServiceLoader());
-    static final ThreadLocal<ByteArrayOutputStream> bytesOutLocal = ThreadLocal.withInitial(() -> new ByteArrayOutputStream());
+    static final ThreadLocal<ByteArrayOutputStream> bytesOutLocal = ThreadLocal.withInitial(ByteArrayOutputStream::new);
 
     static {
         try {
             InputStream is = ClientsWriteCNBytes.class.getClassLoader().getResourceAsStream("data/jjb/client_cn.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             clients = JSONReader.of(str)
                     .read(Clients.class);
         } catch (Throwable ex) {

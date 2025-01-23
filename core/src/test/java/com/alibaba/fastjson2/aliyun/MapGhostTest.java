@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MapGhostTest {
     @Test
     public void test() {
-        MapGhost<String, Object> map = new MapGhost<String, Object>("abc");
+        MapGhost<String, Object> map = new MapGhost<>("abc");
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         byte[] bytes1 = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
@@ -41,7 +41,7 @@ public class MapGhostTest {
 
     @Test
     public void test1() {
-        MapGhost1<String, Object> map = new MapGhost1<String, Object>("abc");
+        MapGhost1<String, Object> map = new MapGhost1<>("abc");
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         assertNotNull(bytes);
@@ -62,7 +62,7 @@ public class MapGhostTest {
 
     @Test
     public void test2() {
-        MapGhost2<String, Object> map = new MapGhost2<String, Object>("abc");
+        MapGhost2<String, Object> map = new MapGhost2<>("abc");
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         assertNotNull(bytes);
@@ -74,7 +74,7 @@ public class MapGhostTest {
 
     @Test
     public void test3() {
-        MapGhost2<String, Object> map = new MapGhost2<String, Object>("abc");
+        MapGhost2<String, Object> map = new MapGhost2<>("abc");
         map.put("name", 123);
         String str = JSON.toJSONString(map);
         assertEquals("{\"name\":123}", str);
@@ -82,7 +82,7 @@ public class MapGhostTest {
 
     @Test
     public void test4() {
-        MapGhost2<String, Object> map = new MapGhost2<String, Object>("abc");
+        MapGhost2<String, Object> map = new MapGhost2<>("abc");
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map);
         String str = JSONB.toJSONString(bytes);

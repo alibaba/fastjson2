@@ -1053,27 +1053,27 @@ public class JSONReaderTest2 {
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64Value());
+                    jsonReader::readInt64Value);
         }
         {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64());
+                    jsonReader::readInt64);
         }
 
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64Value());
+                    jsonReader::readInt64Value);
         }
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64());
+                    jsonReader::readInt64);
         }
     }
 
@@ -1087,27 +1087,27 @@ public class JSONReaderTest2 {
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64Value());
+                    jsonReader::readInt64Value);
         }
         {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64());
+                    jsonReader::readInt64);
         }
 
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64Value());
+                    jsonReader::readInt64Value);
         }
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64());
+                    jsonReader::readInt64);
         }
     }
 
@@ -1120,27 +1120,27 @@ public class JSONReaderTest2 {
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64Value());
+                    jsonReader::readInt64Value);
         }
         {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64());
+                    jsonReader::readInt64);
         }
 
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64Value());
+                    jsonReader::readInt64Value);
         }
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt64());
+                    jsonReader::readInt64);
         }
     }
 
@@ -1153,27 +1153,27 @@ public class JSONReaderTest2 {
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32Value());
+                    jsonReader::readInt32Value);
         }
         {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32());
+                    jsonReader::readInt32);
         }
 
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32Value());
+                    jsonReader::readInt32Value);
         }
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32());
+                    jsonReader::readInt32);
         }
     }
 
@@ -1186,27 +1186,27 @@ public class JSONReaderTest2 {
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32Value());
+                    jsonReader::readInt32Value);
         }
         {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32());
+                    jsonReader::readInt32);
         }
 
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32Value());
+                    jsonReader::readInt32Value);
         }
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32());
+                    jsonReader::readInt32);
         }
     }
 
@@ -1219,27 +1219,27 @@ public class JSONReaderTest2 {
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32Value());
+                    jsonReader::readInt32Value);
         }
         {
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             JSONReader jsonReader = JSONReader.of(bytes);
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32());
+                    jsonReader::readInt32);
         }
 
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32Value());
+                    jsonReader::readInt32Value);
         }
         {
             JSONReader jsonReader = JSONReader.of(str.toCharArray());
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readInt32());
+                    jsonReader::readInt32);
         }
     }
 

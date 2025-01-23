@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -66,44 +67,21 @@ public class Issue582 {
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((brokerName == null) ? 0 : brokerName.hashCode());
-            result = prime * result + queueId;
-            result = prime * result + ((topic == null) ? 0 : topic.hashCode());
-            return result;
+            return Objects.hash(topic, brokerName, queueId);
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
+        public boolean equals(Object o) {
+            if (this == o) {
                 return true;
             }
-            if (obj == null) {
+            if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            MessageQueue other = (MessageQueue) obj;
-            if (brokerName == null) {
-                if (other.brokerName != null) {
-                    return false;
-                }
-            } else if (!brokerName.equals(other.brokerName)) {
-                return false;
-            }
-            if (queueId != other.queueId) {
-                return false;
-            }
-            if (topic == null) {
-                if (other.topic != null) {
-                    return false;
-                }
-            } else if (!topic.equals(other.topic)) {
-                return false;
-            }
-            return true;
+            MessageQueue that = (MessageQueue) o;
+            return queueId == that.queueId
+                    && Objects.equals(topic, that.topic)
+                    && Objects.equals(brokerName, that.brokerName);
         }
 
         @Override
@@ -133,7 +111,7 @@ public class Issue582 {
 
     public static class OffsetSerializeWrapper {
         private ConcurrentMap<MessageQueue, AtomicLong> offsetTable =
-                new ConcurrentHashMap<MessageQueue, AtomicLong>();
+                new ConcurrentHashMap<>();
 
         public ConcurrentMap<MessageQueue, AtomicLong> getOffsetTable() {
             return offsetTable;

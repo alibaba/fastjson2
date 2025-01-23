@@ -13,9 +13,9 @@ public class ValueFilterTest4 {
         bean.gender = 1;
 
         JSON.register(Bean.class, ValueFilter.of(
-                e -> "gender".equals(e),
+                "gender"::equals,
                 (value) -> {
-                    switch (((Integer) value).intValue()) {
+                    switch ((Integer) value) {
                         case 1:
                             return "男";
                         case 2:

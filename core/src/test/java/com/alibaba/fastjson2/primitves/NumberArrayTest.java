@@ -109,7 +109,7 @@ public class NumberArrayTest {
     public void test_byte() {
         byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("value", 100));
         Number1 vo = JSONB.parseObject(jsonbBytes, Number1.class);
-        assertEquals(Integer.valueOf(100), vo.getValue());
+        assertEquals(100, vo.getValue());
     }
 
     @Test

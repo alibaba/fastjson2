@@ -39,7 +39,7 @@ public class EishayParseUTF8Bytes {
         featuresContext = new JSONReader.Context(provider);
         try {
             InputStream is = EishayParseUTF8Bytes.class.getClassLoader().getResourceAsStream("data/eishay_compact.json");
-            utf8Bytes = IOUtils.toString(is, "UTF-8").getBytes(StandardCharsets.UTF_8);
+            utf8Bytes = IOUtils.toString(is, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

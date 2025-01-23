@@ -38,7 +38,7 @@ public class Issue1424 {
 
     @Test
     public void test_for_issue_int() {
-        Map<String, Long> intOverflowMap = new HashMap<String, Long>();
+        Map<String, Long> intOverflowMap = new HashMap<>();
         long intOverflow = Integer.MAX_VALUE;
         intOverflowMap.put("v", intOverflow + 1);
         String sIntOverflow = JSON.toJSONString(intOverflowMap);
@@ -54,7 +54,7 @@ public class Issue1424 {
 
     @Test
     public void test_for_issue_float() {
-        Map<String, Double> floatOverflowMap = new HashMap<String, Double>();
+        Map<String, Double> floatOverflowMap = new HashMap<>();
         double floatOverflow = Float.MAX_VALUE;
         floatOverflowMap.put("v", floatOverflow + 1);
         String sFloatOverflow = JSON.toJSONString(floatOverflowMap);
@@ -68,7 +68,7 @@ public class Issue1424 {
 
     @Test
     public void test_for_issue_float_infinity() {
-        Map<String, Double> floatOverflowMap = new HashMap<String, Double>();
+        Map<String, Double> floatOverflowMap = new HashMap<>();
         double floatOverflow = Float.MAX_VALUE;
         floatOverflowMap.put("v", floatOverflow + floatOverflow);
         String sFloatOverflow = JSON.toJSONString(floatOverflowMap);

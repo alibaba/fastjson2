@@ -117,12 +117,7 @@ public class ByteTest {
 
     @Test
     public void test_filter() {
-        PropertyFilter propertyFilter = new PropertyFilter() {
-            @Override
-            public boolean apply(Object object, String name, Object value) {
-                return false;
-            }
-        };
+        PropertyFilter propertyFilter = (object, name, value) -> false;
 
         ObjectWriterCreator[] creators = TestUtils.writerCreators();
 

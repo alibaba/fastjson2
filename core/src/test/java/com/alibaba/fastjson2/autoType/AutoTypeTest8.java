@@ -110,7 +110,7 @@ public class AutoTypeTest8 {
         JSONB.dump(bytes);
 
         ListBean2 bean2 = (ListBean2) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
-        com.alibaba.fastjson.JSONArray list2 = (com.alibaba.fastjson.JSONArray) bean2.values;
+        com.alibaba.fastjson.JSONArray list2 = bean2.values;
         assertEquals(A.class, list2.get(0).getClass());
     }
 

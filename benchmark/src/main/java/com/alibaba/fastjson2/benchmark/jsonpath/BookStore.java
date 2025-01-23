@@ -11,6 +11,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class BookStore {
@@ -18,7 +19,7 @@ public class BookStore {
     static {
         try {
             InputStream is = BookStore.class.getClassLoader().getResourceAsStream("data/bookstore.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

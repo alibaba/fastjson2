@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DeepTest {
     @Test
     public void testDeepArray() {
-        StringBuffer buf = new StringBuffer();
         final int level = 1000;
+        StringBuilder buf = new StringBuilder(level * 2);
         for (int i = 0; i < level; i++) {
             buf.append('[');
         }
@@ -24,8 +24,8 @@ public class DeepTest {
 
     @Test
     public void testDeepObject() {
-        StringBuffer buf = new StringBuffer();
         final int level = 1000;
+        StringBuilder buf = new StringBuilder(level * 8 + 16);
         for (int i = 0; i < level; i++) {
             buf.append("{\"val\":");
         }

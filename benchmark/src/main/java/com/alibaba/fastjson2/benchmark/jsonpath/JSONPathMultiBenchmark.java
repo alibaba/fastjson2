@@ -16,6 +16,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class JSONPathMultiBenchmark {
@@ -28,7 +29,7 @@ public class JSONPathMultiBenchmark {
     static {
         try {
             InputStream is = BookStore.class.getClassLoader().getResourceAsStream("data/path_02.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

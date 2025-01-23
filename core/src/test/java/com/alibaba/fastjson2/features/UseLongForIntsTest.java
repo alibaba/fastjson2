@@ -48,7 +48,7 @@ public class UseLongForIntsTest {
 
         for (long value : values) {
             String str = JSON.toJSONString(value);
-            Long expected = Long.valueOf(value);
+            Long expected = value;
 
             Number number = JSON.parseObject(str, Number.class, JSONReader.Feature.UseLongForInts);
             assertEquals(expected, number);

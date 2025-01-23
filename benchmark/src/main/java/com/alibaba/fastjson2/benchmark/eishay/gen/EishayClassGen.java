@@ -12,6 +12,7 @@ import org.objectweb.asm.*;
 
 import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +261,7 @@ public class EishayClassGen {
         try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
                 .getResourceAsStream("data/eishay.json")
         ) {
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
 
             DynamicClassLoader classLoader = new DynamicClassLoader();
             byte[][] bytes = new byte[count][];

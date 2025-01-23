@@ -152,15 +152,14 @@ public class DecimalTest {
     @Test
     public void test_decimal_unscaledValue_int_num() {
         for (int i = BC_INT32_NUM_MIN; i <= BC_INT32_NUM_MAX; i++) {
-            int unscaledValue = i;
-            BigDecimal decimal = BigDecimal.valueOf(unscaledValue, 1);
+            BigDecimal decimal = BigDecimal.valueOf(i, 1);
 
             byte[] bytes = JSONB.toBytes(decimal);
             assertEquals(3, bytes.length);
             assertEquals(BC_DECIMAL, bytes[0]);
             assertEquals(1, bytes[1]); // scale
 
-            assertEquals(unscaledValue, bytes[2]); // unscaledValue
+            assertEquals(i, bytes[2]); // unscaledValue
             BigDecimal parsed = (BigDecimal) JSONB.parse(bytes);
             assertEquals(decimal, parsed);
         }

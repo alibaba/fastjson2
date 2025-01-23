@@ -37,6 +37,6 @@ public class Issue1603_field_private {
     }
 
     static class Model_3 {
-        public final Collection<String> values = Collections.unmodifiableList(new ArrayList<String>());
+        public final Collection<String> values = Collections.unmodifiableList(new ArrayList<>());
     }
 }

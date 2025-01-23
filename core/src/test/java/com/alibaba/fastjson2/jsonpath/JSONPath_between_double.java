@@ -49,7 +49,7 @@ public class JSONPath_between_double {
         private String name;
 
         public Entity(int id, String name) {
-            this.id = Double.valueOf(id);
+            this.id = (double) id;
             this.name = name;
         }
 

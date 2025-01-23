@@ -14,8 +14,8 @@ public class TypeConvertTest {
 
         assertEquals(0F, provider.getTypeConvert(String.class, float.class).apply(""));
         assertEquals(0D, provider.getTypeConvert(String.class, double.class).apply(""));
-        assertEquals(Byte.valueOf((byte) 0), provider.getTypeConvert(String.class, byte.class).apply(""));
-        assertEquals(Short.valueOf((short) 0), provider.getTypeConvert(String.class, short.class).apply(""));
+        assertEquals((byte) 0, provider.getTypeConvert(String.class, byte.class).apply(""));
+        assertEquals((short) 0, provider.getTypeConvert(String.class, short.class).apply(""));
         assertEquals(0, provider.getTypeConvert(String.class, int.class).apply(""));
         assertEquals(0L, provider.getTypeConvert(String.class, long.class).apply(""));
         assertEquals(Boolean.FALSE, provider.getTypeConvert(String.class, boolean.class).apply(""));
@@ -25,8 +25,8 @@ public class TypeConvertTest {
 
         assertEquals(0F, provider.getTypeConvert(String.class, float.class).apply("null"));
         assertEquals(0D, provider.getTypeConvert(String.class, double.class).apply("null"));
-        assertEquals(Byte.valueOf((byte) 0), provider.getTypeConvert(String.class, byte.class).apply("null"));
-        assertEquals(Short.valueOf((short) 0), provider.getTypeConvert(String.class, short.class).apply("null"));
+        assertEquals((byte) 0, provider.getTypeConvert(String.class, byte.class).apply("null"));
+        assertEquals((short) 0, provider.getTypeConvert(String.class, short.class).apply("null"));
         assertEquals(0, provider.getTypeConvert(String.class, int.class).apply("null"));
         assertEquals(0L, provider.getTypeConvert(String.class, long.class).apply("null"));
         assertEquals(Boolean.FALSE, provider.getTypeConvert(String.class, boolean.class).apply("null"));
@@ -36,8 +36,8 @@ public class TypeConvertTest {
 
         assertEquals(0F, provider.getTypeConvert(String.class, float.class).apply(null));
         assertEquals(0D, provider.getTypeConvert(String.class, double.class).apply(null));
-        assertEquals(Byte.valueOf((byte) 0), provider.getTypeConvert(String.class, byte.class).apply(null));
-        assertEquals(Short.valueOf((short) 0), provider.getTypeConvert(String.class, short.class).apply(null));
+        assertEquals((byte) 0, provider.getTypeConvert(String.class, byte.class).apply(null));
+        assertEquals((short) 0, provider.getTypeConvert(String.class, short.class).apply(null));
         assertEquals(0, provider.getTypeConvert(String.class, int.class).apply(null));
         assertEquals(0L, provider.getTypeConvert(String.class, long.class).apply(null));
         assertEquals(Boolean.FALSE, provider.getTypeConvert(String.class, boolean.class).apply(null));

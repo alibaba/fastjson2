@@ -17,12 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class Issue3375 {
     @Test
     public void test_for_issue() throws Exception {
-        List<Map<String, String>> models = new ArrayList<Map<String, String>>();
-        Map<String, String> map1 = new HashMap<String, String>();
+        List<Map<String, String>> models = new ArrayList<>();
+        Map<String, String> map1 = new HashMap<>();
         map1.put("name", "nanqi01");
         models.add(map1);
 
-        Map<String, String> map2 = new HashMap<String, String>();
+        Map<String, String> map2 = new HashMap<>();
         map2.put("name", "nanqi02");
         models.add(map2);
 

@@ -137,7 +137,7 @@ public class FieldReaderInt16FuncTest {
     @Test
     public void test4() {
         Bean4 bean = new Bean4();
-        bean.value = Short.valueOf((short) 256);
+        bean.value = (short) 256;
         String str = JSON.toJSONString(bean);
         assertEquals("{\"value\":256}", str);
         Bean4 bean1 = JSON.parseObject(str, Bean4.class);

@@ -30,8 +30,8 @@ public class StringFieldTest_special_1 {
         model.name = buf.toString();
 
         String text = JSON.toJSONString(model, JSONWriter.Feature.BrowserSecure);
-        text = text.replaceAll("&lt;", "<");
-        text = text.replaceAll("&gt;", ">");
+        text = text.replace("&lt;", "<");
+        text = text.replace("&gt;", ">");
         Model model2 = JSON.parseObject(text, Model.class);
         assertEquals(model.name, model2.name);
     }

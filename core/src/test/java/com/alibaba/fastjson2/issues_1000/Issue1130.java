@@ -23,8 +23,8 @@ public class Issue1130 {
     public void testArrayParseCase3() {
         //expected b, actually a
         String raw = "{\"arr1\":[\"a\"],\"numeric\":1,\"arr2\":[\"b\"]}";
-        assertEquals("[\"b\"]", ((JSONArray) JSONPath.extract(raw, "$.arr2[*][0]")).toString());
-        assertEquals("[\"b\"]", ((JSONArray) JSONPath.eval(raw, "$.arr2[*][0]")).toString());
+        assertEquals("[\"b\"]", JSONPath.extract(raw, "$.arr2[*][0]").toString());
+        assertEquals("[\"b\"]", JSONPath.eval(raw, "$.arr2[*][0]").toString());
     }
 
     @Test

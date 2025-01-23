@@ -83,13 +83,7 @@ public final class GoogleProtobufBasic {
         internalGetValueMap() {
       return internalValueMap;
     }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        LEVEL> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<LEVEL>() {
-            public LEVEL findValueByNumber(int number) {
-              return LEVEL.forNumber(number);
-            }
-          };
+    private static final com.google.protobuf.Internal.EnumLiteMap<LEVEL> internalValueMap = LEVEL::forNumber;
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
@@ -682,7 +676,7 @@ DriverCard defaultValue);
       if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<String, DriverCard> map =
           internalGetCardsmap().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
+      return map.getOrDefault(key, defaultValue);
     }
     /**
      * <code>map&lt;string, .com.alibaba.fastjson2.dubbo.DriverCard&gt; cardsmap = 18;</code>
@@ -750,7 +744,7 @@ DriverCard defaultValue);
       if (sfixed64_ != 0L) {
         output.writeSFixed64(12, sfixed64_);
       }
-      if (bool_ != false) {
+      if (bool_) {
         output.writeBool(13, bool_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(string_)) {
@@ -828,7 +822,7 @@ DriverCard defaultValue);
         size += com.google.protobuf.CodedOutputStream
           .computeSFixed64Size(12, sfixed64_);
       }
-      if (bool_ != false) {
+      if (bool_) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(13, bool_);
       }
@@ -913,8 +907,7 @@ DriverCard defaultValue);
           .equals(other.getCardsList())) return false;
       if (!internalGetCardsmap().equals(
           other.internalGetCardsmap())) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
+        return getUnknownFields().equals(other.getUnknownFields());
     }
 
     @Override
@@ -1310,7 +1303,7 @@ DriverCard defaultValue);
         if (other.getSfixed64() != 0L) {
           setSfixed64(other.getSfixed64());
         }
-        if (other.getBool() != false) {
+        if (other.getBool()) {
           setBool(other.getBool());
         }
         if (!other.getString().isEmpty()) {
@@ -2119,8 +2112,7 @@ DriverCard defaultValue);
           DriverCard, DriverCard.Builder, DriverCardOrBuilder>
           getCardFieldBuilder() {
         if (cardBuilder_ == null) {
-          cardBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              DriverCard, DriverCard.Builder, DriverCardOrBuilder>(
+          cardBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getCard(),
                   getParentForChildren(),
                   isClean());
@@ -2132,8 +2124,8 @@ DriverCard defaultValue);
       private java.util.List<DriverCard> cards_ =
         java.util.Collections.emptyList();
       private void ensureCardsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          cards_ = new java.util.ArrayList<DriverCard>(cards_);
+        if ((bitField0_ & 0x00000001) == 0) {
+          cards_ = new java.util.ArrayList<>(cards_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -2358,8 +2350,7 @@ DriverCard defaultValue);
           DriverCard, DriverCard.Builder, DriverCardOrBuilder>
           getCardsFieldBuilder() {
         if (cardsBuilder_ == null) {
-          cardsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              DriverCard, DriverCard.Builder, DriverCardOrBuilder>(
+          cardsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   cards_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
@@ -2432,7 +2423,7 @@ DriverCard defaultValue);
         if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<String, DriverCard> map =
             internalGetCardsmap().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
+        return map.getOrDefault(key, defaultValue);
       }
       /**
        * <code>map&lt;string, .com.alibaba.fastjson2.dubbo.DriverCard&gt; cardsmap = 18;</code>
@@ -2769,8 +2760,7 @@ DriverCard defaultValue);
           .equals(other.getId())) return false;
       if (getYears()
           != other.getYears()) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
+        return getUnknownFields().equals(other.getUnknownFields());
     }
 
     @Override
@@ -3839,7 +3829,7 @@ DriverCard defaultValue);
       if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<String, DriverCard> map =
           internalGetCardsmap().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
+      return map.getOrDefault(key, defaultValue);
     }
     /**
      * <code>map&lt;string, .com.alibaba.fastjson2.dubbo.DriverCard&gt; cardsmap = 18;</code>
@@ -3907,7 +3897,7 @@ DriverCard defaultValue);
       if (sfixed64_ != 0L) {
         output.writeSFixed64(12, sfixed64_);
       }
-      if (bool_ != false) {
+      if (bool_) {
         output.writeBool(13, bool_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(string_)) {
@@ -3985,7 +3975,7 @@ DriverCard defaultValue);
         size += com.google.protobuf.CodedOutputStream
           .computeSFixed64Size(12, sfixed64_);
       }
-      if (bool_ != false) {
+      if (bool_) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(13, bool_);
       }
@@ -4070,8 +4060,7 @@ DriverCard defaultValue);
           .equals(other.getCardsList())) return false;
       if (!internalGetCardsmap().equals(
           other.internalGetCardsmap())) return false;
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
+        return getUnknownFields().equals(other.getUnknownFields());
     }
 
     @Override
@@ -4467,7 +4456,7 @@ DriverCard defaultValue);
         if (other.getSfixed64() != 0L) {
           setSfixed64(other.getSfixed64());
         }
-        if (other.getBool() != false) {
+        if (other.getBool()) {
           setBool(other.getBool());
         }
         if (!other.getString().isEmpty()) {
@@ -5276,8 +5265,7 @@ DriverCard defaultValue);
           DriverCard, DriverCard.Builder, DriverCardOrBuilder>
           getCardFieldBuilder() {
         if (cardBuilder_ == null) {
-          cardBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              DriverCard, DriverCard.Builder, DriverCardOrBuilder>(
+          cardBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getCard(),
                   getParentForChildren(),
                   isClean());
@@ -5289,8 +5277,8 @@ DriverCard defaultValue);
       private java.util.List<DriverCard> cards_ =
         java.util.Collections.emptyList();
       private void ensureCardsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          cards_ = new java.util.ArrayList<DriverCard>(cards_);
+        if ((bitField0_ & 0x00000001) == 0) {
+          cards_ = new java.util.ArrayList<>(cards_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -5515,8 +5503,7 @@ DriverCard defaultValue);
           DriverCard, DriverCard.Builder, DriverCardOrBuilder>
           getCardsFieldBuilder() {
         if (cardsBuilder_ == null) {
-          cardsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              DriverCard, DriverCard.Builder, DriverCardOrBuilder>(
+          cardsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   cards_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
@@ -5589,7 +5576,7 @@ DriverCard defaultValue);
         if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<String, DriverCard> map =
             internalGetCardsmap().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
+        return map.getOrDefault(key, defaultValue);
       }
       /**
        * <code>map&lt;string, .com.alibaba.fastjson2.dubbo.DriverCard&gt; cardsmap = 18;</code>

@@ -12,9 +12,9 @@ public class ConstLongTest {
         assertEquals(JSONSchema.Type.Integer, schema.getType());
         assertTrue(schema.isValid((Object) null));
         assertTrue(schema.validate((Object) null).isSuccess());
-        assertTrue(schema.validate((Object) Long.valueOf(123)).isSuccess());
-        assertTrue(schema.validate((Object) Float.valueOf(123)).isSuccess());
-        assertFalse(schema.validate((Object) Float.valueOf(123.123F)).isSuccess());
+        assertTrue(schema.validate((Object) 123L).isSuccess());
+        assertTrue(schema.validate((Object) 123F).isSuccess());
+        assertFalse(schema.validate((Object) 123.123F).isSuccess());
         assertFalse(schema.validate("abc").isSuccess());
         assertTrue(schema.validate("123").isSuccess());
         assertFalse(schema.validate("-9223372036854775818").isSuccess());

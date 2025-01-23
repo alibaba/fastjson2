@@ -65,7 +65,7 @@ public class Issue1190 {
     }
 
     public Object deserialize(byte[] bytes) throws SerializationException {
-        if (bytes == null || bytes.length <= 0) {
+        if (bytes == null || bytes.length == 0) {
             return null;
         }
         return JSON.parseObject(bytes, Object.class, autoTypeFilter, JSONReader.Feature.SupportAutoType);

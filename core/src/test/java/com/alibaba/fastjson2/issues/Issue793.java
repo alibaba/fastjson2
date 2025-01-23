@@ -20,7 +20,7 @@ public class Issue793 {
                 JSON.parse(
                         "{}",
                         JSONFactory.createReadContext(
-                                () -> new HashMap() // 指定objectSupplier为 HashMap
+                                HashMap::new // 指定objectSupplier为 HashMap
                         )
                 ).getClass()
         );
@@ -30,7 +30,7 @@ public class Issue793 {
                 JSON.parse(
                         "{}",
                         JSONFactory.createReadContext(
-                                () -> new LinkedHashMap() // 指定objectSupplier为 LinkedHashMap
+                                LinkedHashMap::new // 指定objectSupplier为 LinkedHashMap
                         )
                 ).getClass()
         );
@@ -40,7 +40,7 @@ public class Issue793 {
                 JSON.parse(
                         "{}",
                         JSONFactory.createReadContext(
-                                () -> new TreeMap() // 指定objectSupplier为 TreeMap
+                                TreeMap::new // 指定objectSupplier为 TreeMap
                         )
                 ).getClass()
         );
@@ -50,7 +50,7 @@ public class Issue793 {
                 JSON.parse(
                         "{}",
                         JSONFactory.createReadContext(
-                                () -> new ConcurrentHashMap() // 指定objectSupplier为 ConcurrentHashMap
+                                ConcurrentHashMap::new // 指定objectSupplier为 ConcurrentHashMap
                         )
                 ).getClass()
         );
@@ -64,7 +64,7 @@ public class Issue793 {
                         "[]",
                         JSONFactory.createReadContext(
                                 null,
-                                () -> new ArrayList()) // 指定arraySupplier为 ArrayList
+                                ArrayList::new) // 指定arraySupplier为 ArrayList
                 ).getClass()
         );
 
@@ -74,7 +74,7 @@ public class Issue793 {
                         "[]",
                         JSONFactory.createReadContext(
                                 null,
-                                () -> new LinkedList()) // 指定arraySupplier为 LinkedList
+                                LinkedList::new) // 指定arraySupplier为 LinkedList
                 ).getClass()
         );
 
@@ -84,7 +84,7 @@ public class Issue793 {
                         "[]",
                         JSONFactory.createReadContext(
                                 null,
-                                () -> new ArrayDeque()) // 指定arraySupplier为 ArrayDeque
+                                ArrayDeque::new) // 指定arraySupplier为 ArrayDeque
                 ).getClass()
         );
     }
@@ -93,7 +93,7 @@ public class Issue793 {
     public void test2() {
         try {
             JSONFactory.setDefaultObjectSupplier(
-                    () -> new TreeMap() // 全局指定objectSupplier为 TreeMap
+                    TreeMap::new // 全局指定objectSupplier为 TreeMap
             );
             assertEquals(
                     TreeMap.class,
@@ -101,7 +101,7 @@ public class Issue793 {
             );
 
             JSONFactory.setDefaultObjectSupplier(
-                    () -> new ConcurrentHashMap() // 全局指定objectSupplier为 ConcurrentHashMap
+                    ConcurrentHashMap::new // 全局指定objectSupplier为 ConcurrentHashMap
             );
             assertEquals(
                     ConcurrentHashMap.class,
@@ -109,7 +109,7 @@ public class Issue793 {
             );
 
             JSONFactory.setDefaultArraySupplier(
-                    () -> new LinkedList() // 全局指定arraySupplier为 LinkedList
+                    LinkedList::new // 全局指定arraySupplier为 LinkedList
             );
             assertEquals(
                     LinkedList.class,
@@ -117,7 +117,7 @@ public class Issue793 {
             );
 
             JSONFactory.setDefaultArraySupplier(
-                    () -> new CopyOnWriteArrayList() // 全局指定arraySupplier为 CopyOnWriteArrayList
+                    CopyOnWriteArrayList::new // 全局指定arraySupplier为 CopyOnWriteArrayList
             );
             assertEquals(
                     CopyOnWriteArrayList.class,

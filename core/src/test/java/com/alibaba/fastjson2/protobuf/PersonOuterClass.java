@@ -289,8 +289,7 @@ public final class PersonOuterClass {
         if (!getEmail()
             .equals(other.getEmail())) return false;
       }
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
-      return true;
+        return getUnknownFields().equals(other.getUnknownFields());
     }
 
     @Override

@@ -58,10 +58,7 @@ public class JSONTest_register {
 
             int id = 0;
             String name = null;
-            for (; ; ) {
-                if (jsonReader.nextIfObjectEnd()) {
-                    break;
-                }
+            while (!jsonReader.nextIfObjectEnd()) {
                 String fieldName = jsonReader.readFieldName();
                 switch (fieldName) {
                     case "ID":
@@ -72,7 +69,6 @@ public class JSONTest_register {
                         break;
                     default:
                         jsonReader.skipValue();
-                        break;
                 }
             }
 

@@ -32,9 +32,9 @@ public class Issue2164 {
     @Test
     public void test() {
         String json = "{\r\n"
-                + "	\"Ref\": \"\",\r\n"
-                + "	\"Width\": \"1.01\",\r\n"
-                + "	\"High\": \"\"\r\n"
+                + "    \"Ref\": \"\",\r\n"
+                + "    \"Width\": \"1.01\",\r\n"
+                + "    \"High\": \"\"\r\n"
                 + "}";
         TestVO jsonRootBean = JSON.parseObject(json, TestVO.class, FASTJSON_DEFAULT_READER_FEATURES);
         assertEquals("",jsonRootBean.Ref);
@@ -46,9 +46,9 @@ public class Issue2164 {
     @Test
     public void testWhiteSpaceComma(){
         String json = "{\r\n"
-                + "	\"Ref\": \"\"\r\n,\r\n"
-                + "	\"Width\": \"1.01\"\r\n , \r\n"
-                + "	\"High\": \"\"\r\n"
+                + "    \"Ref\": \"\"\r\n,\r\n"
+                + "    \"Width\": \"1.01\"\r\n , \r\n"
+                + "    \"High\": \"\"\r\n"
                 + ",\"test2\": \"\"\r\n}";
         TestVO jsonRootBean = JSON.parseObject(json, TestVO.class, FASTJSON_DEFAULT_READER_FEATURES);
         assertEquals("",jsonRootBean.Ref);

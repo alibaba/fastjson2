@@ -20,7 +20,7 @@ public class Issue1330_long {
             error = e;
         }
         assertNotNull(error);
-        assertTrue(error.getMessage().indexOf("parseLong error") != -1);
+        assertTrue(error.getMessage().contains("parseLong error"));
     }
 
     @Test
@@ -32,7 +32,7 @@ public class Issue1330_long {
             error = e;
         }
         assertNotNull(error);
-        assertTrue(error.getMessage().indexOf("parseLong error") != -1);
+        assertTrue(error.getMessage().contains("parseLong error"));
     }
 
     @Test
@@ -44,7 +44,7 @@ public class Issue1330_long {
             error = e;
         }
         assertNotNull(error);
-        assertTrue(error.getMessage().indexOf("parseLong error") != -1);
+        assertTrue(error.getMessage().contains("parseLong error"));
     }
 
     public static class Model {

@@ -41,7 +41,7 @@ public class Issue1400 {
         public Resource resource;
 
         Bean(TypeReference tr) {
-            resource = (Resource) JSON.parseObject(str, tr.getType());
+            resource = JSON.parseObject(str, tr.getType());
         }
     }
 }

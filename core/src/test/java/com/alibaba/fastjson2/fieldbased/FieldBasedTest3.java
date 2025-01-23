@@ -115,10 +115,10 @@ public class FieldBasedTest3 {
         );
 
         assertEquals(101,
-                ((Bean2) JSONArray.of(JSONObject
+                JSONArray.of(JSONObject
                                 .of("id", 101)
                         )
-                        .getObject(0, Bean2.class, JSONReader.Feature.FieldBased))
+                        .getObject(0, Bean2.class, JSONReader.Feature.FieldBased)
                         .id
         );
 

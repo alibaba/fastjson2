@@ -18,7 +18,7 @@ public class BrokerData {
         String addr = this.brokerAddrs.get(MASTER_ID);
 
         if (addr == null) {
-            List<String> addrs = new ArrayList<String>(brokerAddrs.values());
+            List<String> addrs = new ArrayList<>(brokerAddrs.values());
             return addrs.get(random.nextInt(addrs.size()));
         }
 

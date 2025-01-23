@@ -14,6 +14,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class OffsetDateTime20 {
@@ -23,7 +24,7 @@ public class OffsetDateTime20 {
     public OffsetDateTime20() {
         try {
             InputStream is = OffsetDateTime20.class.getClassLoader().getResourceAsStream("data/date20.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             object = JSON.parseObject(str, OffsetDateTime20Field.class);
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -19,7 +19,7 @@ public class Issue567 {
         test.setConfig(catConfig);
         String json = JSON.toJSONString(test, JSONWriter.Feature.WriteClassName);
         //JSON结果 {"@type":"com.example.fastjson2.Test","config":{"@type":"com.example.fastjson2.Test$CatConfig","height":"200","width":"100"}}
-        Bean t = (Bean) JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportAutoType);
+        Bean t = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportAutoType);
         assertTrue(t.getConfig() instanceof Bean.CatConfig);
         //对象结果：Test.Config()
     }

@@ -153,7 +153,7 @@ public class MapTest {
     }
 
     public static class VO {
-        private Map<String, String> properties = new LinkedHashMap<String, String>();
+        private Map<String, String> properties = new LinkedHashMap<>();
 
         public Map<String, String> getProperties() {
             return properties;

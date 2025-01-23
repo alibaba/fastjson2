@@ -373,7 +373,7 @@ public class IntegerTest {
             jsonPath.set(vo, "103");
             assertEquals(Integer.valueOf(103), vo.getV0000());
 
-            assertEquals(Integer.valueOf(103), jsonPath.eval(vo));
+            assertEquals(103, jsonPath.eval(vo));
         }
     }
 }

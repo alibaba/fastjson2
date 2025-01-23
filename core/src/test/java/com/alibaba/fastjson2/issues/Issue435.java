@@ -35,7 +35,7 @@ public class Issue435 {
     public void test256() {
         for (int i = 0; i < 256; ++i) {
             char ch = (char) i;
-            String str = new String(new char[]{ch});
+            String str = String.valueOf(ch);
             String json = JSON.toJSONString(str);
             assertEquals(str, JSON.parse(json), "fail " + i);
         }
@@ -45,7 +45,7 @@ public class Issue435 {
     public void test256Bytes() {
         for (int i = 0; i < 256; ++i) {
             char ch = (char) i;
-            String str = new String(new char[]{ch});
+            String str = String.valueOf(ch);
             byte[] jsonBytes = JSON.toJSONBytes(str);
             assertEquals(str, JSON.parse(jsonBytes), "fail " + i);
         }
@@ -59,7 +59,7 @@ public class Issue435 {
 
         for (int i = 0; i < 256; ++i) {
             char ch = (char) i;
-            String str = new String(new char[]{ch});
+            String str = String.valueOf(ch);
 
             JSONWriter[] jsonWriters = TestUtils.createJSONWriters();
             for (JSONWriter jsonWriter : jsonWriters) {

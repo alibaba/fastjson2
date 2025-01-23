@@ -15,10 +15,10 @@ public class ArrayNumberTest {
     @Test
     public void test_array() {
         Object[] array = new Object[]{
-                (Byte.valueOf((byte) 0)),
-                Short.valueOf((short) 0),
-                Integer.valueOf(0),
-                Long.valueOf(0),
+                ((byte) 0),
+                (short) 0,
+                0,
+                0L,
                 BigInteger.valueOf(0),
                 BigDecimal.valueOf(0),
         };
@@ -28,9 +28,8 @@ public class ArrayNumberTest {
         assertEquals("[0,0,0,0,0,0]", str);
 
         assertEquals(Arrays.toString(array),
-                Arrays.toString((Object[])
-                        JSONReader.of(str)
-                                .read(array.getClass())
+                Arrays.toString(JSONReader.of(str)
+                        .read(array.getClass())
                 )
         );
     }
@@ -38,10 +37,10 @@ public class ArrayNumberTest {
     @Test
     public void test_array_1() {
         Number[] array = new Number[]{
-                (Byte.valueOf((byte) 0)),
-                Short.valueOf((short) 0),
-                Integer.valueOf(0),
-                Long.valueOf(0),
+                ((byte) 0),
+                (short) 0,
+                0,
+                0L,
                 BigInteger.valueOf(0),
                 BigDecimal.valueOf(0),
         };
@@ -51,9 +50,8 @@ public class ArrayNumberTest {
         assertEquals("[0,0,0,0,0,0]", str);
 
         assertEquals(Arrays.toString(array),
-                Arrays.toString((Object[])
-                        JSONReader.of(str)
-                                .read(array.getClass())
+                Arrays.toString(JSONReader.of(str)
+                        .read(array.getClass())
                 )
         );
     }

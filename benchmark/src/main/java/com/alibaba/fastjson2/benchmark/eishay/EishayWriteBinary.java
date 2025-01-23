@@ -20,6 +20,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinary {
@@ -29,7 +30,7 @@ public class EishayWriteBinary {
     static {
         try {
             InputStream is = EishayWriteBinary.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
         } catch (Throwable ex) {

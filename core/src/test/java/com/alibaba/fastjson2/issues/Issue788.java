@@ -12,7 +12,7 @@ public class Issue788 {
         String str = "{\"@type\":\"com.alibaba.fastjson2.issues.Issue788$GoodsDetailDTO\",\"goodsName\":\"HK GOLD香港黄金\",\"goodsPrice\":100.00}";
         GoodsDetailDTO dto = (GoodsDetailDTO) JSON.parseObject(str, Object.class, JSONReader.Feature.SupportAutoType);
         assertEquals("HK GOLD香港黄金", dto.goodsName);
-        assertEquals("100.00", dto.goodsPrice.toString());
+        assertEquals("100.00", dto.goodsPrice);
     }
 
     public static class GoodsDetailDTO {

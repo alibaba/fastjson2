@@ -31,10 +31,7 @@ public class JSONType_deserializer {
         public Bean readObject(JSONReader jsonReader, Type fieldType, Object fieldName0, long features) {
             Bean bean = new Bean();
             jsonReader.nextIfObjectStart();
-            for (; ; ) {
-                if (jsonReader.nextIfObjectEnd()) {
-                    break;
-                }
+            while (!jsonReader.nextIfObjectEnd()) {
                 String fieldName = jsonReader.readFieldName();
                 if (fieldName.equals("beanId")) {
                     bean.id = jsonReader.readInt32Value();

@@ -121,7 +121,7 @@ public class VeryComplexDO
         vdo.setPfloat(1.2f);
         vdo.setPint(69);
         vdo.setPdouble(9999.9999);
-        List<String> tmp = new ArrayList<String>();
+        List<String> tmp = new ArrayList<>();
         tmp.add("taobao");
         tmp.add("java");
         tmp.add("linux");
@@ -131,12 +131,12 @@ public class VeryComplexDO
         BaseDO bdo = new BaseDO();
         bdo.setId(45);
         vdo.setpBaseDO(bdo);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("me", "you");
         map.put("love", "taobao");
         map.put("test", "HSF");
 //        vdo.setPmap(map);
-        TreeSet<String> ts = new TreeSet<String>();
+        TreeSet<String> ts = new TreeSet<>();
         ts.add("bbb");
         ts.add("aaa");
         ts.add("bbb");

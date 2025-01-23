@@ -14,6 +14,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class ZonedDateTime20 {
@@ -24,7 +25,7 @@ public class ZonedDateTime20 {
     public ZonedDateTime20() {
         try {
             InputStream is = ZonedDateTime20.class.getClassLoader().getResourceAsStream("data/date20.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
             jsonbBytes = JSONB.toBytes(
                     JSON.parseObject(str, ZonedDateTime20Field.class)
             );

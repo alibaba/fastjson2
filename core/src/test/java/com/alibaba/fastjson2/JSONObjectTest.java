@@ -149,7 +149,7 @@ public class JSONObjectTest {
     public void test_clone() {
         JSONObject object = new JSONObject();
         object.put("val", BigDecimal.valueOf(123));
-        JSONObject clone = (JSONObject) object.clone();
+        JSONObject clone = object.clone();
         assertEquals(object, clone);
     }
 
@@ -821,12 +821,12 @@ public class JSONObjectTest {
         assertEquals(
                 Short.valueOf((short) 12),
                 new JSONObject()
-                        .fluentPut("val", Short.valueOf((short) 12))
+                        .fluentPut("val", (short) 12)
                         .getShort("val"));
         assertEquals(
                 Short.valueOf((short) 12),
                 new JSONObject()
-                        .fluentPut("val", Byte.valueOf((byte) 12))
+                        .fluentPut("val", (byte) 12)
                         .getShort("val"));
         assertEquals(
                 Short.valueOf((short) 12),
@@ -929,12 +929,12 @@ public class JSONObjectTest {
         assertEquals(
                 Byte.valueOf((byte) 12),
                 new JSONObject()
-                        .fluentPut("val", Short.valueOf((short) 12))
+                        .fluentPut("val", (short) 12)
                         .getByte("val"));
         assertEquals(
                 Byte.valueOf((byte) 12),
                 new JSONObject()
-                        .fluentPut("val", Byte.valueOf((byte) 12))
+                        .fluentPut("val", (byte) 12)
                         .getByte("val"));
         assertEquals(
                 Byte.valueOf((byte) 12),
@@ -1127,7 +1127,7 @@ public class JSONObjectTest {
                         .getObject("id", UUID.class)
         );
 
-        assertEquals(Integer.valueOf(101),
+        assertEquals(101,
                 JSONObject
                         .of("id", 101)
                         .getObject("id", Number.class)
@@ -1235,16 +1235,16 @@ public class JSONObjectTest {
                 () -> proxy.set(101)
         );
         assertThrows(JSONException.class,
-                () -> proxy.get()
+                proxy::get
         );
         assertThrows(JSONException.class,
-                () -> proxy.getX()
+                proxy::getX
         );
         assertThrows(JSONException.class,
-                () -> proxy.is()
+                proxy::is
         );
         assertThrows(JSONException.class,
-                () -> proxy.x0()
+                proxy::x0
         );
         assertThrows(JSONException.class,
                 () -> proxy.x(0)
@@ -1347,7 +1347,7 @@ public class JSONObjectTest {
     @Test
     public void testCompatible() {
         assertEquals(0, JSONObject.parseObject("{}").size());
-        assertEquals(0, ((JSONObject) JSONObject.parse("{}")).size());
+        assertEquals(0, JSONObject.parse("{}").size());
         assertEquals(101, JSONObject.parseObject("{\"id\":101}", Bean.class).id);
         assertEquals(101, JSONObject.parseObject("{\"ID\":101}", Bean.class, JSONReader.Feature.SupportSmartMatch).id);
         assertEquals(0, JSONArray.parseArray("[]").size());

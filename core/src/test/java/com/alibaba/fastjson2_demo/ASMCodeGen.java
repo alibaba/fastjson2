@@ -12,7 +12,7 @@ public class ASMCodeGen {
     @Test
     public void gen() {
         List<Method> methods = new ArrayList<>();
-        BeanUtils.setters(Int1000.class, e -> methods.add(e));
+        BeanUtils.setters(Int1000.class, methods::add);
 
         List<String> propertyNames = new ArrayList<>();
         methods.forEach(

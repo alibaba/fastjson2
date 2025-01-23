@@ -473,12 +473,12 @@ public class JSONReaderJSONBTest2 {
         {
             byte[] jsonBytes = JSONB.toBytes(1024 * 1024 * 512);
             JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(jsonBytes);
-            assertThrows(JSONException.class, () -> jsonReader.readLength());
+            assertThrows(JSONException.class, jsonReader::readLength);
         }
         {
             byte[] jsonBytes = JSONB.toBytes("xxx");
             JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(jsonBytes);
-            assertThrows(JSONException.class, () -> jsonReader.readLength());
+            assertThrows(JSONException.class, jsonReader::readLength);
         }
     }
 }

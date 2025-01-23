@@ -14,10 +14,8 @@ public class Issue1082 {
     public void test_for_issue() throws Exception {
         Throwable error = null;
         try {
-            Model_1082 m = (Model_1082) JSON.parseObject("{}", Model_1082.class);
-        } catch (JSONException ex) {
-            error = ex;
-        } catch (NullPointerException ex) {
+            Model_1082 m = JSON.parseObject("{}", Model_1082.class);
+        } catch (JSONException | NullPointerException ex) {
             error = ex;
         }
         assertNotNull(error);

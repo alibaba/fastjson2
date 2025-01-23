@@ -28,7 +28,7 @@ public class UsersParseUTF8Bytes {
     static {
         try {
             InputStream is = UsersParseUTF8Bytes.class.getClassLoader().getResourceAsStream("data/jjb/user.json");
-            utf8Bytes = IOUtils.toString(is, "UTF-8").getBytes(StandardCharsets.UTF_8);
+            utf8Bytes = IOUtils.toString(is, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

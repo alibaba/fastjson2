@@ -17,12 +17,7 @@ public class FormatTest {
         // 当有 Provider::register 类型处理后，@JSONField 注解失效了
         //
         JSONWriter.Context context = new JSONWriter.Context();
-        context.getProvider().register(Date.class, new ObjectWriter() {
-            @Override
-            public void write(JSONWriter jsonWriter, Object o, Object o1, Type type, long l) {
-                jsonWriter.writeInt64(((Date) o).getTime());
-            }
-        });
+        context.getProvider().register(Date.class, (jsonWriter, o, o1, type, l) -> jsonWriter.writeInt64(((Date) o).getTime()));
 
         CustomDateDo dateDo = new CustomDateDo();
 

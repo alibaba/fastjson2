@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1628 {
     @Test
     public void test_toJSONBytes() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("a", 1001);
         map.put("b", 2002);
         byte[] bytes = JSON.toJSONBytes(map, new SimplePropertyPreFilter("a"));
@@ -22,7 +22,7 @@ public class Issue1628 {
 
     @Test
     public void test_toJSONBytes_1() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("a", 1001);
         map.put("b", 2002);
         byte[] bytes = JSON.toJSONBytes(map, new Filter[]{new SimplePropertyPreFilter("a")});
@@ -31,7 +31,7 @@ public class Issue1628 {
 
     @Test
     public void test_toJSONBytes_2() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("a", 1001);
         map.put("b", 2002);
         byte[] bytes = JSON.toJSONBytes(map, new SimplePropertyPreFilter("a"));

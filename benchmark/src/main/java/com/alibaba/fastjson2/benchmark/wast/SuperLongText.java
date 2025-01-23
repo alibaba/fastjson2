@@ -13,6 +13,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipInputStream;
@@ -35,7 +36,7 @@ public class SuperLongText {
                 ZipInputStream zipIn = new ZipInputStream(bis)
         ) {
             zipIn.getNextEntry();
-            result = IOUtils.toString(zipIn, "UTF-8");
+            result = IOUtils.toString(zipIn, StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

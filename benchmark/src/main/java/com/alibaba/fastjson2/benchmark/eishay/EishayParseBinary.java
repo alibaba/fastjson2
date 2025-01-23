@@ -20,6 +20,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -29,24 +30,22 @@ public class EishayParseBinary {
     static byte[] fastjson2JSONBBytes;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
-    private static final ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
-        protected Kryo initialValue() {
-            Kryo kryo = new Kryo();
-            kryo.register(MediaContent.class);
-            kryo.register(ArrayList.class);
-            kryo.register(Image.class);
-            kryo.register(Image.Size.class);
-            kryo.register(Media.class);
-            kryo.register(Media.Player.class);
-            return kryo;
-        }
-    };
+    private static final ThreadLocal<Kryo> kryos = ThreadLocal.withInitial(() -> {
+        Kryo kryo = new Kryo();
+        kryo.register(MediaContent.class);
+        kryo.register(ArrayList.class);
+        kryo.register(Image.class);
+        kryo.register(Image.Size.class);
+        kryo.register(Media.class);
+        kryo.register(Media.Player.class);
+        return kryo;
+    });
     static byte[] kryoBytes;
 
     static {
         try {
             InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 

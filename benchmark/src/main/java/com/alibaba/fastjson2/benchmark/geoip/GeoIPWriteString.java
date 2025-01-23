@@ -14,6 +14,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class GeoIPWriteString {
@@ -24,7 +25,7 @@ public class GeoIPWriteString {
     static {
         try {
             InputStream is = GeoIPWriteString.class.getClassLoader().getResourceAsStream("data/geoip.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             object = JSONReader.of(str).read(GeoIP.class);
         } catch (Throwable ex) {
             ex.printStackTrace();

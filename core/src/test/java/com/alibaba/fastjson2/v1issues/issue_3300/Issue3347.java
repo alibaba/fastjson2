@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class Issue3347 {
     @Test
     public void test_for_issue() throws Exception {
-        Map<Integer, String> map = new HashMap<Integer, String>();
+        Map<Integer, String> map = new HashMap<>();
         map.put(1, "hello");
         String mapJSONString = JSON.toJSONString(map);
         Map mapValues = JSONObject.parseObject(mapJSONString, Map.class);

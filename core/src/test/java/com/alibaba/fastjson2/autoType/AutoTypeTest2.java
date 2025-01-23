@@ -26,7 +26,7 @@ public class AutoTypeTest2 {
     }
 
     public static class A {
-        public List<B> list = new ArrayList<B>();
+        public List<B> list = new ArrayList<>();
     }
 
     public static class B {

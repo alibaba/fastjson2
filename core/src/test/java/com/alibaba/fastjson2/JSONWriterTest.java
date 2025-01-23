@@ -341,7 +341,7 @@ public class JSONWriterTest {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         jsonWriter.flushTo(out);
-        assertEquals("1", new String(out.toByteArray()));
+        assertEquals("1", out.toString());
     }
 
     @Test
@@ -352,7 +352,7 @@ public class JSONWriterTest {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         jsonWriter.flushTo(out, StandardCharsets.UTF_8);
-        assertEquals("101", new String(out.toByteArray()));
+        assertEquals("101", out.toString());
     }
 
     @Test
@@ -1831,8 +1831,7 @@ public class JSONWriterTest {
                 jsonWriter.writeStringLatin1(bytes);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
-                byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, out.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF16();
@@ -1872,8 +1871,7 @@ public class JSONWriterTest {
                 jsonWriter.writeStringLatin1(bytes);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
-                byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, out.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -1924,8 +1922,7 @@ public class JSONWriterTest {
                 jsonWriter.writeString(k);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
-                byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, out.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF16();
@@ -1941,8 +1938,7 @@ public class JSONWriterTest {
                 jsonWriter.writeString(k);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
-                byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, out.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2908,22 +2904,22 @@ public class JSONWriterTest {
     public void startArrayN() {
         JSONWriter jsonWriter = JSONWriter.of();
         assertThrows(JSONException.class, () -> jsonWriter.startArray(0));
-        assertThrows(JSONException.class, () -> jsonWriter.startArray0());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray1());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray2());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray3());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray4());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray5());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray6());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray7());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray8());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray9());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray10());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray11());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray12());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray13());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray14());
-        assertThrows(JSONException.class, () -> jsonWriter.startArray15());
+        assertThrows(JSONException.class, jsonWriter::startArray0);
+        assertThrows(JSONException.class, jsonWriter::startArray1);
+        assertThrows(JSONException.class, jsonWriter::startArray2);
+        assertThrows(JSONException.class, jsonWriter::startArray3);
+        assertThrows(JSONException.class, jsonWriter::startArray4);
+        assertThrows(JSONException.class, jsonWriter::startArray5);
+        assertThrows(JSONException.class, jsonWriter::startArray6);
+        assertThrows(JSONException.class, jsonWriter::startArray7);
+        assertThrows(JSONException.class, jsonWriter::startArray8);
+        assertThrows(JSONException.class, jsonWriter::startArray9);
+        assertThrows(JSONException.class, jsonWriter::startArray10);
+        assertThrows(JSONException.class, jsonWriter::startArray11);
+        assertThrows(JSONException.class, jsonWriter::startArray12);
+        assertThrows(JSONException.class, jsonWriter::startArray13);
+        assertThrows(JSONException.class, jsonWriter::startArray14);
+        assertThrows(JSONException.class, jsonWriter::startArray15);
     }
 
     @Test

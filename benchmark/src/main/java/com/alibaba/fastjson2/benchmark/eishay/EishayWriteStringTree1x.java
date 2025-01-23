@@ -13,6 +13,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteStringTree1x {
@@ -23,7 +24,7 @@ public class EishayWriteStringTree1x {
     static {
         try {
             InputStream is = EishayWriteStringTree1x.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             mc = com.alibaba.fastjson.JSON.parseObject(str);
         } catch (Throwable ex) {
             ex.printStackTrace();

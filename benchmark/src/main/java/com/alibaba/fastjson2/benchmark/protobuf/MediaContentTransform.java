@@ -9,7 +9,7 @@ import java.util.List;
 
 public class MediaContentTransform {
     public static MediaContent reverse(MediaContentHolder.MediaContent mc) {
-        List<Image> images = new ArrayList<Image>(mc.getImageCount());
+        List<Image> images = new ArrayList<>(mc.getImageCount());
 
         for (MediaContentHolder.Image image : mc.getImageList()) {
             images.add(reverseImage(image));
@@ -28,7 +28,7 @@ public class MediaContentTransform {
                 media.getDuration(),
                 media.getSize(),
                 media.hasBitrate() ? media.getBitrate() : 0,
-                new ArrayList<String>(media.getPersonList()),
+                new ArrayList<>(media.getPersonList()),
                 reversePlayer(media.getPlayer()),
                 media.hasCopyright() ? media.getCopyright() : null
         );

@@ -46,7 +46,7 @@ public class Issue2447 {
         public int id;
 
         @JSONField(unwrapped = true)
-        public Map<String, Object> properties = new LinkedHashMap<String, Object>();
+        public Map<String, Object> properties = new LinkedHashMap<>();
     }
 
     public static class Location {

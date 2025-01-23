@@ -40,7 +40,7 @@ public class SimpleBeanWriteCase {
         mapType.put("v2", "v2 helldsdsd ");
         simpleMap.put("mapInstance", mapType);
 
-        List<Object> versions = new ArrayList<Object>();
+        List<Object> versions = new ArrayList<>();
         versions.add("v0.0.1");
         versions.add("v0.0.2");
         versions.add("v0.0.3");

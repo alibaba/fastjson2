@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplFromString;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2_vo.*;
@@ -774,13 +773,13 @@ public class JSONReaderTest1 {
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20183301'")) {
-            assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
+            assertThrows(JSONException.class, jsonReader::readLocalDate8);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180241'")) {
-            assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
+            assertThrows(JSONException.class, jsonReader::readLocalDate8);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180231'")) {
-            assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
+            assertThrows(JSONException.class, jsonReader::readLocalDate8);
         }
     }
 
@@ -799,7 +798,7 @@ public class JSONReaderTest1 {
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-2-31'")) {
-            assertThrows(JSONException.class, () -> jsonReader.readLocalDate9());
+            assertThrows(JSONException.class, jsonReader::readLocalDate9);
         }
     }
 
@@ -858,7 +857,7 @@ public class JSONReaderTest1 {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-02-31'")) {
             assertThrows(
                     JSONException.class,
-                    () -> jsonReader.readLocalDate10()
+                    jsonReader::readLocalDate10
             );
         }
     }
@@ -1412,7 +1411,7 @@ public class JSONReaderTest1 {
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders("'abc',")) {
-            assertThrows(JSONException.class, () -> jsonReader.readBinary());
+            assertThrows(JSONException.class, jsonReader::readBinary);
         }
     }
 
@@ -1521,17 +1520,17 @@ public class JSONReaderTest1 {
         byte[] bytes = JSONB.toBytes("");
         {
             JSONReader jsonReader = JSONReader.ofJSONB(bytes, JSONFactory.createReadContext());
-            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+            assertThrows(JSONException.class, jsonReader::readLocalDate11);
         }
         {
             JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
-            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+            assertThrows(JSONException.class, jsonReader::readLocalDate11);
         }
     }
 
     @Test
     public void testResolveTaskToString() {
-        JSONReader.ResolveTask resolveTask = new JSONReader.ResolveTask((FieldReader) null, new Object(), "", JSONPath.of("$"));
+        JSONReader.ResolveTask resolveTask = new JSONReader.ResolveTask(null, new Object(), "", JSONPath.of("$"));
         assertEquals("$", resolveTask.toString());
     }
 
@@ -2514,7 +2513,7 @@ public class JSONReaderTest1 {
     public void test15() {
         JSONReader jsonReader = JSONReader.of("{\"v\":\"123\"}");
         Map map = new HashMap();
-        jsonReader.read(map, new ObjectReaderImplFromString<>(Long.class, s -> Long.parseLong(s)), 0);
+        jsonReader.read(map, new ObjectReaderImplFromString<>(Long.class, Long::parseLong), 0);
         assertEquals(123L, map.get("v"));
     }
 

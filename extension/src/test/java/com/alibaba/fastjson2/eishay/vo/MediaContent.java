@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.eishay.vo;
 
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings("serial")
 public class MediaContent
@@ -26,22 +27,13 @@ public class MediaContent
         }
 
         MediaContent that = (MediaContent) o;
-
-        if (images != null ? !images.equals(that.images) : that.images != null) {
-            return false;
-        }
-        if (media != null ? !media.equals(that.media) : that.media != null) {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(images, that.images)
+                && Objects.equals(media, that.media);
     }
 
     @Override
     public int hashCode() {
-        int result = media != null ? media.hashCode() : 0;
-        result = 31 * result + (images != null ? images.hashCode() : 0);
-        return result;
+        return Objects.hash(media, images);
     }
 
     public String toString() {

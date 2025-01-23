@@ -26,7 +26,7 @@ public class JSONPath_0 {
 
     @Test
     public void test_map() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("val", new Object());
         assertSame(map.get("val"), JSONPath.of("$.val").eval(map));
     }

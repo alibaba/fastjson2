@@ -74,7 +74,7 @@ public class Issue1556 {
         }
 
         public static <T> ApiResult<T> valueOfSuccess(T data) {
-            return new ApiResult<T>(0, "Success", data);
+            return new ApiResult<>(0, "Success", data);
         }
     }
 

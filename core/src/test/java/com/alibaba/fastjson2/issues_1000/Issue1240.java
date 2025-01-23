@@ -16,7 +16,7 @@ public class Issue1240 {
     public void test() {
         String str = "{\"date\":\"2023-03-10 11:55:42\",\"errorCode\":\"202004\",\"errorMessage\":\"人员不存在或获取失败\",\"obj\":{\"deptCode\":\"755H\",\"scheduleCode\":\"03D\",\"scheduleEndTime\":1330,\"scheduleName\":\"755H03D10311330\",\"scheduleStartTime\":1031,\"scheduleTime\":\"10:31-13:30\",\"scheduleType\":2,\"status\":0,\"unitCode\":\"755H013\"},\"success\":false}";
 
-        Result<List> result = (Result<List>) JSON.parseObject(str, new TypeReference<Result<List>>() {});
+        Result<List> result = JSON.parseObject(str, new TypeReference<Result<List>>() {});
         assertEquals(1, result.obj.size());
         JSONObject object = (JSONObject) result.obj.get(0);
         assertNotNull(object);

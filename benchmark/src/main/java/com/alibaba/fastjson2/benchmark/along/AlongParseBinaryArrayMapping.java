@@ -18,6 +18,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.FieldBased;
@@ -40,7 +41,7 @@ public class AlongParseBinaryArrayMapping {
 
         try {
             InputStream is = AlongParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             object = JSONReader.of(str, contextFeatures).read(SkillFire_S2C_Msg.class);
 
             fury = Fury.builder().withLanguage(Language.JAVA)

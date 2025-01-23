@@ -14,6 +14,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayFuryCompatibleWrite {
@@ -42,7 +43,7 @@ public class EishayFuryCompatibleWrite {
     static {
         try {
             InputStream is = EishayFuryCompatibleWrite.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
         } catch (Throwable ex) {

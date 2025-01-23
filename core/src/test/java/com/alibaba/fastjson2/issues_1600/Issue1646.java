@@ -12,7 +12,7 @@ public class Issue1646 {
     @Test
     public void test() {
         String s = "{\"test\":{null:\"a\",\"b\":\"c\"}}";
-        Bean bean = (Bean) JSONObject.parseObject(s, Bean.class, JSONReader.Feature.AllowUnQuotedFieldNames);
+        Bean bean = JSONObject.parseObject(s, Bean.class, JSONReader.Feature.AllowUnQuotedFieldNames);
         assertEquals("a", bean.getTest().get("null"));
     }
 

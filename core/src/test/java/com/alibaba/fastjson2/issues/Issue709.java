@@ -258,7 +258,7 @@ public class Issue709 {
             for (JSONReader jsonReader : jsonReaders) {
                 assertThrows(
                         JSONException.class,
-                        () -> jsonReader.readObject()
+                        jsonReader::readObject
                 );
             }
         }

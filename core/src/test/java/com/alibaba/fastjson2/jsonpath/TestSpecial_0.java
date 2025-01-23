@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestSpecial_0 {
     @Test
     public void test_special() {
-        Map<String, Object> vo = new HashMap<String, Object>();
+        Map<String, Object> vo = new HashMap<>();
 
         vo.put("a.b", 123);
 

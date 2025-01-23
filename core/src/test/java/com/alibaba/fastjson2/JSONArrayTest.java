@@ -842,12 +842,12 @@ public class JSONArrayTest {
         assertEquals(
                 Short.valueOf((short) 12),
                 new JSONArray()
-                        .fluentAdd(Short.valueOf((short) 12))
+                        .fluentAdd((short) 12)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
                 new JSONArray()
-                        .fluentAdd(Byte.valueOf((byte) 12))
+                        .fluentAdd((byte) 12)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
@@ -950,12 +950,12 @@ public class JSONArrayTest {
         assertEquals(
                 Byte.valueOf((byte) 12),
                 new JSONArray()
-                        .fluentAdd(Short.valueOf((short) 12))
+                        .fluentAdd((short) 12)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
                 new JSONArray()
-                        .fluentAdd(Byte.valueOf((byte) 12))
+                        .fluentAdd((byte) 12)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
@@ -1116,7 +1116,7 @@ public class JSONArrayTest {
                         .getObject(0, UUID.class)
         );
 
-        assertEquals(Integer.valueOf(101),
+        assertEquals(101,
                 JSONArray
                         .of(101)
                         .getObject(0, Number.class)
@@ -1267,9 +1267,9 @@ public class JSONArrayTest {
                     .of("1", 2, 3L, null)
                     .to(int[].class);
             assertEquals(4, array.length);
-            assertEquals((int) 1, array[0]);
-            assertEquals((int) 2, array[1]);
-            assertEquals((int) 3, array[2]);
+            assertEquals(1, array[0]);
+            assertEquals(2, array[1]);
+            assertEquals(3, array[2]);
             assertEquals(0, array[3]);
         }
         {
@@ -1286,9 +1286,9 @@ public class JSONArrayTest {
                     .of("1", 2, "3", null)
                     .to(long[].class);
             assertEquals(4, array.length);
-            assertEquals((long) 1, array[0]);
-            assertEquals((long) 2, array[1]);
-            assertEquals((long) 3, array[2]);
+            assertEquals(1, array[0]);
+            assertEquals(2, array[1]);
+            assertEquals(3, array[2]);
             assertEquals(0, array[3]);
         }
         {
@@ -1348,9 +1348,9 @@ public class JSONArrayTest {
                     .of("1", 2, "3", null)
                     .to(Double[].class);
             assertEquals(4, array.length);
-            assertEquals((double) 1, array[0]);
-            assertEquals((double) 2, array[1]);
-            assertEquals((double) 3, array[2]);
+            assertEquals(1, array[0]);
+            assertEquals(2, array[1]);
+            assertEquals(3, array[2]);
             assertNull(array[3]);
         }
         {
@@ -1358,10 +1358,10 @@ public class JSONArrayTest {
                     .of("1", 2L, "3", null)
                     .to(double[].class);
             assertEquals(4, array.length);
-            assertEquals((double) 1, array[0]);
-            assertEquals((double) 2, array[1]);
-            assertEquals((double) 3, array[2]);
-            assertEquals((double) 0, array[3]);
+            assertEquals(1, array[0]);
+            assertEquals(2, array[1]);
+            assertEquals(3, array[2]);
+            assertEquals(0, array[3]);
         }
 
         {
@@ -1390,11 +1390,11 @@ public class JSONArrayTest {
                     .of(1L, 2, 3D, "4", 5F, null)
                     .to(Number[].class);
             assertEquals(6, array.length);
-            assertEquals(Long.valueOf(1), array[0]);
-            assertEquals(Integer.valueOf(2), array[1]);
-            assertEquals(Double.valueOf(3), array[2]);
+            assertEquals(1L, array[0]);
+            assertEquals(2, array[1]);
+            assertEquals(3.0, array[2]);
             assertEquals(new BigDecimal("4"), array[3]);
-            assertEquals(Float.valueOf(5), array[4]);
+            assertEquals(5F, array[4]);
             assertNull(array[5]);
         }
     }

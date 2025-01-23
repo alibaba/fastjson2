@@ -142,7 +142,7 @@ public class LambdaMiscCodecTest {
         LambdaMiscCodec.ConstructorSupplier supplier = new LambdaMiscCodec.ConstructorSupplier(
                 BeanError.class.getConstructor(Bean.class)
         );
-        assertThrows(Exception.class, () -> supplier.get());
+        assertThrows(Exception.class, supplier::get);
     }
 
     public static class BeanError {

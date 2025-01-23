@@ -154,9 +154,7 @@ public class JSONPathSegmentIndexTest {
                         }
                         return;
                     }
-                    assertThrows(JSONException.class, () -> {
-                        context.current.eval(context);
-                    });
+                    assertThrows(JSONException.class, () -> context.current.eval(context));
                 } else if (type == ContextRootType.t_jsonpathSequence) {
                     //not all covered
                     assertFalse(context.eval);
@@ -403,7 +401,7 @@ public class JSONPathSegmentIndexTest {
             }
             long[] arr = (long[]) root;
             if (realIndex >= 0 && realIndex < 5) {
-                assertEquals(arr[realIndex], (long) paramArray[1]);
+                assertEquals(arr[realIndex], paramArray[1]);
                 return null;
             }
             assertTrue(Arrays.equals(arr, new long[]{1, 2, 3, 4, 5}));
@@ -463,7 +461,7 @@ public class JSONPathSegmentIndexTest {
             }
             long[] arr = (long[]) root;
             if (realIndex >= 0 && realIndex < 5) {
-                assertEquals(arr[realIndex], (long) paramArray[1]);
+                assertEquals(arr[realIndex], paramArray[1]);
                 return null;
             }
             assertTrue(Arrays.equals(arr, new long[]{1, 2, 3, 4, 5}));
@@ -507,19 +505,13 @@ public class JSONPathSegmentIndexTest {
         for (String str : getStringContent()) {
             //System.out.println(str);//debug
             JSONPath.Context context = getNewContext(nullType, index);
-            assertDoesNotThrow(() -> {
-                context.current.accept(JSONReader.of(str), context);
-            });
+            assertDoesNotThrow(() -> context.current.accept(JSONReader.of(str), context));
         }
 
         JSONPath.Context context1 = getNewContext(nullType, index);
-        assertThrows(JSONException.class, () -> {
-            context1.current.accept(JSONReader.of("aaaaaa"), context1);
-        });
+        assertThrows(JSONException.class, () -> context1.current.accept(JSONReader.of("aaaaaa"), context1));
         JSONPath.Context context2 = getNewContext(nullType, index);
-        assertThrows(JSONException.class, () -> {
-            context2.current.accept(JSONReader.of("%%%"), context2);
-        });
+        assertThrows(JSONException.class, () -> context2.current.accept(JSONReader.of("%%%"), context2));
     }
 
     private void setLongTest(ContextRootType type, BiFunction callback) {
@@ -561,9 +553,7 @@ public class JSONPathSegmentIndexTest {
             //print(((List) context.root).iterator());//debug
             if (callback == null) {
                 //not support
-                assertThrows(JSONException.class, () -> {
-                    context.current.set(context, 100);
-                });
+                assertThrows(JSONException.class, () -> context.current.set(context, 100));
                 return;
             }
             //print(((List) context.root).iterator());//debug
@@ -578,11 +568,7 @@ public class JSONPathSegmentIndexTest {
             //print(((List) context.root).iterator());//debug
             if (callback == null) {
                 //not support
-                assertThrows(JSONException.class, () -> {
-                    context.current.setCallback(context, (root, value) -> {
-                        return (int) value + 10;
-                    });
-                });
+                assertThrows(JSONException.class, () -> context.current.setCallback(context, (root, value) -> (int) value + 10));
                 return;
             }
             AtomicInteger oldValue = new AtomicInteger();
@@ -602,9 +588,7 @@ public class JSONPathSegmentIndexTest {
             //print(((List) context.root).iterator());//debug
             if (callback == null) {
                 //not support
-                assertThrows(JSONException.class, () -> {
-                    context.current.set(context, 100);
-                });
+                assertThrows(JSONException.class, () -> context.current.set(context, 100));
                 return;
             }
             context.current.set(context, 100);

@@ -20,9 +20,7 @@ public class JSONStreamingTest {
         assertNotNull(is);
 
         List list = new ArrayList<>();
-        Consumer consumer = (Object row) -> {
-            list.add(row);
-        };
+        Consumer consumer = list::add;
         JSON.parseObject(is, StandardCharsets.UTF_8, '\n', JSONObject.class, consumer);
 
         assertEquals(3, list.size());
@@ -38,9 +36,7 @@ public class JSONStreamingTest {
         assertNotNull(is);
 
         List list = new ArrayList<>();
-        Consumer consumer = (Object row) -> {
-            list.add(row);
-        };
+        Consumer consumer = list::add;
         JSON.parseObject(is, JSONObject.class, consumer);
 
         assertEquals(3, list.size());
@@ -56,9 +52,7 @@ public class JSONStreamingTest {
         assertNotNull(is);
 
         List list = new ArrayList<>();
-        Consumer consumer = (Object row) -> {
-            list.add(row);
-        };
+        Consumer consumer = list::add;
         JSON.parseObject(is, StandardCharsets.US_ASCII, '\n', JSONObject.class, consumer);
 
         assertEquals(3, list.size());
@@ -74,9 +68,7 @@ public class JSONStreamingTest {
         assertNotNull(is);
 
         List list = new ArrayList<>();
-        Consumer consumer = (Object row) -> {
-            list.add(row);
-        };
+        Consumer consumer = list::add;
         JSON.parseObject(is, '\n', JSONObject.class, consumer);
 
         assertEquals(3, list.size());

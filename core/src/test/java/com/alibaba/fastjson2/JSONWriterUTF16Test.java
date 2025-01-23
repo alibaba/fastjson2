@@ -525,7 +525,7 @@ public class JSONWriterUTF16Test {
         JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
         jsonWriter.writeStringLatin1(bytes);
         String json = jsonWriter.toString();
-        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        String str = new String(bytes, StandardCharsets.ISO_8859_1);
         Object parse = JSON.parse(json);
         assertEquals(str, parse);
     }
@@ -537,7 +537,7 @@ public class JSONWriterUTF16Test {
         JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeStringLatin1(bytes);
         String json = jsonWriter.toString();
-        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        String str = new String(bytes, StandardCharsets.ISO_8859_1);
         Object parse = JSON.parse(json);
         assertEquals(str, parse);
     }

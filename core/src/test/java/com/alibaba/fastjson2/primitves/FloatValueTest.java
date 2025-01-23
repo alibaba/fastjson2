@@ -20,8 +20,8 @@ public class FloatValueTest {
         values[off++] = Float.MAX_VALUE;
         values[off++] = (float) Integer.MIN_VALUE;
         values[off++] = (float) Integer.MAX_VALUE;
-        values[off++] = (float) Short.MIN_VALUE;
-        values[off++] = (float) Short.MAX_VALUE;
+        values[off++] = Short.MIN_VALUE;
+        values[off++] = Short.MAX_VALUE;
         values[off++] = (float) JSONBTest.INT24_MIN;
         values[off++] = (float) JSONBTest.INT24_MAX;
         values[off++] = -1F;
@@ -123,9 +123,7 @@ public class FloatValueTest {
     @Test
     public void test_jsonb_array3() {
         float[] primitiveValues = new float[values.length];
-        for (int i = 0; i < values.length; i++) {
-            primitiveValues[i] = values[i];
-        }
+        System.arraycopy(values, 0, primitiveValues, 0, values.length);
         byte[] jsonbBytes = JSONB.toBytes(primitiveValues);
         float[] id2 = JSONB.parseObject(jsonbBytes, float[].class);
         assertEquals(values.length, id2.length);
@@ -247,9 +245,7 @@ public class FloatValueTest {
     @Test
     public void test_str_array3() {
         float[] primitiveValues = new float[values.length];
-        for (int i = 0; i < values.length; i++) {
-            primitiveValues[i] = values[i];
-        }
+        System.arraycopy(values, 0, primitiveValues, 0, values.length);
         String str = JSON.toJSONString(primitiveValues);
         float[] id2 = JSON.parseObject(str, float[].class);
         assertEquals(values.length, id2.length);

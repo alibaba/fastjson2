@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1290 {
     @Test
     public void test() {
-        IntFunction function = (int i) -> Integer.valueOf(i);
+        IntFunction function = Integer::valueOf;
         Bean bean = new Bean();
         bean.function = function;
         String str = JSON.toJSONString(bean);

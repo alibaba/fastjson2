@@ -56,7 +56,7 @@ public class Issue829 {
                     status = ServiceCode.SERVER_ERROR;
                     break;
             }
-            Optional.ofNullable(msg).ifPresent(msgVal -> status.setMsg(msgVal));
+            Optional.ofNullable(msg).ifPresent(status::setMsg);
             return status;
         }
     }

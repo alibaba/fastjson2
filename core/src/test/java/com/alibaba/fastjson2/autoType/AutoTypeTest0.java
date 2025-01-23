@@ -132,7 +132,7 @@ public class AutoTypeTest0 {
         java.util.TreeMap model = JSONB.parseObject(jsonbBytes, Object.class, symbolTable, JSONReader.Feature.SupportAutoType);
         assertEquals(32, model.size());
         for (int i = 0; i < 32; ++i) {
-            assertEquals(Integer.valueOf(i), map.get("v" + i));
+            assertEquals(i, map.get("v" + i));
         }
     }
 

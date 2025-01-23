@@ -35,7 +35,7 @@ public class Issue273 {
 
         Type type3 = new TypeReference<TreeMap<Long, Short>>() {
         }.getType();
-        TreeMap<Integer, String> map3 = JSON.parseObject(json, type3);
+        TreeMap<Long, Short> map3 = JSON.parseObject(json, type3);
         assertEquals((short) 111, map3.get(1L));
         assertEquals((short) 222, map3.get(2L));
     }

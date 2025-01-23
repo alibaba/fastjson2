@@ -27,7 +27,7 @@ public class Issue3214 {
     @Test
     public void test1() {
         JSONReader.Context context = JSONFactory.createReadContext();
-        context.setObjectSupplier(() -> new com.alibaba.fastjson.JSONObject());
+        context.setObjectSupplier(com.alibaba.fastjson.JSONObject::new);
         String json = "{\n"
                 + "  \"k1\":{\n"
                 + "    \"k2\":[\n"

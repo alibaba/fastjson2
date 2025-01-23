@@ -355,7 +355,7 @@ public class CSVReaderTest6 {
         char[] chars = str.toCharArray();
         CSVReader csvReader = CSVReader.of(chars);
         csvReader.readHeader();
-        assertThrows(Exception.class, () -> csvReader.readAll());
+        assertThrows(Exception.class, csvReader::readAll);
     }
 
     @Test
@@ -373,7 +373,7 @@ public class CSVReaderTest6 {
         byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
         CSVReaderUTF8 csvReader = new CSVReaderUTF8(bytes, 0, bytes.length, new Type[0]);
         csvReader.readHeader();
-        assertThrows(Exception.class, () -> csvReader.readAll());
+        assertThrows(Exception.class, csvReader::readAll);
 
         Consumer consumer = o -> {};
         CSVReaderUTF8.ByteArrayConsumerImpl byteArrayConsumer = csvReader.new ByteArrayConsumerImpl(consumer);

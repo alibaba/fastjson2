@@ -20,7 +20,7 @@ public class FieldReaderListMethodTest {
 
         fieldReader.accept(
                 bean,
-                Arrays.asList(Long.valueOf(123L))
+                Arrays.asList(123L)
         );
         assertEquals(123L, bean.values.get(0));
 
@@ -57,7 +57,7 @@ public class FieldReaderListMethodTest {
 
         fieldReader.accept(
                 bean,
-                Arrays.asList(Long.valueOf(123L))
+                Arrays.asList(123L)
         );
         assertEquals(123L, bean.values.get(0));
 

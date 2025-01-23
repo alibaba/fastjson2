@@ -31,7 +31,7 @@ public class JSONPathTest {
     @Test
     public void testMiss() {
         Object[] result = (Object[]) path.extract("{}");
-        assertEquals("[null,null]", JSON.toJSONString((Object[]) path.extract("{}")));
+        assertEquals("[null,null]", JSON.toJSONString(path.extract("{}")));
     }
 
     @Test

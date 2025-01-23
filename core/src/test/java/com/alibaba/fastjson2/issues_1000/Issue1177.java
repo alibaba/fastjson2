@@ -58,12 +58,7 @@ public class Issue1177 {
 
     @Data
     public static class Bean1 {
-        private MyFunction function = new MyFunction() {
-            @Override
-            public Object apply(Object o) {
-                return null;
-            }
-        };
+        private MyFunction function = o -> null;
     }
 
     @Test
@@ -74,12 +69,7 @@ public class Issue1177 {
     }
 
     public static class Bean2 {
-        public MyFunction function = new MyFunction() {
-            @Override
-            public Object apply(Object o) {
-                return null;
-            }
-        };
+        public MyFunction function = o -> null;
     }
 
     @Test
@@ -90,12 +80,7 @@ public class Issue1177 {
     }
 
     private static class Bean3 {
-        public MyFunction function = new MyFunction() {
-            @Override
-            public Object apply(Object o) {
-                return null;
-            }
-        };
+        public MyFunction function = o -> null;
     }
 
     @FunctionalInterface

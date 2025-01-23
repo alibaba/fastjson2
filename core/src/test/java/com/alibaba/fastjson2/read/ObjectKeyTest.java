@@ -37,9 +37,7 @@ public class ObjectKeyTest {
     public void testDisablingSingleQuote() {
         String str = "{'key': 'value'}";
         byte[] bytes = str.getBytes();
-        assertThrows(JSONException.class, () -> {
-            JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.UTF_8, Bean.class, JSONReader.Feature.DisableSingleQuote);
-        });
+        assertThrows(JSONException.class, () -> JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.UTF_8, Bean.class, JSONReader.Feature.DisableSingleQuote));
     }
 
     public static class Bean {

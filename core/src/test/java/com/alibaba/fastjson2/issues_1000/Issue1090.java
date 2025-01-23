@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.filter.BeanContext;
 import com.alibaba.fastjson2.filter.ContextValueFilter;
 import org.junit.jupiter.api.Test;
 
@@ -18,12 +17,9 @@ public class Issue1090 {
 
         AtomicReference<Field> fieldRef = new AtomicReference<>();
 
-        ContextValueFilter filter = new ContextValueFilter() {
-            @Override
-            public Object process(BeanContext context, Object object, String name, Object value) {
-                fieldRef.set(context.getField());
-                return value;
-            }
+        ContextValueFilter filter = (context, object, name, value) -> {
+            fieldRef.set(context.getField());
+            return value;
         };
 
         JSON.toJSONString(bean, filter);

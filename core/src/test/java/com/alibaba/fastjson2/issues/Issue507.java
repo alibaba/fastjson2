@@ -24,7 +24,7 @@ public class Issue507 {
         String str = JSON.toJSONString(map, JSONWriter.Feature.WriteClassName);
         JSONAssert.assertEquals("{\"@type\":\"java.util.HashMap\",1L:\"张三\",2L:\"张四\"}", str, true);
 
-        Map map2 = (Map) JSON.parseObject(str, HashMap.class);
+        Map map2 = JSON.parseObject(str, HashMap.class);
         assertTrue(map2.containsKey(1L));
         assertEquals("张三", map2.get(1L));
         assertEquals("张四", map2.get(2L));

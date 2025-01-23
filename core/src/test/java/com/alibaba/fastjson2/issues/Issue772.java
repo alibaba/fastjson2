@@ -13,9 +13,7 @@ public class Issue772 {
     @Test
     public void testCase() {
         NameFilter nameFilter = (o, s, o1) -> s;
-        ValueFilter localDateFormatter1 = (o, s, source) -> {
-            return source;
-        };
+        ValueFilter localDateFormatter1 = (o, s, source) -> source;
         Filter[] defaultSerializeFilters = {nameFilter, localDateFormatter1};
 
         JSONWriter.Feature[] serializeFeatures = {

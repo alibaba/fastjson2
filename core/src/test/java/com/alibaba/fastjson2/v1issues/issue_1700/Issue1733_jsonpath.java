@@ -53,7 +53,7 @@ public class Issue1733_jsonpath {
     }
 
     public static class Order {
-        public List<Book> books = new ArrayList<Book>();
+        public List<Book> books = new ArrayList<>();
     }
 
     public static class Book {

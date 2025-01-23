@@ -71,7 +71,7 @@ public class AutoTypeTest14 {
 
         byte[] bytes = JSONB.toBytes(array, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection);
 
-        Number[] array2 = (Number[]) JSONB.parseObject(bytes, Number[].class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
+        Number[] array2 = JSONB.parseObject(bytes, Number[].class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertNotNull(array2);
         assertEquals(array.length, array2.length);
         for (int i = 0; i < array.length; i++) {

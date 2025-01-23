@@ -47,48 +47,36 @@ public class Issue2535 {
     @Test
     public void test5() {
         String json = "11\"11111\"";
-        assertThrows(JSONException.class, () -> {
-            JSON.parseArray(json, String.class);
-        });
+        assertThrows(JSONException.class, () -> JSON.parseArray(json, String.class));
     }
 
     @Test
     public void test6() {
         String json = "22'22222'";
-        assertThrows(JSONException.class, () -> {
-            JSON.parseArray(json, String.class);
-        });
+        assertThrows(JSONException.class, () -> JSON.parseArray(json, String.class));
     }
 
     @Test
     public void test7() {
         String json = "1{}";
-        assertThrows(JSONException.class, () -> {
-            JSON.parseArray(json, String.class);
-        });
+        assertThrows(JSONException.class, () -> JSON.parseArray(json, String.class));
     }
 
     @Test
     public void test8() {
         String json = "a{}";
-        assertThrows(JSONException.class, () -> {
-            JSON.parseArray(json, String.class);
-        });
+        assertThrows(JSONException.class, () -> JSON.parseArray(json, String.class));
     }
 
     @Test
     public void test9() {
         String json = "a'333'";
-        assertThrows(JSONException.class, () -> {
-            JSON.parseArray(json, String.class);
-        });
+        assertThrows(JSONException.class, () -> JSON.parseArray(json, String.class));
     }
 
     @Test
     public void test10() {
         String json = "a\"444\"";
-        assertThrows(JSONException.class, () -> {
-            JSON.parseArray(json, String.class);
-        });
+        assertThrows(JSONException.class, () -> JSON.parseArray(json, String.class));
     }
 }

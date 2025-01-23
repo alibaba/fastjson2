@@ -107,17 +107,17 @@ public class JSONReaderJSONBTest {
     public void notSupported() {
         JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(JSONB.toBytes(""));
         assertThrows(JSONException.class, () -> jsonReader.nextIfMatch('A'));
-        assertThrows(JSONException.class, () -> jsonReader.readNullOrNewDate());
-        assertThrows(JSONException.class, () -> jsonReader.readNumber0());
-        assertThrows(JSONException.class, () -> jsonReader.readLocalDateTime16());
-        assertThrows(JSONException.class, () -> jsonReader.readLocalDateTime17());
-        assertThrows(JSONException.class, () -> jsonReader.readLocalTime10());
-        assertThrows(JSONException.class, () -> jsonReader.readLocalTime11());
-        assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
-        assertThrows(JSONException.class, () -> jsonReader.readLocalDateTime18());
+        assertThrows(JSONException.class, jsonReader::readNullOrNewDate);
+        assertThrows(JSONException.class, jsonReader::readNumber0);
+        assertThrows(JSONException.class, jsonReader::readLocalDateTime16);
+        assertThrows(JSONException.class, jsonReader::readLocalDateTime17);
+        assertThrows(JSONException.class, jsonReader::readLocalTime10);
+        assertThrows(JSONException.class, jsonReader::readLocalTime11);
+        assertThrows(JSONException.class, jsonReader::readLocalDate11);
+        assertThrows(JSONException.class, jsonReader::readLocalDateTime18);
         assertThrows(JSONException.class, () -> jsonReader.readZonedDateTimeX(10));
-        assertThrows(JSONException.class, () -> jsonReader.skipComment());
-        assertThrows(JSONException.class, () -> jsonReader.readPattern());
+        assertThrows(JSONException.class, jsonReader::skipComment);
+        assertThrows(JSONException.class, jsonReader::readPattern);
         assertThrows(JSONException.class, () -> jsonReader.nextIfMatchIdent('0', '1', '2'));
         assertThrows(JSONException.class, () -> jsonReader.nextIfMatchIdent('0', '1', '2', '3'));
         assertThrows(JSONException.class, () -> jsonReader.nextIfMatchIdent('0', '1', '2', '3', '4'));
@@ -274,7 +274,7 @@ public class JSONReaderJSONBTest {
     public void readUUID() {
         UUID uuid = UUID.randomUUID();
         String str = uuid.toString();
-        String str1 = str.replaceAll("-", "");
+        String str1 = str.replace("-", "");
         assertEquals(
                 uuid,
                 JSONReader.ofJSONB(
@@ -393,10 +393,10 @@ public class JSONReaderJSONBTest {
     public void unsupport() {
         JSONReaderJSONB jsonReader = (JSONReaderJSONB) JSONReader.ofJSONB(JSONB.toBytes("abc"));
         jsonReader.notSupportType(JSONB.Constants.BC_ARRAY);
-        assertThrows(JSONException.class, () -> jsonReader.notSupportString());
+        assertThrows(JSONException.class, jsonReader::notSupportString);
         assertThrows(JSONException.class, () -> jsonReader.readInt32ValueError(JSONB.Constants.BC_ARRAY));
         assertThrows(JSONException.class, () -> jsonReader.readInt64ValueError(JSONB.Constants.BC_ARRAY));
-        assertThrows(JSONException.class, () -> jsonReader.readStringError());
-        assertThrows(JSONException.class, () -> jsonReader.typeRefNotFound(-1));
+        assertThrows(JSONException.class, jsonReader::readStringError);
+        assertThrows(JSONException.class, () -> JSONReaderJSONB.typeRefNotFound(-1));
     }
 }

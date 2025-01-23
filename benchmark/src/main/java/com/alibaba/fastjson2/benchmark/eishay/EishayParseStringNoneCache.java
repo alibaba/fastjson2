@@ -18,6 +18,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +30,7 @@ public class EishayParseStringNoneCache {
     static {
         try {
             InputStream is = EishayParseStringNoneCache.class.getClassLoader().getResourceAsStream("data/eishay_compact.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

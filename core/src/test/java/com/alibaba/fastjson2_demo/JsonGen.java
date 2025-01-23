@@ -54,7 +54,7 @@ public class JsonGen {
                 field = "v" + i;
             }
             int intVal = r.nextInt(999999999);
-            System.out.print("\t\"" + field + "\" : " + intVal + "");
+            System.out.print("\t\"" + field + "\" : " + intVal);
             if (i != COUNT - 1) {
                 System.out.print(',');
             }
@@ -79,7 +79,7 @@ public class JsonGen {
                 field = "v" + i;
             }
             boolean val = (r.nextInt() % 2) == 0;
-            System.out.print("\t\"" + field + "\" : " + val + "");
+            System.out.print("\t\"" + field + "\" : " + val);
             if (i != COUNT - 1) {
                 System.out.print(',');
             }
@@ -104,7 +104,7 @@ public class JsonGen {
             } else {
                 field = "v" + i;
             }
-            System.out.print("\t\"" + field + "\" : " + r.nextLong() + "");
+            System.out.print("\t\"" + field + "\" : " + r.nextLong());
             if (i != COUNT - 1) {
                 System.out.print(',');
             }

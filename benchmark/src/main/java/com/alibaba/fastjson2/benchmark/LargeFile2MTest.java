@@ -9,6 +9,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.zip.ZipInputStream;
 
@@ -25,7 +26,7 @@ public class LargeFile2MTest {
                 ZipInputStream zipIn = new ZipInputStream(bis)
         ) {
             zipIn.getNextEntry();
-            str = IOUtils.toString(zipIn, "UTF-8");
+            str = IOUtils.toString(zipIn, StandardCharsets.UTF_8);
             zipIn.closeEntry();
         } catch (IOException ex) {
             ex.printStackTrace();

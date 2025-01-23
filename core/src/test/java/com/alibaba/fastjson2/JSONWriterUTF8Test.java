@@ -70,7 +70,7 @@ public class JSONWriterUTF8Test {
 
     @Test
     public void test_writeString_utf8_2() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder(512);
         for (int i = 0; i < 512; i++) {
             char ch = (char) i;
             buf.append(ch);
@@ -653,7 +653,7 @@ public class JSONWriterUTF8Test {
         JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
         jsonWriter.writeStringLatin1(bytes);
         String json = jsonWriter.toString();
-        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        String str = new String(bytes, StandardCharsets.ISO_8859_1);
         Object parse = JSON.parse(json);
         assertEquals(str, parse);
     }
@@ -665,7 +665,7 @@ public class JSONWriterUTF8Test {
         JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeStringLatin1(bytes);
         String json = jsonWriter.toString();
-        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        String str = new String(bytes, StandardCharsets.ISO_8859_1);
         Object parse = JSON.parse(json);
         assertEquals(str, parse);
     }
@@ -678,7 +678,7 @@ public class JSONWriterUTF8Test {
         try (JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(context)) {
             jsonWriter.writeStringEscaped(bytes);
             String json = jsonWriter.toString();
-            String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+            String str = new String(bytes, StandardCharsets.ISO_8859_1);
             Object parse = JSON.parse(json);
             assertEquals(str, parse);
         }

@@ -201,12 +201,7 @@ public final class MediaContentHolder {
         return internalValueMap;
       }
       private static final com.google.protobuf.Internal.EnumLiteMap<
-          Size> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Size>() {
-              public Size findValueByNumber(int number) {
-                return Size.forNumber(number);
-              }
-            };
+          Size> internalValueMap = Size::forNumber;
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
@@ -241,7 +236,7 @@ public final class MediaContentHolder {
 
       private final int value;
 
-      private Size(int value) {
+      Size(int value) {
         this.value = value;
       }
 
@@ -249,7 +244,6 @@ public final class MediaContentHolder {
     }
 
     public static final int URI_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
     private volatile java.lang.Object uri_ = "";
     /**
      * <pre>
@@ -1550,12 +1544,7 @@ public final class MediaContentHolder {
         return internalValueMap;
       }
       private static final com.google.protobuf.Internal.EnumLiteMap<
-          Player> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Player>() {
-              public Player findValueByNumber(int number) {
-                return Player.forNumber(number);
-              }
-            };
+          Player> internalValueMap = Player::forNumber;
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
@@ -1590,7 +1579,7 @@ public final class MediaContentHolder {
 
       private final int value;
 
-      private Player(int value) {
+      Player(int value) {
         this.value = value;
       }
 
@@ -1599,7 +1588,6 @@ public final class MediaContentHolder {
 
     private int bitField0_;
     public static final int URI_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
     private volatile java.lang.Object uri_ = "";
     /**
      * <pre>
@@ -4034,8 +4022,8 @@ public final class MediaContentHolder {
       private java.util.List<com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Image> image_ =
         java.util.Collections.emptyList();
       private void ensureImageIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          image_ = new java.util.ArrayList<com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Image>(image_);
+        if ((bitField0_ & 0x00000001) == 0) {
+          image_ = new java.util.ArrayList<>(image_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -4260,8 +4248,7 @@ public final class MediaContentHolder {
           com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Image, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Image.Builder, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.ImageOrBuilder>
           getImageFieldBuilder() {
         if (imageBuilder_ == null) {
-          imageBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Image, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Image.Builder, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.ImageOrBuilder>(
+          imageBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   image_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
@@ -4380,8 +4367,7 @@ public final class MediaContentHolder {
           com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Media, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Media.Builder, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.MediaOrBuilder>
           getMediaFieldBuilder() {
         if (mediaBuilder_ == null) {
-          mediaBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Media, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.Media.Builder, com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder.MediaOrBuilder>(
+          mediaBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getMedia(),
                   getParentForChildren(),
                   isClean());

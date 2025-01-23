@@ -146,7 +146,7 @@ public class JSONPathExtractTest {
                 JSONPath.of("$[0]")
                         .extract(
                                 JSONReader.of(json)));
-        assertEquals(Integer.valueOf(1),
+        assertEquals(1,
                 JSONPath.of("$[1]")
                         .extract(
                                 JSONReader.of(json)));

@@ -50,7 +50,7 @@ public class AtomicReferenceReadOnlyTest {
     }
 
     public static class V1 {
-        public final AtomicReference<Value> value = new AtomicReference<Value>();
+        public final AtomicReference<Value> value = new AtomicReference<>();
     }
 
     public static class Value {

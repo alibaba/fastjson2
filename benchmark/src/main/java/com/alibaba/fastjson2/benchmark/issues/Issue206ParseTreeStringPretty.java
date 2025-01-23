@@ -12,6 +12,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,7 @@ public class Issue206ParseTreeStringPretty {
     static {
         try {
             InputStream is = Issue206ParseTreeStringPretty.class.getClassLoader().getResourceAsStream("issue/issue206.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

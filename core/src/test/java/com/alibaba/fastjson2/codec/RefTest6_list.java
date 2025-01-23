@@ -36,10 +36,10 @@ public class RefTest6_list {
 
         JSONB.dump(bytes);
 
-        B b = JSONB.parseObject(bytes, (java.lang.reflect.Type) B.class, JSONB.symbolTable(""), JSONReader.Feature.SupportAutoType);
+        B b = JSONB.parseObject(bytes, B.class, JSONB.symbolTable(""), JSONReader.Feature.SupportAutoType);
         assertSame(b.c, b.values.get(0));
 
-        A a1 = JSONB.parseObject(bytes, (java.lang.reflect.Type) A.class, JSONB.symbolTable(""));
+        A a1 = JSONB.parseObject(bytes, A.class, JSONB.symbolTable(""));
         assertSame(a1.c, a1.values.get(0));
     }
 

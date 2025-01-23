@@ -13,7 +13,7 @@ public class Issue1503 {
     @Test
     public void test_for_issue() throws Exception {
 //        config.setAutoTypeSupport(true);
-        Map<Long, Bean> map = new HashMap<Long, Bean>();
+        Map<Long, Bean> map = new HashMap<>();
         map.put(null, new Bean());
         Map<Long, Bean> rmap = (Map<Long, Bean>) JSON.parse(JSON.toJSONString(map, JSONWriter.Feature.WriteClassName));
         String json = JSON.toJSONString(rmap);

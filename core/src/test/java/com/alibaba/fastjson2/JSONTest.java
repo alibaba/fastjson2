@@ -134,10 +134,10 @@ public class JSONTest {
                 (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, intField1.v0000);
         Date1 date1 = JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8),
-                (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
+                Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
         assertNotNull(date1.getDate());
         assertNotNull(JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8),
-                (Type) Date1.class, ""));
+                Date1.class, ""));
     }
 
     @Test
@@ -224,7 +224,7 @@ public class JSONTest {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out, null);
-        assertEquals("null", new String(out.toByteArray()));
+        assertEquals("null", out.toString());
     }
 
     @Test
@@ -241,7 +241,7 @@ public class JSONTest {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out, null, context);
-        assertEquals("null", new String(out.toByteArray()));
+        assertEquals("null", out.toString());
     }
 
     @Test
@@ -344,7 +344,7 @@ public class JSONTest {
         };
 
         for (Type type : types) {
-            List list = (List) JSON.parseObject("[123]", type);
+            List list = JSON.parseObject("[123]", type);
             assertEquals(1, list.size());
             assertEquals(123, list.get(0));
         }
@@ -423,7 +423,7 @@ public class JSONTest {
         };
 
         for (Type type : types) {
-            Collection list = (Collection) JSON.parseObject("[123]", type);
+            Collection list = JSON.parseObject("[123]", type);
             assertEquals(1, list.size());
             assertEquals(123, list.stream().findFirst().get());
         }
@@ -480,7 +480,7 @@ public class JSONTest {
         };
 
         for (Type type : types) {
-            Set list = (Set) JSON.parseObject("[123]", type);
+            Set list = JSON.parseObject("[123]", type);
             assertEquals(1, list.size());
             assertEquals(123, list.stream().findFirst().get());
         }
@@ -500,7 +500,7 @@ public class JSONTest {
 
         for (Type type : types) {
             ParameterizedTypeImpl parameterizedType = new ParameterizedTypeImpl(new Type[]{String.class}, null, type);
-            Set list = (Set) JSON.parseObject("[123]", parameterizedType);
+            Set list = JSON.parseObject("[123]", parameterizedType);
             assertEquals(1, list.size());
             assertEquals("123", list.stream().findFirst().get());
         }
@@ -520,7 +520,7 @@ public class JSONTest {
 
         for (Type type : types) {
             ParameterizedTypeImpl parameterizedType = new ParameterizedTypeImpl(new Type[]{Long.class}, null, type);
-            Set list = (Set) JSON.parseObject("[123]", parameterizedType);
+            Set list = JSON.parseObject("[123]", parameterizedType);
             assertEquals(1, list.size());
             assertEquals(123L, list.stream().findFirst().get());
         }
@@ -621,7 +621,7 @@ public class JSONTest {
         assertNull(JSON.parseObject("abc".getBytes(StandardCharsets.UTF_8), 0, 0));
         assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), 0, 4));
 
-        assertNull(JSON.parseObject((byte[]) null, 0, 0, StandardCharsets.US_ASCII));
+        assertNull(JSON.parseObject(null, 0, 0, StandardCharsets.US_ASCII));
         assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.US_ASCII));
         assertNull(JSON.parseObject("abc".getBytes(StandardCharsets.UTF_8), 0, 0, StandardCharsets.US_ASCII));
         assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), 0, 4, StandardCharsets.US_ASCII));
@@ -650,7 +650,7 @@ public class JSONTest {
         assertNull(JSON.parseObject("".getBytes(StandardCharsets.UTF_8), Object.class, "", new Filter[0]));
         assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), Object.class, "", new Filter[0]));
 
-        assertNull(JSON.parseObject((String) null, new TypeReference<List<Map>>() {
+        assertNull(JSON.parseObject(null, new TypeReference<List<Map>>() {
         }, (Filter) null));
         assertNull(JSON.parseObject("", new TypeReference<List<Map>>() {
         }, (Filter) null));
@@ -685,7 +685,7 @@ public class JSONTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out, Collections.singleton(1));
         assertEquals("[1]",
-                new String(out.toByteArray()));
+                out.toString());
     }
 
     @Test
@@ -693,7 +693,7 @@ public class JSONTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out, Collections.singleton(1), JSONWriter.Feature.WriteNulls);
         assertEquals("[1]",
-                new String(out.toByteArray()));
+                out.toString());
     }
 
     @Test
@@ -702,7 +702,7 @@ public class JSONTest {
         JSON.writeTo(out,
                 null, new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("null",
-                new String(out.toByteArray()));
+                out.toString());
     }
 
     @Test
@@ -711,7 +711,7 @@ public class JSONTest {
         JSON.writeTo(out,
                 Collections.singleton(1), new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1]",
-                new String(out.toByteArray()));
+                out.toString());
     }
 
     @Test
@@ -720,7 +720,7 @@ public class JSONTest {
         JSON.writeTo(out,
                 Collections.singleton(1), Arrays.asList(new SimplePropertyPreFilter()).toArray(new Filter[0]), JSONWriter.Feature.WriteNulls);
         assertEquals("[1]",
-                new String(out.toByteArray()));
+                out.toString());
     }
 
     @Test
@@ -729,11 +729,11 @@ public class JSONTest {
         JSON.writeTo(out,
                 Collections.singleton(1), "millis", new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1]",
-                new String(out.toByteArray()));
+                out.toString());
         JSON.writeTo(out,
                 Collections.singleton(1), "", new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1][1]",
-                new String(out.toByteArray()));
+                out.toString());
     }
 
     @Test
@@ -912,11 +912,11 @@ public class JSONTest {
         assertNull(JSON.parseObject((byte[]) null, (Type) User.class));
         assertNull(JSON.parseObject((byte[]) null, (Type) User.class, JSONReader.Feature.SupportAutoType));
 
-        assertNull(JSON.parseObject((byte[]) null, (Type) User.class, ""));
-        assertNull(JSON.parseObject((byte[]) null, (Type) User.class, "", JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parseObject((byte[]) null, User.class, ""));
+        assertNull(JSON.parseObject((byte[]) null, User.class, "", JSONReader.Feature.SupportAutoType));
 
-        assertNull(JSON.parseObject(new byte[0], (Type) User.class, ""));
-        assertNull(JSON.parseObject(new byte[0], (Type) User.class, "", JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parseObject(new byte[0], User.class, ""));
+        assertNull(JSON.parseObject(new byte[0], User.class, "", JSONReader.Feature.SupportAutoType));
 
         assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.UTF_8, (Type) User.class));
 
@@ -947,14 +947,14 @@ public class JSONTest {
         assertNull(JSON.parseObject((byte[]) null, User.class, JSONFactory.createReadContext()));
         assertNull(JSON.parseObject(new byte[0], User.class, JSONFactory.createReadContext()));
         assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
-        assertNull(JSON.parseObject((byte[]) null, 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
+        assertNull(JSON.parseObject(null, 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
 
         assertNull(JSON.parseObject(new ByteArrayInputStream("null".getBytes()), StandardCharsets.UTF_8));
         assertNull(JSON.parseObject("null".getBytes(), JSONReader.Feature.IgnoreNoneSerializable));
         assertNull(JSON.parseArray(new ByteArrayInputStream("null".getBytes()), JSONReader.Feature.IgnoreNoneSerializable));
         assertNull(JSON.parseArray("", (Type) User.class, JSONReader.Feature.IgnoreNoneSerializable));
         assertNull(JSON.parseArray((String) null, (Type) User.class, JSONReader.Feature.IgnoreNoneSerializable));
-        assertNull(JSON.parseArray((byte[]) null, 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
+        assertNull(JSON.parseArray(null, 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
 
         assertNull(JSON.parseObject(null, 0, 0, StandardCharsets.UTF_8));
         assertNull(JSON.parseArray(null, 0, 0, StandardCharsets.UTF_8));
@@ -975,9 +975,9 @@ public class JSONTest {
         assertNull(JSON.parseObject((String) null, (Type) User.class, ""));
         assertNull(JSON.parseObject((String) null, (Type) User.class, "", JSONReader.Feature.SupportAutoType));
 
-        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>() {
+        assertNull(JSON.parseObject(null, new TypeReference<List<User>>() {
         }));
-        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>() {
+        assertNull(JSON.parseObject(null, new TypeReference<List<User>>() {
         }, JSONReader.Feature.SupportAutoType));
 
         assertNull(JSON.parseArray((String) null));
@@ -1019,8 +1019,8 @@ public class JSONTest {
 
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            JSON.writeTo(out, null, "", (Filter[]) null);
-            assertEquals("null", new String(out.toByteArray()));
+            JSON.writeTo(out, null, "", null);
+            assertEquals("null", out.toString());
         }
 
         assertNull(JSON.parseObject((URL) null));
@@ -1031,12 +1031,12 @@ public class JSONTest {
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             JSON.writeTo(out, 12, "", new Filter[0]);
-            assertEquals("12", new String(out.toByteArray()));
+            assertEquals("12", out.toString());
         }
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             JSON.writeTo(out, 12, "", new Filter[]{new PascalNameFilter()});
-            assertEquals("12", new String(out.toByteArray()));
+            assertEquals("12", out.toString());
         }
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream() {
@@ -1135,7 +1135,7 @@ public class JSONTest {
     public void testParseInputStream() throws Exception {
         Charset utf8 = StandardCharsets.UTF_8;
 
-        assertNull(JSON.parseObject((InputStream) null, utf8));
+        assertNull(JSON.parseObject(null, utf8));
         String str = "{}";
 
         byte[] bytes = str.getBytes(utf8);

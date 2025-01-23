@@ -108,26 +108,26 @@ public class ParserTest_media {
 
         Map image_0 = (Map) images.get(0);
         assertEquals(5, image_0.size());
-        assertEquals(Integer.valueOf(768), image_0.get("height"));
+        assertEquals(768, image_0.get("height"));
         assertEquals("LARGE", image_0.get("size"));
         assertEquals("Javaone Keynote", image_0.get("title"));
         assertEquals("http://javaone.com/keynote_large.jpg", image_0.get("uri"));
-        assertEquals(Integer.valueOf(1024), image_0.get("width"));
+        assertEquals(1024, image_0.get("width"));
 
         Map image_1 = (Map) images.get(1);
         assertEquals(5, image_0.size());
-        assertEquals(Integer.valueOf(240), image_1.get("height"));
+        assertEquals(240, image_1.get("height"));
         assertEquals("SMALL", image_1.get("size"));
         assertEquals("Javaone Keynote", image_1.get("title"));
         assertEquals("http://javaone.com/keynote_small.jpg", image_1.get("uri"));
-        assertEquals(Integer.valueOf(320), image_1.get("width"));
+        assertEquals(320, image_1.get("width"));
 
         Map media = (Map) map.get("media");
         assertEquals(10, media.size());
-        assertEquals(Integer.valueOf(262144), media.get("bitrate"));
-        assertEquals(Integer.valueOf(18000000), media.get("duration"));
+        assertEquals(262144, media.get("bitrate"));
+        assertEquals(18000000, media.get("duration"));
         assertEquals("video/mpg4", media.get("format"));
-        assertEquals(Integer.valueOf(480), media.get("height"));
+        assertEquals(480, media.get("height"));
 
         List persons = (List) media.get("persons");
         assertEquals(2, persons.size());
@@ -135,9 +135,9 @@ public class ParserTest_media {
         assertEquals("Steve Jobs", persons.get(1));
 
         assertEquals("JAVA", media.get("player"));
-        assertEquals(Integer.valueOf(58982400), media.get("size"));
+        assertEquals(58982400, media.get("size"));
         assertEquals("Javaone Keynote", media.get("title"));
         assertEquals("http://javaone.com/keynote.mpg", media.get("uri"));
-        assertEquals(Integer.valueOf(640), media.get("width"));
+        assertEquals(640, media.get("width"));
     }
 }

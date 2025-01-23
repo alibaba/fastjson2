@@ -13,6 +13,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +25,7 @@ public class BigDecimal20Tree {
     public BigDecimal20Tree() {
         try {
             InputStream is = BigDecimal20Tree.class.getClassLoader().getResourceAsStream("data/dec20.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
             jsonbBytes = JSONB.toBytes(
                     JSON.parseObject(str, Map.class)
             );

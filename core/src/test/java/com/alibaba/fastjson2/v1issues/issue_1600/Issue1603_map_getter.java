@@ -31,7 +31,7 @@ public class Issue1603_map_getter {
     }
 
     public static class Model_2 {
-        private final Map<String, Object> values = Collections.unmodifiableMap(new HashMap<String, Object>());
+        private final Map<String, Object> values = Collections.unmodifiableMap(new HashMap<>());
 
         public Map<String, Object> getValues() {
             return values;

@@ -155,7 +155,7 @@ public class ObjectReaderProviderTest {
 
         assertNull(provider.getAutoTypeBeforeHandler());
         assertNull(provider.getAutoTypeHandler());
-        provider.setAutoTypeHandler((e) -> list.add(e));
+        provider.setAutoTypeHandler(list::add);
         assertNotNull(provider.getAutoTypeHandler());
 
         provider.checkAutoType("java.lang.Integer", Integer.class, 0);
@@ -168,7 +168,7 @@ public class ObjectReaderProviderTest {
         assertNull(provider.checkAutoType(null, null, 0));
         assertNull(provider.checkAutoType("", null, 0));
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder(1000);
         for (int i = 0; i < 1000; ++i) {
             buf.append('A');
         }

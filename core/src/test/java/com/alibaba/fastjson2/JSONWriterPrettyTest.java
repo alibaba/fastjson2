@@ -75,7 +75,7 @@ public class JSONWriterPrettyTest {
         jsonWriter.flushTo(out, StandardCharsets.UTF_8);
         assertEquals("{\n" +
                 "\tA:1\n" +
-                "}", new String(out.toByteArray()));
+                "}", out.toString());
     }
 
     @Test
@@ -92,7 +92,7 @@ public class JSONWriterPrettyTest {
         assertEquals("[\n" +
                 "\t1,\n" +
                 "\t2\n" +
-                "]", new String(out.toByteArray()));
+                "]", out.toString());
     }
 
     @Test

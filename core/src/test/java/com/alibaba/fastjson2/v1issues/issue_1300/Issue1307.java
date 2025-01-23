@@ -29,7 +29,7 @@ public class Issue1307 {
 
     @Test
     public void test_context_value_filter_not_effected() {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         Map data = new HashMap();
         data.put("name", "ace");
         params.add(data);
@@ -44,7 +44,7 @@ public class Issue1307 {
 
     @Test
     public void test_context_value_filter_effected() {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         Map data = new HashMap();
         data.put("name", "ace");
         params.add(data);

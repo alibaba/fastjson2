@@ -12,6 +12,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,7 @@ public class TaobaoH5ApiTree {
     public TaobaoH5ApiTree() {
         try {
             InputStream is = TaobaoH5ApiTree.class.getClassLoader().getResourceAsStream("data/taobao_h5api.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

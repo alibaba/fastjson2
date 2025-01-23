@@ -27,10 +27,7 @@ public class Issue2590 {
         @Override
         public boolean process(JSONWriter writer, Object source, String name) {
             String parentPath = writer.getPath();
-            if (parentPath.startsWith("$.item2")) {
-                return false;
-            }
-            return true;
+            return !parentPath.startsWith("$.item2");
         }
     }
 
@@ -51,10 +48,7 @@ public class Issue2590 {
         @Override
         public boolean apply(JSONSerializer serializer, Object object, String name) {
             SerialContext context = serializer.getContext();
-            if (context.toString().startsWith("$.item2")) {
-                return false;
-            }
-            return true;
+            return !context.toString().startsWith("$.item2");
         }
     }
 

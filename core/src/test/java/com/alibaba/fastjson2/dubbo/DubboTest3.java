@@ -17,7 +17,7 @@ public class DubboTest3 {
         Map<String, Object> inner = new HashMap<>();
         map.put("innerObject", inner);
         inner.put("innerA", "v1");
-        inner.put("innerB", Integer.valueOf(234));
+        inner.put("innerB", 234);
         inner.put("class", "org.apache.dubbo.service.ComplexObject$InnerObject");
 
         byte[] jsonbBytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName,

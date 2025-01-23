@@ -56,7 +56,7 @@ public class GenericFastJsonJSONBRedisSerializerTest {
 
     @Test
     public void test_6() {
-        BaseResult<List<String>> baseResult = new BaseResult<List<String>>();
+        BaseResult<List<String>> baseResult = new BaseResult<>();
         baseResult.setCode("1000");
         baseResult.setMsg("success");
         baseResult.setData(Arrays.asList("测试1", "测试2", "测试3"));

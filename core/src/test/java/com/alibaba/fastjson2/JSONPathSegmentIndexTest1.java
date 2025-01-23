@@ -21,16 +21,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[0] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[0] + (int) v);
         //test
         assertEquals(data[4], 6);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[4] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[4] + (int) v);
         //test
         assertEquals(data[4], 12);
 
@@ -48,16 +44,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[0] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[0] + (Integer) v);
         //test
         assertEquals(data[4], 6);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[4] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[4] + (Integer) v);
         //test
         assertEquals(data[4], 12);
 
@@ -75,16 +67,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(0) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(0) + (Integer) v);
         //test
         assertEquals(data.get(4), 6);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(4) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(4) + (Integer) v);
         //test
         assertEquals(data.get(4), 12);
 
@@ -102,16 +90,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[0] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[0] + (int) v);
         //test
         assertEquals(data[0], 2);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[4] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[4] + (int) v);
         //test
         assertEquals(data[0], 7);
 
@@ -129,16 +113,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[0] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[0] + (Integer) v);
         //test
         assertEquals(data[0], 2);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[4] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[4] + (Integer) v);
         //test
         assertEquals(data[0], 7);
 
@@ -156,16 +136,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(0) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(0) + (Integer) v);
         //test
         assertEquals(data.get(0), 2);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(4) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(4) + (Integer) v);
         //test
         assertEquals(data.get(0), 7);
 
@@ -183,16 +159,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[0] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[0] + (int) v);
         //test
         assertEquals(data[1], 3);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[4] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[4] + (int) v);
         //test
         assertEquals(data[1], 8);
 
@@ -210,16 +182,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[0] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[0] + (Integer) v);
         //test
         assertEquals(data[1], 3);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[4] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[4] + (Integer) v);
         //test
         assertEquals(data[1], 8);
 
@@ -237,16 +205,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(0) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(0) + (Integer) v);
         //test
         assertEquals(data.get(1), 3);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(4) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(4) + (Integer) v);
         //test
         assertEquals(data.get(1), 8);
 
@@ -264,16 +228,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[0] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[0] + (int) v);
         //test
         assertEquals(data[3], 5);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[4] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[4] + (int) v);
         //test
         assertEquals(data[3], 10);
 
@@ -291,16 +251,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[0] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[0] + (Integer) v);
         //test
         assertEquals(data[3], 5);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((Integer[]) obj)[4] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((Integer[]) obj)[4] + (Integer) v);
         //test
         assertEquals(data[3], 10);
 
@@ -318,16 +274,12 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(0) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(0) + (Integer) v);
         //test
         assertEquals(data.get(3), 5);
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(4) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(4) + (Integer) v);
         //test
         assertEquals(data.get(3), 10);
 
@@ -346,9 +298,7 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[0] + (int) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[0] + (int) v);
         //test
         assertArrayEquals(data, compare);
 
@@ -368,9 +318,7 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((int[]) obj)[0] + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((int[]) obj)[0] + (Integer) v);
         //test
         assertArrayEquals(data, compare);
 
@@ -390,9 +338,7 @@ public class JSONPathSegmentIndexTest1 {
         context.root = data;
 
         //call
-        segment.setCallback(context, (obj, v) -> {
-            return ((List<Integer>) obj).get(0) + (Integer) v;
-        });
+        segment.setCallback(context, (obj, v) -> ((List<Integer>) obj).get(0) + (Integer) v);
         //test
         assertTrue(data.equals(compare));
 
@@ -413,9 +359,7 @@ public class JSONPathSegmentIndexTest1 {
         //test
         assertThrows(JSONException.class, () -> {
             //call
-            segment.setCallback(context, (obj, v) -> {
-                return v;
-            });
+            segment.setCallback(context, (obj, v) -> v);
         });
 
         //clear

@@ -112,12 +112,10 @@ public class Issue2548A {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("class StoreDTO {\n");
-            sb.append("    storeId: ").append(toIndentedString(storeId)).append("\n");
-            sb.append("    item: ").append(toIndentedString(item)).append("\n");
-            sb.append("}");
-            return sb.toString();
+            return "class StoreDTO {\n"
+                    + "    storeId: " + toIndentedString(storeId) + "\n"
+                    + "    item: " + toIndentedString(item) + "\n"
+                    + "}";
         }
 
         /**

@@ -45,16 +45,15 @@ public class JSONPathComplianceSupportTest {
             }
         }
 
-        StringBuffer buf = new StringBuffer()
-                .append(firstChar)
-                .append(" [")
-                .append(stat.errorCount < 10 ? "0" : "")
-                .append(stat.errorCount)
-                .append("/")
-                .append(i < 10 ? "0" : "")
-                .append(i)
-                .append("]\t")
-                .append(JSON.toJSONString(selector));
+        String buf = firstChar
+                + " ["
+                + (stat.errorCount < 10 ? "0" : "")
+                + stat.errorCount
+                + "/"
+                + (i < 10 ? "0" : "")
+                + i
+                + "]\t"
+                + JSON.toJSONString(selector);
         System.out.println(buf);
         // validate(i, name, selector, document, results);
     }

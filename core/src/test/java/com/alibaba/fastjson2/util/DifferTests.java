@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
@@ -150,14 +149,11 @@ public class DifferTests {
         }
         {
             Differ differ = new Differ(new Bean(0), new Bean(0));
-            differ.setComparator(new Comparator() {
-                @Override
-                public int compare(Object o1, Object o2) {
-                    if (o1 instanceof Integer) {
-                        return ((Integer) o1).compareTo((Integer) o2);
-                    }
-                    return 1;
+            differ.setComparator((o1, o2) -> {
+                if (o1 instanceof Integer) {
+                    return ((Integer) o1).compareTo((Integer) o2);
                 }
+                return 1;
             });
             assertFalse(
                     differ.diff()

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.benchmark.eishay.vo;
 
 import java.util.List;
+import java.util.Objects;
 
 //@com.alibaba.fastjson2.annotation.JSONCompiled
 //@com.alibaba.fastjson2.annotation.JSONType(disableReferenceDetect = true, disableArrayMapping = true, disableSmartMatch = true, disableAutoType = true, disableJSONB = true)
@@ -29,14 +30,10 @@ public class MediaContent
 
         MediaContent that = (MediaContent) o;
 
-        if (images != null ? !images.equals(that.images) : that.images != null) {
+        if (!Objects.equals(images, that.images)) {
             return false;
         }
-        if (media != null ? !media.equals(that.media) : that.media != null) {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(media, that.media);
     }
 
     @Override

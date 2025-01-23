@@ -22,19 +22,19 @@ public class Issue2583 {
         bean.enumMap = new EnumMap(TimeUnit.class);
 
         byte[] bytes = JSONB.toBytes(bean);
-        Bean bean1 = (Bean) JSONB.parseObject(bytes, Bean.class);
+        Bean bean1 = JSONB.parseObject(bytes, Bean.class);
         assertEquals(0, bean1.enumMap.size());
 
         String json = JSON.toJSONString(bean);
-        Bean bean2 = (Bean) JSON.parseObject(json, Bean.class);
+        Bean bean2 = JSON.parseObject(json, Bean.class);
         assertEquals(0, bean2.enumMap.size());
 
         byte[] bytes2 = JSON.toJSONString(bean).getBytes(StandardCharsets.UTF_8);
-        Bean bean3 = (Bean) JSON.parseObject(bytes2, Bean.class);
+        Bean bean3 = JSON.parseObject(bytes2, Bean.class);
         assertEquals(0, bean3.enumMap.size());
 
         String json2 = com.alibaba.fastjson.JSON.toJSONString(bean);
-        Bean bean4 = (Bean) com.alibaba.fastjson.JSON.parseObject(json2, Bean.class);
+        Bean bean4 = com.alibaba.fastjson.JSON.parseObject(json2, Bean.class);
         assertEquals(0, bean4.enumMap.size());
     }
 
@@ -44,7 +44,7 @@ public class Issue2583 {
         bean.enumMap = new EnumMap(TimeUnit.class);
 
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
-        Bean bean1 = (Bean) JSONB.parseObject(bytes, Bean.class, JSONReader.Feature.SupportAutoType);
+        Bean bean1 = JSONB.parseObject(bytes, Bean.class, JSONReader.Feature.SupportAutoType);
         assertEquals(0, bean1.enumMap.size());
     }
 
@@ -55,7 +55,7 @@ public class Issue2583 {
 
         String json = JSON.toJSONString(bean, JSONWriter.Feature.WriteClassName);
         System.out.println(json);
-        Bean bean1 = (Bean) JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportAutoType);
+        Bean bean1 = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportAutoType);
         assertEquals(0, bean1.enumMap.size());
     }
 
@@ -65,7 +65,7 @@ public class Issue2583 {
         bean.enumMap = new EnumMap(TimeUnit.class);
 
         byte[] bytes = JSON.toJSONString(bean, JSONWriter.Feature.WriteClassName).getBytes(StandardCharsets.UTF_8);
-        Bean bean1 = (Bean) JSON.parseObject(bytes, Bean.class, JSONReader.Feature.SupportAutoType);
+        Bean bean1 = JSON.parseObject(bytes, Bean.class, JSONReader.Feature.SupportAutoType);
         assertEquals(0, bean1.enumMap.size());
     }
 
@@ -75,7 +75,7 @@ public class Issue2583 {
         bean.enumMap = new EnumMap(TimeUnit.class);
 
         String json = com.alibaba.fastjson.JSON.toJSONString(bean, SerializerFeature.WriteClassName);
-        Bean bean1 = (Bean) com.alibaba.fastjson.JSON.parseObject(json, Bean.class, SupportAutoType);
+        Bean bean1 = com.alibaba.fastjson.JSON.parseObject(json, Bean.class, SupportAutoType);
         assertEquals(0, bean1.enumMap.size());
     }
 
@@ -85,7 +85,7 @@ public class Issue2583 {
         bean.enumMap = new EnumMap(TimeUnit.class);
 
         byte[] bytes = com.alibaba.fastjson.JSON.toJSONString(bean, SerializerFeature.WriteClassName).getBytes(StandardCharsets.UTF_8);
-        Bean bean1 = (Bean) com.alibaba.fastjson.JSON.parseObject(bytes, Bean.class, SupportAutoType);
+        Bean bean1 = com.alibaba.fastjson.JSON.parseObject(bytes, Bean.class, SupportAutoType);
         assertEquals(0, bean1.enumMap.size());
     }
 

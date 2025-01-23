@@ -12,6 +12,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipInputStream;
@@ -29,7 +30,7 @@ public class LargeFile26MTest {
                 ZipInputStream zipIn = new ZipInputStream(bis)
         ) {
             zipIn.getNextEntry();
-            str = IOUtils.toString(zipIn, "UTF-8");
+            str = IOUtils.toString(zipIn, StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

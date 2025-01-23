@@ -31,15 +31,11 @@ public class Issue139 {
 
         //不能foreach java.lang.ClassCastException: class com.alibaba.fastjson2.JSONObject cannot be cast to class
         //Issue128$Item are in unnamed module of loader 'app'
-        bean1.getData().forEach(k -> {
-            assertTrue(k.getValue() instanceof BigDecimal);
-        });
+        bean1.getData().forEach(k -> assertTrue(k.getValue() instanceof BigDecimal));
 
         List<Item> items = bean.getData();
 
-        items.forEach(item -> {
-            assertTrue(item instanceof Item);
-        });
+        items.forEach(item -> assertTrue(item instanceof Item));
     }
 
     public static class Bean {

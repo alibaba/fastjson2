@@ -81,7 +81,7 @@ public class GenericException
     @Transient
     public StackTraceElement[] getStackTrace() {
         if (this.useCause) {
-            return ((GenericException) getCause()).getStackTrace();
+            return getCause().getStackTrace();
         }
         return super.getStackTrace();
     }

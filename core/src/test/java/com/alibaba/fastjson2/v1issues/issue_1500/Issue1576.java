@@ -23,7 +23,7 @@ public class Issue1576 {
         public String client_id;
         public String client_param;
         public String userid;
-        public List<DataBean> data = new ArrayList<DataBean>();
+        public List<DataBean> data = new ArrayList<>();
 
         public int getCode() {
             return code;

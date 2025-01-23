@@ -59,7 +59,7 @@ public class Issue1879 {
 
         @JSONCreator
         public M1(@JSONField(name = "ids") String ids) {
-            this.ids = new ArrayList<Long>();
+            this.ids = new ArrayList<>();
             for (String id : ids.split(",")) {
                 this.ids.add(Long.valueOf(id));
             }

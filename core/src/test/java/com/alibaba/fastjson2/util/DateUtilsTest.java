@@ -1062,9 +1062,8 @@ public class DateUtilsTest {
         String str = "2022-04-29T00:00:00Z";
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime ldt = LocalDateTime.parse(str.substring(0, 19), fmt);
-        ZoneId zoneId = UTC;
         assertEquals(
-                ldt.atZone(zoneId).toInstant().toEpochMilli(),
+                ldt.atZone(UTC).toInstant().toEpochMilli(),
                 DateUtils.parseDate(str).getTime()
         );
     }

@@ -5,9 +5,7 @@ import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
 import com.alibaba.fastjson2.reader.CharArrayValueConsumer;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -232,15 +230,9 @@ public class CSVReaderTest3 {
         byte[] bytes = str.getBytes();
         CSVReaderUTF8<Bean2> parser = new CSVReaderUTF8(bytes, 0, bytes.length, StandardCharsets.UTF_8, Bean2.class);
 
-        parser.new ByteArrayConsumerImpl(
-                (Consumer) o -> {}
-        );
+        parser.new ByteArrayConsumerImpl(o -> {});
 
-        ByteArrayValueConsumer consumer = new ByteArrayValueConsumer() {
-            @Override
-            public void accept(int row, int column, byte[] bytes, int off, int len, Charset charset) {
-            }
-        };
+        ByteArrayValueConsumer consumer = (row, column, bytes1, off, len, charset) -> {};
         consumer.beforeRow(1);
         consumer.afterRow(1);
     }
@@ -255,11 +247,7 @@ public class CSVReaderTest3 {
                 e -> {}
         );
 
-        CharArrayValueConsumer consumer = new CharArrayValueConsumer() {
-            @Override
-            public void accept(int row, int column, char[] bytes, int off, int len) {
-            }
-        };
+        CharArrayValueConsumer consumer = (row, column, bytes, off, len) -> {};
         consumer.beforeRow(1);
         consumer.afterRow(1);
     }

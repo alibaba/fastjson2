@@ -13,6 +13,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +24,7 @@ public class Float20Tree {
     public Float20Tree() {
         try {
             InputStream is = Float20Tree.class.getClassLoader().getResourceAsStream("data/dec20.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,8 @@ public class Issue2459 {
         User user = new User();
         user.setFirstName("first");
         user.setLastName("last");
-        List<String> getMethodNames = Arrays.stream(User.class.getDeclaredMethods()).sequential().filter(m -> m.getName().startsWith("get")).map(s2 -> s2.getName()).collect(Collectors.toList());
-        List<String> setMethodNames = Arrays.stream(User.class.getDeclaredMethods()).sequential().filter(m -> m.getName().startsWith("set")).map(s2 -> s2.getName()).collect(Collectors.toList());
+        List<String> getMethodNames = Arrays.stream(User.class.getDeclaredMethods()).sequential().map(Method::getName).filter(name -> name.startsWith("get")).collect(Collectors.toList());
+        List<String> setMethodNames = Arrays.stream(User.class.getDeclaredMethods()).sequential().map(Method::getName).filter(name -> name.startsWith("set")).collect(Collectors.toList());
         Arrays.stream(PropertyNamingStrategy.values()).sequential().forEach(s -> {
             String expected = getExpected(user, s);
             assertEquals(expected, getterTest(getMethodNames, s));

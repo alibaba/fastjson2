@@ -25,7 +25,7 @@ public class EishayParseTreeUTF8BytesPretty {
     static {
         try {
             InputStream is = EishayParseTreeUTF8BytesPretty.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            utf8Bytes = IOUtils.toString(is, "UTF-8").getBytes(StandardCharsets.UTF_8);
+            utf8Bytes = IOUtils.toString(is, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

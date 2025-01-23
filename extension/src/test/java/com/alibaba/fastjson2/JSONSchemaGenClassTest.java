@@ -76,11 +76,8 @@ public class JSONSchemaGenClassTest {
                             schemaNameMap.put(e, property);
                             return false;
                         }
-
-                        className = property;
-                    } else {
-                        className = property;
                     }
+                    className = property;
                 }
 
                 if (className == null) {
@@ -91,8 +88,7 @@ public class JSONSchemaGenClassTest {
                 schemas.put(className, e);
 
                 buf.append("public class ").append(className).append(" {\n");
-                for (Iterator<Map.Entry<String, JSONSchema>> it = ((ObjectSchema) e).getProperties().entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry<String, JSONSchema> entry = it.next();
+                for (Map.Entry<String, JSONSchema> entry : ((ObjectSchema) e).getProperties().entrySet()) {
                     String propertyName = entry.getKey();
                     JSONSchema schema = entry.getValue();
 

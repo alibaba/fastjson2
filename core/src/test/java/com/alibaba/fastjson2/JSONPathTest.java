@@ -41,7 +41,7 @@ public class JSONPathTest {
         bean.f4 = Boolean.TRUE;
         bean.f5 = bean.f4;
 
-        bean.c0 = Character.valueOf('A');
+        bean.c0 = 'A';
         bean.c1 = bean.c0;
 
         bean.str0 = "ABC";

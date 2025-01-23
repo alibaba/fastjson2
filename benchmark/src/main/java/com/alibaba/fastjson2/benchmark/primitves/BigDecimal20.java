@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class BigDecimal20 {
@@ -46,7 +47,7 @@ public class BigDecimal20 {
     public BigDecimal20() {
         try {
             InputStream is = BigDecimal20.class.getClassLoader().getResourceAsStream("data/dec20.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
             BigDecimal20Field bean = JSON.parseObject(str, BigDecimal20Field.class);
             jsonbBytes = JSONB.toBytes(bean);
 

@@ -11,6 +11,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class StringField20 {
@@ -20,7 +21,7 @@ public class StringField20 {
     public StringField20() {
         try {
             InputStream is = StringField20.class.getClassLoader().getResourceAsStream("data/String20_compact.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

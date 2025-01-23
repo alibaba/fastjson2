@@ -25,14 +25,14 @@ public class JSONBTest {
     @Test
     public void test_object_empty() {
         byte[] jsonbBytes = JSONB.toBytes(new HashMap());
-        Map object = (Map) JSONB.parseObject(jsonbBytes, Map.class);
+        Map object = JSONB.parseObject(jsonbBytes, Map.class);
         assertTrue(object.isEmpty());
     }
 
     @Test
     public void test_object_one() {
         byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("id", 123));
-        Map object = (Map) JSONB.parseObject(jsonbBytes, Map.class);
+        Map object = JSONB.parseObject(jsonbBytes, Map.class);
         assertEquals(1, object.size());
         assertEquals(123, ((Number) object.get("id")).intValue());
     }
@@ -119,7 +119,7 @@ public class JSONBTest {
 
         byte[] jsonbBytes = JSONB.toBytes(Collections.singleton(123));
         for (Type type : types) {
-            List list = (List) JSONB.parseObject(jsonbBytes, type);
+            List list = JSONB.parseObject(jsonbBytes, type);
             assertEquals(1, list.size());
             assertEquals(123, ((Number) list.get(0)).intValue());
         }
@@ -206,7 +206,7 @@ public class JSONBTest {
         byte[] jsonbBytes = JSONB.toBytes(Collections.singleton(123));
 
         for (Type type : types) {
-            Collection<Number> list = (Collection) JSONB.parseObject(jsonbBytes, type);
+            Collection<Number> list = JSONB.parseObject(jsonbBytes, type);
             assertEquals(1, list.size());
             assertEquals(123, list.stream().findFirst().get().intValue());
         }
@@ -269,7 +269,7 @@ public class JSONBTest {
         byte[] jsonbBytes = JSONB.toBytes(Collections.singleton(123));
 
         for (Type type : types) {
-            Set<Number> list = (Set) JSONB.parseObject(jsonbBytes, type);
+            Set<Number> list = JSONB.parseObject(jsonbBytes, type);
             assertEquals(1, list.size());
             assertEquals(123, list.stream().findFirst().get().intValue());
         }
@@ -291,7 +291,7 @@ public class JSONBTest {
 
         for (Type type : types) {
             ParameterizedTypeImpl parameterizedType = new ParameterizedTypeImpl(new Type[]{String.class}, null, type);
-            Set list = (Set) JSONB.parseObject(jsonbBytes, parameterizedType);
+            Set list = JSONB.parseObject(jsonbBytes, parameterizedType);
             assertEquals(1, list.size());
             assertEquals("123", list.stream().findFirst().get());
         }
@@ -313,7 +313,7 @@ public class JSONBTest {
 
         for (Type type : types) {
             ParameterizedTypeImpl parameterizedType = new ParameterizedTypeImpl(new Type[]{Long.class}, null, type);
-            Set list = (Set) JSONB.parseObject(jsonbBytes, parameterizedType);
+            Set list = JSONB.parseObject(jsonbBytes, parameterizedType);
             assertEquals(1, list.size());
             Optional first = list.stream().findFirst();
             assertEquals(123L, first.get());
@@ -345,13 +345,13 @@ public class JSONBTest {
 
     @Test
     public void test_null_features() {
-        byte[] jsonbBytes = JSONB.toBytes((Object) null, JSONWriter.Feature.WriteNulls);
+        byte[] jsonbBytes = JSONB.toBytes(null, JSONWriter.Feature.WriteNulls);
         assertNull(JSONB.parseObject(jsonbBytes, Object.class));
     }
 
     @Test
     public void test_null_features1() {
-        byte[] jsonbBytes = JSONB.toBytes((Object) null, new JSONWriter.Context(JSONFactory.getDefaultObjectWriterProvider(), JSONWriter.Feature.WriteNulls));
+        byte[] jsonbBytes = JSONB.toBytes(null, new JSONWriter.Context(JSONFactory.getDefaultObjectWriterProvider(), JSONWriter.Feature.WriteNulls));
         assertNull(JSONB.parseObject(jsonbBytes, Object.class));
     }
 
@@ -548,7 +548,7 @@ public class JSONBTest {
         };
         for (long i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(Long.toString(i));
-            assertEquals(i, ((Long) JSONB.parseObject(jsonbBytes, Long.class)).longValue());
+            assertEquals(i, JSONB.parseObject(jsonbBytes, Long.class).longValue());
         }
     }
 
@@ -797,9 +797,9 @@ public class JSONBTest {
     @Test
     public void testToBytesNull() {
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},
-                JSONB.toBytes((String) null));
+                JSONB.toBytes(null));
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},
-                JSONB.toBytes((String) null, (Charset) null));
+                JSONB.toBytes(null, (Charset) null));
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},
                 JSONB.toBytes((BigInteger) null));
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},

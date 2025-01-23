@@ -36,7 +36,7 @@ public class CartItemDO2Test {
         CartItemDO2 cartItemDO2 = new CartItemDO2();
         cartItemDO2.setUserId(i);
         cartItemDO2.setAttributes(new HashMap());
-        cartItemDO2.setCartId(i * 100);
+        cartItemDO2.setCartId(i * 100L);
         cartItemDO2.setCityCode(i * 12);
         cartItemDO2.setItemId(i * 3);
         cartItemDO2.setMainType(11);
@@ -60,7 +60,7 @@ public class CartItemDO2Test {
         CartItemDO2 cartItemDO2 = new CartItemDO2();
         cartItemDO2.setUserId(i);
         cartItemDO2.setAttributes(new HashMap());
-        cartItemDO2.setCartId(i * 100);
+        cartItemDO2.setCartId(i * 100L);
         cartItemDO2.setCityCode(i * 12);
         cartItemDO2.setItemId(i * 3);
         cartItemDO2.setMainType(11);

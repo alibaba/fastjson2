@@ -93,7 +93,7 @@ public class DateUtilsTestFormat {
         assertEquals(epochMilli, DateUtils.millis(ldt));
         assertEquals(epochMilli, DateUtils.millis(ldt, DEFAULT_ZONE_ID));
 
-        assertNull(DateUtils.format((Date) null));
+        assertNull(DateUtils.format(null));
         assertNull(DateUtils.formatYMDHMS19((Date) null));
         assertNull(DateUtils.format((Date) null, "yyyy-MM-dd HH:mm:ss"));
         assertEquals("2012-06-23 12:13:14", DateUtils.format(date));

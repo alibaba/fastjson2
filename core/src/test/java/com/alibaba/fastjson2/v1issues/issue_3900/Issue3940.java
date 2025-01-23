@@ -21,7 +21,7 @@ public class Issue3940 {
 
     @Test
     public void testInteger() {
-        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> map = new HashMap<>();
         map.put(1, 2);
         assertEquals("{1:2}", JSON.toJSONString(map));
         assertEquals("{\"1\":2}", JSON.toJSONString(map, JSONWriter.Feature.WriteNonStringKeyAsString));
@@ -29,7 +29,7 @@ public class Issue3940 {
 
     @Test
     public void testFloat() {
-        Map<Float, Integer> map = new HashMap<Float, Integer>();
+        Map<Float, Integer> map = new HashMap<>();
         map.put(1.23F, 2);
         assertEquals("{1.23:2}", JSON.toJSONString(map));
         assertEquals("{\"1.23\":2}", JSON.toJSONString(map, JSONWriter.Feature.WriteNonStringKeyAsString));
@@ -37,7 +37,7 @@ public class Issue3940 {
 
     @Test
     public void testDouble() {
-        Map<Double, Integer> map = new HashMap<Double, Integer>();
+        Map<Double, Integer> map = new HashMap<>();
         map.put(1.23, 2);
         assertEquals("{1.23:2}", JSON.toJSONString(map));
         assertEquals("{\"1.23\":2}", JSON.toJSONString(map, JSONWriter.Feature.WriteNonStringKeyAsString));

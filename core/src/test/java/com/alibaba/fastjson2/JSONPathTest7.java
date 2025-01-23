@@ -157,7 +157,7 @@ public class JSONPathTest7 {
         assertSame(jsonPath, JSONPath.of("#-1", JSONPath.Feature.AlwaysReturnList));
         assertThrows(
                 JSONException.class,
-                () -> jsonPath.isRef()
+                jsonPath::isRef
         );
         assertThrows(
                 JSONException.class,
@@ -173,7 +173,7 @@ public class JSONPathTest7 {
         );
         assertThrows(
                 JSONException.class,
-                () -> jsonPath.extractScalar((JSONReader) null)
+                () -> jsonPath.extractScalar(null)
         );
         assertThrows(
                 JSONException.class,

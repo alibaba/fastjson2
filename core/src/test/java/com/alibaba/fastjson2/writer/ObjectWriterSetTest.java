@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ObjectWriterSetTest {
     @Test
     public void testJsonbSet() {
-        Set<Integer> set = new LinkedHashSet<Integer>();
+        Set<Integer> set = new LinkedHashSet<>();
         set.add(1);
         set.add(null);
         String str = JSON.toJSONString(set);

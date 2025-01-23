@@ -18,7 +18,7 @@ public class FieldConsumerTest {
                 new String[]{"id", "name", "value"},
                 new Type[]{Integer.class, String.class, Long.class},
                 Row::new,
-                (o, i, v) -> o.set(i, v)
+                Row::set
         );
 
         JSONReader jsonReader = JSONReader.of("{\"id\":123,\"name\":\"DataWorks\",\"value\":10001}");

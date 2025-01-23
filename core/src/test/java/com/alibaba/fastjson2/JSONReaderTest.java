@@ -260,8 +260,7 @@ public class JSONReaderTest {
         String str = "{\"\\u" + Integer.toHexString(ch) + "\":\"\\u" + Integer.toHexString(ch) + "\" }";
         byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
-        String fieldName = new String(new char[]{ch});
-        String value = fieldName;
+        String fieldName = String.valueOf(ch);
         long hash = Fnv.hashCode64(fieldName);
         {
             JSONReader reader = JSONReader.of(str);
@@ -270,7 +269,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
         {
@@ -280,7 +279,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
         {
@@ -290,7 +289,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
         {
@@ -300,7 +299,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
         {
@@ -310,7 +309,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
         {
@@ -320,7 +319,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
             assertTrue(reader.nextIfObjectEnd());
         }
     }
@@ -331,8 +330,7 @@ public class JSONReaderTest {
         String str = "\\u" + Integer.toHexString(ch);
         byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
-        String fieldName = new String(new char[]{ch});
-        String value = fieldName;
+        String fieldName = String.valueOf(ch);
         long hash = Fnv.hashCode64(fieldName);
         {
             JSONReader reader = JSONReader.of(strBytes);
@@ -497,7 +495,7 @@ public class JSONReaderTest {
 
         for (int i = 0; i < 127; ++i) {
             char ch = (char) i;
-            boolean space0 = ch <= ' ' && (ch == ' ' || ch == '\n' ||
+            boolean space0 = (ch == ' ' || ch == '\n' ||
                     ch == '\r' ||
                     ch == '\t' ||
                     ch == '\f' ||
@@ -560,14 +558,14 @@ public class JSONReaderTest {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("{\"id\":123}")) {
             assertThrows(
                     Exception.class,
-                    () -> jsonReader.readBigDecimal()
+                    jsonReader::readBigDecimal
             );
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("[1]")) {
             assertThrows(
                     Exception.class,
-                    () -> jsonReader.readBigDecimal()
+                    jsonReader::readBigDecimal
             );
         }
     }
@@ -578,8 +576,7 @@ public class JSONReaderTest {
         String str = "{\"" + ch + "\":\"" + ch + "\" }";
         byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
-        String fieldName = new String(new char[]{ch});
-        String value = fieldName;
+        String fieldName = String.valueOf(ch);
         long hash = Fnv.hashCode64(fieldName);
         {
             JSONReader reader = JSONReader.of(str);
@@ -588,7 +585,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
@@ -597,7 +594,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
@@ -606,7 +603,7 @@ public class JSONReaderTest {
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
-            assertEquals(value, reader.getString());
+            assertEquals(fieldName, reader.getString());
         }
     }
 
@@ -617,7 +614,7 @@ public class JSONReaderTest {
             Arrays.fill(chars, 'A');
             String item = new String(chars);
 
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             buf.append("{\"");
             buf.append(item);
             buf.append("\":\"");

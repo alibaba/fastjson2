@@ -18,8 +18,8 @@ public class IntTest {
     public IntTest() {
         values[off++] = Integer.MIN_VALUE;
         values[off++] = Integer.MAX_VALUE;
-        values[off++] = (int) Short.MIN_VALUE;
-        values[off++] = (int) Short.MAX_VALUE;
+        values[off++] = Short.MIN_VALUE;
+        values[off++] = Short.MAX_VALUE;
         values[off++] = JSONBTest.INT24_MIN;
         values[off++] = JSONBTest.INT24_MAX;
         values[off++] = -1;

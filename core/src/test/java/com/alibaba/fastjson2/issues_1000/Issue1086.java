@@ -24,7 +24,7 @@ public class Issue1086 {
     public static class VO {
         public int id;
         @JSONField(unwrapped = true, serialize = false, deserialize = false)
-        public Map<String, Object> properties = new LinkedHashMap<String, Object>();
+        public Map<String, Object> properties = new LinkedHashMap<>();
     }
 
     @Test
@@ -40,7 +40,7 @@ public class Issue1086 {
     public static class VO1 {
         public int id;
 
-        private Map<String, Object> properties = new LinkedHashMap<String, Object>();
+        private Map<String, Object> properties = new LinkedHashMap<>();
 
         @JSONField(name = "_any", unwrapped = true, serialize = false)
         public void setProperty(String key, Object value) {

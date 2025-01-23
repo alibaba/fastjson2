@@ -15,6 +15,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,7 @@ public class Date20TreeWrite {
     public Date20TreeWrite() {
         try {
             InputStream is = Date20TreeWrite.class.getClassLoader().getResourceAsStream("data/date20.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
             Date20Field object = JSON.parseObject(str, Date20Field.class);
             array = JSONArray.of(
                     object.v0000, object.v0001, object.v0002, object.v0003, object.v0004,

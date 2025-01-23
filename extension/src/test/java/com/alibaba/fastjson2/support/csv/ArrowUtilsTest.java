@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -52,10 +53,9 @@ public class ArrowUtilsTest {
             DecimalVector vector = new DecimalVector("value", allocator, 38, 2);
             vector.allocateNew(1);
 
-            for (int i = 0; i < strings.length; i++) {
-                String str = strings[i];
+            for (String str : strings) {
                 BigDecimal decimal = new BigDecimal(str);
-                BigDecimal decimalScaled = decimal.setScale(vector.getScale(), BigDecimal.ROUND_CEILING);
+                BigDecimal decimalScaled = decimal.setScale(vector.getScale(), RoundingMode.CEILING);
 
                 vector.set(0, decimalScaled);
                 assertEquals(decimalScaled, vector.getObject(0));
@@ -107,10 +107,9 @@ public class ArrowUtilsTest {
 
             vector.allocateNew(1);
 
-            for (int i = 0; i < strings.length; i++) {
-                String str = strings[i];
+            for (String str : strings) {
                 BigDecimal decimal = new BigDecimal(str);
-                BigDecimal decimalScaled = decimal.setScale(vector.getScale(), BigDecimal.ROUND_CEILING);
+                BigDecimal decimalScaled = decimal.setScale(vector.getScale(), RoundingMode.CEILING);
 
                 vector.set(0, decimalScaled);
                 assertEquals(decimalScaled, vector.getObject(0));
@@ -182,9 +181,7 @@ public class ArrowUtilsTest {
                     new ArrowByteArrayConsumer(
                             root2.getSchema(),
                             1,
-                            (VectorSchemaRoot o, int blockIndex) -> {
-                                System.out.println("write block " + blockIndex + " [" + root2.getRowCount() + "]");
-                            },
+                            (VectorSchemaRoot o, int blockIndex) -> System.out.println("write block " + blockIndex + " [" + root2.getRowCount() + "]"),
                             null
                     ));
             csvReader.readAll();

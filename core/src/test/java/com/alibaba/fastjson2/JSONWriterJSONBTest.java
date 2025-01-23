@@ -61,9 +61,9 @@ public class JSONWriterJSONBTest {
     @Test
     public void notSupported() {
         JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
-        assertThrows(JSONException.class, () -> jsonWriter.startArray());
+        assertThrows(JSONException.class, jsonWriter::startArray);
         assertThrows(JSONException.class, () -> jsonWriter.writeRaw(""));
-        assertThrows(JSONException.class, () -> jsonWriter.writeComma());
+        assertThrows(JSONException.class, jsonWriter::writeComma);
         assertThrows(JSONException.class, () -> jsonWriter.write0('A'));
         assertThrows(JSONException.class, () -> jsonWriter.writeDateTimeISO8601(2001, 1, 1, 12, 13, 14, 0, 0, true));
         assertThrows(JSONException.class, () -> jsonWriter.writeTimeHHMMSS8(12, 13, 14));
@@ -72,7 +72,7 @@ public class JSONWriterJSONBTest {
         assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new byte[0], 0, 0));
         assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new char[0]));
         assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new char[0], 0, 0));
-        assertThrows(JSONException.class, () -> jsonWriter.writeColon());
+        assertThrows(JSONException.class, jsonWriter::writeColon);
         assertThrows(JSONException.class, () -> jsonWriter.flushTo(null, null));
     }
 
@@ -202,7 +202,7 @@ public class JSONWriterJSONBTest {
             jsonWriter.writeInt64((Long) null);
             jsonWriter.writeFloat((Float) null);
             jsonWriter.writeFloat((float[]) null);
-            jsonWriter.writeDouble((double[]) null);
+            jsonWriter.writeDouble(null);
             jsonWriter.writeInt32((int[]) null);
             jsonWriter.writeInt32((Integer) null);
             jsonWriter.writeLocalDate(null);

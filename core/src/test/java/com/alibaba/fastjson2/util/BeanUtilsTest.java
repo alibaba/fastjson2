@@ -141,7 +141,7 @@ public class BeanUtilsTest {
         return null;
     }
 
-    public static List<? extends Object> f1() {
+    public static List<?> f1() {
         return null;
     }
 
@@ -208,7 +208,7 @@ public class BeanUtilsTest {
     @Test
     public void setters() {
         ArrayList list = new ArrayList();
-        BeanUtils.setters(Bean.class, e -> list.add(e));
+        BeanUtils.setters(Bean.class, list::add);
         assertEquals(1, list.size());
     }
 
@@ -220,7 +220,7 @@ public class BeanUtilsTest {
     @Test
     public void setters1() {
         ArrayList list = new ArrayList();
-        BeanUtils.setters(Bean1.class, true, e -> list.add(e));
+        BeanUtils.setters(Bean1.class, true, list::add);
         assertEquals(4, list.size());
     }
 
@@ -250,7 +250,7 @@ public class BeanUtilsTest {
     @Test
     public void getters() {
         List list = new ArrayList();
-        BeanUtils.getters(Bean2.class, e -> list.add(e));
+        BeanUtils.getters(Bean2.class, list::add);
         assertEquals(0, list.size());
     }
 

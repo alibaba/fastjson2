@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,7 +24,7 @@ public class Issue1204 {
             public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
                 BigDecimal decimal = (BigDecimal) object;
                 if (decimal.scale() == 0) {
-                    decimal = decimal.setScale(1);
+                    decimal = decimal.setScale(1, RoundingMode.CEILING);
                 }
                 jsonWriter.writeDecimal(decimal);
             }

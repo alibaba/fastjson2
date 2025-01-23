@@ -22,7 +22,7 @@ public class JSON_test_validate {
     public void test0_bytes() {
         assertFalse(JSON.isValid((byte[]) null));
         assertFalse(JSON.isValid(new byte[0]));
-        assertFalse(JSON.isValid((byte[]) null, 0, 0, StandardCharsets.UTF_8));
+        assertFalse(JSON.isValid(null, 0, 0, StandardCharsets.UTF_8));
         assertFalse(JSON.isValid(new byte[0], 0, 0, StandardCharsets.UTF_8));
 
         assertTrue(JSON.isValid("123".getBytes(StandardCharsets.UTF_8)));

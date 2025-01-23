@@ -105,7 +105,7 @@ public class CSVWriterTest {
     public void writeRow1() {
         CSVWriter writer = CSVWriter.of();
         List<String> strings = Arrays.asList("id", "name");
-        writer.writeLine(strings.size(), i -> strings.get(i));
+        writer.writeLine(strings.size(), strings::get);
         assertEquals("id,name\n", writer.toString());
     }
 

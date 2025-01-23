@@ -20,7 +20,7 @@ public class WriteCase {
 
     static {
         int len = 200;
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < len; i++) {
             buffer.append("a");
         }

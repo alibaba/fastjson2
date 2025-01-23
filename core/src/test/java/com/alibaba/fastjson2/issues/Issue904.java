@@ -72,7 +72,7 @@ public class Issue904 {
                                         "message",
                                         JSONObject.of(
                                                 "accountKeys",
-                                                JSONArray.of(Float.valueOf(12))
+                                                JSONArray.of(12F)
                                         )
                                 )
                         )

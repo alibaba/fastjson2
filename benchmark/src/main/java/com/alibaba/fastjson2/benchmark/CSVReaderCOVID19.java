@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class CSVReaderCOVID19 {
@@ -24,7 +25,7 @@ public class CSVReaderCOVID19 {
     static byte[] byteArray;
     static {
         try (InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream(file)) {
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             byteArray = str.getBytes();
         } catch (IOException e) {
             throw new RuntimeException(e);

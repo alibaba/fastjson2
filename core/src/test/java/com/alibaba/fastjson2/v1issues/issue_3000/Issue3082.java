@@ -22,9 +22,9 @@ public class Issue3082 {
     }
 
     public void test_for_issue() throws Exception {
-        HashSet<Map.Entry<String, Map.Entry<String, String>>> nestedSet = new HashSet<Map.Entry<String, Map.Entry<String, String>>>();
-        nestedSet.add(new AbstractMap.SimpleEntry<String, Map.Entry<String, String>>("a", new AbstractMap.SimpleEntry<String, String>("b", "c")));
-        nestedSet.add(new AbstractMap.SimpleEntry<String, Map.Entry<String, String>>("d", new AbstractMap.SimpleEntry<String, String>("e", "f")));
+        HashSet<Map.Entry<String, Map.Entry<String, String>>> nestedSet = new HashSet<>();
+        nestedSet.add(new AbstractMap.SimpleEntry<>("a", new AbstractMap.SimpleEntry<>("b", "c")));
+        nestedSet.add(new AbstractMap.SimpleEntry<>("d", new AbstractMap.SimpleEntry<>("e", "f")));
 
         String content = JSON.toJSONString(nestedSet);
 

@@ -487,14 +487,12 @@ public class Differ {
             }
         }
 
-        Object leftInnerMap = null;
-        Object rightInnerMap = null;
         if ("com.alibaba.fastjson.JSONObject".equals(leftClass.getName())) {
             Field mapField = BeanUtils.getDeclaredField(leftClass, "map");
             mapField.setAccessible(true);
             try {
-                leftInnerMap = mapField.get(leftMap);
-                rightInnerMap = mapField.get(rightMap);
+                Object leftInnerMap = mapField.get(leftMap);
+                Object rightInnerMap = mapField.get(rightMap);
 
                 boolean result = diff(leftInnerMap, rightInnerMap, new JSONWriter.Path(path, "map"), null);
                 if (!result) {

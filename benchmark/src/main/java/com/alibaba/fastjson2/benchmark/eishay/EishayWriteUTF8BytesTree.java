@@ -12,6 +12,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteUTF8BytesTree {
@@ -21,7 +22,7 @@ public class EishayWriteUTF8BytesTree {
     static {
         try {
             InputStream is = EishayWriteUTF8BytesTree.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             mc = (JSONObject) JSONReader.of(str)
                     .readAny();
         } catch (Throwable ex) {

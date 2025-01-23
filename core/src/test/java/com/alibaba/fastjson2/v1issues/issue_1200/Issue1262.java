@@ -16,7 +16,7 @@ public class Issue1262 {
     }
 
     public static class Model {
-        public Map<String, Chatter> chatterMap = new ConcurrentHashMap<String, Chatter>();
+        public Map<String, Chatter> chatterMap = new ConcurrentHashMap<>();
     }
 
     public static class Chatter {

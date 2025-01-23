@@ -26,7 +26,7 @@ public class CSVPerson {
     static byte[] byteArray;
     static {
         try (InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream(file)) {
-            String str = IOUtils.toString(is, "UTF-8");
+            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
             byteArray = str.getBytes();
         } catch (IOException e) {
             throw new RuntimeException(e);

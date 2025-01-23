@@ -15,6 +15,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +60,7 @@ public class JSONPathMultiBenchmark2 {
     static {
         try {
             InputStream is = BookStore.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

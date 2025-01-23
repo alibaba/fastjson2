@@ -14,6 +14,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class Date20 {
@@ -25,14 +26,14 @@ public class Date20 {
     public Date20() {
         try {
             InputStream is = Date20.class.getClassLoader().getResourceAsStream("data/date20.json");
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         try {
             InputStream is = Date20.class.getClassLoader().getResourceAsStream("data/millis20.json");
-            str_millis = IOUtils.toString(is, "UTF-8");
+            str_millis = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

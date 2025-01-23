@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Created by kimmking on 03/08/2017.
@@ -18,7 +18,7 @@ public class Issue1369 {
         foo.bars.c = 3;
         String json = JSON.toJSONString(foo);
         System.out.println(json);
-        assertTrue(json.indexOf("\\") < 0);
+        assertFalse(json.contains("\\"));
     }
 
     public static class Foo {

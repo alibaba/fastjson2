@@ -35,8 +35,8 @@ public class TestSpecial_2 {
     }
 
     public static class Model {
-        public Map<String, Value> values = new HashMap<String, Value>();
-        public Map<String, Value> subInvokes = new HashMap<String, Value>();
+        public Map<String, Value> values = new HashMap<>();
+        public Map<String, Value> subInvokes = new HashMap<>();
     }
 
     public static class Value {

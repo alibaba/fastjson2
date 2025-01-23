@@ -88,7 +88,7 @@ public class JSONWriterUTF8JDK9Test {
             return;
         }
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder(512);
         for (int i = 0; i < 512; i++) {
             char ch = (char) i;
             buf.append(ch);
