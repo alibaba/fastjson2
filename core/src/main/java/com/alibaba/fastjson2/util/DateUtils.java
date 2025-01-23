@@ -9223,7 +9223,6 @@ public class DateUtils {
         return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
     }
 
-
     public static int yy(byte[] bytes, int off) {
         int x = getShortLE(bytes, off);
         int d;

@@ -14,7 +14,6 @@ import java.util.Locale;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID;
-import static com.alibaba.fastjson2.util.IOUtils.getLongLE;
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
 
