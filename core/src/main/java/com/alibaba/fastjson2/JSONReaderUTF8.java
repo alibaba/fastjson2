@@ -13,6 +13,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
+import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.Long.MIN_VALUE;
@@ -5793,24 +5794,21 @@ class JSONReaderUTF8
                 char quote = this.ch;
                 byte c10;
                 int off21 = offset + 19;
+                int yy;
+                long ymd, timeV;
                 if (off21 < bytes.length
                         && off21 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
-                        && bytes[offset + 13] == ':'
-                        && bytes[offset + 16] == ':'
+                        && ((timeV = hms(bytes, offset + 11))) != -1L
                 ) {
-                    int year = IOUtils.digit4(bytes, offset);
-                    int month = IOUtils.digit2(bytes, offset + 5);
-                    int dom = IOUtils.digit2(bytes, offset + 8);
-                    int hour = IOUtils.digit2(bytes, offset + 11);
-                    int minute = IOUtils.digit2(bytes, offset + 14);
-                    int second = IOUtils.digit2(bytes, offset + 17);
-                    if ((year | month | dom | minute | second) < 0) {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
+                    int year = yy + ((int) ymd & 0xFF);
+                    int month = (int) (ymd >> 24) & 0xFF;
+                    int dom = (int) (ymd >> 48) & 0xFF;
+                    int hour = (int) timeV & 0xFF;
+                    int minute = (int) (timeV >> 24) & 0xFF;
+                    int second = (int) (timeV >> 48) & 0xFF;
 
                     LocalDate localDate;
                     try {

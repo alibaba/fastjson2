@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID;
+import static com.alibaba.fastjson2.util.IOUtils.getLongLE;
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -2876,5 +2877,45 @@ public class DateUtilsTest {
 
         assertNull(DateUtils.parseLocalDateTime(bytes, 0, bytes.length));
         assertNull(DateUtils.parseLocalDateTime(chars, 0, bytes.length));
+    }
+
+    static long timeV(long x) {
+        long d;
+        if ((((x & 0xF0F0F0F0_F0F0F0F0L) - 0x30303030_30303030L) | (((d = x & 0x0F0F0F0F_0F0F0F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0
+                || (d & 0x00000F00_000F0000L) != 0x00000a00_000a0000L
+        ) {
+            return -1;
+        }
+//        return ((d & 0xF) << 3) + ((d & 0xF) << 1)  // (d & 0xF) * 10
+//                + (d >> 8);
+        return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
+    }
+
+    static long MonthDay(long timeV) {
+        long d;
+        if (((timeV & 0x0000FF00_00FF0000L) != 0x00002d00_002d0000L)
+                || (((timeV & 0xF0F000F0_F000F0F0L) - 0x30300030_30003030L) | (((d = timeV & 0x0F0F000F_0F000F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0) {
+            return -1;
+        }
+        return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
+    }
+
+    @Test
+    public void timeV() {
+//        byte[] bytes = new byte[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':'};
+//        for (byte b : bytes) {
+//            System.out.println((char) b + "\t" + b + "\t" + Integer.toHexString(b) + "\t" + Integer.toBinaryString(b));
+//        }
+//        long x = 0;
+//
+//        System.out.println(Integer.toHexString(0b11_0000));
+        byte[] bytes = "1978-12-13".getBytes();
+        long x = IOUtils.getLongLE(bytes, 2);
+        long t = MonthDay(x);
+        System.out.println(Long.toHexString(t));
+        System.out.println(t & 0xFF);
+        System.out.println((t >> 24) & 0xFF);
+        System.out.println((t >> 48) & 0xFF);
+//        System.out.println(Integer.toString('-') + "\t" + Integer.toBinaryString('-'));
     }
 }
