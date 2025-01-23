@@ -379,7 +379,7 @@ class JSONWriterUTF16
             IOUtils.putLongLE(chars, off, v);
             off += 4;
         }
-        for (; i < char_len;) {
+        while (i < char_len) {
             char c = getChar(value, i++);
             if (c == '\\' || c == quote || c < ' ') {
                 escape = true;

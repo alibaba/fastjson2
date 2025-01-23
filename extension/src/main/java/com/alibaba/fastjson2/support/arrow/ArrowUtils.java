@@ -10,6 +10,7 @@ import org.apache.arrow.vector.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -167,11 +168,9 @@ public class ArrowUtils {
         }
 
         if (vector instanceof BitVector) {
-            Boolean booleanValue = Boolean.parseBoolean(value);
-            if (value != null) {
-                int intValue = booleanValue.booleanValue() ? 1 : 0;
-                ((BitVector) vector).set(row, intValue);
-            }
+            boolean booleanValue = Boolean.parseBoolean(value);
+            int intValue = booleanValue ? 1 : 0;
+            ((BitVector) vector).set(row, intValue);
             return;
         }
 
@@ -180,7 +179,7 @@ public class ArrowUtils {
             Decimal256Vector decimalVector = (Decimal256Vector) vector;
             int scale = decimalVector.getScale();
             if (decimal.scale() != scale) {
-                decimal = decimal.setScale(scale);
+                decimal = decimal.setScale(scale, RoundingMode.CEILING);
             }
             decimalVector.set(row, decimal);
             return;
@@ -190,7 +189,7 @@ public class ArrowUtils {
     }
 
     public static void setDecimal(DecimalVector vector, int row, String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             vector.setNull(row);
             return;
         }
@@ -296,7 +295,7 @@ public class ArrowUtils {
 
                 BigDecimal decimal = BigDecimal.valueOf(unscaleValue, scale);
                 if (vector.getScale() != decimal.scale()) {
-                    decimal = decimal.setScale(vector.getScale(), BigDecimal.ROUND_CEILING);
+                    decimal = decimal.setScale(vector.getScale(), RoundingMode.CEILING);
                 }
                 vector.set(row, decimal);
                 return;
@@ -305,7 +304,7 @@ public class ArrowUtils {
 
         BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, off, len);
         if (vector.getScale() != decimal.scale()) {
-            decimal = decimal.setScale(vector.getScale(), BigDecimal.ROUND_CEILING);
+            decimal = decimal.setScale(vector.getScale(), RoundingMode.CEILING);
         }
         vector.set(row, decimal);
     }
@@ -386,7 +385,7 @@ public class ArrowUtils {
 
                 BigDecimal decimal = BigDecimal.valueOf(unscaleValue, scale);
                 if (vector.getScale() != decimal.scale()) {
-                    decimal = decimal.setScale(vector.getScale(), BigDecimal.ROUND_CEILING);
+                    decimal = decimal.setScale(vector.getScale(), RoundingMode.CEILING);
                 }
                 vector.set(row, decimal);
                 return;
@@ -395,7 +394,7 @@ public class ArrowUtils {
 
         BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, off, len);
         if (vector.getScale() != decimal.scale()) {
-            decimal = decimal.setScale(vector.getScale(), BigDecimal.ROUND_CEILING);
+            decimal = decimal.setScale(vector.getScale(), RoundingMode.CEILING);
         }
         vector.set(row, decimal);
     }
@@ -403,7 +402,7 @@ public class ArrowUtils {
     public static void setDecimal(DecimalVector vector, int row, BigDecimal decimal) {
         int scale = vector.getScale();
         if (decimal.scale() != scale) {
-            decimal = decimal.setScale(scale, BigDecimal.ROUND_CEILING);
+            decimal = decimal.setScale(scale, RoundingMode.CEILING);
         }
         int precision = decimal.precision();
         if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {

@@ -1080,7 +1080,7 @@ public class DateUtils {
         } else if (c1 == '-' && str[off + 5] == '-') {
             // d-MMM-yy
             dom = digit1(str, off);
-            month = DateUtils.month((char) str[off + 2], c3, c4);
+            month = DateUtils.month(str[off + 2], c3, c4);
             year = digit2(str, off + 6);
             if (year != -1) {
                 year += 2000;
@@ -1320,7 +1320,6 @@ public class DateUtils {
         char c9 = str[off + 9];
 
         int year, month, dom;
-        char y0, y1, y2, y3, m0, m1, d0, d1;
         if ((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/')) {
             // yyyy-MM-dd
             year = digit4(str, off);
@@ -1353,7 +1352,7 @@ public class DateUtils {
         } else if (c1 == ' ' && c5 == ' ') {
             // d MMM yyyy
             dom = digit1(str, off);
-            month = DateUtils.month(c2, (char) str[off + 3], c4);
+            month = DateUtils.month(c2, str[off + 3], c4);
             year = digit4(str, off + 6);
         } else {
             return null;
@@ -1705,7 +1704,7 @@ public class DateUtils {
         char c15 = str[off + 15];
         char c16 = str[off + 16];
 
-        int year, month, dom, hour, minute, second = 0, nanoOfSecond = 0;
+        int year, month, dom, hour, minute, second, nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
             year = digit4(str, off);
             month = digit2(str, off + 5);
@@ -5691,23 +5690,7 @@ public class DateUtils {
 
         long utcSeconds;
         {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long total = (365 * year)
-                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                    + ((367 * month - 362) / 12)
-                    + (dom - 1);
-
-            if (month > 2) {
-                total--;
-                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                if (!leapYear) {
-                    total--;
-                }
-            }
-
-            long epochDay = total - DAYS_0000_TO_1970;
+            long epochDay = calcEpochDay(year, month, dom);
             utcSeconds = epochDay * 86400
                     + hour * 3600
                     + minute * 60
@@ -5734,6 +5717,26 @@ public class DateUtils {
         }
 
         return (utcSeconds - zoneOffsetTotalSeconds) * 1000L;
+    }
+
+    private static long calcEpochDay(int year, int month, int dom) {
+        final int DAYS_PER_CYCLE = 146097;
+        final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+        long total = (365 * year)
+                + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
+                + ((367 * month - 362) / 12)
+                + (dom - 1);
+
+        if (month > 2) {
+            total--;
+            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+            if (!leapYear) {
+                total--;
+            }
+        }
+
+        return total - DAYS_0000_TO_1970;
     }
 
     static long parseMillis19(
@@ -6013,23 +6016,7 @@ public class DateUtils {
 
         long utcSeconds;
         {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long total = (365 * year)
-                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                    + ((367 * month - 362) / 12)
-                    + (dom - 1);
-
-            if (month > 2) {
-                total--;
-                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                if (!leapYear) {
-                    total--;
-                }
-            }
-
-            long epochDay = total - DAYS_0000_TO_1970;
+            long epochDay = calcEpochDay(year, month, dom);
             utcSeconds = epochDay * 86400
                     + hour * 3600
                     + minute * 60
@@ -6215,23 +6202,7 @@ public class DateUtils {
 
         long utcSeconds;
         {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long total = (365 * year)
-                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                    + ((367 * month - 362) / 12)
-                    + (dom - 1);
-
-            if (month > 2) {
-                total--;
-                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                if (!leapYear) {
-                    total--;
-                }
-            }
-
-            long epochDay = total - DAYS_0000_TO_1970;
+            long epochDay = calcEpochDay(year, month, dom);
             utcSeconds = epochDay * 86400;
         }
 
@@ -6620,23 +6591,7 @@ public class DateUtils {
 
         long utcSeconds;
         {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long total = (365 * year)
-                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                    + ((367 * month - 362) / 12)
-                    + (dom - 1);
-
-            if (month > 2) {
-                total--;
-                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                if (!leapYear) {
-                    total--;
-                }
-            }
-
-            long epochDay = total - DAYS_0000_TO_1970;
+            long epochDay = calcEpochDay(year, month, dom);
             utcSeconds = epochDay * 86400
                     + hour * 3600
                     + minute * 60
@@ -6971,23 +6926,7 @@ public class DateUtils {
 
         long utcSeconds;
         {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long total = (365 * year)
-                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                    + ((367 * month - 362) / 12)
-                    + (dom - 1);
-
-            if (month > 2) {
-                total--;
-                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                if (!leapYear) {
-                    total--;
-                }
-            }
-
-            long epochDay = total - DAYS_0000_TO_1970;
+            long epochDay = calcEpochDay(year, month, dom);
             utcSeconds = epochDay * 86400
                     + hour * 3600
                     + minute * 60
@@ -7323,23 +7262,7 @@ public class DateUtils {
 
         long utcSeconds;
         {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long total = (365 * year)
-                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                    + ((367 * month - 362) / 12)
-                    + (dom - 1);
-
-            if (month > 2) {
-                total--;
-                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                if (!leapYear) {
-                    total--;
-                }
-            }
-
-            long epochDay = total - DAYS_0000_TO_1970;
+            long epochDay = calcEpochDay(year, month, dom);
             utcSeconds = epochDay * 86400
                     + hour * 3600
                     + minute * 60
@@ -7600,23 +7523,7 @@ public class DateUtils {
 
         long utcSeconds;
         {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long total = (365 * year)
-                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                    + ((367 * month - 362) / 12)
-                    + (dom - 1);
-
-            if (month > 2) {
-                total--;
-                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                if (!leapYear) {
-                    total--;
-                }
-            }
-
-            long epochDay = total - DAYS_0000_TO_1970;
+            long epochDay = calcEpochDay(year, month, dom);
             utcSeconds = epochDay * 86400
                     + hour * 3600
                     + minute * 60
@@ -7654,23 +7561,7 @@ public class DateUtils {
             int minute,
             int second
     ) {
-        final int DAYS_PER_CYCLE = 146097;
-        final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-        long total = (365 * year)
-                + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                + ((367 * month - 362) / 12)
-                + (dom - 1);
-
-        if (month > 2) {
-            total--;
-            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-            if (!leapYear) {
-                total--;
-            }
-        }
-
-        long epochDay = total - DAYS_0000_TO_1970;
+        long epochDay = calcEpochDay(year, month, dom);
         return epochDay * 86400
                 + hour * 3600
                 + minute * 60

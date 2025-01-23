@@ -643,8 +643,8 @@ final class JSONWriterJSONB
             } else {
                 off += putStringSizeLarge(bytes, off, strlen);
             }
-            for (int i = 0; i < chars.length; i++) {
-                bytes[off++] = (byte) chars[i];
+            for (char ch : chars) {
+                bytes[off++] = (byte) ch;
             }
         } else {
             int maxSize = chars.length * 3;
@@ -754,8 +754,8 @@ final class JSONWriterJSONB
                 bytes[off++] = BC_STR_ASCII;
                 off += writeInt32(bytes, off, len);
             }
-            for (int i = 0; i < chars.length; i++) {
-                bytes[off++] = (byte) chars[i];
+            for (char ch : chars) {
+                bytes[off++] = (byte) ch;
             }
         } else {
             int maxSize = chars.length * 3;
