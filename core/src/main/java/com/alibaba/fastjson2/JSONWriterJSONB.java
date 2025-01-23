@@ -1058,7 +1058,7 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
         int i = (int) value;
-        if (i == value && value >= BC_INT32_NUM_MIN && value <= BC_INT32_NUM_MAX) {
+        if (i == value && i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
             putShortLE(bytes, off, (short) ((BC_FLOAT_INT & 0xFF) | (i << 8)));
             off += 2;
         } else {
