@@ -1864,6 +1864,7 @@ public class IOUtils {
     }
 
     public static boolean isLatin1(char[] chars, int off, int len) {
+        int end = off + len;
         int upperBound = off + (len & ~7);
         long address = ARRAY_CHAR_BASE_OFFSET + off;
         while (off < upperBound
@@ -1872,7 +1873,6 @@ public class IOUtils {
             address += 16;
             off += 8;
         }
-        int end = off + len;
         while (off++ < end) {
             if ((convEndian(false, UNSAFE.getShort(chars, address)) & 0xFF00) != 0) {
                 return false;
@@ -1883,6 +1883,7 @@ public class IOUtils {
     }
 
     public static boolean isASCII(byte[] bytes, int off, int len) {
+        int end = off + len;
         int upperBound = off + (len & ~7);
         long address = ARRAY_BYTE_BASE_OFFSET + off;
         while (off < upperBound && (UNSAFE.getLong(bytes, address) & 0x8080808080808080L) == 0) {
@@ -1890,7 +1891,6 @@ public class IOUtils {
             off += 8;
         }
 
-        int end = off + len;
         while (off++ < end) {
             if ((UNSAFE.getByte(bytes, address++) & 0x80) != 0) {
                 return false;
