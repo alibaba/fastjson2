@@ -1300,31 +1300,30 @@ class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        putByte(bytes, off, (byte) '"');
 
         final long base = ARRAY_BYTE_BASE_OFFSET + off;
-
+        UNSAFE.putByte(bytes, base, (byte) '"');
         UNSAFE.putLong(
                 bytes,
                 base + 1,
                 packDigits((int) (msb >> 56), (int) (msb >> 48), (int) (msb >> 40), (int) (msb >> 32))
         );
-        putByte(bytes, off + 9, (byte) '-');
+        UNSAFE.putByte(bytes, base + 9, (byte) '-');
         UNSAFE.putLong(
                 bytes,
                 base + 10,
                 packDigits(((int) msb) >> 24, ((int) msb) >> 16));
-        putByte(bytes, off + 14, (byte) '-');
+        UNSAFE.putByte(bytes, base + 14, (byte) '-');
         UNSAFE.putLong(
                 bytes,
                 base + 15,
                 packDigits(((int) msb) >> 8, (int) msb));
-        putByte(bytes, off + 19, (byte) '-');
+        UNSAFE.putByte(bytes, base + 19, (byte) '-');
         UNSAFE.putLong(
                 bytes,
                 base + 20,
                 packDigits((int) (lsb >> 56), (int) (lsb >> 48)));
-        putByte(bytes, off + 24, (byte) '-');
+        UNSAFE.putByte(bytes, base + 24, (byte) '-');
         UNSAFE.putLong(
                 bytes,
                 base + 25,
@@ -1333,7 +1332,7 @@ class JSONWriterUTF8
                 bytes,
                 base + 33,
                 packDigits(((int) lsb) >> 8, (int) lsb));
-        putByte(bytes, off + 37, (byte) '"');
+        UNSAFE.putByte(bytes, base + 37, (byte) '"');
         this.off += 38;
     }
 
