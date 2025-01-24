@@ -499,13 +499,6 @@ public abstract class JSONReader
                 + DIGITS2[c2]);
     }
 
-    static char char4(int c1, int c2, int c3, int c4) {
-        return (char) (DIGITS2[c1] * 0x1000
-                + DIGITS2[c2] * 0x100
-                + DIGITS2[c3] * 0x10
-                + DIGITS2[c4]);
-    }
-
     public abstract boolean nextIfObjectStart();
 
     public abstract boolean nextIfNullOrEmptyString();
@@ -3247,84 +3240,34 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes) {
-        boolean ascii = false;
-        if (PREDICATE_IS_ASCII != null) {
-            ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
-        }
-
         Context context = createReadContext();
-        if (ascii) {
-            if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-            }
-
+        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-        } else {
-            return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
-        }
+        return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
     }
 
     @Deprecated
     public static JSONReader of(Context context, byte[] utf8Bytes) {
-        boolean ascii = false;
-        if (PREDICATE_IS_ASCII != null) {
-            ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
-        }
-
-        if (ascii) {
-            if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-            }
-
+        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-        } else {
-            return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
-        }
+        return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
     }
 
     public static JSONReader of(byte[] utf8Bytes, Context context) {
-        boolean ascii = false;
-        if (PREDICATE_IS_ASCII != null) {
-            ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
-        }
-
-        if (ascii) {
-            if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-            }
-
+        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, utf8Bytes, 0, utf8Bytes.length);
-        } else {
-            return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
-        }
+        return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
     }
 
     public static JSONReader of(char[] chars) {
-        Context context = createReadContext();
-
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    null,
-                    chars,
-                    0,
-                    chars.length);
-        }
-
         return new JSONReaderUTF16(
-                context,
+                createReadContext(),
                 null,
                 chars,
                 0,
@@ -3333,15 +3276,6 @@ public abstract class JSONReader
 
     @Deprecated
     public static JSONReader of(Context context, char[] chars) {
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    null,
-                    chars,
-                    0,
-                    chars.length);
-        }
-
         return new JSONReaderUTF16(
                 context,
                 null,
@@ -3409,11 +3343,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader ofJSONB(byte[] bytes, int offset, int length, Context context) {
-        return new JSONReaderJSONB(
-                context,
-                bytes,
-                offset,
-                length);
+        return new JSONReaderJSONB(context, bytes, offset, length);
     }
 
     public static JSONReader ofJSONB(byte[] bytes, int offset, int length, SymbolTable symbolTable) {
@@ -3428,11 +3358,7 @@ public abstract class JSONReader
         Context context = JSONFactory.createReadContext();
 
         if (charset == StandardCharsets.UTF_8) {
-            if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-            } else {
-                return new JSONReaderUTF8(context, null, bytes, offset, length);
-            }
+            return new JSONReaderUTF8(context, null, bytes, offset, length);
         }
 
         if (charset == StandardCharsets.UTF_16) {
@@ -3440,11 +3366,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, bytes, offset, length);
-            } else {
-                return new JSONReaderASCII(context, null, bytes, offset, length);
-            }
+            return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -3466,18 +3388,10 @@ public abstract class JSONReader
             }
 
             if (!hasNegative) {
-                if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                    return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, bytes, offset, length);
-                } else {
-                    return new JSONReaderASCII(context, null, bytes, offset, length);
-                }
+                return new JSONReaderASCII(context, null, bytes, offset, length);
             }
 
-            if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-            } else {
-                return new JSONReaderUTF8(context, null, bytes, offset, length);
-            }
+            return new JSONReaderUTF8(context, null, bytes, offset, length);
         }
 
         if (charset == StandardCharsets.UTF_16) {
@@ -3485,58 +3399,25 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, bytes, offset, length);
-            } else {
-                return new JSONReaderASCII(context, null, bytes, offset, length);
-            }
+            return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length) {
-        Context context = createReadContext();
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-        } else {
-            return new JSONReaderUTF8(context, null, bytes, offset, length);
-        }
+        return new JSONReaderUTF8(createReadContext(), null, bytes, offset, length);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Context context) {
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
-        } else {
-            return new JSONReaderUTF8(context, null, bytes, offset, length);
-        }
+        return new JSONReaderUTF8(context, null, bytes, offset, length);
     }
 
     public static JSONReader of(char[] chars, int offset, int length) {
-        Context context = createReadContext();
-
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    null,
-                    chars,
-                    offset,
-                    length);
-        }
-
-        return new JSONReaderUTF16(context, null, chars, offset, length);
+        return new JSONReaderUTF16(createReadContext(), null, chars, offset, length);
     }
 
     public static JSONReader of(char[] chars, int offset, int length, Context context) {
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    null,
-                    chars,
-                    offset,
-                    length);
-        }
-
         return new JSONReaderUTF16(context, null, chars, offset, length);
     }
 
@@ -3614,18 +3495,14 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (STRING_VALUE != null && STRING_CODER != null && PREDICATE_IS_ASCII != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
                 final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     if (PREDICATE_IS_ASCII.test(bytes)) {
-                        if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                            return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, str, bytes, 0, bytes.length);
-                        } else {
-                            return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
-                        }
+                        return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                     }
                 }
             } catch (Exception e) {
@@ -3637,15 +3514,6 @@ public abstract class JSONReader
         if (JVM_VERSION == 8) {
             char[] chars = JDKUtils.getCharArray(str);
             return new JSONReaderUTF16(context, str, chars, 0, length);
-        }
-
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    str,
-                    null,
-                    0,
-                    length);
         }
 
         return new JSONReaderUTF16(context, str, 0, length);
@@ -3662,11 +3530,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                        return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, str, bytes, 0, bytes.length);
-                    } else {
-                        return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
-                    }
+                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3679,15 +3543,6 @@ public abstract class JSONReader
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
-        }
-
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    str,
-                    chars,
-                    0,
-                    length);
         }
 
         return new JSONReaderUTF16(context, str, chars, 0, length);
@@ -3705,11 +3560,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                        return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, str, bytes, offset, length);
-                    } else {
-                        return new JSONReaderASCII(context, str, bytes, offset, length);
-                    }
+                    return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3721,15 +3572,6 @@ public abstract class JSONReader
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
-        }
-
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    str,
-                    chars,
-                    offset,
-                    length);
         }
 
         return new JSONReaderUTF16(context, str, chars, offset, length);
@@ -3746,11 +3588,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                        return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, str, bytes, offset, length);
-                    } else {
-                        return new JSONReaderASCII(context, str, bytes, offset, length);
-                    }
+                    return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3762,15 +3600,6 @@ public abstract class JSONReader
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
-        }
-
-        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
-            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
-                    context,
-                    str,
-                    chars,
-                    offset,
-                    length);
         }
 
         return new JSONReaderUTF16(context, str, chars, offset, length);
@@ -4077,6 +3906,7 @@ public abstract class JSONReader
 
     public static final class Context {
         String dateFormat;
+        boolean formatComplex;
         boolean formatyyyyMMddhhmmss19;
         boolean formatyyyyMMddhhmmssT19;
         boolean yyyyMMddhhmm16;
@@ -4411,6 +4241,7 @@ public abstract class JSONReader
                         break;
                 }
 
+                this.formatComplex = !(formatyyyyMMddhhmmss19 | formatyyyyMMddhhmmssT19 | formatyyyyMMdd8 | formatISO8601);
                 // this.yyyyMMddhhmm16 = "yyyy-MM-dd HH:mm".equals(format);
             }
 

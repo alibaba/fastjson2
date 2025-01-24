@@ -87,8 +87,8 @@ public class AlongWriteBinaryArrayMappingTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        jsonb();
-        jsonbFeatures();
+        jsonb();
+//        jsonbFeatures();
 //        json();
 //        jsonStr();
 //        fury();

@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
+import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_INT64_BYTE_MAX;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONReaderJSONBTest {
@@ -398,5 +400,29 @@ public class JSONReaderJSONBTest {
         assertThrows(JSONException.class, () -> jsonReader.readInt64ValueError(JSONB.Constants.BC_ARRAY));
         assertThrows(JSONException.class, jsonReader::readStringError);
         assertThrows(JSONException.class, () -> JSONReaderJSONB.typeRefNotFound(-1));
+    }
+
+    @Test
+    public void testX() {
+//        System.out.println(Integer.toHexString(BC_INT64_SHORT_MIN & 0xFF));
+//        System.out.println(Integer.toHexString(BC_INT64_SHORT_MAX & 0xFF));
+//        System.out.println(Integer.toHexString(0b1111_1000));
+
+        for (int i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; ++i) {
+            byte b = (byte) i;
+            boolean h = isInt64Byte2(b);
+            boolean h1 = isInt64Byte3(b);
+            if (h != h1) {
+                System.out.println(b + "\t" + Integer.toHexString(b & 0xFF) + "\t" + h + "\t" + h1);
+            }
+        }
+    }
+
+    private static boolean isInt64Byte2(int type) {
+        return ((type - BC_INT64_BYTE_MIN) & 0xF0) == 0;
+    }
+
+    private static boolean isInt64Byte3(int type) {
+        return type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX;
     }
 }

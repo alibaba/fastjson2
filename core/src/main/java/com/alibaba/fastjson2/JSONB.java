@@ -159,8 +159,8 @@ public interface JSONB {
         byte BC_INT32_NUM_MAX = 47;  // 0x2f
 
         byte BC_INT32_BYTE_MIN = 48;    // 0x30
-        byte BC_INT32_BYTE_ZERO = 56;
-        byte BC_INT32_BYTE_MAX = 63;
+        byte BC_INT32_BYTE_ZERO = 56;   // 0x38
+        byte BC_INT32_BYTE_MAX = 63;    // 0x3f
 
         byte BC_INT32_SHORT_MIN = 64; // 0x40
         byte BC_INT32_SHORT_ZERO = 68;
@@ -1442,5 +1442,33 @@ public interface JSONB {
 
                 return Integer.toString(type);
         }
+    }
+
+    static boolean isInt32(int type) {
+        return type >= BC_INT32_NUM_MIN && type <= BC_INT32;
+    }
+
+    static boolean isInt32Num(int type) {
+        return type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX;
+    }
+
+    static boolean isInt32Byte(int type) {
+        return (type & 0xF0) == 0x30;
+    }
+
+    static boolean isInt32Short(int type) {
+        return (type & 0xF8) == 0x40;
+    }
+
+    static boolean isInt64Num(int type) {
+        return type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX;
+    }
+
+    static boolean isInt64Byte(int type) {
+        return ((type - BC_INT64_BYTE_MIN) & 0xF0) == 0;
+    }
+
+    static boolean isInt64Short(int type) {
+        return (type & 0xF8) == 0xC0;
     }
 }

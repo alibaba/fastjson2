@@ -62,28 +62,14 @@
     </properties>
 
     <modules>
-        <!--
-        <module>adapter</module>
-        -->
         <module>benchmark</module>
-        <module>codegen</module>
-        <module>codegen-test</module>
         <module>core</module>
-        <!--
-            <module>example-graalvm-native</module>
-        -->
         <module>example-solon-test</module>
         <module>example-spring-test</module>
-        <!--
-            <module>example-spring6-test</module>
-        -->
         <module>extension</module>
         <module>extension-jaxrs</module>
         <module>extension-solon</module>
         <module>extension-spring5</module>
-        <!--
-        <module>extension-spring6</module>
-        -->
         <module>fastjson1-compatible</module>
         <module>kotlin</module>
         <module>safemode-test</module>
@@ -674,7 +660,7 @@
             <plugin>
                 <groupId>org.gaul</groupId>
                 <artifactId>modernizer-maven-plugin</artifactId>
-                <version>2.9.0</version>
+                <version>3.0.0</version>
                 <configuration>
                     <violationsFiles>
                         <violationsFile>${maven.multiModuleProjectDirectory}/src/violations.xml</violationsFile>
@@ -1030,8 +1016,17 @@
                 <module>example-graalvm-native</module>
                 <module>extension-spring6</module>
                 <module>example-spring6-test</module>
-                <module>incubator-vector</module>
                 <module>test-jdk17</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>enable-codegen</id>
+            <activation>
+                <jdk>(,22]</jdk>
+            </activation>
+            <modules>
+                <module>codegen</module>
+                <module>codegen-test</module>
             </modules>
         </profile>
         <profile>

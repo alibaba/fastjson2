@@ -15,8 +15,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterUTF8Test {
     @Test
@@ -1130,5 +1129,97 @@ public class JSONWriterUTF8Test {
 
         IOUtils.putIntUnaligned(bytes, 2, IOUtils.hex4U(1));
         assertEquals("\\u0001", new String(bytes));
+    }
+
+    static boolean containsEscaped(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) data;
+            if (c == quote || c == '\\' || c < ' ') {
+                return true;
+            }
+            data >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
+        long x5c = v ^ 0x5C5C5C5C5C5C5C5CL;
+
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x5c = (x5c - 0x0101010101010101L) & ~x5c;
+
+        return ((x22 | x5c | (0x7F7F7F7F7F7F7F7FL - v + 0x2020202020202020L) | v) & 0x8080808080808080L) != 0;
+    }
+
+    @Test
+    public void testSpecial_false() {
+        long quote = 0x2222_2222_2222_2222L;
+        byte[] escaped = new byte[32 + 2 + 128];
+        for (int i = 0; i < 32; i++) {
+            escaped[i] = (byte) i;
+        }
+        escaped[32] = (byte) quote;
+        escaped[33] = '\\';
+        for (int i = 0; i < 128; i++) {
+            escaped[i + 32 + 2] = (byte) (i + 128);
+        }
+
+        byte[] buf = new byte[8];
+        for (byte c : escaped) {
+            for (int i = 0; i < 8; i++) {
+                Arrays.fill(buf, (byte) 'a');
+                buf[i] = c;
+                long v = IOUtils.getLongUnaligned(buf, 0);
+                assertTrue(containsEscaped(v, quote));
+                assertFalse(JSONWriterUTF8.noneEscaped(v, ~quote));
+            }
+        }
+
+        quote = 0x2727_2727_2727_2727L;
+        escaped[32] = (byte) quote;
+
+        for (byte c : escaped) {
+            for (int i = 0; i < 8; i++) {
+                Arrays.fill(buf, (byte) 'a');
+                buf[i] = c;
+                long v = IOUtils.getLongUnaligned(buf, 0);
+                assertTrue(containsEscaped(v, quote));
+                assertFalse(JSONWriterUTF8.noneEscaped(v, ~quote));
+            }
+        }
+    }
+
+    @Test
+    public void testSpecial_true() {
+        long vectorQuote = 0x2222_2222_2222_2222L;
+        byte quote = (byte) vectorQuote;
+        byte[] buf = new byte[8];
+
+        for (int i = 33; i < 128; i++) {
+            if (i == quote || i == '\\') {
+                continue;
+            }
+            Arrays.fill(buf, (byte) i);
+            long v = IOUtils.getLongUnaligned(buf, 0);
+            assertTrue(JSONWriterUTF8.noneEscaped(v, ~vectorQuote));
+            assertFalse(containsEscaped(v, vectorQuote));
+        }
+    }
+
+    @Test
+    public void testSpecial_true_singleQuote() {
+        long vectorQuote = 0x2727_2727_2727_2727L;
+        byte quote = (byte) vectorQuote;
+        byte[] buf = new byte[8];
+
+        for (int i = 33; i < 128; i++) {
+            if (i == quote || i == '\\') {
+                continue;
+            }
+            Arrays.fill(buf, (byte) i);
+            long v = IOUtils.getLongUnaligned(buf, 0);
+            assertTrue(JSONWriterUTF8.noneEscaped(v, ~vectorQuote));
+            assertFalse(containsEscaped(v, vectorQuote));
+        }
     }
 }

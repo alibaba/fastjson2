@@ -268,6 +268,16 @@ public abstract class FieldReader<T>
                         return -1;
                     }
 
+                    // Collection first
+                    if (Collection.class.isAssignableFrom(otherParamType) && !Collection.class.isAssignableFrom(thisParamType)) {
+                        return 1;
+                    }
+
+                    if (Collection.class.isAssignableFrom(thisParamType) && !Collection.class.isAssignableFrom(otherParamType)) {
+                        return -1;
+                    }
+
+                    // field class compare
                     if (needCompareToActualFieldClass(thisParamType) || needCompareToActualFieldClass(otherParamType)) {
                         Class actualFieldClass = null;
                         try {

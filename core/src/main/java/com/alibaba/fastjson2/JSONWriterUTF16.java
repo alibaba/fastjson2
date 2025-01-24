@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriterUTF8.containsEscaped;
+import static com.alibaba.fastjson2.JSONWriterUTF8.noneEscaped;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -75,7 +75,7 @@ class JSONWriterUTF16
             chars = new char[8192];
         }
         this.chars = chars;
-        this.byteVectorQuote = this.useSingleQuote ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+        this.byteVectorQuote = this.useSingleQuote ? ~0x2727_2727_2727_2727L : ~0x2222_2222_2222_2222L;
     }
 
     public final void writeNull() {
@@ -280,12 +280,8 @@ class JSONWriterUTF16
         int i = 0;
         final long vecQuote = this.byteVectorQuote;
         final int upperBound = (value.length - i) & ~7;
-        for (; i < upperBound; i += 8) {
-            long vec64 = getLongLE(value, i);
-            if (containsEscaped(vec64, vecQuote)) {
-                escape = true;
-                break;
-            }
+        long vec64;
+        for (; i < upperBound && noneEscaped(vec64 = getLongLE(value, i), vecQuote); i += 8) {
             IOUtils.putLongLE(chars, off, expand(vec64));
             IOUtils.putLongLE(chars, off + 4, expand(vec64 >>> 32));
             off += 8;
@@ -365,21 +361,21 @@ class JSONWriterUTF16
             grow(minCapacity);
         }
 
-        final long vecQuote = this.useSingleQuote ? BYTE_VEC_64_SINGLE_QUOTE : BYTE_VEC_64_DOUBLE_QUOTE;
+        final long vecQuote = this.byteVectorQuote;
         final char[] chars = this.chars;
         chars[off++] = quote;
-        int i = 0, char_len = value.length >> 1;
-
-        final int upperBound = (char_len - i) & ~3;
-        for (; i < upperBound; i += 4) {
-            long v = getLongLE(value, i << 1);
-            if (containsEscapedUTF16(v, vecQuote)) {
-                break;
+        for (int i = 0, char_len = value.length >> 1; i < char_len;) {
+            if (i + 8 < char_len) {
+                long v0 = getLongLE(value, i << 1);
+                long v1 = getLongLE(value, (i + 4) << 1);
+                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && noneEscaped((v0 << 8) | v1, vecQuote)) {
+                    putLongLE(chars, off, v0);
+                    putLongLE(chars, off + 4, v1);
+                    i += 8;
+                    off += 8;
+                    continue;
+                }
             }
-            IOUtils.putLongLE(chars, off, v);
-            off += 4;
-        }
-        while (i < char_len) {
             char c = getChar(value, i++);
             if (c == '\\' || c == quote || c < ' ') {
                 escape = true;
@@ -398,24 +394,43 @@ class JSONWriterUTF16
         writeStringEscapeUTF16(value);
     }
 
-    static boolean containsEscapedUTF16(long v, long quote) {
-        /*
-          for (int i = 0; i < 8; ++i) {
-            byte c = (byte) data;
-            if (c == quote || c == '\\' || c < ' ') {
-                return true;
+    final void writeStringBrowserSecure(char[] value) {
+        boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
+
+        boolean escape = false;
+        int off = this.off;
+        int minCapacity = off + value.length + 2;
+        if (minCapacity >= chars.length) {
+            grow(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        chars[off++] = quote;
+        for (int i = 0, char_len = value.length; i < char_len; i++) {
+            char c = getChar(value, i);
+            if (c == '\\'
+                    || c == quote
+                    || c < ' '
+                    || c == '<'
+                    || c == '>'
+                    || c == '('
+                    || c == ')'
+                    || (escapeNoneAscii && c > 0x007F)
+            ) {
+                escape = true;
+                break;
             }
-            data >>>= 8;
-          }
-          return false;
-         */
-        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
-        long x5c = v ^ 0x005C005C_005C005CL;
 
-        x22 = (x22 - 0x00010001_00010001L) & ~x22;
-        x5c = (x5c - 0x00010001_00010001L) & ~x5c;
+            chars[off++] = c;
+        }
 
-        return ((x22 | x5c | (0x007F007F_007F007FL - v + 0x00100010_00100010L) | v) & 0x00800080_00800080L) != 0;
+        if (!escape) {
+            chars[off] = quote;
+            this.off = off + 1;
+            return;
+        }
+
+        writeStringEscape(value);
     }
 
     final void writeStringUTF16BrowserSecure(byte[] value) {
@@ -2955,45 +2970,55 @@ class JSONWriterUTF16
         chars[off++] = quote;
     }
 
-    public final void writeString(final char[] str) {
-        if (str == null) {
+    public final void writeString(final char[] value) {
+        if (value == null) {
             writeStringNull();
             return;
         }
 
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
-        boolean special = (context.features & EscapeNoneAscii.mask) != 0;
-        for (int i = 0; i < str.length; i++) {
-            char c = str[i];
-            if (c == '\\' || c == quote || c < ' ') {
-                special = true;
-                break;
-            }
-
-            if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
-                special = true;
-                break;
-            }
+        if ((context.features & (BrowserSecure.mask | EscapeNoneAscii.mask)) != 0) {
+            writeStringBrowserSecure(value);
+            return;
         }
 
-        if (!special) {
-            // inline ensureCapacity
-            int off = this.off;
-            int minCapacity = off + str.length + 2;
-            char[] chars = this.chars;
-            if (minCapacity > chars.length) {
-                chars = grow(minCapacity);
+        boolean escape = false;
+        int off = this.off;
+        int minCapacity = off + value.length + 2;
+        if (minCapacity >= chars.length) {
+            grow(minCapacity);
+        }
+
+        final long vecQuote = this.byteVectorQuote;
+        final char[] chars = this.chars;
+        chars[off++] = quote;
+        for (int i = 0, char_len = value.length; i < char_len;) {
+            if (i + 8 < char_len) {
+                long v0 = getLongLE(value, i);
+                long v1 = getLongLE(value, i + 4);
+                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && noneEscaped((v0 << 8) | v1, vecQuote)) {
+                    putLongLE(chars, off, v0);
+                    putLongLE(chars, off + 4, v1);
+                    i += 8;
+                    off += 8;
+                    continue;
+                }
+            }
+            char c = getChar(value, i++);
+            if (c == '\\' || c == quote || c < ' ') {
+                escape = true;
+                break;
             }
 
-            chars[off++] = quote;
-            System.arraycopy(str, 0, chars, off, str.length);
-            off += str.length;
+            chars[off++] = c;
+        }
+
+        if (!escape) {
             chars[off] = quote;
             this.off = off + 1;
             return;
         }
 
-        writeStringEscape(str);
+        writeStringEscape(value);
     }
 
     public final void writeString(char[] str, int coff, int len) {

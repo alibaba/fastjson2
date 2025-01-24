@@ -406,7 +406,40 @@ public class JSONWriterJSONBTest {
         JSONWriter jsonWriter = JSONWriter.ofJSONB();
         jsonWriter.writeString(chars, 256, 512);
         byte[] jsonbBytes = jsonWriter.getBytes();
-        assertEquals(new String(chars), JSONB.parse(jsonbBytes));
+        assertEquals(
+                new String(chars, 256, 512),
+                JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeChars2() {
+        char[] chars = new char[] {'A', 'A'};
+        Arrays.fill(chars, 'A');
+        for (int i = 128; i < 256; i++) {
+            chars[1] = (char) (i - 256);
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.writeString(chars, 1, 1);
+            byte[] jsonbBytes = jsonWriter.getBytes();
+            assertEquals(
+                    new String(chars, 1, 1),
+                    JSONB.parse(jsonbBytes));
+        }
+    }
+
+    @Test
+    public void writeChars3() {
+        char[] chars = new char[128];
+        for (int i = 128; i < 256; i++) {
+            Arrays.fill(chars, (char) (i - 256));
+            chars[0] = 'A';
+            int strlen = chars.length - 1;
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.writeString(chars, 1, strlen);
+            byte[] jsonbBytes = jsonWriter.getBytes();
+            assertEquals(
+                    new String(chars, 1, strlen),
+                    JSONB.parse(jsonbBytes));
+        }
     }
 
     @Test

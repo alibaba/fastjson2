@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
+import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.Long.MIN_VALUE;
@@ -528,7 +531,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[offset++];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                        ch = hexDigit4(bytes, check3(offset, end));
                         offset += 4;
                         break;
                     }
@@ -641,7 +644,7 @@ class JSONReaderUTF8
                     ch = bytes[offset++];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                            ch = hexDigit4(bytes, check3(offset, end));
                             offset += 4;
                             break;
                         }
@@ -2493,7 +2496,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2567,7 +2570,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2681,7 +2684,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -2748,7 +2751,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2858,7 +2861,7 @@ class JSONReaderUTF8
     @Override
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
-        int offset = nameBegin;
+        int offset = nameBegin, end = this.end;
         final byte[] bytes = this.bytes;
 
         long nameValue = 0;
@@ -2869,7 +2872,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -2968,7 +2971,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -3075,7 +3078,7 @@ class JSONReaderUTF8
 
         char[] chars = new char[nameLength];
 
-        for (int i = 0; offset < nameEnd; ++i) {
+        for (int i = 0, end = this.end; offset < nameEnd; ++i) {
             int ch = bytes[offset];
             if (ch < 0) {
                 ch &= 0xFF;
@@ -3104,7 +3107,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -4068,13 +4071,13 @@ class JSONReaderUTF8
 
             char[] chars = new char[valueLength];
             offset = start;
-            for (int i = 0; ; ++i) {
+            for (int i = 0, end = this.end; ; ++i) {
                 int c = bytes[offset];
                 if (c == '\\') {
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            c = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -4191,7 +4194,7 @@ class JSONReaderUTF8
         char quote = this.ch;
         int valueLength;
         int offset = this.offset;
-        int start = offset;
+        int start = offset, end = this.end;
         boolean ascii = true;
         valueEscape = false;
         final byte[] bytes = this.bytes;
@@ -4250,7 +4253,7 @@ class JSONReaderUTF8
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            c = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -4616,7 +4619,7 @@ class JSONReaderUTF8
             return stringValue;
         }
         final byte[] bytes = this.bytes;
-        int offset = nameBegin;
+        int offset = nameBegin, end = this.end;
         int length = nameEnd - offset;
         if (!nameEscape) {
             if (ANDROID) {
@@ -4694,11 +4697,7 @@ class JSONReaderUTF8
                 c = (char) bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        int c1 = bytes[offset + 1];
-                        int c2 = bytes[offset + 2];
-                        int c3 = bytes[offset + 3];
-                        int c4 = bytes[offset + 4];
-                        c = char4(c1, c2, c3, c4);
+                        c = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -4735,7 +4734,6 @@ class JSONReaderUTF8
 
         final byte[] bytes = this.bytes;
         byte ch = bytes[offset++];
-        byte start = ch;
 
         boolean multi;
         if (ch == '*') {
@@ -4796,58 +4794,92 @@ class JSONReaderUTF8
         }
     }
 
+    static boolean containsSlashOrQuote(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) v;
+            if (c == '"' || c == '\\') {
+                return true;
+            }
+            v >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22
+        long x5c = v ^ 0x5C5C5C5C5C5C5C5CL; // \n -> 0x0a
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x5c = (x5c - 0x0101010101010101L) & ~x5c;
+        return ((x22 | x5c) & 0x8080808080808080L) != 0;
+    }
+
     @Override
     public String readString() {
-        final byte[] bytes = this.bytes;
         if (ch == '"' || ch == '\'') {
+            final byte[] bytes = this.bytes;
             char quote = this.ch;
             int valueLength;
             int offset = this.offset;
             final int start = offset, end = this.end;
+            final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
             boolean ascii = true;
             valueEscape = false;
 
-            for (int i = 0; ; ++i) {
-                if (offset >= end) {
-                    throw new JSONException("invalid escape character EOI");
-                }
-
-                int ch = bytes[offset];
-                if (ch == '\\') {
-                    valueEscape = true;
-                    ch = bytes[offset + 1];
-                    offset += (ch == 'u' ? 6 : (ch == 'x' ? 4 : 2));
-                    continue;
-                }
-
-                if (ch >= 0) {
-                    if (ch == quote) {
-                        valueLength = i;
+            {
+                int i = 0;
+                int upperBound = offset + ((end - offset) & ~7);
+                while (offset < upperBound) {
+                    long v = getLongLE(bytes, offset);
+                    if ((v & 0xFF00FF00FF00FF00L) != 0 || JSONReaderUTF8.containsSlashOrQuote(v, byteVectorQuote)) {
                         break;
                     }
-                    offset++;
-                } else {
-                    ascii = false;
-                    switch ((ch & 0xFF) >> 4) {
-                        case 12:
-                        case 13: {
-                            /* 110x xxxx   10xx xxxx*/
-                            offset += 2;
+
+                    offset += 8;
+                    i += 8;
+                }
+                // ...
+
+                for (; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
+                    }
+
+                    int c = bytes[offset];
+                    if (c == '\\') {
+                        valueEscape = true;
+                        c = bytes[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
+                        continue;
+                    }
+
+                    if (c >= 0) {
+                        if (c == quote) {
+                            valueLength = i;
                             break;
                         }
-                        case 14: {
-                            offset += 3;
-                            break;
-                        }
-                        default: {
-                            /* 10xx xxxx,  1111 xxxx */
-                            if ((ch >> 3) == -2) {
-                                offset += 4;
-                                i++;
+                        offset++;
+                    } else {
+                        ascii = false;
+                        switch ((c & 0xFF) >> 4) {
+                            case 12:
+                            case 13: {
+                                /* 110x xxxx   10xx xxxx*/
+                                offset += 2;
                                 break;
                             }
+                            case 14: {
+                                offset += 3;
+                                break;
+                            }
+                            default: {
+                                /* 10xx xxxx,  1111 xxxx */
+                                if ((c >> 3) == -2) {
+                                    offset += 4;
+                                    i++;
+                                    break;
+                                }
 
-                            throw new JSONException("malformed input around byte " + offset);
+                                throw new JSONException("malformed input around byte " + offset);
+                            }
                         }
                     }
                 }
@@ -4863,15 +4895,12 @@ class JSONReaderUTF8
                         ch = bytes[++offset];
                         switch (ch) {
                             case 'u': {
-                                ch = DIGITS2[bytes[offset + 1]] * 0x1000
-                                        + DIGITS2[bytes[offset + 2]] * 0x100
-                                        + DIGITS2[bytes[offset + 3]] * 0x10
-                                        + DIGITS2[bytes[offset + 4]];
+                                ch = hexDigit4(bytes, check3(offset + 1, end));
                                 offset += 4;
                                 break;
                             }
                             case 'x': {
-                                ch = DIGITS2[bytes[offset + 1]] * 0x10 + DIGITS2[bytes[offset + 2]];
+                                ch = char2(bytes[offset + 1], bytes[offset + 2]);
                                 offset += 2;
                                 break;
                             }
@@ -4907,24 +4936,23 @@ class JSONReaderUTF8
                             offset++;
                         } else {
                             switch ((ch & 0xFF) >> 4) {
-                                case 0b1100:
-                                case 0b1101: {
+                                case 12:
+                                case 13: {
                                     /* 110x xxxx   10xx xxxx*/
-                                    int c2 = bytes[offset + 1];
-                                    chars[i] = (char) (
-                                            ((ch & 0x1F) << 6) | (c2 & 0x3F));
+                                    chars[i] = (char) (((ch & 0x1F) << 6) | (bytes[offset + 1] & 0x3F));
                                     offset += 2;
                                     break;
                                 }
-                                case 0b1110: {
+                                case 14: {
                                     chars[i] = (char)
                                             (((ch & 0x0F) << 12) |
                                                     ((bytes[offset + 1] & 0x3F) << 6) |
-                                                    ((bytes[offset + 2] & 0x3F)));
+                                                    ((bytes[offset + 2] & 0x3F) << 0));
                                     offset += 3;
                                     break;
                                 }
                                 default: {
+                                    /* 10xx xxxx,  1111 xxxx */
                                     char2_utf8(bytes, offset, ch, chars, i);
                                     offset += 4;
                                     i++;
@@ -4944,31 +4972,19 @@ class JSONReaderUTF8
                             (char) (bytes[start] & 0xff),
                             (char) (bytes[start + 1] & 0xff)
                     );
-                } else if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[strlen];
-                    for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[start + i];
-                    }
-
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] buf = Arrays.copyOfRange(bytes, start, offset);
-                    str = STRING_CREATOR_JDK11.apply(buf, LATIN1);
-                } else if (ANDROID) {
-                    str = getLatin1String(start, offset - start);
+                    str = STRING_CREATOR_JDK11.apply(
+                            Arrays.copyOfRange(this.bytes, this.offset, offset),
+                            LATIN1);
                 } else {
-                    str = new String(bytes, start, offset - start, ISO_8859_1);
+                    str = new String(bytes, start, offset - start, StandardCharsets.US_ASCII);
                 }
             } else {
-                str = new String(bytes, start, offset - start, UTF_8);
+                str = new String(bytes, start, offset - start, StandardCharsets.UTF_8);
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
@@ -4988,7 +5004,39 @@ class JSONReaderUTF8
             return str;
         }
 
-        return readStringNotMatch();
+        switch (ch) {
+            case '[':
+                return toString(
+                        readArray());
+            case '{':
+                return toString(
+                        readObject());
+            case '-':
+            case '+':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                readNumber0();
+                Number number = getNumber();
+                return number.toString();
+            case 't':
+            case 'f':
+                boolValue = readBoolValue();
+                return boolValue ? "true" : "false";
+            case 'n': {
+                readNull();
+                return null;
+            }
+            default:
+                throw new JSONException("TODO : " + ch);
+        }
     }
 
     @Override
@@ -5664,29 +5712,21 @@ class JSONReaderUTF8
     public final LocalDate readLocalDate() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        if (ch == '"' || ch == '\'') {
-            Context context = this.context;
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = ch;
+        char quote = ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
+                int yy;
+                long ymd;
                 int c10 = offset + 10;
                 if (c10 < bytes.length
                         && c10 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && bytes[offset + 10] == quote
                 ) {
-                    int year = IOUtils.digit4(bytes, offset);
-                    int month = IOUtils.digit2(bytes, offset + 5);
-                    int dom = IOUtils.digit2(bytes, offset + 8);
-
-                    if ((year | month | dom) < 0) {
-                        throw new JSONException(info("read date error"));
-                    }
+                    int year = yy + ((int) ymd & 0xFF);
+                    int month = (int) (ymd >> 24) & 0xFF;
+                    int dom = (int) (ymd >> 48) & 0xFF;
 
                     LocalDate ldt;
                     try {
@@ -5735,35 +5775,26 @@ class JSONReaderUTF8
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
         final int offset = this.offset;
-        final Context context = this.context;
-        if (this.ch == '"' || this.ch == '\'') {
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = this.ch;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
                 byte c10;
                 int off21 = offset + 19;
+                int yy;
+                long ymd, hms;
                 if (off21 < bytes.length
                         && off21 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
-                        && bytes[offset + 13] == ':'
-                        && bytes[offset + 16] == ':'
+                        && ((hms = hms(bytes, offset + 11))) != -1L
                 ) {
-                    int year = IOUtils.digit4(bytes, offset);
-                    int month = IOUtils.digit2(bytes, offset + 5);
-                    int dom = IOUtils.digit2(bytes, offset + 8);
-                    int hour = IOUtils.digit2(bytes, offset + 11);
-                    int minute = IOUtils.digit2(bytes, offset + 14);
-                    int second = IOUtils.digit2(bytes, offset + 17);
-                    if ((year | month | dom | minute | second) < 0) {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
+                    int year = yy + ((int) ymd & 0xFF);
+                    int month = (int) (ymd >> 24) & 0xFF;
+                    int dom = (int) (ymd >> 48) & 0xFF;
+                    int hour = (int) hms & 0xFF;
+                    int minute = (int) (hms >> 24) & 0xFF;
+                    int second = (int) (hms >> 48) & 0xFF;
 
                     LocalDate localDate;
                     try {

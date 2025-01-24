@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
-import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class IOUtilsTest {
@@ -343,7 +342,12 @@ public class IOUtilsTest {
     @Test
     public void hexDigit4() {
         byte[] bytes = "1234ABcd".getBytes(StandardCharsets.UTF_8);
-        System.out.println(Integer.toHexString(IOUtils.hexDigit4(bytes, 0)));
+        assertEquals("1234", Integer.toHexString(IOUtils.hexDigit4(bytes, 0)));
+        assertEquals("34ab", Integer.toHexString(IOUtils.hexDigit4(bytes, 2)));
+
+        char[] chars = "1234ABcd".toCharArray();
+        assertEquals("1234", Integer.toHexString(IOUtils.hexDigit4(chars, 0)));
+        assertEquals("34ab", Integer.toHexString(IOUtils.hexDigit4(chars, 2)));
     }
 
     static int hexDigit4(byte[] bytes, int offset) {
@@ -361,17 +365,45 @@ public class IOUtilsTest {
     }
 
     @Test
-    public void indexOf() throws Throwable {
-        byte[] bytes = "abcda".getBytes(StandardCharsets.UTF_8);
+    public void indexOf() {
+        byte[] bytes = "'b'd'".getBytes(StandardCharsets.UTF_8);
         assertEquals(2,
-                IOUtils.indexOfChar(
-                        bytes, 'c', 0));
+                IOUtils.indexOfQuote(
+                        bytes, '\'', 1, bytes.length));
         assertEquals(0,
-                IOUtils.indexOfChar(
-                        bytes, 'a', 0));
+                IOUtils.indexOfQuote(
+                        bytes, '\'', 0, bytes.length));
         assertEquals(4,
-                IOUtils.indexOfChar(
-                        bytes, 'a', 1));
+                IOUtils.indexOfQuote(
+                        bytes, '\'', 3, bytes.length));
+    }
+
+    @Test
+    public void indexOf1() {
+        byte[] bytes = "\"b\"d\"".getBytes(StandardCharsets.UTF_8);
+        assertEquals(2,
+                IOUtils.indexOfQuote(
+                        bytes, '"', 1, bytes.length));
+        assertEquals(0,
+                IOUtils.indexOfQuote(
+                        bytes, '"', 0, bytes.length));
+        assertEquals(4,
+                IOUtils.indexOfQuote(
+                        bytes, '"', 3, bytes.length));
+    }
+
+    @Test
+    public void indexOfSlash() {
+        byte[] bytes = "\\b\\d\\".getBytes(StandardCharsets.UTF_8);
+        assertEquals(2,
+                IOUtils.indexOfSlash(
+                        bytes, 1, bytes.length));
+        assertEquals(0,
+                IOUtils.indexOfSlash(
+                        bytes, 0, bytes.length));
+        assertEquals(4,
+                IOUtils.indexOfSlash(
+                        bytes, 3, bytes.length));
     }
 
     @Test
@@ -389,5 +421,13 @@ public class IOUtilsTest {
 
         assertEquals(i16, IOUtils.convEndian(false, i16));
         assertEquals(Short.reverseBytes(i16), IOUtils.convEndian(true, i16));
+    }
+
+    @Test
+    public void test_isASCII() {
+        char[] chars = new char[] {'0', '1', '2', '3', '4', '5', '6', 0x80};
+        long v = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
+        assertTrue(IOUtils.isLatin1(chars, 0, 4));
+        assertTrue(IOUtils.isLatin1(chars, 4, 4));
     }
 }
