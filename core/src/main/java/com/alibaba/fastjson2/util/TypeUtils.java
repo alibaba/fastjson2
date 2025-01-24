@@ -1001,7 +1001,7 @@ public class TypeUtils {
                 if (ieeeBits == 0 || ieeeBits == DOUBLE_EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
                     break; // oops. Fell off end of range.
                 }
-                continue; // try again.
+                // try again.
             }
         }
         if (isNegative) {
@@ -1404,9 +1404,10 @@ public class TypeUtils {
         return cast(obj, type, JSONFactory.getDefaultObjectReaderProvider());
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> T cast(Object obj, Type type, ObjectReaderProvider provider) {
         if (type instanceof Class) {
-            return (T) cast(obj, (Class) type, provider);
+            return cast(obj, (Class<T>) type, provider);
         }
 
         if (obj instanceof Collection) {
@@ -1429,6 +1430,7 @@ public class TypeUtils {
         return cast(obj, targetClass, JSONFactory.getDefaultObjectReaderProvider());
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> T cast(Object obj, Class<T> targetClass, ObjectReaderProvider provider) {
         if (obj == null) {
             return null;

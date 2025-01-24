@@ -78,9 +78,9 @@ public class JSONObject
 
     public JSONObject(int initialCapacity, boolean ordered) {
         if (ordered) {
-            map = new LinkedHashMap<String, Object>(initialCapacity);
+            map = new LinkedHashMap<>(initialCapacity);
         } else {
-            map = new HashMap<String, Object>(initialCapacity);
+            map = new HashMap<>(initialCapacity);
         }
     }
 
@@ -425,7 +425,7 @@ public class JSONObject
             return false;
         }
 
-        return booleanVal.booleanValue();
+        return booleanVal;
     }
 
     public byte getByteValue(String key) {
@@ -751,12 +751,12 @@ public class JSONObject
             }
 
             if (value instanceof Float) {
-                float floatValue = ((Float) value).floatValue();
+                float floatValue = (Float) value;
                 return toBigDecimal(floatValue);
             }
 
             if (value instanceof Double) {
-                double doubleValue = ((Double) value).doubleValue();
+                double doubleValue = (Double) value;
                 return toBigDecimal(doubleValue);
             }
 
@@ -856,11 +856,11 @@ public class JSONObject
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Object> m) {
+    public void putAll(Map<? extends String, ?> m) {
         map.putAll(m);
     }
 
-    public JSONObject fluentPutAll(Map<? extends String, ? extends Object> m) {
+    public JSONObject fluentPutAll(Map<? extends String, ?> m) {
         map.putAll(m);
         return this;
     }
@@ -903,8 +903,8 @@ public class JSONObject
     @Override
     public Object clone() {
         return new JSONObject(map instanceof LinkedHashMap //
-                ? new LinkedHashMap<String, Object>(map) //
-                : new HashMap<String, Object>(map)
+                ? new LinkedHashMap<>(map) //
+                : new HashMap<>(map)
         );
     }
 
