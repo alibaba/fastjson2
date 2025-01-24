@@ -52,7 +52,7 @@ public class Retrofit2ConverterFactory
             Annotation[] annotations,
             Retrofit retrofit
     ) {
-        return new ResponseBodyConverter<>(type);
+        return new ResponseBodyConverter<Object>(type);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class Retrofit2ConverterFactory
             Annotation[] methodAnnotations,
             Retrofit retrofit
     ) {
-        return new RequestBodyConverter<>();
+        return new RequestBodyConverter<Object>();
     }
 
     public FastJsonConfig getFastJsonConfig() {

@@ -40,7 +40,7 @@ final class ObjectWriterImplDouble
         DecimalFormat decimalFormat = this.format;
         if (decimalFormat == null) {
             String format = jsonWriter.getContext().getDateFormat();
-            if (format != null && format.indexOf('#') != -1) {
+            if (format != null && format.indexOf("#") != -1) {
                 decimalFormat = new DecimalFormat(format);
             }
         }

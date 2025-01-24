@@ -82,7 +82,7 @@ public class UUIDTest {
                 uuid,
                 JSONReader.ofJSONB(
                         JSONB.toBytes(
-                                str.replace("-", "")
+                                str.replaceAll("-", "")
                         )
                 ).readUUID()
         );

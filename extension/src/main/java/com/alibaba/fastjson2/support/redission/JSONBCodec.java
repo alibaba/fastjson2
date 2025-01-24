@@ -99,7 +99,7 @@ public class JSONBCodec
         }
     }
 
-    protected static final class JSONBDecoder
+    static final class JSONBDecoder
             implements Decoder<Object> {
         final JSONReader.Context context;
         final Type valueType;

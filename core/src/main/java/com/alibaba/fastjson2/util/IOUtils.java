@@ -1037,8 +1037,10 @@ public class IOUtils {
         long i;
         if (value < 0) {
             if (value == Long.MIN_VALUE) {
-                System.arraycopy(MIN_LONG_CHARS, 0, buf, pos, MIN_LONG_CHARS.length);
-                return pos + MIN_LONG_CHARS.length;
+                if (value == Long.MIN_VALUE) {
+                    System.arraycopy(MIN_LONG_CHARS, 0, buf, pos, MIN_LONG_CHARS.length);
+                    return pos + MIN_LONG_CHARS.length;
+                }
             }
             i = -value;
             putChar(buf, pos++, '-');

@@ -28,7 +28,11 @@ public class GeoJsonPointReader
         jsonReader.nextIfObjectStart();
 
         double x = 0, y = 0;
-        while (!jsonReader.nextIfObjectEnd()) {
+        for (; ; ) {
+            if (jsonReader.nextIfObjectEnd()) {
+                break;
+            }
+
             long nameHashCode = jsonReader.readFieldNameHashCode();
             if (nameHashCode == HASH_TYPE) {
                 long valueHashCode = jsonReader.readValueHashCode();

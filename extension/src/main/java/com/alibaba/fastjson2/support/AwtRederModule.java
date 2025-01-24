@@ -72,7 +72,7 @@ public class AwtRederModule
         public Color apply(Map<Long, Object> values) {
             Integer rgb = (Integer) values.get(HASH_RGB);
             if (rgb != null) {
-                return new Color(rgb);
+                return new Color(rgb.intValue());
             }
 
             Integer r = (Integer) values.get(HASH_R);

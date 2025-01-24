@@ -164,7 +164,7 @@ public final class FDBigInteger {
     }
 
     private static void mult(int[] src, int srcLen, int value, int[] dst) {
-        final long val = value & 0XFFFFFFFFL;
+        long val = value & 0XFFFFFFFFL;
         long carry = 0;
         for (int i = 0; i < srcLen; i++) {
             long product = (src[i] & 0XFFFFFFFFL) * val + carry;
@@ -188,9 +188,16 @@ public final class FDBigInteger {
     }
 
     private static void mult(int[] src, int srcLen, int v0, int v1, int[] dst) {
-        mult(src, srcLen, v0, dst);
-        long v = v1 & 0XFFFFFFFFL;
+        long v = v0 & 0XFFFFFFFFL;
         long carry = 0;
+        for (int j = 0; j < srcLen; j++) {
+            long product = v * (src[j] & 0XFFFFFFFFL) + carry;
+            dst[j] = (int) product;
+            carry = product >>> 32;
+        }
+        dst[srcLen] = (int) carry;
+        v = v1 & 0XFFFFFFFFL;
+        carry = 0;
         for (int j = 0; j < srcLen; j++) {
             long product = (dst[j + 1] & 0XFFFFFFFFL) + v * (src[j] & 0XFFFFFFFFL) + carry;
             dst[j + 1] = (int) product;

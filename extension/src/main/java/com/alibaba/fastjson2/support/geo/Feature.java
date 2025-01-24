@@ -13,7 +13,7 @@ public class Feature
         extends Geometry {
     private String id;
     private Geometry geometry;
-    private Map<String, String> properties = new LinkedHashMap<>();
+    private Map<String, String> properties = new LinkedHashMap<String, String>();
     public Feature() {
         super("Feature");
     }

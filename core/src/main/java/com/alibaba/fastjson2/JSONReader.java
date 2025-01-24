@@ -2163,7 +2163,7 @@ public abstract class JSONReader
                     try {
                         jsonPath = JSONPath.of(reference);
                     } catch (Exception ignored) {
-                        map.put(name, JSONObject.of("$ref", reference));
+                        map.put(name, new JSONObject().fluentPut("$ref", reference));
                         continue;
                     }
                     addResolveTask(map, name, jsonPath);

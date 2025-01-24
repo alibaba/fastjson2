@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,10 +48,10 @@ public class FastJsonJsonView
     private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
 
     @Deprecated
-    protected Charset charset = StandardCharsets.UTF_8;
+    protected Charset charset = Charset.forName("UTF-8");
 
     @Deprecated
-    protected SerializerFeature[] features = SerializerFeature.EMPTY;
+    protected SerializerFeature[] features = new SerializerFeature[0];
 
     @Deprecated
     protected SerializeFilter[] filters = new SerializeFilter[0];
@@ -360,7 +359,7 @@ public class FastJsonJsonView
      * @return the object to be rendered
      */
     protected Object filterModel(Map<String, Object> model) {
-        Map<String, Object> result = new HashMap<>(model.size());
+        Map<String, Object> result = new HashMap<String, Object>(model.size());
         Set<String> renderedAttributes = !CollectionUtils.isEmpty(this.renderedAttributes) ? //
                 this.renderedAttributes //
                 : model.keySet();

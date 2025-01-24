@@ -394,11 +394,14 @@ public class ObjectWriterProvider
             if (fieldBased) {
                 fieldBased = false;
                 objectWriter = cacheFieldBased.get(objectType);
+                if (objectWriter != null) {
+                    return objectWriter;
+                }
             } else {
                 objectWriter = cache.get(objectType);
-            }
-            if (objectWriter != null) {
-                return objectWriter;
+                if (objectWriter != null) {
+                    return objectWriter;
+                }
             }
         }
 

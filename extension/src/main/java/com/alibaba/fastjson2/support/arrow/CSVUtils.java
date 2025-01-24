@@ -22,7 +22,7 @@ public class CSVUtils {
 
             String columnName;
             {
-                StringBuilder buf = new StringBuilder();
+                StringBuffer buf = new StringBuffer();
                 for (int j = 0; j < columnStat.name.length(); j++) {
                     char ch = columnStat.name.charAt(j);
                     if (ch == 0xFFFD) {
@@ -62,7 +62,7 @@ public class CSVUtils {
             sql.append('\t');
 
             if (special) {
-                sql.append("COL_").append(i);
+                sql.append("COL_" + i);
             } else {
                 sql.append(columnName);
             }

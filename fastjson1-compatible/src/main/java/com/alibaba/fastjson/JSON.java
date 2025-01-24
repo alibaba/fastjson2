@@ -9,6 +9,7 @@ import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
@@ -513,13 +514,14 @@ public abstract class JSON
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T parseObject(String str, TypeReference<T> typeReference, Feature... features) {
         Type type = typeReference != null ? typeReference.getType() : Object.class;
-        return parseObject(str, type, features);
+        return (T) parseObject(str, type, features);
     }
 
     public static <T> T parseObject(String input, Type clazz, int featureValues, Feature... features) {
-        return parseObject(input, clazz, ParserConfig.global, featureValues, features);
+        return (T) parseObject(input, clazz, ParserConfig.global, featureValues, features);
     }
 
     public static <T> T parseObject(String str, Class<T> objectClass) {
@@ -721,7 +723,7 @@ public abstract class JSON
             ParserConfig config,
             Feature... features
     ) throws IOException {
-        return parseObject(is, charset, type, config, null, DEFAULT_PARSER_FEATURE, features);
+        return (T) parseObject(is, charset, type, config, null, DEFAULT_PARSER_FEATURE, features);
     }
 
     public static <T> T parseObject(
@@ -761,7 +763,7 @@ public abstract class JSON
     /**
      * @since 2.0.7
      */
-    public static JSONObject parseObject(byte[] jsonBytes, Feature... features) {
+    public static <T> JSONObject parseObject(byte[] jsonBytes, Feature... features) {
         if (jsonBytes == null || jsonBytes.length == 0) {
             return null;
         }
@@ -894,8 +896,8 @@ public abstract class JSON
         try {
             JSONReader jsonReader = JSONReader.of(jsonBytes, context);
 
-            if (filter != null) {
-                context.config(filter);
+            if (filter instanceof Filter) {
+                context.config((Filter) filter);
             }
 
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
@@ -1132,6 +1134,7 @@ public abstract class JSON
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T parseObject(
             byte[] input,
             int off,
@@ -1605,7 +1608,7 @@ public abstract class JSON
     public static String toJSONString(Object object, boolean prettyFormat) {
         SerializerFeature[] features = prettyFormat
                 ? new SerializerFeature[]{SerializerFeature.PrettyFormat}
-                : SerializerFeature.EMPTY;
+                : new SerializerFeature[0];
         JSONWriter.Context context =
                 createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
@@ -1723,7 +1726,7 @@ public abstract class JSON
     }
 
     public static byte[] toJSONBytes(Object object, SerializeFilter... filters) {
-        return toJSONBytes(object, filters, SerializerFeature.EMPTY);
+        return toJSONBytes(object, filters, new SerializerFeature[0]);
     }
 
     public static byte[] toJSONBytes(Object object, int defaultFeatures, SerializerFeature... features) {
@@ -1942,7 +1945,7 @@ public abstract class JSON
             OutputStream os,
             Object object,
             SerializeFilter[] filters) throws IOException {
-        return writeJSONString(os, object, filters, SerializerFeature.EMPTY);
+        return writeJSONString(os, object, filters, new SerializerFeature[0]);
     }
 
     public static final int writeJSONString(
@@ -2292,7 +2295,7 @@ public abstract class JSON
 
     public static <T> T toJavaObject(JSON json, Class<T> clazz) {
         if (json instanceof JSONObject) {
-            return json.toJavaObject(clazz);
+            return ((JSONObject) json).toJavaObject(clazz);
         }
 
         String str = toJSONString(json);

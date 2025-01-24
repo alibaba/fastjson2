@@ -70,6 +70,10 @@ class FieldReaderCollectionMethodReadOnly<T>
             return;
         }
 
+        if (value == collection) {
+            return;
+        }
+
         Collection values = (Collection) value;
         for (Object item : values) {
             if (item == null) {

@@ -7152,9 +7152,9 @@ class JSONReaderUTF8
             wasNull = true;
             offset += 3;
             val = false;
-        } else if (ch == '"' || ch == '\'') {
+        } else if (ch == '"') {
             if (offset + 1 < bytes.length
-                    && bytes[offset + 1] == ch
+                    && bytes[offset + 1] == '"'
             ) {
                 byte c0 = bytes[offset];
                 offset += 2;

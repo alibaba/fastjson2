@@ -2474,7 +2474,7 @@ class JSONReaderUTF16
         }
 
         if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : chars[offset++];
+            ch = offset == end ? EOI : (char) chars[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
@@ -2571,7 +2571,7 @@ class JSONReaderUTF16
         }
 
         if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : chars[offset++];
+            ch = offset == end ? EOI : (char) chars[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
@@ -5002,9 +5002,9 @@ class JSONReaderUTF16
             wasNull = true;
             offset += 3;
             val = false;
-        } else if (ch == '"' || ch == '\'') {
+        } else if (ch == '"') {
             if (offset + 1 < chars.length
-                    && chars[offset + 1] == ch
+                    && chars[offset + 1] == '"'
             ) {
                 char c0 = chars[offset];
                 offset += 2;

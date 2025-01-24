@@ -641,10 +641,6 @@ public abstract class JSONSchema {
 
     static AnyOf anyOf(JSONObject input, Class type) {
         JSONArray array = input.getJSONArray("anyOf");
-        return anyOf(array, type);
-    }
-
-    static JSONSchema[] makeSchemaItems(JSONArray array, Class type) {
         if (array == null || array.isEmpty()) {
             return null;
         }
@@ -652,28 +648,58 @@ public abstract class JSONSchema {
         for (int i = 0; i < items.length; i++) {
             items[i] = JSONSchema.of(array.getJSONObject(i), type);
         }
-        return items;
+
+        return new AnyOf(items);
     }
 
     static AnyOf anyOf(JSONArray array, Class type) {
-        JSONSchema[] items = makeSchemaItems(array, type);
-        return items == null ? null : new AnyOf(items);
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+
+        return new AnyOf(items);
     }
 
     static AllOf allOf(JSONObject input, Class type) {
         JSONArray array = input.getJSONArray("allOf");
-        JSONSchema[] items = makeSchemaItems(array, type);
-        return items == null ? null : new AllOf(items);
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        return new AllOf(items);
     }
 
     static OneOf oneOf(JSONObject input, Class type) {
         JSONArray array = input.getJSONArray("oneOf");
-        return oneOf(array, type);
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        return new OneOf(items);
     }
 
     static OneOf oneOf(JSONArray array, Class type) {
-        JSONSchema[] items = makeSchemaItems(array, type);
-        return items == null ? null : new OneOf(items);
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        return new OneOf(items);
     }
 
     public String getTitle() {
@@ -916,20 +942,5 @@ public abstract class JSONSchema {
 
     public void accept(Predicate<JSONSchema> v) {
         v.test(this);
-    }
-
-    static JSONObject injectIfPresent(JSONObject object, AllOf allOf, AnyOf anyOf, OneOf oneOf) {
-        if (allOf != null) {
-            object.put("allOf", allOf);
-        }
-
-        if (anyOf != null) {
-            object.put("anyOf", anyOf);
-        }
-
-        if (oneOf != null) {
-            object.put("oneOf", oneOf);
-        }
-        return object;
     }
 }

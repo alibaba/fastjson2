@@ -64,7 +64,7 @@ public final class StringSchema
             Object property = input.get("enum");
             if (property instanceof Collection) {
                 Collection enums = (Collection) property;
-                enumValues = new LinkedHashSet<>(enums.size(), 1F);
+                enumValues = new LinkedHashSet<>(enums.size());
                 enumValues.addAll((Collection<String>) enums);
             } else if (property instanceof Object[]) {
                 enumValues = input.getObject("enum", TypeReference.collectionType(LinkedHashSet.class, String.class));

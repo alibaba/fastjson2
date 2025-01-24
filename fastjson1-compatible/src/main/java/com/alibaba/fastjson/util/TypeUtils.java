@@ -35,6 +35,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author wenshao[szujobs@hotmail.com]
@@ -57,10 +59,14 @@ public class TypeUtils {
     private static volatile boolean kotlin_error;
     private static volatile Map<Class, String[]> kotlinIgnores;
     private static volatile boolean kotlinIgnores_error;
+    private static ConcurrentMap<String, Class<?>> mappings = new ConcurrentHashMap<String, Class<?>>(256, 0.75f, 1);
+    private static Class<?> pathClass;
+    private static boolean PATH_CLASS_ERROR;
 
     private static boolean transientClassInited;
     private static Class<? extends Annotation> transientClass;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> T cast(Object obj, Class<T> clazz, ParserConfig config) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(obj, clazz, config.getProvider());
     }
@@ -96,42 +102,72 @@ public class TypeUtils {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static <T> T cast(Object obj, ParameterizedType type, ParserConfig mapping) {
-        final Type rawType = type.getRawType();
+        Type rawTye = type.getRawType();
 
-        if (rawType == List.class || rawType == ArrayList.class) {
+        if (rawTye == List.class || rawTye == ArrayList.class) {
             Type itemType = type.getActualTypeArguments()[0];
             if (obj instanceof List) {
                 List listObj = (List) obj;
                 List arrayList = new ArrayList(listObj.size());
 
-                castItemsTo(mapping, listObj, itemType, arrayList);
+                for (int i = 0; i < listObj.size(); i++) {
+                    Object item = listObj.get(i);
+
+                    Object itemValue;
+                    if (itemType instanceof Class) {
+                        if (item != null && item.getClass() == JSONObject.class) {
+                            itemValue = ((JSONObject) item).toJavaObject((Class<T>) itemType, mapping, 0);
+                        } else {
+                            itemValue = cast(item, (Class<T>) itemType, mapping);
+                        }
+                    } else {
+                        itemValue = cast(item, itemType, mapping);
+                    }
+
+                    arrayList.add(itemValue);
+                }
                 return (T) arrayList;
             }
         }
 
-        if (rawType == Set.class || rawType == HashSet.class //
-                || rawType == TreeSet.class //
-                || rawType == Collection.class //
-                || rawType == List.class //
-                || rawType == ArrayList.class) {
+        if (rawTye == Set.class || rawTye == HashSet.class //
+                || rawTye == TreeSet.class //
+                || rawTye == Collection.class //
+                || rawTye == List.class //
+                || rawTye == ArrayList.class) {
             Type itemType = type.getActualTypeArguments()[0];
             if (obj instanceof Iterable) {
                 Collection collection;
-                if (rawType == Set.class || rawType == HashSet.class) {
+                if (rawTye == Set.class || rawTye == HashSet.class) {
                     collection = new HashSet();
-                } else if (rawType == TreeSet.class) {
+                } else if (rawTye == TreeSet.class) {
                     collection = new TreeSet();
                 } else {
                     collection = new ArrayList();
                 }
-                castItemsTo(mapping, (Iterable) obj, itemType, collection);
+                for (Iterator it = ((Iterable) obj).iterator(); it.hasNext(); ) {
+                    Object item = it.next();
+
+                    Object itemValue;
+                    if (itemType instanceof Class) {
+                        if (item != null && item.getClass() == JSONObject.class) {
+                            itemValue = ((JSONObject) item).toJavaObject((Class<T>) itemType, mapping, 0);
+                        } else {
+                            itemValue = cast(item, (Class<T>) itemType, mapping);
+                        }
+                    } else {
+                        itemValue = cast(item, itemType, mapping);
+                    }
+
+                    collection.add(itemValue);
+                }
                 return (T) collection;
             }
         }
 
-        if (rawType == Map.class || rawType == HashMap.class) {
-            final Type[] args = type.getActualTypeArguments();
-            Type keyType = args[0], valueType = args[1];
+        if (rawTye == Map.class || rawTye == HashMap.class) {
+            Type keyType = type.getActualTypeArguments()[0];
+            Type valueType = type.getActualTypeArguments()[1];
             if (obj instanceof Map) {
                 Map map = new HashMap();
                 for (Map.Entry entry : ((Map<?, ?>) obj).entrySet()) {
@@ -144,24 +180,23 @@ public class TypeUtils {
         }
         if (obj instanceof String) {
             String strVal = (String) obj;
-            if (strVal.isEmpty()) {
+            if (strVal.length() == 0) {
                 return null;
             }
         }
-        final Type[] args = type.getActualTypeArguments();
-        if (args.length == 1) {
-            Type argType = args[0];
+        if (type.getActualTypeArguments().length == 1) {
+            Type argType = type.getActualTypeArguments()[0];
             if (argType instanceof WildcardType) {
-                return cast(obj, rawType, mapping);
+                return cast(obj, rawTye, mapping);
             }
         }
 
-        if (rawType == Map.Entry.class && obj instanceof Map && ((Map) obj).size() == 1) {
+        if (rawTye == Map.Entry.class && obj instanceof Map && ((Map) obj).size() == 1) {
             Map.Entry entry = (Map.Entry) ((Map) obj).entrySet().iterator().next();
             return (T) entry;
         }
 
-        if (rawType instanceof Class) {
+        if (rawTye instanceof Class) {
             if (mapping == null) {
                 mapping = ParserConfig.global;
             }
@@ -172,27 +207,10 @@ public class TypeUtils {
 //                return (T) deserializer.deserialze(parser, type, null);
 //            }
 
-            throw new JSONException("TODO : " + type); // TODO: cast
+            throw new JSONException("TODO : " + type); // TOD: cast
         }
 
         throw new JSONException("can not cast to : " + type);
-    }
-
-    private static <T> void castItemsTo(ParserConfig mapping, Iterable items, Type itemType, Collection to) {
-        for (Object item : items) {
-            Object itemValue;
-            if (itemType instanceof Class) {
-                if (item != null && item.getClass() == JSONObject.class) {
-                    itemValue = ((JSONObject) item).toJavaObject((Class<T>) itemType, mapping, 0);
-                } else {
-                    itemValue = cast(item, (Class<T>) itemType, mapping);
-                }
-            } else {
-                itemValue = cast(item, itemType, mapping);
-            }
-
-            to.add(itemValue);
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -279,8 +297,8 @@ public class TypeUtils {
                 if (innerMap instanceof LinkedHashMap) {
                     return (T) innerMap;
                 } else {
-                    // 这里应该返回 LinkedHashMap
-                    return (T) new LinkedHashMap(innerMap);
+                    LinkedHashMap linkedHashMap = new LinkedHashMap();
+                    linkedHashMap.putAll(innerMap);
                 }
             }
 
@@ -447,36 +465,52 @@ public class TypeUtils {
     }
 
     public static <A extends Annotation> A getAnnotation(Class<?> targetClass, Class<A> annotationClass) {
-        Class<?> mixInClass = getMixInClass(targetClass);
+        A targetAnnotation = targetClass.getAnnotation(annotationClass);
+
+        Class<?> mixInClass = null;
+        Type type = JSON.getMixInAnnotations(targetClass);
+        if (type instanceof Class<?>) {
+            mixInClass = (Class<?>) type;
+        }
 
         if (mixInClass != null) {
-            A mixInAnnotation = getAnnotationOrCandidate(mixInClass, annotationClass);
+            A mixInAnnotation = mixInClass.getAnnotation(annotationClass);
+            Annotation[] annotations = mixInClass.getAnnotations();
+            if (mixInAnnotation == null && annotations.length > 0) {
+                for (Annotation annotation : annotations) {
+                    mixInAnnotation = annotation.annotationType().getAnnotation(annotationClass);
+                    if (mixInAnnotation != null) {
+                        break;
+                    }
+                }
+            }
             if (mixInAnnotation != null) {
                 return mixInAnnotation;
             }
         }
 
-        return getAnnotationOrCandidate(targetClass, annotationClass);
-    }
-
-    private static <A extends Annotation> A getAnnotationOrCandidate(Class<?> clazz, Class<A> annotationClass) {
-        A target = clazz.getAnnotation(annotationClass);
-        if (target == null) {
-            Annotation[] candidates = clazz.getAnnotations();
-            for (Annotation annotation : candidates) {
-                target = annotation.annotationType().getAnnotation(annotationClass);
-                if (target != null) {
+        Annotation[] targetClassAnnotations = targetClass.getAnnotations();
+        if (targetAnnotation == null && targetClassAnnotations.length > 0) {
+            for (Annotation annotation : targetClassAnnotations) {
+                targetAnnotation = annotation.annotationType().getAnnotation(annotationClass);
+                if (targetAnnotation != null) {
                     break;
                 }
             }
         }
-        return target;
+        return targetAnnotation;
     }
 
     public static <A extends Annotation> A getAnnotation(Field field, Class<A> annotationClass) {
         A targetAnnotation = field.getAnnotation(annotationClass);
 
-        Class<?> mixInClass = getMixInClass(field.getDeclaringClass());
+        Class<?> clazz = field.getDeclaringClass();
+        A mixInAnnotation;
+        Class<?> mixInClass = null;
+        Type type = JSON.getMixInAnnotations(clazz);
+        if (type instanceof Class<?>) {
+            mixInClass = (Class<?>) type;
+        }
 
         if (mixInClass != null) {
             Field mixInField = null;
@@ -493,7 +527,7 @@ public class TypeUtils {
             if (mixInField == null) {
                 return targetAnnotation;
             }
-            A mixInAnnotation = mixInField.getAnnotation(annotationClass);
+            mixInAnnotation = mixInField.getAnnotation(annotationClass);
             if (mixInAnnotation != null) {
                 return mixInAnnotation;
             }
@@ -501,17 +535,16 @@ public class TypeUtils {
         return targetAnnotation;
     }
 
-    private static Class<?> getMixInClass(Class<?> clazz) {
-        Type type = JSON.getMixInAnnotations(clazz);
+    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationClass) {
+        A targetAnnotation = method.getAnnotation(annotationClass);
+
+        Class<?> clazz = method.getDeclaringClass();
+        A mixInAnnotation;
         Class<?> mixInClass = null;
+        Type type = JSON.getMixInAnnotations(clazz);
         if (type instanceof Class<?>) {
             mixInClass = (Class<?>) type;
         }
-        return mixInClass;
-    }
-
-    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationClass) {
-        Class<?> mixInClass = getMixInClass(method.getDeclaringClass());
 
         if (mixInClass != null) {
             Method mixInMethod = null;
@@ -526,14 +559,15 @@ public class TypeUtils {
                     // skip
                 }
             }
-            if (mixInMethod != null) {
-                A mixInAnnotation = mixInMethod.getAnnotation(annotationClass);
-                if (mixInAnnotation != null) {
-                    return mixInAnnotation;
-                }
+            if (mixInMethod == null) {
+                return targetAnnotation;
+            }
+            mixInAnnotation = mixInMethod.getAnnotation(annotationClass);
+            if (mixInAnnotation != null) {
+                return mixInAnnotation;
             }
         }
-        return method.getAnnotation(annotationClass);
+        return targetAnnotation;
     }
 
     public static Double castToDouble(Object value) {
@@ -681,7 +715,7 @@ public class TypeUtils {
 
     public static List<FieldInfo> computeGetters(Class<?> clazz, Map<String, String> aliasMap, boolean sorted) {
         JSONType jsonType = TypeUtils.getAnnotation(clazz, JSONType.class);
-        Map<String, Field> fieldCacheMap = new HashMap<>();
+        Map<String, Field> fieldCacheMap = new HashMap<String, Field>();
         ParserConfig.parserAllFieldToCache(clazz, fieldCacheMap);
         return computeGetters(clazz, jsonType, aliasMap, fieldCacheMap, sorted, PropertyNamingStrategy.CamelCase);
     }
@@ -693,7 +727,7 @@ public class TypeUtils {
                                                  boolean sorted, //
                                                  PropertyNamingStrategy propertyNamingStrategy //
     ) {
-        Map<String, FieldInfo> fieldInfoMap = new LinkedHashMap<>();
+        Map<String, FieldInfo> fieldInfoMap = new LinkedHashMap<String, FieldInfo>();
         boolean kotlin = TypeUtils.isKotlin(clazz);
         // for kotlin
         Constructor[] constructors = null;
@@ -742,10 +776,10 @@ public class TypeUtils {
             if (kotlin && isKotlinIgnore(clazz, methodName)) {
                 continue;
             }
-            /*
+            /**
              *  如果在属性或者方法上存在JSONField注解，并且定制了name属性，不以类上的propertyNamingStrategy设置为准，以此字段的JSONField的name定制为准。
              */
-            boolean fieldAnnotationAndNameExists = false;
+            Boolean fieldAnnotationAndNameExists = false;
             JSONField annotation = TypeUtils.getAnnotation(method, JSONField.class);
             if (annotation == null) {
                 annotation = getSuperMethodAnnotation(clazz, method);
@@ -1080,14 +1114,14 @@ public class TypeUtils {
     }
 
     private static List<FieldInfo> getFieldInfos(Class<?> clazz, boolean sorted, Map<String, FieldInfo> fieldInfoMap) {
-        List<FieldInfo> fieldInfoList = new ArrayList<>();
+        List<FieldInfo> fieldInfoList = new ArrayList<FieldInfo>();
         String[] orders = null;
         JSONType annotation = TypeUtils.getAnnotation(clazz, JSONType.class);
         if (annotation != null) {
             orders = annotation.orders();
         }
         if (orders != null && orders.length > 0) {
-            LinkedHashMap<String, FieldInfo> map = new LinkedHashMap<>(fieldInfoMap.size());
+            LinkedHashMap<String, FieldInfo> map = new LinkedHashMap<String, FieldInfo>(fieldInfoMap.size());
             for (FieldInfo field : fieldInfoMap.values()) {
                 map.put(field.name, field);
             }
@@ -1144,8 +1178,8 @@ public class TypeUtils {
             if (paramNames != null && parameterTypes.length != paramNames.length) {
                 continue;
             }
-            // String equals to Class will always return false !
-            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1].getName())) {
+
+            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1])) {
                 continue;
             }
             if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
@@ -1204,7 +1238,7 @@ public class TypeUtils {
             Object constructor = null;
             Object kclassImpl = kotlin_kclass_constructor.newInstance(clazz);
             Iterable it = (Iterable) kotlin_kclass_getConstructors.invoke(kclassImpl);
-            for (Iterator iterator = it.iterator(); iterator.hasNext();) {
+            for (Iterator iterator = it.iterator(); iterator.hasNext(); iterator.hasNext()) {
                 Object item = iterator.next();
                 List parameters = (List) kotlin_kfunction_getParameters.invoke(item);
                 if (constructor != null && parameters.size() == 0) {
@@ -1234,7 +1268,7 @@ public class TypeUtils {
     static boolean isKotlinIgnore(Class clazz, String methodName) {
         if (kotlinIgnores == null && !kotlinIgnores_error) {
             try {
-                Map<Class, String[]> map = new HashMap<>();
+                Map<Class, String[]> map = new HashMap<Class, String[]>();
                 Class charRangeClass = Class.forName("kotlin.ranges.CharRange");
                 map.put(charRangeClass, new String[]{"getEndInclusive", "isEmpty"});
                 Class intRangeClass = Class.forName("kotlin.ranges.IntRange");
@@ -1383,15 +1417,21 @@ public class TypeUtils {
     }
 
     public static Annotation[][] getParameterAnnotations(Constructor constructor) {
-        Class<?> clazz = constructor.getDeclaringClass();
+        Annotation[][] targetAnnotations = constructor.getParameterAnnotations();
 
-        Class<?> mixInClass = getMixInClass(clazz);
+        Class<?> clazz = constructor.getDeclaringClass();
+        Annotation[][] mixInAnnotations;
+        Class<?> mixInClass = null;
+        Type type = JSON.getMixInAnnotations(clazz);
+        if (type instanceof Class<?>) {
+            mixInClass = (Class<?>) type;
+        }
 
         if (mixInClass != null) {
             Constructor mixInConstructor = null;
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             // 构建参数列表，因为内部类的构造函数需要传入外部类的引用
-            List<Class<?>> enclosingClasses = new ArrayList<>(2);
+            List<Class<?>> enclosingClasses = new ArrayList<Class<?>>(2);
             for (Class<?> enclosingClass = mixInClass.getEnclosingClass(); enclosingClass != null; enclosingClass = enclosingClass.getEnclosingClass()) {
                 enclosingClasses.add(enclosingClass);
             }
@@ -1414,15 +1454,15 @@ public class TypeUtils {
                     level--;
                 }
             }
-            if (mixInConstructor != null) {
-                // mixInAnnotations is non-null, but length may be 0
-                Annotation[][] mixInAnnotations = mixInConstructor.getParameterAnnotations();
-                if (mixInAnnotations.length == 0) {
-                    return mixInAnnotations;
-                }
+            if (mixInConstructor == null) {
+                return targetAnnotations;
+            }
+            mixInAnnotations = mixInConstructor.getParameterAnnotations();
+            if (mixInAnnotations != null) {
+                return mixInAnnotations;
             }
         }
-        return constructor.getParameterAnnotations();
+        return targetAnnotations;
     }
 
     public static class MethodInheritanceComparator

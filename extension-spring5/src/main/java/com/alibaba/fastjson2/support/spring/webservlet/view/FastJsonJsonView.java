@@ -11,7 +11,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Fastjson for Spring MVC View.
@@ -149,34 +151,29 @@ public class FastJsonJsonView
      * @return the object to be rendered
      */
     protected Object filterModel(Map<String, Object> model) {
-        int expectSize = model.size();
-        final Set<String> renderedKeys;
-        if (CollectionUtils.isEmpty(this.renderedAttributes)) {
-            renderedKeys = null;
-        } else {
-            renderedKeys = this.renderedAttributes;
-            expectSize = renderedKeys.size();
-        }
-        // This is a high frequency operation and is worth optimizing separately.
-        if (expectSize == 1 && extractValueFromSingleKeyModel) {
-            Object value = renderedKeys != null
-                    ? model.get(renderedKeys.iterator().next())
-                    : model.values().iterator().next();
-            return value instanceof BindingResult ? Collections.emptyMap() : value;
-        }
+        Map<String, Object> result = new HashMap<String, Object>(model.size());
+        Set<String> renderedAttributes = !CollectionUtils.isEmpty(this.renderedAttributes) ? //
+                this.renderedAttributes //
+                : model.keySet();
 
-        final Map<String, Object> result = new HashMap<>(expectSize, 1F);
         for (Map.Entry<String, Object> entry : model.entrySet()) {
             if (!(entry.getValue() instanceof BindingResult)
-                    && (renderedKeys == null || renderedKeys.contains(entry.getKey()))) {
+                    && renderedAttributes.contains(entry.getKey())) {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
-        if (extractValueFromSingleKeyModel && result.size() == 1) {
-            for (Map.Entry<String, Object> entry : result.entrySet()) {
-                return entry.getValue();
+        if (extractValueFromSingleKeyModel) {
+            if (result.size() == 1) {
+                for (Map.Entry<String, Object> entry : result.entrySet()) {
+                    return entry.getValue();
+                }
             }
         }
         return result;
+    }
+
+    @Override
+    protected void setResponseContentType(HttpServletRequest request, HttpServletResponse response) {
+        super.setResponseContentType(request, response);
     }
 }

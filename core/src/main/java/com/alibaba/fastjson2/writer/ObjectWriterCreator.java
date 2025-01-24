@@ -492,7 +492,7 @@ public class ObjectWriterCreator {
                         } else if (firstChar >= 'a' && firstChar <= 'z') {
                             sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
                         }
-                        if (sameFieldName != null) {
+                        if (sameFieldName != null && fieldWriterMap.containsKey(sameFieldName)) {
                             fieldWriterMap.remove(sameFieldName);
                         }
                     }
@@ -519,7 +519,7 @@ public class ObjectWriterCreator {
                     SUPER,
                     superType,
                     objectClass.getSuperclass(),
-                    Function.identity()
+                    o -> o
             );
             fieldWriters.add(superWriter);
         }

@@ -81,27 +81,27 @@ final class JSONReaderJSONB
         FIXED_TYPE_SIZE = bytes;
     }
 
-    final byte[] bytes;
-    final int length;
-    final int end;
+    protected final byte[] bytes;
+    protected final int length;
+    protected final int end;
 
-    byte type;
-    int strlen;
-    byte strtype;
-    int strBegin;
+    protected byte type;
+    protected int strlen;
+    protected byte strtype;
+    protected int strBegin;
 
-    byte[] valueBytes;
-    char[] charBuf;
-    final CacheItem cacheItem;
+    protected byte[] valueBytes;
+    protected char[] charBuf;
+    protected final CacheItem cacheItem;
 
-    final SymbolTable symbolTable;
+    protected final SymbolTable symbolTable;
 
-    long symbol0Hash;
-    int symbol0Begin;
-    int symbol0Length;
-    byte symbol0StrType;
+    protected long symbol0Hash;
+    protected int symbol0Begin;
+    protected int symbol0Length;
+    protected byte symbol0StrType;
 
-    long[] symbols;
+    protected long[] symbols;
 
     JSONReaderJSONB(Context ctx, InputStream is) {
         super(ctx, true, false);
@@ -2285,7 +2285,7 @@ final class JSONReaderJSONB
         return hashCode;
     }
 
-    long getNameHashCode() {
+    protected long getNameHashCode() {
         int offset = strBegin;
         long nameValue = 0;
         for (int i = 0; i < strlen; offset++) {
@@ -3774,7 +3774,7 @@ final class JSONReaderJSONB
         return int64Value;
     }
 
-    String readFixedAsciiString(int strlen) {
+    protected String readFixedAsciiString(int strlen) {
         byte[] bytes = this.bytes;
         int offset = this.offset;
         String str;

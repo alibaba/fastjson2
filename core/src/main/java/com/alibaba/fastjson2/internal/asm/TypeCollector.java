@@ -9,7 +9,7 @@ public class TypeCollector {
     static final Map<String, String> PRIMITIVES;
 
     static {
-        HashMap<String, String> map = new HashMap<>();
+        HashMap map = new HashMap();
         map.put("int", "I");
         map.put("boolean", "Z");
         map.put("byte", "B");
@@ -75,22 +75,21 @@ public class TypeCollector {
 //    }
 
     private boolean correctTypeName(Type type, String paramTypeName) {
-        String typeName = type.getClassName();
+        String s = type.getClassName();
         // array notation needs cleanup.
         StringBuilder braces = new StringBuilder();
-        while (typeName.endsWith("[]")) {
+        while (s.endsWith("[]")) {
             braces.append('[');
-            typeName = typeName.substring(0, typeName.length() - 2);
+            s = s.substring(0, s.length() - 2);
         }
         if (braces.length() != 0) {
-            String symbol = PRIMITIVES.get(typeName);
-            if (symbol != null) {
-                typeName = braces.append(symbol).toString();
+            if (PRIMITIVES.containsKey(s)) {
+                s = braces.append(PRIMITIVES.get(s)).toString();
             } else {
-                typeName = braces.append('L').append(typeName).append(';').toString();
+                s = braces.append('L').append(s).append(';').toString();
             }
         }
-        return typeName.equals(paramTypeName);
+        return s.equals(paramTypeName);
     }
 
     public String[] getParameterNamesForMethod() {

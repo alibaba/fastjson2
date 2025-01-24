@@ -673,7 +673,19 @@ public final class ObjectSchema
             object.put("else", elseSchema);
         }
 
-        return injectIfPresent(object, allOf, anyOf, oneOf);
+        if (allOf != null) {
+            object.put("allOf", allOf);
+        }
+
+        if (anyOf != null) {
+            object.put("anyOf", anyOf);
+        }
+
+        if (oneOf != null) {
+            object.put("oneOf", oneOf);
+        }
+
+        return object;
     }
 
     public void accept(Predicate<JSONSchema> v) {

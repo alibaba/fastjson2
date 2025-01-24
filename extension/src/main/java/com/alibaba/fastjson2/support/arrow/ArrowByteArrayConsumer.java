@@ -11,7 +11,6 @@ import org.apache.arrow.vector.types.pojo.Field;
 import org.apache.arrow.vector.types.pojo.Schema;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.function.Consumer;
@@ -65,7 +64,7 @@ public class ArrowByteArrayConsumer
                 if (committer != null) {
                     Long[] blocks = new Long[blockIndex + 1];
                     for (int i = 0; i <= blockIndex; i++) {
-                        blocks[i] = (long) i;
+                        blocks[i] = Long.valueOf(i);
                     }
                     committer.accept(blocks);
                 }
@@ -92,7 +91,7 @@ public class ArrowByteArrayConsumer
                 ((FixedWidthVector) vector).allocateNew(blockSize);
             } else if (vector instanceof VariableWidthVector) {
                 VariableWidthVector variableWidthVector = (VariableWidthVector) vector;
-                variableWidthVector.allocateNew((long) varcharValueSize * blockSize, blockSize);
+                variableWidthVector.allocateNew(varcharValueSize * blockSize, blockSize);
                 valueCapacities[i] = variableWidthVector.getValueCapacity();
             } else {
                 throw new JSONException("TODO");
@@ -151,7 +150,7 @@ public class ArrowByteArrayConsumer
             Decimal256Vector decimalVector = (Decimal256Vector) vector;
             int scale = decimalVector.getScale();
             if (decimal.scale() != scale) {
-                decimal = decimal.setScale(scale, RoundingMode.CEILING);
+                decimal = decimal.setScale(scale);
             }
             decimalVector.set(row, decimal);
             return;
@@ -196,7 +195,7 @@ public class ArrowByteArrayConsumer
         if (vector instanceof BitVector) {
             Boolean value = TypeUtils.parseBoolean(bytes, off, len);
             if (value != null) {
-                int intValue = value ? 1 : 0;
+                int intValue = value.booleanValue() ? 1 : 0;
                 ((BitVector) vector).set(row, intValue);
             }
             return;

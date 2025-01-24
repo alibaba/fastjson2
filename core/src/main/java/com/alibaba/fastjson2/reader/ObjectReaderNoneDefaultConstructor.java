@@ -336,7 +336,10 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
             for (FieldReader fieldReader : fieldReaders) {
                 if (fieldReader.defaultValue != null) {
-                    valueMap.putIfAbsent(fieldReader.fieldNameHash, fieldReader.defaultValue);
+                    Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
+                    if (fieldValue == null) {
+                        valueMap.put(fieldReader.fieldNameHash, fieldReader.defaultValue);
+                    }
                 }
             }
         }

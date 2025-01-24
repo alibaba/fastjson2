@@ -1122,7 +1122,7 @@ public class ObjectReaderBaseModule
                                 format = format.trim();
 
                                 if (format.indexOf('T') != -1 && !format.contains("'T'")) {
-                                    format = format.replace("T", "'T'");
+                                    format = format.replaceAll("T", "'T'");
                                 }
 
                                 fieldInfo.format = format;
@@ -1227,7 +1227,7 @@ public class ObjectReaderBaseModule
             if (!jsonFieldFormat.isEmpty()) {
                 jsonFieldFormat = jsonFieldFormat.trim();
                 if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
-                    jsonFieldFormat = jsonFieldFormat.replace("T", "'T'");
+                    jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
                 }
 
                 fieldInfo.format = jsonFieldFormat;
@@ -1257,9 +1257,9 @@ public class ObjectReaderBaseModule
                 if (fieldInfo.alternateNames == null) {
                     fieldInfo.alternateNames = alternateNames;
                 } else {
-                    Set<String> nameSet = new LinkedHashSet<>(alternateNames.length + fieldInfo.alternateNames.length, 1F);
-                    Collections.addAll(nameSet, alternateNames);
-                    Collections.addAll(nameSet, fieldInfo.alternateNames);
+                    Set<String> nameSet = new LinkedHashSet<>();
+                    nameSet.addAll(Arrays.asList(alternateNames));
+                    nameSet.addAll(Arrays.asList(fieldInfo.alternateNames));
                     fieldInfo.alternateNames = nameSet.toArray(new String[nameSet.size()]);
                 }
             }

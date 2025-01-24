@@ -11,7 +11,7 @@ import java.util.List;
 @JSONType(typeName = "GeometryCollection", orders = {"type", "bbox", "geometries"})
 public class GeometryCollection
         extends Geometry {
-    private List<Geometry> geometries = new ArrayList<>();
+    private List<Geometry> geometries = new ArrayList<Geometry>();
     public GeometryCollection() {
         super("GeometryCollection");
     }

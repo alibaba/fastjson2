@@ -33,7 +33,11 @@ public class GeoJsonPolygonReader
 
         List<Point> points = new ArrayList<>();
 
-        while (!jsonReader.nextIfObjectEnd()) {
+        for (; ; ) {
+            if (jsonReader.nextIfObjectEnd()) {
+                break;
+            }
+
             long nameHashCode = jsonReader.readFieldNameHashCode();
             if (nameHashCode == HASH_TYPE) {
                 long valueHashCode = jsonReader.readValueHashCode();

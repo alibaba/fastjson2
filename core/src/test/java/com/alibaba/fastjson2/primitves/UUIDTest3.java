@@ -17,7 +17,7 @@ public class UUIDTest3 {
     };
 
     static String toString(UUID id) {
-        return id.toString().replace("-", "");
+        return id.toString().replaceAll("-", "");
     }
 
     @Test
