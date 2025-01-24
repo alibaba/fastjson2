@@ -5040,9 +5040,9 @@ class JSONReaderUTF16
             wasNull = true;
             offset += 3;
             val = false;
-        } else if (ch == '"') {
+        } else if (ch == '"' || ch == '\'') {
             if (offset + 1 < chars.length
-                    && chars[offset + 1] == '"'
+                    && chars[offset + 1] == ch
             ) {
                 char c0 = chars[offset];
                 offset += 2;
