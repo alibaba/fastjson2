@@ -6,12 +6,12 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -20,7 +20,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -44,8 +43,7 @@ public class EishayParseBinary {
 
     static {
         try {
-            InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
+            String str = UTF8Encode.readFromClasspath("data/eishay.json");
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
@@ -78,8 +76,8 @@ public class EishayParseBinary {
             Output output = new Output(1024, -1);
             kryo.writeObject(output, mc);
             kryoBytes = output.toBytes();
-        } catch (Throwable ex) {
-            ex.printStackTrace();
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 

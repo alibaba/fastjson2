@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +36,7 @@ public class ByteArrayTest2 {
         writer.flush();
 
         byte[] data = bos.toByteArray();
-        Charset charset = Charset.forName("UTF-8");
+        Charset charset = StandardCharsets.UTF_8;
         CertFile convertFile = (CertFile) JSON.parse(data, 0, data.length, charset.newDecoder(), Feature.AllowArbitraryCommas,
                 Feature.IgnoreNotMatch, Feature.SortFeidFastMatch, Feature.DisableCircularReferenceDetect,
                 Feature.AutoCloseSource, Feature.SupportAutoType

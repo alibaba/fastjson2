@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -13,23 +13,12 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseStringPretty {
-    static String str;
+    static String str = UTF8Encode.readFromClasspath("data/eishay.json");
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
-
-    static {
-        try {
-            InputStream is = EishayParseStringPretty.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            str = IOUtils.toString(is, StandardCharsets.UTF_8);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Benchmark
     public void fastjson1(Blackhole bh) {

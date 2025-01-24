@@ -6,8 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.HarmDTO;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillCategory;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import org.apache.commons.io.IOUtils;
 import org.apache.fury.Fury;
 import org.apache.fury.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -17,8 +17,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.FieldBased;
@@ -39,26 +37,21 @@ public class AlongParseBinaryArrayMapping {
         providerFeatures.setDisableReferenceDetect(true);
         contextFeatures = new JSONReader.Context(providerFeatures, JSONReader.Feature.SupportArrayToBean, JSONReader.Feature.FieldBased);
 
-        try {
-            InputStream is = AlongParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            object = JSONReader.of(str, contextFeatures).read(SkillFire_S2C_Msg.class);
+        String str = UTF8Encode.readFromClasspath("data/along.json");
+        object = JSONReader.of(str, contextFeatures).read(SkillFire_S2C_Msg.class);
 
-            fury = Fury.builder().withLanguage(Language.JAVA)
-                    .withRefTracking(false)
-                    .requireClassRegistration(false)
-                    .withNumberCompressed(true)
-                    .build();
+        fury = Fury.builder().withLanguage(Language.JAVA)
+                .withRefTracking(false)
+                .requireClassRegistration(false)
+                .withNumberCompressed(true)
+                .build();
 
-            fury.register(SkillCategory.class);
-            fury.register(SkillFire_S2C_Msg.class);
-            fury.register(HarmDTO.class);
+        fury.register(SkillCategory.class);
+        fury.register(SkillFire_S2C_Msg.class);
+        fury.register(HarmDTO.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(object, JSONWriter.Feature.BeanToArray);
-            furyBytes = fury.serializeJavaObject(object);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        fastjson2JSONBBytes = JSONB.toBytes(object, JSONWriter.Feature.BeanToArray);
+        furyBytes = fury.serializeJavaObject(object);
     }
 
     @Benchmark

@@ -16,17 +16,17 @@ public class JSONBTest4 {
     public JSONBTest4() throws Exception {
         {
             InputStream is = JSONBTest4.class.getClassLoader().getResourceAsStream("data/path_01.json");
-            str1 = IOUtils.toString(is, "UTF-8");
+            str1 = IOUtils.toString(is, StandardCharsets.UTF_8);
             is.close();
         }
         {
             InputStream is = JSONBTest4.class.getClassLoader().getResourceAsStream("data/path_02.json");
-            str2 = IOUtils.toString(is, "UTF-8");
+            str2 = IOUtils.toString(is, StandardCharsets.UTF_8);
             is.close();
         }
         {
             InputStream is = JSONBTest4.class.getClassLoader().getResourceAsStream("data/path_03.json");
-            str3 = IOUtils.toString(is, "UTF-8");
+            str3 = IOUtils.toString(is, StandardCharsets.UTF_8);
             is.close();
         }
     }

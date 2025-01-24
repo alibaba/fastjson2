@@ -5,12 +5,11 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.gen.EishayClassGen;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
-import org.apache.commons.io.IOUtils;
 
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.util.LinkedHashMap;
 
@@ -75,27 +74,23 @@ public class EishayFuryParseNoneCacheTest {
         // com.alibaba.fastjson2.benchmark.eishay.vo
         String packageName = "com/alibaba/fastjson2/benchmark/eishay0";
 
-        try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
-                .getResourceAsStream("data/eishay.json")
-        ) {
-            String str = IOUtils.toString(is, "UTF-8");
-            DynamicClassLoader classLoader = new DynamicClassLoader();
-            EishayClassGen gen = new EishayClassGen();
-            Class objectClass = gen.genMedia(classLoader, packageName);
-            ObjectReaderProvider provider = new ObjectReaderProvider();
-            JSONReader.Context context = JSONFactory.createReadContext(provider);
-            Object object = JSONReader.of(str, context).read(objectClass);
-            jsonbBytes = JSONB.toBytes(object, writerFeatures);
-        }
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        DynamicClassLoader classLoader = new DynamicClassLoader();
+        EishayClassGen gen = new EishayClassGen();
+        Class objectClass = gen.genMedia(classLoader, packageName);
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        JSONReader.Context context = JSONFactory.createReadContext(provider);
+        Object object = JSONReader.of(str, context).read(objectClass);
+        jsonbBytes = JSONB.toBytes(object, writerFeatures);
 
         JSONB.dump(jsonbBytes);
 //
-        DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
-        EishayClassGen gen = new EishayClassGen();
+        classLoader = DynamicClassLoader.getInstance();
+        gen = new EishayClassGen();
         Class clazz = gen.genMedia(classLoader, packageName);
         Thread.currentThread().setContextClassLoader(classLoader);
 
-        Object object = JSONB.parseObject(jsonbBytes, Object.class, features);
+        object = JSONB.parseObject(jsonbBytes, Object.class, features);
     }
 
     public static void fastjson2JSONB() throws Exception {

@@ -38,8 +38,7 @@ public class FastJsonHttpMessageConverterTest {
             }
 
             public InputStream getBody() throws IOException {
-                return new ByteArrayInputStream("{\"id\":123}".getBytes(Charset
-                        .forName("UTF-8")));
+                return new ByteArrayInputStream("{\"id\":123}".getBytes(StandardCharsets.UTF_8));
             }
         };
         VO vo = (VO) converter.read(VO.class, input);

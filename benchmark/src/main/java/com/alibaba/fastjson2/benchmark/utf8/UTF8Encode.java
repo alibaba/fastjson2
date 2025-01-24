@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -120,5 +121,13 @@ public class UTF8Encode {
         byte[] utf8 = Arrays.copyOf(bytes, cnt);
         BYTES_UPDATER.lazySet(cacheItem, bytes);
         return utf8;
+    }
+
+    public static String readFromClasspath(String path) {
+        try (InputStream is = UTF8Encode.class.getClassLoader().getResourceAsStream(path)) {
+            return org.apache.commons.io.IOUtils.toString(is, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

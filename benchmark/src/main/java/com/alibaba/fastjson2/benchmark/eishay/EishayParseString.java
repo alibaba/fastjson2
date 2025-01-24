@@ -8,10 +8,10 @@ import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -20,8 +20,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseString {
@@ -31,17 +29,12 @@ public class EishayParseString {
     static final ObjectReaderProvider provider = new ObjectReaderProvider();
 
     static {
-        try {
-            InputStream is = EishayParseString.class.getClassLoader().getResourceAsStream("data/eishay_compact.json");
-            str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            JSON.parseObject(str, MediaContent.class);
+        str = UTF8Encode.readFromClasspath("data/eishay_compact.json");
+        JSON.parseObject(str, MediaContent.class);
 
-            provider.register(MediaContent.class, MediaContentMixin.objectReader);
-            provider.register(Image.class, ImageMixin.objectReader);
-            provider.register(Media.class, MediaMixin.objectReader);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        provider.register(MediaContent.class, MediaContentMixin.objectReader);
+        provider.register(Image.class, ImageMixin.objectReader);
+        provider.register(Media.class, MediaMixin.objectReader);
     }
 
     @Benchmark

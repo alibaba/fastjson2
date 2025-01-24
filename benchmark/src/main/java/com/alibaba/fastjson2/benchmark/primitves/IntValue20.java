@@ -3,8 +3,8 @@ package com.alibaba.fastjson2.benchmark.primitves;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.benchmark.primitves.vo.Int20Field;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -13,8 +13,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class IntValue20 {
@@ -24,15 +22,10 @@ public class IntValue20 {
     static ObjectMapper mapper = new ObjectMapper();
 
     public IntValue20() {
-        try {
-            InputStream is = IntValue20.class.getClassLoader().getResourceAsStream("data/Int20.json");
-            str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            jsonbBytes = JSONB.toBytes(
-                    JSON.parseObject(str, OBJECT_CLASS)
-            );
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        str = UTF8Encode.readFromClasspath("data/Int20.json");
+        jsonbBytes = JSONB.toBytes(
+                JSON.parseObject(str, OBJECT_CLASS)
+        );
     }
 
     @Benchmark

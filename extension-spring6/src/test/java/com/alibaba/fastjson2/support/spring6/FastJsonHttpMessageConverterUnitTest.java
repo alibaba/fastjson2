@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +39,7 @@ public class FastJsonHttpMessageConverterUnitTest {
         VO vo = (VO) messageConverter.read(VO.class, VO.class, new HttpInputMessage() {
             @Override
             public InputStream getBody() {
-                return new ByteArrayInputStream("{\"id\":123}".getBytes(Charset.forName("UTF-8")));
+                return new ByteArrayInputStream("{\"id\":123}".getBytes(StandardCharsets.UTF_8));
             }
 
             @Override

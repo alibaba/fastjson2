@@ -8,10 +8,10 @@ import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder;
 import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.commons.io.IOUtils;
 import org.apache.fury.Fury;
 import org.apache.fury.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -21,8 +21,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -52,31 +50,26 @@ public class EishayParseBinaryArrayMapping {
     });
 
     static {
-        try {
-            InputStream is = EishayParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            mediaContent = JSONReader.of(str)
-                    .read(MediaContent.class);
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        mediaContent = JSONReader.of(str)
+                .read(MediaContent.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(mediaContent, JSONWriter.Feature.BeanToArray);
+        fastjson2JSONBBytes = JSONB.toBytes(mediaContent, JSONWriter.Feature.BeanToArray);
 
-            Kryo kryo = new Kryo();
-            kryo.register(MediaContent.class);
-            kryo.register(ArrayList.class);
-            kryo.register(Image.class);
-            kryo.register(Image.Size.class);
-            kryo.register(Media.class);
-            kryo.register(Media.Player.class);
+        Kryo kryo = new Kryo();
+        kryo.register(MediaContent.class);
+        kryo.register(ArrayList.class);
+        kryo.register(Image.class);
+        kryo.register(Image.Size.class);
+        kryo.register(Media.class);
+        kryo.register(Media.Player.class);
 
-            Output output = new Output(1024, -1);
-            kryo.writeObject(output, mediaContent);
-            kryoBytes = output.toBytes();
+        Output output = new Output(1024, -1);
+        kryo.writeObject(output, mediaContent);
+        kryoBytes = output.toBytes();
 
-            protobufBytes = MediaContentTransform.forward(mediaContent).toByteArray();
-            furyBytes = MediaContentTransform.forward(mediaContent).toByteArray();
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        protobufBytes = MediaContentTransform.forward(mediaContent).toByteArray();
+        furyBytes = MediaContentTransform.forward(mediaContent).toByteArray();
     }
 
 //    @Benchmark

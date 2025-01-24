@@ -12,14 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PathJSONBTest2 {
     private String str;
-    private byte[] utf8Bytes;
     private byte[] jsonbBytes;
     private JSONObject rootObject;
 
     public PathJSONBTest2() throws Exception {
         InputStream is = PathJSONBTest2.class.getClassLoader().getResourceAsStream("data/path_02.json");
-        str = IOUtils.toString(is, "UTF-8");
-        byte[] utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
+        str = IOUtils.toString(is, StandardCharsets.UTF_8);
         rootObject = JSON.parseObject(str);
         jsonbBytes = JSONB.toBytes(rootObject);
     }

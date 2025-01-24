@@ -2,25 +2,13 @@ package com.alibaba.fastjson2.benchmark;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.benchmark.eishay.EishayParseTreeString;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.dslplatform.json.DslJson;
-import org.apache.commons.io.IOUtils;
-
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DoubleTest {
-    static String str;
-
-    static {
-        try {
-            InputStream is = EishayParseTreeString.class.getClassLoader().getResourceAsStream("data/double_array_20.json");
-            str = IOUtils.toString(is, "UTF-8");
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-    }
+    static String str = UTF8Encode.readFromClasspath("data/double_array_20.json");
 
     public static void main(String[] args) throws Exception {
         JSON.parseObject(str, double[].class);

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_1000;
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +17,7 @@ public class Issue1025 {
             bytes[i] = 0x01;
         }
 
-        String str = new String(bytes, "UTF-8");
+        String str = new String(bytes, StandardCharsets.UTF_8);
         String json = JSON.toJSONString(str);
         assertEquals(str, JSON.parse(json));
 
@@ -32,7 +33,7 @@ public class Issue1025 {
             bytes[i] = 0x01;
         }
 
-        String str = new String(bytes, "UTF-8");
+        String str = new String(bytes, StandardCharsets.UTF_8);
         String json = JSON.toJSONString(str);
         assertEquals(str, JSON.parse(json));
 

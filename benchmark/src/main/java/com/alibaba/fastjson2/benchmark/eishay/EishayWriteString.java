@@ -9,10 +9,10 @@ import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -21,8 +21,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteString {
@@ -32,18 +30,13 @@ public class EishayWriteString {
 
     static ObjectWriterProvider provider = new ObjectWriterProvider();
     static {
-        try {
-            InputStream is = EishayWriteString.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            mc = JSONReader.of(str)
-                    .read(MediaContent.class);
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        mc = JSONReader.of(str)
+                .read(MediaContent.class);
 
-            provider.register(MediaContent.class, MediaContentMixin.objectWriter);
-            provider.register(Media.class, MediaMixin.objectWriter);
-            provider.register(Image.class, ImageMixin.objectWriter);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        provider.register(MediaContent.class, MediaContentMixin.objectWriter);
+        provider.register(Media.class, MediaMixin.objectWriter);
+        provider.register(Image.class, ImageMixin.objectWriter);
     }
 
     @Benchmark

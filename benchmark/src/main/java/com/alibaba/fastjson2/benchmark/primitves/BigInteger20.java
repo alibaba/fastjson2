@@ -4,9 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.primitves.vo.BigInteger20Field;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -15,8 +15,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class BigInteger20 {
@@ -26,15 +24,10 @@ public class BigInteger20 {
     static Gson gson = new Gson();
 
     public BigInteger20() {
-        try {
-            InputStream is = BigInteger20.class.getClassLoader().getResourceAsStream("data/bigint20.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            bean = JSON.parseObject(str, BigInteger20Field.class);
+        String str = UTF8Encode.readFromClasspath("data/bigint20.json");
+        bean = JSON.parseObject(str, BigInteger20Field.class);
 
-//            furyCompatibleBytes = furyCompatible.serialize(bean);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        // furyCompatibleBytes = furyCompatible.serialize(bean);
     }
 
     @Benchmark

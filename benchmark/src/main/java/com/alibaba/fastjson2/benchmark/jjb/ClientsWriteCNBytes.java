@@ -4,11 +4,11 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.runtime.Settings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -19,7 +19,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -31,14 +30,9 @@ public class ClientsWriteCNBytes {
     static final ThreadLocal<ByteArrayOutputStream> bytesOutLocal = ThreadLocal.withInitial(ByteArrayOutputStream::new);
 
     static {
-        try {
-            InputStream is = ClientsWriteCNBytes.class.getClassLoader().getResourceAsStream("data/jjb/client_cn.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            clients = JSONReader.of(str)
-                    .read(Clients.class);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        String str = UTF8Encode.readFromClasspath("data/jjb/client_cn.json");
+        clients = JSONReader.of(str)
+                .read(Clients.class);
     }
 
     @Benchmark

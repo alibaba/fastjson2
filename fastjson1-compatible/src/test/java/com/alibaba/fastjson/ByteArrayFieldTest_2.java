@@ -3,6 +3,7 @@ package com.alibaba.fastjson;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,7 +16,7 @@ public class ByteArrayFieldTest_2 {
         assertEquals(TestUtils.encodeToBase64String(entity.getValue(), false), json.getString("value"));
 
         Entity entity2 = JSON.parseObject(text, Entity.class);
-        assertEquals("中华人民共和国", new String(entity2.getValue(), "UTF-8"));
+        assertEquals("中华人民共和国", new String(entity2.getValue(), StandardCharsets.UTF_8));
     }
 
     public static class Entity {
@@ -25,7 +26,7 @@ public class ByteArrayFieldTest_2 {
         }
 
         public Entity(String value) throws UnsupportedEncodingException {
-            this.value = value.getBytes("UTF-8");
+            this.value = value.getBytes(StandardCharsets.UTF_8);
         }
 
         public byte[] getValue() {

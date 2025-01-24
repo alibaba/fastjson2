@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -19,7 +20,7 @@ public class PathTest2 {
 
     public PathTest2() throws Exception {
         InputStream is = PathTest2.class.getClassLoader().getResourceAsStream("data/path_02.json");
-        str = IOUtils.toString(is, "UTF-8");
+        str = IOUtils.toString(is, StandardCharsets.UTF_8);
         rootObject = JSON.parseObject(str);
     }
 

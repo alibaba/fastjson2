@@ -17,7 +17,7 @@ public class JSONExtractTest {
 
     public JSONExtractTest() throws Exception {
         InputStream is = JSONExtractTest.class.getClassLoader().getResourceAsStream("data/path_01.json");
-        str = IOUtils.toString(is, "UTF-8");
+        str = IOUtils.toString(is, StandardCharsets.UTF_8);
         utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
     }
 

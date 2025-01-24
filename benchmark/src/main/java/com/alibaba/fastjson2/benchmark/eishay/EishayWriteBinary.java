@@ -5,9 +5,9 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.caucho.hessian.io.Hessian2Output;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.IOUtils;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -18,9 +18,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.ObjectOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinary {
@@ -28,14 +26,9 @@ public class EishayWriteBinary {
     static ObjectMapper msgpackMapper = new ObjectMapper(new MessagePackFactory());
 
     static {
-        try {
-            InputStream is = EishayWriteBinary.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            mc = JSONReader.of(str)
-                    .read(MediaContent.class);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        mc = JSONReader.of(str)
+                .read(MediaContent.class);
     }
 
 //    @Benchmark

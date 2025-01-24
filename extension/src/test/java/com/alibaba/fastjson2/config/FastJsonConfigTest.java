@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,7 +20,7 @@ public class FastJsonConfigTest {
         assertEquals(fastJsonConfig.isJSONB(), true);
         fastJsonConfig.setWriteContentLength(false);
         assertEquals(fastJsonConfig.isWriteContentLength(), false);
-        fastJsonConfig.setCharset(Charset.forName("UTF-8"));
+        fastJsonConfig.setCharset(StandardCharsets.UTF_8);
         assertEquals(fastJsonConfig.getCharset().name(), "UTF-8");
         fastJsonConfig.setDateFormat("yyyyMMdd");
         assertEquals(fastJsonConfig.getDateFormat(), "yyyyMMdd");

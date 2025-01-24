@@ -2,17 +2,14 @@ package com.alibaba.fastjson2.benchmark.eishay.gen;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.TypeReference;
-import com.alibaba.fastjson2.benchmark.eishay.EishayFuryWriteNoneCache;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
-import org.apache.commons.io.IOUtils;
 import org.objectweb.asm.*;
 
-import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +17,7 @@ import java.util.Map;
 import static org.objectweb.asm.Opcodes.*;
 
 public class EishayClassGen {
-    public Class genMedia(DynamicClassLoader classLoader, String packageName) throws Exception {
+    public Class genMedia(DynamicClassLoader classLoader, String packageName) {
         classLoader.definePackage(packageName.replace('/', '.'));
 
         LinkedHashMap<String, byte[]> codes = new LinkedHashMap();
@@ -258,25 +255,21 @@ public class EishayClassGen {
     }
 
     public byte[][] genFastjsonJSONBBytes(int count, JSONWriter.Feature[] writerFeatures) throws Exception {
-        try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
-                .getResourceAsStream("data/eishay.json")
-        ) {
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
 
-            DynamicClassLoader classLoader = new DynamicClassLoader();
-            byte[][] bytes = new byte[count][];
-            EishayClassGen gen = new EishayClassGen();
-            for (int i = 0; i < count; i++) {
-                String packageName = "com/alibaba/fastjson2/benchmark/eishay" + i;
-                Class objectClass = gen.genMedia(classLoader, packageName);
-                ObjectReaderProvider provider = new ObjectReaderProvider();
-                Object object = JSONReader.of(str, JSONFactory.createReadContext(provider)).read(objectClass);
+        DynamicClassLoader classLoader = new DynamicClassLoader();
+        byte[][] bytes = new byte[count][];
+        EishayClassGen gen = new EishayClassGen();
+        for (int i = 0; i < count; i++) {
+            String packageName = "com/alibaba/fastjson2/benchmark/eishay" + i;
+            Class objectClass = gen.genMedia(classLoader, packageName);
+            ObjectReaderProvider provider = new ObjectReaderProvider();
+            Object object = JSONReader.of(str, JSONFactory.createReadContext(provider)).read(objectClass);
 
-                ObjectWriterProvider writerProvider = new ObjectWriterProvider();
-                bytes[i] = JSONB.toBytes(object, JSONFactory.createWriteContext(writerProvider, writerFeatures));
-            }
-            return bytes;
+            ObjectWriterProvider writerProvider = new ObjectWriterProvider();
+            bytes[i] = JSONB.toBytes(object, JSONFactory.createWriteContext(writerProvider, writerFeatures));
         }
+        return bytes;
     }
 
     public LinkedHashMap<String, byte[]> genCodes(int count) throws Exception {

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,7 +13,7 @@ public class CharsetFieldTest {
     @Test
     public void test_codec() throws Exception {
         User user = new User();
-        user.setValue(Charset.forName("UTF-8"));
+        user.setValue(StandardCharsets.UTF_8);
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(false);

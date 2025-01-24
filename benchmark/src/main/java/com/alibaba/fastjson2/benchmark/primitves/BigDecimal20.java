@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.benchmark.primitves;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.benchmark.primitves.vo.BigDecimal20Field;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.esotericsoftware.kryo.Kryo;
@@ -10,7 +11,6 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -19,11 +19,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class BigDecimal20 {
@@ -45,31 +42,26 @@ public class BigDecimal20 {
 //    static byte[] furyCompatibleBytes;
 
     public BigDecimal20() {
+        str = UTF8Encode.readFromClasspath("data/dec20.json");
+        BigDecimal20Field bean = JSON.parseObject(str, BigDecimal20Field.class);
+        jsonbBytes = JSONB.toBytes(bean);
+
+        kryo = new Kryo();
+        kryo.register(BigDecimal20Field.class);
+        kryo.register(BigDecimal.class);
+
+        Output output = new Output(1024, -1);
+        kryo.writeObject(output, bean);
+        kryoBytes = output.toBytes();
         try {
-            InputStream is = BigDecimal20.class.getClassLoader().getResourceAsStream("data/dec20.json");
-            str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            BigDecimal20Field bean = JSON.parseObject(str, BigDecimal20Field.class);
-            jsonbBytes = JSONB.toBytes(bean);
-
-            kryo = new Kryo();
-            kryo.register(BigDecimal20Field.class);
-            kryo.register(BigDecimal.class);
-
-            Output output = new Output(1024, -1);
-            kryo.writeObject(output, bean);
-            kryoBytes = output.toBytes();
-
-            {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                Hessian2Output hessian2Output = new Hessian2Output(byteArrayOutputStream);
-                hessian2Output.writeObject(bean);
-                hessian2Output.flush();
-                hessianBytes = byteArrayOutputStream.toByteArray();
-            }
-
-//            furyCompatibleBytes = furyCompatible.serialize(bean);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            Hessian2Output hessian2Output = new Hessian2Output(byteArrayOutputStream);
+            hessian2Output.writeObject(bean);
+            hessian2Output.flush();
+            hessianBytes = byteArrayOutputStream.toByteArray();
+            // furyCompatibleBytes = furyCompatible.serialize(bean);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 

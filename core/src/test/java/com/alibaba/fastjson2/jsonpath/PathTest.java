@@ -17,7 +17,7 @@ public class PathTest {
 
     public PathTest() throws Exception {
         InputStream is = PathTest.class.getClassLoader().getResourceAsStream("data/path_01.json");
-        str = IOUtils.toString(is, "UTF-8");
+        str = IOUtils.toString(is, StandardCharsets.UTF_8);
         utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
         rootObject = JSON.parseObject(str);
     }

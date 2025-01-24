@@ -2,8 +2,8 @@ package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.primitves.vo.FloatValue20Field;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -12,22 +12,11 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class FloatValue20 {
-    static String str;
+    static String str = UTF8Encode.readFromClasspath("data/dec20.json");
     static ObjectMapper mapper = new ObjectMapper();
-
-    public FloatValue20() {
-        try {
-            InputStream is = FloatValue20.class.getClassLoader().getResourceAsStream("data/dec20.json");
-            str = IOUtils.toString(is, StandardCharsets.UTF_8);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Benchmark
     public void fastjson1(Blackhole bh) {

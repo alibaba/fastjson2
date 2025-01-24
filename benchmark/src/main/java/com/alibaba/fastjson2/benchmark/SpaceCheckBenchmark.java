@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.benchmark.eishay.EishayParseStringPretty;
-import org.apache.commons.io.IOUtils;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -9,31 +8,16 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class SpaceCheckBenchmark {
-    static String str;
-    static char[] chars;
-
+    static char[] chars = UTF8Encode.readFromClasspath("data/eishay.json").toCharArray();
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
-
-    static {
-        try {
-            InputStream is = EishayParseStringPretty.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            chars = str.toCharArray();
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Benchmark
     public void spaceBitAnd(Blackhole bh) {
         int spaceCount = 0;
-        for (int i = 0; i < chars.length; i++) {
-            char ch = chars[i];
+        for (char ch : chars) {
             boolean space = ch <= ' ' && ((1L << ch) & SPACE) != 0;
             if (space) {
                 spaceCount++;
@@ -45,8 +29,7 @@ public class SpaceCheckBenchmark {
     @Benchmark
     public void spaceOr(Blackhole bh) {
         int spaceCount = 0;
-        for (int i = 0; i < chars.length; i++) {
-            char ch = chars[i];
+        for (char ch : chars) {
             boolean space = ch == ' '
                     || ch == '\n'
                     || ch == '\r'
@@ -63,15 +46,13 @@ public class SpaceCheckBenchmark {
     @Benchmark
     public void spaceOrPreCheck(Blackhole bh) {
         int spaceCount = 0;
-        for (int i = 0; i < chars.length; i++) {
-            char ch = chars[i];
-            boolean space = ch <= ' '
-                    && (ch == ' '
-                        || ch == '\n'
-                        || ch == '\r'
-                        || ch == '\f'
-                        || ch == '\t'
-                        || ch == '\b'
+        for (char ch : chars) {
+            boolean space = (ch == ' '
+                    || ch == '\n'
+                    || ch == '\r'
+                    || ch == '\f'
+                    || ch == '\t'
+                    || ch == '\b'
             );
             if (space) {
                 spaceCount++;
@@ -83,8 +64,7 @@ public class SpaceCheckBenchmark {
     @Benchmark
     public void CharacterIsWhitespace(Blackhole bh) {
         int spaceCount = 0;
-        for (int i = 0; i < chars.length; i++) {
-            char ch = chars[i];
+        for (char ch : chars) {
             boolean space = Character.isWhitespace(ch);
             if (space) {
                 spaceCount++;
@@ -96,8 +76,7 @@ public class SpaceCheckBenchmark {
     @Benchmark
     public void spaceSwitch(Blackhole bh) {
         int spaceCount = 0;
-        for (int i = 0; i < chars.length; i++) {
-            char ch = chars[i];
+        for (char ch : chars) {
             boolean space;
             switch (ch) {
                 case ' ':

@@ -1,16 +1,13 @@
 package com.alibaba.fastjson2.benchmark.eishay.gen;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.benchmark.eishay.EishayFuryParse;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
-import org.apache.commons.io.IOUtils;
-
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EishayClassGenTest {
-    public void test() throws Exception {
+    public void test() {
         DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
         EishayClassGen gen = new EishayClassGen();
 
@@ -22,8 +19,7 @@ public class EishayClassGenTest {
         }
         System.out.println("millis " + (System.currentTimeMillis() - start));
         Class objectClass = gen.genMedia(classLoader, "com/alibaba/fastjson2/benchmark/eishay");
-        InputStream is = EishayFuryParse.class.getClassLoader().getResourceAsStream("data/eishay.json");
-        String str = IOUtils.toString(is, "UTF-8");
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
 
         Object o = JSON.parseObject(str, objectClass);
         String str1 = JSON.toJSONString(o);

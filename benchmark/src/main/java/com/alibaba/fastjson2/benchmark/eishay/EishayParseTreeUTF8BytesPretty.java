@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -12,24 +12,14 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseTreeUTF8BytesPretty {
-    static byte[] utf8Bytes;
+    static byte[] utf8Bytes = UTF8Encode.readFromClasspath("data/eishay.json").getBytes(StandardCharsets.UTF_8);
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
-
-    static {
-        try {
-            InputStream is = EishayParseTreeUTF8BytesPretty.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            utf8Bytes = IOUtils.toString(is, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Benchmark
     public void fastjson1(Blackhole bh) {
@@ -50,7 +40,7 @@ public class EishayParseTreeUTF8BytesPretty {
     public void gson(Blackhole bh) throws Exception {
         bh.consume(gson
                 .fromJson(
-                        new String(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8),
+                        new String(utf8Bytes, StandardCharsets.UTF_8),
                         HashMap.class)
         );
     }

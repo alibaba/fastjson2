@@ -7,9 +7,9 @@ import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -18,7 +18,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseBinaryAutoType {
@@ -48,44 +47,42 @@ public class EishayParseBinaryAutoType {
     static JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(true, Media.class, MediaContent.class, Image.class);
 
     static {
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        mc = JSONReader.of(str)
+                .read(MediaContent.class);
+
+        fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.IgnoreNoneSerializable,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                JSONWriter.Feature.WriteNameAsSymbol);
+
+        fastjson2JSONBBytes_arrayMapping = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.IgnoreNoneSerializable,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                JSONWriter.Feature.BeanToArray
+        );
+
+        fastjson2JSONBBytes_symbols = JSONB.toBytes(
+                mc,
+                symbolTable,
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.IgnoreNoneSerializable,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                JSONWriter.Feature.WriteNameAsSymbol
+        );
         try {
-            InputStream is = EishayParseBinaryAutoType.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            mc = JSONReader.of(str)
-                    .read(MediaContent.class);
-
-            fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
-                    JSONWriter.Feature.IgnoreNoneSerializable,
-                    JSONWriter.Feature.FieldBased,
-                    JSONWriter.Feature.ReferenceDetection,
-                    JSONWriter.Feature.WriteNulls,
-                    JSONWriter.Feature.NotWriteDefaultValue,
-                    JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                    JSONWriter.Feature.WriteNameAsSymbol);
-
-            fastjson2JSONBBytes_arrayMapping = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
-                    JSONWriter.Feature.IgnoreNoneSerializable,
-                    JSONWriter.Feature.FieldBased,
-                    JSONWriter.Feature.ReferenceDetection,
-                    JSONWriter.Feature.WriteNulls,
-                    JSONWriter.Feature.NotWriteDefaultValue,
-                    JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                    JSONWriter.Feature.BeanToArray
-            );
-
-            fastjson2JSONBBytes_symbols = JSONB.toBytes(
-                    mc,
-                    symbolTable,
-                    JSONWriter.Feature.WriteClassName,
-                    JSONWriter.Feature.IgnoreNoneSerializable,
-                    JSONWriter.Feature.FieldBased,
-                    JSONWriter.Feature.ReferenceDetection,
-                    JSONWriter.Feature.WriteNulls,
-                    JSONWriter.Feature.NotWriteDefaultValue,
-                    JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                    JSONWriter.Feature.WriteNameAsSymbol
-                    );
-
             {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 Hessian2Output hessian2Output = new Hessian2Output(byteArrayOutputStream);
@@ -100,8 +97,8 @@ public class EishayParseBinaryAutoType {
                 objectOutputStream.flush();
                 javaSerializeBytes = byteArrayOutputStream.toByteArray();
             }
-        } catch (Throwable ex) {
-            ex.printStackTrace();
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 

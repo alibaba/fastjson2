@@ -10,12 +10,12 @@ import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -24,23 +24,16 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteStringNoneCache {
     static MediaContent mc;
     static {
-        try {
-            InputStream is = EishayWriteString.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
 
-            ObjectReaderProvider provider = new ObjectReaderProvider(ObjectReaderCreator.INSTANCE);
-            JSONReader.Context readContext = JSONFactory.createReadContext(provider);
-            mc = JSON.parseObject(str, MediaContent.class, readContext);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        ObjectReaderProvider provider = new ObjectReaderProvider(ObjectReaderCreator.INSTANCE);
+        JSONReader.Context readContext = JSONFactory.createReadContext(provider);
+        mc = JSON.parseObject(str, MediaContent.class, readContext);
     }
 
     @Benchmark

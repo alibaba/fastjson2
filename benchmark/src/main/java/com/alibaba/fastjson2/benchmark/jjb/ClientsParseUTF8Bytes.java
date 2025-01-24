@@ -2,11 +2,11 @@ package com.alibaba.fastjson2.benchmark.jjb;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.eishay.EishayParseUTF8BytesPretty;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.runtime.Settings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -16,7 +16,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -26,12 +25,7 @@ public class ClientsParseUTF8Bytes {
     static final Gson gson = new Gson();
     static final DslJson<Object> dslJson = new DslJson<>(Settings.withRuntime().includeServiceLoader());
     static {
-        try {
-            InputStream is = ClientsParseUTF8Bytes.class.getClassLoader().getResourceAsStream("data/jjb/client.json");
-            utf8Bytes = IOUtils.toString(is, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        utf8Bytes = UTF8Encode.readFromClasspath("data/jjb/client.json").getBytes(StandardCharsets.UTF_8);
     }
 
     @Benchmark

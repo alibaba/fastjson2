@@ -1,8 +1,7 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.benchmark.eishay.EishayParseBinaryArrayMapping;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.util.JDKUtils;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -10,8 +9,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
@@ -21,13 +18,8 @@ public class BytesAsciiCheck {
     static byte[] bytes;
 
     static {
-        try {
-            InputStream is = EishayParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            bytes = str.getBytes();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        bytes = str.getBytes();
     }
 
     @Benchmark

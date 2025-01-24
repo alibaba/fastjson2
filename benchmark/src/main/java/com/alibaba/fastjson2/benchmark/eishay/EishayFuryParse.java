@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
-import org.apache.commons.io.IOUtils;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -11,8 +11,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayFuryParse {
@@ -36,21 +34,16 @@ public class EishayFuryParse {
             .buildThreadSafeFury();
 
     static {
-        try {
-            InputStream is = EishayFuryParse.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            mc = JSONReader.of(str)
-                    .read(MediaContent.class);
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        mc = JSONReader.of(str)
+                .read(MediaContent.class);
 
-            jsonbBytes = JSONB.toBytes(
-                    mc,
-                    EishayFuryWrite.features
-            );
+        jsonbBytes = JSONB.toBytes(
+                mc,
+                EishayFuryWrite.features
+        );
 
-            furyBytes = fury.serializeJavaObject(mc);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        furyBytes = fury.serializeJavaObject(mc);
     }
 
     @Benchmark

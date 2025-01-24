@@ -1,9 +1,8 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.benchmark.eishay.EishayParseBinary;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.support.csv.CSVReader;
 import com.csvreader.CsvReader;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -15,21 +14,15 @@ import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class CSVReaderCOVID19 {
     static final String file = "csv/COVID-19_Public_Therapeutic_Locator.csv";
     static byte[] byteArray;
     static {
-        try (InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream(file)) {
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            byteArray = str.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String str = UTF8Encode.readFromClasspath(file);
+        byteArray = str.getBytes();
     }
 
     @Benchmark
@@ -41,10 +34,7 @@ public class CSVReaderCOVID19 {
     @Benchmark
     public void csvReader(Blackhole BH) throws IOException {
         CsvReader csvReader = new CsvReader(new InputStreamReader(new ByteArrayInputStream(byteArray)));
-        while (true) {
-            if (!csvReader.readRecord()) {
-                break;
-            }
+        while (csvReader.readRecord()) {
             String[] line = csvReader.getValues();
             BH.consume(line);
         }

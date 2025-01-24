@@ -5,8 +5,8 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.gen.EishayClassGen;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
-import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -15,8 +15,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayFuryWriteNoneCache {
@@ -44,19 +42,14 @@ public class EishayFuryWriteNoneCache {
     );
 
     static {
-        try {
-            InputStream is = EishayFuryWriteNoneCache.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
 
-            DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
-            EishayClassGen gen = new EishayClassGen();
-            for (int i = 0; i < classes.length; i++) {
-                Class objectClass = gen.genMedia(classLoader, "com/alibaba/fastjson2/benchmark/eishay" + i);
-                classes[i] = objectClass;
-                objects[i] = JSONReader.of(str).read(objectClass);
-            }
-        } catch (Throwable ex) {
-            ex.printStackTrace();
+        DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
+        EishayClassGen gen = new EishayClassGen();
+        for (int i = 0; i < classes.length; i++) {
+            Class objectClass = gen.genMedia(classLoader, "com/alibaba/fastjson2/benchmark/eishay" + i);
+            classes[i] = objectClass;
+            objects[i] = JSONReader.of(str).read(objectClass);
         }
     }
 

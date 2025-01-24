@@ -7,9 +7,9 @@ import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.commons.io.IOUtils;
 import org.apache.fury.Fury;
 import org.apache.fury.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -20,8 +20,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -47,22 +45,17 @@ public class EishayWriteBinaryArrayMapping {
     private static final ThreadLocal<Output> outputs = ThreadLocal.withInitial(() -> new Output(1024, -1));
 
     static {
-        try {
-            InputStream is = EishayWriteBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            mediaContent = JSONReader.of(str)
-                    .read(MediaContent.class);
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        mediaContent = JSONReader.of(str)
+                .read(MediaContent.class);
 
-            Kryo kryo = new Kryo();
-            kryo.register(MediaContent.class);
-            kryo.register(ArrayList.class);
-            kryo.register(Image.class);
-            kryo.register(Image.Size.class);
-            kryo.register(Media.class);
-            kryo.register(Media.Player.class);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        Kryo kryo = new Kryo();
+        kryo.register(MediaContent.class);
+        kryo.register(ArrayList.class);
+        kryo.register(Image.class);
+        kryo.register(Image.Size.class);
+        kryo.register(Media.class);
+        kryo.register(Media.Player.class);
     }
 
     public int furySize() {

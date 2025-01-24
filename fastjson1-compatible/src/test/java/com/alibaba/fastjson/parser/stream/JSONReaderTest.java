@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,7 +18,7 @@ public class JSONReaderTest {
         String resource = "2.json";
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
 
-        JSONReader reader = new JSONReader(new InputStreamReader(is, "UTF-8"));
+        JSONReader reader = new JSONReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
         reader.startObject();
 

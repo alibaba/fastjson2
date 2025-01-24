@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
-import org.apache.commons.io.IOUtils;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -14,8 +14,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayFuryWrite {
@@ -42,14 +40,9 @@ public class EishayFuryWrite {
     );
 
     static {
-        try {
-            InputStream is = EishayFuryWrite.class.getClassLoader().getResourceAsStream("data/eishay.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            object = JSONReader.of(str)
-                    .read(MediaContent.class);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        String str = UTF8Encode.readFromClasspath("data/eishay.json");
+        object = JSONReader.of(str)
+                .read(MediaContent.class);
     }
 
     @Benchmark

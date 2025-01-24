@@ -5,8 +5,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
+import com.alibaba.fastjson2.benchmark.utf8.UTF8Encode;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
-import org.apache.commons.io.IOUtils;
 import org.apache.fury.Fury;
 import org.apache.fury.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -17,8 +17,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class AlongWriteBinaryArrayMapping {
@@ -28,21 +26,16 @@ public class AlongWriteBinaryArrayMapping {
     static Fury fury;
 
     static {
-        try {
-            InputStream is = AlongWriteBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
-            String str = IOUtils.toString(is, StandardCharsets.UTF_8);
-            object = JSONReader.of(str)
-                    .read(SkillFire_S2C_Msg.class);
+        String str = UTF8Encode.readFromClasspath("data/along.json");
+        object = JSONReader.of(str)
+                .read(SkillFire_S2C_Msg.class);
 
-            fury = Fury.builder()
-                    .withLanguage(Language.JAVA)
-                    .withRefTracking(false)
-                    .requireClassRegistration(false)
-                    .withNumberCompressed(true)
-                    .build();
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+        fury = Fury.builder()
+                .withLanguage(Language.JAVA)
+                .withRefTracking(false)
+                .requireClassRegistration(false)
+                .withNumberCompressed(true)
+                .build();
 
         providerFeatures.setDisableAutoType(true);
         providerFeatures.setDisableReferenceDetect(true);
