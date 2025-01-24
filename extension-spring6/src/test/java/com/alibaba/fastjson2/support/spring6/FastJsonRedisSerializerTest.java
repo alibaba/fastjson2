@@ -20,7 +20,7 @@ public class FastJsonRedisSerializerTest {
 
     @BeforeEach
     public void setUp() {
-        this.serializer = new FastJsonRedisSerializer<User>(User.class);
+        this.serializer = new FastJsonRedisSerializer<>(User.class);
     }
 
     @Test

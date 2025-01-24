@@ -19,7 +19,7 @@ public class FastJsonJsonViewUnitTest {
         FastJsonJsonView view = new FastJsonJsonView();
         FastJsonConfig config = new FastJsonConfig();
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.setFastJsonConfig(config);
@@ -37,7 +37,7 @@ public class FastJsonJsonViewUnitTest {
         view.setUpdateContentLength(false);
         view.render(model, request, response);
 
-        view.setRenderedAttributes(new HashSet<String>(Collections.singletonList("abc")));
+        view.setRenderedAttributes(new HashSet<>(Collections.singletonList("abc")));
         view.render(Collections.singletonMap("abc", "cde"), request, response);
     }
 
@@ -48,7 +48,7 @@ public class FastJsonJsonViewUnitTest {
         assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.render(model, request, response);

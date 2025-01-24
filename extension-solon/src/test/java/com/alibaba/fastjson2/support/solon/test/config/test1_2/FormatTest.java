@@ -3,9 +3,7 @@ package com.alibaba.fastjson2.support.solon.test.config.test1_2;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.writer.ObjectWriter;
 
-import java.lang.reflect.Type;
 import java.util.Date;
 
 /**
