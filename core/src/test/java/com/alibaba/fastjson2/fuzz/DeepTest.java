@@ -72,7 +72,8 @@ public class DeepTest {
     public void testObj() {
         StringBuilder buf = new StringBuilder();
         int count = 100000;
-        if (System.getProperty("os.name").toLowerCase().contains("win") && JDKUtils.JVM_VERSION == 11) {
+        String os = System.getProperty("os.name");
+        if (os.toLowerCase().contains("win") && JDKUtils.JVM_VERSION == 11) {
             count = 1000;
         }
         for (int i = 0; i < count; i++) {
@@ -90,7 +91,7 @@ public class DeepTest {
             if (JDKUtils.JVM_VERSION == 8) {
                 context.setMaxLevel(512);
             }
-            assertThrows(JSONException.class, () -> JSON.parse(str, context));
+            assertThrows(JSONException.class, () -> JSON.parse(str, context), os);
         }
     }
 }
