@@ -447,9 +447,10 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime8(byte[] bytes, int off) {
-        return off + 8 > bytes.length || bytes[off + 2] != ':' || bytes[off + 5] != ':'
+        long hms;
+        return off + 8 > bytes.length || (hms = hms(bytes, off)) == -1L
                 ? null
-                : localTime(digit2(bytes, off), digit2(bytes, off + 3), digit2(bytes, off + 6));
+                : LocalTime.of((int) hms & 0xFF, (int) (hms >> 24) & 0xFF, (int) (hms >> 48) & 0xFF);
     }
 
     public static LocalTime parseLocalTime8(char[] bytes, int off) {
@@ -545,19 +546,18 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime11(byte[] str, int off) {
-        if (off + 11 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
+        long hms;
+        if (off + 11 > str.length || (hms = hms(str, off)) == -1L || str[off + 8] != '.') {
             return null;
         } else {
-            int hour = digit2(str, off);
-            int minute = digit2(str, off + 3);
-            int second = digit2(str, off + 6);
+            int hour = (int) hms & 0xFF;
+            int minute = (int) (hms >> 24) & 0xFF;
+            int second = (int) (hms >> 48) & 0xFF;
             int millis = digit2(str, off + 9);
             if (millis > 0) {
                 millis *= 10000000;
             }
-            return ((hour | minute | second | minute) < 0)
-                    ? null
-                    : LocalTime.of(hour, minute, second, millis);
+            return LocalTime.of(hour, minute, second, millis);
         }
     }
 
@@ -579,19 +579,18 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime12(byte[] str, int off) {
-        if (off + 12 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
+        long hms;
+        if (off + 12 > str.length || (hms = hms(str, off)) == -1L || str[off + 8] != '.') {
             return null;
         } else {
-            int hour = digit2(str, off);
-            int minute = digit2(str, off + 3);
-            int second = digit2(str, off + 6);
+            int hour = (int) hms & 0xFF;
+            int minute = (int) (hms >> 24) & 0xFF;
+            int second = (int) (hms >> 48) & 0xFF;
             int millis = digit3(str, off + 9);
             if (millis > 0) {
                 millis *= 1000000;
             }
-            return ((hour | minute | second | minute) < 0)
-                    ? null
-                    : LocalTime.of(hour, minute, second, millis);
+            return LocalTime.of(hour, minute, second, millis);
         }
     }
 
@@ -613,16 +612,15 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime18(byte[] str, int off) {
-        if (off + 18 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
+        long hms;
+        if (off + 18 > str.length || (hms = hms(str, off)) == -1L || str[off + 8] != '.') {
             return null;
         }
-        int hour = digit2(str, off);
-        int minute = digit2(str, off + 3);
-        int second = digit2(str, off + 6);
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
         int nanos = readNanos(str, 9, off + 9);
-        return (hour | minute | second | nanos) < 0
-                ? null
-                : LocalTime.of(hour, minute, second, nanos);
+        return nanos < 0 ? null : LocalTime.of(hour, minute, second, nanos);
     }
 
     public static LocalTime parseLocalTime18(char[] str, int off) {
@@ -802,12 +800,7 @@ public class DateUtils {
             return 0;
         }
 
-        if (len == 4
-                && chars[off] == 'n'
-                && chars[off + 1] == 'u'
-                && chars[off + 2] == 'l'
-                && chars[off + 3] == 'l'
-        ) {
+        if (len == 4 && isNULL(chars, off)) {
             return 0;
         }
 
@@ -873,16 +866,8 @@ public class DateUtils {
             LocalDateTime ldt = DateUtils.parseLocalDateTime(chars, off, len);
             if (ldt == null
                     // && "0000-00-00".equals(str)
-                    && chars[off] == '0'
-                    && chars[off + 1] == '0'
-                    && chars[off + 2] == '0'
-                    && chars[off + 3] == '0'
-                    && chars[off + 4] == '-'
-                    && chars[off + 5] == '0'
-                    && chars[off + 6] == '0'
-                    && chars[off + 7] == '-'
-                    && chars[off + 8] == '0'
-                    && chars[off + 9] == '0'
+                    && getLongLE(chars, off) == 0x2d30302d30303030L
+                    && getShortLE(chars, off + 8) == 0x3030
             ) {
                 ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             }
@@ -907,12 +892,7 @@ public class DateUtils {
             return 0;
         }
 
-        if (len == 4
-                && chars[off] == 'n'
-                && chars[off + 1] == 'u'
-                && chars[off + 2] == 'l'
-                && chars[off + 3] == 'l'
-        ) {
+        if (len == 4 && isNULL(chars, off)) {
             return 0;
         }
 
@@ -979,16 +959,9 @@ public class DateUtils {
             LocalDateTime ldt = DateUtils.parseLocalDateTime(chars, off, len);
             if (ldt == null
                     // && "0000-00-00".equals(str)
-                    && chars[off] == '0'
-                    && chars[off + 1] == '0'
-                    && chars[off + 2] == '0'
-                    && chars[off + 3] == '0'
-                    && chars[off + 4] == '-'
-                    && chars[off + 5] == '0'
-                    && chars[off + 6] == '0'
-                    && chars[off + 7] == '-'
-                    && chars[off + 8] == '0'
-                    && chars[off + 9] == '0'
+                    && getLongLE(chars, off) == 0x30003000300030L
+                    && getLongLE(chars, off + 4) == 0x2d00300030002dL
+                    && getIntLE(chars, off + 8) == 0x30003000
             ) {
                 ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             }
@@ -8700,69 +8673,35 @@ public class DateUtils {
     }
 
     public static int month(char c0, char c1, char c2) {
-        switch (c0) {
-            case 'J':
-                // Jan
-                if (c1 == 'a' && c2 == 'n') {
-                    return 1;
-                }
-                if (c1 == 'u') {
-                    if (c2 == 'n') {
-                        return 6;
-                    }
-                    if (c2 == 'l') {
-                        return 7;
-                    }
-                }
-                break;
-            case 'F':
-                if (c1 == 'e' && c2 == 'b') {
-                    return 2;
-                }
-                break;
-            case 'M':
-                if (c1 == 'a') {
-                    if (c2 == 'r') {
-                        return 3;
-                    }
-                    if (c2 == 'y') {
-                        return 5;
-                    }
-                }
-                break;
-            case 'A':
-                if (c1 == 'p' && c2 == 'r') {
-                    return 4;
-                }
-                if (c1 == 'u' && c2 == 'g') {
-                    return 8;
-                }
-                break;
-            case 'S':
-                if (c1 == 'e' && c2 == 'p') {
-                    return 9;
-                }
-                break;
-            case 'O':
-                if (c1 == 'c' && c2 == 't') {
-                    return 10;
-                }
-                break;
-            case 'N':
-                if (c1 == 'o' && c2 == 'v') {
-                    return 11;
-                }
-                break;
-            case 'D':
-                if (c1 == 'e' && c2 == 'c') {
-                    return 12;
-                }
-                break;
+        int x = (c0 << 16) | (c1 << 8) | c2;
+        switch (x) {
+            case 0x4a616e:// Jan
+                return 1;
+            case 0x466562: // Feb
+                return 2;
+            case 0x4d6172: // Mar
+                return 3;
+            case 0x417072: // Apr
+                return 4;
+            case 0x4d6179: // May
+                return 5;
+            case 0x4a756e:// Jun
+                return 6;
+            case 0x4a756c:// Jul
+                return 7;
+            case 0x417567: // Aug
+                return 8;
+            case 0x536570: // Sep
+                return 9;
+            case 0x4f6374: // Oct
+                return 10;
+            case 0x4e6f76: // Nov
+                return 11;
+            case 0x446563: // Dec
+                return 12;
             default:
-                break;
+                return -1;
         }
-
-        return -1;
     }
 
     public static int hourAfterNoon(char h0, char h1) {
