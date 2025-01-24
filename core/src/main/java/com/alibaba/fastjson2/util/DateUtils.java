@@ -961,7 +961,7 @@ public class DateUtils {
                     // && "0000-00-00".equals(str)
                     && getLongLE(chars, off) == 0x30003000300030L
                     && getLongLE(chars, off + 4) == 0x2d00300030002dL
-                    && getIntLE(chars, off + 8) == 0x30003000
+                    && getIntLE(chars, off + 8) == 0x300030L
             ) {
                 ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             }
@@ -1293,7 +1293,6 @@ public class DateUtils {
         char c9 = str[off + 9];
 
         int year, month, dom;
-        char y0, y1, y2, y3, m0, m1, d0, d1;
         if ((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/')) {
             // yyyy-MM-dd
             year = digit4(str, off);
