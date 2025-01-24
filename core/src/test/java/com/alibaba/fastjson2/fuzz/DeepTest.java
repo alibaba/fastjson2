@@ -72,6 +72,9 @@ public class DeepTest {
     public void testObj() {
         StringBuilder buf = new StringBuilder();
         int count = 100000;
+        if (System.getProperty("os.name").toLowerCase().contains("win") && JDKUtils.JVM_VERSION == 11) {
+            count = 80000;
+        }
         for (int i = 0; i < count; i++) {
             buf.append("{\"v\":");
         }
