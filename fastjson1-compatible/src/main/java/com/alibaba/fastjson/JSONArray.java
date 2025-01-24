@@ -192,12 +192,12 @@ public class JSONArray
             }
 
             if (value instanceof Float) {
-                float floatValue = ((Float) value).floatValue();
+                float floatValue = (Float) value;
                 return toBigDecimal(floatValue);
             }
 
             if (value instanceof Double) {
-                double doubleValue = ((Double) value).doubleValue();
+                double doubleValue = (Double) value;
                 return toBigDecimal(doubleValue);
             }
 
@@ -821,7 +821,7 @@ public class JSONArray
             return (T) TypeUtils.cast(obj, (Class) type);
         } else {
             String json = JSON.toJSONString(obj);
-            return (T) JSON.parseObject(json, type);
+            return JSON.parseObject(json, type);
         }
     }
 
@@ -856,7 +856,7 @@ public class JSONArray
     }
 
     public <T> List<T> toJavaList(Class<T> clazz) {
-        List<T> list = new ArrayList<T>(this.size());
+        List<T> list = new ArrayList<>(this.size());
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader objectReader = provider.getObjectReader(clazz);
@@ -877,10 +877,8 @@ public class JSONArray
                     list.add((T) converted);
                     continue;
                 }
-
-                throw new com.alibaba.fastjson2.JSONException(
-                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
-                );
+                // item is NOT null here
+                throw new com.alibaba.fastjson2.JSONException(item.getClass() + " cannot be converted to " + clazz);
             }
             list.add(classItem);
         }

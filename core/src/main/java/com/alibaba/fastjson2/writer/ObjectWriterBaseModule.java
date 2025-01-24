@@ -980,7 +980,7 @@ public class ObjectWriterBaseModule
                 jsonFieldFormat = jsonFieldFormat.trim();
 
                 if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
-                    jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
+                    jsonFieldFormat = jsonFieldFormat.replace("T", "'T'");
                 }
 
                 if (!jsonFieldFormat.isEmpty()) {
