@@ -24,8 +24,7 @@ public class TestController {
     @GetMapping(value = "/hello", produces = "text/html")
     public void hello(HttpServletResponse response) {
         //返回一个html测试页面
-        try (ServletOutputStream servletOutputStream = response.getOutputStream();
-        ) {
+        try (ServletOutputStream servletOutputStream = response.getOutputStream()) {
             ClassPathResource classPathResource = new ClassPathResource("hello.html");
             servletOutputStream.write(classPathResource.readBytes());
         } catch (IOException e) {
