@@ -279,8 +279,8 @@ public class TypeUtils {
                 if (innerMap instanceof LinkedHashMap) {
                     return (T) innerMap;
                 } else {
-                    LinkedHashMap linkedHashMap = new LinkedHashMap();
-                    linkedHashMap.putAll(innerMap);
+                    // 这里应该返回 LinkedHashMap
+                    return (T) new LinkedHashMap(innerMap);
                 }
             }
 
@@ -1144,8 +1144,8 @@ public class TypeUtils {
             if (paramNames != null && parameterTypes.length != paramNames.length) {
                 continue;
             }
-
-            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1])) {
+            // String equals to Class will always return false !
+            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1].getName())) {
                 continue;
             }
             if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
