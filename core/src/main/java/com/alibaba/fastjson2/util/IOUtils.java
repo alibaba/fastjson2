@@ -1740,6 +1740,11 @@ public class IOUtils {
                 UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
+    public static int getIntLE(char[] bytes, int offset) {
+        return convEndian(false,
+                UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+    }
+
     public static int getIntUnaligned(byte[] bytes, int offset) {
         return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
     }
