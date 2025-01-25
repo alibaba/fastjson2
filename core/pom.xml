@@ -303,7 +303,6 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
                     <includes>
                         <include>com/alibaba/fastjson2/**/*.java</include>
                     </includes>
