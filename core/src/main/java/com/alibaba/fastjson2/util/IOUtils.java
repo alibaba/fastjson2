@@ -1613,12 +1613,10 @@ public class IOUtils {
 
     private static int digit2(int x) {
         int d;
-        if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0
-        ) {
+        if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0) {
             return -1;
         }
-        return ((d & 0xF) << 3) + ((d & 0xF) << 1)  // (d & 0xF) * 10
-                + (d >> 8);
+        return (d & 0xF) * 10 + (d >> 8);
     }
 
     public static int digit1(char[] chars, int off) {
