@@ -433,17 +433,6 @@ public class IOUtilsTest {
     }
 
     @Test
-    public void testNotContainsQuote() {
-        assertTrue(doesNotContainQuote(IOUtils.getLongUnaligned("01234567".getBytes(), 0)));
-        assertFalse(doesNotContainQuote(IOUtils.getLongUnaligned("0123456'".getBytes(), 0)));
-    }
-
-    private static boolean doesNotContainQuote(long v) {
-        // Create a mask where each byte is 0xFF if it's not equal to '"', otherwise 0.
-        return (((v & 0x7F7F7F7F7F7F7F7FL) - 0x2121212121212121L) & 0x8080808080808080L) == 0;
-    }
-
-    @Test
     public void test_format() {
         DecimalFormat format = new DecimalFormat("###.##");
         assertEquals("123.45",
