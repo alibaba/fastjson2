@@ -1682,7 +1682,7 @@ public class IOUtils {
         return -1;
     }
 
-    private static boolean notContains(long v, long quote) {
+    private static boolean notContains(long value, long vector) {
         /*
           for (int i = 0; i < 8; ++i) {
             byte c = (byte) v;
@@ -1693,7 +1693,7 @@ public class IOUtils {
           }
           return false;
          */
-        long x = v ^ quote;
+        long x = value ^ vector;
         return (((x - 0x0101010101010101L) & ~x) & 0x8080808080808080L) == 0;
     }
 
