@@ -32,7 +32,7 @@ public interface JSON {
     /**
      * fastjson2 version name
      */
-    String VERSION = "2.0.54";
+    String VERSION = "2.0.55";
 
     /**
      * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
@@ -4383,5 +4383,16 @@ public interface JSON {
 
             return (T) objectReader.readJSONBObject(jsonReader, null, null, 0);
         }
+    }
+
+    /**
+     * Configure the Enum classes as a JavaBean
+     * @since 2.0.55
+     * @param enumClasses enum classes
+     */
+    @SuppressWarnings("rawtypes")
+    @SafeVarargs
+    static void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        JSONFactory.getDefaultObjectWriterProvider().configEnumAsJavaBean(enumClasses);
     }
 }

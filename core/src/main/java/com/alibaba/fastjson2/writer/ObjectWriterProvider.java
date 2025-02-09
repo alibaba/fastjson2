@@ -1316,4 +1316,17 @@ public class ObjectWriterProvider {
         String[] annotationNames = BeanUtils.getEnumAnnotationNames(enumClass);
         return new ObjectWriterImplEnum(null, enumClass, valueField, annotationNames, 0);
     }
+
+    /**
+     * Configure the Enum classes as a JavaBean
+     * @since 2.0.55
+     * @param enumClasses enum classes
+     */
+    @SuppressWarnings("rawtypes")
+    @SafeVarargs
+    public final void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        for (Class<? extends Enum> enumClass : enumClasses) {
+            register(enumClass, creator.createObjectWriter(enumClass));
+        }
+    }
 }
