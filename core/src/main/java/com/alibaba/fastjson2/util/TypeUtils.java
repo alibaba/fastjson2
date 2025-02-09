@@ -3051,7 +3051,16 @@ public class TypeUtils {
             return 0;
         }
 
-        throw new JSONException("can not cast to decimal");
+        if (value instanceof Collection && ((Collection<?>) value).size() == 1) {
+            Object first = ((Collection<?>) value).iterator().next();
+            if (first instanceof Number) {
+                return ((Number) first).doubleValue();
+            } else if (first instanceof String) {
+                return Double.parseDouble((String) first);
+            }
+        }
+
+        throw new JSONException("can not cast to double");
     }
 
     public static Double toDouble(Object value) {
@@ -3071,7 +3080,7 @@ public class TypeUtils {
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("can not cast to decimal");
+        throw new JSONException("can not cast to double");
     }
 
     public static int compare(Object a, Object b) {

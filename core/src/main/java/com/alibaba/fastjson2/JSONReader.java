@@ -4749,8 +4749,12 @@ public abstract class JSONReader
     protected final String readStringNotMatch() {
         switch (ch) {
             case '[':
-                return toString(
-                        readArray());
+                List array = readArray();
+                if (array.size() == 1) {
+                    Object item = array.get(0);
+                    return item == null ? null : item.toString();
+                }
+                return toString(array);
             case '{':
                 return toString(
                         readObject());

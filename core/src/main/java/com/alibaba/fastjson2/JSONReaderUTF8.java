@@ -5004,39 +5004,7 @@ class JSONReaderUTF8
             return str;
         }
 
-        switch (ch) {
-            case '[':
-                return toString(
-                        readArray());
-            case '{':
-                return toString(
-                        readObject());
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                readNumber0();
-                Number number = getNumber();
-                return number.toString();
-            case 't':
-            case 'f':
-                boolValue = readBoolValue();
-                return boolValue ? "true" : "false";
-            case 'n': {
-                readNull();
-                return null;
-            }
-            default:
-                throw new JSONException("TODO : " + ch);
-        }
+        return readStringNotMatch();
     }
 
     @Override
