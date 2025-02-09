@@ -56,7 +56,8 @@ public class CSVTest4 {
 
         in = new ByteArrayInputStream(bytes);
         CSVReader<Integer[]> parser2 = CSVReader.of(in, types);
-        Object object = parser2.stream(Object[].class).findFirst().get();
+        Object object = parser2.stream(Object[].class)
+                .findFirst().get();
         assertTrue(object instanceof Object[]);
         assertFalse(object instanceof Integer[]);
         assertFalse(object instanceof String[]);

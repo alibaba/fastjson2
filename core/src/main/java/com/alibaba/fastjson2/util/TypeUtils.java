@@ -2076,25 +2076,21 @@ public class TypeUtils {
                 return null;
             case 1: {
                 byte b0 = bytes[off];
-                if (b0 == '1' || b0 == 'Y') {
+                if (b0 == '1' | b0 == 'Y') {
                     return Boolean.TRUE;
                 }
-                if (b0 == '0' || b0 == 'N') {
+                if (b0 == '0' | b0 == 'N') {
                     return Boolean.FALSE;
                 }
                 break;
             }
             case 4:
-                if (bytes[off] == 't' && bytes[off + 1] == 'r' && bytes[off + 2] == 'u' && bytes[off + 3] == 'e') {
+                if (IOUtils.isTRUE(bytes, off)) {
                     return Boolean.TRUE;
                 }
                 break;
             case 5:
-                if (bytes[off] == 'f'
-                        && bytes[off + 1] == 'a'
-                        && bytes[off + 2] == 'l'
-                        && bytes[off + 3] == 's'
-                        && bytes[off + 4] == 'e') {
+                if (bytes[off] == 'f' && IOUtils.isALSE(bytes, off + 1)) {
                     return Boolean.FALSE;
                 }
                 break;
@@ -2143,154 +2139,46 @@ public class TypeUtils {
     }
 
     public static int parseInt(byte[] bytes, int off, int len) {
+        int digit;
         switch (len) {
             case 1: {
-                byte b0 = bytes[off];
-                if (b0 >= '0' && b0 <= '9') {
-                    return b0 - '0';
-                }
+                digit = IOUtils.digit1(bytes, off);
                 break;
             }
             case 2: {
-                byte b0 = bytes[off];
-                byte b1 = bytes[off + 1];
-                if (b0 >= '0' && b0 <= '9'
-                        && b1 >= '0' && b1 <= '9') {
-                    return (b0 - '0') * 10
-                            + (b1 - '0');
-                }
+                digit = IOUtils.digit2(bytes, off);
                 break;
             }
             case 3: {
-                byte b0 = bytes[off];
-                byte b1 = bytes[off + 1];
-                byte b2 = bytes[off + 2];
-                if (b0 >= '0' && b0 <= '9'
-                        && b1 >= '0' && b1 <= '9'
-                        && b2 >= '0' && b2 <= '9') {
-                    return (b0 - '0') * 100
-                            + (b1 - '0') * 10
-                            + (b2 - '0');
-                }
+                digit = IOUtils.digit3(bytes, off);
                 break;
             }
             case 4: {
-                byte b0 = bytes[off];
-                byte b1 = bytes[off + 1];
-                byte b2 = bytes[off + 2];
-                byte b3 = bytes[off + 3];
-                if (b0 >= '0' && b0 <= '9'
-                        && b1 >= '0' && b1 <= '9'
-                        && b2 >= '0' && b2 <= '9'
-                        && b3 >= '0' && b3 <= '9'
-                ) {
-                    return (b0 - '0') * 1000
-                            + (b1 - '0') * 100
-                            + (b2 - '0') * 10
-                            + (b3 - '0');
-                }
+                digit = IOUtils.digit4(bytes, off);
                 break;
             }
             case 5: {
-                byte b0 = bytes[off];
-                byte b1 = bytes[off + 1];
-                byte b2 = bytes[off + 2];
-                byte b3 = bytes[off + 3];
-                byte b4 = bytes[off + 4];
-                if (b0 >= '0' && b0 <= '9'
-                        && b1 >= '0' && b1 <= '9'
-                        && b2 >= '0' && b2 <= '9'
-                        && b3 >= '0' && b3 <= '9'
-                        && b4 >= '0' && b4 <= '9'
-                ) {
-                    return (b0 - '0') * 10_000
-                            + (b1 - '0') * 1000
-                            + (b2 - '0') * 100
-                            + (b3 - '0') * 10
-                            + (b4 - '0');
-                }
+                digit = IOUtils.digit5(bytes, off);
                 break;
             }
             case 6: {
-                byte b0 = bytes[off];
-                byte b1 = bytes[off + 1];
-                byte b2 = bytes[off + 2];
-                byte b3 = bytes[off + 3];
-                byte b4 = bytes[off + 4];
-                byte b5 = bytes[off + 5];
-                if (b0 >= '0' && b0 <= '9'
-                        && b1 >= '0' && b1 <= '9'
-                        && b2 >= '0' && b2 <= '9'
-                        && b3 >= '0' && b3 <= '9'
-                        && b4 >= '0' && b4 <= '9'
-                        && b5 >= '0' && b5 <= '9'
-                ) {
-                    return (b0 - '0') * 100_000
-                            + (b1 - '0') * 10_000
-                            + (b2 - '0') * 1_000
-                            + (b3 - '0') * 100
-                            + (b4 - '0') * 10
-                            + (b5 - '0');
-                }
+                digit = IOUtils.digit6(bytes, off);
                 break;
             }
             case 7: {
-                byte b0 = bytes[off];
-                byte b1 = bytes[off + 1];
-                byte b2 = bytes[off + 2];
-                byte b3 = bytes[off + 3];
-                byte b4 = bytes[off + 4];
-                byte b5 = bytes[off + 5];
-                byte b6 = bytes[off + 6];
-                if (b0 >= '0' && b0 <= '9'
-                        && b1 >= '0' && b1 <= '9'
-                        && b2 >= '0' && b2 <= '9'
-                        && b3 >= '0' && b3 <= '9'
-                        && b4 >= '0' && b4 <= '9'
-                        && b5 >= '0' && b5 <= '9'
-                        && b6 >= '0' && b6 <= '9'
-                ) {
-                    return (b0 - '0') * 1_000_000
-                            + (b1 - '0') * 100_000
-                            + (b2 - '0') * 10_000
-                            + (b3 - '0') * 1_000
-                            + (b4 - '0') * 100
-                            + (b5 - '0') * 10
-                            + (b6 - '0');
-                }
+                digit = IOUtils.digit7(bytes, off);
                 break;
             }
             case 8: {
-                byte b0 = bytes[off];
-                byte b1 = bytes[off + 1];
-                byte b2 = bytes[off + 2];
-                byte b3 = bytes[off + 3];
-                byte b4 = bytes[off + 4];
-                byte b5 = bytes[off + 5];
-                byte b6 = bytes[off + 6];
-                byte b7 = bytes[off + 7];
-                if (b0 >= '0' && b0 <= '9'
-                        && b1 >= '0' && b1 <= '9'
-                        && b2 >= '0' && b2 <= '9'
-                        && b3 >= '0' && b3 <= '9'
-                        && b4 >= '0' && b4 <= '9'
-                        && b5 >= '0' && b5 <= '9'
-                        && b6 >= '0' && b6 <= '9'
-                        && b7 >= '0' && b7 <= '9'
-                ) {
-                    return (b0 - '0') * 10_000_000
-                            + (b1 - '0') * 1_000_000
-                            + (b2 - '0') * 100_000
-                            + (b3 - '0') * 10_000
-                            + (b4 - '0') * 1_000
-                            + (b5 - '0') * 100
-                            + (b6 - '0') * 10
-                            + (b7 - '0');
-                }
+                digit = IOUtils.digit8(bytes, off);
                 break;
             }
             default:
+                digit = -1;
                 break;
+        }
+        if (digit != -1) {
+            return digit;
         }
 
         String str = new String(bytes, off, len);

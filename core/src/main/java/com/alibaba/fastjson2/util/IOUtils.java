@@ -1483,6 +1483,10 @@ public class IOUtils {
         }
     }
 
+    public static boolean isTRUE(byte[] buf, int pos) {
+        return getIntUnaligned(buf, pos) == TRUE;
+    }
+
     public static boolean isALSE(byte[] buf, int pos) {
         return getIntUnaligned(buf, pos) == ALSE;
     }
@@ -1523,6 +1527,75 @@ public class IOUtils {
         return digit4(
                 getIntLE(bytes, off)
         );
+    }
+
+    public static int digit5(byte[] bytes, int off) {
+        int d4 = digit4(bytes, off);
+        int d1 = digit2(bytes, off + 4);
+        return (d4 | d1) == -1 ? -1 : (d4 * 10 + d1);
+    }
+
+    public static int digit6(byte[] bytes, int off) {
+        int d4 = digit4(bytes, off);
+        int d2 = digit2(bytes, off + 4);
+        return (d4 | d2) == -1 ? -1 : (d4 * 100 + d2);
+    }
+
+    public static int digit7(byte[] bytes, int off) {
+        int d4 = digit4(bytes, off);
+        int d2 = digit2(bytes, off + 4);
+        int d1 = digit1(bytes, off + 6);
+        return (d4 | d2 | d1) == -1 ? -1 : (d4 * 1000 + d2 * 10 + d1);
+    }
+
+    public static int digit8(byte[] bytes, int off) {
+        return digit8(
+                getLongLE(bytes, off)
+        );
+    }
+
+    private static int digit8(long x) {
+        /*
+            Here we are doing a 4-Byte Vector operation on the Int type.
+
+            x & 0xF0 != 0xC0
+            ---------------
+            0 0b0011_0000 & 0b1111_0000 = 0b0011_0000
+            1 0b0011_0001 & 0b1111_0000 = 0b0011_0000
+            2 0b0011_0010 & 0b1111_0000 = 0b0011_0000
+            3 0b0011_0011 & 0b1111_0000 = 0b0011_0000
+            4 0b0011_0100 & 0b1111_0000 = 0b0011_0000
+            5 0b0011_0101 & 0b1111_0000 = 0b0011_0000
+            6 0b0011_0110 & 0b1111_0000 = 0b0011_0000
+            7 0b0011_0111 & 0b1111_0000 = 0b0011_0000
+            8 0b0011_1000 & 0b1111_0000 = 0b0011_0000
+            9 0b0011_1001 & 0b1111_0000 = 0b0011_0000
+
+            (((d = x & 0x0F) + 0x06) & 0xF0) != 0
+            ---------------
+            0 ((0b0011_0000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            1 ((0b0011_0001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            2 ((0b0011_0010) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            3 ((0b0011_0011) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            4 ((0b0011_0100) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            5 ((0b0011_0101) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            6 ((0b0011_0110) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            7 ((0b0011_0111) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            8 ((0b0011_1000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+            9 ((0b0011_1001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
+         */
+        long d;
+        if ((((x & 0xF0F0F0F0F0F0F0F0L) - 0x3030303030303030L) | (((d = x & 0x0F0F0F0F0F0F0F0FL) + 0x0606060606060606L) & 0xF0F0F0F0F0F0F0F0L)) != 0) {
+            return -1;
+        }
+        return (int) ((d & 0x0FL) * 10000000
+                + ((d & 0x0F00L) >> 8) * 1000000
+                + ((d & 0x0F0000L) >> 16) * 100000
+                + ((d & 0x0F000000L) >> 24) * 10000
+                + ((d & 0x0F00000000L) >> 32) * 1000
+                + ((d & 0x0F0000000000L) >> 40) * 100
+                + ((d & 0x0F000000000000L) >> 48) * 10
+                + (d >> 56));
     }
 
     private static int digit4(int x) {
@@ -1639,6 +1712,7 @@ public class IOUtils {
             throw new JSONException(e.getMessage());
         }
     }
+
     static int indexOfQuote0(byte[] value, int quote, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
@@ -1649,6 +1723,50 @@ public class IOUtils {
             address += 8;
         }
         return indexOfChar0(value, quote, i, max);
+    }
+
+    public static int indexOfDoubleQuote(byte[] value, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfDoubleQuoteV(value, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '"', fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+
+    public static int indexOfDoubleQuoteV(byte[] value, int fromIndex, int max) {
+        int i = fromIndex;
+        long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
+        int upperBound = fromIndex + ((max - fromIndex) & ~7);
+        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x2222_2222_2222_2222L)) {
+            i += 8;
+            address += 8;
+        }
+        return indexOfChar0(value, '"', i, max);
+    }
+
+    public static int indexOfLineSeparator(byte[] value, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return indexOfLineSeparatorV(value, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\n', fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
+    }
+
+    public static int indexOfLineSeparatorV(byte[] value, int fromIndex, int max) {
+        int i = fromIndex;
+        long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
+        int upperBound = fromIndex + ((max - fromIndex) & ~7);
+        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x0A0A0A0A0A0A0A0AL)) {
+            i += 8;
+            address += 8;
+        }
+        return indexOfChar0(value, '\n', i, max);
     }
 
     public static int indexOfSlash(byte[] value, int fromIndex, int max) {
@@ -1905,5 +2023,39 @@ public class IOUtils {
             }
         }
         return true;
+    }
+
+    private static boolean isDigitLatin1(int c) {
+        return c >= '0' && c <= '9';
+    }
+
+    public static int parseInt(byte[] bytes, int off, int len) {
+        int fc = bytes[off];
+        int result = isDigitLatin1(fc)
+                ? '0' - fc
+                : len != 1 && (fc == '-' || fc == '+')
+                ? 0
+                : 1;  // or any value > 0
+        int end = off + len;
+        off++;
+        int d;
+        while (off + 1 < end
+                && (d = IOUtils.digit2(bytes, off)) != -1
+                && Integer.MIN_VALUE / 100 <= result & result <= 0) {
+            result = result * 100 - d;  // overflow from d => result > 0
+            off += 2;
+        }
+        if (off < end
+                && isDigitLatin1(d = bytes[off])
+                && Integer.MIN_VALUE / 10 <= result & result <= 0) {
+            result = result * 10 + '0' - d;  // overflow from '0' - d => result > 0
+            off += 1;
+        }
+        if (off == end
+                & result <= 0
+                & (Integer.MIN_VALUE < result || fc == '-')) {
+            return fc == '-' ? result : -result;
+        }
+        throw new NumberFormatException(new String(bytes, off, len));
     }
 }

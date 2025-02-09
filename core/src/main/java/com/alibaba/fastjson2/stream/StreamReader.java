@@ -584,7 +584,7 @@ public abstract class StreamReader<T> {
                 throw new IllegalArgumentException("action must not be null");
             }
             T object = next();
-            if (streamReader.inputEnd || object == null) {
+            if ((streamReader.inputEnd && streamReader.off >= streamReader.end) || object == null) {
                 return false;
             } else {
                 action.accept(object);
@@ -611,7 +611,7 @@ public abstract class StreamReader<T> {
 
         @Override
         public long estimateSize() {
-            return streamReader.inputEnd ? 0L : Long.MAX_VALUE;
+            return (streamReader.inputEnd && streamReader.off >= streamReader.end) ? 0L : Long.MAX_VALUE;
         }
 
         @Override
