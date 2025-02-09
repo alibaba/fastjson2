@@ -6186,4 +6186,11 @@ final class JSONReaderJSONB
         int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
         return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
     }
+
+    public void readArray(Collection list, Type itemType) {
+        int count = startArray();
+        for (int i = 0; i < count; i++) {
+            list.add(read(itemType));
+        }
+    }
 }

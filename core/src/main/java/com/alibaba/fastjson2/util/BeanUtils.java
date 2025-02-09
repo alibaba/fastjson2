@@ -1194,6 +1194,10 @@ public abstract class BeanUtils {
         }
 
         String fieldName = getterName(methodName, namingStrategy);
+        int subIndex;
+        if (kotlin && (subIndex = fieldName.indexOf('-')) != -1) {
+            fieldName = fieldName.substring(0, subIndex);
+        }
 
         if (fieldName.length() > 2
                 && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'

@@ -1382,4 +1382,17 @@ public class ObjectWriterProvider {
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         }
     }
+
+    /**
+     * Configure the Enum classes as a JavaBean
+     * @since 2.0.55
+     * @param enumClasses enum classes
+     */
+    @SuppressWarnings("rawtypes")
+    @SafeVarargs
+    public final void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        for (Class<? extends Enum> enumClass : enumClasses) {
+            register(enumClass, creator.createObjectWriter(enumClass));
+        }
+    }
 }

@@ -76,8 +76,17 @@ final class JSONReaderASCII
                 && bytes[offset + 2] == 'l'
         ) {
             offset += 3;
-        } else if ((first == '"' || first == '\'') && offset < end && bytes[offset] == first) {
-            offset++;
+        } else if (first == '"' || first == '\'') {
+            if (offset < end && bytes[offset] == first) {
+                offset++;
+            } else if (offset + 4 < end
+                    && IOUtils.isNULL(bytes, offset)
+                    && bytes[offset + 4] == first
+            ) {
+                offset += 5;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -97,7 +106,7 @@ final class JSONReaderASCII
         }
 
         this.offset = offset;
-        this.ch = (char) ch;
+        this.ch = (char) (ch & 0xFF);
         return true;
     }
 
