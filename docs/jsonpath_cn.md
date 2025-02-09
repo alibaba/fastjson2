@@ -104,12 +104,12 @@ $['store']['book'][0]['title']
 ### 3.1 例1
 ```java
 public void test_entity() throws Exception {
-   Entity entity = new Entity(123, new Object());
-   
-  assertSame(entity.getValue(), JSONPath.eval(entity, "$.value")); 
-  assertTrue(JSONPath.contains(entity, "$.value"));
-  assertEquals(2, JSONPath.size(entity, "$"));
-  assertEquals(0, JSONPath.size(new Object[], "$")); 
+    Entity entity = new Entity(123, new Object());
+
+    assertSame(entity.getValue(), JSONPath.eval(entity, "$.value")); 
+    assertTrue(JSONPath.contains(entity, "$.value"));
+    assertEquals(2, JSONPath.eval(entity, "$.length()"));
+    assertEquals(0, JSONPath.eval(new Object[0], "$.length()"));
 }
 
 public static class Entity {
