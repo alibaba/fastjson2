@@ -145,9 +145,9 @@ final class CSVReaderUTF8<T>
         byte[] buf = getBuf();
         int off = this.off, end = this.end;
 
-        int slashIndex = this.nextEscapeIndex;
-        if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < off)) {
-            nextEscapeIndex = slashIndex = IOUtils.indexOfDoubleQuote(buf, off, end);
+        int escapeIndex = this.nextEscapeIndex;
+        if (escapeIndex == ESCAPE_INDEX_NOT_SET || (escapeIndex != -1 && escapeIndex < off)) {
+            nextEscapeIndex = escapeIndex = IOUtils.indexOfDoubleQuote(buf, off, end);
         }
 
         int lineSeparatorIndex = IOUtils.indexOfLineSeparator(buf, off, end);
@@ -169,8 +169,8 @@ final class CSVReaderUTF8<T>
                             break;
                         }
                     }
-                    this.nextEscapeIndex = slashIndex >= off
-                            ? slashIndex - off
+                    this.nextEscapeIndex = escapeIndex >= off
+                            ? escapeIndex - off
                             : IOUtils.indexOfDoubleQuote(buf, rest, end);
                     lineSeparatorIndex = IOUtils.indexOfLineSeparator(buf, rest, end);
                     this.off = off = 0;
@@ -185,7 +185,7 @@ final class CSVReaderUTF8<T>
                 }
             }
         }
-        if ((lineSeparatorIndex != -1) && (slashIndex == -1 || slashIndex > lineSeparatorIndex)) {
+        if ((lineSeparatorIndex != -1) && (escapeIndex == -1 || escapeIndex > lineSeparatorIndex)) {
             this.lineTerminated = true;
             this.lineStart = off;
             this.lineEnd = lineSeparatorIndex != off && buf[lineSeparatorIndex - 1] == '\r'
@@ -259,11 +259,11 @@ final class CSVReaderUTF8<T>
             if (!lineTerminated) {
                 if (input != null && !inputEnd) {
                     int len = end - off;
-                    int slashIndex = this.nextEscapeIndex;
+                    int escapedIndex = this.nextEscapeIndex;
                     if (off > 0) {
                         if (len > 0) {
                             System.arraycopy(buf, off, buf, 0, len);
-                            this.nextEscapeIndex = slashIndex >= off ? slashIndex - off : ESCAPE_INDEX_NOT_SET;
+                            this.nextEscapeIndex = escapedIndex >= off ? escapedIndex - off : ESCAPE_INDEX_NOT_SET;
                         }
                         lineStart = lineNextStart = 0;
                         off = 0;
