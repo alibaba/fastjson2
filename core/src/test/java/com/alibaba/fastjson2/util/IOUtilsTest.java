@@ -295,6 +295,13 @@ public class IOUtilsTest {
     }
 
     @Test
+    public void digit8() {
+        byte[] bytes = "12345678".getBytes(StandardCharsets.ISO_8859_1);
+        int d8 = IOUtils.digit8(bytes, 0);
+        System.out.println(d8);
+    }
+
+    @Test
     public void printDigit() {
         System.out.println("0xF " + Integer.toBinaryString(0xF));
         System.out.println("0xF0 " + Integer.toBinaryString(0xF0));
