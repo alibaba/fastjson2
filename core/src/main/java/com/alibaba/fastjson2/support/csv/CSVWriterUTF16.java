@@ -25,7 +25,7 @@ final class CSVWriterUTF16
     ) {
         super(zoneId, features);
         this.out = out;
-        this.chars = new char[1024 * 64];
+        this.chars = new char[1024 * 512];
     }
 
     void writeDirect(char[] bytes, int off, int len) {
