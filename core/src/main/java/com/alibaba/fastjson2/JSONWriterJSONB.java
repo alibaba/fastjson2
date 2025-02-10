@@ -938,12 +938,12 @@ final class JSONWriterJSONB
     }
 
     public static int writeInt32(byte[] bytes, int off, int i) {
-        if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
+        if (((i + 0x10) & ~0x3f) == 0) {
             putByte(bytes, off++, (byte) i);
-        } else if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
+        } else if (((i + 0x800) & ~0xfff) == 0) {
             putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + i));
             off += 2;
-        } else if (i >= INT32_SHORT_MIN && i <= INT32_SHORT_MAX) {
+        } else if (((i + 0x40000) & ~0x7ffff) == 0) {
             putByte(bytes, off, (byte) (BC_INT32_SHORT_ZERO + (i >> 16)));
             putShortBE(bytes, off + 1, (short) i);
             off += 3;
@@ -952,21 +952,20 @@ final class JSONWriterJSONB
             putIntBE(bytes, off + 1, i);
             off += 5;
         }
-
         return off;
     }
 
     private static int writeInt64(byte[] bytes, int off, long i) {
         if (i >= INT64_NUM_LOW_VALUE && i <= INT64_NUM_HIGH_VALUE) {
             putByte(bytes, off++, (byte) (BC_INT64_NUM_MIN + (i - INT64_NUM_LOW_VALUE)));
-        } else if (i >= INT64_BYTE_MIN && i <= INT64_BYTE_MAX) {
+        } else if (((i + 0x800) & ~0xfffL) == 0) {
             putShortBE(bytes, off, (short) ((BC_INT64_BYTE_ZERO << 8) + i));
             off += 2;
-        } else if (i >= INT64_SHORT_MIN && i <= INT64_SHORT_MAX) {
+        } else if (((i + 0x40000) & ~0x7ffffL) == 0) {
             putByte(bytes, off, (byte) (BC_INT64_SHORT_ZERO + (i >> 16)));
             putShortBE(bytes, off + 1, (short) i);
             off += 3;
-        } else if (i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE) {
+        } else if ((((i + 0x80000000L) & ~0xffffffffL) == 0)) {
             putByte(bytes, off, BC_INT64_INT);
             putIntBE(bytes, off + 1, (int) i);
             off += 5;

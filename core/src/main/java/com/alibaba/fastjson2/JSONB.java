@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONWriterJSONB.writeInt32;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 /**
@@ -234,33 +235,6 @@ public interface JSONB {
             jsonWriter.writeInt64(i);
             return jsonWriter.getBytes();
         }
-    }
-
-    static int writeInt(byte[] bytes, int off, int i) {
-        if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
-            bytes[off] = (byte) i;
-            return 1;
-        }
-
-        if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
-            bytes[off] = (byte) (BC_INT32_BYTE_ZERO + (i >> 8));
-            bytes[off + 1] = (byte) i;
-            return 2;
-        }
-
-        if (i >= INT32_SHORT_MIN && i <= INT32_SHORT_MAX) {
-            bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (i >> 16));
-            bytes[off + 1] = (byte) (i >> 8);
-            bytes[off + 2] = (byte) i;
-            return 3;
-        }
-
-        bytes[off] = BC_INT32;
-        bytes[off + 1] = (byte) (i >>> 24);
-        bytes[off + 2] = (byte) (i >>> 16);
-        bytes[off + 3] = (byte) (i >>> 8);
-        bytes[off + 4] = (byte) i;
-        return 5;
     }
 
     /**
@@ -1135,7 +1109,7 @@ public interface JSONB {
         byte[] bytes = new byte[byteslen];
         bytes[0] = type;
         int off = 1;
-        off += writeInt(bytes, off, utf16.length);
+        off = writeInt32(bytes, off, utf16.length);
         System.arraycopy(utf16, 0, bytes, off, utf16.length);
         return bytes;
     }
@@ -1470,5 +1444,13 @@ public interface JSONB {
 
     static boolean isInt64Short(int type) {
         return (type & 0xF8) == 0xC0;
+    }
+
+    static boolean isInt32ByteValue(int i) {
+        return ((i + 2048) & ~0xFFF) != 0;
+    }
+
+    static boolean isInt32ByteValue1(int i) {
+        return i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX;
     }
 }
