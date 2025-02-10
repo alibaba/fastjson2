@@ -1512,15 +1512,16 @@ public class IOUtils {
     }
 
     public static int digit4(char[] chars, int off) {
-        char c0, c1, c2, c3;
-        c0 = getChar(chars, off);
-        c1 = getChar(chars, off + 1);
-        c2 = getChar(chars, off + 2);
-        c3 = getChar(chars, off + 3);
-        if ((c0 | c1 | c2 | c3) > 0x7f) {
+        long x = getLongLE(chars, off);
+        long d;
+        if ((((x & 0xFFF0FFF0FFF0FFF0L) - 0x30003000300030L) | (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L)) != 0) {
             return -1;
         }
-        return digit4(c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
+        return (int) ((
+                ((d & 0xF) * 10 +
+                ((d >> 16) & 0xF)) * 10 +
+                ((d >> 32) & 0xF)) * 10 +
+                (d >> 48));
     }
 
     public static int digit4(byte[] bytes, int off) {
@@ -1530,22 +1531,50 @@ public class IOUtils {
     }
 
     public static int digit5(byte[] bytes, int off) {
-        int d4 = digit4(bytes, off);
-        int d1 = digit2(bytes, off + 4);
-        return (d4 | d1) == -1 ? -1 : (d4 * 10 + d1);
+        long x = getIntLE(bytes, off) | (((long) getByte(bytes, off + 4)) << 32);
+        long d;
+        if ((((x & 0xF0F0F0F0F0L) - 0x3030303030L) | (((d = x & 0x0F0F0F0F0FL) + 0x0606060606L) & 0xF0F0F0F0F0L)) != 0) {
+            return -1;
+        }
+        return (int) ((((
+                (d & 0xFL) * 10 +
+                ((d >> 8) & 0xFL)) * 10 +
+                ((d >> 16) & 0xFL)) * 10 +
+                ((d >> 24) & 0xFL)) * 10 +
+                (d >> 32));
     }
 
     public static int digit6(byte[] bytes, int off) {
-        int d4 = digit4(bytes, off);
-        int d2 = digit2(bytes, off + 4);
-        return (d4 | d2) == -1 ? -1 : (d4 * 100 + d2);
+        long x = getIntLE(bytes, off) | (((long) getShortLE(bytes, off + 4)) << 32);
+        long d;
+        if ((((x & 0xF0F0F0F0F0F0L) - 0x303030303030L) | (((d = x & 0x0F0F0F0F0F0FL) + 0x060606060606L) & 0xF0F0F0F0F0F0L)) != 0) {
+            return -1;
+        }
+        return (int) ((((((
+                (d & 0xFL) * 10 +
+                ((d >> 8) & 0xFL)) * 10 +
+                ((d >> 16) & 0xFL)) * 10 +
+                ((d >> 24) & 0xFL)) * 10 +
+                ((d >> 32) & 0xFL)) * 10 +
+                (d >> 40)));
     }
 
     public static int digit7(byte[] bytes, int off) {
-        int d4 = digit4(bytes, off);
-        int d2 = digit2(bytes, off + 4);
-        int d1 = digit1(bytes, off + 6);
-        return (d4 | d2 | d1) == -1 ? -1 : (d4 * 1000 + d2 * 10 + d1);
+        long x = getIntLE(bytes, off)
+                | (((long) getShortLE(bytes, off + 4)) << 32)
+                | (((long) getByte(bytes, off + 6)) << 48);
+        long d;
+        if ((((x & 0xF0F0F0F0F0F0F0L) - 0x30303030303030L) | (((d = x & 0x0F0F0F0F0F0F0FL) + 0x06060606060606L) & 0xF0F0F0F0F0F0F0L)) != 0) {
+            return -1;
+        }
+        return (int) ((((((
+                ((d & 0xFL) * 10 +
+                ((d >> 8) & 0xFL)) * 10 +
+                ((d >> 16) & 0xFL)) * 10 +
+                ((d >> 24) & 0xFL)) * 10 +
+                ((d >> 32) & 0xFL)) * 10 +
+                ((d >> 40) & 0xFL)) * 10 +
+                (d >> 48)));
     }
 
     public static int digit8(byte[] bytes, int off) {
@@ -1588,14 +1617,15 @@ public class IOUtils {
         if ((((x & 0xF0F0F0F0F0F0F0F0L) - 0x3030303030303030L) | (((d = x & 0x0F0F0F0F0F0F0F0FL) + 0x0606060606060606L) & 0xF0F0F0F0F0F0F0F0L)) != 0) {
             return -1;
         }
-        return (int) ((d & 0x0FL) * 10000000
-                + ((d & 0x0F00L) >> 8) * 1000000
-                + ((d & 0x0F0000L) >> 16) * 100000
-                + ((d & 0x0F000000L) >> 24) * 10000
-                + ((d & 0x0F00000000L) >> 32) * 1000
-                + ((d & 0x0F0000000000L) >> 40) * 100
-                + ((d & 0x0F000000000000L) >> 48) * 10
-                + (d >> 56));
+        return (int) (((((((
+                ((d & 0xFL) * 10 +
+                ((d >> 8) & 0xFL)) * 10 +
+                ((d >> 16) & 0xFL)) * 10 +
+                ((d >> 24) & 0xFL)) * 10 +
+                ((d >> 32) & 0xFL)) * 10 +
+                ((d >> 40) & 0xFL)) * 10 +
+                ((d >> 48) & 0xFL)) * 10 +
+                (d >> 56)));
     }
 
     private static int digit4(int x) {
@@ -1632,31 +1662,24 @@ public class IOUtils {
         if ((((x & 0xF0F0F0F0) - 0x30303030) | (((d = x & 0x0F0F0F0F) + 0x06060606) & 0xF0F0F0F0)) != 0) {
             return -1;
         }
-        /*
-            10   = (1 << 3 ) + (1 << 1)
-            100  = (1 << 6 ) + (1 << 5) + (1 << 2)
-            1000 = (1 << 10) + (1 << 3) - (1 << 5)
-         */
-        return ((d & 0xF) << 10) + ((d & 0xF) << 3) - ((d & 0xF) << 5) // (d & 0xF) * 1000
-                + ((d & 0xF00) >> 2) + ((d & 0xF00) >> 3) + ((d & 0xF00) >> 6) // ((d & 0xF00) >> 8) * 100
-                + ((d & 0xF0000) >> 13) + ((d & 0xF0000) >> 15) // ((d & 0xF0000) >> 16) * 10
-                + (d >> 24);
+        return (((d & 0xF) * 10 +
+                ((d >> 8) & 0xF)) * 10 +
+                ((d >> 16) & 0xF)) * 10 +
+                (d >> 24);
     }
 
     public static int digit3(char[] chars, int off) {
-        char c0 = getChar(chars, off), c1 = getChar(chars, off + 1), c2 = getChar(chars, off + 2);
-        if ((c0 | c1 | c2) > 0x7F) {
+        long x = getIntLE(chars, off) + (((long) getChar(chars, off + 2)) << 32);
+        long d;
+        if ((((x & 0xFFF0FFF0FFF0L) - 0x3000300030L) | (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L)) != 0) {
             return -1;
         }
-        return digit3(
-                c0 | (c1 << 8) | (c2 << 16)
-        );
+        return (int) (((d & 0xF) * 10 + ((d >> 16) & 0xF)) * 10 + (d >> 32));
     }
 
     public static int digit3(byte[] bytes, int off) {
         return digit3(
-                getShortLE(bytes, off)
-                        | (UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2) << 16)
+                getShortLE(bytes, off) | (getByte(bytes, off + 2) << 16)
         );
     }
 
@@ -1665,23 +1688,25 @@ public class IOUtils {
         if ((((x & 0xF0F0F0) - 0x303030) | (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0)) != 0) {
             return -1;
         }
-        return ((d & 0xF) << 6) + ((d & 0xF) << 5) + ((d & 0xF) << 2) // (d & 0xff) * 100
-                + ((d & 0xF00) >> 5) + ((d & 0xF00) >> 7) // ((d & 0xF00) >> 8) * 10
-                + (d >> 16);
+        return ((d & 0xF) * 10 + ((d >> 8) & 0xF)) * 10 + (d >> 16);
     }
 
     public static int digit2(char[] chars, int off) {
-        char c0 = getChar(chars, off), c1 = getChar(chars, off + 1);
-        if ((c0 | c1) > 0x7f) {
+        int x = getIntLE(chars, off);
+        int d;
+        if ((((x & 0xFFF0FFF0) - 0x300030) | (((d = x & 0x0F000F) + 0x060006) & 0xF000F0)) != 0) {
             return -1;
         }
-        return digit2(c0 | (c1 << 8));
+        return (d & 0xF) * 10 + (d >> 16);
     }
 
     public static int digit2(byte[] bytes, int off) {
-        return digit2(
-                getShortLE(bytes, off)
-        );
+        int x = getShortLE(bytes, off);
+        int d;
+        if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0) {
+            return -1;
+        }
+        return (d & 0xF) * 10 + (d >> 8);
     }
 
     private static int digit2(int x) {

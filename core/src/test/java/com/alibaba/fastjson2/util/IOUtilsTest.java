@@ -172,6 +172,40 @@ public class IOUtilsTest {
     }
 
     @Test
+    public void digit5() {
+        String str = "12345";
+        assertEquals(
+                Integer.parseInt(str),
+                IOUtils.digit5(
+                        str.getBytes(StandardCharsets.ISO_8859_1), 0));
+    }
+
+    @Test
+    public void digit6() {
+        String str = "123456";
+        assertEquals(
+                Integer.parseInt(str),
+                IOUtils.digit6(
+                        str.getBytes(StandardCharsets.ISO_8859_1), 0));
+    }
+
+    @Test
+    public void digit7() {
+        String str = "1234567";
+        assertEquals(
+                Integer.parseInt(str),
+                IOUtils.digit7(
+                        str.getBytes(StandardCharsets.ISO_8859_1), 0));
+    }
+
+    @Test
+    public void digit8() {
+        byte[] bytes = "12345678".getBytes(StandardCharsets.ISO_8859_1);
+        int d8 = IOUtils.digit8(bytes, 0);
+        System.out.println(d8);
+    }
+
+    @Test
     public void digit4_chars() {
         assertEquals(1972,
                 IOUtils.digit4(
@@ -233,12 +267,16 @@ public class IOUtilsTest {
                         "1972".getBytes(StandardCharsets.UTF_8), 0));
 
         byte[] bytes = new byte[4];
+        char[] chars = new char[4];
         for (int x0 = -1; x0 <= 10; x0++) {
             bytes[0] = (byte) (x0 + '0');
+            chars[0] = (char) (x0 + '0');
             for (int x1 = -1; x1 <= 10; x1++) {
                 bytes[1] = (byte) (x1 + '0');
+                chars[1] = (char) (x1 + '0');
                 for (int x2 = -1; x2 <= 10; x2++) {
                     bytes[2] = (byte) (x2 + '0');
+                    chars[2] = (char) (x2 + '0');
                     int d3 = IOUtils.digit3(bytes, 0);
                     int expect;
                     if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9) {
@@ -246,6 +284,8 @@ public class IOUtilsTest {
                     } else {
                         expect = x0 * 100 + x1 * 10 + x2;
                     }
+                    assertEquals(expect, d3);
+                    d3 = IOUtils.digit3(chars, 0);
                     assertEquals(expect, d3);
                 }
             }
@@ -292,13 +332,6 @@ public class IOUtilsTest {
                 assertEquals(expect, d2);
             }
         }
-    }
-
-    @Test
-    public void digit8() {
-        byte[] bytes = "12345678".getBytes(StandardCharsets.ISO_8859_1);
-        int d8 = IOUtils.digit8(bytes, 0);
-        System.out.println(d8);
     }
 
     @Test
