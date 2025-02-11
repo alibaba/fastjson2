@@ -836,7 +836,7 @@ public class IOUtils {
         final int div2 = div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putIntLE(bytes, off, DIGITS_K_32[div2] & 0xffffff00 | '.');
+        putIntLE(bytes, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
         off += 4;
 
         int v;
