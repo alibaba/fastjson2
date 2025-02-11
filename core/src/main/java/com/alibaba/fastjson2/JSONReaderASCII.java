@@ -11,14 +11,13 @@ import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
+import static com.alibaba.fastjson2.util.IOUtils.getLongLE;
 import static com.alibaba.fastjson2.util.IOUtils.hexDigit4;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-class JSONReaderASCII
+final class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
-    static final int ESCAPE_INDEX_NOT_SET = -2;
-    protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, bytes, offset, length);
@@ -118,7 +117,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public final long readFieldNameHashCode() {
+    public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
         if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
@@ -908,7 +907,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public final String getFieldName() {
+    public String getFieldName() {
         final byte[] bytes = this.bytes;
         int offset = nameBegin;
         int length = nameEnd - offset;
@@ -1023,7 +1022,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public final String readFieldName() {
+    public String readFieldName() {
         final char quote = ch;
         if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
@@ -1423,74 +1422,116 @@ class JSONReaderASCII
     public String readString() {
         if (ch == '"' || ch == '\'') {
             final byte[] bytes = this.bytes;
-            final byte quote = (byte) ch;
-            final byte slash = (byte) '\\';
-
+            char quote = this.ch;
+            int valueLength;
             int offset = this.offset;
             final int start = offset, end = this.end;
-            int valueLength;
-            boolean valueEscape = false;
+            final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+            valueEscape = false;
 
-            int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
-            if (index == -1) {
-                throw error("invalid escape character EOI");
-            }
-            int slashIndex = nextEscapeIndex;
-            if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
-                nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
-            }
-            if (slashIndex == -1 || slashIndex > index) {
-                valueLength = index - offset;
-                offset = index;
-            } else {
-                valueEscape = true;
-                valueLength = slashIndex - offset;
-                offset = slashIndex;
-
-                for (;;) {
-                    if (offset >= end) {
-                        throw error("invalid escape character EOI");
+            {
+                int i = 0;
+                int upperBound = offset + ((end - offset) & ~7);
+                while (offset < upperBound) {
+                    long v = getLongLE(bytes, offset);
+                    if ((v & 0xFF00FF00FF00FF00L) != 0 || containsSlashOrQuote(v, byteVectorQuote)) {
+                        break;
                     }
 
-                    byte c = bytes[offset];
-                    if (c == slash) {
-                        valueLength++;
+                    offset += 8;
+                    i += 8;
+                }
+                // ...
+
+                for (; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
+                    }
+
+                    int c = bytes[offset] & 0xFF;
+                    if (c == '\\') {
+                        valueEscape = true;
                         c = bytes[offset + 1];
                         offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
                         continue;
                     }
 
                     if (c == quote) {
+                        valueLength = i;
                         break;
                     }
                     offset++;
-                    valueLength++;
                 }
             }
 
             String str;
             if (valueEscape) {
-                char[] buf = new char[valueLength];
-                offset = readEscaped(bytes, start, quote, buf);
-                str = new String(buf);
+                char[] chars = new char[valueLength];
+                offset = start;
+                for (int i = 0; ; ++i) {
+                    int ch = bytes[offset];
+                    if (ch == '\\') {
+                        ch = bytes[++offset];
+                        switch (ch) {
+                            case 'u': {
+                                ch = hexDigit4(bytes, check3(offset + 1, end));
+                                offset += 4;
+                                break;
+                            }
+                            case 'x': {
+                                ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                                offset += 2;
+                                break;
+                            }
+                            case '\\':
+                            case '"':
+                                break;
+                            case 'b':
+                                ch = '\b';
+                                break;
+                            case 't':
+                                ch = '\t';
+                                break;
+                            case 'n':
+                                ch = '\n';
+                                break;
+                            case 'f':
+                                ch = '\f';
+                                break;
+                            case 'r':
+                                ch = '\r';
+                                break;
+                            default:
+                                ch = char1(ch);
+                                break;
+                        }
+                        chars[i] = (char) ch;
+                        offset++;
+                    } else if (ch == quote) {
+                        break;
+                    } else {
+                        chars[i] = (char) ch;
+                        offset++;
+                    }
+                }
+
+                str = new String(chars);
             } else {
-                if (this.str != null) {
-                    str = this.str.substring(start, offset);
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1);
-                } else if (ANDROID) {
-                    str = getLatin1String(start, offset - start);
+                int strlen = offset - start;
+                if (strlen == 1) {
+                    str = TypeUtils.toString((char) (bytes[start] & 0xff));
+                } else if (strlen == 2) {
+                    str = TypeUtils.toString(
+                            (char) (bytes[start] & 0xff),
+                            (char) (bytes[start + 1] & 0xff)
+                    );
                 } else {
-                    str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+                    str = new String(bytes, start, offset - start, StandardCharsets.US_ASCII);
                 }
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
@@ -1505,59 +1546,12 @@ class JSONReaderASCII
                 }
             }
 
-            this.ch = (char) (ch & 0xFF);
+            this.ch = (char) ch;
             this.offset = offset;
             return str;
         }
 
         return readStringNotMatch();
-    }
-
-    protected final int readEscaped(byte[] bytes, int offset, byte quote, char[] buf) {
-        for (int i = 0; ; ++i) {
-            char c = (char) (bytes[offset] & 0xff);
-            if (c == '\\') {
-                c = (char) bytes[++offset];
-                switch (c) {
-                    case 'u': {
-                        c = (char) hexDigit4(bytes, check3(offset + 1, end));
-                        offset += 4;
-                        break;
-                    }
-                    case 'x': {
-                        c = char2(bytes[offset + 1], bytes[offset + 2]);
-                        offset += 2;
-                        break;
-                    }
-                    case '\\':
-                    case '"':
-                        break;
-                    case 'b':
-                        c = '\b';
-                        break;
-                    case 't':
-                        c = '\t';
-                        break;
-                    case 'n':
-                        c = '\n';
-                        break;
-                    case 'f':
-                        c = '\f';
-                        break;
-                    case 'r':
-                        c = '\r';
-                        break;
-                    default:
-                        c = char1(c);
-                        break;
-                }
-            } else if (c == quote) {
-                break;
-            }
-            buf[i] = c;
-            offset++;
-        }
-        return offset;
     }
 
     public static JSONReaderASCII of(Context ctx, String str, byte[] bytes, int offset, int length) {

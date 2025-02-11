@@ -3415,9 +3415,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII) {
-            return JVM_VERSION == 8
-                    ? new JSONReaderASCIIJDK8(context, is)
-                    : new JSONReaderASCII(context, is);
+            return new JSONReaderASCII(context, is);
         }
 
         return JSONReader.of(new InputStreamReader(is, charset), context);
