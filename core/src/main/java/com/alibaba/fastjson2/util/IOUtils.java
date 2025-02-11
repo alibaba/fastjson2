@@ -1960,9 +1960,7 @@ public class IOUtils {
             15 = 0b0000_1111 => m = ((x + 6) & 0x10); (m >> 1) - (m >> 4) => 7 + 0x30 + (x & 0xF) => F
          */
         int m = (i + 0x06060606) & 0x10101010;
-        return ((m >> 1) - (m >> 4))
-                + 0x30303030
-                + i;
+        return ((m * 7) >> 4) + 0x30303030 + i;
     }
 
     public static long utf16Hex4U(long i) {
@@ -1993,8 +1991,7 @@ public class IOUtils {
 
     private static int reverseBytesExpand(int i) {
         // i = Integer.reverseBytes(Integer.expand(i, 0xF0F0F0F0));
-        i = ((i & 0xF000) >> 12) | (i & 0xF00) | ((i & 0xF0) << 12) | ((i & 0xF) << 24);
-        return i;
+        return ((i & 0xF000) >> 12) | (i & 0xF00) | ((i & 0xF0) << 12) | ((i & 0xF) << 24);
     }
 
     private static long utf16ReverseBytesExpand(long i) {
