@@ -2016,7 +2016,7 @@ public class IOUtils {
         int upperBound = off + (len & ~7);
         long address = ARRAY_CHAR_BASE_OFFSET + off;
         while (off < upperBound
-                && (convEndian(false, (UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8))) & 0xFF00FF00FF00FF00L) == 0
+                && (convEndian(false, UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8)) & 0xFF00FF00FF00FF00L) == 0
         ) {
             address += 16;
             off += 8;
