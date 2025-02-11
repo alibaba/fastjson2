@@ -3240,7 +3240,7 @@ public abstract class JSONReader
 
     public static JSONReader of(byte[] utf8Bytes) {
         Context context = createReadContext();
-        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
+        if (PREDICATE_IS_ASCII != null && PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -3249,7 +3249,7 @@ public abstract class JSONReader
 
     @Deprecated
     public static JSONReader of(Context context, byte[] utf8Bytes) {
-        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
+        if (PREDICATE_IS_ASCII != null && PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -3257,7 +3257,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes, Context context) {
-        if (PREDICATE_IS_ASCII.test(utf8Bytes)) {
+        if (PREDICATE_IS_ASCII != null && PREDICATE_IS_ASCII.test(utf8Bytes)) {
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -3500,7 +3500,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    if (PREDICATE_IS_ASCII.test(bytes)) {
+                    if (PREDICATE_IS_ASCII != null && PREDICATE_IS_ASCII.test(bytes)) {
                         return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                     }
                 }

@@ -317,9 +317,6 @@ public class JDKUtils {
                     initErrorLast = e;
                 }
             }
-            if (isAscii == null) {
-                isAscii = JDKUtils::isASCII;
-            }
 
             PREDICATE_IS_ASCII = isAscii;
         }
@@ -524,9 +521,5 @@ public class JDKUtils {
             chars[i] = (char) (bytes[offset + i] & 0xff);
         }
         return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-    }
-
-    static boolean isASCII(byte[] chars) {
-        return IOUtils.isASCII(chars, 0, chars.length);
     }
 }
