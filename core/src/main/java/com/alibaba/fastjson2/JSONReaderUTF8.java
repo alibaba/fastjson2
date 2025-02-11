@@ -4987,6 +4987,10 @@ class JSONReaderUTF8
                 str = str.trim();
             }
 
+            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+                str = null;
+            }
+
             int ch = ++offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
                 ch = offset == end ? EOI : bytes[offset++];
@@ -7238,11 +7242,8 @@ class JSONReaderUTF8
         } else if (IOUtils.isASCII(bytes, off, len)) {
             hasNegative = false;
         }
-
-        if (!hasNegative) {
-            return new JSONReaderASCII(context, null, bytes, off, len);
-        }
-
-        return new JSONReaderUTF8(context, bytes, off, len);
+        return hasNegative
+                ? new JSONReaderUTF8(context, bytes, off, len)
+                : new JSONReaderASCII(context, null, bytes, off, len);
     }
 }
