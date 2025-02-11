@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.function.ToByteFunction;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.*;
-import java.util.Arrays;
 import java.util.function.ToIntFunction;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
