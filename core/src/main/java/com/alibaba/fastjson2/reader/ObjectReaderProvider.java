@@ -19,6 +19,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -156,7 +157,7 @@ public class ObjectReaderProvider
     private final ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
 
     final ObjectReaderCreator creator;
-    final List<ObjectReaderModule> modules = new ArrayList<>();
+    final List<ObjectReaderModule> modules = new CopyOnWriteArrayList<>();
 
     boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
     boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
