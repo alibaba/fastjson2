@@ -9,7 +9,8 @@ import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
 import static com.alibaba.fastjson2.util.IOUtils.getLongLE;
 import static com.alibaba.fastjson2.util.IOUtils.hexDigit4;
 
-final class JSONReaderASCIIJDK8 extends JSONReaderASCII {
+final class JSONReaderASCIIJDK8
+        extends JSONReaderASCII {
     JSONReaderASCIIJDK8(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, str, bytes, offset, length);
     }
