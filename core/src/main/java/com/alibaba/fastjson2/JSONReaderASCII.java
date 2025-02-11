@@ -21,7 +21,7 @@ class JSONReaderASCII
     protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
-        super(ctx, str, bytes, offset, length);
+        super(ctx, bytes, offset, length);
         this.str = str;
         nameAscii = true;
     }
@@ -1420,7 +1420,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public final String readString() {
+    public String readString() {
         if (ch == '"' || ch == '\'') {
             final byte[] bytes = this.bytes;
             final byte quote = (byte) ch;
@@ -1513,7 +1513,7 @@ class JSONReaderASCII
         return readStringNotMatch();
     }
 
-    private int readEscaped(byte[] bytes, int offset, byte quote, char[] buf) {
+    protected final int readEscaped(byte[] bytes, int offset, byte quote, char[] buf) {
         for (int i = 0; ; ++i) {
             char c = (char) (bytes[offset] & 0xff);
             if (c == '\\') {
@@ -1558,5 +1558,9 @@ class JSONReaderASCII
             offset++;
         }
         return offset;
+    }
+
+    public static JSONReaderASCII of(Context ctx, String str, byte[] bytes, int offset, int length) {
+        return new JSONReaderASCII(ctx, str, bytes, offset, length);
     }
 }

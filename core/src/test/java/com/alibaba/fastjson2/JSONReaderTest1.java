@@ -1763,7 +1763,7 @@ public class JSONReaderTest1 {
                 assertEquals(name0, name1);
 
                 byte[] ut8Bytes = new String(chars).getBytes(StandardCharsets.UTF_8);
-                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), null, ut8Bytes, 0, ut8Bytes.length);
+                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), ut8Bytes, 0, ut8Bytes.length);
                 assertTrue(utf8Reader.nextIfObjectStart());
                 String name2 = utf8Reader.readFieldName();
                 assertEquals(name0, name2);
@@ -2023,7 +2023,7 @@ public class JSONReaderTest1 {
             String json = JSON.toJSONString(JSONObject.of(s1, s1));
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
             JSONReader.Context ctx = JSONFactory.createReadContext();
-            JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, s1, bytes, 0, bytes.length);
+            JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, bytes, 0, bytes.length);
             JSONObject object = (JSONObject) jsonReader.readObject();
             Object v1 = object.get(s1);
             assertEquals(s1, v1);
@@ -2035,7 +2035,7 @@ public class JSONReaderTest1 {
                 String json = JSON.toJSONString(JSONObject.of(s2, s2));
                 byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
                 JSONReader.Context ctx = JSONFactory.createReadContext();
-                JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, s2, bytes, 0, bytes.length);
+                JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, bytes, 0, bytes.length);
                 JSONObject object = (JSONObject) jsonReader.readObject();
                 Object v1 = object.get(s2);
                 assertEquals(s2, v1);

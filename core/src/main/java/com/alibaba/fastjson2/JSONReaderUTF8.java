@@ -105,7 +105,7 @@ class JSONReaderUTF8
         }
     }
 
-    JSONReaderUTF8(Context ctx, String str, byte[] bytes, int offset, int length) {
+    JSONReaderUTF8(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx, false, true);
 
         this.bytes = bytes;
@@ -7225,5 +7225,22 @@ class JSONReaderUTF8
                 // ignored
             }
         }
+    }
+
+    public static JSONReaderUTF8 of(byte[] bytes, int off, int len, JSONReader.Context context) {
+        if (METHOD_HANDLE_HAS_NEGATIVE != null) {
+            try {
+                boolean hasNegative = (Boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len);
+                if (!hasNegative) {
+                    return new JSONReaderASCII(context, null, bytes, off, len);
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        } else if (IOUtils.isASCII(bytes, off, len)) {
+            return new JSONReaderASCIIJDK8(context, null, bytes, off, len);
+        }
+
+        return new JSONReaderUTF8(context, bytes, off, len);
     }
 }
