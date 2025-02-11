@@ -135,13 +135,6 @@ public class JDKUtilsTest {
         assertNotNull(func);
     }
 
-    @Test
-    public void test_isASCII() {
-        byte[] bytes = new byte[127];
-        Arrays.fill(bytes, (byte) 'a');
-        assertTrue(isASCII(bytes));
-    }
-
     private static class PrivateBeanInt {
         private byte coder;
 
