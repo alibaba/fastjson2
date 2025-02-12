@@ -3252,33 +3252,20 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(char[] chars) {
-        return new JSONReaderUTF16(
-                createReadContext(),
+        return ofUTF16(
                 null,
                 chars,
                 0,
-                chars.length);
+                chars.length, createReadContext());
     }
 
     @Deprecated
     public static JSONReader of(Context context, char[] chars) {
-        return new JSONReaderUTF16(
-                context,
-                null,
-                chars,
-                0,
-                chars.length
-        );
+        return ofUTF16(null, chars, 0, chars.length, context);
     }
 
     public static JSONReader of(char[] chars, Context context) {
-        return new JSONReaderUTF16(
-                context,
-                null,
-                chars,
-                0,
-                chars.length
-        );
+        return ofUTF16(null, chars, 0, chars.length, context);
     }
 
     public static JSONReader ofJSONB(byte[] jsonbBytes) {
@@ -3344,11 +3331,11 @@ public abstract class JSONReader
         Context context = JSONFactory.createReadContext();
 
         if (charset == StandardCharsets.UTF_8) {
-            return new JSONReaderUTF8(context, bytes, offset, length);
+            return JSONReaderUTF8.of(bytes, offset, length, context);
         }
 
         if (charset == StandardCharsets.UTF_16) {
-            return new JSONReaderUTF16(context, bytes, offset, length);
+            return ofUTF16(bytes, offset, length, context);
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
@@ -3358,13 +3345,23 @@ public abstract class JSONReader
         throw new JSONException("not support charset " + charset);
     }
 
+    private static JSONReader ofUTF16(byte[] bytes, int offset, int length, Context ctx) {
+        return new JSONReaderUTF16(ctx, bytes, offset, length);
+    }
+
+    private static JSONReader ofUTF16(String str, char[] chars, int offset, int length, Context ctx) {
+        return (str != null && str.indexOf('\\') == -1) || IOUtils.isNonSlashASCII(chars, offset, length)
+                ? new JSONReaderUTF16NonSlash(ctx, str, chars, offset, length)
+                : new JSONReaderUTF16(ctx, str, chars, offset, length);
+    }
+
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
         if (charset == StandardCharsets.UTF_8) {
             return JSONReaderUTF8.of(bytes, offset, length, context);
         }
 
         if (charset == StandardCharsets.UTF_16) {
-            return new JSONReaderUTF16(context, bytes, offset, length);
+            return ofUTF16(bytes, offset, length, context);
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
@@ -3383,11 +3380,11 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(char[] chars, int offset, int length) {
-        return new JSONReaderUTF16(createReadContext(), null, chars, offset, length);
+        return ofUTF16(null, chars, offset, length, createReadContext());
     }
 
     public static JSONReader of(char[] chars, int offset, int length, Context context) {
-        return new JSONReaderUTF16(context, null, chars, offset, length);
+        return ofUTF16(null, chars, offset, length, context);
     }
 
     public static JSONReader of(URL url, Context context) throws IOException {
@@ -3415,9 +3412,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII) {
-            return JVM_VERSION == 8
-                    ? new JSONReaderASCIIJDK8(context, is)
-                    : new JSONReaderASCII(context, is);
+            return new JSONReaderASCII(context, is);
         }
 
         return JSONReader.of(new InputStreamReader(is, charset), context);
@@ -3461,33 +3456,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(String str) {
-        if (str == null) {
-            throw new NullPointerException();
-        }
-
-        Context context = JSONFactory.createReadContext();
-        if (STRING_VALUE != null && STRING_CODER != null) {
-            try {
-                final int LATIN1 = 0;
-                int coder = STRING_CODER.applyAsInt(str);
-                if (coder == LATIN1) {
-                    byte[] bytes = STRING_VALUE.apply(str);
-                    if (PREDICATE_IS_ASCII != null && PREDICATE_IS_ASCII.test(bytes)) {
-                        return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
-                    }
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
-
-        final int length = str.length();
-        if (JVM_VERSION == 8) {
-            char[] chars = JDKUtils.getCharArray(str);
-            return new JSONReaderUTF16(context, str, chars, 0, length);
-        }
-
-        return new JSONReaderUTF16(context, str, 0, length);
+        return of(str, JSONFactory.createReadContext());
     }
 
     public static JSONReader of(String str, Context context) {
@@ -3501,7 +3470,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
+                    return JSONReaderASCII.of(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3516,36 +3485,11 @@ public abstract class JSONReader
             chars = str.toCharArray();
         }
 
-        return new JSONReaderUTF16(context, str, chars, 0, length);
+        return ofUTF16(str, chars, 0, length, context);
     }
 
     public static JSONReader of(String str, int offset, int length) {
-        if (str == null) {
-            throw new NullPointerException();
-        }
-
-        Context context = JSONFactory.createReadContext();
-        if (STRING_VALUE != null) {
-            try {
-                final int LATIN1 = 0;
-                int coder = STRING_CODER.applyAsInt(str);
-                if (coder == LATIN1) {
-                    byte[] bytes = STRING_VALUE.apply(str);
-                    return new JSONReaderASCII(context, str, bytes, offset, length);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
-
-        char[] chars;
-        if (JVM_VERSION == 8) {
-            chars = JDKUtils.getCharArray(str);
-        } else {
-            chars = str.toCharArray();
-        }
-
-        return new JSONReaderUTF16(context, str, chars, offset, length);
+        return of(str, offset, length, JSONFactory.createReadContext());
     }
 
     public static JSONReader of(String str, int offset, int length, Context context) {
@@ -3559,7 +3503,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new JSONReaderASCII(context, str, bytes, offset, length);
+                    return JSONReaderASCII.of(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3573,7 +3517,7 @@ public abstract class JSONReader
             chars = str.toCharArray();
         }
 
-        return new JSONReaderUTF16(context, str, chars, offset, length);
+        return ofUTF16(str, chars, offset, length, context);
     }
 
     final void bigInt(char[] chars, int off, int len) {

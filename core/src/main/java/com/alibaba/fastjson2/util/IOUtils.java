@@ -1460,7 +1460,7 @@ public class IOUtils {
     }
 
     public static int putBoolean(byte[] bytes, int off, boolean v) {
-        long address = ARRAY_CHAR_BASE_OFFSET + off;
+        long address = ARRAY_BYTE_BASE_OFFSET + off;
         if (v) {
             UNSAFE.putInt(bytes, address, TRUE);
             return off + 4;
@@ -2014,7 +2014,7 @@ public class IOUtils {
     public static boolean isLatin1(char[] chars, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
-        long address = ARRAY_CHAR_BASE_OFFSET + off;
+        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         while (off < upperBound
                 && (convEndian(false, UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8)) & 0xFF00FF00FF00FF00L) == 0
         ) {
@@ -2041,6 +2041,53 @@ public class IOUtils {
 
         while (off++ < end) {
             if ((UNSAFE.getByte(bytes, address++) & 0x80) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isNonSlashASCII(char[] chars, int off, int len) {
+        if (BIG_ENDIAN) {
+            return false;
+        }
+        int end = off + len;
+        int upperBound = off + (len & ~7);
+        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
+        long d0, d1;
+        while (off < upperBound
+                && (((d0 = UNSAFE.getLong(chars, address)) | (d1 = UNSAFE.getLong(chars, address + 8))) & 0xFF00FF00FF00FF00L) == 0
+                && notContains(d0 | (d1 << 8), 0x5C5C5C5C5C5C5C5CL)
+        ) {
+            address += 16;
+            off += 8;
+        }
+        while (off++ < end) {
+            char c;
+            if ((c = UNSAFE.getChar(chars, address)) >= 0x80 || c == '\\') {
+                return false;
+            }
+            address += 2;
+        }
+        return true;
+    }
+
+    public static boolean isNonSlashASCII(byte[] bytes, int off, int len) {
+        int end = off + len;
+        int upperBound = off + (len & ~7);
+        long address = ARRAY_BYTE_BASE_OFFSET + off;
+        long d;
+        while (off < upperBound
+                && ((d = UNSAFE.getLong(bytes, address)) & 0x8080808080808080L) == 0
+                && notContains(d, 0x5C5C5C5C5C5C5C5CL)
+        ) {
+            address += 8;
+            off += 8;
+        }
+
+        while (off++ < end) {
+            byte b;
+            if (((b = UNSAFE.getByte(bytes, address++)) & 0x80) != 0 || b == '\\') {
                 return false;
             }
         }

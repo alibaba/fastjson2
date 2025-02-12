@@ -640,7 +640,7 @@ class JSONReaderASCII
 
         long nameValue = 0;
         for (int i = 0; offset < end; offset++, i++) {
-            ch = bytes[offset];
+            ch = bytes[offset] & 0xff;
 
             if (ch == quote) {
                 if (i == 0) {
@@ -1474,23 +1474,7 @@ class JSONReaderASCII
                 offset = readEscaped(bytes, start, quote, buf);
                 str = new String(buf);
             } else {
-                if (this.str != null) {
-                    str = this.str.substring(start, offset);
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1);
-                } else if (ANDROID) {
-                    str = getLatin1String(start, offset - start);
-                } else {
-                    str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
-                }
-            }
-
-            if ((context.features & Feature.TrimString.mask) != 0) {
-                str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
+                str = subString(bytes, start, offset);
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
@@ -1560,7 +1544,30 @@ class JSONReaderASCII
         return offset;
     }
 
+    protected final String subString(byte[] bytes, int start, int offset) {
+        String str;
+        if (this.str != null) {
+            str = this.str.substring(start, offset);
+        } else if (STRING_CREATOR_JDK11 != null) {
+            str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1);
+        } else if (ANDROID) {
+            str = getLatin1String(start, offset - start);
+        } else {
+            str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+        }
+        if ((context.features & Feature.TrimString.mask) != 0) {
+            str = str.trim();
+        }
+        // empty string to null
+        if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+            str = null;
+        }
+        return str;
+    }
+
     public static JSONReaderASCII of(Context ctx, String str, byte[] bytes, int offset, int length) {
-        return new JSONReaderASCII(ctx, str, bytes, offset, length);
+        return IOUtils.isNonSlashASCII(bytes, offset, length)
+                ? new JSONReaderASCIINonSlash(ctx, str, bytes, offset, length)
+                : new JSONReaderASCII(ctx, str, bytes, offset, length);
     }
 }
