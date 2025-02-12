@@ -7134,16 +7134,14 @@ class JSONReaderUTF8
             buf.append(message).append(", ");
         }
 
-        buf.append("offset ").append(offset)
+        return buf.append("offset ").append(offset)
                 .append(", character ").append(ch)
                 .append(", line ").append(line)
                 .append(", column ").append(column)
                 .append(", fastjson-version ").append(JSON.VERSION)
-                .append(line > 1 ? '\n' : ' ');
-
-        String str = new String(bytes, this.start, Math.min(length, 65535));
-        buf.append(str);
-        return buf.toString();
+                .append(line > 1 ? '\n' : ' ')
+                .append(new String(bytes, this.start, Math.min(length, 65535)))
+                .toString();
     }
 
     @Override
