@@ -985,7 +985,7 @@ final class JSONReaderASCII
             char ch = (char) (bytes[offset] & 0xff);
 
             if (ch == '\\') {
-                ch = (char) (bytes[++offset] & 0xff);
+                ch = (char) bytes[++offset];
                 switch (ch) {
                     case 'u': {
                         ch = (char) hexDigit4(bytes, check3(offset + 1, end));
@@ -1469,7 +1469,7 @@ final class JSONReaderASCII
                 char[] chars = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
-                    int ch = bytes[offset] & 0xff;
+                    int ch = bytes[offset];
                     if (ch == '\\') {
                         ch = bytes[++offset];
                         switch (ch) {
@@ -1517,23 +1517,21 @@ final class JSONReaderASCII
 
                 str = new String(chars);
             } else {
-                if (this.str != null) {
-                    str = this.str.substring(start, offset);
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1);
-                } else if (ANDROID) {
-                    str = getLatin1String(start, offset - start);
+                int strlen = offset - start;
+                if (strlen == 1) {
+                    str = TypeUtils.toString((char) (bytes[start] & 0xff));
+                } else if (strlen == 2) {
+                    str = TypeUtils.toString(
+                            (char) (bytes[start] & 0xff),
+                            (char) (bytes[start + 1] & 0xff)
+                    );
                 } else {
-                    str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+                    str = new String(bytes, start, offset - start, StandardCharsets.US_ASCII);
                 }
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
-            }
-
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
