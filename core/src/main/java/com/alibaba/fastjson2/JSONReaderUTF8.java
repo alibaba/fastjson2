@@ -7228,19 +7228,17 @@ class JSONReaderUTF8
     }
 
     public static JSONReaderUTF8 of(byte[] bytes, int off, int len, JSONReader.Context context) {
-        boolean hasNegative = true;
         if (METHOD_HANDLE_HAS_NEGATIVE != null) {
             try {
-                hasNegative = (Boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len);
+                boolean hasNegative = (Boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len);
+                if (!hasNegative) {
+                    return new JSONReaderASCII(context, null, bytes, off, len);
+                }
             } catch (Throwable ignored) {
                 // ignored
             }
         } else if (IOUtils.isASCII(bytes, off, len)) {
-            hasNegative = false;
-        }
-
-        if (!hasNegative) {
-            return new JSONReaderASCII(context, null, bytes, off, len);
+            return new JSONReaderASCIIJDK8(context, null, bytes, off, len);
         }
 
         return new JSONReaderUTF8(context, bytes, off, len);
