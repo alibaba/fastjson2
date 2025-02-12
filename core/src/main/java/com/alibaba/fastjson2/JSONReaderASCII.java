@@ -98,7 +98,22 @@ class JSONReaderASCII
             return false;
         }
 
-        valueEnd(bytes, offset, end);
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (comma = (ch == ',')) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        this.offset = offset;
+        this.ch = (char) (ch & 0xFF);
         return true;
     }
 
@@ -746,7 +761,20 @@ class JSONReaderASCII
             }
         }
 
-        valueEnd(bytes, offset, end);
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (comma = (ch == ',')) {
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+        }
+
+        this.offset = offset;
+        this.ch = (char) (ch & 0xFF);
 
         return hashCode;
     }
@@ -1376,7 +1404,17 @@ class JSONReaderASCII
             }
         }
 
-        valueEnd(bytes, offset, end);
+        int ch = bytes[++offset];
+        while (ch > 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = bytes[++offset];
+        }
+
+        this.offset = offset + 1;
+        if (comma = (ch == ',')) {
+            next();
+        } else {
+            this.ch = (char) ch;
+        }
 
         stringValue = str;
     }
@@ -1436,11 +1474,7 @@ class JSONReaderASCII
                 offset = readEscaped(bytes, start, quote, buf);
                 str = new String(buf);
             } else {
-                if (STRING_CREATOR_JDK11 != null) {
-                    str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(this.bytes, this.offset, offset), LATIN1);
-                } else {
-                    str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
-                }
+                str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
             }
 
             long features = context.features;
@@ -1452,7 +1486,20 @@ class JSONReaderASCII
                 str = null;
             }
 
-            valueEnd(bytes, offset, end);
+            int ch = ++offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if (comma = ch == ',') {
+                ch = offset == end ? EOI : bytes[offset++];
+                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            this.ch = (char) (ch & 0xFF);
+            this.offset = offset;
             return str;
         }
 
@@ -1510,22 +1557,5 @@ class JSONReaderASCII
         return IOUtils.isNonSlashASCII(bytes, offset, length)
                 ? new JSONReaderASCIINonSlash(ctx, str, bytes, offset, length)
                 : new JSONReaderASCII(ctx, str, bytes, offset, length);
-    }
-
-    final void valueEnd(byte[] bytes, int offset, int end) {
-        int ch = ++offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = ch == ',') {
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
     }
 }
