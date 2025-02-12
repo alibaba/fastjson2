@@ -52,6 +52,15 @@ public abstract class JSONReader
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
+    static final boolean[] INT_VALUE_END = new boolean[256];
+    static {
+        Arrays.fill(INT_VALUE_END, true);
+        char[] chars = {'.', 'e', 'E', 't', 'f', 'n', '{', '[', '0', '1', '2', '2', '3', '4', '5', '6', '7', '8', '9'};
+        for (char ch : chars) {
+            INT_VALUE_END[ch] = false;
+        }
+    }
+
     protected final Context context;
     public final boolean jsonb;
     public final boolean utf8;
@@ -799,6 +808,16 @@ public abstract class JSONReader
     }
 
     public abstract Integer readInt32();
+
+    protected final int readInt32ValueOverflow() {
+        readNumber0();
+        return getInt32Value();
+    }
+
+    protected final long readInt64ValueOverflow() {
+        readNumber0();
+        return getInt64Value();
+    }
 
     public final int getInt32Value() {
         switch (valueType) {
@@ -3339,7 +3358,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return JSONReaderASCII.of(context, null, bytes, offset, length);
+            return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -3350,9 +3369,7 @@ public abstract class JSONReader
     }
 
     private static JSONReader ofUTF16(String str, char[] chars, int offset, int length, Context ctx) {
-        return (str != null && str.indexOf('\\') == -1) || IOUtils.isNonSlashASCII(chars, offset, length)
-                ? new JSONReaderUTF16NonSlash(ctx, str, chars, offset, length)
-                : new JSONReaderUTF16(ctx, str, chars, offset, length);
+        return new JSONReaderUTF16(ctx, str, chars, offset, length);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
@@ -3365,7 +3382,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return JSONReaderASCII.of(context, null, bytes, offset, length);
+            return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -3470,7 +3487,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return JSONReaderASCII.of(context, str, bytes, 0, bytes.length);
+                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3503,7 +3520,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return JSONReaderASCII.of(context, str, bytes, offset, length);
+                    return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");

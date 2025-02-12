@@ -16,11 +16,10 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.IOUtils.INT_32_MULT_MIN_10;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.Long.MIN_VALUE;
 
-class JSONReaderUTF16
+final class JSONReaderUTF16
         extends JSONReader {
     static final long CHAR_MASK = BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L;
 
@@ -2407,83 +2406,55 @@ class JSONReaderUTF16
             quote = ch;
             ch = chars[offset++];
         }
+        int fc = ch;
+        int result = ch >= '0' && ch <= '9'
+                ? '0' - ch
+                : ch == '-' || ch == '+'
+                ? 0
+                : 1;  // or any value > 0
+        int d;
+        while (offset + 1 < end
+                && (d = IOUtils.digit2(chars, offset)) != -1
+                && Integer.MIN_VALUE / 100 <= result & result <= 0) {
+            result = result * 100 - d;  // overflow from d => result > 0
+            offset += 2;
+        }
+        if (offset < end && IOUtils.isDigit(ch = chars[offset]) && Integer.MIN_VALUE / 10 <= result & result <= 0) {
+            result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+            offset++;
+        }
 
-        int result = 0;
-        boolean inRange, negative;
-        if ((negative = (ch == '-')) || ch == '+') {
-            ch = offset == end ? EOI : chars[offset++];
-        } else if (ch == ',') {
-            throw numberError();
-        }
-        if (inRange = IOUtils.isDigit(ch)) {
-            result = '0' - ch;
-        }
-        int limit = Integer.MIN_VALUE + (negative ? 0 : 1);
-        int digit;
-        while (inRange
-                && offset + 1 < end
-                && (digit = IOUtils.digit2(chars, offset)) != -1
+        ch = offset == end ? EOI : chars[offset++];
+        if (result <= 0 && (Integer.MIN_VALUE < result || fc == '-')
+                && INT_VALUE_END[ch & 0xff]
+                && (quote == 0 || ch == quote)
         ) {
-            // max digits is 19, no need to check inRange (result == MULT_MIN_100 && digit <= (MULT_MIN_100 * 100 - limit))
-            if (inRange = (result > INT_32_MULT_MIN_100)) {
-                result = result * 100 - digit;
-                offset += 2;
-            }
-        }
-        if (inRange) {
-            if (offset < end && IOUtils.isDigit((ch = chars[offset]))) {
-                digit = ch - '0';
-                if (inRange = (result > INT_32_MULT_MIN_10 || (result == INT_32_MULT_MIN_10 && digit <= (INT_32_MULT_MIN_10 * 10 - limit)))) {
-                    result = result * 10 - digit;
-                    offset++;
-                }
-            }
-            if (inRange) {
+            if (quote != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
-        }
 
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || (quote != 0 && ch != quote)
-        ) {
-            inRange = false;
-        }
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                ch = offset == end ? EOI : chars[offset++];
+            }
 
-        if (!inRange) {
-            readNumber0();
-            return getInt32Value();
-        }
-
-        if (quote != 0) {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : chars[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
+
+            if (comma = (ch == ',')) {
+                ch = offset == end ? EOI : chars[offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    ch = offset == end ? EOI : chars[offset++];
+                }
+            }
+
+            this.ch = ch;
+            this.offset = offset;
+
+            return fc == '-' ? result : -result;
+        } else {
+            return readInt32ValueOverflow();
         }
-
-        this.ch = ch;
-        this.offset = offset;
-
-        return negative ? result : -result;
     }
 
     @Override
@@ -2496,7 +2467,7 @@ class JSONReaderUTF16
     }
 
     public final long readInt64Value() {
-        int ch = this.ch;
+        char ch = this.ch;
         int offset = this.offset, end = this.end;
         final char[] chars = this.chars;
 
@@ -2505,82 +2476,55 @@ class JSONReaderUTF16
             quote = ch;
             ch = chars[offset++];
         }
+        int fc = ch;
+        long result = ch >= '0' && ch <= '9'
+                ? '0' - ch
+                : ch == '-' || ch == '+'
+                ? 0
+                : 1;  // or any value > 0
+        int d;
+        while (offset + 1 < end
+                && (d = IOUtils.digit2(chars, offset)) != -1
+                && Long.MIN_VALUE / 100 <= result & result <= 0) {
+            result = result * 100 - d;  // overflow from d => result > 0
+            offset += 2;
+        }
+        if (offset < end && IOUtils.isDigit(ch = chars[offset]) && Long.MIN_VALUE / 10 <= result & result <= 0) {
+            result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+            offset++;
+        }
 
-        long result = 0;
-        boolean inRange, negative;
-        if ((negative = (ch == '-')) || ch == '+') {
-            ch = offset == end ? EOI : chars[offset++];
-        } else if (ch == ',') {
-            throw numberError();
-        }
-        if (inRange = IOUtils.isDigit(ch)) {
-            result = '0' - ch;
-        }
-        long limit = MIN_VALUE + (negative ? 0L : 1L);
-        int digit;
-        while (inRange
-                && offset + 1 < end
-                && (digit = IOUtils.digit2(chars, offset)) != -1
+        ch = offset == end ? EOI : chars[offset++];
+        if (result <= 0 && (Long.MIN_VALUE < result || fc == '-')
+                && INT_VALUE_END[ch & 0xff]
+                && (quote == 0 || ch == quote)
         ) {
-            if (inRange = (result > INT_64_MULT_MIN_100 || (result == INT_64_MULT_MIN_100 && digit <= (INT_64_MULT_MIN_100 * 100 - limit)))) {
-                result = result * 100 - digit;
-                offset += 2;
-            }
-        }
-        if (inRange) {
-            if (offset < end && IOUtils.isDigit((ch = chars[offset]))) {
-                digit = ch - '0';
-                if (inRange = (result > INT_64_MULT_MIN_10) || (result == INT_64_MULT_MIN_10 && digit <= (INT_64_MULT_MIN_10 * 10 - limit))) {
-                    result = result * 10 - digit;
-                    offset++;
-                }
-            }
-            if (inRange) {
+            if (quote != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
-        }
 
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || (quote != 0 && ch != quote)
-        ) {
-            inRange = false;
-        }
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                ch = offset == end ? EOI : chars[offset++];
+            }
 
-        if (!inRange) {
-            readNumber0();
-            return getInt64Value();
-        }
-
-        if (quote != 0) {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : chars[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
+
+            if (comma = (ch == ',')) {
+                ch = offset == end ? EOI : chars[offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    ch = offset == end ? EOI : chars[offset++];
+                }
+            }
+
+            this.ch = ch;
+            this.offset = offset;
+
+            return fc == '-' ? result : -result;
+        } else {
+            return readInt64ValueOverflow();
         }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-
-        return negative ? result : -result;
     }
 
     @Override

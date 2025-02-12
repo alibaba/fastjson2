@@ -21,9 +21,6 @@ public class IOUtils {
     static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
     public static final long DOT_X0 = BIG_ENDIAN ? 0x2e00L : 0x2eL;
 
-    public static final int INT_32_MULT_MIN_10 = Integer.MIN_VALUE / 10;
-    public static final int INT_32_MULT_MIN_100 = Integer.MIN_VALUE / 100;
-
     public static final long INT_64_MULT_MIN_10 = Long.MIN_VALUE / 10;
     public static final long INT_64_MULT_MIN_100 = Long.MIN_VALUE / 100;
 
@@ -2035,31 +2032,6 @@ public class IOUtils {
             if ((UNSAFE.getByte(bytes, address++) & 0x80) != 0) {
                 return false;
             }
-        }
-        return true;
-    }
-
-    public static boolean isNonSlashASCII(char[] chars, int off, int len) {
-        if (BIG_ENDIAN) {
-            return false;
-        }
-        int end = off + len;
-        int upperBound = off + (len & ~7);
-        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
-        long d0, d1;
-        while (off < upperBound
-                && (((d0 = UNSAFE.getLong(chars, address)) | (d1 = UNSAFE.getLong(chars, address + 8))) & 0xFF00FF00FF00FF00L) == 0
-                && notContains(d0 | (d1 << 8), 0x5C5C5C5C5C5C5C5CL)
-        ) {
-            address += 16;
-            off += 8;
-        }
-        while (off++ < end) {
-            char c;
-            if ((c = UNSAFE.getChar(chars, address)) >= 0x80 || c == '\\') {
-                return false;
-            }
-            address += 2;
         }
         return true;
     }
