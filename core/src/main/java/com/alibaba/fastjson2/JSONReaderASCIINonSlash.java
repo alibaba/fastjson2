@@ -3,6 +3,10 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 
 final class JSONReaderASCIINonSlash
         extends JSONReaderASCII {
@@ -21,7 +25,13 @@ final class JSONReaderASCIINonSlash
                 throw new JSONException("invalid escape character EOI");
             }
 
-            String str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+            String str;
+            if (STRING_CREATOR_JDK11 != null) {
+                str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(this.bytes, this.offset, offset), LATIN1);
+            } else {
+                str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+            }
+
             long features = context.features;
             if ((features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
@@ -31,20 +41,7 @@ final class JSONReaderASCIINonSlash
                 str = null;
             }
 
-            int ch = ++offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-
-            if (comma = ch == ',') {
-                ch = offset == end ? EOI : bytes[offset++];
-                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-            }
-
-            this.ch = (char) ch;
-            this.offset = offset;
+            valueEnd(bytes, offset, end);
             return str;
         }
 
