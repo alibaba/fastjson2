@@ -43,7 +43,7 @@ public class EishayParseString {
         }
     }
 
-//    @Benchmark
+    @Benchmark
     public void fastjson1(Blackhole bh) {
         bh.consume(com.alibaba.fastjson.JSON.parseObject(str, MediaContent.class));
     }
@@ -58,7 +58,7 @@ public class EishayParseString {
         bh.consume(JSON.parseObject(str, MediaContent.class, JSONFactory.createReadContext(provider)));
     }
 
-//    @Benchmark
+    @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.readValue(str, MediaContent.class));
     }
@@ -70,7 +70,7 @@ public class EishayParseString {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void gson(Blackhole bh) throws Exception {
         bh.consume(
                 gson.fromJson(str, MediaContent.class)
