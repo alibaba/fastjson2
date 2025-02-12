@@ -6,7 +6,7 @@ public class EishayParseUTF8BytesTest {
     static final EishayParseUTF8Bytes benchmark = new EishayParseUTF8Bytes();
 
     public static void fastjson2() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
                 benchmark.fastjson2(BH);

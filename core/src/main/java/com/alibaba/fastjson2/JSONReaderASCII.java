@@ -1474,7 +1474,16 @@ class JSONReaderASCII
                 offset = readEscaped(bytes, start, quote, buf);
                 str = new String(buf);
             } else {
-                str = subString(bytes, start, offset);
+                str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+            }
+
+            long features = context.features;
+            if ((features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+            // empty string to null
+            if (str.isEmpty() && (features & Feature.EmptyStringAsNull.mask) != 0) {
+                str = null;
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
@@ -1542,27 +1551,6 @@ class JSONReaderASCII
             offset++;
         }
         return offset;
-    }
-
-    protected final String subString(byte[] bytes, int start, int offset) {
-        String str;
-        if (this.str != null) {
-            str = this.str.substring(start, offset);
-        } else if (STRING_CREATOR_JDK11 != null) {
-            str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1);
-        } else if (ANDROID) {
-            str = getLatin1String(start, offset - start);
-        } else {
-            str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
-        }
-        if ((context.features & Feature.TrimString.mask) != 0) {
-            str = str.trim();
-        }
-        // empty string to null
-        if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-            str = null;
-        }
-        return str;
     }
 
     public static JSONReaderASCII of(Context ctx, String str, byte[] bytes, int offset, int length) {

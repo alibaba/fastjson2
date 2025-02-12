@@ -1709,14 +1709,6 @@ public class IOUtils {
         return (d & 0xF) * 10 + (d >> 8);
     }
 
-    private static int digit2(int x) {
-        int d;
-        if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0) {
-            return -1;
-        }
-        return (d & 0xF) * 10 + (d >> 8);
-    }
-
     public static int digit1(char[] chars, int off) {
         int d = UNSAFE.getByte(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
         return d >= 0 && d <= 9 ? d : -1;
@@ -2075,19 +2067,16 @@ public class IOUtils {
     public static boolean isNonSlashASCII(byte[] bytes, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
-        long address = ARRAY_BYTE_BASE_OFFSET + off;
-        long d;
+        long addr = ARRAY_BYTE_BASE_OFFSET + off;
+        long d, x;
         while (off < upperBound
-                && ((d = UNSAFE.getLong(bytes, address)) & 0x8080808080808080L) == 0
-                && notContains(d, 0x5C5C5C5C5C5C5C5CL)
-        ) {
-            address += 8;
+                && (((d = UNSAFE.getLong(bytes, addr)) | (((x = d ^ 0x5C5C5C5C5C5C5C5CL) - 0x0101010101010101L) & ~x)) & 0x8080808080808080L) == 0) {
+            addr += 8;
             off += 8;
         }
-
         while (off++ < end) {
             byte b;
-            if (((b = UNSAFE.getByte(bytes, address++)) & 0x80) != 0 || b == '\\') {
+            if (((b = UNSAFE.getByte(bytes, addr++)) & 0x80) != 0 || b == '\\') {
                 return false;
             }
         }

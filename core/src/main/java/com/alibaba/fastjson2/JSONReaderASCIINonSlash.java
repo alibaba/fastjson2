@@ -1,5 +1,9 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.IOUtils;
+
+import java.nio.charset.StandardCharsets;
+
 final class JSONReaderASCIINonSlash
         extends JSONReaderASCII {
     JSONReaderASCIINonSlash(Context ctx, String str, byte[] bytes, int offset, int length) {
@@ -11,19 +15,21 @@ final class JSONReaderASCIINonSlash
         char quote = this.ch;
         if (quote == '"' || quote == '\'') {
             final byte[] bytes = this.bytes;
-            int offset = this.offset;
             final int start = offset, end = this.end;
-            valueEscape = false;
-            for (; ; offset++) {
-                if (offset >= end) {
-                    throw new JSONException("invalid escape character EOI");
-                }
-                if (bytes[offset] == quote) {
-                    break;
-                }
+            int offset = IOUtils.indexOfQuote(bytes, quote, start, end);
+            if (offset == -1) {
+                throw new JSONException("invalid escape character EOI");
             }
 
-            String str = subString(bytes, start, offset);
+            String str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+            long features = context.features;
+            if ((features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+            // empty string to null
+            if (str.isEmpty() && (features & Feature.EmptyStringAsNull.mask) != 0) {
+                str = null;
+            }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {

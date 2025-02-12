@@ -33,11 +33,12 @@ final class JSONReaderUTF16NonSlash
                 str = new String(chars, start, offset - start);
             }
 
-            if ((context.features & Feature.TrimString.mask) != 0) {
+            long features = context.features;
+            if ((features & Feature.TrimString.mask) != 0) {
                 str = str.trim();
             }
             // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
+            if (str.isEmpty() && (features & Feature.EmptyStringAsNull.mask) != 0) {
                 str = null;
             }
 
