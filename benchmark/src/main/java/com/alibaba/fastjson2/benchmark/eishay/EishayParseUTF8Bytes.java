@@ -45,7 +45,7 @@ public class EishayParseUTF8Bytes {
         }
     }
 
-//    @Benchmark
+    @Benchmark
     public void fastjson1(Blackhole bh) {
         bh.consume(com.alibaba.fastjson.JSON.parseObject(utf8Bytes, MediaContent.class));
     }
