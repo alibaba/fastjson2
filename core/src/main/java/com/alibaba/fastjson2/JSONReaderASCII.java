@@ -1473,6 +1473,8 @@ class JSONReaderASCII
                 char[] buf = new char[valueLength];
                 offset = readEscaped(bytes, start, quote, buf);
                 str = new String(buf);
+            } else if (STRING_CREATOR_JDK11 != null) {
+                str = STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1);
             } else {
                 str = new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
             }
@@ -1551,11 +1553,5 @@ class JSONReaderASCII
             offset++;
         }
         return offset;
-    }
-
-    public static JSONReaderASCII of(Context ctx, String str, byte[] bytes, int offset, int length) {
-        return IOUtils.isNonSlashASCII(bytes, offset, length)
-                ? new JSONReaderASCIINonSlash(ctx, str, bytes, offset, length)
-                : new JSONReaderASCII(ctx, str, bytes, offset, length);
     }
 }
