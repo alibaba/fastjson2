@@ -1477,14 +1477,6 @@ public class IOUtils {
         }
     }
 
-    public static boolean isTRUE(byte[] buf, int pos) {
-        return getIntUnaligned(buf, pos) == TRUE;
-    }
-
-    public static boolean isTRUE(char[] buf, int pos) {
-        return getLongUnaligned(buf, pos) == TRUE_64;
-    }
-
     public static boolean isALSE(byte[] buf, int pos) {
         return getIntUnaligned(buf, pos) == ALSE;
     }
@@ -1526,104 +1518,6 @@ public class IOUtils {
         return digit4(
                 getIntLE(bytes, off)
         );
-    }
-
-    public static int digit5(byte[] bytes, int off) {
-        long x = getIntLE(bytes, off) | (((long) getByte(bytes, off + 4)) << 32);
-        long d;
-        if ((((x & 0xF0F0F0F0F0L) - 0x3030303030L) | (((d = x & 0x0F0F0F0F0FL) + 0x0606060606L) & 0xF0F0F0F0F0L)) != 0) {
-            return -1;
-        }
-        return (int) ((((
-                (d & 0xFL) * 10 +
-                ((d >> 8) & 0xFL)) * 10 +
-                ((d >> 16) & 0xFL)) * 10 +
-                ((d >> 24) & 0xFL)) * 10 +
-                (d >> 32));
-    }
-
-    public static int digit6(byte[] bytes, int off) {
-        long x = getIntLE(bytes, off) | (((long) getShortLE(bytes, off + 4)) << 32);
-        long d;
-        if ((((x & 0xF0F0F0F0F0F0L) - 0x303030303030L) | (((d = x & 0x0F0F0F0F0F0FL) + 0x060606060606L) & 0xF0F0F0F0F0F0L)) != 0) {
-            return -1;
-        }
-        return (int) ((((((
-                (d & 0xFL) * 10 +
-                ((d >> 8) & 0xFL)) * 10 +
-                ((d >> 16) & 0xFL)) * 10 +
-                ((d >> 24) & 0xFL)) * 10 +
-                ((d >> 32) & 0xFL)) * 10 +
-                (d >> 40)));
-    }
-
-    public static int digit7(byte[] bytes, int off) {
-        long x = getIntLE(bytes, off)
-                | (((long) getShortLE(bytes, off + 4)) << 32)
-                | (((long) getByte(bytes, off + 6)) << 48);
-        long d;
-        if ((((x & 0xF0F0F0F0F0F0F0L) - 0x30303030303030L) | (((d = x & 0x0F0F0F0F0F0F0FL) + 0x06060606060606L) & 0xF0F0F0F0F0F0F0L)) != 0) {
-            return -1;
-        }
-        return (int) ((((((
-                ((d & 0xFL) * 10 +
-                ((d >> 8) & 0xFL)) * 10 +
-                ((d >> 16) & 0xFL)) * 10 +
-                ((d >> 24) & 0xFL)) * 10 +
-                ((d >> 32) & 0xFL)) * 10 +
-                ((d >> 40) & 0xFL)) * 10 +
-                (d >> 48)));
-    }
-
-    public static int digit8(byte[] bytes, int off) {
-        return digit8(
-                getLongLE(bytes, off)
-        );
-    }
-
-    private static int digit8(long x) {
-        /*
-            Here we are doing a 4-Byte Vector operation on the Int type.
-
-            x & 0xF0 != 0xC0
-            ---------------
-            0 0b0011_0000 & 0b1111_0000 = 0b0011_0000
-            1 0b0011_0001 & 0b1111_0000 = 0b0011_0000
-            2 0b0011_0010 & 0b1111_0000 = 0b0011_0000
-            3 0b0011_0011 & 0b1111_0000 = 0b0011_0000
-            4 0b0011_0100 & 0b1111_0000 = 0b0011_0000
-            5 0b0011_0101 & 0b1111_0000 = 0b0011_0000
-            6 0b0011_0110 & 0b1111_0000 = 0b0011_0000
-            7 0b0011_0111 & 0b1111_0000 = 0b0011_0000
-            8 0b0011_1000 & 0b1111_0000 = 0b0011_0000
-            9 0b0011_1001 & 0b1111_0000 = 0b0011_0000
-
-            (((d = x & 0x0F) + 0x06) & 0xF0) != 0
-            ---------------
-            0 ((0b0011_0000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            1 ((0b0011_0001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            2 ((0b0011_0010) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            3 ((0b0011_0011) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            4 ((0b0011_0100) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            5 ((0b0011_0101) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            6 ((0b0011_0110) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            7 ((0b0011_0111) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            8 ((0b0011_1000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            9 ((0b0011_1001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-         */
-        long d;
-        if ((((x & 0xF0F0F0F0F0F0F0F0L) - 0x3030303030303030L) | (((d = x & 0x0F0F0F0F0F0F0F0FL) + 0x0606060606060606L) & 0xF0F0F0F0F0F0F0F0L)) != 0) {
-            return -1;
-        }
-        return (int) (((((((
-                ((d & 0xFL) * 10 +
-                ((d >> 8) & 0xFL)) * 10 +
-                ((d >> 16) & 0xFL)) * 10 +
-                ((d >> 24) & 0xFL)) * 10 +
-                ((d >> 32) & 0xFL)) * 10 +
-                ((d >> 40) & 0xFL)) * 10 +
-                ((d >> 48) & 0xFL)) * 10 +
-                (d >> 56)));
     }
 
     private static int digit4(int x) {

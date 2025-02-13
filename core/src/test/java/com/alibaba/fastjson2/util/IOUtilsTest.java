@@ -172,40 +172,6 @@ public class IOUtilsTest {
     }
 
     @Test
-    public void digit5() {
-        String str = "12345";
-        assertEquals(
-                Integer.parseInt(str),
-                IOUtils.digit5(
-                        str.getBytes(StandardCharsets.ISO_8859_1), 0));
-    }
-
-    @Test
-    public void digit6() {
-        String str = "123456";
-        assertEquals(
-                Integer.parseInt(str),
-                IOUtils.digit6(
-                        str.getBytes(StandardCharsets.ISO_8859_1), 0));
-    }
-
-    @Test
-    public void digit7() {
-        String str = "1234567";
-        assertEquals(
-                Integer.parseInt(str),
-                IOUtils.digit7(
-                        str.getBytes(StandardCharsets.ISO_8859_1), 0));
-    }
-
-    @Test
-    public void digit8() {
-        byte[] bytes = "12345678".getBytes(StandardCharsets.ISO_8859_1);
-        int d8 = IOUtils.digit8(bytes, 0);
-        System.out.println(d8);
-    }
-
-    @Test
     public void digit4_chars() {
         assertEquals(1972,
                 IOUtils.digit4(
