@@ -1484,6 +1484,10 @@ public class IOUtils {
         return getIntUnaligned(buf, pos) == TRUE;
     }
 
+    public static boolean isTRUE(char[] buf, int pos) {
+        return getLongUnaligned(buf, pos) == TRUE_64;
+    }
+
     public static boolean isALSE(byte[] buf, int pos) {
         return getIntUnaligned(buf, pos) == ALSE;
     }
