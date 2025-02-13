@@ -742,6 +742,21 @@ public abstract class BeanUtils {
                                     // ignored
                                 }
                             });
+                        } else if ("com.fasterxml.jackson.annotation.JsonProperty".equals(annotationTypeName)) {
+                            BeanUtils.annotationMethods(annotationType, m -> {
+                                String name = m.getName();
+                                try {
+                                    Object result = m.invoke(annotation);
+                                    if ("value".equals(name)) {
+                                        String annotationName = (String) result;
+                                        if (annotationName.length() != 0 && !annotationName.equals(enumName)) {
+                                            annotationNames[enumIndex] = annotationName;
+                                        }
+                                    }
+                                } catch (Exception ignored) {
+                                    // ignored
+                                }
+                            });
                         }
                     }
                     break;
