@@ -494,7 +494,7 @@ public class DoubleTest {
         for (String str : strings) {
             double d = Double.parseDouble(str);
             double v = JSONReader.of(str.getBytes()).readDoubleValue();
-            assertEquals(d, v);
+            assertEquals(d, v, str);
 
             double v1 = JSONReader.of(str.toCharArray()).readDoubleValue();
             assertEquals(d, v1);

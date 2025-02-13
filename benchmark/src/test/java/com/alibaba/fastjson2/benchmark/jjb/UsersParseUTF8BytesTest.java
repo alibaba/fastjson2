@@ -13,7 +13,7 @@ public class UsersParseUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu17.40.19 : 2198 2189
+            // zulu17.40.19 : 2198 2189 1633
             // oracle-jdk-17.0.6 :
             // oracle-jdk-17.0.6_vec :
         }

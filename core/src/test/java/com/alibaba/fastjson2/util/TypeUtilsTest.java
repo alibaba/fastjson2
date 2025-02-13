@@ -842,7 +842,22 @@ public class TypeUtilsTest {
 
     @Test
     public void parseDouble() {
-        String[] strings = {"28.303947340611323", "3.237861088027525", "0.123", ".123", "303947340611323", "123"};
+        String[] strings = {
+                "0.012345678901234567890",
+                "1139.2966694974831",
+                "0.0",
+                "123.",
+                "9223372036854775807",
+                "9223372036854775807.",
+                "922337203685477.5807",
+                "0.9223372036854775807",
+                "28.303947340611323",
+                "3.237861088027525",
+                "0.123",
+                ".123",
+                "303947340611323",
+                "123"
+        };
         for (String str : strings) {
             validateParseDouble(str);
             validateParseDouble("-".concat(str));
@@ -850,10 +865,15 @@ public class TypeUtilsTest {
     }
 
     private static void validateParseDouble(String str) {
+        String quoteStr = '"' + str + '"';
+        byte[] quoteBytes = quoteStr.getBytes(StandardCharsets.ISO_8859_1);
         byte[] bytes = str.getBytes(StandardCharsets.ISO_8859_1);
         double d1 = TypeUtils.parseDouble(bytes, 0, bytes.length);
         double d2 = JSON.parseObject(bytes, Double.class);
-        assertEquals(d1, d2);
+        assertEquals(d1, d2, str);
+
+        double d3 = JSON.parseObject(quoteBytes, Double.class);
+        assertEquals(d1, d3, str);
 
         String json = "{\"v0000\": " + str + "}";
         byte[] jsonBytes = json.getBytes(StandardCharsets.ISO_8859_1);

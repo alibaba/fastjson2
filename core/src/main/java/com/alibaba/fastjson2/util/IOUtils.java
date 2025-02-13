@@ -21,9 +21,6 @@ public class IOUtils {
     static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
     public static final long DOT_X0 = BIG_ENDIAN ? 0x2e00L : 0x2eL;
 
-    public static final long INT_64_MULT_MIN_10 = Long.MIN_VALUE / 10;
-    public static final long INT_64_MULT_MIN_100 = Long.MIN_VALUE / 100;
-
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
 
     public static final int[] DIGITS_K_32 = new int[1024];

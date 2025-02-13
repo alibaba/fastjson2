@@ -3708,6 +3708,22 @@ public class TypeUtils {
         BIG_TEN_POWERS_TABLE = bigInts;
     }
 
+    private static long divideAndRemainder(BigInteger m, BigInteger n) {
+        if (FIELD_BIGINTEGER_MAG_OFFSET == -1) {
+            return divideAndRemainder0(m, n);
+        }
+        MutableBigInteger q = new MutableBigInteger(),
+                a = new MutableBigInteger((int[]) UNSAFE.getObject(m, FIELD_BIGINTEGER_MAG_OFFSET)),
+                b = new MutableBigInteger((int[]) UNSAFE.getObject(n, FIELD_BIGINTEGER_MAG_OFFSET));
+        a.divideKnuth(b, q, false);
+        return q.longValue(m.signum() == n.signum() ? 1 : -1);
+    }
+
+    private static long divideAndRemainder0(BigInteger m, BigInteger n) {
+        return m.divideAndRemainder(n)[0]
+                .longValue();
+    }
+
     public static double doubleValue(int signNum, long intCompact, int scale) {
         final int P_D = 53; // Double.PRECISION
         final int Q_MIN_D = -1074; //(Double.MIN_EXPONENT - (P_D - 1));
@@ -3745,9 +3761,8 @@ public class TypeUtils {
             n = pow10.shiftLeft(ql);
         }
 
-        BigInteger[] qr = m.divideAndRemainder(n);
-        long i = qr[0].longValue();
-        int sb = qr[1].signum();
+        long i = divideAndRemainder(m, n);
+        int sb = m.signum();
         int dq = (Long.SIZE - (P_D + 2)) - Long.numberOfLeadingZeros(i);
         int eq = (Q_MIN_D - 2) - ql;
         if (dq >= eq) {
