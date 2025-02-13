@@ -3168,7 +3168,7 @@ public abstract class JSONReader
             return TypeUtils.toIntValue(val);
         }
 
-        throw new JSONException("parseInt error, value : " + val);
+        throw error("parseInt error, value : " + val);
     }
 
     protected final long toInt64(String val) {
@@ -3185,7 +3185,7 @@ public abstract class JSONReader
             }
         }
 
-        throw new JSONException("parseLong error, value : " + val);
+        throw error("parseLong error, value : " + val);
     }
 
     protected final long toLong(Map map) {
@@ -3193,7 +3193,7 @@ public abstract class JSONReader
         if (val instanceof Number) {
             return ((Number) val).intValue();
         }
-        throw new JSONException("parseLong error, value : " + map);
+        throw error("parseLong error, value : " + map);
     }
 
     protected final int toInt(List list) {
@@ -3207,7 +3207,7 @@ public abstract class JSONReader
             }
         }
 
-        throw new JSONException("parseLong error, field : value " + list);
+        throw error("parseLong error, field : value " + list);
     }
 
     protected final Number toNumber(Map map) {
@@ -3226,7 +3226,7 @@ public abstract class JSONReader
         if (decimal != null) {
             return decimal;
         }
-        throw new JSONException("can not cast to decimal " + object);
+        throw error("can not cast to decimal " + object);
     }
 
     protected final Number toNumber(List list) {

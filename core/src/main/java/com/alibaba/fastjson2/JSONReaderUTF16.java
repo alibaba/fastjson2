@@ -4037,7 +4037,7 @@ final class JSONReaderUTF16
                 try {
                     return TypeUtils.toBigDecimal(str);
                 } catch (NumberFormatException e) {
-                    throw new JSONException(info(e.getMessage()), e);
+                    throw new JSONException(info("cast to decimal error " + str), e);
                 }
             } else {
                 ch = offset >= end ? EOI : chars[offset++];
@@ -5028,7 +5028,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final String info(String message) {
+    public String info(String message) {
         int line = 1, column = 0;
         for (int i = 0; i < offset & i < end; i++, column++) {
             if (chars[i] == '\n') {
