@@ -14,7 +14,7 @@ public class Issue2407Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("Issue2407-parseArray millis : " + millis);
-            // zulu17.40.19 : 2639
+            // zulu17.40.19 : 2639 2343
         }
     }
 
