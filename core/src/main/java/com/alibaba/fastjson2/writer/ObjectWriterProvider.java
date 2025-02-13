@@ -23,8 +23,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static javax.swing.UIManager.put;
-
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
     static final int TYPE_INT32_MASK = 1 << 1;
