@@ -2618,7 +2618,7 @@ public abstract class JSONReader
         readArray((Collection) list, itemType);
     }
 
-    public final void readArray(Collection list, Type itemType) {
+    public void readArray(Collection list, Type itemType) {
         if (nextIfArrayStart()) {
             while (!nextIfArrayEnd()) {
                 Object item = read(itemType);

@@ -6281,4 +6281,11 @@ final class JSONReaderJSONB
     static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
         return new JSONException("offset overflow, offset " + offset + ", end " + end);
     }
+
+    public void readArray(Collection list, Type itemType) {
+        int count = startArray();
+        for (int i = 0; i < count; i++) {
+            list.add(read(itemType));
+        }
+    }
 }
