@@ -93,7 +93,7 @@ public abstract class JSONReader
 
     protected boolean typeRedirect; // redirect for {"@type":"xxx"",...
 
-    protected char[] doubleChars;
+    protected byte[] doubleChars;
 
     public final char current() {
         return ch;
@@ -3027,7 +3027,7 @@ public abstract class JSONReader
 
                                     int len = IOUtils.stringSize(unsignedUnscaledVal);
                                     if (doubleChars == null) {
-                                        doubleChars = new char[20];
+                                        doubleChars = new byte[20];
                                     }
                                     IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
                                     return TypeUtils.floatValue(isNegative, len - scale, doubleChars, len);
@@ -3065,7 +3065,7 @@ public abstract class JSONReader
                                             ? 17
                                             : unsignedUnscaledVal < 1000000000000000000L ? 18 : 19;
                                     if (doubleChars == null) {
-                                        doubleChars = new char[20];
+                                        doubleChars = new byte[20];
                                     }
                                     IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
                                     return TypeUtils.doubleValue(isNegative, len - scale, doubleChars, len);

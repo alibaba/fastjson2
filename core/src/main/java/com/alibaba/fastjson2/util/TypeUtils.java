@@ -267,7 +267,7 @@ public class TypeUtils {
                     signSeen = true;
             }
 
-            char[] digits = new char[len];
+            byte[] digits = new byte[len];
 
             int nDigits = 0;
             boolean decSeen = false;
@@ -297,10 +297,10 @@ public class TypeUtils {
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
-                    digits[nDigits++] = (char) c;
+                    digits[nDigits++] = c;
                     nTrailZero = 0;
                 } else if (c == '0') {
-                    digits[nDigits++] = (char) c;
+                    digits[nDigits++] = c;
                     nTrailZero++;
                 } else if (c == '.') {
                     if (decSeen) {
@@ -400,7 +400,7 @@ public class TypeUtils {
                     signSeen = true;
             }
 
-            char[] digits = new char[len];
+            byte[] digits = new byte[len];
 
             int nDigits = 0;
             boolean decSeen = false;
@@ -430,10 +430,10 @@ public class TypeUtils {
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero = 0;
                 } else if (c == '0') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero++;
                 } else if (c == '.') {
                     if (decSeen) {
@@ -534,7 +534,7 @@ public class TypeUtils {
                     signSeen = true;
             }
 
-            char[] digits = new char[len];
+            byte[] digits = new byte[len];
 
             int nDigits = 0;
             boolean decSeen = false;
@@ -564,10 +564,10 @@ public class TypeUtils {
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
-                    digits[nDigits++] = (char) c;
+                    digits[nDigits++] = c;
                     nTrailZero = 0;
                 } else if (c == '0') {
-                    digits[nDigits++] = (char) c;
+                    digits[nDigits++] = c;
                     nTrailZero++;
                 } else if (c == '.') {
                     if (decSeen) {
@@ -668,7 +668,7 @@ public class TypeUtils {
                     signSeen = true;
             }
 
-            char[] digits = new char[len];
+            byte[] digits = new byte[len];
 
             int nDigits = 0;
             boolean decSeen = false;
@@ -698,10 +698,10 @@ public class TypeUtils {
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero = 0;
                 } else if (c == '0') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero++;
                 } else if (c == '.') {
                     if (decSeen) {
@@ -779,7 +779,7 @@ public class TypeUtils {
         throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
     }
 
-    public static double doubleValue(boolean isNegative, int decExp, char[] digits, int nDigits) {
+    public static double doubleValue(boolean isNegative, int decExp, byte[] digits, int nDigits) {
         final int MAX_DECIMAL_EXPONENT = 308;
         final int MIN_DECIMAL_EXPONENT = -324;
         final int MAX_NDIGITS = 1100;
@@ -789,7 +789,6 @@ public class TypeUtils {
         final int EXP_SHIFT = 53 /*DOUBLE_SIGNIFICAND_WIDTH*/ - 1;
         final long FRACT_HOB = (1L << EXP_SHIFT); // assumed High-Order bit
         final int MAX_SMALL_TEN = SMALL_10_POW.length - 1;
-        final int SINGLE_MAX_SMALL_TEN = SINGLE_SMALL_10_POW.length - 1;
 
         int kDigits = Math.min(nDigits, MAX_DECIMAL_DIGITS + 1);
 
@@ -1011,7 +1010,7 @@ public class TypeUtils {
         return Double.longBitsToDouble(ieeeBits);
     }
 
-    public static float floatValue(boolean isNegative, int decExponent, char[] digits, int nDigits) {
+    public static float floatValue(boolean isNegative, int decExponent, byte[] digits, int nDigits) {
         final int SINGLE_MAX_NDIGITS = 200;
         final int SINGLE_MAX_DECIMAL_DIGITS = 7;
         final int MAX_DECIMAL_DIGITS = 15;

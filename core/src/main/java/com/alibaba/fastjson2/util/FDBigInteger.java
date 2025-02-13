@@ -38,7 +38,7 @@ public final class FDBigInteger {
         trimLeadingZeros();
     }
 
-    public FDBigInteger(long lValue, char[] digits, int kDigits, int nDigits) {
+    public FDBigInteger(long lValue, byte[] digits, int kDigits, int nDigits) {
         int n = Math.max((nDigits + 8) / 9, 2);        // estimate size needed.
         data = new int[n];      // allocate enough space
         data[0] = (int) lValue;    // starting value
