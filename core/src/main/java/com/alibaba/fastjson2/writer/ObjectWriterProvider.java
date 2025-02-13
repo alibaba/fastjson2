@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static javax.swing.UIManager.put;
+
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
     static final int TYPE_INT32_MASK = 1 << 1;
@@ -663,5 +665,18 @@ public class ObjectWriterProvider
 
     protected BeanInfo createBeanInfo() {
         return new BeanInfo(this);
+    }
+
+    /**
+     * Configure the Enum classes as a JavaBean
+     * @since 2.0.55
+     * @param enumClasses enum classes
+     */
+    @SuppressWarnings("rawtypes")
+    @SafeVarargs
+    public final void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        for (Class<? extends Enum> enumClass : enumClasses) {
+            register(enumClass, getCreator().createObjectWriter(enumClass));
+        }
     }
 }

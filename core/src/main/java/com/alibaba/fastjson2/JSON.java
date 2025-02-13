@@ -4413,4 +4413,15 @@ public interface JSON {
             return (T) objectReader.readJSONBObject(jsonReader, null, null, 0);
         }
     }
+
+    /**
+     * Configure the Enum classes as a JavaBean
+     * @since 2.0.55
+     * @param enumClasses enum classes
+     */
+    @SuppressWarnings("rawtypes")
+    @SafeVarargs
+    static void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        JSONFactory.getDefaultObjectWriterProvider().configEnumAsJavaBean(enumClasses);
+    }
 }
