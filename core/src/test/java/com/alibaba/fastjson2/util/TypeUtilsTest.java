@@ -1,12 +1,15 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2_vo.Double1;
+import com.alibaba.fastjson2_vo.Double2;
 import com.alibaba.fastjson2_vo.Int1;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 
@@ -835,5 +838,32 @@ public class TypeUtilsTest {
         for (BigInteger integer : integers) {
             assertFalse(TypeUtils.isJavaScriptSupport(integer));
         }
+    }
+
+    @Test
+    public void parseDouble() {
+        String[] strings = {"28.303947340611323", "3.237861088027525", "0.123", ".123", "303947340611323", "123"};
+        for (String str : strings) {
+            validateParseDouble(str);
+            validateParseDouble("-".concat(str));
+        }
+    }
+
+    private static void validateParseDouble(String str) {
+        byte[] bytes = str.getBytes(StandardCharsets.ISO_8859_1);
+        double d1 = TypeUtils.parseDouble(bytes, 0, bytes.length);
+        double d2 = JSON.parseObject(bytes, Double.class);
+        assertEquals(d1, d2);
+
+        String json = "{\"v0000\": " + str + "}";
+        byte[] jsonBytes = json.getBytes(StandardCharsets.ISO_8859_1);
+        Double1 double1 = JSON.parseObject(jsonBytes, Double1.class);
+        assertEquals(d1, double1.getV0000());
+
+        String json2 = "{\"v0000\": " + str + ",\"v0001\": " + str + "}";
+        byte[] json2Bytes = json2.getBytes(StandardCharsets.ISO_8859_1);
+        Double2 double2 = JSON.parseObject(json2Bytes, Double2.class);
+        assertEquals(d1, double2.getV0000());
+        assertEquals(d1, double2.getV0001());
     }
 }
