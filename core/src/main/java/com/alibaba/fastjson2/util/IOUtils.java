@@ -1434,7 +1434,7 @@ public class IOUtils {
     }
 
     public static void putIntUnaligned(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
     public static void putLongLE(char[] buf, int pos, long v) {
@@ -1445,12 +1445,16 @@ public class IOUtils {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    public static void putLongUnaligned(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
+    }
+
     public static void putLongBE(byte[] buf, int pos, long v) {
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + pos, convEndian(true, v));
+        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
     }
 
     public static void putLongLE(byte[] buf, int pos, long v) {
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + pos, convEndian(false, v));
+        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
 
     public static int putBoolean(byte[] bytes, int off, boolean v) {

@@ -457,45 +457,47 @@ class JSONWriterUTF8
     }
 
     public void writeStringLatin1(byte[] value) {
-        boolean escape = false;
         if ((context.features & BrowserSecure.mask) != 0) {
             writeStringLatin1BrowserSecure(value);
             return;
         }
 
+        if (escaped(value)) {
+            writeStringEscaped(value);
+            return;
+        }
+
+        int off = this.off;
+        int minCapacity = off + value.length + 2;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        byte quote = (byte) this.quote;
+        putByte(bytes, off, quote);
+        System.arraycopy(value, 0, bytes, off + 1, value.length);
+        off += value.length + 1;
+        putByte(bytes, off, quote);
+        this.off = off + 1;
+    }
+
+    private boolean escaped(byte[] value) {
         final byte quote = (byte) this.quote;
         final long vecQuote = this.byteVectorQuote;
         int i = 0;
         final int upperBound = (value.length - i) & ~7;
         for (; i < upperBound; i += 8) {
             if (!noneEscaped(getLongUnaligned(value, i), vecQuote)) {
-                break;
+                return true;
             }
         }
         for (; i < value.length; i++) {
             byte c = value[i];
             if (c == quote || c == '\\' || c < ' ') {
-                escape = true;
-                break;
+                return true;
             }
         }
-
-        int off = this.off;
-        if (escape) {
-            writeStringEscaped(value);
-            return;
-        }
-
-        int minCapacity = off + value.length + 2;
-        byte[] bytes = this.bytes;
-        if (minCapacity > bytes.length) {
-            bytes = grow(minCapacity);
-        }
-        putByte(bytes, off, quote);
-        System.arraycopy(value, 0, bytes, off + 1, value.length);
-        off += value.length + 1;
-        putByte(bytes, off, quote);
-        this.off = off + 1;
+        return false;
     }
 
     static boolean noneEscaped(long v, long quote) {
