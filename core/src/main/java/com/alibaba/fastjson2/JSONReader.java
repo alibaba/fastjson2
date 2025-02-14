@@ -3180,7 +3180,7 @@ public abstract class JSONReader
         if (val.length() > 10 && val.length() < 40) {
             try {
                 return DateUtils.parseMillis(val, context.zoneId);
-            } catch (DateTimeException | JSONException ignored) {
+            } catch (DateTimeException | JSONException | NullPointerException ignored) {
                 // ignored
             }
         }
