@@ -7155,9 +7155,6 @@ class JSONReaderUTF8
     }
 
     public static JSONReaderUTF8 of(byte[] bytes, int off, int len, JSONReader.Context context) {
-        if (IOUtils.isNonSlashASCII(bytes, off, len)) {
-            return new JSONReaderASCIINonSlash(context, null, bytes, off, len);
-        }
         if (METHOD_HANDLE_HAS_NEGATIVE != null) {
             try {
                 if (!(boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len)) {
@@ -7166,6 +7163,8 @@ class JSONReaderUTF8
             } catch (Throwable ignored) {
                 // ignored
             }
+        } else if (IOUtils.isNonSlashASCII(bytes, off, len)) {
+            return new JSONReaderASCIINonSlash(context, null, bytes, off, len);
         }
         return new JSONReaderUTF8(context, bytes, off, len);
     }
