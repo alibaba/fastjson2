@@ -6857,7 +6857,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public boolean isReference() {
+    public final boolean isReference() {
         // should be codeSize <= FreqInlineSize 325, current : 284
         final byte[] bytes = this.bytes;
         int ch = this.ch;
@@ -6879,14 +6879,18 @@ class JSONReaderUTF8
             ch = bytes[offset];
         }
 
-        int quote = ch;
         if (offset + 6 >= end
-                || bytes[offset + 5] != quote
+                || bytes[offset + 5] != ch
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1) != REF
         ) {
             return false;
         }
 
+        return readReference0(bytes, offset, end, ch);
+    }
+
+    private boolean readReference0(byte[] bytes, int offset, int end, int quote) {
+        int ch;
         offset += 6;
         ch = bytes[offset];
         while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -7153,9 +7157,10 @@ class JSONReaderUTF8
             } catch (Throwable ignored) {
                 // ignored
             }
+        } else {
+            ascii = IOUtils.isASCII(bytes, off, len);
         }
-
-        if (ascii || IOUtils.isASCII(bytes, off, len)) {
+        if (ascii) {
             return new JSONReaderASCII(context, null, bytes, off, len);
         }
         return new JSONReaderUTF8(context, bytes, off, len);

@@ -1482,7 +1482,7 @@ public class IOUtils {
     }
 
     public static boolean isALSE(byte[] buf, int pos) {
-        return getIntUnaligned(buf, pos) == ALSE;
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
     }
 
     public static boolean isALSE(char[] buf, int pos) {
@@ -1490,7 +1490,7 @@ public class IOUtils {
     }
 
     public static boolean isNULL(byte[] buf, int pos) {
-        return getIntUnaligned(buf, pos) == NULL_32;
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == NULL_32;
     }
 
     public static boolean isNULL(char[] buf, int pos) {

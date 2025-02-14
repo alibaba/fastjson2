@@ -525,14 +525,21 @@ public abstract class JSONReader
 
     public abstract String readReference();
 
-    public boolean readReference(List list, int i) {
-        return readReference((Collection) list, i);
+    public final boolean readReference(List list, int i) {
+        if (!isReference()) {
+            return false;
+        }
+        return readReference0(list, i);
     }
 
     public boolean readReference(Collection list, int i) {
         if (!isReference()) {
             return false;
         }
+        return readReference0(list, i);
+    }
+
+    private boolean readReference0(Collection list, int i) {
         String path = readReference();
         if ("..".equals(path)) {
             list.add(list);
@@ -4726,5 +4733,13 @@ public abstract class JSONReader
             str = str.trim();
         }
         return (features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty() ? null : str;
+    }
+
+    protected static int firstIntValue(int ch) {
+        return ch >= '0' && ch <= '9'
+                ? '0' - ch
+                : ch == '-' || ch == '+'
+                ? 0
+                : 1;  // or any value > 0
     }
 }

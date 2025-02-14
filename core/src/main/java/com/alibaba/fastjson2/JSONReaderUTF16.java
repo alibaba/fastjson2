@@ -386,7 +386,6 @@ final class JSONReaderUTF16
         return bytes;
     }
 
-    @Override
     public final boolean isReference() {
         // should be codeSize <= FreqInlineSize 325, current is 276
         final char[] chars = this.chars;
@@ -420,6 +419,11 @@ final class JSONReaderUTF16
             return false;
         }
 
+        return readReference0(chars, offset, end, quote);
+    }
+
+    private boolean readReference0(char[] chars, int offset, int end, char quote) {
+        char ch;
         offset += 6;
         ch = chars[offset];
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
