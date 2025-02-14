@@ -22,7 +22,7 @@ final class JSONReaderASCIINonSlash
             final int start = offset, end = this.end;
             int offset = IOUtils.indexOfQuote(bytes, quote, start, end);
             if (offset == -1) {
-                throw new JSONException("invalid escape character EOI");
+                throw error("invalid escape character EOI");
             }
 
             String str;
