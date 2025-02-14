@@ -6959,6 +6959,46 @@ class JSONReaderUTF8
     }
 
     public final boolean readBoolValue() {
+        boolean val = false;
+        int end = this.end;
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        if (ch == 't'
+                && offset + 2 < bytes.length
+                && bytes[offset] == 'r'
+                && bytes[offset + 1] == 'u'
+                && bytes[offset + 2] == 'e'
+        ) {
+            offset += 3;
+            val = true;
+        } else if (ch == 'f' && offset + 3 < end && isALSE(bytes, offset)) {
+            offset += 4;
+        } else if ((ch == '1' || ch == '0') && offset < end && !IOUtils.isDigit(ch)) {
+            val = ch == '1';
+        } else {
+            return readBoolValue0();
+        }
+
+        ch = offset == end ? EOI : (char) bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset >= end ? EOI : bytes[offset++];
+        }
+
+        if (comma = (ch == ',')) {
+            ch = offset >= end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset >= end ? EOI : bytes[offset++];
+            }
+        }
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        return val;
+    }
+
+    private boolean readBoolValue0() {
         wasNull = false;
         boolean val;
         final byte[] bytes = this.bytes;
