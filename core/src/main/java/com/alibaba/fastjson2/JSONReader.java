@@ -4319,6 +4319,9 @@ public abstract class JSONReader
         }
     }
 
+    protected static final long MASK_TRIM_STRING = 1L << 14;
+    protected static final long MASK_EMPTY_STRING_AS_NULL = 1L << 27;
+
     public enum Feature {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
@@ -4341,7 +4344,7 @@ public abstract class JSONReader
         UseBigDecimalForFloats(1 << 11),
         UseBigDecimalForDoubles(1 << 12),
         ErrorOnEnumNotMatch(1 << 13),
-        TrimString(1 << 14),
+        TrimString(MASK_TRIM_STRING),
         ErrorOnNotSupportAutoType(1 << 15),
         DuplicateKeyValueAsArray(1 << 16),
         AllowUnQuotedFieldNames(1 << 17),
@@ -4390,7 +4393,7 @@ public abstract class JSONReader
          *
          * @since 2.0.48
          */
-        EmptyStringAsNull(1 << 27),
+        EmptyStringAsNull(MASK_EMPTY_STRING_AS_NULL),
 
         /**
          * @since 2.0.48
@@ -4716,5 +4719,12 @@ public abstract class JSONReader
             default:
                 throw new JSONException(info("illegal input : " + ch));
         }
+    }
+
+    protected static String stringValue(String str, long features) {
+        if ((features & MASK_TRIM_STRING) != 0) {
+            str = str.trim();
+        }
+        return (features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty() ? null : str;
     }
 }

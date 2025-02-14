@@ -2971,14 +2971,7 @@ final class JSONReaderJSONB
 
             if (str != null) {
                 offset += strlen;
-                if ((context.features & Feature.TrimString.mask) != 0) {
-                    str = str.trim();
-                }
-                // empty string to null
-                if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                    str = null;
-                }
-                return str;
+                return stringValue(str, context.features);
             }
         }
 

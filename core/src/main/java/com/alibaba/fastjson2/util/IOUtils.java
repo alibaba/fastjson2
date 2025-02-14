@@ -1588,7 +1588,10 @@ public class IOUtils {
     }
 
     public static int digit2(char[] chars, int off) {
-        int x = getIntLE(chars, off);
+        int x = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+        if (BIG_ENDIAN) {
+            x = Integer.reverseBytes(x);
+        }
         int d;
         if ((((x & 0xFFF0FFF0) - 0x300030) | (((d = x & 0x0F000F) + 0x060006) & 0xF000F0)) != 0) {
             return -1;
@@ -1597,7 +1600,10 @@ public class IOUtils {
     }
 
     public static int digit2(byte[] bytes, int off) {
-        int x = getShortLE(bytes, off);
+        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            x = Short.reverseBytes(x);
+        }
         int d;
         if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0) {
             return -1;
@@ -1617,7 +1623,7 @@ public class IOUtils {
 
     public static int indexOfQuote(byte[] value, int quote, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfQuote0(value, quote, fromIndex, max);
+            return indexOfQuoteV(value, quote, fromIndex, max);
         }
         try {
             return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, quote, fromIndex, max);
@@ -1626,7 +1632,7 @@ public class IOUtils {
         }
     }
 
-    static int indexOfQuote0(byte[] value, int quote, int fromIndex, int max) {
+    public static int indexOfQuoteV(byte[] value, int quote, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);

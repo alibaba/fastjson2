@@ -3125,12 +3125,9 @@ final class JSONReaderUTF16
                 }
             }
 
-            if ((context.features & Feature.TrimString.mask) != 0) {
-                str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
+            long features = context.features;
+            if ((features & (MASK_TRIM_STRING | MASK_EMPTY_STRING_AS_NULL)) != 0) {
+                str = stringValue(str, features);
             }
 
             int ch = ++offset == end ? EOI : chars[offset++];

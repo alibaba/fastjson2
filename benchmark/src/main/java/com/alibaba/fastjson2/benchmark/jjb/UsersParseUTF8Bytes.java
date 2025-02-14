@@ -37,12 +37,13 @@ public class UsersParseUTF8Bytes {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.parseObject(utf8Bytes, Users.class));
-        // zulu17.40.19 : 3515
+        // zulu17.40.19 : 3515 4708
         // zulu17.40.19_vec : 338
     }
 
     @Benchmark
     public void wast(Blackhole bh) {
+        // zulu17.40.19 : 3221
         bh.consume(io.github.wycst.wast.json.JSON.parseObject(utf8Bytes, Users.class));
     }
 

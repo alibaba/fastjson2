@@ -21,6 +21,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 class JSONReaderUTF8
         extends JSONReader {
+    static final int REF = BIG_ENDIAN ? 0x24726566 : 0x66657224;
+
     protected final byte[] bytes;
     protected final int length;
     protected final int start;
@@ -1452,14 +1454,10 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match25(long name1, long name2, long name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 27;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name3
-        ) {
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name3) {
             return false;
         }
 
@@ -1478,15 +1476,11 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match26(long name1, long name2, long name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 28;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name3
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
@@ -1505,16 +1499,12 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match27(long name1, long name2, long name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 29;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name3
                 || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
@@ -1533,17 +1523,13 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match28(long name1, long name2, long name3, byte c29) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 30;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name3
                 || bytes[offset - 3] != c29
                 || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
@@ -1562,15 +1548,11 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match29(long name1, long name2, long name3, int name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 31;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name3
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name4
-        ) {
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name4) {
             return false;
         }
 
@@ -1589,16 +1571,12 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match30(long name1, long name2, long name3, int name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 32;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name3
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name4
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
@@ -1617,16 +1595,13 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match31(long name1, long name2, long name3, int name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 33;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name1
+        if (offset >= end
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name3
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name4
-                || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
         ) {
             return false;
         }
@@ -1676,15 +1651,11 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match33(long name1, long name2, long name3, long name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 35;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name4
-        ) {
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name4) {
             return false;
         }
 
@@ -1703,15 +1674,12 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match34(long name1, long name2, long name3, long name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 36;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name1
+        if (offset >= end
+                || bytes[offset - 1] != ':'
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name3
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name4
-                || bytes[offset - 1] != ':'
         ) {
             return false;
         }
@@ -4951,8 +4919,9 @@ class JSONReaderUTF8
                 str = new String(bytes, start, offset - start, StandardCharsets.UTF_8);
             }
 
-            if ((context.features & Feature.TrimString.mask) != 0) {
-                str = str.trim();
+            long features = context.features;
+            if ((features & (MASK_TRIM_STRING | MASK_EMPTY_STRING_AS_NULL)) != 0) {
+                str = stringValue(str, features);
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
@@ -6961,11 +6930,8 @@ class JSONReaderUTF8
 
         int quote = ch;
         if (offset + 6 >= end
-                || bytes[offset + 1] != '$'
-                || bytes[offset + 2] != 'r'
-                || bytes[offset + 3] != 'e'
-                || bytes[offset + 4] != 'f'
                 || bytes[offset + 5] != quote
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1) != REF
         ) {
             return false;
         }
@@ -7189,6 +7155,9 @@ class JSONReaderUTF8
     }
 
     public static JSONReaderUTF8 of(byte[] bytes, int off, int len, JSONReader.Context context) {
+        if (IOUtils.isNonSlashASCII(bytes, off, len)) {
+            return new JSONReaderASCIINonSlash(context, null, bytes, off, len);
+        }
         if (METHOD_HANDLE_HAS_NEGATIVE != null) {
             try {
                 if (!(boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len)) {
@@ -7197,8 +7166,6 @@ class JSONReaderUTF8
             } catch (Throwable ignored) {
                 // ignored
             }
-        } else if (IOUtils.isNonSlashASCII(bytes, off, len)) {
-            return new JSONReaderASCIINonSlash(context, null, bytes, off, len);
         }
         return new JSONReaderUTF8(context, bytes, off, len);
     }
