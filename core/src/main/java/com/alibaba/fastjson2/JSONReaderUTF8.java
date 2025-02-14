@@ -7106,16 +7106,17 @@ class JSONReaderUTF8
     }
 
     public static JSONReaderUTF8 of(byte[] bytes, int off, int len, JSONReader.Context context) {
+        boolean ascii = false;
         if (METHOD_HANDLE_HAS_NEGATIVE != null) {
             try {
-                if (!(boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len)) {
-                    return new JSONReaderASCII(context, null, bytes, off, len);
-                }
+                ascii = !(boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len);
             } catch (Throwable ignored) {
                 // ignored
             }
-        } else if (IOUtils.isNonSlashASCII(bytes, off, len)) {
-            return new JSONReaderASCIINonSlash(context, null, bytes, off, len);
+        }
+
+        if (ascii || IOUtils.isASCII(bytes, off, len)) {
+            return new JSONReaderASCII(context, null, bytes, off, len);
         }
         return new JSONReaderUTF8(context, bytes, off, len);
     }
