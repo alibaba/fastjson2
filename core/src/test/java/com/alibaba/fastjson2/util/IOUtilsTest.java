@@ -444,4 +444,49 @@ public class IOUtilsTest {
         assertEquals("123.45",
                 format.format(123.45D));
     }
+
+    @Test
+    public void writeInt64X() {
+        long[] values = {
+                1,
+                12,
+                123,
+                1234,
+                12345,
+                123456,
+                1234567,
+                12345678,
+                123456789,
+                1234567890,
+                12345678901L,
+                123456789012L,
+                1234567890123L,
+                12345678901234L,
+                123456789012345L,
+                1234567890123456L,
+                12345678901234567L,
+                123456789012345678L,
+                1234567890123456789L,
+                2234567890123456789L,
+                3234567890123456789L,
+                4234567890123456789L,
+                5234567890123456789L,
+                6234567890123456789L,
+                7234567890123456789L,
+                8234567890123456789L
+        };
+        for (int i = 0; i < values.length; i++) {
+            long value = values[i];
+            {
+                byte[] bytes = new byte[32];
+                int off = IOUtils.writeInt64(bytes, 0, value);
+                assertEquals(Long.toString(value), new String(bytes, 0, off));
+            }
+            {
+                byte[] bytes = new byte[32];
+                int off = IOUtils.writeInt64(bytes, 0, -value);
+                assertEquals(Long.toString(-value), new String(bytes, 0, off));
+            }
+        }
+    }
 }

@@ -1928,7 +1928,7 @@ class JSONWriterUTF8
 
     @Override
     public final void writeInt32(int i) {
-        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
 
         int off = this.off;
         int minCapacity = off + 13;
@@ -1954,7 +1954,7 @@ class JSONWriterUTF8
         }
 
         int size = values.size();
-        boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
         int off = this.off;
         int minCapacity = off + 2 + size * 23;
         byte[] bytes = this.bytes;
@@ -2080,8 +2080,8 @@ class JSONWriterUTF8
         off = IOUtils.writeInt64(bytes, off, i);
         if (writeAsString) {
             putByte(bytes, off++, (byte) quote);
-        } else if ((features & WriteClassName.mask) != 0
-                && (features & NotWriteNumberClassName.mask) == 0
+        } else if ((features & MASK_WRITE_CLASS_NAME) != 0
+                && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
                 && i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE
         ) {
             putByte(bytes, off++, (byte) 'L');

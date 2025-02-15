@@ -789,31 +789,18 @@ public abstract class JSONWriter
     }
 
     protected static boolean isWriteAsString(long value, long features) {
-        if ((features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
-            return true;
-        }
-
-        return (features & BrowserCompatible.mask) != 0
-                && !isJavaScriptSupport(value);
+        return (features & (MASK_WRITE_NON_STRING_VALUE_AS_STRING | MASK_WRITE_LONG_AS_STRING)) != 0
+                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
 
     protected static boolean isWriteAsString(BigInteger value, long features) {
-        if ((features & WriteNonStringValueAsString.mask) != 0) {
-            return true;
-        }
-
-        return (features & BrowserCompatible.mask) != 0
-                && !isJavaScriptSupport(value);
+        return (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0
+                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
 
     protected static boolean isWriteAsString(BigDecimal value, long features) {
-        if ((features & WriteNonStringValueAsString.mask) != 0) {
-            return true;
-        }
-
-        return (features & BrowserCompatible.mask) != 0
-                && value.precision() >= 16
-                && !isJavaScriptSupport(value.unscaledValue());
+        return (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0
+                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && value.precision() >= 16 && !isJavaScriptSupport(value.unscaledValue()));
     }
 
     public abstract void writeNameRaw(char[] chars);
@@ -2112,13 +2099,18 @@ public abstract class JSONWriter
         }
     }
 
+    protected static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
     protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
+    protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
+    protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
     protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
     protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
     protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
     protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
     protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
     protected static final long MASK_BROWSER_SECURE = 1L << 35;
+    protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
 
     public enum Feature {
         FieldBased(1),
@@ -2127,11 +2119,11 @@ public abstract class JSONWriter
         BeanToArray(1 << 3),
         WriteNulls(1 << 4),
         WriteMapNullValue(1 << 4),
-        BrowserCompatible(1 << 5),
+        BrowserCompatible(MASK_BROWSER_COMPATIBLE),
         NullAsDefaultValue(MASK_NULL_AS_DEFAULT_VALUE),
         WriteBooleanAsNumber(1 << 7),
-        WriteNonStringValueAsString(1 << 8),
-        WriteClassName(1 << 9),
+        WriteNonStringValueAsString(MASK_WRITE_NON_STRING_VALUE_AS_STRING),
+        WriteClassName(MASK_WRITE_CLASS_NAME),
         NotWriteRootClassName(1 << 10),
         NotWriteHashMapArrayListClassName(1 << 11),
         NotWriteDefaultValue(1 << 12),
@@ -2213,7 +2205,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.17
          */
-        WriteLongAsString(1L << 34),
+        WriteLongAsString(MASK_WRITE_LONG_AS_STRING),
 
         /**
          * @since 2.0.20
@@ -2239,7 +2231,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.34
          */
-        NotWriteNumberClassName(1L << 40),
+        NotWriteNumberClassName(MASK_NOT_WRITE_NUMBER_CLASS_NAME),
 
         /**
          * The serialized Map will first be sorted according to Key,

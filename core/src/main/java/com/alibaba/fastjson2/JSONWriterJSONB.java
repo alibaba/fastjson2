@@ -1257,7 +1257,7 @@ final class JSONWriterJSONB
         }
         int off = this.off;
         if (i == null) {
-            putByte(bytes, off++, (this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullNumberAsZero.mask)) == 0 ? BC_NULL : 0);
+            putByte(bytes, off++, (this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0);
         } else {
             off = writeInt32(bytes, off, i);
         }
