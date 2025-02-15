@@ -1889,7 +1889,7 @@ public class TypeUtils {
 
     public static BigDecimal toBigDecimal(double d) {
         byte[] bytes = new byte[24];
-        int size = DoubleToDecimal.toString(d, bytes, 0, true);
+        int size = NumberUtils.writeDouble(bytes, 0, d, true);
         return parseBigDecimal(bytes, 0, size);
     }
 

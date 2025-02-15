@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.DoubleToDecimal;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.NumberUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import sun.misc.Unsafe;
 
@@ -2187,7 +2188,7 @@ class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        off += DoubleToDecimal.toString(value, chars, off, true);
+        off = NumberUtils.writeDouble(chars, off, value, true);
 
         if (writeAsString) {
             chars[off++] = '"';
@@ -2215,8 +2216,7 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = '"';
         }
-        int len0 = DoubleToDecimal.toString(value0, chars, off, true);
-        off += len0;
+        off = NumberUtils.writeDouble(chars, off, value0, true);
         if (writeAsString) {
             chars[off++] = '"';
         }
@@ -2226,8 +2226,7 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = '"';
         }
-        int len1 = DoubleToDecimal.toString(value1, chars, off, true);
-        off += len1;
+        off = NumberUtils.writeDouble(chars, off, value1, true);
         if (writeAsString) {
             chars[off++] = '"';
         }
@@ -2262,9 +2261,7 @@ class JSONWriterUTF16
                 chars[off++] = '"';
             }
 
-            double value = values[i];
-            int len = DoubleToDecimal.toString(value, chars, off, true);
-            off += len;
+            off = NumberUtils.writeDouble(chars, off, values[i], true);
 
             if (writeAsString) {
                 chars[off++] = '"';

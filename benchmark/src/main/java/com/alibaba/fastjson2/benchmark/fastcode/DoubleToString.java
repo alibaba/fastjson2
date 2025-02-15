@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.benchmark.fastcode;
 
 import com.alibaba.fastjson2.util.DoubleToDecimal;
+import com.alibaba.fastjson2.util.NumberUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -23,7 +24,7 @@ public class DoubleToString {
     @Benchmark
     public void ryu(Blackhole bh) throws Throwable {
         byte[] bytes = new byte[24];
-        int size = DoubleToDecimal.toString(d, bytes, 0, true);
+        int size = NumberUtils.writeDouble(bytes, 0, d, true);
         String str = new String(bytes, 0, 0, size);
         bh.consume(str);
     }

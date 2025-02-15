@@ -19,6 +19,18 @@ public class UsersParseUTF8BytesTest {
         }
     }
 
+    public static void wast() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.wast(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("wast millis : " + millis);
+            // zulu17.40.19 :
+        }
+    }
+
     public static void dsljson() throws Exception {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
@@ -43,7 +55,7 @@ public class UsersParseUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
+        wast();
 //        dsljson();
 //        jackson();
     }

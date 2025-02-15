@@ -111,8 +111,7 @@ final class CSVWriterUTF8
     public void writeDouble(double value) {
         checkCapacity(24);
 
-        int size = DoubleToDecimal.toString(value, this.bytes, off, true);
-        off += size;
+        off = NumberUtils.writeDouble(this.bytes, off, value, true);
     }
 
     public void writeFloat(float value) {

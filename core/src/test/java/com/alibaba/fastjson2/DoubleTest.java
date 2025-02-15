@@ -272,9 +272,27 @@ public class DoubleTest {
     }
 
     @Test
+    public void test_float_min() {
+        double value = Float.MIN_VALUE;
+        byte[] utf8Bytes = JSON.toJSONBytes(value);
+        assertEquals(Double.toString(value), new String(utf8Bytes, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    public void test_double_null() {
+        Double value = null;
+        byte[] utf8Bytes = JSON.toJSONBytes(value);
+        assertEquals("null", new String(utf8Bytes, StandardCharsets.US_ASCII));
+    }
+
+    @Test
     public void test_ascii_value() {
-        for (Double id : values) {
+        for (int i = 0; i < values.length; i++) {
+            Double id = values[i];
             byte[] utf8Bytes = JSON.toJSONBytes(id);
+            if (id != null) {
+                assertEquals(id.toString(), new String(utf8Bytes, StandardCharsets.US_ASCII), "index " + Integer.toString(i));
+            }
             Double id2 = JSON.parseObject(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.US_ASCII, Double.class);
             assertEquals(id, id2);
         }

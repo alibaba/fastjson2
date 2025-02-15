@@ -12,6 +12,12 @@ import static com.alibaba.fastjson2.util.DoubleToDecimal.MULTIPLY_HIGH;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public class IOUtils {
+    static final short DOT_ZERO_16 = BIG_ENDIAN ? (short) ('.' << 8 | '0') : (short) ('0' << 8 | '.');
+    static final int DOT_ZERO_32 = BIG_ENDIAN ? '.' << 16 | '0' : '0' << 16 | '.';
+    static final short ZERO_DOT_16 = BIG_ENDIAN ? (short) ('0' << 8 | '.') : (short) ('.' << 8 | '0');
+    static final int ZERO_DOT_32 = BIG_ENDIAN ? '0' << 16 | '.' : '.' << 16 | '0';
+    static final short ZERO_ZERO_16 = '0' << 8 | '0';
+    static final int ZERO_ZERO_32 = '0' << 16 | '0';
     static final int NULL_32 = BIG_ENDIAN ? 0x6e756c6c : 0x6c6c756e;
     static final long NULL_64 = BIG_ENDIAN ? 0x6e0075006c006cL : 0x6c006c0075006eL;
 
@@ -1547,6 +1553,10 @@ public class IOUtils {
             return -1;
         }
         return (d & 0xF) * 10 + (d >> 8);
+    }
+
+    public static int digit(int d) {
+        return d >= 0 && d <= 9 ? d : -1;
     }
 
     public static int digit1(char[] chars, int off) {

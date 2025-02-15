@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.DoubleToDecimal;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.NumberUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -2136,7 +2137,7 @@ class JSONWriterUTF8
             putByte(bytes, off++, (byte) '"');
         }
 
-        off += DoubleToDecimal.toString(value, bytes, off, true);
+        off = NumberUtils.writeDouble(bytes, off, value, true);
 
         if (writeAsString) {
             putByte(bytes, off++, (byte) '"');
@@ -2207,9 +2208,7 @@ class JSONWriterUTF8
                 putByte(bytes, off++, (byte) '"');
             }
 
-            double value = values[i];
-            int len = DoubleToDecimal.toString(value, bytes, off, true);
-            off += len;
+            off = NumberUtils.writeDouble(bytes, off, values[i], true);
 
             if (writeAsString) {
                 putByte(bytes, off++, (byte) '"');

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.support.csv;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.DoubleToDecimal;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.NumberUtils;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -162,8 +163,7 @@ final class CSVWriterUTF16
     public void writeDouble(double value) {
         checkCapacity(24);
 
-        int size = DoubleToDecimal.toString(value, this.chars, off, true);
-        off += size;
+        off = NumberUtils.writeDouble(this.chars, off, value, true);
     }
 
     public void writeFloat(float value) {
