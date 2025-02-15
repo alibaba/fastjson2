@@ -1897,7 +1897,7 @@ public class IOUtils {
         return big == BIG_ENDIAN ? n : Integer.reverseBytes(n);
     }
 
-    static long convEndian(boolean big, long n) {
+    public static long convEndian(boolean big, long n) {
         return big == BIG_ENDIAN ? n : Long.reverseBytes(n);
     }
 

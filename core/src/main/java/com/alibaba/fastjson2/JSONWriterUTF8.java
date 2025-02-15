@@ -27,22 +27,8 @@ class JSONWriterUTF8
         extends JSONWriter {
     static final long REF;
     static final short QUOTE2_COLON, QUOTE_COLON;
-    static final short[] HEX256;
 
     static {
-        short[] digits = new short[16 * 16];
-
-        for (int i = 0; i < 16; i++) {
-            short hi = (short) (i < 10 ? i + '0' : i - 10 + 'a');
-
-            for (int j = 0; j < 16; j++) {
-                short lo = (short) (j < 10 ? j + '0' : j - 10 + 'a');
-                digits[(i << 4) + j] = BIG_ENDIAN ? (short) ((hi << 8) | lo) : (short) (hi | (lo << 8));
-            }
-        }
-
-        HEX256 = digits;
-
         byte[] chars = {'{', '"', '$', 'r', 'e', 'f', '"', ':'};
         REF = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
         QUOTE2_COLON = UNSAFE.getShort(chars, ARRAY_CHAR_BASE_OFFSET + 6);
@@ -1265,30 +1251,6 @@ class JSONWriterUTF8
         this.off = off + 1;
     }
 
-    /**
-     * Return a big-endian packed integer for the 4 ASCII bytes for an input unsigned 2-byte integer.
-     * {@code b0} is the most significant byte and {@code b1} is the least significant byte.
-     * The integer is passed byte-wise to allow reordering of execution.
-     */
-    static int packDigits(int b0, int b1) {
-        int v = HEX256[b0 & 0xff] | (HEX256[b1 & 0xff] << 16);
-        return BIG_ENDIAN ? Integer.reverseBytes(v) : v;
-    }
-
-    /**
-     * Return a big-endian packed long for the 8 ASCII bytes for an input unsigned 4-byte integer.
-     * {@code b0} is the most significant byte and {@code b3} is the least significant byte.
-     * The integer is passed byte-wise to allow reordering of execution.
-     */
-    static long packDigits(int b0, int b1, int b2, int b3) {
-        short[] digits = HEX256;
-        long v = (digits[b0 & 0xff]
-                | (((long) digits[b1 & 0xff]) << 16)
-                | (((long) digits[b2 & 0xff]) << 32))
-                | (((long) digits[b3 & 0xff]) << 48);
-        return BIG_ENDIAN ? Long.reverseBytes(v) : v;
-    }
-
     @Override
     public final void writeUUID(UUID value) {
         if (value == null) {
@@ -1296,49 +1258,79 @@ class JSONWriterUTF8
             return;
         }
 
-        long msb = value.getMostSignificantBits();
-        long lsb = value.getLeastSignificantBits();
-
         int off = this.off;
         int minCapacity = off + 38;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
+        byte quote = (byte) this.quote;
 
         final long base = ARRAY_BYTE_BASE_OFFSET + off;
-        UNSAFE.putByte(bytes, base, (byte) '"');
-        UNSAFE.putLong(
-                bytes,
-                base + 1,
-                packDigits((int) (msb >> 56), (int) (msb >> 48), (int) (msb >> 40), (int) (msb >> 32))
-        );
+        UNSAFE.putByte(bytes, base, quote);
         UNSAFE.putByte(bytes, base + 9, (byte) '-');
-        UNSAFE.putLong(
-                bytes,
-                base + 10,
-                packDigits(((int) msb) >> 24, ((int) msb) >> 16));
         UNSAFE.putByte(bytes, base + 14, (byte) '-');
-        UNSAFE.putLong(
-                bytes,
-                base + 15,
-                packDigits(((int) msb) >> 8, (int) msb));
         UNSAFE.putByte(bytes, base + 19, (byte) '-');
-        UNSAFE.putLong(
-                bytes,
-                base + 20,
-                packDigits((int) (lsb >> 56), (int) (lsb >> 48)));
         UNSAFE.putByte(bytes, base + 24, (byte) '-');
-        UNSAFE.putLong(
-                bytes,
-                base + 25,
-                packDigits(((int) (lsb >> 40)), (int) (lsb >> 32), ((int) lsb) >> 24, ((int) lsb) >> 16));
-        UNSAFE.putLong(
-                bytes,
-                base + 33,
-                packDigits(((int) lsb) >> 8, (int) lsb));
-        UNSAFE.putByte(bytes, base + 37, (byte) '"');
+        UNSAFE.putByte(bytes, base + 37, quote);
+        long msb = value.getMostSignificantBits();
+        long lsb = value.getLeastSignificantBits();
+        long x = msb, x0 = hex8(x >>> 32), x1 = hex8(x);
+        UNSAFE.putLong(bytes, base + 1, x0);
+        UNSAFE.putInt(bytes, base + 10, (int) x1);
+        UNSAFE.putInt(bytes, base + 15, (int) (x1 >>> 32));
+        x = lsb;
+        x0 = hex8(x >>> 32);
+        x1 = hex8(x);
+        UNSAFE.putInt(bytes, base + 20, (int) (x0));
+        UNSAFE.putInt(bytes, base + 25, (int) (x0 >>> 32));
+        UNSAFE.putLong(bytes, base + 29, x1);
         this.off += 38;
+    }
+
+    /**
+     * Extract the least significant 4 bytes from the input integer i, convert each byte into its corresponding 2-digit
+     * hexadecimal representation, concatenate these hexadecimal strings into one continuous string, and then interpret
+     * this string as a hexadecimal number to form and return a long value.
+     */
+    private static long hex8(long i) {
+        i = expand(i);
+        /*
+            Use long to simulate vector operations and generate 8 hexadecimal characters at a time.
+            ------------
+            0  = 0b0000_0000 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '0'
+            1  = 0b0000_0001 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '1'
+            2  = 0b0000_0010 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '2'
+            3  = 0b0000_0011 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '3'
+            4  = 0b0000_0100 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '4'
+            5  = 0b0000_0101 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '5'
+            6  = 0b0000_0110 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '6'
+            7  = 0b0000_0111 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '7'
+            8  = 0b0000_1000 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '8'
+            9  = 0b0000_1001 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 0  + 0x30 + (i & 0xF) => '9'
+            10 = 0b0000_1010 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (i & 0xF) => 'a'
+            11 = 0b0000_1011 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (i & 0xF) => 'b'
+            12 = 0b0000_1100 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (i & 0xF) => 'c'
+            13 = 0b0000_1101 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (i & 0xF) => 'd'
+            14 = 0b0000_1110 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (i & 0xF) => 'e'
+            15 = 0b0000_1111 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (i & 0xF) => 'f'
+         */
+        long m = (i + 0x0606_0606_0606_0606L) & 0x1010_1010_1010_1010L;
+        return convEndian(true,
+                ((m << 1) + (m >> 1) - (m >> 4)) + 0x3030_3030_3030_3030L + i);
+    }
+
+    /**
+     * A faster alternative that is functionally equivalent to Long.expand(i, 0x0F0F_0F0F_0F0F_0F0FL)
+     */
+    private static long expand(long i) {
+        long t = i << 16;
+        i = (i & ~0xFFFF00000000L) | (t & 0xFFFF00000000L);
+        t = i << 8;
+        i = (i & ~0xFF000000FF0000L) | (t & 0xFF000000FF0000L);
+        t = i << 4;
+        i = (i & ~0xF000F000F000F00L) | (t & 0xF000F000F000F00L);
+        return i & 0x0F0F_0F0F_0F0F_0F0FL;
     }
 
     @Override
