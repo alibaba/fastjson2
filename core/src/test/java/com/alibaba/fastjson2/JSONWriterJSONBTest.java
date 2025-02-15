@@ -160,7 +160,8 @@ public class JSONWriterJSONBTest {
             jsonWriter.writeTypeName("abc");
 
             bytes.set(jsonWriter, new byte[0]);
-            jsonWriter.off = 0;
+            jsonWriter.setOffset(0);
+            assertEquals(0, jsonWriter.getOffset());
             jsonWriter.ensureCapacity(1);
         }
 

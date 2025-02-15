@@ -191,7 +191,7 @@ class JSONWriterUTF8
     protected final void write0(char c) {
         int off = this.off;
         if (off == bytes.length) {
-            ensureCapacity(off + 1);
+            grow0(off + 1);
         }
         putByte(bytes, off, (byte) c);
         this.off = off + 1;
@@ -1746,7 +1746,7 @@ class JSONWriterUTF8
         }
 
         if (off == bytes.length) {
-            ensureCapacity(off + 1);
+            grow0(off + 1);
         }
         putByte(bytes, off++, (byte) ch);
     }
@@ -1787,10 +1787,12 @@ class JSONWriterUTF8
         this.off = off + len;
     }
 
-    final void ensureCapacity(int minCapacity) {
-        if (minCapacity > bytes.length) {
-            grow0(minCapacity);
+    public final Object ensureCapacity(int minCapacity) {
+        byte[] bytes = this.bytes;
+        if (minCapacity >= bytes.length) {
+            bytes = Arrays.copyOf(bytes, newCapacity(minCapacity, bytes.length));
         }
+        return bytes;
     }
 
     private byte[] grow(int minCapacity) {
@@ -2682,7 +2684,7 @@ class JSONWriterUTF8
 
             if (!first) {
                 if (off == bytes.length) {
-                    ensureCapacity(off + 1);
+                    grow0(off + 1);
                 }
                 putByte(bytes, off++, (byte) ',');
             }
@@ -2696,7 +2698,7 @@ class JSONWriterUTF8
             }
 
             if (off == bytes.length) {
-                ensureCapacity(off + 1);
+                grow0(off + 1);
             }
             putByte(bytes, off++, (byte) ':');
 

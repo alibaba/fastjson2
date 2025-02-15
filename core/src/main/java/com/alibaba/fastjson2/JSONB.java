@@ -13,11 +13,14 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONWriterJSONB.writeInt32;
+import static com.alibaba.fastjson2.JSONWriter.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteEnumUsingToString;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 /**
@@ -238,10 +241,10 @@ public interface JSONB {
     }
 
     /**
-     * @since 2.0.46
      * @param jsonbBytes
      * @param context
      * @return
+     * @since 2.0.46
      */
     static Object parse(byte[] jsonbBytes, JSONReader.Context context) {
         try (JSONReaderJSONB reader = new JSONReaderJSONB(
@@ -1108,8 +1111,7 @@ public interface JSONB {
 
         byte[] bytes = new byte[byteslen];
         bytes[0] = type;
-        int off = 1;
-        off = writeInt32(bytes, off, utf16.length);
+        int off = IO.writeInt32(bytes, 1, utf16.length);
         System.arraycopy(utf16, 0, bytes, off, utf16.length);
         return bytes;
     }
@@ -1452,5 +1454,357 @@ public interface JSONB {
 
     static boolean isInt32ByteValue1(int i) {
         return i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX;
+    }
+
+    interface IO {
+        static int enumSize(Enum e, long features) {
+            if ((features & (MASK_WRITE_ENUM_USING_TO_STRING | MASK_WRITE_ENUMS_USING_NAME)) != 0) {
+                return stringSize((features & WriteEnumUsingToString.mask) != 0
+                        ? e.toString()
+                        : e.name());
+            }
+            return 5;
+        }
+
+        static int writeEnum(byte[] bytes, int off, Enum e, long features) {
+            if ((features & (MASK_WRITE_ENUM_USING_TO_STRING | MASK_WRITE_ENUMS_USING_NAME)) != 0) {
+                return writeString(bytes, off,
+                        (features & WriteEnumUsingToString.mask) != 0
+                                ? e.toString()
+                                : e.name()
+                );
+            } else {
+                return JSONB.IO.writeInt32(bytes, off, e.ordinal());
+            }
+        }
+
+        static int writeBoolean(byte[] bytes, int off, Boolean value) {
+            bytes[off] = value == null ? BC_NULL : value ? BC_TRUE : BC_FALSE;
+            return off + 1;
+        }
+
+        static int writeBoolean(byte[] bytes, int off, boolean value) {
+            bytes[off] = value ? BC_TRUE : BC_FALSE;
+            return off + 1;
+        }
+
+        static int writeFloat(byte[] bytes, int off, Float value, long features) {
+            float floatValue;
+            if (value == null) {
+                if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0) {
+                    putByte(bytes, off, BC_NULL);
+                    return off + 1;
+                }
+                floatValue = 0;
+            } else {
+                floatValue = value;
+            }
+            return IO.writeFloat(bytes, off, floatValue);
+        }
+
+        static int writeFloat(byte[] bytes, int off, float value) {
+            int i = (int) value;
+            if (i == value && ((i + 0x10) & ~0x3f) == 0) {
+                putShortLE(bytes, off, (short) ((BC_FLOAT_INT & 0xFF) | (i << 8)));
+                return off + 2;
+            }
+
+            putByte(bytes, off, BC_FLOAT);
+            putIntBE(bytes, off + 1, Float.floatToIntBits(value));
+            return off + 5;
+        }
+
+        static int writeDouble(byte[] bytes, int off, Double value, long features) {
+            if (value == null) {
+                putByte(bytes, off,
+                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0);
+                return off + 1;
+            }
+            return IO.writeDouble(bytes, off, value);
+        }
+
+        static int writeDouble(byte[] bytes, int off, double value) {
+            if (value == 0 || value == 1) {
+                putByte(bytes, off, value == 0 ? BC_DOUBLE_NUM_0 : BC_DOUBLE_NUM_1);
+                return off + 1;
+            }
+
+            if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+                long longValue = (long) value;
+                if (longValue == value) {
+                    putByte(bytes, off, BC_DOUBLE_LONG);
+                    return IO.writeInt64(bytes, off + 1, longValue);
+                }
+            }
+
+            putByte(bytes, off, BC_DOUBLE);
+            IOUtils.putLongBE(bytes, off + 1, Double.doubleToLongBits(value));
+            return off + 9;
+        }
+
+        static int writeInt32(byte[] bytes, int off, Integer value, long features) {
+            if (value == null) {
+                putByte(bytes, off,
+                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0);
+                return off + 1;
+            }
+            return IO.writeInt32(bytes, off, value);
+        }
+
+        static int writeInt32(byte[] bytes, int off, int value) {
+            if (((value + 0x10) & ~0x3f) == 0) {
+                putByte(bytes, off++, (byte) value);
+            } else if (((value + 0x800) & ~0xfff) == 0) {
+                putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + value));
+                off += 2;
+            } else if (((value + 0x40000) & ~0x7ffff) == 0) {
+                putByte(bytes, off, (byte) (BC_INT32_SHORT_ZERO + (value >> 16)));
+                putShortBE(bytes, off + 1, (short) value);
+                off += 3;
+            } else {
+                putByte(bytes, off, BC_INT32);
+                putIntBE(bytes, off + 1, value);
+                off += 5;
+            }
+            return off;
+        }
+
+        static int writeInt64(byte[] bytes, int off, Collection<Long> values, long features) {
+            if (values == null) {
+                putByte(bytes, off, (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
+                return off + 1;
+            }
+            int size = values.size();
+            off = startArray(bytes, off, size);
+            for (Long string : values) {
+                off = writeInt64(bytes, off, string, features);
+            }
+            return off;
+        }
+
+        static int writeInt64(byte[] bytes, int off, Long value, long features) {
+            if (value == null) {
+                putByte(bytes, off,
+                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
+                                ? BC_NULL
+                                : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE));
+                return off + 1;
+            }
+            return IO.writeInt64(bytes, off, value);
+        }
+
+        static int writeInt64(byte[] bytes, int off, long value) {
+            if (value >= INT64_NUM_LOW_VALUE && value <= INT64_NUM_HIGH_VALUE) {
+                putByte(bytes, off++, (byte) (BC_INT64_NUM_MIN + (value - INT64_NUM_LOW_VALUE)));
+            } else if (((value + 0x800) & ~0xfffL) == 0) {
+                putShortBE(bytes, off, (short) ((BC_INT64_BYTE_ZERO << 8) + value));
+                off += 2;
+            } else if (((value + 0x40000) & ~0x7ffffL) == 0) {
+                putByte(bytes, off, (byte) (BC_INT64_SHORT_ZERO + (value >> 16)));
+                putShortBE(bytes, off + 1, (short) value);
+                off += 3;
+            } else if ((((value + 0x80000000L) & ~0xffffffffL) == 0)) {
+                putByte(bytes, off, BC_INT64_INT);
+                putIntBE(bytes, off + 1, (int) value);
+                off += 5;
+            } else {
+                putByte(bytes, off, BC_INT64);
+                putLongBE(bytes, off + 1, value);
+                off += 9;
+            }
+            return off;
+        }
+
+        static int startArray(byte[] bytes, int off, int size) {
+            boolean tinyInt = size <= ARRAY_FIX_LEN;
+            putByte(bytes, off++, tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY);
+            if (!tinyInt) {
+                off = writeInt32(bytes, off, size);
+            }
+            return off;
+        }
+
+        static int writeString(byte[] bytes, int off, Collection<String> strings, long features) {
+            if (strings == null) {
+                putByte(bytes, off, (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
+                return off + 1;
+            }
+            int size = strings.size();
+            off = startArray(bytes, off, size);
+            for (String string : strings) {
+                off = writeString(bytes, off, string);
+            }
+            return off;
+        }
+
+        static int writeString(byte[] bytes, int off, String str) {
+            if (str == null) {
+                putByte(bytes, off, BC_NULL);
+                return off + 1;
+            }
+            if (STRING_CODER != null && STRING_VALUE != null) {
+                int coder = STRING_CODER.applyAsInt(str);
+                byte[] value = STRING_VALUE.apply(str);
+                if (coder == 0) {
+                    return writeStringLatin1(bytes, off, value);
+                } else {
+                    return writeStringUTF16(bytes, off, value);
+                }
+            } else {
+                return writeString(bytes, off, JDKUtils.getCharArray(str));
+            }
+        }
+
+        static int writeStringUTF16(byte[] bytes, int off, byte[] value) {
+            final int strlen = value.length;
+            putByte(bytes, off, JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE);
+            off = JSONB.IO.writeInt32(bytes, off + 1, strlen);
+            System.arraycopy(value, 0, bytes, off, strlen);
+            return off + strlen;
+        }
+
+        static int writeStringLatin1(byte[] bytes, int off, byte[] value) {
+            int strlen = value.length;
+            if (strlen <= STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            } else if (strlen <= INT32_BYTE_MAX) {
+                off = putStringSizeSmall(bytes, off, strlen);
+            } else {
+                off = putStringSizeLarge(bytes, off, strlen);
+            }
+            System.arraycopy(value, 0, bytes, off, value.length);
+            return off + strlen;
+        }
+
+        static int stringSize(Collection<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = 6;
+            for (String string : strings) {
+                size += stringSize(string);
+            }
+            return size;
+        }
+
+        static int int64Size(Collection<Long> values) {
+            if (values == null) {
+                return 1;
+            }
+            return 6 + values.size() * 9;
+        }
+
+        static int stringSize(String str) {
+            if (str == null) {
+                return 0;
+            }
+
+            int strlen = str.length();
+            if (STRING_CODER != null && STRING_VALUE != null) {
+                return (strlen << STRING_CODER.applyAsInt(str)) + 6;
+            }
+
+            return strlen * 3 + 6;
+        }
+
+        static int putStringSizeSmall(byte[] bytes, int off, int val) {
+            putByte(bytes, off, BC_STR_ASCII);
+            putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + val));
+            return off + 3;
+        }
+
+        static int putStringSizeLarge(byte[] bytes, int off, int strlen) {
+            if (strlen <= INT32_SHORT_MAX) {
+                putIntBE(bytes, off, (BC_STR_ASCII << 24) + (BC_INT32_SHORT_ZERO << 16) + strlen);
+                return off + 4;
+            }
+
+            putShortBE(bytes, off, (short) ((BC_STR_ASCII << 8) | BC_INT32));
+            putIntBE(bytes, off + 2, strlen);
+            return off + 6;
+        }
+
+        static int writeString(byte[] bytes, int off, char[] chars) {
+            return writeString(bytes, off, chars, 0, chars.length);
+        }
+
+        static int writeString(byte[] bytes, int off, char[] chars, int coff, int strlen) {
+            int start = off;
+            boolean ascii = true;
+            if (strlen < STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                for (int i = coff, end = coff + strlen; i < end; i++) {
+                    char ch = chars[i];
+                    if (ch > 0x00FF) {
+                        ascii = false;
+                        break;
+                    }
+                    putByte(bytes, off++, (byte) ch);
+                }
+
+                if (ascii) {
+                    return off;
+                }
+
+                off = start;
+            } else {
+                ascii = isLatin1(chars, coff, strlen);
+            }
+
+            if (ascii) {
+                off = writeStringLatin1(bytes, off, chars, coff, strlen);
+            } else {
+                off = writeUTF8(bytes, off, chars, coff, strlen);
+            }
+            return off;
+        }
+
+        static int writeStringLatin1(byte[] bytes, int off, char[] chars, int coff, int strlen) {
+            if (strlen <= STR_ASCII_FIX_LEN) {
+                putByte(bytes, off++, (byte) (strlen + BC_STR_ASCII_FIX_MIN));
+            } else {
+                putByte(bytes, off, BC_STR_ASCII);
+                if (strlen <= INT32_BYTE_MAX) {
+                    putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
+                    off += 3;
+                } else {
+                    off = JSONB.IO.writeInt32(bytes, off + 1, strlen);
+                }
+            }
+            for (int i = 0; i < strlen; i++) {
+                putByte(bytes, off++, (byte) chars[coff + i]);
+            }
+            return off;
+        }
+
+        static int writeUTF8(byte[] bytes, int off, char[] chars, int coff, int strlen) {
+            int maxSize = strlen * 3;
+            int lenByteCnt = sizeOfInt(maxSize);
+            int result = IOUtils.encodeUTF8(chars, coff, strlen, bytes, off + lenByteCnt + 1);
+
+            int utf8len = result - off - lenByteCnt - 1;
+            int utf8lenByteCnt = sizeOfInt(utf8len);
+            if (lenByteCnt != utf8lenByteCnt) {
+                System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
+            }
+            putByte(bytes, off, BC_STR_UTF8);
+            return JSONB.IO.writeInt32(bytes, off + 1, utf8len) + utf8len;
+        }
+
+        static int sizeOfInt(int i) {
+            if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
+                return 1;
+            }
+
+            if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
+                return 2;
+            }
+
+            if (i >= INT32_SHORT_MIN && i <= INT32_SHORT_MAX) {
+                return 3;
+            }
+
+            return 5;
+        }
     }
 }

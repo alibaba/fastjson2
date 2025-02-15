@@ -2103,6 +2103,8 @@ public abstract class JSONWriter
     protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
     protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
     protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
+    protected static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
+    protected static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
     protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
     protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
     protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
@@ -2127,8 +2129,8 @@ public abstract class JSONWriter
         NotWriteRootClassName(1 << 10),
         NotWriteHashMapArrayListClassName(1 << 11),
         NotWriteDefaultValue(1 << 12),
-        WriteEnumsUsingName(1 << 13),
-        WriteEnumUsingToString(1 << 14),
+        WriteEnumsUsingName(MASK_WRITE_ENUMS_USING_NAME),
+        WriteEnumUsingToString(MASK_WRITE_ENUM_USING_TO_STRING),
         IgnoreErrorGetter(1 << 15),
         PrettyFormat(1 << 16),
         ReferenceDetection(MASK_REFERENCE_DETECTION),
@@ -2682,4 +2684,14 @@ public abstract class JSONWriter
     protected final void overflowLevel() {
         throw new JSONException("level too large : " + level);
     }
+
+    public int getOffset() {
+        return off;
+    }
+
+    public void setOffset(int offset) {
+        this.off = offset;
+    }
+
+    public abstract Object ensureCapacity(int minCapacity);
 }

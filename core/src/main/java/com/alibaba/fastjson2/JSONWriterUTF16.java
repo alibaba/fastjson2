@@ -524,7 +524,7 @@ class JSONWriterUTF16
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         int off = this.off;
-        ensureCapacity(off + strlen * 6 + 2);
+        ensureCapacityInternal(off + strlen * 6 + 2);
 
         final char[] chars = this.chars;
         chars[off++] = quote;
@@ -609,7 +609,7 @@ class JSONWriterUTF16
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         int off = this.off;
-        ensureCapacity(off + strlen * 6 + 2);
+        ensureCapacityInternal(off + strlen * 6 + 2);
 
         final char[] chars = this.chars;
         chars[off++] = quote;
@@ -694,7 +694,7 @@ class JSONWriterUTF16
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         int off = this.off;
-        ensureCapacity(off + strlen * 6 + 2);
+        ensureCapacityInternal(off + strlen * 6 + 2);
 
         final char[] chars = this.chars;
         chars[off++] = quote;
@@ -779,7 +779,7 @@ class JSONWriterUTF16
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         int off = this.off;
-        ensureCapacity(off + strlen * 6 + 2);
+        ensureCapacityInternal(off + strlen * 6 + 2);
 
         final char[] chars = this.chars;
         chars[off++] = quote;
@@ -1006,7 +1006,7 @@ class JSONWriterUTF16
         int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
 
         int off = this.off;
-        ensureCapacity(off + charsLen + 2);
+        ensureCapacityInternal(off + charsLen + 2);
 
         final char[] chars = this.chars;
         chars[off++] = quote;
@@ -1786,7 +1786,15 @@ class JSONWriterUTF16
         this.off = off + len;
     }
 
-    final void ensureCapacity(int minCapacity) {
+    public final Object ensureCapacity(int minCapacity) {
+        char[] chars = this.chars;
+        if (minCapacity >= chars.length) {
+            chars = Arrays.copyOf(chars, newCapacity(minCapacity, chars.length));
+        }
+        return chars;
+    }
+
+    final void ensureCapacityInternal(int minCapacity) {
         if (minCapacity > chars.length) {
             grow0(minCapacity);
         }
@@ -1797,7 +1805,7 @@ class JSONWriterUTF16
         return chars;
     }
 
-    private void grow0(int minCapacity) {
+    protected final void grow0(int minCapacity) {
         chars = Arrays.copyOf(chars, newCapacity(minCapacity, chars.length));
     }
 
@@ -1988,7 +1996,7 @@ class JSONWriterUTF16
         int off = this.off;
         int minCapacity = off + 2 + size * 23;
         if (minCapacity >= chars.length) {
-            ensureCapacity(minCapacity);
+            grow0(minCapacity);
         }
 
         final char[] chars = this.chars;
@@ -2841,7 +2849,7 @@ class JSONWriterUTF16
         }
 
         if (off == chars.length) {
-            ensureCapacity(off + 1);
+            grow0(off + 1);
         }
         chars[off++] = '[';
 

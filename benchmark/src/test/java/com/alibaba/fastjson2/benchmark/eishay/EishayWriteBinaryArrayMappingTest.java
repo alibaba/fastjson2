@@ -34,7 +34,7 @@ public class EishayWriteBinaryArrayMappingTest {
             System.out.println("EishayWriteBinaryArrayMapping-jsonb millis : " + millis);
             // zulu8.62.0.19 : 796
             // zulu11.52.13 :  782
-            // zulu17.32.13 : 790
+            // zulu17.32.13 : 790 767 716 804
         }
     }
 

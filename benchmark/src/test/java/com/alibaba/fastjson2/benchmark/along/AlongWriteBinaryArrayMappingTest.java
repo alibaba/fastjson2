@@ -36,7 +36,7 @@ public class AlongWriteBinaryArrayMappingTest {
             System.out.println("AlongWriteBinaryArrayMapping-fastjson2_jsonb_features millis : " + millis);
             // zulu8.68.0.21 :
             // zulu11.52.13 :
-            // zulu17.32.13 : 3126 2888 2736 2564 1674 1404
+            // zulu17.32.13 : 3126 2888 2736 2564 1674 1404 1785 1340 1060
         }
     }
 
@@ -87,8 +87,8 @@ public class AlongWriteBinaryArrayMappingTest {
     }
 
     public static void main(String[] args) throws Exception {
-        jsonb();
-//        jsonbFeatures();
+//        jsonb();
+        jsonbFeatures();
 //        json();
 //        jsonStr();
 //        fury();

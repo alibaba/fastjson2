@@ -29,7 +29,7 @@ final class JSONWriterUTF16JDK9UF
     public void writeBool(boolean value) {
         int minCapacity = off + 5;
         if (minCapacity >= this.chars.length) {
-            ensureCapacity(minCapacity);
+            grow0(minCapacity);
         }
 
         char[] chars = this.chars;
