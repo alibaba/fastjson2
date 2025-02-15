@@ -804,10 +804,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -826,10 +825,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -849,10 +847,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -868,9 +865,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -887,10 +884,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -907,9 +903,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -926,9 +922,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -947,9 +943,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -970,9 +966,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -993,9 +989,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1012,9 +1008,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1034,9 +1030,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1056,9 +1052,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1080,9 +1076,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1102,9 +1098,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1125,9 +1121,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1149,9 +1145,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1174,9 +1170,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1199,9 +1195,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1225,9 +1221,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1252,9 +1248,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1280,9 +1276,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1306,9 +1302,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1333,9 +1329,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1361,9 +1357,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1390,9 +1386,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1412,9 +1408,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1435,9 +1431,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1459,9 +1455,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1484,9 +1480,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1507,9 +1503,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1531,9 +1527,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1557,9 +1553,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1587,9 +1583,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1610,9 +1606,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1635,9 +1631,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1664,9 +1660,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1694,9 +1690,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1721,9 +1717,9 @@ class JSONReaderUTF8
         ) {
             return false;
         }
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1750,9 +1746,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1780,9 +1776,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1811,9 +1807,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1839,9 +1835,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1868,9 +1864,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1898,9 +1894,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;

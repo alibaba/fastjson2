@@ -5140,9 +5140,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5160,9 +5160,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5181,9 +5181,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5200,9 +5200,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5219,10 +5219,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        char c;
+        while ((c = chars[offset]) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = chars[offset];
         }
 
         this.offset = offset + 1;
@@ -5239,10 +5238,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        char c;
+        while ((c = chars[offset]) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = chars[offset];
         }
 
         this.offset = offset + 1;
@@ -5259,9 +5257,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5278,9 +5276,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5304,9 +5302,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5331,9 +5329,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5354,9 +5352,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5379,9 +5377,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5405,9 +5403,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5418,23 +5416,23 @@ final class JSONReaderUTF16
 
     @Override
     public final boolean nextIfName4Match12(long name1, byte name2) {
-        char[] bytes = this.chars;
+        char[] chars = this.chars;
         int offset = this.offset + 14;
         if (offset >= end) {
             return false;
         }
 
-        if (getLong(bytes, offset - 11) != name1
-                || bytes[offset - 3] != name2
-                || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
+        if (getLong(chars, offset - 11) != name1
+                || chars[offset - 3] != name2
+                || chars[offset - 2] != '"'
+                || chars[offset - 1] != ':'
         ) {
             return false;
         }
 
-        char c = bytes[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5457,9 +5455,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5483,9 +5481,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5510,9 +5508,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5538,9 +5536,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5563,9 +5561,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5589,9 +5587,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5616,9 +5614,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5644,9 +5642,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5670,9 +5668,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5697,9 +5695,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5725,9 +5723,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5754,9 +5752,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5780,9 +5778,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5807,9 +5805,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5835,9 +5833,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5864,9 +5862,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5891,9 +5889,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5919,9 +5917,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5948,9 +5946,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -5978,9 +5976,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6005,9 +6003,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6033,9 +6031,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6062,9 +6060,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6092,9 +6090,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6120,9 +6118,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6149,9 +6147,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6179,9 +6177,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6210,9 +6208,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6238,9 +6236,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6267,9 +6265,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
@@ -6297,9 +6295,9 @@ final class JSONReaderUTF16
             return false;
         }
 
-        char c = chars[offset++];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = chars[offset++];
+        char c;
+        while ((c = chars[offset++]) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty loop
         }
 
         this.offset = offset;
