@@ -227,7 +227,7 @@ public abstract class JSONWriter
         }
 
         if (this.path == null
-                || (context.features & ReferenceDetection.mask) == 0
+                || (context.features & MASK_REFERENCE_DETECTION) == 0
                 || object == Collections.EMPTY_LIST
                 || object == Collections.EMPTY_SET
         ) {
@@ -1136,8 +1136,9 @@ public abstract class JSONWriter
 
     public void writeStringNull() {
         String raw;
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask)) != 0) {
-            raw = (this.context.features & UseSingleQuotes.mask) != 0 ? "''" : "\"\"";
+        long features = this.context.features;
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_STRING_AS_EMPTY)) != 0) {
+            raw = (features & MASK_USE_SINGLE_QUOTES) != 0 ? "''" : "\"\"";
         } else {
             raw = "null";
         }
@@ -1146,7 +1147,7 @@ public abstract class JSONWriter
 
     public void writeArrayNull() {
         String raw;
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
             raw = "[]";
         } else {
             raw = "null";
@@ -1155,7 +1156,7 @@ public abstract class JSONWriter
     }
 
     public final void writeNumberNull() {
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeInt32(0);
         } else {
             writeNull();
@@ -1468,7 +1469,21 @@ public abstract class JSONWriter
         endArray();
     }
 
-    public abstract void writeString(String[] strings);
+    public void writeString(String[] strings) {
+        if (strings == null) {
+            writeArrayNull();
+            return;
+        }
+
+        startArray();
+        for (int i = 0; i < strings.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(strings[i]);
+        }
+        endArray();
+    }
 
     public void writeSymbol(String string) {
         writeString(string);
@@ -2097,6 +2112,14 @@ public abstract class JSONWriter
         }
     }
 
+    protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
+    protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
+    protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
+    protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
+    protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
+    protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    protected static final long MASK_BROWSER_SECURE = 1L << 35;
+
     public enum Feature {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
@@ -2105,7 +2128,7 @@ public abstract class JSONWriter
         WriteNulls(1 << 4),
         WriteMapNullValue(1 << 4),
         BrowserCompatible(1 << 5),
-        NullAsDefaultValue(1 << 6),
+        NullAsDefaultValue(MASK_NULL_AS_DEFAULT_VALUE),
         WriteBooleanAsNumber(1 << 7),
         WriteNonStringValueAsString(1 << 8),
         WriteClassName(1 << 9),
@@ -2116,10 +2139,10 @@ public abstract class JSONWriter
         WriteEnumUsingToString(1 << 14),
         IgnoreErrorGetter(1 << 15),
         PrettyFormat(1 << 16),
-        ReferenceDetection(1 << 17),
+        ReferenceDetection(MASK_REFERENCE_DETECTION),
         WriteNameAsSymbol(1 << 18),
         WriteBigDecimalAsPlain(1 << 19),
-        UseSingleQuotes(1 << 20),
+        UseSingleQuotes(MASK_USE_SINGLE_QUOTES),
 
         /**
          * The serialized Map will first be sorted according to Key,
@@ -2129,15 +2152,15 @@ public abstract class JSONWriter
          * @deprecated Use {@link Feature#SortMapEntriesByKeys} instead.
          */
         MapSortField(1 << 21),
-        WriteNullListAsEmpty(1 << 22),
+        WriteNullListAsEmpty(MASK_WRITE_NULL_LIST_AS_EMPTY),
         /**
          * @since 1.1
          */
-        WriteNullStringAsEmpty(1 << 23),
+        WriteNullStringAsEmpty(MASK_WRITE_NULL_STRING_AS_EMPTY),
         /**
          * @since 1.1
          */
-        WriteNullNumberAsZero(1 << 24),
+        WriteNullNumberAsZero(MASK_WRITE_NULL_NUMBER_AS_ZERO),
         /**
          * @since 1.1
          */
@@ -2195,7 +2218,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.20
          */
-        BrowserSecure(1L << 35),
+        BrowserSecure(MASK_BROWSER_SECURE),
         WriteEnumUsingOrdinal(1L << 36),
 
         /**

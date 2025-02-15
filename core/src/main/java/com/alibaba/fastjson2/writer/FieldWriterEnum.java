@@ -198,39 +198,14 @@ class FieldWriterEnum
                 return;
             }
 
-            boolean unquoteName = (features & JSONWriter.Feature.UnquoteFieldName.mask) != 0;
-            final boolean utf8 = jsonWriter.utf8;
-            final boolean utf16 = !jsonWriter.utf8 && jsonWriter.utf16;
             final int ordinal = e.ordinal();
-
             if ((features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0) {
-                if (!unquoteName) {
-                    if (utf8) {
-                        byte[] bytes = utf8ValueCache[ordinal];
-                        if (bytes == null) {
-                            utf8ValueCache[ordinal] = bytes = getBytes(ordinal);
-                        }
-                        jsonWriter.writeNameRaw(bytes);
-                        return;
-                    }
-
-                    if (utf16) {
-                        char[] chars = utf16ValueCache[ordinal];
-                        if (chars == null) {
-                            utf16ValueCache[ordinal] = chars = getChars(ordinal);
-                        }
-                        jsonWriter.writeNameRaw(chars);
-                        return;
-                    }
-                }
-
-                writeFieldName(jsonWriter);
-                jsonWriter.writeInt32(ordinal);
+                writeEnumUsingOrdinal(jsonWriter, ordinal);
                 return;
             }
 
-            if (!unquoteName) {
-                if (utf8) {
+            if ((features & JSONWriter.Feature.UnquoteFieldName.mask) == 0) {
+                if (jsonWriter.utf8) {
                     byte[] bytes = valueNameCacheUTF8[ordinal];
 
                     if (bytes == null) {
@@ -240,7 +215,7 @@ class FieldWriterEnum
                     return;
                 }
 
-                if (utf16) {
+                if (jsonWriter.utf16) {
                     char[] chars = valueNameCacheUTF16[ordinal];
                     if (chars == null) {
                         valueNameCacheUTF16[ordinal] = chars = getNameChars(ordinal);
@@ -253,6 +228,31 @@ class FieldWriterEnum
 
         writeFieldName(jsonWriter);
         jsonWriter.writeString(e.toString());
+    }
+
+    private void writeEnumUsingOrdinal(JSONWriter jsonWriter, int ordinal) {
+        if ((features & JSONWriter.Feature.UnquoteFieldName.mask) == 0) {
+            if (jsonWriter.utf8) {
+                byte[] bytes = utf8ValueCache[ordinal];
+                if (bytes == null) {
+                    utf8ValueCache[ordinal] = bytes = getBytes(ordinal);
+                }
+                jsonWriter.writeNameRaw(bytes);
+                return;
+            }
+
+            if (jsonWriter.utf16) {
+                char[] chars = utf16ValueCache[ordinal];
+                if (chars == null) {
+                    utf16ValueCache[ordinal] = chars = getChars(ordinal);
+                }
+                jsonWriter.writeNameRaw(chars);
+                return;
+            }
+        }
+
+        writeFieldName(jsonWriter);
+        jsonWriter.writeInt32(ordinal);
     }
 
     private char[] getNameChars(int ordinal) {

@@ -309,6 +309,34 @@ class JSONWriterUTF8
         startObject = false;
     }
 
+    public final void writeString(String[] strings) {
+        if (pretty != PRETTY_NON || strings == null) {
+            super.writeString(strings);
+            return;
+        }
+        int off = this.off;
+        byte[] bytes = grow1(off);
+        putByte(bytes, off, (byte) '[');
+        this.off = off + 1;
+
+        for (int i = 0; i < strings.length; i++) {
+            if (i != 0) {
+                off = this.off;
+                bytes = grow1(off);
+                putByte(bytes, off, (byte) ',');
+                this.off = off + 1;
+            }
+
+            writeString(
+                    strings[i]);
+        }
+
+        off = this.off;
+        bytes = grow1(off);
+        putByte(bytes, off, (byte) ']');
+        this.off = off + 1;
+    }
+
     public final void writeString(List<String> list) {
         if (pretty != PRETTY_NON) {
             super.writeString(list);
@@ -457,7 +485,7 @@ class JSONWriterUTF8
     }
 
     public void writeStringLatin1(byte[] value) {
-        if ((context.features & BrowserSecure.mask) != 0) {
+        if ((context.features & MASK_BROWSER_SECURE) != 0) {
             writeStringLatin1BrowserSecure(value);
             return;
         }
@@ -558,8 +586,9 @@ class JSONWriterUTF8
             return;
         }
 
-        boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        long features = context.features;
+        boolean escapeNoneAscii = (features & EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
 
         int off = this.off;
         int minCapacity = off + value.length * 4 + 2;
@@ -1158,32 +1187,6 @@ class JSONWriterUTF8
             putByte(bytes, off++, (byte) quote);
         }
         this.off = off;
-    }
-
-    public final void writeString(String[] strings) {
-        if (strings == null) {
-            writeArrayNull();
-            return;
-        }
-
-        startArray();
-        for (int i = 0; i < strings.length; i++) {
-            if (i != 0) {
-                writeComma();
-            }
-
-            String item = strings[i];
-            if (item == null) {
-                if (isEnabled(NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask)) {
-                    writeString("");
-                } else {
-                    writeNull();
-                }
-                continue;
-            }
-            writeString(item);
-        }
-        endArray();
     }
 
     @Override

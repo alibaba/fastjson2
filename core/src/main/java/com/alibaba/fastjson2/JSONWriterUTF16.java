@@ -250,8 +250,7 @@ class JSONWriterUTF16
                 chars[off++] = ',';
             }
 
-            String str = list.get(i);
-            writeString(str);
+            writeString(list.get(i));
         }
 
         if (off == chars.length) {
@@ -261,7 +260,7 @@ class JSONWriterUTF16
     }
 
     public void writeStringLatin1(byte[] value) {
-        if ((context.features & BrowserSecure.mask) != 0) {
+        if ((context.features & MASK_BROWSER_SECURE) != 0) {
             writeStringLatin1BrowserSecure(value);
             return;
         }
@@ -947,29 +946,31 @@ class JSONWriterUTF16
     }
 
     public final void writeString(String[] strings) {
-        if (strings == null) {
-            writeArrayNull();
+        if (pretty != PRETTY_NON || strings == null) {
+            super.writeString(strings);
             return;
         }
+        // startArray();
+        if (off == chars.length) {
+            grow(off + 1);
+        }
+        chars[off++] = '[';
 
-        startArray();
         for (int i = 0; i < strings.length; i++) {
             if (i != 0) {
-                writeComma();
+                if (off == chars.length) {
+                    grow(off + 1);
+                }
+                chars[off++] = ',';
             }
 
-            String item = strings[i];
-            if (item == null) {
-                if (isEnabled(NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask)) {
-                    writeString("");
-                } else {
-                    writeNull();
-                }
-                continue;
-            }
-            writeString(item);
+            writeString(strings[i]);
         }
-        endArray();
+
+        if (off == chars.length) {
+            grow(off + 1);
+        }
+        chars[off++] = ']';
     }
 
     @Override
