@@ -129,7 +129,7 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public final boolean hasFilter(JSONWriter jsonWriter) {
-        return hasFilter | containsNoneFieldGetter | jsonWriter.hasFilter();
+        return hasFilter | jsonWriter.hasFilter(containsNoneFieldGetter);
     }
 
     protected final boolean hasFilter0(JSONWriter jsonWriter) {
