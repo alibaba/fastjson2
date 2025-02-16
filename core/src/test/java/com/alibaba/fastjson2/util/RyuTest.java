@@ -12,7 +12,7 @@ public class RyuTest {
         assertEquals("1.4E-45", toString(Float.MIN_VALUE));
         assertEquals("1.0", toString(1D));
         assertEquals("1.7976931348623157E308", toString(Double.MAX_VALUE));
-        assertEquals("5.0E-324", toString(Double.MIN_VALUE));
+        assertEquals("4.9E-324", toString(Double.MIN_VALUE));
     }
 
     static String toString(double value) {
@@ -23,7 +23,7 @@ public class RyuTest {
 
     static String toString(float value) {
         byte[] bytes = new byte[15];
-        int len = DoubleToDecimal.toString(value, bytes, 0, false);
+        int len = NumberUtils.writeFloat(bytes, 0, value, false);
         return new String(bytes, 0, len);
     }
 }

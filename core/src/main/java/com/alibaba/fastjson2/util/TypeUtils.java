@@ -1883,7 +1883,7 @@ public class TypeUtils {
 
     public static BigDecimal toBigDecimal(float f) {
         byte[] bytes = new byte[15];
-        int size = DoubleToDecimal.toString(f, bytes, 0, true);
+        int size = NumberUtils.writeFloat(bytes, 0, f, true);
         return parseBigDecimal(bytes, 0, size);
     }
 

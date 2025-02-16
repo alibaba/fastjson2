@@ -1,21 +1,71 @@
 package com.alibaba.fastjson2.util;
 
+import java.lang.invoke.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
-import static com.alibaba.fastjson2.util.DoubleToDecimal.MULTIPLY_HIGH;
 import static com.alibaba.fastjson2.util.IOUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
 
 /**
  * Author: wangy
  */
 public final class NumberUtils {
+    @FunctionalInterface
+    interface LongBiFunction {
+        long multiplyHigh(long x, long y);
+    }
+
+    static long multiplyHigh(long x, long y) {
+        long x1 = x >> 32;
+        long x2 = x & 0xFFFFFFFFL;
+        long y1 = y >> 32;
+        long y2 = y & 0xFFFFFFFFL;
+
+        long z2 = x2 * y2;
+        long t = x1 * y2 + (z2 >>> 32);
+        long z1 = t & 0xFFFFFFFFL;
+        long z0 = t >> 32;
+        z1 += x2 * y1;
+
+        return x1 * y1 + z0 + (z1 >> 32);
+    }
+
+    static final LongBiFunction MULTIPLY_HIGH;
+
+    static {
+        LongBiFunction function = null;
+        if (JDKUtils.JVM_VERSION > 8 && !ANDROID) {
+            try {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(NumberUtils.class);
+                MethodType methodType = MethodType.methodType(long.class, long.class, long.class);
+                MethodHandle methodHandle = lookup.findStatic(Math.class, "multiplyHigh", methodType);
+                CallSite callSite = LambdaMetafactory.metafactory(
+                        lookup,
+                        "multiplyHigh",
+                        MethodType.methodType(LongBiFunction.class),
+                        methodType,
+                        methodHandle,
+                        methodType
+                );
+                function = (LongBiFunction) callSite.getTarget().invokeExact();
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        }
+        if (function == null) {
+            function = NumberUtils::multiplyHigh;
+        }
+        MULTIPLY_HIGH = function;
+    }
+
     private NumberUtils() {
     }
 
     static final long INFI;
     static final long NITY;
     static final long INFINITY;
+
     static {
         String str = "Infinity";
         INFINITY = IOUtils.getLongUnaligned(str.getBytes(StandardCharsets.ISO_8859_1), 0);
@@ -120,6 +170,11 @@ public final class NumberUtils {
      * @return
      */
     public static Scientific doubleToScientific(double doubleValue) {
+        if (doubleValue == Double.MIN_VALUE) {
+            // Double.MIN_VALUE The minimum double value converted by JDK is 4.9e-324. This method converts it to 5.0e-324.
+            // Due to the special value, it is specially processed to be consistent with JDK conversion.
+            return Scientific.DOUBLE_MIN;
+        }
         long bits = Double.doubleToRawLongBits(doubleValue);
         int e2 = (int) (bits >> 52) & MOD_DOUBLE_EXP;
         long mantissa0 = bits & MOD_DOUBLE_MANTISSA;
@@ -366,6 +421,218 @@ public final class NumberUtils {
             System.arraycopy(chars, 0, buf, off, chars.length);
             return off + chars.length;
         }
+    }
+
+    public static int writeFloat(byte[] buf, int off, float floatValue, boolean json) {
+        if (Float.isNaN(floatValue) || floatValue == Float.POSITIVE_INFINITY || floatValue == Float.NEGATIVE_INFINITY) {
+            return writeSpecial(buf, off, floatValue, json);
+        }
+        int bits;
+        if (floatValue == 0) {
+            bits = Float.floatToIntBits(floatValue);
+            if (bits == 0x80000000) {
+                buf[off++] = '-';
+            }
+            buf[off] = '0';
+            IOUtils.putShortUnaligned(buf, off + 1, DOT_ZERO_16);
+            return off + 3;
+        }
+        boolean sign = floatValue < 0;
+        if (sign) {
+            buf[off++] = '-';
+            floatValue = -floatValue;
+        }
+
+        Scientific scientific = floatToScientific(floatValue);
+        return writeDecimal(scientific.output, scientific.count, scientific.e10, buf, off);
+    }
+
+    public static int writeFloat(char[] buf, int off, float floatValue, boolean json) {
+        if (Float.isNaN(floatValue) || floatValue == Float.POSITIVE_INFINITY || floatValue == Float.NEGATIVE_INFINITY) {
+            return writeSpecial(buf, off, floatValue, json);
+        }
+        int bits;
+        if (floatValue == 0) {
+            bits = Float.floatToIntBits(floatValue);
+            if (bits == 0x80000000) {
+                buf[off++] = '-';
+            }
+            buf[off] = '0';
+            IOUtils.putIntUnaligned(buf, off + 1, DOT_ZERO_32); // .0
+            return off + 3;
+        }
+        boolean sign = floatValue < 0;
+        if (sign) {
+            buf[off++] = '-';
+            floatValue = -floatValue;
+        }
+
+        Scientific scientific = NumberUtils.floatToScientific(floatValue);
+        return writeDecimal(scientific.output, scientific.count, scientific.e10, buf, off);
+    }
+
+    private static int writeSpecial(byte[] buf, int off, float floatValue, boolean json) {
+        if (json) {
+            IOUtils.putIntUnaligned(buf, off, NULL_32);
+            return off + 4;
+        }
+
+        if (Float.isNaN(floatValue)) {
+            buf[off] = 'N';
+            buf[off + 1] = 'a';
+            buf[off + 2] = 'N';
+            return off + 3;
+        }
+
+        if (floatValue == Float.NEGATIVE_INFINITY) {
+            buf[off++] = '-';
+        }
+
+        IOUtils.putLongUnaligned(buf, off, INFINITY);
+        return off + 8;
+    }
+
+    private static int writeSpecial(char[] buf, int off, float floatValue, boolean json) {
+        if (json) {
+            IOUtils.putLongUnaligned(buf, off, NULL_64);
+            return off + 4;
+        }
+
+        if (Float.isNaN(floatValue)) {
+            buf[off] = 'N';
+            buf[off + 1] = 'a';
+            buf[off + 2] = 'N';
+            return off + 3;
+        }
+
+        if (floatValue == Float.NEGATIVE_INFINITY) {
+            buf[off++] = '-';
+        }
+
+        IOUtils.putLongUnaligned(buf, off, INFI);
+        IOUtils.putLongUnaligned(buf, off + 4, NITY);
+        return off + 8;
+    }
+
+    static final int MOD_FLOAT_EXP = (1 << 9) - 1;
+    static final int MOD_FLOAT_MANTISSA = (1 << 23) - 1;
+
+    public static Scientific floatToScientific(float floatValue) {
+        final int bits = Float.floatToRawIntBits(floatValue);
+        int e2 = (bits >> 23) & MOD_FLOAT_EXP;
+        int mantissa0 = bits & MOD_FLOAT_MANTISSA;
+        boolean nonZeroFlag = mantissa0 > 0;
+        int e23;
+        long output, rawOutput;
+        long d4;
+        int e10, adl;
+        boolean accurate = false;
+        if (e2 > 0) {
+            mantissa0 = 1 << 23 | mantissa0;
+            e23 = e2 - 150;   // 1023 - 52
+        } else {
+            // e2 == 0
+            int l = Integer.numberOfLeadingZeros(mantissa0) - 8;
+            mantissa0 <<= l;
+            e23 = -149 - l;
+        }
+        if (e23 >= 0) {
+            ED d = EF.E2_F_A[e23];
+            e10 = d.e10;
+            adl = d.adl;
+            d4 = d.d4;
+            if (d.b && mantissa0 > d.bv) {
+                ++e10;
+                ++adl;
+            }
+            int o5 = d.o5 + 6;  // Compared to double (adl + 2 - e10), adding 6 more numbers increases the probability of hitting
+            int sb = e23 + o5;
+            if (o5 < 0) {
+                // mantissa0 * 2^(e23 + o5) * 5^o5 -> mantissa0 * 2^sb / 5^(-o5)
+                // rawOutput = BigInteger.valueOf(mantissa0).shiftLeft(sb).divide(POW5_BI_VALUES[-o5]).longValue();
+                if (sb < 40) {
+                    rawOutput = ((long) mantissa0 << sb) / POW5_LONG_VALUES[-o5];
+                } else {
+                    ED5 d5 = ED5.ED5_A[-o5];
+                    rawOutput = multiplyHighAndShift((long) mantissa0 << 39, d5.oy, d5.of, 71 + d5.ob - sb);
+                }
+            } else {
+                // o5 > 0 -> sb > 0
+                // accurate
+                rawOutput = mantissa0 * POW5_LONG_VALUES[o5] << sb;
+                accurate = true;
+            }
+        } else {
+            // e52 >= -149 -> p5 <= 149
+            int e5 = -e23;
+            ED d = EF.E5_F_A[e5];
+            e10 = d.e10;
+            adl = d.adl;
+            d4 = d.d4;
+            if (d.b && mantissa0 > d.bv) {
+                ++e10;
+                ++adl;
+            }
+
+            int o5 = d.o5 + 6; // Compared to double (adl + 2 - e10), adding 6 more numbers increases the probability of hitting
+            int sb = o5 + e23;
+            if (sb < 0) {
+                // todo To be optimized
+                if (o5 < 17) {
+                    rawOutput = mantissa0 * POW5_LONG_VALUES[o5] >> -sb;
+                } else if (o5 < POW5_LONG_VALUES.length) {
+                    rawOutput = multiplyHighAndShift(mantissa0, POW5_LONG_VALUES[o5], -sb);
+                } else if (o5 < POW5_LONG_VALUES.length + 4) {
+                    rawOutput = multiplyHighAndShift(mantissa0 * POW5_LONG_VALUES[o5 - POW5_LONG_VALUES.length + 1], POW5_LONG_VALUES[POW5_LONG_VALUES.length - 1], -sb);
+                } else {
+                    ED5 ed5 = ED5.ED5_A[o5];
+                    rawOutput = multiplyHighAndShift((long) mantissa0 << 39, ed5.y, ed5.f, -(ed5.dfb + sb) + 39);   // 39 = 63 - 24
+                }
+            } else {
+                rawOutput = POW5_LONG_VALUES[o5] * mantissa0 << sb;
+                accurate = true;
+            }
+        }
+
+        if (accurate) {
+            // If we pursue performance, we can return it here, but it may return a non-shortest sequence of numbers (the result is correct)
+            // rawOutput = EnvUtils.JDK_AGENT_INSTANCE.multiplyHighKaratsuba(rawOutput, 0x6b5fca6af2bd215fL) >> 22; // rawOutput / 10000000;
+            // if (adl == 7) {
+            //     --adl;
+            //     rawOutput = (rawOutput + 5) / 10; // rawOutput = rawOutput / 10 + ((rawOutput % 10) >= 5 ? 1 : 0);
+            // }
+            // return new Scientific(rawOutput, adl + 2, e10);
+        }
+
+        if (rawOutput < 1000000000) {
+            return new Scientific(rawOutput / 10000000, 2, e10);
+        }
+        long div = MULTIPLY_HIGH.multiplyHigh(rawOutput, 0x44b82fa09b5a52ccL) >> 28; // rawOutput / 1000000000;
+        long rem = rawOutput - div * 1000000000;
+        long remUp = (1000000001 - rem) << 1;
+        boolean up = remUp <= d4;
+        if (up || ((rem + 1) << (nonZeroFlag ? 1 : 2)) <= d4) {
+            output = div + (up ? 1 : 0);
+            --adl;
+            if (up) {
+                if (POW10_LONG_VALUES[adl] == output) {
+                    ++e10;
+                    output = 1;
+                    adl = 0;
+                }
+            }
+        } else {
+            if (nonZeroFlag) {
+                long div0 = MULTIPLY_HIGH.multiplyHigh(rawOutput, 0x55e63b88c230e77fL) >> 25; // rawOutput / 100000000
+                output = div0 + (rem % 100000000 >= 50000000 ? 1 : 0);
+            } else {
+                long div0 = MULTIPLY_HIGH.multiplyHigh(rawOutput, 0x6b5fca6af2bd215fL) >> 22; // rawOutput / 10000000
+                output = div0 + (rem % 10000000 >= 5000000 ? 1 : 0);
+                ++adl;
+            }
+        }
+
+        return new Scientific(output, adl + 1, e10);
     }
 
     static final int[] TWO_DIGITS_32_BITS = new int[100];

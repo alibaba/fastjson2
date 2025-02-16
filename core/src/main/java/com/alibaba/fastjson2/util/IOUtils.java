@@ -8,8 +8,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.time.LocalTime;
 
-import static com.alibaba.fastjson2.util.DoubleToDecimal.MULTIPLY_HIGH;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.NumberUtils.MULTIPLY_HIGH;
 
 public class IOUtils {
     static final short DOT_ZERO_16 = BIG_ENDIAN ? (short) ('.' << 8 | '0') : (short) ('0' << 8 | '.');
