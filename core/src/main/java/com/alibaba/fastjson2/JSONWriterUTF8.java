@@ -2069,13 +2069,13 @@ class JSONWriterUTF8
     @Override
     public final void writeInt64(long i) {
         final long features = context.features;
-        boolean writeAsString = isWriteAsString(i, features);
         int off = this.off;
         int minCapacity = off + 23;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
+        boolean writeAsString = isWriteAsString(i, features);
         if (writeAsString) {
             putByte(bytes, off++, (byte) quote);
         }

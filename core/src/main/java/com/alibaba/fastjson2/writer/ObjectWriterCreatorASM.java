@@ -676,10 +676,7 @@ public class ObjectWriterCreatorASM
         }
 
         Label object_ = new Label();
-        mw.visitVarInsn(Opcodes.ALOAD, THIS);
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_WRITER, "hasFilter", METHOD_DESC_HAS_FILTER, true);
-        mw.visitJumpInsn(Opcodes.IFEQ, object_);
+        hashFilter(mw, fieldWriters, object_);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -1642,10 +1639,7 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(jsonb_);
 
         Label object_ = new Label();
-        mw.visitVarInsn(Opcodes.ALOAD, THIS);
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_WRITER, "hasFilter", METHOD_DESC_HAS_FILTER, true);
-        mw.visitJumpInsn(Opcodes.IFEQ, object_);
+        hashFilter(mw, fieldWriters, object_);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -1682,6 +1676,26 @@ public class ObjectWriterCreatorASM
 
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
+    }
+
+    private static void hashFilter(MethodWriter mw, List<FieldWriter> fieldWriters, Label object_) {
+        boolean containsNoneFieldGetter = false;
+        for (FieldWriter fieldWriter : fieldWriters) {
+            if (fieldWriter.method != null && (fieldWriter.features & FieldInfo.FIELD_MASK) == 0) {
+                containsNoneFieldGetter = true;
+                break;
+            }
+        }
+
+        mw.visitVarInsn(Opcodes.ALOAD, THIS);
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+        mw.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                TYPE_OBJECT_WRITER_ADAPTER,
+                containsNoneFieldGetter ? "hasFilter" : "hasFilter0",
+                METHOD_DESC_HAS_FILTER,
+                false);
+        mw.visitJumpInsn(Opcodes.IFEQ, object_);
     }
 
     private void gwFieldValueArrayMapping(

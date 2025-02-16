@@ -2110,6 +2110,7 @@ public abstract class JSONWriter
     protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
     protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
     protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    protected static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
     protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
     protected static final long MASK_BROWSER_SECURE = 1L << 35;
     protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
@@ -2197,7 +2198,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.13
          */
-        IgnoreNonFieldGetter(1L << 32),
+        IgnoreNonFieldGetter(MASK_IGNORE_NON_FIELD_GETTER),
 
         /**
          * @since 2.0.16
