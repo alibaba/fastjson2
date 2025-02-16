@@ -166,8 +166,7 @@ public final class NumberUtils {
      * <p> Using the difference estimation method </p>
      * <p> The output may not be the shortest, but the general result is correct </p>
      *
-     * @param doubleValue > 0
-     * @return
+     * @param doubleValue &gt; 0
      */
     public static Scientific doubleToScientific(double doubleValue) {
         if (doubleValue == Double.MIN_VALUE) {
