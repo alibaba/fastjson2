@@ -2986,19 +2986,23 @@ public class ObjectReaderCreatorASM
 
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readReference", "()Ljava/lang/String;", false);
-                mw.visitInsn(Opcodes.DUP);
-                mw.visitVarInsn(Opcodes.ASTORE, REFERENCE);
-                mw.visitLdcInsn("..");
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
-                mw.visitJumpInsn(Opcodes.IFEQ, addResolveTask_);
+                if (context.objectClass == null || fieldClass.isAssignableFrom(context.objectClass)) {
+                    mw.visitInsn(Opcodes.DUP);
+                    mw.visitVarInsn(Opcodes.ASTORE, REFERENCE);
+                    mw.visitLdcInsn("..");
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
+                    mw.visitJumpInsn(Opcodes.IFEQ, addResolveTask_);
 
-                if (objectClass != null && fieldClass.isAssignableFrom(objectClass)) {
-                    mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+                    if (objectClass != null && fieldClass.isAssignableFrom(objectClass)) {
+                        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
 //                    mw.visitTypeInsn(CHECKCAST, TYPE_FIELD_CLASS); // cast
-                    mw.visitJumpInsn(Opcodes.GOTO, endObject_);
-                }
+                        mw.visitJumpInsn(Opcodes.GOTO, endObject_);
+                    }
 
-                mw.visitLabel(addResolveTask_);
+                    mw.visitLabel(addResolveTask_);
+                } else {
+                    mw.visitVarInsn(Opcodes.ASTORE, REFERENCE);
+                }
 
                 mw.visitVarInsn(Opcodes.ALOAD, THIS);
                 mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
