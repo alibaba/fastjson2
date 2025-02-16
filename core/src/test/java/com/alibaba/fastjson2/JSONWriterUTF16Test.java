@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -1244,15 +1245,15 @@ public class JSONWriterUTF16Test {
     @Test
     public void write2() {
         char[] chars = new char[4];
-        JSONWriterUTF16.writeEscapedChar(chars, 0, '\r');
-        JSONWriterUTF16.writeEscapedChar(chars, 2, '\n');
+        StringUtils.writeEscapedChar(chars, 0, '\r');
+        StringUtils.writeEscapedChar(chars, 2, '\n');
         assertEquals("\\r\\n", new String(chars));
     }
 
     @Test
     public void writeU4() {
         char[] chars = new char[6];
-        JSONWriterUTF16.writeU4Hex2(chars, 0, 1);
+        StringUtils.writeU4Hex2(chars, 0, 1);
         assertEquals("\\u0001", new String(chars));
 
         IOUtils.putLongUnaligned(chars, 2, IOUtils.utf16Hex4U(1));

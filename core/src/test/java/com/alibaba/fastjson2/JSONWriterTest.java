@@ -1671,6 +1671,24 @@ public class JSONWriterTest {
     }
 
     @Test
+    public void test_writeStringLatin1Escape() {
+        String str = "1234567890\rabcde";
+        byte[] bytes = str.getBytes();
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeStringLatin1(bytes);
+            String json = jsonWriter.toString();
+            assertEquals("\"1234567890\\rabcde\"", json);
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeStringLatin1(bytes);
+            String json = jsonWriter.toString();
+            assertEquals("\"1234567890\\rabcde\"", json);
+        }
+    }
+
+    @Test
     public void test_writeStringLatin1() {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("abc\rabc", "\"abc\\rabc\"");

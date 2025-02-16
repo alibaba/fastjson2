@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.NumberUtils;
+import com.alibaba.fastjson2.util.StringUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import sun.misc.Unsafe;
 
@@ -20,7 +21,6 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriterUTF8.noneEscaped;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -267,27 +267,26 @@ class JSONWriterUTF16
 
         boolean escape = false;
         int off = this.off;
-        int minCapacity = off + value.length + 2;
+        char[] chars = this.chars;
+        int minCapacity = off + value.length * 2 + 2;
         if (minCapacity >= chars.length) {
-            grow(minCapacity);
+            chars = grow(minCapacity);
         }
 
-        final int start = off;
-        final char[] chars = this.chars;
         chars[off++] = quote;
 
-        int i = 0;
+        int coff = 0;
         final long vecQuote = this.byteVectorQuote;
-        final int upperBound = (value.length - i) & ~7;
+        final int upperBound = (value.length - coff) & ~7;
         long vec64;
-        for (; i < upperBound && noneEscaped(vec64 = getLongLE(value, i), vecQuote); i += 8) {
+        for (; coff < upperBound && StringUtils.noneEscaped(vec64 = getLongLE(value, coff), vecQuote); coff += 8) {
             IOUtils.putLongLE(chars, off, expand(vec64));
             IOUtils.putLongLE(chars, off + 4, expand(vec64 >>> 32));
             off += 8;
         }
         if (!escape) {
-            for (; i < value.length; i++) {
-                byte c = value[i];
+            for (; coff < value.length; coff++) {
+                byte c = value[coff];
                 if (c == '\\' || c == quote || c < ' ') {
                     escape = true;
                     break;
@@ -303,8 +302,12 @@ class JSONWriterUTF16
             return;
         }
 
-        this.off = start;
-        writeStringEscape(value);
+        minCapacity += value.length * 4;
+        if (minCapacity >= chars.length) {
+            chars = grow(minCapacity);
+        }
+
+        this.off = StringUtils.writeLatin1EscapedRest(chars, off, value, coff, this.quote, context.features);
     }
 
     static long expand(long i) {
@@ -367,7 +370,7 @@ class JSONWriterUTF16
             if (i + 8 < char_len) {
                 long v0 = getLongLE(value, i << 1);
                 long v1 = getLongLE(value, (i + 4) << 1);
-                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && noneEscaped((v0 << 8) | v1, vecQuote)) {
+                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && StringUtils.noneEscaped((v0 << 8) | v1, vecQuote)) {
                     putLongLE(chars, off, v0);
                     putLongLE(chars, off + 4, v1);
                     i += 8;
@@ -543,7 +546,7 @@ class JSONWriterUTF16
                 case '\b':
                 case '\f':
                 case '\t':
-                    writeEscapedChar(chars, off, ch);
+                    StringUtils.writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -573,7 +576,7 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    writeU4Hex2(chars, off, ch);
+                    StringUtils.writeU4Hex2(chars, off, ch);
                     off += 6;
                     break;
                 case '<':
@@ -581,7 +584,7 @@ class JSONWriterUTF16
                 case '(':
                 case ')':
                     if (browserSecure) {
-                        writeU4HexU(chars, off, ch);
+                        StringUtils.writeU4HexU(chars, off, ch);
                         off += 6;
                     } else {
                         chars[off++] = ch;
@@ -589,7 +592,7 @@ class JSONWriterUTF16
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        writeU4HexU(chars, off, ch);
+                        StringUtils.writeU4HexU(chars, off, ch);
                         off += 6;
                     } else {
                         chars[off++] = ch;
@@ -628,7 +631,7 @@ class JSONWriterUTF16
                 case '\b':
                 case '\f':
                 case '\t':
-                    writeEscapedChar(chars, off, ch);
+                    StringUtils.writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -658,7 +661,7 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    writeU4Hex2(chars, off, ch);
+                    StringUtils.writeU4Hex2(chars, off, ch);
                     off += 6;
                     break;
                 case '<':
@@ -666,7 +669,7 @@ class JSONWriterUTF16
                 case '(':
                 case ')':
                     if (browserSecure) {
-                        writeU4HexU(chars, off, ch);
+                        StringUtils.writeU4HexU(chars, off, ch);
                         off += 6;
                     } else {
                         chars[off++] = ch;
@@ -674,7 +677,7 @@ class JSONWriterUTF16
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        writeU4HexU(chars, off, ch);
+                        StringUtils.writeU4HexU(chars, off, ch);
                         off += 6;
                     } else {
                         chars[off++] = ch;
@@ -713,7 +716,7 @@ class JSONWriterUTF16
                 case '\b':
                 case '\f':
                 case '\t':
-                    writeEscapedChar(chars, off, ch);
+                    StringUtils.writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -743,7 +746,7 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    writeU4Hex2(chars, off, ch);
+                    StringUtils.writeU4Hex2(chars, off, ch);
                     off += 6;
                     break;
                 case '<':
@@ -751,7 +754,7 @@ class JSONWriterUTF16
                 case '(':
                 case ')':
                     if (browserSecure) {
-                        writeU4HexU(chars, off, ch);
+                        StringUtils.writeU4HexU(chars, off, ch);
                         off += 6;
                     } else {
                         chars[off++] = ch;
@@ -759,7 +762,7 @@ class JSONWriterUTF16
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        writeU4HexU(chars, off, ch);
+                        StringUtils.writeU4HexU(chars, off, ch);
                         off += 6;
                     } else {
                         chars[off++] = ch;
@@ -772,89 +775,17 @@ class JSONWriterUTF16
     }
 
     protected final void writeStringEscape(byte[] str) {
-        final int strlen = str.length;
-        final char quote = this.quote;
-        boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
-
         int off = this.off;
-        ensureCapacityInternal(off + strlen * 6 + 2);
+        char[] chars = this.chars;
 
-        final char[] chars = this.chars;
-        chars[off++] = quote;
-        for (int i = 0; i < str.length; i++) {
-            byte b = str[i];
-            char ch = (char) (b & 0xff);
-            switch (ch) {
-                case '"':
-                case '\'':
-                    if (ch == quote) {
-                        chars[off++] = '\\';
-                    }
-                    chars[off++] = ch;
-                    break;
-                case '\\':
-                case '\r':
-                case '\n':
-                case '\b':
-                case '\f':
-                case '\t':
-                    writeEscapedChar(chars, off, ch);
-                    off += 2;
-                    break;
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 11:
-                case 14:
-                case 15:
-                case 16:
-                case 17:
-                case 18:
-                case 19:
-                case 20:
-                case 21:
-                case 22:
-                case 23:
-                case 24:
-                case 25:
-                case 26:
-                case 27:
-                case 28:
-                case 29:
-                case 30:
-                case 31:
-                    writeU4Hex2(chars, off, ch);
-                    off += 6;
-                    break;
-                case '<':
-                case '>':
-                case '(':
-                case ')':
-                    if (browserSecure) {
-                        writeU4HexU(chars, off, ch);
-                        off += 6;
-                    } else {
-                        chars[off++] = ch;
-                    }
-                    break;
-                default:
-                    if (escapeNoneAscii && ch > 0x007F) {
-                        writeU4HexU(chars, off, ch);
-                        off += 6;
-                    } else {
-                        chars[off++] = ch;
-                    }
-                    break;
-            }
+        int minCapacity = off + str.length * 6 + 2;
+        if (minCapacity >= chars.length) {
+            chars = grow(minCapacity);
         }
-        chars[off] = quote;
-        this.off = off + 1;
+
+        char quote = this.quote;
+        chars[off++] = quote;
+        this.off = StringUtils.writeLatin1EscapedRest(chars, off, str, 0, quote, context.features);
     }
 
     @Override
@@ -895,7 +826,7 @@ class JSONWriterUTF16
                 case '\b':
                 case '\f':
                 case '\t':
-                    writeEscapedChar(chars, off, ch);
+                    StringUtils.writeEscapedChar(chars, off, ch);
                     off += 2;
                     break;
                 case 0:
@@ -925,12 +856,12 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    writeU4Hex2(chars, off, ch);
+                    StringUtils.writeU4Hex2(chars, off, ch);
                     off += 6;
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        writeU4HexU(chars, off, ch);
+                        StringUtils.writeU4HexU(chars, off, ch);
                         off += 6;
                     } else {
                         chars[off++] = ch;
@@ -1251,7 +1182,7 @@ class JSONWriterUTF16
             case '\b':
             case '\f':
             case '\t':
-                writeEscapedChar(chars, off, ch);
+                StringUtils.writeEscapedChar(chars, off, ch);
                 off += 2;
                 break;
             case 0:
@@ -2996,7 +2927,7 @@ class JSONWriterUTF16
             if (i + 8 < char_len) {
                 long v0 = getLongLE(value, i);
                 long v1 = getLongLE(value, i + 4);
-                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && noneEscaped((v0 << 8) | v1, vecQuote)) {
+                if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && StringUtils.noneEscaped((v0 << 8) | v1, vecQuote)) {
                     putLongLE(chars, off, v0);
                     putLongLE(chars, off + 4, v1);
                     i += 8;
@@ -3084,47 +3015,5 @@ class JSONWriterUTF16
             }
         }
         this.off = off;
-    }
-
-    private static final int U2;
-    private static final long U4;
-    private static final int[] ESCAPED_CHARS;
-    static {
-        {
-            char[] bytes = "\\u00".toCharArray();
-            U2 = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET);
-            U4 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
-        }
-        {
-            char[] mapping = new char[] {
-                    '\\', '\\',
-                    '\n', 'n',
-                    '\r', 'r',
-                    '\f', 'f',
-                    '\b', 'b',
-                    '\t', 't'
-            };
-            char[] buf = {'\\', '\0'};
-            int[] shorts = new int[128];
-            for (int i = 0; i < mapping.length; i += 2) {
-                buf[1] = mapping[i + 1];
-                shorts[mapping[i]] = IOUtils.getIntUnaligned(buf, 0);
-            }
-            ESCAPED_CHARS = shorts;
-        }
-    }
-
-    static void writeEscapedChar(char[] chars, int off, int c0) {
-        IOUtils.putIntUnaligned(chars, off, ESCAPED_CHARS[c0 & 0x7f]);
-    }
-
-    static void writeU4Hex2(char[] chars, int off, int c) {
-        IOUtils.putLongUnaligned(chars, off, U4);
-        IOUtils.putIntLE(chars, off + 4, utf16Hex2(c));
-    }
-
-    static void writeU4HexU(char[] chars, int off, int c) {
-        IOUtils.putIntUnaligned(chars, off, U2);
-        IOUtils.putLongLE(chars, off + 2, utf16Hex4U(c));
     }
 }

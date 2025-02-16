@@ -2110,9 +2110,10 @@ public abstract class JSONWriter
     protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
     protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
     protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    public static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
     protected static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
     protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
-    protected static final long MASK_BROWSER_SECURE = 1L << 35;
+    public static final long MASK_BROWSER_SECURE = 1L << 35;
     protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
 
     public enum Feature {
@@ -2189,7 +2190,7 @@ public abstract class JSONWriter
          * if format uses escaping mechanisms (which is generally true for textual formats but not for binary formats).
          * Feature is disabled by default.
          */
-        EscapeNoneAscii(1L << 30),
+        EscapeNoneAscii(MASK_ESCAPE_NONE_ASCII),
         /**
          * @since 2.0.13
          */
