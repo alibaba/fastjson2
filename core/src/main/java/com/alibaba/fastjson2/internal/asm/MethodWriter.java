@@ -189,6 +189,62 @@ public final class MethodWriter {
         }
     }
 
+    public void loadLocal(Class<?> cls, int var) {
+        if (cls == byte.class || cls == short.class || cls == int.class || cls == char.class || cls == boolean.class) {
+            visitVarInsn(Opcodes.ILOAD, var);
+        } else if (cls == long.class) {
+            visitVarInsn(Opcodes.LLOAD, var);
+        } else if (cls == float.class) {
+            visitVarInsn(Opcodes.FLOAD, var);
+        } else if (cls == double.class) {
+            visitVarInsn(Opcodes.DLOAD, var);
+        } else {
+            visitVarInsn(Opcodes.ALOAD, var);
+        }
+    }
+
+    public void storeLocal(Class<?> cls, int var) {
+        if (cls == byte.class || cls == short.class || cls == int.class || cls == char.class || cls == boolean.class) {
+            visitVarInsn(Opcodes.ISTORE, var);
+        } else if (cls == long.class) {
+            visitVarInsn(Opcodes.LSTORE, var);
+        } else if (cls == float.class) {
+            visitVarInsn(Opcodes.FSTORE, var);
+        } else if (cls == double.class) {
+            visitVarInsn(Opcodes.DSTORE, var);
+        } else {
+            visitVarInsn(Opcodes.ASTORE, var);
+        }
+    }
+
+    public void aload(final int var) {
+        visitVarInsn(Opcodes.ALOAD, var);
+    }
+
+    public void astore(final int var) {
+        visitVarInsn(Opcodes.ASTORE, var);
+    }
+
+    public void iload(final int var) {
+        visitVarInsn(Opcodes.ILOAD, var);
+    }
+
+    public void istore(final int var) {
+        visitVarInsn(Opcodes.ISTORE, var);
+    }
+
+    public void lload(final int var) {
+        visitVarInsn(Opcodes.LLOAD, var);
+    }
+
+    public void dup() {
+        visitInsn(Opcodes.DUP);
+    }
+
+    public void pop() {
+        visitInsn(Opcodes.POP);
+    }
+
     public void visitVarInsn(final int opcode, final int var) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
@@ -271,6 +327,18 @@ public final class MethodWriter {
         if (currentBasicBlock != null) {
             currentBasicBlock.frame.execute(opcode, 0, methodrefSymbol, symbolTable);
         }
+    }
+
+    public void ifeq(final Label label) {
+        visitJumpInsn(Opcodes.IFEQ, label);
+    }
+
+    public void ifne(final Label label) {
+        visitJumpInsn(Opcodes.IFNE, label);
+    }
+
+    public void ifnull(final Label label) {
+        visitJumpInsn(Opcodes.IFNULL, label);
     }
 
     public void visitJumpInsn(final int opcode, final Label label) {

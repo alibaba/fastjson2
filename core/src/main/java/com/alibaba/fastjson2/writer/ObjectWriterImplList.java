@@ -212,10 +212,10 @@ final class ObjectWriterImplList
             }
 
             if (refDetect) {
-                String refPath = jsonWriter.setPath(i, item);
+                String refPath = jsonWriter.setPath0(i, item);
                 if (refPath != null) {
                     jsonWriter.writeReference(refPath);
-                    jsonWriter.popPath(item);
+                    jsonWriter.popPath0(item);
                     continue;
                 }
             }
@@ -223,7 +223,7 @@ final class ObjectWriterImplList
             itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, this.features);
 
             if (refDetect) {
-                jsonWriter.popPath(item);
+                jsonWriter.popPath0(item);
             }
         }
         jsonWriter.endArray();

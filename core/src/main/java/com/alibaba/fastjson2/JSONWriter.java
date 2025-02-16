@@ -177,6 +177,27 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
+    public final String setPath0(FieldWriter fieldWriter, Object object) {
+        this.path = this.path == Path.ROOT
+                ? fieldWriter.getRootParentPath()
+                : fieldWriter.getPath(path);
+
+        Path previous;
+        if (object == rootObject) {
+            previous = Path.ROOT;
+        } else {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
+                refs.put(object, this.path);
+                return null;
+            }
+        }
+
+        return previous.toString();
+    }
+
     public final void addManagerReference(Object object) {
         if (refs == null) {
             refs = new IdentityHashMap(8);
@@ -199,6 +220,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        return setPath0(index, object);
+    }
+
+    public final String setPath0(int index, Object object) {
         this.path = index == 0
                 ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
                 : index == 1
@@ -211,7 +236,7 @@ public abstract class JSONWriter
         } else {
             if (refs == null || (previous = refs.get(object)) == null) {
                 if (refs == null) {
-                    refs = new IdentityHashMap(8);
+                    this.refs = new IdentityHashMap(8);
                 }
                 refs.put(object, this.path);
                 return null;
@@ -226,6 +251,10 @@ public abstract class JSONWriter
             return;
         }
 
+        popPath0(object);
+    }
+
+    public final void popPath0(Object object) {
         if (this.path == null
                 || (context.features & MASK_REFERENCE_DETECTION) == 0
                 || object == Collections.EMPTY_LIST

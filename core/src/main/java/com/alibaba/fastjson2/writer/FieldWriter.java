@@ -180,6 +180,10 @@ public abstract class FieldWriter<T>
         return false;
     }
 
+    public int writeEnumValueJSONB(byte[] bytes, int off, Enum e, SymbolTable symbolTable, long features) {
+        throw new UnsupportedOperationException();
+    }
+
     public void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
         throw new UnsupportedOperationException();
     }
@@ -198,6 +202,15 @@ public abstract class FieldWriter<T>
             return;
         }
         jsonWriter.writeNameRaw(nameJSONB, hashCode);
+    }
+
+    public final int writeFieldNameJSONB(byte[] bytes, int off) {
+        System.arraycopy(nameJSONB, 0, bytes, off, nameJSONB.length);
+        return off + nameJSONB.length;
+    }
+
+    public final int writeFieldNameJSONB(byte[] bytes, int off, JSONWriter jsonWriter) {
+        return JSONB.IO.writeNameRaw(bytes, off, nameJSONB, hashCode, jsonWriter);
     }
 
     public final void writeFieldName(JSONWriter jsonWriter) {
@@ -247,6 +260,32 @@ public abstract class FieldWriter<T>
             return true;
         }
         return false;
+    }
+
+    public int writeFieldNameSymbol(SymbolTable symbolTable) {
+        int symbolTableIdentity = System.identityHashCode(symbolTable);
+
+        int symbol;
+        if (nameSymbolCache == 0) {
+            symbol = symbolTable.getOrdinalByHashCode(hashCode);
+            nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+        } else {
+            if ((int) nameSymbolCache == symbolTableIdentity) {
+                symbol = (int) (nameSymbolCache >> 32);
+            } else {
+                symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+            }
+        }
+        return symbol;
+    }
+
+    public boolean isRefDetect(Object object, long features) {
+        features |= this.features;
+        return (features & ReferenceDetection.mask) != 0
+                && (features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
+                && object != null
+                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
 
     public final JSONWriter.Path getRootParentPath() {

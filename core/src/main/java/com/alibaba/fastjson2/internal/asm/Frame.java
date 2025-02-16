@@ -874,6 +874,11 @@ class Frame {
                     }
                 }
                 break;
+            case Opcodes.IASTORE:
+            case Opcodes.BASTORE:
+            case Opcodes.CASTORE:
+                pop(3);
+                break;
             case Opcodes.POP:
             case Opcodes.IFEQ:
             case Opcodes.IFNE:

@@ -375,10 +375,11 @@ public class StringUtils {
         return value.length * (coder == 0 && escaped ? 1 : 6) + 2;
     }
 
-    public final static class LATIN1 {
+    public static final class LATIN1 {
         private static final short U2;
         private static final int U4;
         private static final short[] ESCAPED_CHARS;
+
         static {
             {
                 byte[] bytes = "\\u00".getBytes(StandardCharsets.UTF_8);
@@ -399,10 +400,11 @@ public class StringUtils {
         }
     }
 
-    public final static class UTF16 {
+    public static final class UTF16 {
         private static final int U2;
         private static final long U4;
         private static final int[] ESCAPED_CHARS;
+
         static {
             {
                 char[] bytes = "\\u00".toCharArray();
@@ -410,7 +412,7 @@ public class StringUtils {
                 U4 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
             }
             {
-                char[] mapping = new char[] {
+                char[] mapping = new char[]{
                         '\\', '\\',
                         '\n', 'n',
                         '\r', 'r',

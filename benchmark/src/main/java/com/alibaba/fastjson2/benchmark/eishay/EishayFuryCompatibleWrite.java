@@ -67,8 +67,8 @@ public class EishayFuryCompatibleWrite {
     }
 
     public int furySize() {
-//        return furyCompatible.serialize(mc).length;
-        return 0;
+        return furyCompatible.serialize(mc).length;
+//        return 0;
     }
 
     public static void main(String[] args) throws RunnerException {

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
-import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -34,8 +33,8 @@ final class JSONWriterJSONB
 
     private final CacheItem cacheItem;
     byte[] bytes;
-    private TLongIntHashMap symbols;
-    private int symbolIndex;
+    TLongIntHashMap symbols;
+    int symbolIndex;
 
     private long rootTypeNameHash;
 
@@ -968,15 +967,13 @@ final class JSONWriterJSONB
 
     @Override
     public void writeFloat(float[] values) {
-        if (values == null) {
-            writeNull();
-            return;
+        int off = this.off;
+        byte[] bytes = this.bytes;
+        int minCapacity = off + (values == null ? 1 : (5 + values.length * 5));
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
         }
-        startArray(values.length);
-        for (int i = 0; i < values.length; i++) {
-            writeFloat(values[i]);
-        }
-        endArray();
+        this.off = JSONB.IO.writeFloat(bytes, off, values);
     }
 
     @Override
@@ -991,15 +988,13 @@ final class JSONWriterJSONB
 
     @Override
     public void writeDouble(double[] values) {
-        if (values == null) {
-            writeNull();
-            return;
+        int off = this.off;
+        byte[] bytes = this.bytes;
+        int minCapacity = off + (values == null ? 1 : (5 + values.length * 9));
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
         }
-        startArray(values.length);
-        for (int i = 0; i < values.length; i++) {
-            writeDouble(values[i]);
-        }
-        endArray();
+        this.off = JSONB.IO.writeDouble(bytes, off, values);
     }
 
     @Override
@@ -1082,8 +1077,7 @@ final class JSONWriterJSONB
         if (off + 2 > bytes.length) {
             bytes = grow(off + 2);
         }
-        putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
-        this.off = off + 2;
+        this.off = JSONB.IO.writeInt8(bytes, off, val);
     }
 
     @Override
@@ -1093,9 +1087,7 @@ final class JSONWriterJSONB
         if (off + 3 > bytes.length) {
             bytes = grow(off + 3);
         }
-        putByte(bytes, off, BC_INT16);
-        putShortBE(bytes, off + 1, val);
-        this.off = off + 3;
+        this.off = JSONB.IO.writeInt16(bytes, off, val);
     }
 
     @Override
@@ -1278,65 +1270,32 @@ final class JSONWriterJSONB
 
     @Override
     public void writeLocalDate(LocalDate date) {
-        if (date == null) {
-            writeNull();
-            return;
-        }
-
         int off = this.off;
         byte[] bytes = this.bytes;
         if (off + 5 > bytes.length) {
             bytes = grow(off + 5);
         }
-
-        putByte(bytes, off, BC_LOCAL_DATE);
-        int year = date.getYear();
-        putIntBE(bytes, off + 1, (year << 16) | (date.getMonthValue() << 8) | date.getDayOfMonth());
-        this.off = off + 5;
+        this.off = JSONB.IO.writeLocalDate(bytes, off, date);
     }
 
     @Override
     public void writeLocalTime(LocalTime time) {
-        if (time == null) {
-            writeNull();
-            return;
-        }
-
         int off = this.off;
         byte[] bytes = this.bytes;
         if (off + 9 > bytes.length) {
             bytes = grow(off + 9);
         }
-
-        putIntBE(bytes,
-                off,
-                (BC_LOCAL_TIME << 24) | (time.getHour() << 16) | (time.getMinute() << 8) | time.getSecond());
-        this.off = JSONB.IO.writeInt32(bytes, off + 4, time.getNano());
+        this.off = JSONB.IO.writeLocalTime(bytes, off, time);
     }
 
     @Override
     public void writeLocalDateTime(LocalDateTime dateTime) {
-        if (dateTime == null) {
-            writeNull();
-            return;
-        }
-
         int off = this.off;
         byte[] bytes = this.bytes;
         if (off + 13 > bytes.length) {
             bytes = grow(off + 13);
         }
-
-        putIntBE(bytes,
-                off,
-                (BC_LOCAL_DATETIME << 24) | (dateTime.getYear() << 8) | dateTime.getMonthValue());
-        putIntBE(bytes,
-                off + 4,
-                (dateTime.getDayOfMonth() << 24)
-                        | (dateTime.getHour() << 16)
-                        | (dateTime.getMinute() << 8)
-                        | dateTime.getSecond());
-        this.off = JSONB.IO.writeInt32(bytes, off + 8, dateTime.getNano());
+        this.off = JSONB.IO.writeLocalDateTime(bytes, off, dateTime);
     }
 
     @Override
@@ -1363,8 +1322,7 @@ final class JSONWriterJSONB
                         | dateTime.getSecond());
         this.off = JSONB.IO.writeInt32(bytes, off + 8, dateTime.getNano());
 
-        ZoneId zoneId = dateTime.getZone();
-        String zoneIdStr = zoneId.getId();
+        String zoneIdStr = dateTime.getZone().getId();
         if (zoneIdStr.equals(SHANGHAI_ZONE_ID_NAME)) {
             writeRaw(SHANGHAI_ZONE_ID_NAME_BYTES);
         } else {
@@ -1374,85 +1332,44 @@ final class JSONWriterJSONB
 
     @Override
     public void writeOffsetDateTime(OffsetDateTime dateTime) {
-        if (dateTime == null) {
-            writeNull();
-            return;
-        }
-
-        String zoneIdStr = dateTime.getOffset().getId();
-        int strlen = zoneIdStr.length();
-
         int off = this.off;
         byte[] bytes = this.bytes;
-        int minCapacity = off + 14 + strlen;
+        int minCapacity = off + 21;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-
-        putIntBE(bytes,
-                off,
-                (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (dateTime.getYear() << 8) | dateTime.getMonthValue());
-        putIntBE(bytes,
-                off + 4,
-                (dateTime.getDayOfMonth() << 24)
-                        | (dateTime.getHour() << 16)
-                        | (dateTime.getMinute() << 8)
-                        | dateTime.getSecond());
-
-        off = JSONB.IO.writeInt32(bytes, off + 8, dateTime.getNano());
-
-        putByte(bytes, off++, (byte) (strlen + BC_STR_ASCII_FIX_MIN));
-        zoneIdStr.getBytes(0, strlen, bytes, off);
-        this.off = off + strlen;
+        this.off = JSONB.IO.writeOffsetDateTime(bytes, off, dateTime);
     }
 
     @Override
     public void writeOffsetTime(OffsetTime offsetTime) {
-        if (offsetTime == null) {
-            writeNull();
-            return;
+        int off = this.off;
+        byte[] bytes = this.bytes;
+        int minCapacity = off + 21;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
         }
-
-        writeOffsetDateTime(
-                OffsetDateTime.of(DateUtils.LOCAL_DATE_19700101, offsetTime.toLocalTime(), offsetTime.getOffset())
-        );
+        this.off = JSONB.IO.writeOffsetTime(bytes, off, offsetTime);
     }
 
     @Override
     public void writeInstant(Instant instant) {
-        if (instant == null) {
-            writeNull();
-            return;
-        }
-
         int off = this.off;
         byte[] bytes = this.bytes;
         if (off + 15 > bytes.length) {
             bytes = grow(off + 15);
         }
-
-        putByte(bytes, off, BC_TIMESTAMP);
-        off = JSONB.IO.writeInt64(bytes, off + 1, instant.getEpochSecond());
-        this.off = JSONB.IO.writeInt32(bytes, off, instant.getNano());
+        this.off = JSONB.IO.writeInstant(bytes, off, instant);
     }
 
     @Override
     public void writeUUID(UUID value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-
         int off = this.off;
         byte[] bytes = this.bytes;
         if (off + 18 > bytes.length) {
             bytes = grow(off + 18);
         }
-
-        putShortLE(bytes, off, (short) ((BC_BINARY & 0xFF) | ((BC_INT32_NUM_16 & 0xFF) << 8)));
-        putLongBE(bytes, off + 2, value.getMostSignificantBits());
-        putLongBE(bytes, off + 10, value.getLeastSignificantBits());
-        this.off = off + 18;
+        this.off = JSONB.IO.writeUUID(bytes, off, value);
     }
 
     @Override
@@ -1570,16 +1487,13 @@ final class JSONWriterJSONB
 
     @Override
     public void writeBool(boolean[] values) {
-        if (values == null) {
-            writeNull();
-            return;
+        int off = this.off;
+        byte[] bytes = this.bytes;
+        int minCapacity = off + (values == null ? 1 : (5 + values.length));
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
         }
-
-        startArray(values.length);
-        for (int i = 0; i < values.length; i++) {
-            writeBool(values[i]);
-        }
-        endArray();
+        this.off = JSONB.IO.writeBoolean(bytes, off, values);
     }
 
     @Override
