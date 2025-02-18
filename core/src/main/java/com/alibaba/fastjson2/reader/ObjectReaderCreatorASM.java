@@ -506,7 +506,7 @@ public class ObjectReaderCreatorASM
 
             genInitFields(fieldReaderArray, classNameType, generatedFields, THIS, FIELD_READER_ARRAY, mw, objectReaderSuper);
 
-            mw.return_();;
+            mw.return_();
             mw.visitMaxs(3, 3);
         }
 
@@ -4146,7 +4146,7 @@ public class ObjectReaderCreatorASM
             mw.aload(CONSUMER);
             mw.visitFieldInsn(PUTFIELD, classNameType, "consumer", "Ljava/util/function/Consumer;");
 
-            mw.return_();;
+            mw.return_();
             mw.visitMaxs(3, 3);
         }
 
@@ -4162,7 +4162,7 @@ public class ObjectReaderCreatorASM
             newObject(mw, TYPE_OBJECT, defaultConstructor);
             mw.visitFieldInsn(PUTFIELD, classNameType, "object", DESC_OBJECT);
 
-            mw.return_();;
+            mw.return_();
             mw.visitMaxs(3, 3);
         }
 
@@ -4184,7 +4184,7 @@ public class ObjectReaderCreatorASM
             mw.aconst_null();
             mw.visitFieldInsn(PUTFIELD, classNameType, "object", DESC_OBJECT);
 
-            mw.return_();;
+            mw.return_();
             mw.visitMaxs(3, 3);
         }
 
@@ -4209,18 +4209,18 @@ public class ObjectReaderCreatorASM
 
             mw.iload(LEN);
             mw.ifne(L0_);
-            mw.return_();;
+            mw.return_();
 
             mw.visitLabel(L0_);
             mw.iload(COLUMN);
             mw.ifge(L1_);
-            mw.return_();;
+            mw.return_();
 
             mw.visitLabel(L1_);
             mw.iload(COLUMN);
             mw.visitLdcInsn(fieldReaderArray.length);
             mw.if_icmple(switch_);
-            mw.return_();;
+            mw.return_();
 
             mw.visitLabel(switch_);
 
@@ -4407,7 +4407,7 @@ public class ObjectReaderCreatorASM
 
             mw.visitLabel(dflt);
 
-            mw.return_();;
+            mw.return_();
             mw.visitMaxs(3, 3);
         }
 

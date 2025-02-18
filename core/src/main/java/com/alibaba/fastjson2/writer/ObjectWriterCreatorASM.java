@@ -860,7 +860,7 @@ public class ObjectWriterCreatorASM
                     if (isFieldVarIndex(mwc, fieldWriter)) {
                         // save field values to local variants
                         sotreFieldValueToLocalVar(mwc, item.ordinal, fieldWriter, OBJECT, mw);
-                    } else  {
+                    } else {
                         minCapacity += fieldCapacity(fieldClass);
                     }
                 }
@@ -1604,7 +1604,7 @@ public class ObjectWriterCreatorASM
                     if (isFieldVarIndex(mwc, fieldWriter)) {
                         // save field values to local variants
                         sotreFieldValueToLocalVar(mwc, item.ordinal, fieldWriter, OBJECT, mw);
-                    } else  {
+                    } else {
                         minCapacity += fieldCapacity(fieldClass);
                     }
                 }
