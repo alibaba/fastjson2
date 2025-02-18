@@ -480,6 +480,21 @@ public class Enum_0 {
     }
 
     @Test
+    public void test_jsonb_value_1() {
+        Type id = Type.十1;
+        SymbolTable symbolTable = JSONB.symbolTable(
+                "value"
+        );
+
+        VO vo = new VO();
+        vo.setValue(id);
+        byte[] jsonbBytes = JSONB.toBytes(vo, symbolTable);
+
+        VO v1 = JSONB.parseObject(jsonbBytes, 0, jsonbBytes.length, VO.class, symbolTable);
+        assertEquals(vo.getValue(), v1.getValue());
+    }
+
+    @Test
     public void test_jsonb_value_type() {
         for (Type id : types) {
             byte[] jsonbBytes = JSONB.toBytes(id);

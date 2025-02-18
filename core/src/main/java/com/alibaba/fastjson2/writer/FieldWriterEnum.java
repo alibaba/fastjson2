@@ -62,39 +62,16 @@ class FieldWriterEnum
         features |= this.features;
         boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
         boolean usingToString = (features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0;
-
-//        if (usingOrdinal) {
-//
-//            int symbolTableIdentity = System.identityHashCode(symbolTable);
-//            long enumNameCache = hashCodesSymbolCache[ordinal];
-//            int enumSymbol;
-//            if (enumNameCache == 0) {
-//                enumSymbol = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
-//                hashCodesSymbolCache[ordinal] = ((long) enumSymbol << 32) | symbolTableIdentity;
-//            } else {
-//                int identity = (int) enumNameCache;
-//                if (identity == symbolTableIdentity) {
-//                    enumSymbol = (int) (enumNameCache >> 32);
-//                } else {
-//                    enumSymbol = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
-//                    hashCodesSymbolCache[ordinal] = ((long) enumSymbol << 32) | symbolTableIdentity;
-//                }
-//            }
-//
-//            int namingOrdinal = enumSymbol;
-//            if (namingOrdinal >= 0) {
-//
-//
-//                jsonWriter.writeRaw(JSONB.Constants.BC_STR_ASCII);
-//                jsonWriter.writeInt32(-namingOrdinal);
-//
-//            }
-//
-//            return JSONB.IO.writeInt32(bytes, off, e.ordinal());
-//        }
-
         String str = usingToString ? e.toString() : e.name();
-        return JSONB.IO.writeSymbol(bytes, off, str, symbolTable);
+        if (IOUtils.isASCII(str)) {
+            return JSONB.IO.writeSymbol(bytes, off, str, symbolTable);
+        }
+
+        if (usingOrdinal) {
+            return JSONB.IO.writeInt32(bytes, off, e.ordinal());
+        }
+
+        return JSONB.IO.writeString(bytes, off, str);
     }
 
     @Override

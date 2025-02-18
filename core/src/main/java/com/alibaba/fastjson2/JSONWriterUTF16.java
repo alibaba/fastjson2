@@ -268,7 +268,7 @@ class JSONWriterUTF16
         boolean escape = false;
         int off = this.off;
         char[] chars = this.chars;
-        int minCapacity = off + value.length * 2 + 2;
+        int minCapacity = off + value.length + 2;
         if (minCapacity >= chars.length) {
             chars = grow(minCapacity);
         }
@@ -302,7 +302,7 @@ class JSONWriterUTF16
             return;
         }
 
-        minCapacity += value.length * 4;
+        minCapacity += value.length * 5;
         if (minCapacity >= chars.length) {
             chars = grow(minCapacity);
         }

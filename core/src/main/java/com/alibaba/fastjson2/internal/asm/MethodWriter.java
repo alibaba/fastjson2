@@ -162,6 +162,70 @@ public final class MethodWriter {
     // Implementation of the MethodVisitor abstract class
     // -----------------------------------------------------------------------------------------------
 
+    public void return_() {
+        visitInsn(Opcodes.RETURN);
+    }
+
+    public void areturn() {
+        visitInsn(Opcodes.ARETURN);
+    }
+
+    public void iconst_0() {
+        visitInsn(Opcodes.ICONST_0);
+    }
+
+    public void iconst_1() {
+        visitInsn(Opcodes.ICONST_1);
+    }
+
+    public void iconst_2() {
+        visitInsn(Opcodes.ICONST_2);
+    }
+
+    public void lconst_0() {
+        visitInsn(Opcodes.LCONST_0);
+    }
+
+    public void lconst_1() {
+        visitInsn(Opcodes.LCONST_1);
+    }
+
+    public void lcmp() {
+        visitInsn(Opcodes.LCMP);
+    }
+
+    public void land() {
+        visitInsn(Opcodes.LAND);
+    }
+
+    public void aaload() {
+        visitInsn(Opcodes.AALOAD);
+    }
+
+    public void iadd() {
+        visitInsn(Opcodes.IADD);
+    }
+
+    public void bastore() {
+        visitInsn(Opcodes.BASTORE);
+    }
+
+    public void aconst_null() {
+        visitInsn(Opcodes.ACONST_NULL);
+    }
+
+    public void ixor() {
+        visitInsn(Opcodes.IXOR);
+    }
+
+    public void ineg() {
+        visitInsn(Opcodes.INEG);
+    }
+
+    public void lor() {
+        visitInsn(Opcodes.LOR);
+    }
+
     public void visitInsn(final int opcode) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
@@ -217,6 +281,10 @@ public final class MethodWriter {
         }
     }
 
+    public MethodWriter x() {
+        return this;
+    }
+
     public void aload(final int var) {
         visitVarInsn(Opcodes.ALOAD, var);
     }
@@ -237,8 +305,16 @@ public final class MethodWriter {
         visitVarInsn(Opcodes.LLOAD, var);
     }
 
+    public void lstore(final int var) {
+        visitVarInsn(Opcodes.LSTORE, var);
+    }
+
     public void dup() {
         visitInsn(Opcodes.DUP);
+    }
+
+    public void dup2() {
+        visitInsn(Opcodes.DUP2);
     }
 
     public void pop() {
@@ -280,6 +356,10 @@ public final class MethodWriter {
         }
     }
 
+    public void checkcast(final String type) {
+        visitTypeInsn(Opcodes.CHECKCAST, type);
+    }
+
     public void visitTypeInsn(final int opcode, final String type) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
@@ -289,6 +369,18 @@ public final class MethodWriter {
         if (currentBasicBlock != null) {
             currentBasicBlock.frame.execute(opcode, lastBytecodeOffset, typeSymbol, symbolTable);
         }
+    }
+
+    public void getfield(final String owner, final String name, final String descriptor) {
+        visitFieldInsn(Opcodes.GETFIELD, owner, name, descriptor);
+    }
+
+    public void putfield(final String owner, final String name, final String descriptor) {
+        visitFieldInsn(Opcodes.PUTFIELD, owner, name, descriptor);
+    }
+
+    public void getstatic(final String owner, final String name, final String descriptor) {
+        visitFieldInsn(Opcodes.GETSTATIC, owner, name, descriptor);
     }
 
     public void visitFieldInsn(
@@ -301,6 +393,26 @@ public final class MethodWriter {
         if (currentBasicBlock != null) {
             currentBasicBlock.frame.execute(opcode, 0, fieldrefSymbol, symbolTable);
         }
+    }
+
+    public void invokestatic(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, descriptor, false);
+    }
+
+    public void invokestatic(final String owner, final String name, final String descriptor, final boolean isInterface) {
+        visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, descriptor, isInterface);
+    }
+
+    public void invokevirtual(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKEVIRTUAL, owner, name, descriptor, false);
+    }
+
+    public void invokeinterface(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKEINTERFACE, owner, name, descriptor, true);
+    }
+
+    public void invokespecial(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKESPECIAL, owner, name, descriptor, false);
     }
 
     public void visitMethodInsn(
@@ -337,8 +449,40 @@ public final class MethodWriter {
         visitJumpInsn(Opcodes.IFNE, label);
     }
 
+    public void ifge(final Label label) {
+        visitJumpInsn(Opcodes.IFGE, label);
+    }
+
     public void ifnull(final Label label) {
         visitJumpInsn(Opcodes.IFNULL, label);
+    }
+
+    public void if_icmpeq(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPEQ, label);
+    }
+
+    public void if_acmpeq(final Label label) {
+        visitJumpInsn(Opcodes.IF_ACMPEQ, label);
+    }
+
+    public void if_acmpne(final Label label) {
+        visitJumpInsn(Opcodes.IF_ACMPNE, label);
+    }
+
+    public void goto_(final Label label) {
+        visitJumpInsn(Opcodes.GOTO, label);
+    }
+
+    public void ifnonnull(final Label label) {
+        visitJumpInsn(Opcodes.IFNONNULL, label);
+    }
+
+    public void if_icmpge(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPGE, label);
+    }
+
+    public void if_icmple(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPLE, label);
     }
 
     public void visitJumpInsn(final int opcode, final Label label) {
