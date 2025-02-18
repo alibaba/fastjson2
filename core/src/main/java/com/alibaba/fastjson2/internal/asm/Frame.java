@@ -974,6 +974,12 @@ class Frame {
             case Opcodes.IINC:
                 setLocal(arg, INTEGER);
                 break;
+            case Opcodes.I2L:
+            case Opcodes.F2L:
+                pop(1);
+                push(LONG);
+                push(TOP);
+                break;
             case Opcodes.F2I:
             case Opcodes.ARRAYLENGTH:
             case Opcodes.INSTANCEOF:

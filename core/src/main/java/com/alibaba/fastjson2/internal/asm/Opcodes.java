@@ -125,8 +125,10 @@ public interface Opcodes {
     int IXOR = 130; // -
     int LXOR = 131; // -
     int IINC = 132; // visitIincInsn
-    int L2I = 136; // visitInsn
+    int I2L = 133; // visitInsn
+    int L2I = 136; //
     int F2I = 139; // -
+    int F2L = 140; // -
     int D2I = 142; // -
     int D2L = 143; // -
     int I2B = 145; // -

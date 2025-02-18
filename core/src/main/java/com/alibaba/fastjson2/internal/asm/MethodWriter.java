@@ -218,6 +218,10 @@ public final class MethodWriter {
         visitInsn(Opcodes.BASTORE);
     }
 
+    public void castore() {
+        visitInsn(Opcodes.CASTORE);
+    }
+
     public void aconst_null() {
         visitInsn(Opcodes.ACONST_NULL);
     }
@@ -244,6 +248,10 @@ public final class MethodWriter {
 
     public void l2i() {
         visitInsn(Opcodes.L2I);
+    }
+
+    public void i2l() {
+        visitInsn(Opcodes.I2L);
     }
 
     public void lxor() {

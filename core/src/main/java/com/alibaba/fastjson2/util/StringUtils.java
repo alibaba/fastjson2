@@ -4,27 +4,19 @@ import java.nio.charset.StandardCharsets;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
-import static com.alibaba.fastjson2.JSONWriter.MASK_BROWSER_SECURE;
-import static com.alibaba.fastjson2.JSONWriter.MASK_ESCAPE_NONE_ASCII;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.hex4U;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public class StringUtils {
+    protected static final long MASK_ESCAPE_NONE_ASCII = EscapeNoneAscii.mask;
+    protected static final long MASK_BROWSER_SECURE = BrowserSecure.mask;
     public static int writeLatin1(byte[] bytes, int off, byte[] value, byte quote) {
         int strlen = value.length;
         putByte(bytes, off, quote);
         System.arraycopy(value, 0, bytes, off + 1, strlen);
         putByte(bytes, off + strlen + 1, quote);
-        return off + strlen + 2;
-    }
-
-    public static int writeLatin1(char[] bytes, int off, byte[] value, char quote) {
-        int strlen = value.length;
-        putChar(bytes, off, quote);
-        System.arraycopy(value, 0, bytes, off + 1, strlen);
-        putChar(bytes, off + strlen + 1, quote);
         return off + strlen + 2;
     }
 
