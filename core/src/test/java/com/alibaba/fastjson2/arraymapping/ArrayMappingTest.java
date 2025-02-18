@@ -1,14 +1,9 @@
 package com.alibaba.fastjson2.arraymapping;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2_vo.Int1;
-import com.alibaba.fastjson2_vo.ListStr1;
-import com.alibaba.fastjson2_vo.String1;
+import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -34,6 +29,84 @@ public class ArrayMappingTest {
             String json = jsonWriter.toString();
             assertEquals("[101]", json);
         }
+    }
+
+    @Test
+    public void test_int1_json() {
+        Int1 vo = new Int1();
+        vo.setV0000(123);
+        byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+        assertEquals("[123]", new String(bytes));
+    }
+
+    @Test
+    public void test_long1_json() {
+        LongValue1 vo = new LongValue1();
+        vo.setV0000(123);
+        byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+        assertEquals("[123]", new String(bytes));
+    }
+
+    @Test
+    public void test_Integer1_json() {
+        Integer1 vo = new Integer1();
+
+        {
+            byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+            assertEquals("[null]", new String(bytes));
+        }
+
+        {
+            byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.NullAsDefaultValue);
+            assertEquals("[0]", new String(bytes));
+        }
+
+        {
+            byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.WriteNullNumberAsZero);
+            assertEquals("[0]", new String(bytes));
+        }
+
+        vo.setV0000(123);
+        byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+        assertEquals("[123]", new String(bytes));
+    }
+
+    @Test
+    public void test_Long1_json() {
+        Long1 vo = new Long1();
+
+        {
+            byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+            assertEquals("[null]", new String(bytes));
+        }
+
+        {
+            byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.NullAsDefaultValue);
+            assertEquals("[0]", new String(bytes));
+        }
+
+        {
+            byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.WriteNullNumberAsZero);
+            assertEquals("[0]", new String(bytes));
+        }
+
+        vo.setV0000(123L);
+        byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+        assertEquals("[123]", new String(bytes));
+    }
+
+    @Test
+    public void test_String1_json() {
+        String1 vo = new String1();
+
+        {
+            byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+            assertEquals("[null]", new String(bytes));
+        }
+
+        vo.setId("abc");
+        byte[] bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+        assertEquals("[\"abc\"]", new String(bytes));
     }
 
     @Test
@@ -72,5 +145,13 @@ public class ArrayMappingTest {
         assertEquals("[\n" +
                 "\t[\"1\"]\n" +
                 "]", JSONB.toJSONString(jsonbBytes));
+    }
+
+    @Test
+    public void test_2_json() {
+        ListStr1 vo = new ListStr1();
+        vo.setV0000(Collections.singletonList("1"));
+        byte[] jsonbBytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
+        assertEquals("[[\"1\"]]", new String(jsonbBytes));
     }
 }

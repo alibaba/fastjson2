@@ -54,9 +54,9 @@ public class NameTest {
             );
 
             mw.visitVarInsn(Opcodes.ALOAD, 0);
-            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, ASMUtils.type(Object.class), "<init>", "()V", false);
+            mw.invokespecial(ASMUtils.type(Object.class), "<init>", "()V");
 
-            mw.visitInsn(Opcodes.RETURN);
+            mw.return_();
             mw.visitMaxs(7, 7);
 
             byte[] code = cw.toByteArray();
@@ -207,9 +207,9 @@ public class NameTest {
             );
 
             mw.visitVarInsn(Opcodes.ALOAD, 0);
-            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, ASMUtils.type(Object.class), "<init>", "()V", false);
+            mw.invokespecial(ASMUtils.type(Object.class), "<init>", "()V");
 
-            mw.visitInsn(Opcodes.RETURN);
+            mw.return_();
             mw.visitMaxs(7, 7);
 
             byte[] code = cw.toByteArray();

@@ -53,6 +53,27 @@ class FieldWriterEnum
         utf16ValueCache = new char[enumConstants.length][];
     }
 
+    public final int writeEnumValueJSONB(byte[] bytes, int off, Enum e, SymbolTable symbolTable, long features) {
+        if (e == null) {
+            bytes[off] = JSONB.Constants.BC_NULL;
+            return off + 1;
+        }
+
+        features |= this.features;
+        boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
+        boolean usingToString = (features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0;
+        String str = usingToString ? e.toString() : e.name();
+        if (IOUtils.isASCII(str)) {
+            return JSONB.IO.writeSymbol(bytes, off, str, symbolTable);
+        }
+
+        if (usingOrdinal) {
+            return JSONB.IO.writeInt32(bytes, off, e.ordinal());
+        }
+
+        return JSONB.IO.writeString(bytes, off, str);
+    }
+
     @Override
     public final void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
         if (e == null) {

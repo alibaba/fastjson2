@@ -177,6 +177,27 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
+    public final String setPath0(FieldWriter fieldWriter, Object object) {
+        this.path = this.path == Path.ROOT
+                ? fieldWriter.getRootParentPath()
+                : fieldWriter.getPath(path);
+
+        Path previous;
+        if (object == rootObject) {
+            previous = Path.ROOT;
+        } else {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
+                refs.put(object, this.path);
+                return null;
+            }
+        }
+
+        return previous.toString();
+    }
+
     public final void addManagerReference(Object object) {
         if (refs == null) {
             refs = new IdentityHashMap(8);
@@ -199,6 +220,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        return setPath0(index, object);
+    }
+
+    public final String setPath0(int index, Object object) {
         this.path = index == 0
                 ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
                 : index == 1
@@ -211,7 +236,7 @@ public abstract class JSONWriter
         } else {
             if (refs == null || (previous = refs.get(object)) == null) {
                 if (refs == null) {
-                    refs = new IdentityHashMap(8);
+                    this.refs = new IdentityHashMap(8);
                 }
                 refs.put(object, this.path);
                 return null;
@@ -226,6 +251,10 @@ public abstract class JSONWriter
             return;
         }
 
+        popPath0(object);
+    }
+
+    public final void popPath0(Object object) {
         if (this.path == null
                 || (context.features & MASK_REFERENCE_DETECTION) == 0
                 || object == Collections.EMPTY_LIST
@@ -1151,7 +1180,7 @@ public abstract class JSONWriter
     }
 
     public final void writeInt64Null() {
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeInt64(0);
         } else {
             writeNull();
@@ -1159,7 +1188,7 @@ public abstract class JSONWriter
     }
 
     public final void writeBooleanNull() {
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullBooleanAsFalse.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | WriteNullBooleanAsFalse.mask)) != 0) {
             writeBool(false);
         } else {
             writeNull();
@@ -2099,17 +2128,25 @@ public abstract class JSONWriter
         }
     }
 
+    protected static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
     protected static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
     protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
+    protected static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
     protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
     protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
+    protected static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
     protected static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
     protected static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
+    protected static final long MASK_PRETTY_FORMAT = 1 << 16;
     protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
     protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
     protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
     protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
     protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    protected static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
+    protected static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
+    protected static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
+    protected static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
     protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
     protected static final long MASK_BROWSER_SECURE = 1L << 35;
     protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
@@ -2119,20 +2156,20 @@ public abstract class JSONWriter
         IgnoreNoneSerializable(1 << 1),
         ErrorOnNoneSerializable(1 << 2),
         BeanToArray(1 << 3),
-        WriteNulls(1 << 4),
-        WriteMapNullValue(1 << 4),
+        WriteNulls(MASK_WRITE_MAP_NULL_VALUE),
+        WriteMapNullValue(MASK_WRITE_MAP_NULL_VALUE),
         BrowserCompatible(MASK_BROWSER_COMPATIBLE),
         NullAsDefaultValue(MASK_NULL_AS_DEFAULT_VALUE),
-        WriteBooleanAsNumber(1 << 7),
+        WriteBooleanAsNumber(MASK_WRITE_BOOLEAN_AS_NUMBER),
         WriteNonStringValueAsString(MASK_WRITE_NON_STRING_VALUE_AS_STRING),
         WriteClassName(MASK_WRITE_CLASS_NAME),
         NotWriteRootClassName(1 << 10),
         NotWriteHashMapArrayListClassName(1 << 11),
-        NotWriteDefaultValue(1 << 12),
+        NotWriteDefaultValue(MASK_NOT_WRITE_DEFAULT_VALUE),
         WriteEnumsUsingName(MASK_WRITE_ENUMS_USING_NAME),
         WriteEnumUsingToString(MASK_WRITE_ENUM_USING_TO_STRING),
         IgnoreErrorGetter(1 << 15),
-        PrettyFormat(1 << 16),
+        PrettyFormat(MASK_PRETTY_FORMAT),
         ReferenceDetection(MASK_REFERENCE_DETECTION),
         WriteNameAsSymbol(1 << 18),
         WriteBigDecimalAsPlain(1 << 19),
@@ -2158,18 +2195,18 @@ public abstract class JSONWriter
         /**
          * @since 1.1
          */
-        WriteNullBooleanAsFalse(1 << 25),
+        WriteNullBooleanAsFalse(MASK_WRITE_NULL_BOOLEAN_AS_FALSE),
 
         /**
          * @since 2.0.7
          * @deprecated use IgnoreEmpty
          */
-        NotWriteEmptyArray(1 << 26),
+        NotWriteEmptyArray(MASK_NOT_WRITE_EMPTY_ARRAY),
 
         /**
          * @since 2.0.51
          */
-        IgnoreEmpty(1L << 26),
+        IgnoreEmpty(MASK_NOT_WRITE_EMPTY_ARRAY),
 
         WriteNonStringKeyAsString(1 << 27),
         /**
@@ -2188,7 +2225,7 @@ public abstract class JSONWriter
          * if format uses escaping mechanisms (which is generally true for textual formats but not for binary formats).
          * Feature is disabled by default.
          */
-        EscapeNoneAscii(1L << 30),
+        EscapeNoneAscii(MASK_ESCAPE_NONE_ASCII),
         /**
          * @since 2.0.13
          */
@@ -2197,7 +2234,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.13
          */
-        IgnoreNonFieldGetter(1L << 32),
+        IgnoreNonFieldGetter(MASK_IGNORE_NON_FIELD_GETTER),
 
         /**
          * @since 2.0.16

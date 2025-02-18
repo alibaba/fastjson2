@@ -1620,6 +1620,10 @@ public class IOUtils {
         return ch >= '0' && ch <= '9';
     }
 
+    public static short getShortUnaligned(byte[] bytes, int offset) {
+        return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
     public static short getShortBE(byte[] bytes, int offset) {
         return convEndian(true,
                 UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
@@ -1792,6 +1796,22 @@ public class IOUtils {
             address += 2;
         }
         return true;
+    }
+
+    public static boolean isASCII(String str) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
+            return STRING_CODER.applyAsInt(str) == 0 && isASCII(STRING_VALUE.apply(str));
+        }
+        for (int i = 0, len = str.length(); i < len; ++i) {
+            if (str.charAt(i) > 0x7F) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isASCII(byte[] bytes) {
+        return isASCII(bytes, 0, bytes.length);
     }
 
     public static boolean isASCII(byte[] bytes, int off, int len) {

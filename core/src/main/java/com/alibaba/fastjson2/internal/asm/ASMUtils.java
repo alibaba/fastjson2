@@ -67,6 +67,7 @@ public class ASMUtils {
     public static final String TYPE_JSON_WRITER = JSONWriter.class.getName().replace('.', '/');
     public static final String TYPE_JSONB_IO = JSONB.IO.class.getName().replace('.', '/');
     public static final String TYPE_FIELD_WRITER = FieldWriter.class.getName().replace('.', '/');
+    public static final String TYPE_IO_UTILS = IOUtils.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT = "java/lang/Object";
 
     public static final String DESC_FIELD_WRITER = 'L' + FieldWriter.class.getName().replace('.', '/') + ';';

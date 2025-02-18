@@ -162,7 +162,111 @@ public final class MethodWriter {
     // Implementation of the MethodVisitor abstract class
     // -----------------------------------------------------------------------------------------------
 
-    public void visitInsn(final int opcode) {
+    public void return_() {
+        visitInsn(Opcodes.RETURN);
+    }
+
+    public void areturn() {
+        visitInsn(Opcodes.ARETURN);
+    }
+
+    public void iconst_0() {
+        visitInsn(Opcodes.ICONST_0);
+    }
+
+    public void iconst_1() {
+        visitInsn(Opcodes.ICONST_1);
+    }
+
+    public void iconst_2() {
+        visitInsn(Opcodes.ICONST_2);
+    }
+
+    public void iconst_3() {
+        visitInsn(Opcodes.ICONST_3);
+    }
+
+    public void iconst_4() {
+        visitInsn(Opcodes.ICONST_4);
+    }
+
+    public void iconst_5() {
+        visitInsn(Opcodes.ICONST_5);
+    }
+
+    public void iconst_m1() {
+        visitInsn(Opcodes.ICONST_M1);
+    }
+
+    public void lconst_0() {
+        visitInsn(Opcodes.LCONST_0);
+    }
+
+    public void lcmp() {
+        visitInsn(Opcodes.LCMP);
+    }
+
+    public void land() {
+        visitInsn(Opcodes.LAND);
+    }
+
+    public void iadd() {
+        visitInsn(Opcodes.IADD);
+    }
+
+    public void bastore() {
+        visitInsn(Opcodes.BASTORE);
+    }
+
+    public void castore() {
+        visitInsn(Opcodes.CASTORE);
+    }
+
+    public void aconst_null() {
+        visitInsn(Opcodes.ACONST_NULL);
+    }
+
+    public void ixor() {
+        visitInsn(Opcodes.IXOR);
+    }
+
+    public void ineg() {
+        visitInsn(Opcodes.INEG);
+    }
+
+    public void lor() {
+        visitInsn(Opcodes.LOR);
+    }
+
+    public void swap() {
+        visitInsn(Opcodes.SWAP);
+    }
+
+    public void arraylength() {
+        visitInsn(Opcodes.ARRAYLENGTH);
+    }
+
+    public void l2i() {
+        visitInsn(Opcodes.L2I);
+    }
+
+    public void i2l() {
+        visitInsn(Opcodes.I2L);
+    }
+
+    public void lxor() {
+        visitInsn(Opcodes.LXOR);
+    }
+
+    public void lushr() {
+        visitInsn(Opcodes.LUSHR);
+    }
+
+    public void aaload() {
+        visitInsn(Opcodes.AALOAD);
+    }
+
+    private void visitInsn(final int opcode) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         code.putByte(opcode);
@@ -175,7 +279,15 @@ public final class MethodWriter {
         }
     }
 
-    public void visitIntInsn(final int opcode, final int operand) {
+    public void sipush(final int operand) {
+        visitIntInsn(Opcodes.SIPUSH, operand);
+    }
+
+    public void bipush(final int operand) {
+        visitIntInsn(Opcodes.BIPUSH, operand);
+    }
+
+    private void visitIntInsn(final int opcode, final int operand) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         if (opcode == Opcodes.SIPUSH) {
@@ -187,6 +299,78 @@ public final class MethodWriter {
         if (currentBasicBlock != null) {
             currentBasicBlock.frame.execute(opcode, operand, null, null);
         }
+    }
+
+    public void loadLocal(Class<?> cls, int var) {
+        if (cls == byte.class || cls == short.class || cls == int.class || cls == char.class || cls == boolean.class) {
+            visitVarInsn(Opcodes.ILOAD, var);
+        } else if (cls == long.class) {
+            visitVarInsn(Opcodes.LLOAD, var);
+        } else if (cls == float.class) {
+            visitVarInsn(Opcodes.FLOAD, var);
+        } else if (cls == double.class) {
+            visitVarInsn(Opcodes.DLOAD, var);
+        } else {
+            visitVarInsn(Opcodes.ALOAD, var);
+        }
+    }
+
+    public void storeLocal(Class<?> cls, int var) {
+        if (cls == byte.class || cls == short.class || cls == int.class || cls == char.class || cls == boolean.class) {
+            visitVarInsn(Opcodes.ISTORE, var);
+        } else if (cls == long.class) {
+            visitVarInsn(Opcodes.LSTORE, var);
+        } else if (cls == float.class) {
+            visitVarInsn(Opcodes.FSTORE, var);
+        } else if (cls == double.class) {
+            visitVarInsn(Opcodes.DSTORE, var);
+        } else {
+            visitVarInsn(Opcodes.ASTORE, var);
+        }
+    }
+
+    public void aload(final int var) {
+        visitVarInsn(Opcodes.ALOAD, var);
+    }
+
+    public void astore(final int var) {
+        visitVarInsn(Opcodes.ASTORE, var);
+    }
+
+    public void iload(final int var) {
+        visitVarInsn(Opcodes.ILOAD, var);
+    }
+
+    public void istore(final int var) {
+        visitVarInsn(Opcodes.ISTORE, var);
+    }
+
+    public void lload(final int var) {
+        visitVarInsn(Opcodes.LLOAD, var);
+    }
+
+    public void lstore(final int var) {
+        visitVarInsn(Opcodes.LSTORE, var);
+    }
+
+    public void fstore(final int var) {
+        visitVarInsn(Opcodes.FSTORE, var);
+    }
+
+    public void dstore(final int var) {
+        visitVarInsn(Opcodes.DSTORE, var);
+    }
+
+    public void dup() {
+        visitInsn(Opcodes.DUP);
+    }
+
+    public void dup2() {
+        visitInsn(Opcodes.DUP2);
+    }
+
+    public void pop() {
+        visitInsn(Opcodes.POP);
     }
 
     public void visitVarInsn(final int opcode, final int var) {
@@ -224,7 +408,19 @@ public final class MethodWriter {
         }
     }
 
-    public void visitTypeInsn(final int opcode, final String type) {
+    public void checkcast(final String type) {
+        visitTypeInsn(Opcodes.CHECKCAST, type);
+    }
+
+    public void new_(final String type) {
+        visitTypeInsn(Opcodes.NEW, type);
+    }
+
+    public void instanceOf(final String type) {
+        visitTypeInsn(Opcodes.INSTANCEOF, type);
+    }
+
+    private void visitTypeInsn(final int opcode, final String type) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         Symbol typeSymbol = symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, type);
@@ -235,7 +431,19 @@ public final class MethodWriter {
         }
     }
 
-    public void visitFieldInsn(
+    public void getfield(final String owner, final String name, final String descriptor) {
+        visitFieldInsn(Opcodes.GETFIELD, owner, name, descriptor);
+    }
+
+    public void putfield(final String owner, final String name, final String descriptor) {
+        visitFieldInsn(Opcodes.PUTFIELD, owner, name, descriptor);
+    }
+
+    public void getstatic(final String owner, final String name, final String descriptor) {
+        visitFieldInsn(Opcodes.GETSTATIC, owner, name, descriptor);
+    }
+
+    private void visitFieldInsn(
             final int opcode, final String owner, final String name, final String descriptor) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
@@ -247,7 +455,27 @@ public final class MethodWriter {
         }
     }
 
-    public void visitMethodInsn(
+    public void invokestatic(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, descriptor, false);
+    }
+
+    public void invokestatic(final String owner, final String name, final String descriptor, final boolean isInterface) {
+        visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, descriptor, isInterface);
+    }
+
+    public void invokevirtual(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKEVIRTUAL, owner, name, descriptor, false);
+    }
+
+    public void invokeinterface(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKEINTERFACE, owner, name, descriptor, true);
+    }
+
+    public void invokespecial(final String owner, final String name, final String descriptor) {
+        visitMethodInsn(Opcodes.INVOKESPECIAL, owner, name, descriptor, false);
+    }
+
+    private void visitMethodInsn(
             final int opcode,
             final String owner,
             final String name,
@@ -273,7 +501,55 @@ public final class MethodWriter {
         }
     }
 
-    public void visitJumpInsn(final int opcode, final Label label) {
+    public void ifeq(final Label label) {
+        visitJumpInsn(Opcodes.IFEQ, label);
+    }
+
+    public void ifne(final Label label) {
+        visitJumpInsn(Opcodes.IFNE, label);
+    }
+
+    public void ifge(final Label label) {
+        visitJumpInsn(Opcodes.IFGE, label);
+    }
+
+    public void ifnull(final Label label) {
+        visitJumpInsn(Opcodes.IFNULL, label);
+    }
+
+    public void if_icmpeq(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPEQ, label);
+    }
+
+    public void if_acmpeq(final Label label) {
+        visitJumpInsn(Opcodes.IF_ACMPEQ, label);
+    }
+
+    public void if_acmpne(final Label label) {
+        visitJumpInsn(Opcodes.IF_ACMPNE, label);
+    }
+
+    public void goto_(final Label label) {
+        visitJumpInsn(Opcodes.GOTO, label);
+    }
+
+    public void ifnonnull(final Label label) {
+        visitJumpInsn(Opcodes.IFNONNULL, label);
+    }
+
+    public void if_icmpge(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPGE, label);
+    }
+
+    public void if_icmple(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPLE, label);
+    }
+
+    public void if_icmpne(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPNE, label);
+    }
+
+    private void visitJumpInsn(final int opcode, final Label label) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         // Compute the 'base' opcode, i.e. GOTO or JSR if opcode is GOTO_W or JSR_W, otherwise opcode.

@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +15,9 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 abstract class FieldWriterList<T>
         extends FieldWriter<T> {
+    private static final Class<?> EMPTY_LIST_CLASS = Collections.emptyList().getClass();
+    private static final Class<?> EMPTY_SET_CLASS = Collections.emptySet().getClass();
+
     final Type itemType;
     final Class itemClass;
     final boolean itemClassNotReferenceDetect;
@@ -383,5 +388,14 @@ abstract class FieldWriterList<T>
         }
 
         jsonWriter.writeString(list);
+    }
+
+    public final boolean isRefDetect(Object object, long features) {
+        Class<?> objectClass;
+        features |= this.features;
+        return (features & ReferenceDetection.mask) != 0
+                && (features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
+                && object != null
+                && ((objectClass = object.getClass()) != EMPTY_LIST_CLASS) && (objectClass != EMPTY_SET_CLASS);
     }
 }

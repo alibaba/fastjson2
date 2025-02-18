@@ -37,11 +37,11 @@ public class LambdaGenerator {
                     "()V",
                     64
             );
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.aload(THIS);
 
-            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            mw.invokespecial("java/lang/Object", "<init>", "()V");
 
-            mw.visitInsn(Opcodes.RETURN);
+            mw.return_();
             mw.visitMaxs(3, 3);
         }
 
@@ -54,9 +54,9 @@ public class LambdaGenerator {
 
         String TYPE_OBJECT = ASMUtils.type(objectClass);
         int OBJECT = 1, VALUE = 2;
-        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-        mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
-        mw.visitVarInsn(Opcodes.ILOAD, VALUE);
+        mw.aload(OBJECT);
+        mw.checkcast(TYPE_OBJECT);
+        mw.iload(VALUE);
 
         Class returnType = Void.TYPE;
         String methodDesc;
@@ -66,12 +66,12 @@ public class LambdaGenerator {
             methodDesc = "(I)" + ASMUtils.desc(returnType);
         }
 
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT, methodName, methodDesc, false);
+        mw.invokevirtual(TYPE_OBJECT, methodName, methodDesc);
         if (returnType != Void.TYPE) {
-            mw.visitInsn(Opcodes.POP);
+            mw.pop();
         }
 
-        mw.visitInsn(Opcodes.RETURN);
+        mw.return_();
         mw.visitMaxs(2, 2);
 
         byte[] code = cw.toByteArray();

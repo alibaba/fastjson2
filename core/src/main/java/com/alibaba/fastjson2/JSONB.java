@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -13,13 +14,13 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
+import java.time.*;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.*;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteEnumUsingToString;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -1274,7 +1275,11 @@ public interface JSONB {
     }
 
     static String toJSONString(byte[] jsonbBytes, SymbolTable symbolTable) {
-        return new JSONBDump(jsonbBytes, symbolTable, false)
+        return toJSONString(jsonbBytes, symbolTable, false);
+    }
+
+    static String toJSONString(byte[] jsonbBytes, SymbolTable symbolTable, boolean raw) {
+        return new JSONBDump(jsonbBytes, symbolTable, raw)
                 .toString();
     }
 
@@ -1457,9 +1462,9 @@ public interface JSONB {
     }
 
     interface IO {
-        static int enumSize(Enum e, long features) {
+        static int enumCapacity(Enum e, long features) {
             if ((features & (MASK_WRITE_ENUM_USING_TO_STRING | MASK_WRITE_ENUMS_USING_NAME)) != 0) {
-                return stringSize((features & WriteEnumUsingToString.mask) != 0
+                return stringCapacity((features & WriteEnumUsingToString.mask) != 0
                         ? e.toString()
                         : e.name());
             }
@@ -1488,6 +1493,18 @@ public interface JSONB {
             return off + 1;
         }
 
+        static int writeBoolean(byte[] bytes, int off, boolean[] values) {
+            if (values == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            off = startArray(bytes, off, values.length);
+            for (int i = 0; i < values.length; i++) {
+                bytes[off + i] = values[i] ? BC_TRUE : BC_FALSE;
+            }
+            return off + values.length;
+        }
+
         static int writeFloat(byte[] bytes, int off, Float value, long features) {
             float floatValue;
             if (value == null) {
@@ -1502,15 +1519,27 @@ public interface JSONB {
             return IO.writeFloat(bytes, off, floatValue);
         }
 
+        static int writeFloat(byte[] bytes, int off, float[] values) {
+            if (values == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            off = startArray(bytes, off, values.length);
+            for (float value : values) {
+                off = IO.writeFloat(bytes, off, value);
+            }
+            return off;
+        }
+
         static int writeFloat(byte[] bytes, int off, float value) {
-            int i = (int) value;
-            if (i == value && ((i + 0x10) & ~0x3f) == 0) {
-                putShortLE(bytes, off, (short) ((BC_FLOAT_INT & 0xFF) | (i << 8)));
-                return off + 2;
+            int intValue = (int) value;
+            if (intValue == value && ((intValue + 0x40000) & ~0x7ffff) == 0) {
+                putByte(bytes, off, BC_FLOAT_INT);
+                return IO.writeInt32(bytes, off + 1, intValue);
             }
 
             putByte(bytes, off, BC_FLOAT);
-            putIntBE(bytes, off + 1, Float.floatToIntBits(value));
+            IOUtils.putIntBE(bytes, off + 1, Float.floatToIntBits(value));
             return off + 5;
         }
 
@@ -1542,6 +1571,50 @@ public interface JSONB {
             return off + 9;
         }
 
+        static int writeDouble(byte[] bytes, int off, double[] values) {
+            if (values == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            off = startArray(bytes, off, values.length);
+            for (double value : values) {
+                off = writeDouble(bytes, off, value);
+            }
+            return off;
+        }
+
+        static int writeInt8(byte[] bytes, int off, Byte val, long features) {
+            if (val == null) {
+                putByte(bytes, off,
+                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0);
+                return off + 1;
+            }
+            putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
+            return off + 2;
+        }
+
+        static int writeInt8(byte[] bytes, int off, byte val) {
+            putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
+            return off + 2;
+        }
+
+        static int writeInt16(byte[] bytes, int off, Short val, long features) {
+            if (val == null) {
+                putByte(bytes, off,
+                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0);
+                return off + 1;
+            }
+            bytes[off] = BC_INT16;
+            putShortBE(bytes, off + 1, val);
+            return off + 3;
+        }
+
+        static int writeInt16(byte[] bytes, int off, short val) {
+            bytes[off] = BC_INT16;
+            putShortBE(bytes, off + 1, val);
+            return off + 3;
+        }
+
         static int writeInt32(byte[] bytes, int off, Integer value, long features) {
             if (value == null) {
                 putByte(bytes, off,
@@ -1549,6 +1622,78 @@ public interface JSONB {
                 return off + 1;
             }
             return IO.writeInt32(bytes, off, value);
+        }
+
+        static int writeSymbol(byte[] bytes, int off, String str, SymbolTable symbolTable) {
+            if (str == null) {
+                putByte(bytes, off, BC_NULL);
+                return off + 1;
+            }
+            int ordinal = symbolTable.getOrdinal(str);
+            if (ordinal >= 0) {
+                bytes[off] = BC_STR_ASCII;
+                return writeInt32(bytes, off + 1, -ordinal);
+            }
+            return writeString(bytes, off, str);
+        }
+
+        static int writeSymbol(byte[] bytes, int off, int symbol) {
+            bytes[off++] = BC_SYMBOL;
+
+            if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) symbol;
+            } else if (symbol >= INT32_BYTE_MIN && symbol <= INT32_BYTE_MAX) {
+                putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
+                off += 2;
+            } else {
+                off = JSONB.IO.writeInt32(bytes, off, symbol);
+            }
+            return off;
+        }
+
+        static int checkAndWriteTypeName(byte[] bytes, int off, Object object, Class<?> fieldClass, JSONWriter jsonWriter) {
+            long features = jsonWriter.getFeatures();
+            Class<?> objectClass;
+            if ((features & WriteClassName.mask) == 0
+                    || object == null
+                    || (objectClass = object.getClass()) == fieldClass
+                    || ((features & NotWriteHashMapArrayListClassName.mask) != 0 && (objectClass == HashMap.class || objectClass == ArrayList.class))
+                    || ((features & NotWriteRootClassName.mask) != 0 && object == jsonWriter.rootObject)
+            ) {
+                return off;
+            }
+
+            return writeTypeName(bytes, off, TypeUtils.getTypeName(objectClass), jsonWriter);
+        }
+
+        static int writeTypeName(byte[] bytes, int off, String typeName, JSONWriter jsonWriter) {
+            JSONWriterJSONB jsonWriterJSONB = (JSONWriterJSONB) jsonWriter;
+            SymbolTable symbolTable = jsonWriter.symbolTable;
+            bytes[off++] = BC_TYPED_ANY;
+
+            long hash = Fnv.hashCode64(typeName);
+
+            int symbol = -1;
+            if (symbolTable != null) {
+                symbol = symbolTable.getOrdinalByHashCode(hash);
+                if (symbol == -1 && jsonWriterJSONB.symbols != null) {
+                    symbol = jsonWriterJSONB.symbols.get(hash);
+                }
+            } else if (jsonWriterJSONB.symbols != null) {
+                symbol = jsonWriterJSONB.symbols.get(hash);
+            }
+
+            if (symbol == -1) {
+                if (jsonWriterJSONB.symbols == null) {
+                    jsonWriterJSONB.symbols = new TLongIntHashMap();
+                }
+                jsonWriterJSONB.symbols.put(hash, symbol = jsonWriterJSONB.symbolIndex++);
+            } else {
+                return JSONB.IO.writeInt32(bytes, off, symbol);
+            }
+
+            off = writeString(bytes, off, typeName);
+            return writeInt32(bytes, off, symbol);
         }
 
         static int writeInt32(byte[] bytes, int off, int value) {
@@ -1576,8 +1721,8 @@ public interface JSONB {
             }
             int size = values.size();
             off = startArray(bytes, off, size);
-            for (Long string : values) {
-                off = writeInt64(bytes, off, string, features);
+            for (Long value : values) {
+                off = writeInt64(bytes, off, value, features);
             }
             return off;
         }
@@ -1617,7 +1762,7 @@ public interface JSONB {
 
         static int startArray(byte[] bytes, int off, int size) {
             boolean tinyInt = size <= ARRAY_FIX_LEN;
-            putByte(bytes, off++, tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY);
+            bytes[off++] = tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY;
             if (!tinyInt) {
                 off = writeInt32(bytes, off, size);
             }
@@ -1637,9 +1782,22 @@ public interface JSONB {
             return off;
         }
 
+        static int writeString(byte[] bytes, int off, String[] strings, long features) {
+            if (strings == null) {
+                putByte(bytes, off, (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
+                return off + 1;
+            }
+            int size = strings.length;
+            off = startArray(bytes, off, size);
+            for (String string : strings) {
+                off = writeString(bytes, off, string);
+            }
+            return off;
+        }
+
         static int writeString(byte[] bytes, int off, String str) {
             if (str == null) {
-                putByte(bytes, off, BC_NULL);
+                bytes[off] = BC_NULL;
                 return off + 1;
             }
             if (STRING_CODER != null && STRING_VALUE != null) {
@@ -1676,25 +1834,38 @@ public interface JSONB {
             return off + strlen;
         }
 
-        static int stringSize(Collection<String> strings) {
+        static int stringCapacity(Collection<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = stringCapacity(strings.getClass().getName()) + 7;
+            for (String string : strings) {
+                size += stringCapacity(string);
+            }
+            return size;
+        }
+
+        static int stringCapacity(String[] strings) {
             if (strings == null) {
                 return 1;
             }
             int size = 6;
             for (String string : strings) {
-                size += stringSize(string);
+                size += stringCapacity(string);
             }
             return size;
         }
 
-        static int int64Size(Collection<Long> values) {
+        static int int64Capacity(Collection<Long> values) {
             if (values == null) {
                 return 1;
             }
-            return 6 + values.size() * 9;
+            return stringCapacity(values.getClass().getName())
+                    + 7
+                    + values.size() * 9;
         }
 
-        static int stringSize(String str) {
+        static int stringCapacity(String str) {
             if (str == null) {
                 return 0;
             }
@@ -1805,6 +1976,175 @@ public interface JSONB {
             }
 
             return 5;
+        }
+
+        static int writeUUID(byte[] bytes, int off, UUID value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putShortLE(bytes, off, (short) ((BC_BINARY & 0xFF) | ((BC_INT32_NUM_16 & 0xFF) << 8)));
+            putLongBE(bytes, off + 2, value.getMostSignificantBits());
+            putLongBE(bytes, off + 10, value.getLeastSignificantBits());
+            return off + 18;
+        }
+
+        static int writeInstant(byte[] bytes, int off, Instant value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            bytes[off] = BC_TIMESTAMP;
+            off = JSONB.IO.writeInt64(bytes, off + 1, value.getEpochSecond());
+            return JSONB.IO.writeInt32(bytes, off, value.getNano());
+        }
+
+        static int writeLocalDate(byte[] bytes, int off, LocalDate value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putByte(bytes, off, BC_LOCAL_DATE);
+            int year = value.getYear();
+            putIntBE(bytes, off + 1, (year << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
+            return off + 5;
+        }
+
+        static int writeLocalTime(byte[] bytes, int off, LocalTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putIntBE(bytes,
+                    off,
+                    (BC_LOCAL_TIME << 24) | (value.getHour() << 16) | (value.getMinute() << 8) | value.getSecond());
+            return JSONB.IO.writeInt32(bytes, off + 4, value.getNano());
+        }
+
+        static int writeLocalDateTime(byte[] bytes, int off, LocalDateTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putIntBE(bytes,
+                    off,
+                    (BC_LOCAL_DATETIME << 24) | (value.getYear() << 8) | value.getMonthValue());
+            putIntBE(bytes,
+                    off + 4,
+                    (value.getDayOfMonth() << 24)
+                            | (value.getHour() << 16)
+                            | (value.getMinute() << 8)
+                            | value.getSecond());
+            return writeInt32(bytes, off + 8, value.getNano());
+        }
+
+        static int writeOffsetDateTime(byte[] bytes, int off, OffsetDateTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putIntBE(bytes,
+                    off,
+                    (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (value.getYear() << 8) | value.getMonthValue());
+            putIntBE(bytes,
+                    off + 4,
+                    (value.getDayOfMonth() << 24)
+                            | (value.getHour() << 16)
+                            | (value.getMinute() << 8)
+                            | value.getSecond());
+
+            off = writeInt32(bytes, off + 8, value.getNano());
+
+            String zoneIdStr = value.getOffset().getId();
+            int strlen = zoneIdStr.length();
+            bytes[off] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            zoneIdStr.getBytes(0, strlen, bytes, off + 1);
+            return off + strlen + 1;
+        }
+
+        static int writeOffsetTime(byte[] bytes, int off, OffsetTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+
+            int year = 1970, month = 1, dayOfMonth = 1;
+            putIntBE(bytes,
+                    off,
+                    (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (year << 8) | month);
+            putIntBE(bytes,
+                    off + 4,
+                    (dayOfMonth << 24)
+                            | (value.getHour() << 16)
+                            | (value.getMinute() << 8)
+                            | value.getSecond());
+
+            off = writeInt32(bytes, off + 8, value.getNano());
+
+            String zoneIdStr = value.getOffset().getId();
+            int strlen = zoneIdStr.length();
+            bytes[off] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            zoneIdStr.getBytes(0, strlen, bytes, off + 1);
+            return off + strlen + 1;
+        }
+
+        static int writeReference(byte[] bytes, int off, String path, JSONWriter jsonWriter) {
+            if (jsonWriter.lastReference == path) {
+                path = "#-1";
+            } else {
+                jsonWriter.lastReference = path;
+            }
+            bytes[off] = BC_REFERENCE;
+            return writeString(bytes, off + 1, path);
+        }
+
+        static int writeNameRaw(byte[] bytes, int off, byte[] name, long nameHash, JSONWriter jsonWriter) {
+            SymbolTable symbolTable = jsonWriter.symbolTable;
+            JSONWriterJSONB jsonWriterJSONB = (JSONWriterJSONB) jsonWriter;
+            int symbol;
+            if (symbolTable == null
+                    || (symbol = symbolTable.getOrdinalByHashCode(nameHash)) == -1
+            ) {
+                if ((jsonWriter.context.features & WriteNameAsSymbol.mask) == 0) {
+                    System.arraycopy(name, 0, bytes, off, name.length);
+                    return off + name.length;
+                }
+
+                boolean symbolExists = false;
+                if (jsonWriterJSONB.symbols != null) {
+                    if ((symbol = jsonWriterJSONB.symbols.putIfAbsent(nameHash, jsonWriterJSONB.symbolIndex)) != jsonWriterJSONB.symbolIndex) {
+                        symbolExists = true;
+                    } else {
+                        jsonWriterJSONB.symbolIndex++;
+                    }
+                } else {
+                    (jsonWriterJSONB.symbols = new TLongIntHashMap())
+                            .put(nameHash, symbol = jsonWriterJSONB.symbolIndex++);
+                }
+
+                if (!symbolExists) {
+                    putByte(bytes, off++, BC_SYMBOL);
+                    System.arraycopy(name, 0, bytes, off, name.length);
+                    off += name.length;
+
+                    if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+                        putByte(bytes, off++, (byte) symbol);
+                    } else {
+                        off = JSONB.IO.writeInt32(bytes, off, symbol);
+                    }
+                    return off;
+                }
+                symbol = -symbol;
+            }
+
+            bytes[off++] = BC_SYMBOL;
+            int intValue = -symbol;
+            if (intValue >= BC_INT32_NUM_MIN && intValue <= BC_INT32_NUM_MAX) {
+                putByte(bytes, off++, (byte) intValue);
+            } else {
+                off = JSONB.IO.writeInt32(bytes, off, intValue);
+            }
+            return off;
         }
     }
 }

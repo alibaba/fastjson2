@@ -874,6 +874,11 @@ class Frame {
                     }
                 }
                 break;
+            case Opcodes.IASTORE:
+            case Opcodes.BASTORE:
+            case Opcodes.CASTORE:
+                pop(3);
+                break;
             case Opcodes.POP:
             case Opcodes.IFEQ:
             case Opcodes.IFNE:
@@ -968,6 +973,12 @@ class Frame {
                 break;
             case Opcodes.IINC:
                 setLocal(arg, INTEGER);
+                break;
+            case Opcodes.I2L:
+            case Opcodes.F2L:
+                pop(1);
+                push(LONG);
+                push(TOP);
                 break;
             case Opcodes.F2I:
             case Opcodes.ARRAYLENGTH:

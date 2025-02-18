@@ -90,6 +90,9 @@ public interface Opcodes {
     int FSTORE = 56; // -
     int DSTORE = 57; // -
     int ASTORE = 58; // -
+    int IASTORE = 79; // visitInsn
+    int BASTORE = 84; // -
+    int CASTORE = 85; // -
     int POP = 87; // visitInsn
     int POP2 = 88; // -
     int DUP = 89; // -
@@ -122,8 +125,10 @@ public interface Opcodes {
     int IXOR = 130; // -
     int LXOR = 131; // -
     int IINC = 132; // visitIincInsn
-    int L2I = 136; // visitInsn
+    int I2L = 133; // visitInsn
+    int L2I = 136; //
     int F2I = 139; // -
+    int F2L = 140; // -
     int D2I = 142; // -
     int D2L = 143; // -
     int I2B = 145; // -

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.JSONWriter.Context;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -1116,15 +1117,15 @@ public class JSONWriterUTF8Test {
     @Test
     public void write2() {
         byte[] bytes = new byte[4];
-        JSONWriterUTF8.writeEscapedChar(bytes, 0, '\r');
-        JSONWriterUTF8.writeEscapedChar(bytes, 2, '\n');
+        StringUtils.writeEscapedChar(bytes, 0, '\r');
+        StringUtils.writeEscapedChar(bytes, 2, '\n');
         assertEquals("\\r\\n", new String(bytes));
     }
 
     @Test
     public void writeU4() {
         byte[] bytes = new byte[6];
-        JSONWriterUTF8.writeU4Hex2(bytes, 0, 1);
+        StringUtils.writeU4Hex2(bytes, 0, 1);
         assertEquals("\\u0001", new String(bytes));
 
         IOUtils.putIntUnaligned(bytes, 2, IOUtils.hex4U(1));
@@ -1171,7 +1172,7 @@ public class JSONWriterUTF8Test {
                 buf[i] = c;
                 long v = IOUtils.getLongUnaligned(buf, 0);
                 assertTrue(containsEscaped(v, quote));
-                assertFalse(JSONWriterUTF8.noneEscaped(v, ~quote));
+                assertFalse(StringUtils.noneEscaped(v, ~quote));
             }
         }
 
@@ -1184,7 +1185,7 @@ public class JSONWriterUTF8Test {
                 buf[i] = c;
                 long v = IOUtils.getLongUnaligned(buf, 0);
                 assertTrue(containsEscaped(v, quote));
-                assertFalse(JSONWriterUTF8.noneEscaped(v, ~quote));
+                assertFalse(StringUtils.noneEscaped(v, ~quote));
             }
         }
     }
@@ -1201,7 +1202,7 @@ public class JSONWriterUTF8Test {
             }
             Arrays.fill(buf, (byte) i);
             long v = IOUtils.getLongUnaligned(buf, 0);
-            assertTrue(JSONWriterUTF8.noneEscaped(v, ~vectorQuote));
+            assertTrue(StringUtils.noneEscaped(v, ~vectorQuote));
             assertFalse(containsEscaped(v, vectorQuote));
         }
     }
@@ -1218,7 +1219,7 @@ public class JSONWriterUTF8Test {
             }
             Arrays.fill(buf, (byte) i);
             long v = IOUtils.getLongUnaligned(buf, 0);
-            assertTrue(JSONWriterUTF8.noneEscaped(v, ~vectorQuote));
+            assertTrue(StringUtils.noneEscaped(v, ~vectorQuote));
             assertFalse(containsEscaped(v, vectorQuote));
         }
     }

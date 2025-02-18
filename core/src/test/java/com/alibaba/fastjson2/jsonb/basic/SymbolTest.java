@@ -83,6 +83,7 @@ public class SymbolTest {
         bean.name = v2;
 
         byte[] bytes = JSONB.toBytes(bean, symbolTable);
+        System.out.println(JSONB.toJSONString(bytes, true));
         assertEquals(17, bytes.length);
         assertEquals(BC_OBJECT, bytes[0]);
         assertEquals(BC_OBJECT_END, bytes[bytes.length - 1]);
