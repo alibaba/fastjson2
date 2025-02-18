@@ -1594,7 +1594,7 @@ public class ObjectWriterCreatorASM
                  * int offset = jsonWriter.getOffset();
                  */
                 mw.aload(JSON_WRITER);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "getOffset", "()I", false);
+                mw.invokevirtual(TYPE_JSON_WRITER, "getOffset", "()I");
                 mw.istore(OFFSET);
 
                 int minCapacity = 6;
@@ -1619,7 +1619,7 @@ public class ObjectWriterCreatorASM
 
                 fieldValueCapacity(objectFeatures, group.fieldWriters, mwc, mw, FEATURES);
 
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "ensureCapacity", "(I)Ljava/lang/Object;", false);
+                mw.invokevirtual(TYPE_JSON_WRITER, "ensureCapacity", "(I)Ljava/lang/Object;");
                 mw.checkcast("[B");
                 mw.astore(BYTES);
 
@@ -1627,7 +1627,7 @@ public class ObjectWriterCreatorASM
                     mw.aload(BYTES);
                     mw.iload(OFFSET);
                     mw.visitLdcInsn(fieldWriters.size());
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_JSONB_IO, "startArray", "([BII)I", true);
+                    mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
                     mw.istore(OFFSET);
                 }
 
@@ -1643,7 +1643,7 @@ public class ObjectWriterCreatorASM
 
                 mw.aload(JSON_WRITER);
                 mw.iload(OFFSET);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "setOffset", "(I)V", false);
+                mw.invokevirtual(TYPE_JSON_WRITER, "setOffset", "(I)V");
             } else {
                 if (group.start) {
                     mw.aload(JSON_WRITER);
@@ -1651,9 +1651,9 @@ public class ObjectWriterCreatorASM
                         mw.invokevirtual(TYPE_JSON_WRITER, "startArray" + size, "()V");
                     } else {
                         if (size >= 128) {
-                            mw.visitIntInsn(Opcodes.SIPUSH, size);
+                            mw.sipush(size);
                         } else {
-                            mw.visitIntInsn(Opcodes.BIPUSH, size);
+                            mw.bipush(size);
                         }
                         mw.invokevirtual(TYPE_JSON_WRITER, "startArray", "(I)V");
                     }
@@ -2789,7 +2789,7 @@ public class ObjectWriterCreatorASM
 
             mw.aload(FIELD_VALUE);
             mw.checkcast("[Ljava/lang/Object;");
-            mw.visitInsn(Opcodes.ARRAYLENGTH);
+            mw.arraylength();
             mw.ifne(notWriteEmptyArrayEnd_);
 
             mw.goto_(notNull_);
@@ -4347,19 +4347,19 @@ public class ObjectWriterCreatorASM
                         mw.iconst_2();
                         break;
                     case 3:
-                        mw.visitInsn(Opcodes.ICONST_3);
+                        mw.iconst_3();
                         break;
                     case 4:
-                        mw.visitInsn(Opcodes.ICONST_4);
+                        mw.iconst_4();
                         break;
                     case 5:
-                        mw.visitInsn(Opcodes.ICONST_5);
+                        mw.iconst_5();
                         break;
                     default:
                         if (i >= 128) {
-                            mw.visitIntInsn(Opcodes.SIPUSH, i);
+                            mw.sipush(i);
                         } else {
-                            mw.visitIntInsn(Opcodes.BIPUSH, i);
+                            mw.bipush(i);
                         }
                         break;
                 }

@@ -182,12 +182,24 @@ public final class MethodWriter {
         visitInsn(Opcodes.ICONST_2);
     }
 
-    public void lconst_0() {
-        visitInsn(Opcodes.LCONST_0);
+    public void iconst_3() {
+        visitInsn(Opcodes.ICONST_3);
     }
 
-    public void lconst_1() {
-        visitInsn(Opcodes.LCONST_1);
+    public void iconst_4() {
+        visitInsn(Opcodes.ICONST_4);
+    }
+
+    public void iconst_5() {
+        visitInsn(Opcodes.ICONST_5);
+    }
+
+    public void iconst_m1() {
+        visitInsn(Opcodes.ICONST_M1);
+    }
+
+    public void lconst_0() {
+        visitInsn(Opcodes.LCONST_0);
     }
 
     public void lcmp() {
@@ -196,10 +208,6 @@ public final class MethodWriter {
 
     public void land() {
         visitInsn(Opcodes.LAND);
-    }
-
-    public void aaload() {
-        visitInsn(Opcodes.AALOAD);
     }
 
     public void iadd() {
@@ -226,7 +234,31 @@ public final class MethodWriter {
         visitInsn(Opcodes.LOR);
     }
 
-    public void visitInsn(final int opcode) {
+    public void swap() {
+        visitInsn(Opcodes.SWAP);
+    }
+
+    public void arraylength() {
+        visitInsn(Opcodes.ARRAYLENGTH);
+    }
+
+    public void l2i() {
+        visitInsn(Opcodes.L2I);
+    }
+
+    public void lxor() {
+        visitInsn(Opcodes.LXOR);
+    }
+
+    public void lushr() {
+        visitInsn(Opcodes.LUSHR);
+    }
+
+    public void aaload() {
+        visitInsn(Opcodes.AALOAD);
+    }
+
+    private void visitInsn(final int opcode) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         code.putByte(opcode);
@@ -239,7 +271,15 @@ public final class MethodWriter {
         }
     }
 
-    public void visitIntInsn(final int opcode, final int operand) {
+    public void sipush(final int operand) {
+        visitIntInsn(Opcodes.SIPUSH, operand);
+    }
+
+    public void bipush(final int operand) {
+        visitIntInsn(Opcodes.BIPUSH, operand);
+    }
+
+    private void visitIntInsn(final int opcode, final int operand) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         if (opcode == Opcodes.SIPUSH) {
@@ -281,10 +321,6 @@ public final class MethodWriter {
         }
     }
 
-    public MethodWriter x() {
-        return this;
-    }
-
     public void aload(final int var) {
         visitVarInsn(Opcodes.ALOAD, var);
     }
@@ -307,6 +343,14 @@ public final class MethodWriter {
 
     public void lstore(final int var) {
         visitVarInsn(Opcodes.LSTORE, var);
+    }
+
+    public void fstore(final int var) {
+        visitVarInsn(Opcodes.FSTORE, var);
+    }
+
+    public void dstore(final int var) {
+        visitVarInsn(Opcodes.DSTORE, var);
     }
 
     public void dup() {
@@ -360,7 +404,15 @@ public final class MethodWriter {
         visitTypeInsn(Opcodes.CHECKCAST, type);
     }
 
-    public void visitTypeInsn(final int opcode, final String type) {
+    public void new_(final String type) {
+        visitTypeInsn(Opcodes.NEW, type);
+    }
+
+    public void instanceOf(final String type) {
+        visitTypeInsn(Opcodes.INSTANCEOF, type);
+    }
+
+    private void visitTypeInsn(final int opcode, final String type) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         Symbol typeSymbol = symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, type);
@@ -383,7 +435,7 @@ public final class MethodWriter {
         visitFieldInsn(Opcodes.GETSTATIC, owner, name, descriptor);
     }
 
-    public void visitFieldInsn(
+    private void visitFieldInsn(
             final int opcode, final String owner, final String name, final String descriptor) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
@@ -415,7 +467,7 @@ public final class MethodWriter {
         visitMethodInsn(Opcodes.INVOKESPECIAL, owner, name, descriptor, false);
     }
 
-    public void visitMethodInsn(
+    private void visitMethodInsn(
             final int opcode,
             final String owner,
             final String name,
@@ -485,7 +537,11 @@ public final class MethodWriter {
         visitJumpInsn(Opcodes.IF_ICMPLE, label);
     }
 
-    public void visitJumpInsn(final int opcode, final Label label) {
+    public void if_icmpne(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPNE, label);
+    }
+
+    private void visitJumpInsn(final int opcode, final Label label) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         // Compute the 'base' opcode, i.e. GOTO or JSR if opcode is GOTO_W or JSR_W, otherwise opcode.

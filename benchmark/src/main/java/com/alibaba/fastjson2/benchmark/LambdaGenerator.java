@@ -66,9 +66,9 @@ public class LambdaGenerator {
             methodDesc = "(I)" + ASMUtils.desc(returnType);
         }
 
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT, methodName, methodDesc, false);
+        mw.invokevirtual(TYPE_OBJECT, methodName, methodDesc);
         if (returnType != Void.TYPE) {
-            mw.visitInsn(Opcodes.POP);
+            mw.pop();
         }
 
         mw.return_();

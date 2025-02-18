@@ -113,7 +113,7 @@ class JSONPathCompilerReflectASM
             mw.aload(OBJECT_WRITER);
             mw.aload(FIELD_WRITER);
 
-            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_SINGLE_NAME_PATH_TYPED, "<init>", METHOD_SINGLE_NAME_PATH_TYPED_INIT, false);
+            mw.invokespecial(TYPE_SINGLE_NAME_PATH_TYPED, "<init>", METHOD_SINGLE_NAME_PATH_TYPED_INIT);
 
             mw.return_();
             mw.visitMaxs(3, 3);
@@ -168,28 +168,28 @@ class JSONPathCompilerReflectASM
                 mw.aload(VALUE);
                 if (fieldClass == int.class) {
                     mw.checkcast("java/lang/Number");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Number", "intValue", "()I", false);
+                    mw.invokevirtual("java/lang/Number", "intValue", "()I");
                 } else if (fieldClass == long.class) {
                     mw.checkcast("java/lang/Number");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Number", "longValue", "()J", false);
+                    mw.invokevirtual("java/lang/Number", "longValue", "()J");
                 } else if (fieldClass == float.class) {
                     mw.checkcast("java/lang/Number");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Number", "floatValue", "()F", false);
+                    mw.invokevirtual("java/lang/Number", "floatValue", "()F");
                 } else if (fieldClass == double.class) {
                     mw.checkcast("java/lang/Number");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Number", "doubleValue", "()D", false);
+                    mw.invokevirtual("java/lang/Number", "doubleValue", "()D");
                 } else if (fieldClass == short.class) {
                     mw.checkcast("java/lang/Number");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Number", "shortValue", "()S", false);
+                    mw.invokevirtual("java/lang/Number", "shortValue", "()S");
                 } else if (fieldClass == byte.class) {
                     mw.checkcast("java/lang/Number");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Number", "byteValue", "()B", false);
+                    mw.invokevirtual("java/lang/Number", "byteValue", "()B");
                 } else if (fieldClass == boolean.class) {
                     mw.checkcast("java/lang/Boolean");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
+                    mw.invokevirtual("java/lang/Boolean", "booleanValue", "()Z");
                 } else if (fieldClass == char.class) {
                     mw.checkcast("java/lang/Character");
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C", false);
+                    mw.invokevirtual("java/lang/Character", "charValue", "()C");
                 }
                 gwSetValue(mw, TYPE_OBJECT, fieldReader);
 
@@ -213,21 +213,21 @@ class JSONPathCompilerReflectASM
             mw.checkcast(TYPE_OBJECT);
             gwGetValue(mw, TYPE_OBJECT, fieldWriter);
             if (fieldClass == int.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+                mw.invokestatic("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
             } else if (fieldClass == long.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
+                mw.invokestatic("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
             } else if (fieldClass == float.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
+                mw.invokestatic("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
             } else if (fieldClass == double.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
+                mw.invokestatic("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
             } else if (fieldClass == short.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
+                mw.invokestatic("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
             } else if (fieldClass == byte.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
+                mw.invokestatic("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
             } else if (fieldClass == boolean.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
+                mw.invokestatic("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
             } else if (fieldClass == char.class) {
-                mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
+                mw.invokestatic("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
             }
 
             mw.areturn();
@@ -258,12 +258,12 @@ class JSONPathCompilerReflectASM
         if (method != null) {
             Class<?> returnType = method.getReturnType();
             String methodDesc = '(' + fieldClassDesc + ')' + ASMUtils.desc(returnType);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT, method.getName(), methodDesc, false);
+            mw.invokevirtual(TYPE_OBJECT, method.getName(), methodDesc);
             if (returnType != Void.TYPE) { // builder
                 mw.pop();
             }
         } else {
-            mw.visitFieldInsn(Opcodes.PUTFIELD, TYPE_OBJECT, field.getName(), fieldClassDesc);
+            mw.putfield(TYPE_OBJECT, field.getName(), fieldClassDesc);
         }
     }
 
@@ -275,9 +275,9 @@ class JSONPathCompilerReflectASM
 
         if (method != null) {
             String methodDesc = "()" + fieldClassDesc;
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT, method.getName(), methodDesc, false);
+            mw.invokevirtual(TYPE_OBJECT, method.getName(), methodDesc);
         } else {
-            mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_OBJECT, field.getName(), fieldClassDesc);
+            mw.getfield(TYPE_OBJECT, field.getName(), fieldClassDesc);
         }
     }
 }

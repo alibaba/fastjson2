@@ -60,7 +60,7 @@ public class AbstractMethodTest {
                     32
             );
             mw.aload(THIS);
-            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            mw.invokespecial("java/lang/Object", "<init>", "()V");
 
             mw.return_();
             mw.visitMaxs(3, 3);
@@ -124,7 +124,7 @@ public class AbstractMethodTest {
                     32
             );
             mw.aload(THIS);
-            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, superClassType, "<init>", "()V", false);
+            mw.invokespecial(superClassType, "<init>", "()V");
 
             mw.return_();
             mw.visitMaxs(3, 3);
