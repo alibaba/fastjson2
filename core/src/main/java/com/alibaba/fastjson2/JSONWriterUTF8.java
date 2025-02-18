@@ -218,7 +218,7 @@ class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        putByte(bytes, off++, (byte) '{');
+        bytes[off++] = '{';
 
         if (pretty != PRETTY_NON) {
             off = indent(bytes, off);
@@ -239,7 +239,7 @@ class JSONWriterUTF8
             off = indent(bytes, off);
         }
 
-        putByte(bytes, off, (byte) '}');
+        bytes[off] = '}';
         this.off = off + 1;
         startObject = false;
     }
@@ -492,40 +492,31 @@ class JSONWriterUTF8
         this.off = StringUtils.writeLatin1(bytes, off, value, quote);
     }
 
-    protected final void writeStringLatin1BrowserSecure(byte[] values) {
-        boolean escape = false;
-
+    protected final void writeStringLatin1BrowserSecure(byte[] value) {
         final byte quote = (byte) this.quote;
-        for (int i = 0; i < values.length; i++) {
-            byte c = values[i];
-            if (c == quote
-                    || c == '\\'
-                    || c < ' '
-                    || c == '<'
-                    || c == '>'
-                    || c == '('
-                    || c == ')'
-            ) {
-                escape = true;
+        int i = 0;
+        for (; i < value.length; i++) {
+            byte c = value[i];
+            if (c == quote || c == '\\' || c < ' ' || c == '<' || c == '>' || c == '(' || c == ')') {
                 break;
             }
         }
 
         int off = this.off;
-        if (!escape) {
-            int minCapacity = off + values.length + 2;
+        if (i == value.length) {
+            int minCapacity = off + value.length + 2;
             byte[] bytes = this.bytes;
             if (minCapacity > bytes.length) {
                 bytes = grow(minCapacity);
             }
             putByte(bytes, off, quote);
-            System.arraycopy(values, 0, bytes, off + 1, values.length);
-            off += values.length + 1;
+            System.arraycopy(value, 0, bytes, off + 1, value.length);
+            off += value.length + 1;
             putByte(bytes, off, quote);
             this.off = off + 1;
             return;
         }
-        writeStringEscaped(values);
+        writeStringEscaped(value);
     }
 
     public final void writeStringUTF16(byte[] value) {

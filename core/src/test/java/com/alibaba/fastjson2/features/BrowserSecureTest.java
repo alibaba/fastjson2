@@ -50,6 +50,13 @@ public class BrowserSecureTest {
     }
 
     @Test
+    public void testUTF8_none() {
+        JSONWriter jsonWriter = JSONWriter.ofUTF8(JSONWriter.Feature.BrowserSecure);
+        jsonWriter.writeString("0123456789");
+        assertEquals("\"0123456789\"", jsonWriter.toString());
+    }
+
+    @Test
     public void testUTF16_2_0() {
         JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.BrowserSecure);
         jsonWriter.writeString("<>");

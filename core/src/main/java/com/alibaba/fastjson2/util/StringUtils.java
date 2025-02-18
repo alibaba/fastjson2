@@ -14,15 +14,15 @@ public class StringUtils {
     protected static final long MASK_BROWSER_SECURE = BrowserSecure.mask;
     public static int writeLatin1(byte[] bytes, int off, byte[] value, byte quote) {
         int strlen = value.length;
-        putByte(bytes, off, quote);
+        bytes[off] = quote;
         System.arraycopy(value, 0, bytes, off + 1, strlen);
-        putByte(bytes, off + strlen + 1, quote);
+        bytes[off + strlen + 1] = quote;
         return off + strlen + 2;
     }
 
     public static int writeLatin1Escaped(byte[] bytes, int off, byte[] values, byte quote, long features) {
         final boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
-        putByte(bytes, off++, quote);
+        bytes[off++] = quote;
         for (int i = 0; i < values.length; i++) {
             byte ch = values[i];
             switch (ch) {
@@ -73,13 +73,13 @@ public class StringUtils {
                         writeU4HexU(bytes, off, ch);
                         off += 6;
                     } else {
-                        putByte(bytes, off++, ch);
+                        bytes[off++] = ch;
                     }
                     break;
                 default:
                     if (ch == quote) {
                         putByte(bytes, off, (byte) '\\');
-                        putByte(bytes, off + 1, (byte) quote);
+                        bytes[off + 1] = quote;
                         off += 2;
                     } else if (ch < 0) {
                         // latin
@@ -93,7 +93,7 @@ public class StringUtils {
                     break;
             }
         }
-        putByte(bytes, off, quote);
+        bytes[off] = quote;
         return off + 1;
     }
 
@@ -361,10 +361,6 @@ public class StringUtils {
         return ((v + 0x6060606060606060L) & 0x8080808080808080L) == 0x8080808080808080L // all >= 32
                 && ((v ^ quote) + 0x0101010101010101L & 0x8080808080808080L) == 0x8080808080808080L // != quote
                 && ((v ^ 0xA3A3A3A3A3A3A3A3L) + 0x0101010101010101L & 0x8080808080808080L) == 0x8080808080808080L; // != '\\'
-    }
-
-    public static int stringNeedCapacity(byte coder, byte[] value, boolean escaped) {
-        return value.length * (coder == 0 && escaped ? 1 : 6) + 2;
     }
 
     public static final class LATIN1 {
