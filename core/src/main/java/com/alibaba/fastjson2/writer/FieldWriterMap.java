@@ -64,29 +64,25 @@ abstract class FieldWriterMap
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        ObjectWriter valueWriter = this.mapWriter;
+        Class<?> contentAs = this.contentAs;
+        if (contentAs == null || !fieldClass.isAssignableFrom(valueClass)) {
+            return super.getObjectWriter(jsonWriter, valueClass);
+        }
+
+        ObjectWriter valueWriter = this.valueWriter;
         if (valueWriter != null) {
             return valueWriter;
         }
 
-        final Class initValueClass = this.initValueClass;
-        if (contentAs == null && (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE)) {
-            valueWriter = getObjectWriterVoid(jsonWriter, valueClass);
-        } else {
-            if (fieldClass.isAssignableFrom(valueClass)) {
-                Type fieldType = this.fieldType;
-                Type valueType = this.valueType;
-                long features = this.features;
-                if (contentAs != null) {
-                    valueType = contentAs;
-                    fieldType = contentAsFieldType;
-                    features |= FieldInfo.CONTENT_AS;
-                }
-                valueWriter = new ObjectWriterImplMap(keyType, valueType, format, valueClass, fieldType, features);
-            } else {
-                valueWriter = ObjectWriterImplMap.of(valueClass);
-            }
+        Type fieldType = this.fieldType;
+        Type valueType = this.valueType;
+        long features = this.features;
+        if (contentAs != null) {
+            valueType = contentAs;
+            fieldType = contentAsFieldType;
+            features |= FieldInfo.CONTENT_AS;
         }
+        valueWriter = new ObjectWriterImplMap(keyType, valueType, format, valueClass, fieldType, features);
         this.mapWriter = valueWriter;
         return valueWriter;
     }
