@@ -4399,7 +4399,8 @@ public class ObjectWriterCreatorASM
             Locale locale,
             String label,
             Field field,
-            ObjectWriter initObjectWriter
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
     ) {
         Class<?> declaringClass = field.getDeclaringClass();
         if (Throwable.class.isAssignableFrom(declaringClass)

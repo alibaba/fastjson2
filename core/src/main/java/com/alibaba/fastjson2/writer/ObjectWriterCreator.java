@@ -267,8 +267,7 @@ public class ObjectWriterCreator {
                 fieldInfo.locale,
                 fieldInfo.label,
                 field,
-                writeUsingWriter,
-                fieldInfo.contentAs);
+                writeUsingWriter);
     }
 
     public ObjectWriter createObjectWriter(
@@ -482,7 +481,7 @@ public class ObjectWriterCreator {
                                 fieldInfo.ordinal,
                                 fieldInfo.features,
                                 fieldInfo.format,
-                                null,
+                                fieldInfo.locale,
                                 fieldInfo.label,
                                 method,
                                 writeUsingWriter,
@@ -946,7 +945,8 @@ public class ObjectWriterCreator {
                 format,
                 null,
                 label,
-                method, initObjectWriter
+                method,
+                initObjectWriter
         );
     }
 
