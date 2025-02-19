@@ -19,7 +19,6 @@ abstract class FieldWriterMap
     private final Type keyType;
     private final Type valueType;
     final boolean valueTypeRefDetect;
-    volatile ObjectWriter keyWriter;
     volatile ObjectWriter valueWriter;
 
     protected FieldWriterMap(
