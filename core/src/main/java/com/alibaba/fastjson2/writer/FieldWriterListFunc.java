@@ -25,9 +25,10 @@ final class FieldWriterListFunc<T>
             Method method,
             Function<T, List> function,
             Type fieldType,
-            Class fieldClass
+            Class fieldClass,
+            Class<?> contentAs
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, contentAs);
         this.function = function;
     }
 

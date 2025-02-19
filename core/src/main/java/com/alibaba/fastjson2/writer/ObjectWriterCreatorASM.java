@@ -323,7 +323,8 @@ public class ObjectWriterCreatorASM
                                     fieldInfo.format,
                                     fieldInfo.label,
                                     method,
-                                    writeUsingWriter
+                                    writeUsingWriter,
+                                    fieldInfo.contentAs
                             );
                         } catch (Throwable e) {
                             jitErrorCount.incrementAndGet();
@@ -341,7 +342,8 @@ public class ObjectWriterCreatorASM
                                 fieldInfo.locale,
                                 fieldInfo.label,
                                 method,
-                                writeUsingWriter
+                                writeUsingWriter,
+                                fieldInfo.contentAs
                         );
                     }
 
@@ -4535,7 +4537,7 @@ public class ObjectWriterCreatorASM
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field);
+            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, null);
         }
 
         if (fieldClass.isArray()) {

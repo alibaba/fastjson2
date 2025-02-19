@@ -46,6 +46,11 @@ public class FieldInfo {
     public String arrayToMapKey;
     public Class<?> arrayToMapDuplicateHandler;
 
+    /**
+     * @since 2.0.56
+     */
+    public Class<?> contentAs;
+
     public ObjectReader getInitReader() {
         Class<?> calzz = readUsing;
         if (calzz != null && ObjectReader.class.isAssignableFrom(calzz)) {
@@ -97,5 +102,6 @@ public class FieldInfo {
 
         arrayToMapKey = null;
         arrayToMapDuplicateHandler = null;
+        contentAs = null;
     }
 }

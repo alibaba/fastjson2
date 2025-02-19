@@ -24,6 +24,7 @@ abstract class FieldWriterList<T>
     ObjectWriter listWriter;
     ObjectWriter itemObjectWriter;
     final boolean writeAsString;
+    final Class<?> contentAs;
 
     FieldWriterList(
             String name,
@@ -35,9 +36,11 @@ abstract class FieldWriterList<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Class<?> contentAs
     ) {
         super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        this.contentAs = contentAs;
 
         writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
 
@@ -77,6 +80,13 @@ abstract class FieldWriterList<T>
 
     @Override
     public ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
+        if (contentAs != null) {
+            ObjectWriter itemObjectWriter = this.itemObjectWriter;
+            if (itemObjectWriter != null) {
+                return itemObjectWriter;
+            }
+            return this.itemObjectWriter = jsonWriter.getObjectWriter(this.contentAs, contentAs);
+        }
         if (itemType == null || itemType == this.itemType) {
             if (itemObjectWriter != null) {
                 return itemObjectWriter;

@@ -258,7 +258,17 @@ public class ObjectWriterCreator {
             format = beanInfo.format;
         }
 
-        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.locale, fieldInfo.label, field, writeUsingWriter);
+        return createFieldWriter(
+                provider,
+                fieldName,
+                fieldInfo.ordinal,
+                fieldInfo.features,
+                format,
+                fieldInfo.locale,
+                fieldInfo.label,
+                field,
+                writeUsingWriter,
+                fieldInfo.contentAs);
     }
 
     public ObjectWriter createObjectWriter(
@@ -456,7 +466,8 @@ public class ObjectWriterCreator {
                                     fieldInfo.format,
                                     fieldInfo.label,
                                     method,
-                                    writeUsingWriter
+                                    writeUsingWriter,
+                                    fieldInfo.contentAs
                             );
                         } catch (Throwable ignored) {
                             jitErrorCount.incrementAndGet();
@@ -471,9 +482,11 @@ public class ObjectWriterCreator {
                                 fieldInfo.ordinal,
                                 fieldInfo.features,
                                 fieldInfo.format,
+                                null,
                                 fieldInfo.label,
                                 method,
-                                writeUsingWriter
+                                writeUsingWriter,
+                                fieldInfo.contentAs
                         );
                     }
 
@@ -733,6 +746,32 @@ public class ObjectWriterCreator {
             Field field,
             ObjectWriter initObjectWriter
     ) {
+        return createFieldWriter(
+                provider,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                locale,
+                label,
+                field,
+                initObjectWriter,
+                null
+        );
+    }
+
+    public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Field field,
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
+    ) {
         Class<?> declaringClass = field.getDeclaringClass();
         Method method = null;
 
@@ -859,7 +898,7 @@ public class ObjectWriterCreator {
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field);
+            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, contentAs);
         }
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
@@ -922,6 +961,22 @@ public class ObjectWriterCreator {
             String label,
             Method method,
             ObjectWriter initObjectWriter
+    ) {
+        return createFieldWriter(provider, objectType, fieldName, ordinal, features, format, locale, label, method, initObjectWriter, null);
+    }
+
+    public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            Class<T> objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Method method,
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
     ) {
         method.setAccessible(true);
         Class<?> fieldClass = method.getReturnType();
@@ -1021,7 +1076,7 @@ public class ObjectWriterCreator {
             } else {
                 itemType = Object.class;
             }
-            return new FieldWriterListMethod(fieldName, itemType, ordinal, features, format, label, null, method, fieldType, fieldClass);
+            return new FieldWriterListMethod(fieldName, itemType, ordinal, features, format, label, null, method, fieldType, fieldClass, contentAs);
         }
 
         if (fieldClass == Float[].class || fieldClass == Double[].class || fieldClass == BigDecimal[].class) {
@@ -1167,6 +1222,40 @@ public class ObjectWriterCreator {
             Method method,
             Function<T, V> function
     ) {
+        return createFieldWriter(
+                provider,
+                objectClass,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                locale,
+                label,
+                fieldType,
+                fieldClass,
+                field,
+                method,
+                function,
+                null
+        );
+    }
+
+    public <T, V> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Type fieldType,
+            Class<V> fieldClass,
+            Field field,
+            Method method,
+            Function<T, V> function,
+            Class<?> contentAs
+    ) {
         if (fieldClass == Byte.class) {
             return new FieldWriterInt8Func(fieldName, ordinal, features, format, label, field, method, function);
         }
@@ -1249,7 +1338,7 @@ public class ObjectWriterCreator {
                     if (itemType == String.class) {
                         return new FieldWriterListStrFunc(fieldName, ordinal, features, format, label, field, method, function, fieldType, fieldClass);
                     }
-                    return new FieldWriterListFunc(fieldName, ordinal, features, format, label, itemType, field, method, function, fieldType, fieldClass);
+                    return new FieldWriterListFunc(fieldName, ordinal, features, format, label, itemType, field, method, function, fieldType, fieldClass, contentAs);
                 }
             }
         }
@@ -1368,7 +1457,8 @@ public class ObjectWriterCreator {
             String format,
             String label,
             Method method,
-            ObjectWriter initObjectWriter
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
     ) {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
@@ -1439,6 +1529,6 @@ public class ObjectWriterCreator {
         }
 
         Function function = (Function) lambda;
-        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function, contentAs);
     }
 }

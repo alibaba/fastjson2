@@ -541,6 +541,12 @@ public class ObjectWriterBaseModule
                                 fieldInfo.valueUsing = valueUsing;
                             }
                             break;
+                        case "contentAs":
+                            Class<?> contentAs = (Class) result;
+                            if (contentAs != Void.class) {
+                                fieldInfo.contentAs = contentAs;
+                            }
+                            break;
                         default:
                             break;
                     }
@@ -966,6 +972,11 @@ public class ObjectWriterBaseModule
             Class serializeUsing = jsonField.serializeUsing();
             if (ObjectWriter.class.isAssignableFrom(serializeUsing)) {
                 fieldInfo.writeUsing = serializeUsing;
+            }
+
+            Class contentAs = jsonField.contentAs();
+            if (contentAs != Void.class) {
+                fieldInfo.contentAs = contentAs;
             }
         }
 

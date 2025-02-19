@@ -1308,9 +1308,15 @@ public class ObjectReaderBaseModule
             if (!keyName.isEmpty()) {
                 fieldInfo.arrayToMapKey = keyName;
             }
+
             Class<?> arrayToMapDuplicateHandler = jsonField.arrayToMapDuplicateHandler();
             if (arrayToMapDuplicateHandler != Void.class) {
                 fieldInfo.arrayToMapDuplicateHandler = arrayToMapDuplicateHandler;
+            }
+
+            Class<?> contentAs = jsonField.contentAs();
+            if (contentAs != Void.class) {
+                fieldInfo.contentAs = contentAs;
             }
         }
     }
