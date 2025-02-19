@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
