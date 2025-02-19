@@ -1,15 +1,26 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
 abstract class FieldWriterMap
-        extends FieldWriter {
+        extends FieldWriterObject {
     protected final Class<?> contentAs;
+    protected Type contentAsFieldType;
+    volatile ObjectWriter mapWriter;
+    private final Type keyType;
+    private final Type valueType;
+    final boolean valueTypeRefDetect;
+    volatile ObjectWriter keyWriter;
+    volatile ObjectWriter valueWriter;
 
     protected FieldWriterMap(
             String name,
@@ -25,20 +36,58 @@ abstract class FieldWriterMap
             Class<?> contentAs
     ) {
         super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
+        Type keyType = null, valueType = null;
+        Type contentAsFieldType = null;
+        if (fieldType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) fieldType;
+            Type[] actualTypeArguments = pt.getActualTypeArguments();
+            if (actualTypeArguments.length == 2) {
+                keyType = actualTypeArguments[0];
+                valueType = actualTypeArguments[1];
+            }
+        }
+        if (keyType == null) {
+            keyType = Object.class;
+        }
+        if (valueType == null) {
+            valueType = Object.class;
+        }
+        if (contentAs != null) {
+            contentAsFieldType = new ParameterizedTypeImpl(fieldClass, String.class, contentAs);
+        }
         this.contentAs = contentAs;
+        this.contentAsFieldType = contentAsFieldType;
+        this.keyType = keyType;
+        this.valueType = valueType;
+        this.valueTypeRefDetect = !ObjectWriterProvider.isNotReferenceDetect(TypeUtils.getClass(valueType));
     }
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (fieldClass.isAssignableFrom(valueClass)) {
-            return ObjectWriterImplMap.of(fieldType, format, valueClass);
-        } else {
-            return ObjectWriterImplMap.of(valueClass);
+        ObjectWriter valueWriter = this.mapWriter;
+        if (valueWriter != null) {
+            return valueWriter;
         }
-    }
 
-    @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
-        throw new UnsupportedOperationException();
+        final Class initValueClass = this.initValueClass;
+        if (contentAs == null && (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE)) {
+            valueWriter = getObjectWriterVoid(jsonWriter, valueClass);
+        } else {
+            if (fieldClass.isAssignableFrom(valueClass)) {
+                Type fieldType = this.fieldType;
+                Type valueType = this.valueType;
+                long features = this.features;
+                if (contentAs != null) {
+                    valueType = contentAs;
+                    fieldType = contentAsFieldType;
+                    features |= FieldInfo.CONTENT_AS;
+                }
+                valueWriter = new ObjectWriterImplMap(keyType, valueType, format, valueClass, fieldType, features);
+            } else {
+                valueWriter = ObjectWriterImplMap.of(valueClass);
+            }
+        }
+        this.mapWriter = valueWriter;
+        return valueWriter;
     }
 }

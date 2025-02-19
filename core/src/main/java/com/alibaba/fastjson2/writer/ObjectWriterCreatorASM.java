@@ -4538,7 +4538,11 @@ public class ObjectWriterCreatorASM
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, null);
+            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, contentAs);
+        }
+
+        if (Map.class.isAssignableFrom(fieldClass)) {
+            return new FieldWriterMapField(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, contentAs);
         }
 
         if (fieldClass.isArray()) {

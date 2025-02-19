@@ -1,12 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONWriter;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.Function;
 
 final class FieldWriterMapFunction
@@ -31,17 +28,12 @@ final class FieldWriterMapFunction
     }
 
     @Override
-    public boolean write(JSONWriter jsonWriter, Object object) {
-        Map value;
-        try {
-            value = (Map) function.apply(object);
-        } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
-                return false;
-            }
-            throw error;
-        }
+    public Object getFieldValue(Object object) {
+        return function.apply(object);
+    }
 
-        throw new UnsupportedOperationException();
+    @Override
+    public Function getFunction() {
+        return function;
     }
 }

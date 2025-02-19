@@ -22,6 +22,7 @@ public class FieldInfo {
     public static final long DISABLE_JSONB = 1L << 60;
     public static final long BACKR_EFERENCE = 1L << 61;
     public static final long RECORD = 1L << 62;
+    public static final long CONTENT_AS = 1L << 63;
 
     public String fieldName;
     public String format;
