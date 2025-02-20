@@ -2864,6 +2864,65 @@ public interface JSON {
     }
 
     /**
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param text the specified string to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> List<T> parseArray(String text, Class<T> type, Filter filter, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
+        try (JSONReader reader = JSONReader.of(text, context)) {
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
+        }
+    }
+
+    /**
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param text the specified string to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> List<T> parseArray(String text, Class<T> type, Filter filter, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
+        try (JSONReader reader = JSONReader.of(text, context)) {
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
+        }
+    }
+    /**
      * Parses the json char array as a list of {@link T}. Returns
      * {@code null} if received char array is {@code null} or empty.
      *
