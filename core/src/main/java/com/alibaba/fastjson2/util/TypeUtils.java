@@ -74,9 +74,6 @@ public class TypeUtils {
     static final long LONG_JAVASCRIPT_LOW = -9007199254740991L;
     static final long LONG_JAVASCRIPT_HIGH = 9007199254740991L;
 
-    static final BigDecimal DECIMAL_JAVASCRIPT_LOW = BigDecimal.valueOf(LONG_JAVASCRIPT_LOW);
-    static final BigDecimal DECIMAL_JAVASCRIPT_HIGH = BigDecimal.valueOf(LONG_JAVASCRIPT_HIGH);
-
     static final BigInteger BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(LONG_JAVASCRIPT_LOW);
     static final BigInteger BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(LONG_JAVASCRIPT_HIGH);
 
