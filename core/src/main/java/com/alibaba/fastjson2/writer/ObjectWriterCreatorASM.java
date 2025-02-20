@@ -20,8 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
-import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
+import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -72,6 +71,7 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_WRITE_CLASS_INFO = "(" + DESC_JSON_WRITER + ")V";
     static final String METHOD_DESC_WRITE_FIELD_NAME_JSONB = "([BI" + DESC_JSON_WRITER + ")I";
     static final String METHOD_DESC_WRITE_NAME_SYMBOL = "(" + DESC_SYMBOL + ")I";
+    static final String METHOD_DESC_WRITE_LIST_VALUE_JSONB = "(" + DESC_JSON_WRITER + "Ljava/util/List;)V";
 
     static final int THIS = 0;
     static final int JSON_WRITER = 1;
@@ -451,7 +451,7 @@ public class ObjectWriterCreatorASM
             List<FieldWriter> fieldWriters,
             long writerFeatures
     ) {
-        List<FieldWriterGroup> fieldWriterGroups = buildGroups(beanInfo, fieldWriters);
+        List<FieldWriterGroup> fieldWriterGroups = buildGroups(beanInfo.writerFeatures, fieldWriters);
 
         ClassWriter cw = new ClassWriter(null);
 
@@ -4538,7 +4538,7 @@ public class ObjectWriterCreatorASM
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, contentAs);
+            return createFieldWriterList(provider, fieldName, ordinal, features, format, label, field, contentAs, itemType, fieldType, fieldClass);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
@@ -4579,6 +4579,338 @@ public class ObjectWriterCreatorASM
         }
 
         return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null);
+    }
+
+    private FieldWriter createFieldWriterList(
+            ObjectWriterProvider provider,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field,
+            Class<?> contentAs,
+            Type itemType,
+            Type fieldType,
+            Class<?> fieldClass
+    ) {
+        FieldWriter fieldWriter = jitFieldWriterList(provider, fieldName, ordinal, features, format, label, field, contentAs, itemType, fieldType, fieldClass);
+        if (fieldWriter == null) {
+            fieldWriter = new FieldWriterListField(
+                    fieldName,
+                    itemType,
+                    ordinal,
+                    features,
+                    format,
+                    label,
+                    fieldType,
+                    fieldClass,
+                    field,
+                    contentAs
+            );
+        }
+        return fieldWriter;
+    }
+
+    private FieldWriter jitFieldWriterList(
+            ObjectWriterProvider provider,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field,
+            Class<?> contentAs,
+            Type itemType,
+            Type fieldType,
+            Class<?> fieldClass
+    ) {
+        boolean direct = false;
+        List<FieldWriter> fieldWriters = null;
+        Class<?> itemClass = TypeUtils.getClass(itemType);
+        if (itemClass != null && field != null && field.getDeclaringClass() != itemClass) {
+            ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, FieldBased.isEnabled(features));
+            if (fieldValueWriter == null && itemClass != null) {
+                fieldValueWriter = super.createObjectWriter(itemClass, features, provider);
+            }
+            fieldWriters = fieldValueWriter.getFieldWriters();
+            List<FieldWriterGroup> groups = buildGroups(fieldValueWriter.getFeatures(), fieldWriters);
+            if (groups.size() == 1 && groups.get(0).direct) {
+                direct = true;
+            }
+
+            for (FieldWriter fieldWriter : fieldWriters) {
+                if (fieldWriter.method == null && fieldWriter.field == null && fieldWriter.getFunction() == null) {
+                    direct = false;
+                    break;
+                }
+                Class cls = fieldWriter.fieldClass;
+                if (cls != boolean.class && cls != Boolean.class
+                        && cls != byte.class && cls != Byte.class
+                        && cls != short.class && cls != Short.class
+                        && cls != int.class && cls != Integer.class
+                        && cls != long.class && cls != Long.class
+                        && cls != float.class && cls != Float.class
+                        && cls != double.class && cls != Double.class
+                        && cls != LocalDate.class && cls != LocalTime.class && cls != LocalDateTime.class
+                        && cls != OffsetDateTime.class && cls != OffsetTime.class
+                        && cls != Instant.class
+                        && cls != UUID.class
+                ) {
+                    direct = false;
+                    break;
+                }
+            }
+        }
+
+        if (direct) {
+            int capacity = 6;
+            for (FieldWriter fieldWriter : fieldWriters) {
+                capacity = fieldCapacity(fieldWriter.fieldClass);
+            }
+
+            ClassWriter cw = new ClassWriter(null);
+
+            String className = "OWF_" + seed.incrementAndGet() + "_" + fieldWriters.size() + "_" + itemClass.getSimpleName();
+            String classNameType;
+            String classNameFull;
+
+            Package pkg = ObjectWriterCreatorASM.class.getPackage();
+            if (pkg != null) {
+                String packageName = pkg.getName();
+                int packageNameLength = packageName.length();
+                int charsLength = packageNameLength + 1 + className.length();
+                char[] chars = new char[charsLength];
+                packageName.getChars(0, packageName.length(), chars, 0);
+                chars[packageNameLength] = '.';
+                className.getChars(0, className.length(), chars, packageNameLength + 1);
+                classNameFull = new String(chars);
+
+                chars[packageNameLength] = '/';
+                for (int i = 0; i < packageNameLength; ++i) {
+                    if (chars[i] == '.') {
+                        chars[i] = '/';
+                    }
+                }
+                classNameType = new String(chars);
+            } else {
+                classNameType = className;
+                classNameFull = className;
+            }
+
+            String supperType = type(FieldWriterListField.class);
+            cw.visit(Opcodes.V1_8,
+                    Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER,
+                    classNameType,
+                    supperType,
+                    INTERFACES
+            );
+
+            {
+                String initDesc = "(Ljava/lang/String;Ljava/lang/reflect/Type;IJLjava/lang/String;Ljava/lang/String;Ljava/lang/reflect/Type;Ljava/lang/Class;Ljava/lang/reflect/Field;Ljava/lang/Class;)V";
+                MethodWriter mw = cw.visitMethod(
+                        Opcodes.ACC_PUBLIC,
+                        "<init>",
+                        initDesc,
+                        64
+                );
+                mw.aload(THIS);
+                mw.aload(1);
+                mw.aload(2);
+                mw.iload(3);
+                mw.lload(4);
+                mw.aload(6);
+                mw.aload(7);
+                mw.aload(8);
+                mw.aload(9);
+                mw.aload(10);
+                mw.aload(11);
+                mw.invokespecial(supperType, "<init>", initDesc);
+
+                mw.return_();
+                mw.visitMaxs(12, 12);
+            }
+
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    "writeListValueJSONB",
+                    METHOD_DESC_WRITE_LIST_VALUE_JSONB,
+                    fieldWriters.size() < 6 ? 512 : 1024
+            );
+            MethodWriterContext mwc = new MethodWriterContext(provider, itemClass, features, classNameType, mw, 8, false);
+
+            int LIST = 2;
+            int OFFSET = mwc.var("offset");
+            int BYTES = mwc.var("bytes");
+            int FEATURES = mwc.var2(CONTEXT_FEATURES);
+            int symbolTable = mwc.var("symbolTable");
+            /*
+             * int offset = jsonWriter.getOffset();
+             */
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "getOffset", "()I");
+            mw.istore(OFFSET);
+
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "getFeatures", "()J");
+            mw.lstore(FEATURES);
+
+            Label L_SUPPER = new Label();
+            if (!provider.isDisableReferenceDetect()) {
+                /*
+                 * if ((features & ReferenceDetection.mask) != 0) {
+                 *  goto L_SUPPER
+                 * }
+                 */
+                mw.lload(FEATURES);
+                mw.visitLdcInsn(ReferenceDetection.mask);
+                mw.land();
+                mw.lconst_0();
+                mw.lcmp();
+                mw.ifne(L_SUPPER);
+            }
+
+            mw.aload(JSON_WRITER);
+            mw.getfield(TYPE_JSON_WRITER, "symbolTable", DESC_SYMBOL);
+            mw.astore(symbolTable);
+
+            int SIZE = mwc.var("size");
+            mw.aload(LIST);
+            mw.invokeinterface("java/util/List", "size", "()I");
+            mw.istore(SIZE);
+
+            /*
+             * byte[] bytes = (byte[]) ensureCapacity(offset + 5 + size * capacity);
+             */
+            mw.aload(JSON_WRITER);
+            mw.iload(OFFSET);
+            mw.iconst_5();
+            mw.iadd();
+            mw.visitLdcInsn(capacity);
+            mw.iload(SIZE);
+            mw.imul();
+            mw.iadd();
+            mw.invokevirtual(TYPE_JSON_WRITER, "ensureCapacity", "(I)Ljava/lang/Object;");
+            mw.checkcast("[B");
+            mw.astore(BYTES);
+
+            /*
+             * offset = JSONB.IO.startArray(bytes, offset, size);
+             */
+            mw.aload(BYTES);
+            mw.iload(OFFSET);
+            mw.iload(SIZE);
+            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
+            mw.istore(OFFSET);
+
+            Label L0 = new Label(), L1 = new Label(), L3 = new Label();
+            int I = mwc.var("I");
+            mw.iconst_0();
+            mw.istore(I);
+
+            mw.visitLabel(L0);
+            mw.iload(I);
+            mw.iload(SIZE);
+            mw.if_icmpge(L3);
+
+            mw.aload(BYTES);
+            mw.iload(OFFSET);
+            mw.visitLdcInsn(fieldWriters.size());
+            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
+            mw.istore(OFFSET);
+
+            int ITEM = mwc.var("ITEM");
+
+            mw.aload(LIST);
+            mw.iload(I);
+            mw.invokeinterface("java/util/List", "get", "(I)Ljava/lang/Object;");
+            mw.astore(ITEM);
+
+            {
+                /*
+                 * if (item == null) {
+                 *     bytes[off++] = BC_NULL;
+                 * }
+                 */
+                // bytes[off] = BC_NULL
+                mw.aload(ITEM);
+                mw.ifnonnull(L1);
+                mw.aload(BYTES);
+                mw.iload(OFFSET);
+                mw.bipush(BC_NULL);
+                mw.bastore();
+                mw.visitIincInsn(OFFSET, 1);
+                mw.goto_(L0);
+
+                mw.visitLabel(L1);
+            }
+
+            {
+                mw.aload(ITEM);
+                mw.invokevirtual(TYPE_OBJECT, "getClass", "()Ljava/lang/Class;");
+                mw.aload(THIS);
+                mw.getfield(TYPE_FIELD_WRITER, "fieldClass", "Ljava/lang/Class;");
+                mw.if_acmpeq(L_SUPPER);
+            }
+
+            for (int i = 0; i < fieldWriters.size(); i++) {
+                FieldWriter fieldWriter = fieldWriters.get(i);
+                writeFieldValueDirectJSONB(features, classNameType, mwc, fieldWriter, i, mw, BYTES, OFFSET, ITEM, FEATURES, symbolTable, false);
+            }
+
+            mw.visitIincInsn(I, 1);
+            mw.goto_(L0);
+
+            mw.visitLabel(L3);
+
+            mw.aload(JSON_WRITER);
+            mw.iload(OFFSET);
+            mw.invokevirtual(TYPE_JSON_WRITER, "setOffset", "(I)V");
+            mw.return_();
+
+            mw.visitLabel(L_SUPPER);
+            mw.aload(THIS);
+            mw.aload(JSON_WRITER);
+            mw.aload(LIST);
+            mw.invokespecial(type(FieldWriterList.class), "writeListValueJSONB", METHOD_DESC_WRITE_LIST_VALUE_JSONB);
+            mw.return_();
+
+            mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
+
+            byte[] code = cw.toByteArray();
+
+            Class<?> deserClass = classLoader.defineClassPublic(classNameFull, code, 0, code.length);
+
+            try {
+                Constructor<?> constructor = deserClass.getConstructor(
+                        String.class,
+                        Type.class,
+                        int.class,
+                        long.class,
+                        String.class,
+                        String.class,
+                        Type.class,
+                        Class.class,
+                        Field.class,
+                        Class.class
+                );
+                return (FieldWriterListField) constructor.newInstance(
+                        fieldName,
+                        itemType,
+                        ordinal,
+                        features,
+                        format,
+                        label,
+                        fieldType,
+                        fieldClass,
+                        field,
+                        contentAs
+                );
+            } catch (Throwable e) {
+                throw new JSONException("create objectWriter error, objectType " + itemClass, e);
+            }
+        }
+        return null;
     }
 
     void genGetObject(MethodWriterContext mwc, FieldWriter fieldWriter, int i, int OBJECT) {
@@ -4922,7 +5254,7 @@ public class ObjectWriterCreatorASM
     }
 
     @SuppressWarnings("rawtypes")
-    static List<FieldWriterGroup> buildGroups(BeanInfo beanInfo, List<FieldWriter> fieldWriters) {
+    static List<FieldWriterGroup> buildGroups(long beanFeatures, List<FieldWriter> fieldWriters) {
         List<FieldWriterGroup> groups = new ArrayList<>();
 
         if (fieldWriters.isEmpty()) {
@@ -4935,7 +5267,7 @@ public class ObjectWriterCreatorASM
         FieldWriterGroup group = null;
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter item = fieldWriters.get(i);
-            boolean direct = supportDirectWrite(beanInfo, item);
+            boolean direct = supportDirectWrite(beanFeatures, item);
             if (group == null || group.direct != direct) {
                 group = new FieldWriterGroup(i == 0, direct);
                 groups.add(group);
@@ -4949,8 +5281,8 @@ public class ObjectWriterCreatorASM
         return groups;
     }
 
-    static boolean supportDirectWrite(BeanInfo beanInfo, FieldWriter fieldWriter) {
-        if (WriteNonStringValueAsString.mask == (beanInfo.writerFeatures & WriteNonStringValueAsString.mask)
+    static boolean supportDirectWrite(long beanFeatures, FieldWriter fieldWriter) {
+        if (WriteNonStringValueAsString.mask == (beanFeatures & WriteNonStringValueAsString.mask)
                 || fieldWriter.format != null
         ) {
             return false;

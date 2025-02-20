@@ -1548,6 +1548,7 @@ public interface JSONB {
                 bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
                         ? BC_NULL
                         : BC_DOUBLE_NUM_0;
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0;
                 return off + 1;
             }
             return IO.writeDouble(bytes, off, value);

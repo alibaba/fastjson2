@@ -13,7 +13,7 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
-abstract class FieldWriterList<T>
+public abstract class FieldWriterList<T>
         extends FieldWriter<T> {
     private static final Class<?> EMPTY_LIST_CLASS = Collections.emptyList().getClass();
     private static final Class<?> EMPTY_SET_CLASS = Collections.emptySet().getClass();
@@ -121,7 +121,7 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public final void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 

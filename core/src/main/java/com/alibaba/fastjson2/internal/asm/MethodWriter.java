@@ -214,6 +214,10 @@ public final class MethodWriter {
         visitInsn(Opcodes.IADD);
     }
 
+    public void imul() {
+        visitInsn(Opcodes.IMUL);
+    }
+
     public void bastore() {
         visitInsn(Opcodes.BASTORE);
     }
