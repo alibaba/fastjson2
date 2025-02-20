@@ -752,65 +752,53 @@ public class IOUtils {
     }
 
     public static int writeLocalDate(byte[] bytes, int off, int year, int month, int dayOfMonth) {
-        if (year >= 0 && year < 10000) {
-            int y01 = year / 100;
-            writeDigitPair(bytes, off, y01);
-            putLongLE(
-                    bytes,
-                    off + 2,
-                    0x2d00002d0000L
-                            | digitPair(year - y01 * 100)
-                            | ((long) digitPair(month) << 24)
-                            | ((long) digitPair(dayOfMonth) << 48));
-            return off + 10;
-        }
-        return writeLocalDate0(bytes, off, year, month, dayOfMonth);
-    }
-
-    private static int writeLocalDate0(byte[] bytes, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
-            putByte(bytes, off++, (byte) '-');
+            bytes[off++] = '-';
             year = -year;
         } else if (year > 9999) {
-            putByte(bytes, off++, (byte) '+');
+            bytes[off++] = '+';
         }
-        off = IOUtils.writeInt32(bytes, off, year);
-        putByte(bytes, off, (byte) '-');
-        writeDigitPair(bytes, off + 1, month);
-        putByte(bytes, off + 3, (byte) '-');
-        writeDigitPair(bytes, off + 4, dayOfMonth);
-        return off + 6;
+        int y01 = year / 100;
+        int y23 = year - y01 * 100;
+
+        if (year >= 0 && year < 10000) {
+            writeDigitPair(bytes, off, y01);
+            off += 2;
+        } else {
+            off = IOUtils.writeInt32(bytes, off, y01);
+        }
+
+        putLongLE(bytes, off,
+                0x2d00002d0000L
+                        | digitPair(y23)
+                        | ((long) digitPair(month) << 24)
+                        | ((long) digitPair(dayOfMonth) << 48));
+        return off + 8;
     }
 
     public static int writeLocalDate(char[] chars, int off, int year, int month, int dayOfMonth) {
-        if (year >= 0 && year < 10000) {
-            int y01 = year / 100;
-            int y23 = year - y01 * 100;
-            writeDigitPair(chars, off, y01);
-            writeDigitPair(chars, off + 2, y23);
-            putChar(chars, off + 4, '-');
-            writeDigitPair(chars, off + 5, month);
-            putChar(chars, off + 7, '-');
-            writeDigitPair(chars, off + 8, dayOfMonth);
-            return off + 10;
-        }
-
-        return writeLocalDate0(chars, off, year, month, dayOfMonth);
-    }
-
-    public static int writeLocalDate0(char[] chars, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
-            putChar(chars, off++, '-');
+            chars[off++] = '-';
             year = -year;
         } else if (year > 9999) {
-            putChar(chars, off++, '+');
+            chars[off++] = '+';
         }
-        off = IOUtils.writeInt32(chars, off, year);
-        putChar(chars, off, '-');
-        writeDigitPair(chars, off + 1, month);
-        putChar(chars, off + 3, '-');
-        writeDigitPair(chars, off + 4, dayOfMonth);
-        return off + 6;
+        int y01 = year / 100;
+        int y23 = year - y01 * 100;
+
+        if (year >= 0 && year < 10000) {
+            writeDigitPair(chars, off, y01);
+            off += 2;
+        } else {
+            off = IOUtils.writeInt32(chars, off, y01);
+        }
+
+        int p1 = PACKED_DIGITS_UTF16[month & 0x7f];
+        putLongLE(chars, off,
+                ((long) (p1 & 0xFFFF) << 48) | ((long) '-' << 32) | PACKED_DIGITS_UTF16[y23 & 0x7f]);
+        putLongLE(chars, off + 4,
+                ((long) (p1 & 0xFFFF0000) >> 16) | ((long) '-' << 16) | ((long) PACKED_DIGITS_UTF16[dayOfMonth & 0x7f] << 32));
+        return off + 8;
     }
 
     public static void writeLocalTime(byte[] bytes, int off, int hour, int minute, int second) {
