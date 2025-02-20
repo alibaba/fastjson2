@@ -1251,11 +1251,11 @@ public class IOUtils {
         return UNSAFE.getChar(str, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
     }
 
-    public static void putByte(byte[] buf, int pos, byte v) {
+    private static void putByte(byte[] buf, int pos, byte v) {
         UNSAFE.putByte(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
     }
 
-    public static void putChar(char[] buf, int pos, char v) {
+    private static void putChar(char[] buf, int pos, char v) {
         UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 

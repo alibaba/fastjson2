@@ -12,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static com.alibaba.fastjson2.util.IOUtils.putByte;
-
 final class CSVWriterUTF8
         extends CSVWriter {
     private static final short DOUBLE_QUOTE_2_LATIN1 = 0x22 | (0x22 << 8);
@@ -44,17 +42,17 @@ final class CSVWriterUTF8
 
     public void writeComma() {
         checkCapacity(1);
-        putByte(bytes, off++, (byte) ',');
+        bytes[off++] = ',';
     }
 
     protected void writeQuote() {
         checkCapacity(1);
-        putByte(bytes, off++, (byte) '"');
+        bytes[off++] = '"';
     }
 
     public void writeLine() {
         checkCapacity(1);
-        putByte(bytes, off++, (byte) '\n');
+        bytes[off++] = '\n';
     }
 
     public void writeBoolean(boolean v) {
@@ -85,7 +83,7 @@ final class CSVWriterUTF8
         final byte[] bytes = this.bytes;
         int off = this.off;
         off = IOUtils.writeLocalDate(bytes, off, year, month, dayOfMonth);
-        putByte(bytes, off, (byte) ' ');
+        bytes[off] = ' ';
         IOUtils.writeLocalTime(bytes, off + 1, hour, minute, second);
         this.off = off + 9;
     }
@@ -169,20 +167,20 @@ final class CSVWriterUTF8
         final int max = bytes.length - 2;
         int off = this.off;
 
-        putByte(bytes, off++, (byte) '"');
+        bytes[off++] = '"';
         for (byte ch : utf8) {
             if (ch == '"') {
                 IOUtils.putShortUnaligned(bytes, off, DOUBLE_QUOTE_2_LATIN1);
                 off += 2;
             } else {
-                putByte(bytes, off++, ch);
+                bytes[off++] = ch;
             }
             if (off >= max) {
                 flush();
                 off = this.off;
             }
         }
-        putByte(bytes, off++, (byte) '"');
+        bytes[off++] = '"';
         this.off = off;
     }
 
@@ -257,7 +255,7 @@ final class CSVWriterUTF8
             off = 0;
         }
         off = IOUtils.writeLocalDate(bytes, off, ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth());
-        putByte(bytes, off++, (byte) ' ');
+        bytes[off++] = ' ';
         this.off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
     }
 
