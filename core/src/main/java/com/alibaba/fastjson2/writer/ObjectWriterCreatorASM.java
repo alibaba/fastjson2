@@ -4639,6 +4639,10 @@ public class ObjectWriterCreatorASM
             }
 
             for (FieldWriter fieldWriter : fieldWriters) {
+                if (fieldWriter.method == null && fieldWriter.field == null && fieldWriter.getFunction() == null) {
+                    direct = false;
+                    break;
+                }
                 Class cls = fieldWriter.fieldClass;
                 if (cls != boolean.class && cls != Boolean.class
                         && cls != byte.class && cls != Byte.class
