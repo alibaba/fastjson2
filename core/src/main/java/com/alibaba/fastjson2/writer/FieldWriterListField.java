@@ -8,9 +8,9 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
-final class FieldWriterListField<T>
+public class FieldWriterListField<T>
         extends FieldWriterList<T> {
-    FieldWriterListField(
+    public FieldWriterListField(
             String fieldName,
             Type itemType,
             int ordinal,

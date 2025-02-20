@@ -154,4 +154,26 @@ public class ArrayMappingTest {
         byte[] jsonbBytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
         assertEquals("[[\"1\"]]", new String(jsonbBytes));
     }
+
+    @Test
+    public void test_3() {
+        Bean vo = new Bean();
+        vo.values.add(new Int1());
+        {
+            byte[] jsonbBytes = JSONB.toBytes(vo, JSONWriter.Feature.BeanToArray);
+            assertEquals("[\n" +
+                    "\t[\n" +
+                    "\t\t[0]\n" +
+                    "\t]\n" +
+                    "]", JSONB.toJSONString(jsonbBytes));
+        }
+    }
+
+    public class Bean {
+        private List<Int1> values = new ArrayList<>();
+
+        public List<Int1> getValues() {
+            return values;
+        }
+    }
 }

@@ -1534,19 +1534,18 @@ public interface JSONB {
         static int writeFloat(byte[] bytes, int off, float value) {
             int intValue = (int) value;
             if (intValue == value && ((intValue + 0x40000) & ~0x7ffff) == 0) {
-                putByte(bytes, off, BC_FLOAT_INT);
+                bytes[off] = BC_FLOAT_INT;
                 return IO.writeInt32(bytes, off + 1, intValue);
             }
 
-            putByte(bytes, off, BC_FLOAT);
+            bytes[off] = BC_FLOAT;
             IOUtils.putIntBE(bytes, off + 1, Float.floatToIntBits(value));
             return off + 5;
         }
 
         static int writeDouble(byte[] bytes, int off, Double value, long features) {
             if (value == null) {
-                putByte(bytes, off,
-                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0);
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0;
                 return off + 1;
             }
             return IO.writeDouble(bytes, off, value);
@@ -1554,19 +1553,19 @@ public interface JSONB {
 
         static int writeDouble(byte[] bytes, int off, double value) {
             if (value == 0 || value == 1) {
-                putByte(bytes, off, value == 0 ? BC_DOUBLE_NUM_0 : BC_DOUBLE_NUM_1);
+                bytes[off] = value == 0 ? BC_DOUBLE_NUM_0 : BC_DOUBLE_NUM_1;
                 return off + 1;
             }
 
             if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
                 long longValue = (long) value;
                 if (longValue == value) {
-                    putByte(bytes, off, BC_DOUBLE_LONG);
+                    bytes[off] = BC_DOUBLE_LONG;
                     return IO.writeInt64(bytes, off + 1, longValue);
                 }
             }
 
-            putByte(bytes, off, BC_DOUBLE);
+            bytes[off] = BC_DOUBLE;
             IOUtils.putLongBE(bytes, off + 1, Double.doubleToLongBits(value));
             return off + 9;
         }
@@ -1585,8 +1584,7 @@ public interface JSONB {
 
         static int writeInt8(byte[] bytes, int off, Byte val, long features) {
             if (val == null) {
-                putByte(bytes, off,
-                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0);
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0;
                 return off + 1;
             }
             putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
@@ -1600,8 +1598,7 @@ public interface JSONB {
 
         static int writeInt16(byte[] bytes, int off, Short val, long features) {
             if (val == null) {
-                putByte(bytes, off,
-                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0);
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0;
                 return off + 1;
             }
             bytes[off] = BC_INT16;
@@ -1617,8 +1614,7 @@ public interface JSONB {
 
         static int writeInt32(byte[] bytes, int off, Integer value, long features) {
             if (value == null) {
-                putByte(bytes, off,
-                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0);
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0;
                 return off + 1;
             }
             return IO.writeInt32(bytes, off, value);
@@ -1740,20 +1736,20 @@ public interface JSONB {
 
         static int writeInt64(byte[] bytes, int off, long value) {
             if (value >= INT64_NUM_LOW_VALUE && value <= INT64_NUM_HIGH_VALUE) {
-                putByte(bytes, off++, (byte) (BC_INT64_NUM_MIN + (value - INT64_NUM_LOW_VALUE)));
+                bytes[off++] = (byte) (BC_INT64_NUM_MIN + (value - INT64_NUM_LOW_VALUE));
             } else if (((value + 0x800) & ~0xfffL) == 0) {
                 putShortBE(bytes, off, (short) ((BC_INT64_BYTE_ZERO << 8) + value));
                 off += 2;
             } else if (((value + 0x40000) & ~0x7ffffL) == 0) {
-                putByte(bytes, off, (byte) (BC_INT64_SHORT_ZERO + (value >> 16)));
+                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (value >> 16));
                 putShortBE(bytes, off + 1, (short) value);
                 off += 3;
             } else if ((((value + 0x80000000L) & ~0xffffffffL) == 0)) {
-                putByte(bytes, off, BC_INT64_INT);
+                bytes[off] = BC_INT64_INT;
                 putIntBE(bytes, off + 1, (int) value);
                 off += 5;
             } else {
-                putByte(bytes, off, BC_INT64);
+                bytes[off] = BC_INT64;
                 putLongBE(bytes, off + 1, value);
                 off += 9;
             }
