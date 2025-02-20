@@ -1388,7 +1388,7 @@ public class ObjectWriterCreatorASM
             methodName = "writeLocalDateTime";
             methodDesc = "([BILjava/time/LocalDateTime;)I";
         } else if (fieldClass == OffsetDateTime.class) {
-            methodName = "writeLocalOffsetDateTime";
+            methodName = "writeOffsetDateTime";
             methodDesc = "([BILjava/time/OffsetDateTime;)I";
         } else if (fieldClass == OffsetTime.class) {
             methodName = "writeOffsetTime";

@@ -13,7 +13,7 @@ public class ClientsWriteUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-jsonb millis : " + millis);
-            // zulu17.40.19 : 609
+            // zulu17.40.19 : 609 413
             // zulu17.40.19_vec :
         }
     }
