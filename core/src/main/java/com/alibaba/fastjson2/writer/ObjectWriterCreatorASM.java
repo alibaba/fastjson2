@@ -323,7 +323,8 @@ public class ObjectWriterCreatorASM
                                     fieldInfo.format,
                                     fieldInfo.label,
                                     method,
-                                    writeUsingWriter
+                                    writeUsingWriter,
+                                    fieldInfo.contentAs
                             );
                         } catch (Throwable e) {
                             jitErrorCount.incrementAndGet();
@@ -341,7 +342,8 @@ public class ObjectWriterCreatorASM
                                 fieldInfo.locale,
                                 fieldInfo.label,
                                 method,
-                                writeUsingWriter
+                                writeUsingWriter,
+                                fieldInfo.contentAs
                         );
                     }
 
@@ -4397,13 +4399,14 @@ public class ObjectWriterCreatorASM
             Locale locale,
             String label,
             Field field,
-            ObjectWriter initObjectWriter
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
     ) {
         Class<?> declaringClass = field.getDeclaringClass();
         if (Throwable.class.isAssignableFrom(declaringClass)
                 || declaringClass.getName().startsWith("java.lang")
         ) {
-            return super.createFieldWriter(provider, fieldName, ordinal, features, format, locale, label, field, initObjectWriter);
+            return super.createFieldWriter(provider, fieldName, ordinal, features, format, locale, label, field, initObjectWriter, contentAs);
         }
 
         Class<?> fieldClass = field.getType();
@@ -4535,7 +4538,11 @@ public class ObjectWriterCreatorASM
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field);
+            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, contentAs);
+        }
+
+        if (Map.class.isAssignableFrom(fieldClass)) {
+            return new FieldWriterMapField(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, contentAs);
         }
 
         if (fieldClass.isArray()) {

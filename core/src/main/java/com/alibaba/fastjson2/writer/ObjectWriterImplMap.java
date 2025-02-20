@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.*;
 
@@ -54,6 +55,8 @@ public final class ObjectWriterImplMap
     final char[] typeInfoUTF16;
     final byte[] typeInfoUTF8;
 
+    final boolean contentAs;
+
     public ObjectWriterImplMap(Class objectClass, long features) {
         this(null, null, objectClass, objectClass, features);
     }
@@ -75,6 +78,7 @@ public final class ObjectWriterImplMap
         } else {
             this.valueTypeRefDetect = !ObjectWriterProvider.isNotReferenceDetect(TypeUtils.getClass(valueType));
         }
+        contentAs = (features & FieldInfo.CONTENT_AS) != 0;
 
         String typeName = TypeUtils.getTypeName(objectClass);
         String typeInfoStr = "\"@type\":\"" + objectClass.getName() + "\"";
@@ -288,7 +292,12 @@ public final class ObjectWriterImplMap
                 }
             }
 
-            Class<?> valueClass = value.getClass();
+            Class valueClass;
+            if (contentAs) {
+                valueClass = (Class) this.valueType;
+            } else {
+                valueClass = value.getClass();
+            }
             if (valueClass == String.class) {
                 jsonWriter.writeString((String) value);
                 continue;
@@ -491,7 +500,12 @@ public final class ObjectWriterImplMap
             }
             jsonWriter.writeColon();
 
-            Class<?> valueClass = value.getClass();
+            Class valueClass;
+            if (contentAs) {
+                valueClass = (Class) this.valueType;
+            } else {
+                valueClass = value.getClass();
+            }
             if (valueClass == String.class) {
                 jsonWriter.writeString((String) value);
                 continue;
@@ -667,8 +681,13 @@ public final class ObjectWriterImplMap
                 if (value == null) {
                     jsonWriter.writeNull();
                 } else {
-                    Class<?> valueType = value.getClass();
-                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
+                    Class valueClass;
+                    if (contentAs) {
+                        valueClass = (Class) this.valueType;
+                    } else {
+                        valueClass = value.getClass();
+                    }
+                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
                     valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
                 }
             } finally {

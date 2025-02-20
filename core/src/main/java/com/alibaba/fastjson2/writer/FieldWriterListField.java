@@ -19,9 +19,10 @@ final class FieldWriterListField<T>
             String label,
             Type fieldType,
             Class fieldClass,
-            Field field
+            Field field,
+            Class<?> contentAs
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, null);
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, null, contentAs);
     }
 
     @Override
