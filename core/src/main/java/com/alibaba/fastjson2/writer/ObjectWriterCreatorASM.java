@@ -71,6 +71,7 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_WRITE_CLASS_INFO = "(" + DESC_JSON_WRITER + ")V";
     static final String METHOD_DESC_WRITE_FIELD_NAME_JSONB = "([BI" + DESC_JSON_WRITER + ")I";
     static final String METHOD_DESC_WRITE_NAME_SYMBOL = "(" + DESC_SYMBOL + ")I";
+    static final String METHOD_DESC_WRITE_LIST_VALUE_JSONB = "(" + DESC_JSON_WRITER + "Ljava/util/List;)V";
 
     static final int THIS = 0;
     static final int JSON_WRITER = 1;
@@ -4730,11 +4731,10 @@ public class ObjectWriterCreatorASM
                 mw.visitMaxs(12, 12);
             }
 
-            String methodDesc = "(" + DESC_JSON_WRITER + "Ljava/util/List;)V";
             MethodWriter mw = cw.visitMethod(
                     Opcodes.ACC_PUBLIC,
                     "writeListValueJSONB",
-                    methodDesc,
+                    METHOD_DESC_WRITE_LIST_VALUE_JSONB,
                     fieldWriters.size() < 6 ? 512 : 1024
             );
             MethodWriterContext mwc = new MethodWriterContext(provider, itemClass, features, classNameType, mw, 8, false);
@@ -4756,7 +4756,7 @@ public class ObjectWriterCreatorASM
             mw.lstore(FEATURES);
 
             Label L_SUPPER = new Label();
-            {
+            if (!provider.isDisableReferenceDetect()) {
                 /*
                  * if ((features & ReferenceDetection.mask) != 0) {
                  *  goto L_SUPPER
@@ -4872,7 +4872,7 @@ public class ObjectWriterCreatorASM
             mw.aload(THIS);
             mw.aload(JSON_WRITER);
             mw.aload(LIST);
-            mw.invokespecial(type(FieldWriterList.class), "writeListValueJSONB", methodDesc);
+            mw.invokespecial(type(FieldWriterList.class), "writeListValueJSONB", METHOD_DESC_WRITE_LIST_VALUE_JSONB);
             mw.return_();
 
             mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
