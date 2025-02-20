@@ -198,7 +198,7 @@ final class JSONWriterJSONB
     @Override
     public void writeRaw(byte b) {
         int off = this.off;
-        putByte(grow1(off), off, b);
+        grow1(off)[off] = b;
         this.off = off + 1;
     }
 
@@ -209,7 +209,7 @@ final class JSONWriterJSONB
         if (off + 6 > bytes.length) {
             bytes = grow(off + 6);
         }
-        putByte(bytes, off, BC_CHAR);
+        bytes[off] = BC_CHAR;
         this.off = JSONB.IO.writeInt32(bytes, off + 1, ch);
     }
 
@@ -433,7 +433,7 @@ final class JSONWriterJSONB
                     ascii = false;
                     break;
                 }
-                putByte(bytes, off++, (byte) ch);
+                bytes[off++] = (byte) ch;
             }
 
             if (ascii) {
@@ -461,9 +461,9 @@ final class JSONWriterJSONB
 
     private static int writeStringLatin1(byte[] bytes, int off, char[] chars, int coff, int strlen) {
         if (strlen <= STR_ASCII_FIX_LEN) {
-            putByte(bytes, off++, (byte) (strlen + BC_STR_ASCII_FIX_MIN));
+            bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
         } else {
-            putByte(bytes, off, BC_STR_ASCII);
+            bytes[off] = BC_STR_ASCII;
             if (strlen <= INT32_BYTE_MAX) {
                 putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
                 off += 3;
@@ -472,7 +472,7 @@ final class JSONWriterJSONB
             }
         }
         for (int i = 0; i < strlen; i++) {
-            putByte(bytes, off++, (byte) chars[coff + i]);
+            bytes[off++] = (byte) chars[coff + i];
         }
         return off;
     }
@@ -487,7 +487,7 @@ final class JSONWriterJSONB
         if (lenByteCnt != utf8lenByteCnt) {
             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
         }
-        putByte(bytes, off, BC_STR_UTF8);
+        bytes[off] = BC_STR_UTF8;
         return JSONB.IO.writeInt32(bytes, off + 1, utf8len) + utf8len;
     }
 
@@ -607,11 +607,11 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
 
-        putByte(bytes, off, BC_TYPED_ANY);
+        bytes[off] = BC_TYPED_ANY;
         System.arraycopy(typeName, 0, bytes, off + 1, typeName.length);
         off += typeName.length + 1;
         if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
-            putByte(bytes, off++, (byte) symbol);
+            bytes[off++] = (byte) symbol;
         } else {
             off = JSONB.IO.writeInt32(bytes, off, symbol);
         }
@@ -626,7 +626,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 7);
         }
 
-        putByte(bytes, off, BC_TYPED_ANY);
+        bytes[off] = BC_TYPED_ANY;
         this.off = JSONB.IO.writeInt32(bytes, off + 1, -symbol);
         return false;
     }
@@ -667,7 +667,7 @@ final class JSONWriterJSONB
                     if (off == bytes.length) {
                         bytes = grow(off + 1);
                     }
-                    putByte(bytes, off++, BC_NULL);
+                    bytes[off++] = BC_NULL;
                     continue;
                 }
                 int coder = STRING_CODER.applyAsInt(str);
@@ -798,14 +798,14 @@ final class JSONWriterJSONB
             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
         }
         int start = off;
-        putByte(bytes, off, strtype);
+        bytes[off] = strtype;
         off = JSONB.IO.writeInt32(bytes, off + 1, utf8len);
         return (off - start) + utf8len;
     }
 
     private static int writeUTF16(byte[] bytes, int off, byte[] value) {
         int start = off;
-        putByte(bytes, off, JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE);
+        bytes[off] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
         off = JSONB.IO.writeInt32(bytes, off + 1, value.length);
         System.arraycopy(value, 0, bytes, off, value.length);
         return value.length + off - start;
@@ -815,7 +815,7 @@ final class JSONWriterJSONB
     public final Object ensureCapacity(int minCapacity) {
         byte[] bytes = this.bytes;
         if (minCapacity >= bytes.length) {
-            bytes = Arrays.copyOf(bytes, newCapacity(minCapacity, bytes.length));
+            this.bytes = bytes = Arrays.copyOf(bytes, newCapacity(minCapacity, bytes.length));
         }
         return bytes;
     }
@@ -849,7 +849,7 @@ final class JSONWriterJSONB
             long seconds = (millis / 1000);
             if (seconds >= Integer.MIN_VALUE && seconds <= Integer.MAX_VALUE) {
                 int secondsInt = (int) seconds;
-                putByte(bytes, off, BC_TIMESTAMP_SECONDS);
+                bytes[off] = BC_TIMESTAMP_SECONDS;
                 putIntBE(bytes, off + 1, secondsInt);
                 this.off = off + 5;
                 return;
@@ -859,7 +859,7 @@ final class JSONWriterJSONB
                 long minutes = seconds / 60;
                 if (minutes >= Integer.MIN_VALUE && minutes <= Integer.MAX_VALUE) {
                     int minutesInt = (int) minutes;
-                    putByte(bytes, off, BC_TIMESTAMP_MINUTES);
+                    bytes[off] = BC_TIMESTAMP_MINUTES;
                     putIntBE(bytes, off + 1, minutesInt);
                     this.off = off + 5;
                     return;
@@ -867,7 +867,7 @@ final class JSONWriterJSONB
             }
         }
 
-        putByte(bytes, off, BC_TIMESTAMP_MILLIS);
+        bytes[off] = BC_TIMESTAMP_MILLIS;
         putLongBE(bytes, off + 1, millis);
         this.off = off + 9;
     }
@@ -909,9 +909,9 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
         if (size <= ARRAY_FIX_LEN) {
-            putByte(bytes, off++, (byte) (BC_ARRAY_FIX_MIN + size));
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
-            putByte(bytes, off, BC_ARRAY);
+            bytes[off] = BC_ARRAY;
             off = JSONB.IO.writeInt32(bytes, off + 1, size);
         }
 
@@ -937,9 +937,9 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
         if (size <= ARRAY_FIX_LEN) {
-            putByte(bytes, off++, (byte) (BC_ARRAY_FIX_MIN + size));
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
-            putByte(bytes, off, BC_ARRAY);
+            bytes[off] = BC_ARRAY;
             off = JSONB.IO.writeInt32(bytes, off + 1, size);
         }
 
@@ -1027,9 +1027,9 @@ final class JSONWriterJSONB
         }
 
         if (size <= ARRAY_FIX_LEN) {
-            putByte(bytes, off++, (byte) (BC_ARRAY_FIX_MIN + size));
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
-            putByte(bytes, off, BC_ARRAY);
+            bytes[off] = BC_ARRAY;
             off = JSONB.IO.writeInt32(bytes, off + 1, size);
         }
 
@@ -1055,17 +1055,17 @@ final class JSONWriterJSONB
         }
 
         if (size <= ARRAY_FIX_LEN) {
-            putByte(bytes, off++, (byte) (BC_ARRAY_FIX_MIN + size));
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
-            putByte(bytes, off, BC_ARRAY);
+            bytes[off] = BC_ARRAY;
             off = JSONB.IO.writeInt32(bytes, off + 1, size);
         }
 
         for (int val : values) {
             if (val < BC_INT32_NUM_MIN || val > BC_INT32_NUM_MAX) {
-                putByte(bytes, off++, (byte) (BC_INT32_BYTE_ZERO + (val >> 8)));
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
             }
-            putByte(bytes, off++, (byte) val);
+            bytes[off++] = (byte) val;
         }
         this.off = off;
     }
@@ -1152,16 +1152,16 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
         if (size <= ARRAY_FIX_LEN) {
-            putByte(bytes, off++, (byte) (BC_ARRAY_FIX_MIN + size));
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
-            putByte(bytes, off, BC_ARRAY);
+            bytes[off] = BC_ARRAY;
             off = JSONB.IO.writeInt32(bytes, off + 1, size);
         }
 
         for (int i = 0; i < size; i++) {
             Integer item = values.get(i);
             if (item == null) {
-                putByte(bytes, off++, BC_NULL);
+                bytes[off++] = BC_NULL;
                 continue;
             }
 
@@ -1199,10 +1199,10 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        putByte(bytes, off++, BC_SYMBOL);
+        bytes[off++] = BC_SYMBOL;
 
         if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
-            putByte(bytes, off++, (byte) symbol);
+            bytes[off++] = (byte) symbol;
         } else if (symbol >= INT32_BYTE_MIN && symbol <= INT32_BYTE_MAX) {
             putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
             off += 2;
@@ -1243,12 +1243,12 @@ final class JSONWriterJSONB
             }
 
             if (!symbolExists) {
-                putByte(bytes, off++, BC_SYMBOL);
+                bytes[off++] = BC_SYMBOL;
                 System.arraycopy(name, 0, bytes, off, name.length);
                 off += name.length;
 
                 if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
-                    putByte(bytes, off++, (byte) symbol);
+                    bytes[off++] = (byte) symbol;
                 } else {
                     off = JSONB.IO.writeInt32(bytes, off, symbol);
                 }
@@ -1261,7 +1261,7 @@ final class JSONWriterJSONB
         bytes[off++] = BC_SYMBOL;
         int intValue = -symbol;
         if (intValue >= BC_INT32_NUM_MIN && intValue <= BC_INT32_NUM_MAX) {
-            putByte(bytes, off++, (byte) intValue);
+            bytes[off++] = (byte) intValue;
         } else {
             off = JSONB.IO.writeInt32(bytes, off, intValue);
         }
@@ -1385,7 +1385,7 @@ final class JSONWriterJSONB
             if (off + 10 > bytes.length) {
                 bytes = grow(off + 10);
             }
-            putByte(bytes, off, BC_BIGINT_LONG);
+            bytes[off] = BC_BIGINT_LONG;
             this.off = JSONB.IO.writeInt64(bytes, off + 1, value.longValue());
             return;
         }
@@ -1396,7 +1396,7 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
 
-        putByte(bytes, off, BC_BIGINT);
+        bytes[off] = BC_BIGINT;
         off = JSONB.IO.writeInt32(bytes, off + 1, valueBytes.length);
         System.arraycopy(valueBytes, 0, bytes, off, valueBytes.length);
         this.off = off + valueBytes.length;
@@ -1416,7 +1416,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        putByte(bytes, off, BC_BINARY);
+        bytes[off] = BC_BINARY;
         off = JSONB.IO.writeInt32(bytes, off + 1, len);
 
         System.arraycopy(binary, 0, bytes, off, len);
@@ -1446,7 +1446,7 @@ final class JSONWriterJSONB
                 return;
             }
 
-            putByte(bytes, off, BC_DECIMAL);
+            bytes[off] = BC_DECIMAL;
             off = JSONB.IO.writeInt32(bytes, off + 1, scale);
             if (intCompact >= Integer.MIN_VALUE && intCompact <= Integer.MAX_VALUE) {
                 off = JSONB.IO.writeInt32(bytes, off, (int) intCompact);
@@ -1460,12 +1460,12 @@ final class JSONWriterJSONB
         BigInteger unscaledValue = value.unscaledValue();
         if (scale == 0
                 && isInt64(unscaledValue)) {
-            putByte(bytes, off, BC_DECIMAL_LONG);
+            bytes[off] = BC_DECIMAL_LONG;
             this.off = JSONB.IO.writeInt64(bytes, off + 1, unscaledValue.longValue());
             return;
         }
 
-        putByte(bytes, off, BC_DECIMAL);
+        bytes[off] = BC_DECIMAL;
         off = JSONB.IO.writeInt32(bytes, off + 1, scale);
 
         if (isInt32(unscaledValue)) {
@@ -1499,7 +1499,7 @@ final class JSONWriterJSONB
     @Override
     public void writeReference(String path) {
         int off = this.off;
-        putByte(grow1(off), off, BC_REFERENCE);
+        grow1(off)[off] = BC_REFERENCE;
         this.off = off + 1;
         writeString(path == this.lastReference ? "#-1" : path);
         this.lastReference = path;
@@ -1522,7 +1522,7 @@ final class JSONWriterJSONB
 
         putIntBE(bytes, off, (BC_LOCAL_DATETIME << 24) | ((year & 0xFFFF) << 8) | month);
         putIntBE(bytes, off + 4, (dayOfMonth << 24) | (hour << 16) | (minute << 8) | second);
-        putByte(bytes, off + 8, BC_INT32_NUM_0);
+        bytes[off + 8] = BC_INT32_NUM_0;
         this.off = off + 9;
     }
 

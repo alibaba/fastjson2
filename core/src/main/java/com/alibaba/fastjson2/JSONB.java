@@ -1509,7 +1509,7 @@ public interface JSONB {
             float floatValue;
             if (value == null) {
                 if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0) {
-                    putByte(bytes, off, BC_NULL);
+                    bytes[off] = BC_NULL;
                     return off + 1;
                 }
                 floatValue = 0;
@@ -1545,6 +1545,9 @@ public interface JSONB {
 
         static int writeDouble(byte[] bytes, int off, Double value, long features) {
             if (value == null) {
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
+                        ? BC_NULL
+                        : BC_DOUBLE_NUM_0;
                 bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0;
                 return off + 1;
             }
@@ -1622,7 +1625,7 @@ public interface JSONB {
 
         static int writeSymbol(byte[] bytes, int off, String str, SymbolTable symbolTable) {
             if (str == null) {
-                putByte(bytes, off, BC_NULL);
+                bytes[off] = BC_NULL;
                 return off + 1;
             }
             int ordinal = symbolTable.getOrdinal(str);
@@ -1694,16 +1697,16 @@ public interface JSONB {
 
         static int writeInt32(byte[] bytes, int off, int value) {
             if (((value + 0x10) & ~0x3f) == 0) {
-                putByte(bytes, off++, (byte) value);
+                bytes[off++] = (byte) value;
             } else if (((value + 0x800) & ~0xfff) == 0) {
                 putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + value));
                 off += 2;
             } else if (((value + 0x40000) & ~0x7ffff) == 0) {
-                putByte(bytes, off, (byte) (BC_INT32_SHORT_ZERO + (value >> 16)));
+                bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (value >> 16));
                 putShortBE(bytes, off + 1, (short) value);
                 off += 3;
             } else {
-                putByte(bytes, off, BC_INT32);
+                bytes[off] = BC_INT32;
                 putIntBE(bytes, off + 1, value);
                 off += 5;
             }
@@ -1712,7 +1715,7 @@ public interface JSONB {
 
         static int writeInt64(byte[] bytes, int off, Collection<Long> values, long features) {
             if (values == null) {
-                putByte(bytes, off, (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
                 return off + 1;
             }
             int size = values.size();
@@ -1725,10 +1728,9 @@ public interface JSONB {
 
         static int writeInt64(byte[] bytes, int off, Long value, long features) {
             if (value == null) {
-                putByte(bytes, off,
-                        (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
-                                ? BC_NULL
-                                : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE));
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
+                        ? BC_NULL
+                        : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE);
                 return off + 1;
             }
             return IO.writeInt64(bytes, off, value);
@@ -1767,7 +1769,7 @@ public interface JSONB {
 
         static int writeString(byte[] bytes, int off, Collection<String> strings, long features) {
             if (strings == null) {
-                putByte(bytes, off, (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
                 return off + 1;
             }
             int size = strings.size();
@@ -1780,7 +1782,7 @@ public interface JSONB {
 
         static int writeString(byte[] bytes, int off, String[] strings, long features) {
             if (strings == null) {
-                putByte(bytes, off, (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
                 return off + 1;
             }
             int size = strings.length;
@@ -1811,7 +1813,7 @@ public interface JSONB {
 
         static int writeStringUTF16(byte[] bytes, int off, byte[] value) {
             final int strlen = value.length;
-            putByte(bytes, off, JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE);
+            bytes[off] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
             off = JSONB.IO.writeInt32(bytes, off + 1, strlen);
             System.arraycopy(value, 0, bytes, off, strlen);
             return off + strlen;
@@ -1875,7 +1877,7 @@ public interface JSONB {
         }
 
         static int putStringSizeSmall(byte[] bytes, int off, int val) {
-            putByte(bytes, off, BC_STR_ASCII);
+            bytes[off] = BC_STR_ASCII;
             putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + val));
             return off + 3;
         }
@@ -1906,7 +1908,7 @@ public interface JSONB {
                         ascii = false;
                         break;
                     }
-                    putByte(bytes, off++, (byte) ch);
+                    bytes[off++] = (byte) ch;
                 }
 
                 if (ascii) {
@@ -1928,9 +1930,9 @@ public interface JSONB {
 
         static int writeStringLatin1(byte[] bytes, int off, char[] chars, int coff, int strlen) {
             if (strlen <= STR_ASCII_FIX_LEN) {
-                putByte(bytes, off++, (byte) (strlen + BC_STR_ASCII_FIX_MIN));
+                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
             } else {
-                putByte(bytes, off, BC_STR_ASCII);
+                bytes[off] = BC_STR_ASCII;
                 if (strlen <= INT32_BYTE_MAX) {
                     putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
                     off += 3;
@@ -1939,7 +1941,7 @@ public interface JSONB {
                 }
             }
             for (int i = 0; i < strlen; i++) {
-                putByte(bytes, off++, (byte) chars[coff + i]);
+                bytes[off++] = (byte) chars[coff + i];
             }
             return off;
         }
@@ -1954,7 +1956,7 @@ public interface JSONB {
             if (lenByteCnt != utf8lenByteCnt) {
                 System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
             }
-            putByte(bytes, off, BC_STR_UTF8);
+            bytes[off] = BC_STR_UTF8;
             return JSONB.IO.writeInt32(bytes, off + 1, utf8len) + utf8len;
         }
 
@@ -2000,7 +2002,7 @@ public interface JSONB {
                 bytes[off] = BC_NULL;
                 return off + 1;
             }
-            putByte(bytes, off, BC_LOCAL_DATE);
+            bytes[off] = BC_LOCAL_DATE;
             int year = value.getYear();
             putIntBE(bytes, off + 1, (year << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
             return off + 5;
@@ -2119,12 +2121,12 @@ public interface JSONB {
                 }
 
                 if (!symbolExists) {
-                    putByte(bytes, off++, BC_SYMBOL);
+                    bytes[off++] = BC_SYMBOL;
                     System.arraycopy(name, 0, bytes, off, name.length);
                     off += name.length;
 
                     if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
-                        putByte(bytes, off++, (byte) symbol);
+                        bytes[off++] = (byte) symbol;
                     } else {
                         off = JSONB.IO.writeInt32(bytes, off, symbol);
                     }
@@ -2136,7 +2138,7 @@ public interface JSONB {
             bytes[off++] = BC_SYMBOL;
             int intValue = -symbol;
             if (intValue >= BC_INT32_NUM_MIN && intValue <= BC_INT32_NUM_MAX) {
-                putByte(bytes, off++, (byte) intValue);
+                bytes[off++] = (byte) intValue;
             } else {
                 off = JSONB.IO.writeInt32(bytes, off, intValue);
             }

@@ -1719,7 +1719,7 @@ class JSONWriterUTF16
     public final Object ensureCapacity(int minCapacity) {
         char[] chars = this.chars;
         if (minCapacity >= chars.length) {
-            chars = Arrays.copyOf(chars, newCapacity(minCapacity, chars.length));
+            this.chars = chars = Arrays.copyOf(chars, newCapacity(minCapacity, chars.length));
         }
         return chars;
     }

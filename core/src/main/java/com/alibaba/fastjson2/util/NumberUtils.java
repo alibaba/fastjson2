@@ -595,7 +595,7 @@ public final class NumberUtils {
 
         if (accurate) {
             // If we pursue performance, we can return it here, but it may return a non-shortest sequence of numbers (the result is correct)
-            // rawOutput = EnvUtils.JDK_AGENT_INSTANCE.multiplyHighKaratsuba(rawOutput, 0x6b5fca6af2bd215fL) >> 22; // rawOutput / 10000000;
+            // rawOutput = MULTIPLY_HIGH.multiplyHigh(rawOutput, 0x6b5fca6af2bd215fL) >> 22; // rawOutput / 10000000;
             // if (adl == 7) {
             //     --adl;
             //     rawOutput = (rawOutput + 5) / 10; // rawOutput = rawOutput / 10 + ((rawOutput % 10) >= 5 ? 1 : 0);
@@ -604,7 +604,7 @@ public final class NumberUtils {
         }
 
         if (rawOutput < 1000000000) {
-            return new Scientific(rawOutput / 10000000, 2, e10);
+            return new Scientific(MULTIPLY_HIGH.multiplyHigh(rawOutput, 0x6b5fca6af2bd215fL) >> 22, 2, e10); // rawOutput / 10000000
         }
         long div = MULTIPLY_HIGH.multiplyHigh(rawOutput, 0x44b82fa09b5a52ccL) >> 28; // rawOutput / 1000000000;
         long rem = rawOutput - div * 1000000000;

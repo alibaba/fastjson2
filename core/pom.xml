@@ -236,6 +236,12 @@
             <artifactId>dubbo</artifactId>
             <version>3.3.2</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alibaba.fastjson2</groupId>
+                    <artifactId>fastjson2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.gitlab4j</groupId>

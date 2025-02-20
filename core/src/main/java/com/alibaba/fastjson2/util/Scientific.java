@@ -5,8 +5,8 @@ package com.alibaba.fastjson2.util;
  * Created by wangyc
  */
 public class Scientific {
-    public long output;
-    public int count;
+    public final long output;
+    public final int count;
     public final int e10;
     public final boolean b;
 
@@ -23,6 +23,8 @@ public class Scientific {
     public Scientific(int e10, boolean b) {
         this.e10 = e10;
         this.b = b;
+        this.output = 0;
+        this.count = 0;
     }
 
     @Override
