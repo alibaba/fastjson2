@@ -4498,7 +4498,7 @@ public abstract class JSONReader
         }
     }
 
-    static class ResolveTask {
+    static final class ResolveTask {
         final FieldReader fieldReader;
         final Object object;
         final Object name;
