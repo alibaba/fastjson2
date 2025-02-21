@@ -387,6 +387,9 @@ final class JSONReaderUTF16
     }
 
     public final boolean isReference() {
+        if ((context.features & MASK_DISABLE_REFERENCE_DETECT) != 0) {
+            return false;
+        }
         // should be codeSize <= FreqInlineSize 325, current is 276
         final char[] chars = this.chars;
         char ch = this.ch;

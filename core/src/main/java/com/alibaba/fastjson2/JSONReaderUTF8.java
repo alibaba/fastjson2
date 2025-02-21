@@ -6855,6 +6855,9 @@ class JSONReaderUTF8
     @Override
     public final boolean isReference() {
         // should be codeSize <= FreqInlineSize 325, current : 284
+        if ((context.features & MASK_DISABLE_REFERENCE_DETECT) != 0) {
+            return false;
+        }
         final byte[] bytes = this.bytes;
         int ch = this.ch;
         if (ch != '{') {
