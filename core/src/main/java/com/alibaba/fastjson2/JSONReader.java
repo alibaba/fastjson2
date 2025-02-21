@@ -2432,13 +2432,8 @@ public abstract class JSONReader
                     break;
                 case '{':
                     if (isReference()) {
-                        String path = readReference();
-                        if (path.startsWith("$") || path.equals("..") || path.equals(".")) {
-                            addResolveTask(object, name, JSONPath.of(path));
-                            val = null;
-                        } else {
-                            val = path;
-                        }
+                        addResolveTask(object, name, JSONPath.of(readReference()));
+                        val = null;
                     } else {
                         val = readObject();
                     }

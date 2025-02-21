@@ -18,7 +18,7 @@ final class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
     static final int ESCAPE_INDEX_NOT_SET = -2;
-    protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
+    private int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, bytes, offset, length);

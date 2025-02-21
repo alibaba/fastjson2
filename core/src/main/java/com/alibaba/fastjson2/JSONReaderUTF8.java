@@ -6885,10 +6885,10 @@ class JSONReaderUTF8
             return false;
         }
 
-        return readReference0(bytes, offset, end, ch);
+        return isReference0(bytes, offset, end, ch);
     }
 
-    private boolean readReference0(byte[] bytes, int offset, int end, int quote) {
+    private boolean isReference0(byte[] bytes, int offset, int end, int quote) {
         int ch;
         offset += 6;
         ch = bytes[offset];
@@ -6913,7 +6913,9 @@ class JSONReaderUTF8
             ch = bytes[offset];
         }
 
-        if (ch != quote || (offset + 1 < end && bytes[offset + 1] == '#')) {
+        if (ch != quote
+                || (offset + 1 < end && (ch = bytes[offset + 1]) != '$' && ch != '.' && ch != '@')
+        ) {
             return false;
         }
 

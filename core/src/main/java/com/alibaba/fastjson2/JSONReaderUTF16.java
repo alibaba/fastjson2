@@ -422,10 +422,10 @@ final class JSONReaderUTF16
             return false;
         }
 
-        return readReference0(chars, offset, end, quote);
+        return isReference0(chars, offset, end, quote);
     }
 
-    private boolean readReference0(char[] chars, int offset, int end, char quote) {
+    private boolean isReference0(char[] chars, int offset, int end, char quote) {
         char ch;
         offset += 6;
         ch = chars[offset];
@@ -450,7 +450,9 @@ final class JSONReaderUTF16
             ch = chars[offset];
         }
 
-        if (ch != quote || (offset + 1 < end && chars[offset + 1] == '#')) {
+        if (ch != quote
+                || (offset + 1 < end && (ch = chars[offset + 1]) != '$' && ch != '.' && ch != '@')
+        ) {
             return false;
         }
 
