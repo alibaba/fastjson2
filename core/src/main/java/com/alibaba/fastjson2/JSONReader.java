@@ -3852,6 +3852,8 @@ public abstract class JSONReader
         }
     }
 
+    protected static final long MASK_DISABLE_REFERENCE_DETECT = 1L << 33;
+
     public enum Feature {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
@@ -3974,7 +3976,12 @@ public abstract class JSONReader
         /**
          * @since 2.0.53
          */
-        UseDoubleForDecimals(1L << 32L);
+        UseDoubleForDecimals(1L << 32L),
+
+        /**
+         * @since 2.0.56
+         */
+        DisableReferenceDetect(MASK_DISABLE_REFERENCE_DETECT);
 
         public final long mask;
 

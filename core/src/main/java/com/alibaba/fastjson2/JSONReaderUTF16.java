@@ -155,17 +155,18 @@ final class JSONReaderUTF16
         return bytes;
     }
 
-    @Override
-    public boolean isReference() {
-        // should be codeSize <= FreqInlineSize 325
+    public final boolean isReference() {
+        if ((context.features & MASK_DISABLE_REFERENCE_DETECT) != 0) {
+            return false;
+        }
+        // should be codeSize <= FreqInlineSize 325, current is 276
         final char[] chars = this.chars;
         char ch = this.ch;
-        int offset = this.offset;
-
         if (ch != '{') {
             return false;
         }
 
+        int offset = this.offset, end = this.end;
         if (offset == end) {
             return false;
         }
@@ -180,20 +181,21 @@ final class JSONReaderUTF16
         }
 
         char quote = ch;
-        if (quote != '"' && quote != '\'' || this.offset + 5 >= end) {
-            return false;
-        }
-
-        if (chars[offset + 1] != '$'
+        if (offset + 6 >= end
+                || chars[offset + 1] != '$'
                 || chars[offset + 2] != 'r'
                 || chars[offset + 3] != 'e'
                 || chars[offset + 4] != 'f'
                 || chars[offset + 5] != quote
-                || offset + 6 >= end
         ) {
             return false;
         }
 
+        return isReference0(chars, offset, end, quote);
+    }
+
+    private boolean isReference0(char[] chars, int offset, int end, char quote) {
+        char ch;
         offset += 6;
         ch = chars[offset];
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -217,7 +219,9 @@ final class JSONReaderUTF16
             ch = chars[offset];
         }
 
-        if (ch != quote || (offset + 1 < end && chars[offset + 1] == '#')) {
+        if (ch != quote
+                || (offset + 1 < end && (ch = chars[offset + 1]) != '$' && ch != '.' && ch != '@')
+        ) {
             return false;
         }
 

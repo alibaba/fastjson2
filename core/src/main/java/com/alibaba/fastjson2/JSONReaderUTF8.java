@@ -17,6 +17,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 class JSONReaderUTF8
         extends JSONReader {
+    static final int REF = BIG_ENDIAN ? 0x24726566 : 0x66657224;
+
     protected final byte[] bytes;
     protected final int length;
     protected final int start;
@@ -4950,22 +4952,24 @@ class JSONReaderUTF8
     }
 
     @Override
-    public boolean isReference() {
-        // should be codeSize <= FreqInlineSize 325
+    public final boolean isReference() {
+        // should be codeSize <= FreqInlineSize 325, current : 284
+        if ((context.features & MASK_DISABLE_REFERENCE_DETECT) != 0) {
+            return false;
+        }
         final byte[] bytes = this.bytes;
         int ch = this.ch;
-        int offset = this.offset;
-
         if (ch != '{') {
             return false;
         }
 
+        int offset = this.offset, end = this.end;
         if (offset == end) {
             return false;
         }
 
         ch = bytes[offset];
-        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
             if (offset >= end) {
                 return false;
@@ -4973,23 +4977,23 @@ class JSONReaderUTF8
             ch = bytes[offset];
         }
 
-        int quote = ch;
-        if ((quote != '"' && quote != '\'')
-                || this.offset + 5 >= end
-                || (bytes[offset + 1] != '$'
-                || bytes[offset + 2] != 'r'
-                || bytes[offset + 3] != 'e'
-                || bytes[offset + 4] != 'f'
-                || bytes[offset + 5] != quote
-                || offset + 6 >= end)
+        if (offset + 6 >= end
+                || bytes[offset + 5] != ch
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1) != REF
         ) {
             return false;
         }
 
+        return isReference0(bytes, offset, end, ch);
+    }
+
+    private boolean isReference0(byte[] bytes, int offset, int end, int quote) {
+        int ch;
         offset += 6;
         ch = bytes[offset];
         while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            if (++offset >= end) {
+            offset++;
+            if (offset >= end) {
                 return false;
             }
             ch = bytes[offset];
@@ -5001,13 +5005,16 @@ class JSONReaderUTF8
 
         ch = bytes[++offset];
         while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            if (++offset >= end) {
+            offset++;
+            if (offset >= end) {
                 return false;
             }
             ch = bytes[offset];
         }
 
-        if (ch != quote || (offset + 1 < end && bytes[offset + 1] == '#')) {
+        if (ch != quote
+                || (offset + 1 < end && (ch = bytes[offset + 1]) != '$' && ch != '.' && ch != '@')
+        ) {
             return false;
         }
 
