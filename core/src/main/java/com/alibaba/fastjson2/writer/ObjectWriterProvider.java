@@ -634,6 +634,11 @@ public class ObjectWriterProvider {
         ) {
             fieldInfo.writeUsing = ObjectWriterImplToString.class;
         }
+
+        Class<?> contentAs = jsonField.contentAs();
+        if (contentAs != Void.class) {
+            fieldInfo.contentAs = contentAs;
+        }
     }
 
     private void processJSONField1x(FieldInfo fieldInfo, Annotation annotation) {

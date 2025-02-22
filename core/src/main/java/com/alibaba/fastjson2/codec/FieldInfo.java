@@ -20,6 +20,7 @@ public class FieldInfo {
     public static final long DISABLE_REFERENCE_DETECT = 1L << 58;
     public static final long BACKR_EFERENCE = 1L << 61;
     public static final long RECORD = 1L << 62;
+    public static final long CONTENT_AS = 1L << 63;
 
     public String fieldName;
     public String format;
@@ -43,6 +44,11 @@ public class FieldInfo {
      */
     public String arrayToMapKey;
     public Class<?> arrayToMapDuplicateHandler;
+
+    /**
+     * @since 2.0.56
+     */
+    public Class<?> contentAs;
 
     public ObjectReader getInitReader() {
         Class<?> calzz = readUsing;
@@ -94,5 +100,6 @@ public class FieldInfo {
 
         arrayToMapKey = null;
         arrayToMapDuplicateHandler = null;
+        contentAs = null;
     }
 }
