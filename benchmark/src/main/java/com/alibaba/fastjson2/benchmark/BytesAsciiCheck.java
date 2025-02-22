@@ -95,17 +95,17 @@ public class BytesAsciiCheck {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.indexOfSlash(bytes, 0, bytes.length));
     }
 
-//    @Benchmark
+    @Benchmark
     public void indexOfSlashV(Blackhole bh) throws Throwable {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.indexOfSlashV(bytes, 0, bytes.length));
     }
 
-//    @Benchmark
+    @Benchmark
     public void indexOfChar(Blackhole bh) throws Throwable {
         bh.consume(indexOfChar(bytes, '\'', 0, bytes.length));
     }
 
-//    @Benchmark
+    @Benchmark
     public void indexOfString(Blackhole bh) throws Throwable {
         bh.consume(str.indexOf('\\'));
     }
