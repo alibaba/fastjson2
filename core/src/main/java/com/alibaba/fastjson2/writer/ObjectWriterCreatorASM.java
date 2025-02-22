@@ -878,10 +878,7 @@ public class ObjectWriterCreatorASM
 
                 if (group.start) {
                     // bytes[off++] = BC_OBJECT;
-                    mw.aload(BYTES);
-                    mw.iload(OFFSET);
-                    mw.visitLdcInsn(BC_OBJECT);
-                    mw.bastore();
+                    gwWriteByte(mw, BYTES, OFFSET, BC_OBJECT);
                     mw.visitIincInsn(OFFSET, 1);
                 }
                 for (FieldWriterRecord item : group.fieldWriters) {
@@ -902,10 +899,7 @@ public class ObjectWriterCreatorASM
                 }
 
                 if (group.end) {
-                    mw.aload(BYTES);
-                    mw.iload(OFFSET);
-                    mw.visitLdcInsn(BC_OBJECT_END);
-                    mw.bastore();
+                    gwWriteByte(mw, BYTES, OFFSET, BC_OBJECT_END);
                 }
 
                 mw.aload(JSON_WRITER);
@@ -984,155 +978,22 @@ public class ObjectWriterCreatorASM
         }
 
         byte[] name = fieldWriter.nameJSONB;
-        switch (name.length) {
-            case 3: {
-                /*
-                 * IOUtils.putShortUnaligned(bytes, offset, IOUtils.getIntUnaligned(name, 0));
-                 */
-                int nameInt = IOUtils.getShortUnaligned(name, 0);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(nameInt);
-                mw.invokestatic(TYPE_IO_UTILS, "putShortUnaligned", "([BIS)V");
-
-                // bytes[offset + 2] = name[4];
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(2);
-                mw.iadd();
-                mw.visitLdcInsn(name[2]);
-                mw.bastore();
-
-                /*
-                 * offset += 3;
-                 */
-                mw.visitIincInsn(OFFSET, 3);
-                break;
-            }
-            case 4: {
-                int nameInt = IOUtils.getIntUnaligned(name, 0);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(nameInt);
-                mw.invokestatic(TYPE_IO_UTILS, "putIntUnaligned", "([BII)V");
-
-                /*
-                 * offset += 4;
-                 */
-                mw.visitIincInsn(OFFSET, 4);
-                break;
-            }
-            case 5: {
-                /*
-                 * IOUtils.putShortUnaligned(bytes, offset, IOUtils.getIntUnaligned(name, 0));
-                 */
-                int nameInt = IOUtils.getIntUnaligned(name, 0);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(nameInt);
-                mw.invokestatic(TYPE_IO_UTILS, "putIntUnaligned", "([BII)V");
-
-                // bytes[offset + 4] = name[4];
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(4);
-                mw.iadd();
-                mw.visitLdcInsn(name[4]);
-                mw.bastore();
-
-                /*
-                 * offset += 5;
-                 */
-                mw.visitIincInsn(OFFSET, 5);
-                break;
-            }
-            case 6: {
-                /*
-                 * IOUtils.putShortUnaligned(bytes, offset, IOUtils.getIntUnaligned(name, 0));
-                 */
-                int nameInt = IOUtils.getIntUnaligned(name, 0);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(nameInt);
-                mw.invokestatic(TYPE_IO_UTILS, "putIntUnaligned", "([BII)V");
-
-                /*
-                 * IOUtils.putShortUnaligned(bytes, offset + 4, IOUtils.getShortUnaligned(name, 4));
-                 */
-                short nameInt1 = IOUtils.getShortUnaligned(name, 4);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(4);
-                mw.iadd();
-                mw.visitLdcInsn(nameInt1);
-                mw.invokestatic(TYPE_IO_UTILS, "putShortUnaligned", "([BIS)V");
-
-                /*
-                 * offset += 6;
-                 */
-                mw.visitIincInsn(OFFSET, 6);
-                break;
-            }
-            case 7: {
-                /*
-                 * IOUtils.putShortUnaligned(bytes, offset, IOUtils.getIntUnaligned(name, 0));
-                 */
-                int nameInt = IOUtils.getIntUnaligned(name, 0);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(nameInt);
-                mw.invokestatic(TYPE_IO_UTILS, "putIntUnaligned", "([BII)V");
-
-                /*
-                 * IOUtils.putShortUnaligned(bytes, offset + 4, IOUtils.getShortUnaligned(name, 4));
-                 */
-                short nameInt1 = IOUtils.getShortUnaligned(name, 4);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(4);
-                mw.iadd();
-                mw.visitLdcInsn(nameInt1);
-                mw.invokestatic(TYPE_IO_UTILS, "putShortUnaligned", "([BIS)V");
-
-                // bytes[offset + 6] = name[6];
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(6);
-                mw.iadd();
-                mw.visitLdcInsn(name[6]);
-                mw.bastore();
-
-                /*
-                 * offset += 7;
-                 */
-                mw.visitIincInsn(OFFSET, 7);
-                break;
-            }
-            case 8: {
-                long nameInt = IOUtils.getLongUnaligned(name, 0);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.visitLdcInsn(nameInt);
-                mw.invokestatic(TYPE_IO_UTILS, "putLongUnaligned", "([BIJ)V");
-
-                /*
-                 * offset += 4;
-                 */
-                mw.visitIincInsn(OFFSET, 8);
-                break;
-            }
-            default: {
-                /*
-                 * offset = fieldWriterN.writeFieldNameJSONB(bytes, offset);
-                 */
-                mw.aload(THIS);
-                mw.getfield(classNameType, fieldWriter(ordinal), DESC_FIELD_WRITER);
-                mw.aload(BYTES);
-                mw.iload(OFFSET);
-                mw.invokevirtual(TYPE_FIELD_WRITER, "writeFieldNameJSONB", "([BI)I");
-                mw.istore(OFFSET);
-            }
+        int i = 0;
+        for (; i + 8 <= name.length; i += 8) {
+            gwWriteLong(mw, BYTES, OFFSET, name, i);
         }
+        if (i + 4 <= name.length) {
+            gwWriteInt(mw, BYTES, OFFSET, name, i);
+            i += 4;
+        }
+        if (i + 2 <= name.length) {
+            gwWriteShort(mw, BYTES, OFFSET, name, i);
+            i += 2;
+        }
+        if (i + 1 <= name.length) {
+            gwWriteByte(mw, BYTES, OFFSET, name, i);
+        }
+        mw.visitIincInsn(OFFSET, name.length);
         mw.goto_(L_NAME_END);
 
         mw.visitLabel(L0);
@@ -1148,6 +1009,60 @@ public class ObjectWriterCreatorASM
         mw.istore(OFFSET);
 
         mw.visitLabel(L_NAME_END);
+    }
+
+    private static void gwWriteByte(MethodWriter mw, int BYTES, int OFFSET, byte value) {
+        mw.aload(BYTES);
+        mw.iload(OFFSET);
+        mw.iconst_n(value);
+        mw.bastore();
+    }
+
+    private static void gwWriteByte(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {
+        mw.aload(BYTES);
+        mw.iload(OFFSET);
+        if (offset != 0) {
+            mw.iconst_n(offset);
+            mw.iadd();
+        }
+        mw.iconst_n(name[offset]);
+        mw.bastore();
+    }
+
+    private static void gwWriteShort(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {
+        short nameInt = IOUtils.getShortUnaligned(name, offset);
+        mw.aload(BYTES);
+        mw.iload(OFFSET);
+        if (offset != 0) {
+            mw.iconst_n(offset);
+            mw.iadd();
+        }
+        mw.visitLdcInsn(nameInt);
+        mw.invokestatic(TYPE_IO_UTILS, "putShortUnaligned", "([BIS)V");
+    }
+
+    private static void gwWriteInt(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {
+        int nameInt = IOUtils.getIntUnaligned(name, offset);
+        mw.aload(BYTES);
+        mw.iload(OFFSET);
+        if (offset != 0) {
+            mw.iconst_n(offset);
+            mw.iadd();
+        }
+        mw.visitLdcInsn(nameInt);
+        mw.invokestatic(TYPE_IO_UTILS, "putIntUnaligned", "([BII)V");
+    }
+
+    private static void gwWriteLong(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {
+        long nameInt = IOUtils.getLongUnaligned(name, offset);
+        mw.aload(BYTES);
+        mw.iload(OFFSET);
+        if (offset != 0) {
+            mw.iconst_n(offset);
+            mw.iadd();
+        }
+        mw.visitLdcInsn(nameInt);
+        mw.invokestatic(TYPE_IO_UTILS, "putLongUnaligned", "([BIJ)V");
     }
 
     private void writeFieldValueDirectJSONB(
@@ -1520,36 +1435,6 @@ public class ObjectWriterCreatorASM
         }
     }
 
-    public boolean supportDirectdWriteArrayMappingJSONB(List<FieldWriter> fieldWriters) {
-        for (FieldWriter fieldWriter : fieldWriters) {
-            if (fieldWriter.initObjectWriter != null) {
-                return false;
-            }
-
-            Class fieldClass = fieldWriter.fieldClass;
-            if (fieldClass == boolean.class || fieldClass == Boolean.class
-                    || fieldClass == int.class || fieldClass == Integer.class
-                    || fieldClass == long.class || fieldClass == Long.class
-                    || fieldClass == float.class || fieldClass == Float.class
-                    || fieldClass == double.class || fieldClass == Double.class
-                    || fieldClass == String.class
-                    || fieldWriter instanceof FieldWriterEnum
-            ) {
-                continue;
-            }
-            if (Collection.class.isAssignableFrom(fieldClass)) {
-                Class itemClass = fieldWriter.getItemClass();
-                if (itemClass == String.class || itemClass == Long.class) {
-                    continue;
-                }
-            }
-
-            return false;
-        }
-
-        return true;
-    }
-
     private void genMethodWriteArrayMappingJSONB(
             ObjectWriterProvider provider,
             Class objectType,
@@ -1652,11 +1537,7 @@ public class ObjectWriterCreatorASM
                     if (size <= 15) {
                         mw.invokevirtual(TYPE_JSON_WRITER, "startArray" + size, "()V");
                     } else {
-                        if (size >= 128) {
-                            mw.sipush(size);
-                        } else {
-                            mw.bipush(size);
-                        }
+                        mw.iconst_n(size);
                         mw.invokevirtual(TYPE_JSON_WRITER, "startArray", "(I)V");
                     }
                 }
@@ -4338,33 +4219,7 @@ public class ObjectWriterCreatorASM
                 mw.dup();
 
                 mw.getfield(TYPE_OBJECT_WRITER_ADAPTER, "fieldWriterArray", DESC_FIELD_WRITER_ARRAY);
-                switch (i) {
-                    case 0:
-                        mw.iconst_0();
-                        break;
-                    case 1:
-                        mw.iconst_1();
-                        break;
-                    case 2:
-                        mw.iconst_2();
-                        break;
-                    case 3:
-                        mw.iconst_3();
-                        break;
-                    case 4:
-                        mw.iconst_4();
-                        break;
-                    case 5:
-                        mw.iconst_5();
-                        break;
-                    default:
-                        if (i >= 128) {
-                            mw.sipush(i);
-                        } else {
-                            mw.bipush(i);
-                        }
-                        break;
-                }
+                mw.iconst_n(i);
                 mw.aaload(); // fieldWriterArray
                 mw.checkcast(TYPE_FIELD_WRITER);
                 mw.putfield(classNameType, fieldWriter(i), DESC_FIELD_WRITER);

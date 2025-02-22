@@ -846,33 +846,7 @@ public class ObjectReaderCreatorASM
         for (int i = 0; i < fieldReaderArray.length; i++) {
             mw.aload(THIS);
             mw.aload(FIELD_READER_ARRAY);
-            switch (i) {
-                case 0:
-                    mw.iconst_0();
-                    break;
-                case 1:
-                    mw.iconst_1();
-                    break;
-                case 2:
-                    mw.iconst_2();
-                    break;
-                case 3:
-                    mw.iconst_3();
-                    break;
-                case 4:
-                    mw.iconst_4();
-                    break;
-                case 5:
-                    mw.iconst_5();
-                    break;
-                default:
-                    if (i >= 128) {
-                        mw.sipush(i);
-                    } else {
-                        mw.bipush(i);
-                    }
-                    break;
-            }
+            mw.iconst_n(i);
             mw.aaload();
             mw.putfield(classNameType, fieldReader(i), DESC_FIELD_READER);
         }

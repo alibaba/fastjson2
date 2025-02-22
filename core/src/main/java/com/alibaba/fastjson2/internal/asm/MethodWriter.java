@@ -194,6 +194,41 @@ public final class MethodWriter {
         visitInsn(Opcodes.ICONST_5);
     }
 
+    public void iconst_n(int n) {
+        switch (n) {
+            case 0:
+                iconst_0();
+                break;
+            case 1:
+                iconst_1();
+                break;
+            case 2:
+                iconst_2();
+                break;
+            case 3:
+                iconst_3();
+                break;
+            case 4:
+                iconst_4();
+                break;
+            case 5:
+                iconst_5();
+                break;
+            case -1:
+                iconst_m1();
+                break;
+            default:
+                if (n >= -128 && n < 127) {
+                    bipush(n);
+                } else if (n >= -32768 && n < 32767) {
+                    sipush(n);
+                } else {
+                    visitLdcInsn(n);
+                }
+                break;
+        }
+    }
+
     public void iconst_m1() {
         visitInsn(Opcodes.ICONST_M1);
     }
