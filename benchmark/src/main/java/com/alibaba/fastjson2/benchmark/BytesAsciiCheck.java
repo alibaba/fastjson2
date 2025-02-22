@@ -65,7 +65,7 @@ public class BytesAsciiCheck {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void direct(Blackhole bh) throws Throwable {
         bh.consume(hasNegatives(bytes, 0, bytes.length));
     }
@@ -133,7 +133,7 @@ public class BytesAsciiCheck {
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
-                .threads(1)
+                .threads(16)
                 .forks(1)
                 .build();
         new Runner(options).run();
