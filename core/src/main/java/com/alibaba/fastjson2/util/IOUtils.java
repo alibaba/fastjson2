@@ -1499,7 +1499,7 @@ public class IOUtils {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, quote, i, max);
+        return indexOfChar(value, quote, i, max);
     }
 
     public static int indexOfDoubleQuote(byte[] value, int fromIndex, int max) {
@@ -1521,7 +1521,7 @@ public class IOUtils {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, '"', i, max);
+        return indexOfChar(value, '"', i, max);
     }
 
     public static int indexOfLineSeparator(byte[] value, int fromIndex, int max) {
@@ -1543,7 +1543,7 @@ public class IOUtils {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, '\n', i, max);
+        return indexOfChar(value, '\n', i, max);
     }
 
     public static int indexOfSlash(byte[] value, int fromIndex, int max) {
@@ -1565,10 +1565,19 @@ public class IOUtils {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, '\\', i, max);
+        return indexOfChar(value, '\\', i, max);
     }
 
-    private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
+    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
+        for (int i = fromIndex; i < max; i++) {
+            if (value[i] == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int indexOfChar(char[] value, int ch, int fromIndex, int max) {
         for (int i = fromIndex; i < max; i++) {
             if (value[i] == ch) {
                 return i;

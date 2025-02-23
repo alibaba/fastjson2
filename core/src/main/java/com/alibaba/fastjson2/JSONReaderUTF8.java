@@ -5625,7 +5625,7 @@ class JSONReaderUTF8
 
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
-        final int offset = this.offset;
+        int offset = this.offset, end = this.end;
         char quote = this.ch;
         if (quote == '"' || quote == '\'') {
             if (!this.context.formatComplex) {
@@ -5640,42 +5640,60 @@ class JSONReaderUTF8
                         && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
                         && ((hms = hms(bytes, offset + 11))) != -1L
                 ) {
-                    int year = yy + ((int) ymd & 0xFF);
-                    int month = (int) (ymd >> 24) & 0xFF;
-                    int dom = (int) (ymd >> 48) & 0xFF;
-                    int hour = (int) hms & 0xFF;
-                    int minute = (int) (hms >> 24) & 0xFF;
-                    int second = (int) (hms >> 48) & 0xFF;
-
-                    LocalDate localDate;
-                    try {
-                        localDate = year == 0 && month == 0 && dom == 0
-                                ? null
-                                : LocalDate.of(year, month, dom);
-                    } catch (DateTimeException ex) {
-                        throw new JSONException(info("read date error"), ex);
+                    int nanos = 0, nanoSize = 0;
+                    offset += 19;
+                    int ch = bytes[offset++];
+                    if (ch == '.') {
+                        ch = bytes[offset++];
                     }
-
-                    int nanoSize = -1;
-                    int len = 0;
-                    for (int start = offset + 19, i = start, end = offset + 31; i < end && i < this.end && i < bytes.length; ++i) {
-                        if (bytes[i] == quote && bytes[i - 1] == 'Z') {
-                            nanoSize = i - start - 2;
-                            len = i - offset + 1;
+                    while (ch >= '0' && ch <= '9') {
+                        nanos = nanos * 10 + (ch - '0');
+                        nanoSize++;
+                        if (offset < end) {
+                            ch = bytes[offset++];
+                        } else {
                             break;
                         }
                     }
-                    if (nanoSize != -1 || len == 21) {
-                        int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 20);
-                        LocalTime localTime = LocalTime.of(hour, minute, second, nano);
-                        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
-                        OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                        this.offset += len;
-                        next();
-                        if (comma = (this.ch == ',')) {
-                            next();
+                    if (nanoSize != 0) {
+                        nanos = DateUtils.nanos(nanos, nanoSize);
+                    }
+                    ZoneOffset zoneOffset = ZoneOffset.UTC;
+                    if (ch == 'Z') {
+                        ch = bytes[offset++];
+                    } else if (ch != quote) {
+                        int quoteIndex = IOUtils.indexOfChar(bytes, '"', offset, end);
+                        if (quoteIndex != -1) {
+                            zoneOffset = DateUtils.zoneOffset(bytes, offset - 1, quoteIndex - offset + 1);
+                            offset = quoteIndex + 1;
+                            ch = quote;
                         }
-                        return oft;
+                    }
+                    if (ch == quote) {
+                        ch = offset >= end ? EOI : bytes[offset++];
+                        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                            ch = offset == end ? EOI : bytes[offset++];
+                        }
+                        if (comma = (ch == ',')) {
+                            ch = offset == end ? EOI : (char) bytes[offset++];
+                            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                                ch = offset == end ? EOI : bytes[offset++];
+                            }
+                        }
+                        if (ch < 0) {
+                            char_utf8(ch, offset);
+                        }
+                        this.offset = offset;
+                        this.ch = (char) ch;
+                        return OffsetDateTime.of(
+                                yy + ((int) ymd & 0xFF),
+                                (int) (ymd >> 24) & 0xFF,
+                                (int) (ymd >> 48) & 0xFF,
+                                (int) hms & 0xFF,
+                                (int) (hms >> 24) & 0xFF,
+                                (int) (hms >> 48) & 0xFF,
+                                nanos,
+                                zoneOffset);
                     }
                 }
             }

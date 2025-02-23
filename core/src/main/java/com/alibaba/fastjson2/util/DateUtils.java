@@ -9008,6 +9008,18 @@ public class DateUtils {
         return v;
     }
 
+    public static ZoneOffset zoneOffset(byte[] bytes, int start, int len) {
+        return ZoneOffset.of(new String(bytes, start, len));
+    }
+
+    public static ZoneOffset zoneOffset(char[] bytes, int start, int len) {
+        return ZoneOffset.of(new String(bytes, start, len));
+    }
+
+    public static int nanos(int value, int nanoSize) {
+        return value * POWERS[(9 - nanoSize) & 0xF];
+    }
+
     private static final int[] POWERS = {
             1,
             10,
