@@ -1070,7 +1070,6 @@ public abstract class JSONReader
 
                 values[size++] = readInt64Value();
             }
-            nextIfComma();
 
             long[] array;
             if (size == values.length) {
@@ -1912,7 +1911,6 @@ public abstract class JSONReader
 
                 values[size++] = readString();
             }
-            nextIfComma();
 
             if (values.length == size) {
                 return values;

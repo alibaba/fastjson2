@@ -1850,10 +1850,6 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(end_);
 
-        mw.aload(JSON_READER);
-        mw.invokevirtual(TYPE_JSON_READER, "nextIfComma", "()Z");
-        mw.pop();
-
         mw.aload(OBJECT);
         mw.areturn();
 
@@ -3067,12 +3063,6 @@ public class ObjectReaderCreatorASM
             }
 
             mw.visitLabel(endObject_);
-
-            if (!jsonb) {
-                mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "nextIfComma", "()Z");
-                mw.pop();
-            }
         }
 
         if (field != null) {
@@ -3835,23 +3825,11 @@ public class ObjectReaderCreatorASM
         mw.invokeinterface("java/util/List", "add", "(Ljava/lang/Object;)Z");
         mw.pop();
 
-        if (!jsonb) {
-            mw.aload(JSON_READER);
-            mw.invokevirtual(TYPE_JSON_READER, "nextIfComma", "()Z");
-            mw.pop();
-        }
-
         mw.visitLabel(for_inc_j_);
         mw.visitIincInsn(J, 1);
         mw.goto_(for_start_j_);
 
         mw.visitLabel(for_end_j_);
-
-        if (!jsonb) {
-            mw.aload(JSON_READER);
-            mw.invokevirtual(TYPE_JSON_READER, "nextIfComma", "()Z");
-            mw.pop();
-        }
 
         mw.visitLabel(loadList_);
         mw.aload(LIST);
