@@ -1950,7 +1950,7 @@ public class ObjectReaderCreatorASM
                         break;
                     case 4: {
                         mw.aload(JSON_READER);
-                        mw.visitLdcInsn(fieldName[3]);
+                        mw.iconst_n(fieldName[3]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match4", "(B)Z");
                         break;
                     }
@@ -1965,7 +1965,7 @@ public class ObjectReaderCreatorASM
                             name1 &= 0xFFFF;
                         }
                         mw.aload(JSON_READER);
-                        mw.visitLdcInsn(name1);
+                        mw.iconst_n(name1);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match5", "(I)Z");
                         break;
                     }
@@ -1980,22 +1980,22 @@ public class ObjectReaderCreatorASM
                             name1 &= 0xFFFFFF;
                         }
                         mw.aload(JSON_READER);
-                        mw.visitLdcInsn(name1);
+                        mw.iconst_n(name1);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match6", "(I)Z");
                         break;
                     }
                     case 7: {
                         int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         mw.aload(JSON_READER);
-                        mw.visitLdcInsn(name1);
+                        mw.iconst_n(name1);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match7", "(I)Z");
                         break;
                     }
                     case 8: {
                         int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         mw.aload(JSON_READER);
-                        mw.visitLdcInsn(name1);
-                        mw.visitLdcInsn(fieldName[7]);
+                        mw.iconst_n(name1);
+                        mw.iconst_n(fieldName[7]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match8", "(IB)Z");
                         break;
                     }
@@ -2037,7 +2037,7 @@ public class ObjectReaderCreatorASM
                         long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
-                        mw.visitLdcInsn(fieldName[11]);
+                        mw.iconst_n(fieldName[11]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match12", "(JB)Z");
                         break;
                     }
@@ -2054,7 +2054,7 @@ public class ObjectReaderCreatorASM
                         }
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
-                        mw.visitLdcInsn(name2);
+                        mw.iconst_n(name2);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match13", "(JI)Z");
                         break;
                     }
@@ -2071,7 +2071,7 @@ public class ObjectReaderCreatorASM
                         }
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
-                        mw.visitLdcInsn(name2);
+                        mw.iconst_n(name2);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match14", "(JI)Z");
                         break;
                     }
@@ -2080,7 +2080,7 @@ public class ObjectReaderCreatorASM
                         int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
-                        mw.visitLdcInsn(name2);
+                        mw.iconst_n(name2);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match15", "(JI)Z");
                         break;
                     }
@@ -2089,7 +2089,7 @@ public class ObjectReaderCreatorASM
                         int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
-                        mw.visitLdcInsn(name2);
+                        mw.iconst_n(name2);
                         mw.visitLdcInsn(fieldName[15]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match16", "(JIB)Z");
                         break;
@@ -2142,7 +2142,7 @@ public class ObjectReaderCreatorASM
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
-                        mw.visitLdcInsn(fieldName[19]);
+                        mw.iconst_n(fieldName[19]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match20", "(JJB)Z");
                         break;
                     }
@@ -2161,7 +2161,7 @@ public class ObjectReaderCreatorASM
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
-                        mw.visitLdcInsn(name3);
+                        mw.iconst_n(name3);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match21", "(JJI)Z");
                         break;
                     }
@@ -2180,7 +2180,7 @@ public class ObjectReaderCreatorASM
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
-                        mw.visitLdcInsn(name3);
+                        mw.iconst_n(name3);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match22", "(JJI)Z");
                         break;
                     }
@@ -2191,7 +2191,7 @@ public class ObjectReaderCreatorASM
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
-                        mw.visitLdcInsn(name3);
+                        mw.iconst_n(name3);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match23", "(JJI)Z");
                         break;
                     }
@@ -2202,7 +2202,7 @@ public class ObjectReaderCreatorASM
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
-                        mw.visitLdcInsn(name3);
+                        mw.iconst_n(name3);
                         mw.visitLdcInsn(fieldName[23]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match24", "(JJIB)Z");
                         break;
@@ -2284,7 +2284,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
-                        mw.visitLdcInsn(name4);
+                        mw.iconst_n(name4);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match29", "(JJJI)Z");
                         break;
                     }
@@ -2305,7 +2305,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
-                        mw.visitLdcInsn(name4);
+                        mw.iconst_n(name4);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match30", "(JJJI)Z");
                         break;
                     }
@@ -2318,7 +2318,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
-                        mw.visitLdcInsn(name4);
+                        mw.iconst_n(name4);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match31", "(JJJI)Z");
                         break;
                     }
@@ -2332,7 +2332,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
                         mw.visitLdcInsn(name4);
-                        mw.visitLdcInsn(fieldName[31]);
+                        mw.iconst_n(fieldName[31]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match32", "(JJJIB)Z");
                         break;
                     }
@@ -2400,7 +2400,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
                         mw.visitLdcInsn(name4);
-                        mw.visitLdcInsn(fieldName[35]);
+                        mw.iconst_n(fieldName[35]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match36", "(JJJJB)Z");
                         break;
                     }
@@ -2423,7 +2423,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
                         mw.visitLdcInsn(name4);
-                        mw.visitLdcInsn(name5);
+                        mw.iconst_n(name5);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match37", "(JJJJI)Z");
                         break;
                     }
@@ -2446,7 +2446,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
                         mw.visitLdcInsn(name4);
-                        mw.visitLdcInsn(name5);
+                        mw.iconst_n(name5);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match38", "(JJJJI)Z");
                         break;
                     }
@@ -2462,7 +2462,7 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
                         mw.visitLdcInsn(name4);
-                        mw.visitLdcInsn(name5);
+                        mw.iconst_n(name5);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match39", "(JJJJI)Z");
                         break;
                     }
@@ -2478,8 +2478,8 @@ public class ObjectReaderCreatorASM
                         mw.visitLdcInsn(name2);
                         mw.visitLdcInsn(name3);
                         mw.visitLdcInsn(name4);
-                        mw.visitLdcInsn(name5);
-                        mw.visitLdcInsn(fieldName[39]);
+                        mw.iconst_n(name5);
+                        mw.iconst_n(fieldName[39]);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match40", "(JJJJIB)Z");
                         break;
                     }
