@@ -945,53 +945,12 @@ public class ObjectReaderCreatorASM
                 mw.invokevirtual(TYPE_JSON_READER, "isSupportBeanArray", "()Z");
                 mw.ifeq(endArray_);
 
-                genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
-                mw.astore(OBJECT);
-
-                Label fieldEnd_ = new Label(), entryCountMatch_ = new Label();
-
-                mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "startArray", "()I");
-                mw.dup();
-                mw.istore(ENTRY_CNT);
-                mw.visitLdcInsn(fieldReaderArray.length);
-                mw.if_icmpne(entryCountMatch_);
-
-                for (int i = 0; i < fieldReaderArray.length; ++i) {
-                    FieldReader fieldReader = fieldReaderArray[i];
-                    varIndex = genReadFieldValue(
-                            context,
-                            fieldReader,
-                            fieldBased,
-                            classNameType,
-                            mw,
-                            THIS,
-                            JSON_READER,
-                            OBJECT,
-                            FEATURES,
-                            varIndex,
-                            variants,
-                            ITEM_CNT,
-                            J,
-                            i,
-                            true,   // JSONB
-                            true, // arrayMapping
-                            TYPE_OBJECT
-                    );
-                }
-
-                mw.goto_(fieldEnd_);
-
-                mw.visitLabel(entryCountMatch_);
                 mw.aload(THIS);
                 mw.aload(JSON_READER);
-                mw.aload(OBJECT);
-                mw.iload(ENTRY_CNT);
-                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "readArrayMappingJSONBObject0", METHOD_DESC_READ_ARRAY_MAPPING_JSONB_OBJECT0);
-
-                mw.visitLabel(fieldEnd_);
-
-                mw.aload(OBJECT);
+                mw.aload(FIELD_TYPE);
+                mw.aload(FIELD_NAME);
+                mw.lload(FEATURES);
+                mw.invokevirtual(classNameType, "readArrayMappingObject", METHOD_DESC_READ_OBJECT);
                 mw.areturn();
 
                 mw.visitLabel(endArray_);

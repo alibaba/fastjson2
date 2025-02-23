@@ -254,6 +254,10 @@ public class ObjectReaderAdapter<T>
 
     @Override
     public T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.jsonb) {
+            return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         if (!serializable) {
             jsonReader.errorOnNoneSerializable(objectClass);
         }
