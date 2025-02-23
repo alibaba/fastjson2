@@ -1070,14 +1070,7 @@ public abstract class JSONReader
 
                 values[size++] = readInt64Value();
             }
-
-            long[] array;
-            if (size == values.length) {
-                array = values;
-            } else {
-                array = Arrays.copyOf(values, size);
-            }
-            return array;
+            return size == values.length ? values : Arrays.copyOf(values, size);
         }
 
         if (isString()) {
@@ -1086,7 +1079,7 @@ public abstract class JSONReader
                 return null;
             }
 
-            throw new JSONException(info("not support input " + str));
+            throw error("not support input ".concat(str));
         }
 
         throw new JSONException(info("TODO"));
