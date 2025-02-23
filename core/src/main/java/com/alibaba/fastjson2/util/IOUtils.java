@@ -909,11 +909,19 @@ public class IOUtils {
     }
 
     private static int mergeInt32(int v1, int v2) {
-        return convEndian(false, PACKED_DIGITS[v2 & 0x7f] | (PACKED_DIGITS[v1 & 0x7f] << 16));
+        int v = PACKED_DIGITS[v2 & 0x7f] | (PACKED_DIGITS[v1 & 0x7f] << 16);
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
     }
 
     private static long mergeInt64(int v1, int v2) {
-        return convEndian(false, PACKED_DIGITS_UTF16[v2 & 0x7f] | ((long) PACKED_DIGITS_UTF16[v1 & 0x7f] << 32));
+        long v = PACKED_DIGITS_UTF16[v2 & 0x7f] | ((long) PACKED_DIGITS_UTF16[v1 & 0x7f] << 32);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
     }
 
     private static int writeInt3(byte[] buf, int off, int val) {
@@ -1268,15 +1276,24 @@ public class IOUtils {
     }
 
     public static void putIntBE(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
+        if (!BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
     public static void putIntLE(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
     public static void putIntLE(char[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
     public static void putShortUnaligned(byte[] buf, int pos, short v) {
@@ -1637,18 +1654,27 @@ public class IOUtils {
     }
 
     public static int getIntBE(byte[] bytes, int offset) {
-        return convEndian(true,
-                UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        int v = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (!BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
     }
 
     public static int getIntLE(byte[] bytes, int offset) {
-        return convEndian(false,
-                UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        int v = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
     }
 
     public static int getIntLE(char[] bytes, int offset) {
-        return convEndian(false,
-                UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+        int v = UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
     }
 
     public static int getIntUnaligned(byte[] bytes, int offset) {
@@ -1660,8 +1686,11 @@ public class IOUtils {
     }
 
     public static long getLongBE(byte[] bytes, int offset) {
-        return convEndian(true,
-                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (!BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
     }
 
     public static long getLongUnaligned(byte[] bytes, int offset) {
@@ -1678,8 +1707,11 @@ public class IOUtils {
     }
 
     public static long getLongLE(char[] bytes, int offset) {
-        return convEndian(false,
-                UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+        long v = UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
     }
 
     public static short hex2(int i) {
@@ -1764,7 +1796,7 @@ public class IOUtils {
         return ((i & 0xF000L) >> 12) | ((i & 0xF00L) << 8) | ((i & 0xF0L) << 28) | ((i & 0xFL) << 48);
     }
 
-    static int convEndian(boolean big, int n) {
+    public static int convEndian(boolean big, int n) {
         return big == BIG_ENDIAN ? n : Integer.reverseBytes(n);
     }
 

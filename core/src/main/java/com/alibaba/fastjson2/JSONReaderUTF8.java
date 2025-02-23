@@ -6567,7 +6567,10 @@ class JSONReaderUTF8
     }
 
     static long parse4Nibbles(byte[] bytes, int offset) {
-        int x = getIntLE(bytes, offset);
+        int x = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            x = Integer.reverseBytes(x);
+        }
         byte[] ns = NIBBLES;
         return ns[x & 0xFF] << 12 | ns[(x >> 8) & 0xFF] << 8 | ns[(x >> 16) & 0xFF] << 4 | ns[(x >> 24) & 0xFF];
     }

@@ -1067,8 +1067,11 @@ class JSONWriterUTF8
             15 = 0b0000_1111 => m = ((i + 6) & 0x10); (m << 1) + (m >> 1) - (m >> 4) => 39 + 0x30 + (i & 0xF) => 'f'
          */
         long m = (i + 0x0606_0606_0606_0606L) & 0x1010_1010_1010_1010L;
-        return convEndian(true,
-                ((m << 1) + (m >> 1) - (m >> 4)) + 0x3030_3030_3030_3030L + i);
+        long v = ((m << 1) + (m >> 1) - (m >> 4)) + 0x3030_3030_3030_3030L + i;
+        if (!BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
     }
 
     /**
