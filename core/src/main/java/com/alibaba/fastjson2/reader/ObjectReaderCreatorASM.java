@@ -1503,44 +1503,12 @@ public class ObjectReaderCreatorASM
                     mw.ifeq(singleItemArray_);
                 }
 
+                mw.aload(THIS);
                 mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "nextIfArrayStart", "()Z");
-
-                genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
-                mw.astore(OBJECT);
-
-                for (int i = 0; i < fieldReaderArray.length; ++i) {
-                    FieldReader fieldReader = fieldReaderArray[i];
-                    varIndex = genReadFieldValue(
-                            context,
-                            fieldReader,
-                            fieldBased,
-                            classNameType,
-                            mw,
-                            THIS,
-                            JSON_READER,
-                            OBJECT,
-                            FEATURES,
-                            varIndex,
-                            variants,
-                            ITEM_CNT,
-                            J,
-                            i,
-                            false, // JSONB
-                            true, // arrayMapping
-                            TYPE_OBJECT
-                    );
-                }
-
-                mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "nextIfArrayEnd", "()Z");
-                mw.pop(); // TODO HANDLE ERROR
-
-                mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "nextIfComma", "()Z");
-                mw.pop();
-
-                mw.aload(OBJECT);
+                mw.aload(FIELD_TYPE);
+                mw.aload(FIELD_NAME);
+                mw.lload(FEATURES);
+                mw.invokevirtual(classNameType, "readArrayMappingObject", METHOD_DESC_READ_OBJECT);
                 mw.areturn();
 
                 mw.visitLabel(singleItemArray_);
