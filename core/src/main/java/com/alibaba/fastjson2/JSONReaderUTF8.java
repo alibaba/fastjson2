@@ -4712,7 +4712,7 @@ class JSONReaderUTF8
                 int upperBound = offset + ((end - offset) & ~7);
                 while (offset < upperBound) {
                     long v = getLongLE(bytes, offset);
-                    if ((v & 0xFF00FF00FF00FF00L) != 0 || JSONReaderUTF8.containsSlashOrQuote(v, byteVectorQuote)) {
+                    if ((v & 0x8080808080808080L) != 0 || JSONReaderUTF8.containsSlashOrQuote(v, byteVectorQuote)) {
                         break;
                     }
 
