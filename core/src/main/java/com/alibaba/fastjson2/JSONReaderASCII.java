@@ -1439,8 +1439,14 @@ final class JSONReaderASCII
                 return readEscaped(bytes, slashIndex, start, end, slashIndex - offset, ch);
             }
 
-            String str = stringValue(
-                    subString(bytes, start, index), context.features);
+            String str = STRING_CREATOR_JDK11 != null
+                    ? STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, index), LATIN1)
+                    : new String(bytes, start, index - start, StandardCharsets.ISO_8859_1);
+            long features = context.features;
+            if ((features & MASK_TRIM_STRING) != 0) {
+                str = str.trim();
+            }
+            str = (features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty() ? null : str;
 
             ch = offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
@@ -1470,10 +1476,10 @@ final class JSONReaderASCII
         return slashIndex;
     }
 
-    private static String subString(byte[] bytes, int start, int offset) {
+    private static String subString(byte[] bytes, int start, int index) {
         return STRING_CREATOR_JDK11 != null
-                        ? STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, offset), LATIN1)
-                        : new String(bytes, start, offset - start, StandardCharsets.ISO_8859_1);
+                        ? STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, index), LATIN1)
+                        : new String(bytes, start, index - start, StandardCharsets.ISO_8859_1);
     }
 
     private String readEscaped(byte[] bytes, int offset, int start, int end, int valueLength, int quote) {

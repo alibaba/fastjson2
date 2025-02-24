@@ -4735,12 +4735,4 @@ public abstract class JSONReader
         }
         return (features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty() ? null : str;
     }
-
-    protected static int firstIntValue(int ch) {
-        return ch >= '0' && ch <= '9'
-                ? '0' - ch
-                : ch == '-' || ch == '+'
-                ? 0
-                : 1;  // or any value > 0
-    }
 }
