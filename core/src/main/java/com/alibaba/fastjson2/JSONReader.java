@@ -4524,6 +4524,10 @@ public abstract class JSONReader
         return new JSONException(info(message));
     }
 
+    final JSONException error(String message, Exception cause) {
+        return new JSONException(info(message), cause);
+    }
+
     final JSONException error(int offset, int ch) {
         throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
     }

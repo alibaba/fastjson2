@@ -5581,11 +5581,11 @@ class JSONReaderUTF8
 
                     LocalDate ldt;
                     try {
-                        ldt = year == 0 && month == 0 && dom == 0
+                        ldt = (year | month | dom) == 0
                                 ? null
                                 : LocalDate.of(year, month, dom);
                     } catch (DateTimeException ex) {
-                        throw new JSONException(info("read date error"), ex);
+                        throw error("read date error", ex);
                     }
 
                     this.offset = offset + 11;
@@ -5596,31 +5596,39 @@ class JSONReaderUTF8
                     return ldt;
                 }
 
-                int nextQuoteOffset = -1;
-                for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
-                    if (bytes[i] == quote) {
-                        nextQuoteOffset = i;
-                    }
-                }
-                if (nextQuoteOffset != -1
-                        && nextQuoteOffset - offset > 10
-                        && bytes[nextQuoteOffset - 6] == '-'
-                        && bytes[nextQuoteOffset - 3] == '-'
-                ) {
-                    int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
-                    int month = IOUtils.digit2(bytes, nextQuoteOffset - 5);
-                    int dayOfMonth = IOUtils.digit2(bytes, nextQuoteOffset - 2);
-                    LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
-                    this.offset = nextQuoteOffset + 1;
-                    next();
-                    if (comma = (this.ch == ',')) {
-                        next();
-                    }
+                LocalDate localDate = readLocalDate0(offset, bytes, quote);
+                if (localDate != null) {
                     return localDate;
                 }
             }
         }
         return super.readLocalDate();
+    }
+
+    private LocalDate readLocalDate0(int offset, byte[] bytes, char quote) {
+        int nextQuoteOffset = -1;
+        for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+            if (bytes[i] == quote) {
+                nextQuoteOffset = i;
+            }
+        }
+        if (nextQuoteOffset != -1
+                && nextQuoteOffset - offset > 10
+                && bytes[nextQuoteOffset - 6] == '-'
+                && bytes[nextQuoteOffset - 3] == '-'
+        ) {
+            int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
+            int month = IOUtils.digit2(bytes, nextQuoteOffset - 5);
+            int dayOfMonth = IOUtils.digit2(bytes, nextQuoteOffset - 2);
+            LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+            this.offset = nextQuoteOffset + 1;
+            next();
+            if (comma = (this.ch == ',')) {
+                next();
+            }
+            return localDate;
+        }
+        return null;
     }
 
     public final OffsetDateTime readOffsetDateTime() {
@@ -6487,7 +6495,7 @@ class JSONReaderUTF8
         }
 
         if (ch != '"' && ch != '\'') {
-            throw new JSONException(info("syntax error, can not read uuid"));
+            throw error("syntax error, can not read uuid");
         }
         final int quote = ch;
         final byte[] bytes = this.bytes;

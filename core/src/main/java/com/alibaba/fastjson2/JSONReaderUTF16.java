@@ -4498,7 +4498,7 @@ final class JSONReaderUTF16
 
                     LocalDate ldt;
                     try {
-                        ldt = year == 0 && month == 0 && dom == 0
+                        ldt = (year | month | dom) == 0
                                 ? null
                                 : LocalDate.of(year, month, dom);
                     } catch (DateTimeException ex) {
@@ -4513,31 +4513,39 @@ final class JSONReaderUTF16
                     return ldt;
                 }
 
-                int nextQuoteOffset = -1;
-                for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
-                    if (chars[i] == quote) {
-                        nextQuoteOffset = i;
-                    }
-                }
-                if (nextQuoteOffset != -1
-                        && nextQuoteOffset - offset > 10
-                        && chars[nextQuoteOffset - 6] == '-'
-                        && chars[nextQuoteOffset - 3] == '-'
-                ) {
-                    int year = TypeUtils.parseInt(chars, offset, nextQuoteOffset - offset - 6);
-                    int month = IOUtils.digit2(chars, nextQuoteOffset - 5);
-                    int dayOfMonth = IOUtils.digit2(chars, nextQuoteOffset - 2);
-                    LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
-                    this.offset = nextQuoteOffset + 1;
-                    next();
-                    if (comma = (this.ch == ',')) {
-                        next();
-                    }
+                LocalDate localDate = readLocalDate0(offset, chars, quote);
+                if (localDate != null) {
                     return localDate;
                 }
             }
         }
         return super.readLocalDate();
+    }
+
+    private LocalDate readLocalDate0(int offset, char[] chars, char quote) {
+        int nextQuoteOffset = -1;
+        for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+            if (chars[i] == quote) {
+                nextQuoteOffset = i;
+            }
+        }
+        if (nextQuoteOffset != -1
+                && nextQuoteOffset - offset > 10
+                && chars[nextQuoteOffset - 6] == '-'
+                && chars[nextQuoteOffset - 3] == '-'
+        ) {
+            int year = TypeUtils.parseInt(chars, offset, nextQuoteOffset - offset - 6);
+            int month = IOUtils.digit2(chars, nextQuoteOffset - 5);
+            int dayOfMonth = IOUtils.digit2(chars, nextQuoteOffset - 2);
+            LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+            this.offset = nextQuoteOffset + 1;
+            next();
+            if (comma = (this.ch == ',')) {
+                next();
+            }
+            return localDate;
+        }
+        return null;
     }
 
     public final OffsetDateTime readOffsetDateTime() {
