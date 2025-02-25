@@ -4734,6 +4734,9 @@ public abstract class JSONReader
         if ((features & MASK_TRIM_STRING) != 0) {
             str = str.trim();
         }
-        return (features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty() ? null : str;
+        if ((features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty()) {
+            return null;
+        }
+        return str;
     }
 }

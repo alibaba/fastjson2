@@ -3023,8 +3023,8 @@ final class JSONReaderUTF16
     @Override
     public String readString() {
         final char[] chars = this.chars;
-        if (ch == '"' || ch == '\'') {
-            final char quote = ch;
+        final char quote = ch;
+        if (quote == '"' || quote == '\'') {
             final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
 
             int offset = this.offset;
@@ -3050,7 +3050,7 @@ final class JSONReaderUTF16
 
                 for (; ; ++i) {
                     if (offset >= end) {
-                        throw new JSONException(info("invalid escape character EOI"));
+                        throw error("invalid escape character EOI");
                     }
                     char c = chars[offset];
                     if (c == '\\') {
