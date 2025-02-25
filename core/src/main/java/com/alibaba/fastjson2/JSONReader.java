@@ -416,7 +416,7 @@ public abstract class JSONReader
     }
 
     public final boolean isInitStringFieldAsEmpty() {
-        return (context.features & Feature.InitStringFieldAsEmpty.mask) != 0;
+        return (context.features & MASK_INIT_STRING_FIELD_AS_EMPTY) != 0;
     }
 
     public final boolean isSupportSmartMatch(long features) {
@@ -3356,7 +3356,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return new JSONReaderASCII(context, null, bytes, offset, length);
+            return JSONReaderASCII.of(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -3380,7 +3380,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return new JSONReaderASCII(context, null, bytes, offset, length);
+            return JSONReaderASCII.of(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -3427,7 +3427,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII) {
-            return new JSONReaderASCII(context, is);
+            return JSONReaderASCII.of(context, is);
         }
 
         return JSONReader.of(new InputStreamReader(is, charset), context);
@@ -3485,7 +3485,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
+                    return JSONReaderASCII.of(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3518,7 +3518,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new JSONReaderASCII(context, str, bytes, offset, length);
+                    return JSONReaderASCII.of(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -4317,6 +4317,7 @@ public abstract class JSONReader
         }
     }
 
+    protected static final long MASK_INIT_STRING_FIELD_AS_EMPTY = 1L << 4;
     protected static final long MASK_TRIM_STRING = 1L << 14;
     protected static final long MASK_EMPTY_STRING_AS_NULL = 1L << 27;
     protected static final long MASK_DISABLE_REFERENCE_DETECT = 1L << 33;
@@ -4329,7 +4330,7 @@ public abstract class JSONReader
          */
         ErrorOnNoneSerializable(1 << 2),
         SupportArrayToBean(1 << 3),
-        InitStringFieldAsEmpty(1 << 4),
+        InitStringFieldAsEmpty(MASK_INIT_STRING_FIELD_AS_EMPTY),
         /**
          * It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler
          */

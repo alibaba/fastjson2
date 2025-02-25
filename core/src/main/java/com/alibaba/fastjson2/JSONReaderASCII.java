@@ -14,19 +14,17 @@ import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
 import static com.alibaba.fastjson2.util.IOUtils.hexDigit4;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-final class JSONReaderASCII
+abstract class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
-    static final int ESCAPE_INDEX_NOT_SET = -2;
-    private int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
-    JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
+    protected JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, bytes, offset, length);
         this.str = str;
         nameAscii = true;
     }
 
-    JSONReaderASCII(Context ctx, InputStream is) {
+    protected JSONReaderASCII(Context ctx, InputStream is) {
         super(ctx, is);
         nameAscii = true;
         str = null;
@@ -1419,75 +1417,13 @@ final class JSONReaderASCII
         stringValue = str;
     }
 
-    @Override
-    public final String readString() {
-        int ch = this.ch;
-        if (ch == '"' || ch == '\'') {
-            final byte[] bytes = this.bytes;
-
-            int offset = this.offset;
-            final int start = offset, end = this.end;
-
-            int index;
-            if (INDEX_OF_CHAR_LATIN1 == null) {
-                index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
-            } else {
-                try {
-                    index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
-                }
-                catch (Throwable e) {
-                    throw new JSONException(e.getMessage());
-                }
-            }
-
-            if (index == -1) {
-                throw error("invalid escape character EOI");
-            }
-            int slashIndex = indexOfSlash(bytes, offset, end);
-            if (slashIndex == -1 || slashIndex > index) {
-                offset = index + 1;
-            } else {
-                return readEscaped(bytes, slashIndex, start, end, slashIndex - offset, ch);
-            }
-
-            String str = STRING_CREATOR_JDK11 != null
-                    ? STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, index), LATIN1)
-                    : new String(bytes, start, index - start, StandardCharsets.ISO_8859_1);
-            long features = context.features;
-            if ((features & MASK_TRIM_STRING) != 0) {
-                str = str.trim();
-            }
-            str = (features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty() ? null : str;
-
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-
-            if (comma = ch == ',') {
-                ch = offset == end ? EOI : bytes[offset++];
-                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-            }
-
-            this.ch = (char) (ch & 0xFF);
-            this.offset = offset;
-            return str;
-        }
-
-        return readStringNotMatch();
+    static String subString(byte[] bytes, int start, int index) {
+        return STRING_CREATOR_JDK11 != null
+                        ? STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, index), LATIN1)
+                        : new String(bytes, start, index - start, StandardCharsets.ISO_8859_1);
     }
 
-    private int indexOfSlash(byte[] bytes, int offset, int end) {
-        int slashIndex = nextEscapeIndex;
-        if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
-            nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
-        }
-        return slashIndex;
-    }
-
-    private String readEscaped(byte[] bytes, int offset, int start, int end, int valueLength, int quote) {
+    final String readEscaped(byte[] bytes, int offset, int start, int end, int valueLength, int quote) {
         for (;;) {
             if (offset >= end) {
                 throw error("invalid escape character EOI");
@@ -1579,5 +1515,13 @@ final class JSONReaderASCII
             offset++;
         }
         return offset;
+    }
+
+    static JSONReaderASCII of(Context ctx, String str, byte[] bytes, int offset, int length) {
+        return new JSONReaderASCIISlash(ctx, str, bytes, offset, length);
+    }
+
+    static JSONReaderASCII of(Context ctx, InputStream is) {
+        return new JSONReaderASCIISlash(ctx, is);
     }
 }

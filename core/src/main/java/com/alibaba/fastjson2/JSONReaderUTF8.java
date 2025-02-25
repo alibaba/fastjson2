@@ -7191,7 +7191,19 @@ class JSONReaderUTF8
             ascii = IOUtils.isASCII(bytes, off, len);
         }
         if (ascii) {
-            return new JSONReaderASCII(context, null, bytes, off, len);
+            int slashIndex = JSONReaderASCIISlash.ESCAPE_INDEX_NOT_SET;
+            if (INDEX_OF_CHAR_LATIN1 != null) {
+                try {
+                    slashIndex = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, (int) '\\', off, off + len);
+                } catch (Throwable ignored) {
+                    // ignore
+                }
+            }
+            if (slashIndex == -1) {
+                return new JSONReaderASCIINonSlash(context, null, bytes, off, len);
+            } else {
+                return new JSONReaderASCIISlash(context, null, bytes, off, len, slashIndex);
+            }
         }
         return new JSONReaderUTF8(context, bytes, off, len);
     }
