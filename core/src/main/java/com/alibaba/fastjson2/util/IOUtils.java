@@ -1563,17 +1563,6 @@ public class IOUtils {
         return indexOfChar(value, '\n', i, max);
     }
 
-    public static int indexOfSlash(byte[] value, int fromIndex, int max) {
-        if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfSlashV(value, fromIndex, max);
-        }
-        try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\\', fromIndex, max);
-        } catch (Throwable e) {
-            throw new JSONException(e.getMessage());
-        }
-    }
-
     public static int indexOfSlashV(byte[] value, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;

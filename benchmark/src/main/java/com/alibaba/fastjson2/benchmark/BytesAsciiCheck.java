@@ -17,6 +17,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.concurrent.TimeUnit;
 
+import static com.alibaba.fastjson2.util.JDKUtils.INDEX_OF_CHAR_LATIN1;
+
 public class BytesAsciiCheck {
     static byte[] bytes;
     static char[] chars;
@@ -92,7 +94,7 @@ public class BytesAsciiCheck {
 
     @Benchmark
     public void indexOfSlash(Blackhole bh) throws Throwable {
-        bh.consume(com.alibaba.fastjson2.util.IOUtils.indexOfSlash(bytes, 0, bytes.length));
+        bh.consume(indexOfSlash(bytes, 0, bytes.length));
     }
 
     @Benchmark
@@ -108,6 +110,17 @@ public class BytesAsciiCheck {
     @Benchmark
     public void indexOfString(Blackhole bh) throws Throwable {
         bh.consume(str.indexOf('\\'));
+    }
+
+    public static int indexOfSlash(byte[] value, int fromIndex, int max) {
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            return com.alibaba.fastjson2.util.IOUtils.indexOfSlashV(value, fromIndex, max);
+        }
+        try {
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\\', fromIndex, max);
+        } catch (Throwable e) {
+            throw new JSONException(e.getMessage());
+        }
     }
 
     private static int indexOfChar(byte[] bytes, int ch, int fromIndex, int toIndex) {
