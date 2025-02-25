@@ -1428,7 +1428,18 @@ final class JSONReaderASCII
             int offset = this.offset;
             final int start = offset, end = this.end;
 
-            int index = IOUtils.indexOfQuote(bytes, ch, offset, end);
+            int index;
+            if (INDEX_OF_CHAR_LATIN1 == null) {
+                index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
+            } else {
+                try {
+                    index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
+                }
+                catch (Throwable e) {
+                    throw new JSONException(e.getMessage());
+                }
+            }
+
             if (index == -1) {
                 throw error("invalid escape character EOI");
             }
@@ -1471,15 +1482,21 @@ final class JSONReaderASCII
     private int indexOfSlash(byte[] bytes, int offset, int end) {
         int slashIndex = nextEscapeIndex;
         if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
-            nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
+            if (str != null) {
+                slashIndex = str.indexOf('\\', offset);
+            } else if (INDEX_OF_CHAR_LATIN1 == null) {
+                slashIndex = IOUtils.indexOfSlashV(bytes, offset, end);
+            } else {
+                try {
+                    slashIndex = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, (int) '\\', offset, end);
+                }
+                catch (Throwable e) {
+                    throw new JSONException(e.getMessage());
+                }
+            }
+            nextEscapeIndex = slashIndex;
         }
         return slashIndex;
-    }
-
-    private static String subString(byte[] bytes, int start, int index) {
-        return STRING_CREATOR_JDK11 != null
-                        ? STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, index), LATIN1)
-                        : new String(bytes, start, index - start, StandardCharsets.ISO_8859_1);
     }
 
     private String readEscaped(byte[] bytes, int offset, int start, int end, int valueLength, int quote) {
