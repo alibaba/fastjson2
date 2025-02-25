@@ -7191,7 +7191,7 @@ class JSONReaderUTF8
             ascii = IOUtils.isASCII(bytes, off, len);
         }
         if (ascii) {
-            return new JSONReaderASCIISlash(context, null, bytes, off, len, JSONReaderASCIISlash.ESCAPE_INDEX_NOT_SET);
+            return new JSONReaderASCII(context, null, bytes, off, len);
         }
         return new JSONReaderUTF8(context, bytes, off, len);
     }
