@@ -132,9 +132,9 @@ public abstract class JSONReader
     }
 
     public final void errorOnNoneSerializable(Class objectClass) {
-        if ((context.features & Feature.ErrorOnNoneSerializable.mask) != 0
+        if ((context.features & MASK_ERROR_ON_NONE_SERIALIZABLE) != 0
                 && !Serializable.class.isAssignableFrom(objectClass)) {
-            throw new JSONException("not support none-Serializable, class " + objectClass.getName());
+            throw new JSONException("not support none-Serializable, class ".concat(objectClass.getName()));
         }
     }
 
@@ -407,12 +407,11 @@ public abstract class JSONReader
     }
 
     public final ObjectReader getObjectReader(Type type) {
-        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-        return context.provider.getObjectReader(type, fieldBased);
+        return context.provider.getObjectReader(type, (context.features & MASK_FIELD_BASED) != 0);
     }
 
     public final boolean isSupportSmartMatch() {
-        return (context.features & Feature.SupportSmartMatch.mask) != 0;
+        return (context.features & MASK_SUPPORT_SMART_MATCH) != 0;
     }
 
     public final boolean isInitStringFieldAsEmpty() {
@@ -420,23 +419,23 @@ public abstract class JSONReader
     }
 
     public final boolean isSupportSmartMatch(long features) {
-        return ((context.features | features) & Feature.SupportSmartMatch.mask) != 0;
+        return ((context.features | features) & MASK_SUPPORT_SMART_MATCH) != 0;
     }
 
     public final boolean isSupportBeanArray() {
-        return (context.features & Feature.SupportArrayToBean.mask) != 0;
+        return (context.features & MASK_SUPPORT_ARRAY_TO_BEAN) != 0;
     }
 
     public final boolean isSupportBeanArray(long features) {
-        return ((context.features | features) & Feature.SupportArrayToBean.mask) != 0;
+        return ((context.features | features) & MASK_SUPPORT_ARRAY_TO_BEAN) != 0;
     }
 
     public final boolean isSupportAutoType(long features) {
-        return ((context.features | features) & Feature.SupportAutoType.mask) != 0;
+        return ((context.features | features) & MASK_SUPPORT_AUTO_TYPE) != 0;
     }
 
     public final boolean isSupportAutoTypeOrHandler(long features) {
-        return ((context.features | features) & Feature.SupportAutoType.mask) != 0 || context.autoTypeBeforeHandler != null;
+        return ((context.features | features) & MASK_SUPPORT_AUTO_TYPE) != 0 || context.autoTypeBeforeHandler != null;
     }
 
     public final boolean isJSONB() {
@@ -444,7 +443,7 @@ public abstract class JSONReader
     }
 
     public final boolean isIgnoreNoneSerializable() {
-        return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
+        return (context.features & MASK_IGNORE_NONE_SERIALIZABLE) != 0;
     }
 
     public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
@@ -4317,26 +4316,32 @@ public abstract class JSONReader
         }
     }
 
+    protected static final long MASK_FIELD_BASED = 1L;
+    protected static final long MASK_IGNORE_NONE_SERIALIZABLE = 1L << 1;
+    protected static final long MASK_ERROR_ON_NONE_SERIALIZABLE = 1L << 2;
+    protected static final long MASK_SUPPORT_ARRAY_TO_BEAN = 1L << 3;
     protected static final long MASK_INIT_STRING_FIELD_AS_EMPTY = 1L << 4;
+    protected static final long MASK_SUPPORT_AUTO_TYPE = 1L << 5;
+    protected static final long MASK_SUPPORT_SMART_MATCH = 1L << 6;
     protected static final long MASK_TRIM_STRING = 1L << 14;
     protected static final long MASK_EMPTY_STRING_AS_NULL = 1L << 27;
     protected static final long MASK_DISABLE_REFERENCE_DETECT = 1L << 33;
 
     public enum Feature {
-        FieldBased(1),
-        IgnoreNoneSerializable(1 << 1),
+        FieldBased(MASK_FIELD_BASED),
+        IgnoreNoneSerializable(MASK_IGNORE_NONE_SERIALIZABLE),
         /**
          * @since 2.0.14
          */
-        ErrorOnNoneSerializable(1 << 2),
-        SupportArrayToBean(1 << 3),
+        ErrorOnNoneSerializable(MASK_ERROR_ON_NONE_SERIALIZABLE),
+        SupportArrayToBean(MASK_SUPPORT_ARRAY_TO_BEAN),
         InitStringFieldAsEmpty(MASK_INIT_STRING_FIELD_AS_EMPTY),
         /**
          * It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler
          */
         @Deprecated
-        SupportAutoType(1 << 5),
-        SupportSmartMatch(1 << 6),
+        SupportAutoType(MASK_SUPPORT_AUTO_TYPE),
+        SupportSmartMatch(MASK_SUPPORT_SMART_MATCH),
         UseNativeObject(1 << 7),
         SupportClassForName(1 << 8),
         IgnoreSetNullValue(1 << 9),
