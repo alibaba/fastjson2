@@ -403,25 +403,14 @@ public class IOUtilsTest {
     public void indexOfSlash() {
         byte[] bytes = "\\b\\d\\".getBytes(StandardCharsets.UTF_8);
         assertEquals(2,
-                indexOfSlash(
+                IOUtils.indexOfSlash(
                         bytes, 1, bytes.length));
         assertEquals(0,
-                indexOfSlash(
+                IOUtils.indexOfSlash(
                         bytes, 0, bytes.length));
         assertEquals(4,
-                indexOfSlash(
+                IOUtils.indexOfSlash(
                         bytes, 3, bytes.length));
-    }
-
-    public static int indexOfSlash(byte[] value, int fromIndex, int max) {
-        if (INDEX_OF_CHAR_LATIN1 == null) {
-            return IOUtils.indexOfSlashV(value, fromIndex, max);
-        }
-        try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\\', fromIndex, max);
-        } catch (Throwable e) {
-            throw new JSONException(e.getMessage());
-        }
     }
 
     @Test

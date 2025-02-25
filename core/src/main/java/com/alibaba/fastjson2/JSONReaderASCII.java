@@ -1482,19 +1482,7 @@ final class JSONReaderASCII
     private int indexOfSlash(byte[] bytes, int offset, int end) {
         int slashIndex = nextEscapeIndex;
         if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
-            if (str != null) {
-                slashIndex = str.indexOf('\\', offset);
-            } else if (INDEX_OF_CHAR_LATIN1 == null) {
-                slashIndex = IOUtils.indexOfSlashV(bytes, offset, end);
-            } else {
-                try {
-                    slashIndex = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, (int) '\\', offset, end);
-                }
-                catch (Throwable e) {
-                    throw new JSONException(e.getMessage());
-                }
-            }
-            nextEscapeIndex = slashIndex;
+            nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
         }
         return slashIndex;
     }
