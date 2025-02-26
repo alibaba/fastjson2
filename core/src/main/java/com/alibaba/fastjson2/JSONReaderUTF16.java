@@ -3154,6 +3154,9 @@ final class JSONReaderUTF16
             this.ch = (char) ch;
             this.offset = offset;
             return str;
+        } else if (quote == 'n') {
+            readNull();
+            return null;
         }
 
         return readStringNotMatch();

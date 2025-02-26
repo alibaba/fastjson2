@@ -4697,9 +4697,9 @@ class JSONReaderUTF8
 
     @Override
     public String readString() {
-        if (ch == '"' || ch == '\'') {
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
             final byte[] bytes = this.bytes;
-            char quote = this.ch;
             int valueLength;
             int offset = this.offset;
             final int start = offset, end = this.end;
@@ -4886,6 +4886,9 @@ class JSONReaderUTF8
             this.ch = (char) ch;
             this.offset = offset;
             return str;
+        } else if (quote == 'n') {
+            readNull();
+            return null;
         }
 
         return readStringNotMatch();

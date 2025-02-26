@@ -2808,6 +2808,9 @@ public class ObjectReaderCreatorASM
                 mw.invokevirtual("java/lang/String", "toUpperCase", "()Ljava/lang/String;");
             }
             mw.visitLabel(null_);
+        } else if (fieldClass == Boolean.class) {
+            mw.aload(JSON_READER);
+            mw.invokevirtual(TYPE_JSON_READER, "readBool", "()Ljava/lang/Boolean;");
         } else if (fieldClass == Byte.class) {
             mw.aload(JSON_READER);
             mw.invokevirtual(TYPE_JSON_READER, "readInt8", "()Ljava/lang/Byte;");

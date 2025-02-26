@@ -1392,6 +1392,9 @@ final class JSONReaderASCII
             this.ch = (char) (ch & 0xFF);
             this.offset = offset;
             return str;
+        } else if (ch == 'n') {
+            readNull();
+            return null;
         }
 
         return readStringNotMatch();
