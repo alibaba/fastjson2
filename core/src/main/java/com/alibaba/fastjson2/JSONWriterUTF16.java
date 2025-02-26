@@ -1632,7 +1632,7 @@ class JSONWriterUTF16
     }
 
     private static void putLong(char[] chars, int off, long name) {
-        final long base = ARRAY_CHAR_BASE_OFFSET + (off << 1);
+        final long base = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         UNSAFE.putLong(chars, base,
                 (name & 0xFFL)
                         | ((name & 0xFF00L) << 8)
@@ -1646,7 +1646,7 @@ class JSONWriterUTF16
     }
 
     private static void putLong(char[] chars, int off, long name, int name1) {
-        final long base = ARRAY_CHAR_BASE_OFFSET + (off << 1);
+        final long base = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         UNSAFE.putLong(chars, base,
                 (name & 0xFFL)
                         | ((name & 0xFF00L) << 8)
@@ -1667,7 +1667,7 @@ class JSONWriterUTF16
     }
 
     private static void putLong(char[] chars, int off, long name, long name1) {
-        final long base = ARRAY_CHAR_BASE_OFFSET + (off << 1);
+        final long base = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         UNSAFE.putLong(chars, base,
                 (name & 0xFFL)
                         | ((name & 0xFF00L) << 8)
