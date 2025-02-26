@@ -897,22 +897,24 @@ public class ObjectReaderCreatorASM
         final int FIELD_TYPE = 2;
         final int FIELD_NAME = 3;
         final int FEATURES = 4;
-        final int OBJECT = 6;
-        final int ENTRY_CNT = 7;
-        final int I = 8;
-        final int HASH_CODE64 = 9;
-        final int HASH_CODE_32 = 11;
-        final int ITEM_CNT = 12;
-        final int J = 13;
-        final int FIELD_READER = 14;
-        final int AUTO_TYPE_OBJECT_READER = 15;
+        MethodWriterContext mwc = new MethodWriterContext(mw, 6);
+        mw.aload(JSON_READER);
+        mw.lload(FEATURES);
+        mw.invokevirtual(TYPE_JSON_READER, "features", "(J)J");
+        mw.lstore(FEATURES);
+
+        final int OBJECT = mwc.var("object");
+        final int I = mwc.var("I");
+        final int HASH_CODE64 = mwc.var2("hashCode64");
+        final int HASH_CODE_32 = mwc.var("hashCode32");
+        final int ITEM_CNT = mwc.var("itemCnt");
+        final int J = mwc.var("J");
+        final int FIELD_READER = mwc.var("fieldReader");
+        final int AUTO_TYPE_OBJECT_READER = mwc.var("autoTypeObjectReader");
 
         if (!disableAutoType) {
             genCheckAutoType(classNameType, mw, JSON_READER, FIELD_TYPE, FIELD_NAME, FEATURES, AUTO_TYPE_OBJECT_READER);
         }
-
-        int varIndex = 16;
-        Map<Object, Integer> variants = new HashMap<>();
 
         {
             Label notNull_ = new Label();
@@ -985,20 +987,18 @@ public class ObjectReaderCreatorASM
         mw.ifne(for_end_i_);
 
         if (context.fieldNameLengthMin >= 2 && context.fieldNameLengthMax <= 43) {
-            varIndex = genRead243(
+            genRead243(
                     context,
                     TYPE_OBJECT,
                     fieldReaderArray,
                     classNameType,
                     fieldBased,
-                    mw,
+                    mwc,
                     JSON_READER,
                     FEATURES,
                     OBJECT,
                     ITEM_CNT,
                     J,
-                    varIndex,
-                    variants,
                     for_inc_i_,
                     hashCode64Start,
                     true
@@ -1096,18 +1096,16 @@ public class ObjectReaderCreatorASM
 
                     FieldReader fieldReader = fieldReaderArray[index];
 
-                    varIndex = genReadFieldValue(
+                    genReadFieldValue(
                             context,
                             fieldReader,
                             fieldBased,
                             classNameType,
-                            mw,
+                            mwc,
                             THIS,
                             JSON_READER,
                             OBJECT,
                             FEATURES,
-                            varIndex,
-                            variants,
                             ITEM_CNT,
                             J,
                             index,
@@ -1165,18 +1163,16 @@ public class ObjectReaderCreatorASM
                 mw.lcmp();
                 mw.ifne(next_);
 
-                varIndex = genReadFieldValue(
+                genReadFieldValue(
                         context,
                         fieldReader,
                         fieldBased,
                         classNameType,
-                        mw,
+                        mwc,
                         THIS,
                         JSON_READER,
                         OBJECT,
                         FEATURES,
-                        varIndex,
-                        variants,
                         ITEM_CNT,
                         J,
                         i,
@@ -1215,18 +1211,16 @@ public class ObjectReaderCreatorASM
                 mw.lcmp();
                 mw.ifne(next_);
 
-                varIndex = genReadFieldValue(
+                genReadFieldValue(
                         context,
                         fieldReader,
                         fieldBased,
                         classNameType,
-                        mw,
+                        mwc,
                         THIS,
                         JSON_READER,
                         OBJECT,
                         FEATURES,
-                        varIndex,
-                        variants,
                         ITEM_CNT,
                         J,
                         i,
@@ -1285,18 +1279,21 @@ public class ObjectReaderCreatorASM
         final int FIELD_TYPE = 2;
         final int FIELD_NAME = 3;
         final int FEATURES = 4;
-        final int OBJECT = 6;
-        final int ENTRY_CNT = 7;
-        final int ITEM_CNT = 8;
-        final int J = 9;
-        final int AUTO_TYPE_OBJECT_READER = 10;
+        MethodWriterContext mwc = new MethodWriterContext(mw, 6);
+        mw.aload(JSON_READER);
+        mw.lload(FEATURES);
+        mw.invokevirtual(TYPE_JSON_READER, "features", "(J)J");
+        mw.lstore(FEATURES);
+
+        final int OBJECT = mwc.var("object");
+        final int ENTRY_CNT = mwc.var("entryCnt");
+        final int ITEM_CNT = mwc.var("itemCount");
+        final int J = mwc.var("J");
+        final int AUTO_TYPE_OBJECT_READER = mwc.var("autoTypeObjectReader");
 
         if (!context.disableAutoType()) {
             genCheckAutoType(classNameType, mw, JSON_READER, FIELD_TYPE, FIELD_NAME, FEATURES, AUTO_TYPE_OBJECT_READER);
         }
-
-        int varIndex = 11;
-        Map<Object, Integer> variants = new HashMap<>();
 
         {
             Label notNull_ = new Label();
@@ -1322,18 +1319,16 @@ public class ObjectReaderCreatorASM
 
         for (int i = 0; i < fieldReaderArray.length; ++i) {
             FieldReader fieldReader = fieldReaderArray[i];
-            varIndex = genReadFieldValue(
+            genReadFieldValue(
                     context,
                     fieldReader,
                     fieldBased,
                     classNameType,
-                    mw,
+                    mwc,
                     THIS,
                     JSON_READER,
                     OBJECT,
                     FEATURES,
-                    varIndex,
-                    variants,
                     ITEM_CNT,
                     J,
                     i,
@@ -1412,16 +1407,15 @@ public class ObjectReaderCreatorASM
         final int FIELD_TYPE = 2;
         final int FIELD_NAME = 3;
         final int FEATURES = 4;
-        final int OBJECT = 6;
-        final int I = 7;
-        final int HASH_CODE64 = 8;
-        final int HASH_CODE_32 = 10;
-        final int ITEM_CNT = 11;
-        final int J = 12;
-        final int FIELD_READER = 13;
+        MethodWriterContext mwc = new MethodWriterContext(mw, 6);
 
-        int varIndex = 14;
-        Map<Object, Integer> variants = new HashMap<>();
+        final int OBJECT = mwc.var("object");
+        final int I = mwc.var("I");
+        final int HASH_CODE64 = mwc.var2("hashCode64");
+        final int HASH_CODE_32 = mwc.var("hashCode32");
+        final int ITEM_CNT = mwc.var("itemCount");
+        final int J = mwc.var("J");
+        final int FIELD_READER = mwc.var("fieldReader");
 
         boolean disableArrayMapping = context.disableSupportArrayMapping();
         boolean disableAutoType = context.disableAutoType();
@@ -1445,6 +1439,10 @@ public class ObjectReaderCreatorASM
 
             mw.visitLabel(json_);
         }
+        mw.aload(JSON_READER);
+        mw.lload(FEATURES);
+        mw.invokevirtual(TYPE_JSON_READER, "features", "(J)J");
+        mw.lstore(FEATURES);
 
         if (!disableSmartMatch || !disableArrayMapping) {
             Label object_ = new Label();
@@ -1520,39 +1518,35 @@ public class ObjectReaderCreatorASM
 
         boolean switchGen = false;
         if (context.fieldNameLengthMin >= 5 && context.fieldNameLengthMax <= 7) {
-            varIndex = genRead57(
+            genRead57(
                     context,
                     TYPE_OBJECT,
                     fieldReaderArray,
                     classNameType,
                     fieldBased,
-                    mw,
+                    mwc,
                     JSON_READER,
                     FEATURES,
                     OBJECT,
                     ITEM_CNT,
                     J,
-                    varIndex,
-                    variants,
                     for_inc_i_,
                     hashCode64Start
             );
             switchGen = true;
         } else if (context.fieldNameLengthMin >= 2 && context.fieldNameLengthMax <= 43) {
-            varIndex = genRead243(
+            genRead243(
                     context,
                     TYPE_OBJECT,
                     fieldReaderArray,
                     classNameType,
                     fieldBased,
-                    mw,
+                    mwc,
                     JSON_READER,
                     FEATURES,
                     OBJECT,
                     ITEM_CNT,
                     J,
-                    varIndex,
-                    variants,
                     for_inc_i_,
                     hashCode64Start,
                     false
@@ -1667,18 +1661,16 @@ public class ObjectReaderCreatorASM
 
                     FieldReader fieldReader = fieldReaderArray[index];
 
-                    varIndex = genReadFieldValue(
+                    genReadFieldValue(
                             context,
                             fieldReader,
                             fieldBased,
                             classNameType,
-                            mw,
+                            mwc,
                             THIS,
                             JSON_READER,
                             OBJECT,
                             FEATURES,
-                            varIndex,
-                            variants,
                             ITEM_CNT,
                             J,
                             index,
@@ -1701,9 +1693,11 @@ public class ObjectReaderCreatorASM
             if (!disableSmartMatch) {
                 Label fieldReaderNull_ = new Label();
                 if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
-                    mw.aload(JSON_READER);
                     mw.lload(FEATURES);
-                    mw.invokevirtual(TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z");
+                    mw.visitLdcInsn(JSONReader.Feature.SupportSmartMatch.mask);
+                    mw.land();
+                    mw.lconst_0();
+                    mw.lcmp();
                     mw.ifeq(fieldReaderNull_);
                 }
 
@@ -1739,18 +1733,16 @@ public class ObjectReaderCreatorASM
                 mw.ifne(next_);
 
                 mw.visitLabel(get_);
-                varIndex = genReadFieldValue(
+                genReadFieldValue(
                         context,
                         fieldReader,
                         fieldBased,
                         classNameType,
-                        mw,
+                        mwc,
                         THIS,
                         JSON_READER,
                         OBJECT,
                         FEATURES,
-                        varIndex,
-                        variants,
                         ITEM_CNT,
                         J,
                         i,
@@ -1768,9 +1760,11 @@ public class ObjectReaderCreatorASM
 
             if (!disableSmartMatch) {
                 if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
-                    mw.aload(JSON_READER);
                     mw.lload(FEATURES);
-                    mw.invokevirtual(TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z");
+                    mw.visitLdcInsn(JSONReader.Feature.SupportSmartMatch.mask);
+                    mw.land();
+                    mw.lconst_0();
+                    mw.lcmp();
                     mw.ifeq(processExtra_);
                 }
 
@@ -1803,18 +1797,16 @@ public class ObjectReaderCreatorASM
                     }
 
                     mw.visitLabel(get_);
-                    varIndex = genReadFieldValue(
+                    genReadFieldValue(
                             context,
                             fieldReader,
                             fieldBased,
                             classNameType,
-                            mw,
+                            mwc,
                             THIS,
                             JSON_READER,
                             OBJECT,
                             FEATURES,
-                            varIndex,
-                            variants,
                             ITEM_CNT,
                             J,
                             i,
@@ -1856,24 +1848,23 @@ public class ObjectReaderCreatorASM
         mw.visitMaxs(5, 10);
     }
 
-    private int genRead243(
+    private void genRead243(
             ObjectWriteContext context,
             String TYPE_OBJECT,
             FieldReader[] fieldReaderArray,
             String classNameType,
             boolean fieldBased,
-            MethodWriter mw,
+            MethodWriterContext mwc,
             int JSON_READER,
             int FEATURES,
             int OBJECT,
             int ITEM_CNT,
             int J,
-            int varIndex,
-            Map<Object, Integer> variants,
             Label for_inc_i_,
             Label hashCode64Start,
             boolean jsonb
     ) {
+        MethodWriter mw = mwc.mw;
         IdentityHashMap<FieldReader, Integer> readerIndexMap = new IdentityHashMap<>();
         Map<Integer, List<FieldReader>> name0Map = new TreeMap<>();
         for (int i = 0; i < fieldReaderArray.length; ++i) {
@@ -2544,18 +2535,16 @@ public class ObjectReaderCreatorASM
                 }
 
                 mw.ifeq(nextJ != null ? nextJ : hashCode64Start);
-                varIndex = genReadFieldValue(
+                genReadFieldValue(
                         context,
                         fieldReader,
                         fieldBased,
                         classNameType,
-                        mw,
+                        mwc,
                         THIS,
                         JSON_READER,
                         OBJECT,
                         FEATURES,
-                        varIndex,
-                        variants,
                         ITEM_CNT,
                         J,
                         fieldReaderIndex,
@@ -2575,32 +2564,25 @@ public class ObjectReaderCreatorASM
         }
 
         mw.visitLabel(dflt);
-
-        return varIndex;
     }
 
-    private int genRead57(
+    private void genRead57(
             ObjectWriteContext context,
             String TYPE_OBJECT,
             FieldReader[] fieldReaderArray,
             String classNameType,
             boolean fieldBased,
-            MethodWriter mw,
+            MethodWriterContext mwc,
             int JSON_READER,
             int FEATURES,
             int OBJECT,
             int ITEM_CNT,
             int J,
-            int varIndex,
-            Map<Object, Integer> variants,
             Label for_inc_i_,
             Label hashCode64Start
     ) {
-        Integer RAW_LONG = variants.get("RAW_LONG");
-        if (RAW_LONG == null) {
-            variants.put("RAW_LONG", RAW_LONG = varIndex);
-            varIndex += 2;
-        }
+        int RAW_LONG = mwc.var2("RAW_LONG");
+        MethodWriter mw = mwc.mw;
 
         mw.aload(JSON_READER);
         mw.invokevirtual(TYPE_JSON_READER, "getRawLong", "()J");
@@ -2649,18 +2631,16 @@ public class ObjectReaderCreatorASM
             mw.invokevirtual(TYPE_JSON_READER, nextMethodName, "()Z");
             mw.ifeq(hashCode64Start);
 
-            varIndex = genReadFieldValue(
+            genReadFieldValue(
                     context,
                     fieldReader,
                     fieldBased,
                     classNameType,
-                    mw,
+                    mwc,
                     THIS,
                     JSON_READER,
                     OBJECT,
                     FEATURES,
-                    varIndex,
-                    variants,
                     ITEM_CNT,
                     J,
                     i,
@@ -2673,7 +2653,6 @@ public class ObjectReaderCreatorASM
 
             mw.visitLabel(next_);
         }
-        return varIndex;
     }
 
     private <T> void genCreateObject(
@@ -2712,32 +2691,37 @@ public class ObjectReaderCreatorASM
         }
 
         if (context.hasStringField) {
-            Label endInitStringAsEmpty_ = new Label(), addResolveTask_ = new Label();
-
-            mw.aload(JSON_READER);
-            mw.invokevirtual(TYPE_JSON_READER, "isInitStringFieldAsEmpty", "()Z");
-            mw.ifeq(endInitStringAsEmpty_);
+            /*
+             * if ((features & JSONReader.Feature.InitStringFieldAsEmpty.mask) != 0) {
+             *    this.initStringFieldAsEmpty(object);
+             * }
+             */
+            Label L0 = new Label();
+            mw.lload(FEATURES);
+            mw.visitLdcInsn(JSONReader.Feature.InitStringFieldAsEmpty.mask);
+            mw.land();
+            mw.lconst_0();
+            mw.lcmp();
+            mw.ifeq(L0);
 
             mw.dup();
             mw.aload(THIS);
             mw.swap();
             mw.invokevirtual(classNameType, "initStringFieldAsEmpty", "(Ljava/lang/Object;)V");
-            mw.visitLabel(endInitStringAsEmpty_);
+            mw.visitLabel(L0);
         }
     }
 
-    private <T> int genReadFieldValue(
+    private <T> void genReadFieldValue(
             ObjectWriteContext context,
             FieldReader fieldReader,
             boolean fieldBased,
             String classNameType,
-            MethodWriter mw,
+            MethodWriterContext mwc,
             int THIS,
             int JSON_READER,
             int OBJECT,
             int FEATURES,
-            int varIndex,
-            Map<Object, Integer> variants,
             int ITEM_CNT,
             int J,
             int i,
@@ -2752,13 +2736,15 @@ public class ObjectReaderCreatorASM
         String format = fieldReader.format;
         Type itemType = fieldReader.itemType;
 
+        MethodWriter mw = mwc.mw;
+
         if ((fieldFeatures & JSONReader.Feature.NullOnError.mask) != 0) {
             mw.aload(THIS);
             mw.getfield(classNameType, fieldReader(i), DESC_FIELD_READER);
             mw.aload(JSON_READER);
             mw.aload(OBJECT);
             mw.invokevirtual(TYPE_FIELD_READE, "readFieldValue", METHOD_DESC_READ_FIELD_VALUE);
-            return varIndex;
+            return;
         }
 
         Field field = fieldReader.field;
@@ -2868,10 +2854,9 @@ public class ObjectReaderCreatorASM
             Label endObject_ = new Label();
 
             boolean disableReferenceDetect = context.disableReferenceDetect();
-            Integer REFERENCE = variants.get("REFERENCE");
-            if (REFERENCE == null && !disableReferenceDetect) {
-                variants.put("REFERENCE", REFERENCE = varIndex);
-                varIndex++;
+            Integer REFERENCE = null;
+            if (!disableReferenceDetect) {
+                REFERENCE = mwc.var("REFERENCE");
             }
 
             if ((!disableReferenceDetect) && (!ObjectWriterProvider.isPrimitiveOrEnum(fieldClass))) {
@@ -2916,9 +2901,19 @@ public class ObjectReaderCreatorASM
             if (!fieldReader.fieldClassSerializable) {
                 Label endIgnoreCheck_ = new Label();
 
-                mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "isIgnoreNoneSerializable", "()Z");
+                /*
+                 * if ((features & Feature.IgnoreNoneSerializable.mask) != 0) {
+                 *     jsonReader.skipValue();
+                 *     goto endSet_;
+                 * }
+                 */
+                mw.lload(FEATURES);
+                mw.visitLdcInsn(JSONReader.Feature.IgnoreNoneSerializable.mask);
+                mw.land();
+                mw.lconst_0();
+                mw.lcmp();
                 mw.ifeq(endIgnoreCheck_);
+
                 mw.aload(JSON_READER);
                 mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
                 mw.pop();
@@ -2945,16 +2940,14 @@ public class ObjectReaderCreatorASM
             }
 
             if (list) {
-                varIndex = genReadFieldValueList(
+                genReadFieldValueList(
                         fieldReader,
                         classNameType,
-                        mw,
+                        mwc,
                         THIS,
                         JSON_READER,
                         OBJECT,
                         FEATURES,
-                        varIndex,
-                        variants,
                         ITEM_CNT,
                         J,
                         i,
@@ -3076,15 +3069,7 @@ public class ObjectReaderCreatorASM
             if (setDirect) {
                 mw.putfield(TYPE_OBJECT, field.getName(), DESC_FIELD_CLASS);
             } else {
-                Integer FIELD_VALUE = variants.get(fieldClass);
-                if (FIELD_VALUE == null) {
-                    variants.put(fieldClass, FIELD_VALUE = varIndex);
-                    if (fieldClass == long.class || fieldClass == double.class) {
-                        varIndex += 2;
-                    } else {
-                        varIndex++;
-                    }
-                }
+                int FIELD_VALUE = mwc.var(fieldClass);
 
                 String methodName, methodDes;
                 int LOAD;
@@ -3147,15 +3132,7 @@ public class ObjectReaderCreatorASM
             boolean invokeFieldReaderAccept = context.externalClass || method == null || !context.publicClass;
 
             if (invokeFieldReaderAccept) {
-                Integer FIELD_VALUE = variants.get(fieldClass);
-                if (FIELD_VALUE == null) {
-                    variants.put(fieldClass, FIELD_VALUE = varIndex);
-                    if (fieldClass == long.class || fieldClass == double.class) {
-                        varIndex += 2;
-                    } else {
-                        varIndex++;
-                    }
-                }
+                int FIELD_VALUE = mwc.var(fieldClass);
 
                 String acceptMethodDesc;
                 int LOAD;
@@ -3271,8 +3248,6 @@ public class ObjectReaderCreatorASM
         }
 
         mw.visitLabel(endSet_);
-
-        return varIndex;
     }
 
     private void genReadObject(
@@ -3529,16 +3504,14 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(enumEnd);
     }
 
-    private int genReadFieldValueList(
+    private void genReadFieldValueList(
             FieldReader fieldReader,
             String classNameType,
-            MethodWriter mw,
+            MethodWriterContext mwc,
             int THIS,
             int JSON_READER,
             int OBJECT,
             int FEATURES,
-            int varIndex,
-            Map<Object, Integer> variants,
             int ITEM_CNT,
             int J,
             int i,
@@ -3558,17 +3531,10 @@ public class ObjectReaderCreatorASM
 
         Class itemClass = TypeUtils.getMapping(itemType);
         String ITEM_OBJECT_READER = fieldItemObjectReader(i);
+        MethodWriter mw = mwc.mw;
 
-        Integer LIST = variants.get(fieldClass);
-        if (LIST == null) {
-            variants.put(fieldClass, LIST = varIndex);
-            varIndex++;
-        }
-        Integer AUTO_TYPE_OBJECT_READER = variants.get(ObjectReader.class);
-        if (AUTO_TYPE_OBJECT_READER == null) {
-            variants.put(fieldClass, AUTO_TYPE_OBJECT_READER = varIndex);
-            varIndex++;
-        }
+        Integer LIST = mwc.var(fieldClass);
+        Integer AUTO_TYPE_OBJECT_READER = mwc.var(ObjectReader.class);
 
         String LIST_TYPE = fieldClass.isInterface() ? "java/util/ArrayList" : TYPE_FIELD_CLASS;
 
@@ -3833,7 +3799,6 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(loadList_);
         mw.aload(LIST);
-        return varIndex;
     }
 
     private void gwGetFieldType(String classNameType, MethodWriter mw, int THIS, int i, Type fieldType) {
@@ -4302,5 +4267,40 @@ public class ObjectReaderCreatorASM
             e.printStackTrace();
         }
         return null;
+    }
+
+    static class MethodWriterContext {
+        final MethodWriter mw;
+        final Map<Object, Integer> variants = new LinkedHashMap<>();
+        int maxVariant;
+
+        public MethodWriterContext(MethodWriter mw, int maxVariant) {
+            this.mw = mw;
+            this.maxVariant = maxVariant;
+        }
+
+        int var(Object key) {
+            Integer var = variants.get(key);
+            if (var == null) {
+                var = maxVariant;
+                variants.put(key, var);
+                if (key == long.class || key == double.class) {
+                    maxVariant += 2;
+                } else {
+                    maxVariant += 1;
+                }
+            }
+            return var;
+        }
+
+        int var2(Object key) {
+            Integer var = variants.get(key);
+            if (var == null) {
+                var = maxVariant;
+                variants.put(key, var);
+                maxVariant += 2;
+            }
+            return var;
+        }
     }
 }
