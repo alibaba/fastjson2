@@ -1333,6 +1333,16 @@ public abstract class BeanUtils {
         return fieldName;
     }
 
+    public static Field getField(Class objectClass, String fieldName) {
+        Field[] fields = new Field[1];
+        declaredFields(objectClass, field -> {
+            if (field.getName().equals(fieldName)) {
+                fields[0] = field;
+            }
+        });
+        return fields[0];
+    }
+
     public static Field getField(Class objectClass, Method method) {
         String methodName = method.getName();
         final int len = methodName.length();

@@ -184,7 +184,7 @@ public class ObjectReaderCreator {
             declaringClass = owner.getDeclaringClass();
         }
 
-        FieldReader[] fieldReaders = new FieldReader[parameters.length];
+        List<FieldReader> fieldReaders = new ArrayList<>(parameters.length);
         for (int i = 0; i < parameters.length; i++) {
             FieldInfo fieldInfo = new FieldInfo();
 
@@ -224,7 +224,8 @@ public class ObjectReaderCreator {
 
             ObjectReader initReader = getInitReader(provider, parameter.getParameterizedType(), parameter.getType(), fieldInfo);
             Type paramType = parameter.getParameterizedType();
-            fieldReaders[i] = createFieldReaderParam(
+            fieldReaders.add(
+                    createFieldReaderParam(
                     null,
                     null,
                     fieldName,
@@ -239,10 +240,34 @@ public class ObjectReaderCreator {
                     declaringClass,
                     parameter,
                     null,
-                    initReader
-            );
+                    initReader));
+
+            if (fieldInfo.alternateNames != null) {
+                for (String alternateName : fieldInfo.alternateNames) {
+                    if (fieldName.equals(alternateName)) {
+                        continue;
+                    }
+
+                    fieldReaders.add(createFieldReaderParam(
+                            null,
+                            null,
+                            alternateName,
+                            i,
+                            fieldInfo.features,
+                            fieldInfo.format,
+                            fieldInfo.locale,
+                            fieldInfo.defaultValue,
+                            paramType,
+                            parameter.getType(),
+                            paramName,
+                            declaringClass,
+                            parameter,
+                            null,
+                            initReader));
+                }
+            }
         }
-        return fieldReaders;
+        return fieldReaders.toArray(new FieldReader[0]);
     }
 
     public <T> Function<Map<Long, Object>, T> createFactoryFunction(Method factoryMethod, String... paramNames) {
@@ -1160,6 +1185,13 @@ public class ObjectReaderCreator {
                 if (creatorConstructor.getParameterCount() == 1) {
                     FieldInfo fieldInfo = new FieldInfo();
                     provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, 0, creatorConstructor.getParameters()[0]);
+                    if (record) {
+                        Field field = getField(objectClass, fieldInfo.fieldName);
+                        if (field != null) {
+                            provider.getFieldInfo(fieldInfo, objectClass, field);
+                        }
+                    }
+
                     if ((fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
                         Type valueType = creatorConstructor.getGenericParameterTypes()[0];
                         Class valueClass = creatorConstructor.getParameterTypes()[0];
