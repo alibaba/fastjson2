@@ -15,10 +15,8 @@ final class JSONWriterUTF8JDK9
             return;
         }
 
-        int coder = STRING_CODER.applyAsInt(str);
         byte[] value = STRING_VALUE.apply(str);
-
-        if (coder == 0) {
+        if (STRING_CODER.applyAsInt(str) == 0) {
             writeStringLatin1(value);
         } else {
             writeStringUTF16(value);

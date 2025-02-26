@@ -471,7 +471,7 @@ class JSONWriterUTF8
         this.bytes[this.off++] = (byte) quote;
     }
 
-    public void writeStringLatin1(byte[] value) {
+    public final void writeStringLatin1(byte[] value) {
         if ((context.features & MASK_BROWSER_SECURE) != 0) {
             writeStringLatin1BrowserSecure(value);
             return;
