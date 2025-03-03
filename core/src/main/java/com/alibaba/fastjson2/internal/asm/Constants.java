@@ -123,7 +123,8 @@ final class Constants {
 //    static final int ASTORE_3 = 78;
     static final int WIDE = 196;
     static final int GOTO_W = 200;
-//    static final int JSR_W = 201;
+    static final int JSR_W = 201;
+    static final int ASM_GOTO_W = 220;
 
     // Constants to convert between normal and wide jump instructions.
 

@@ -154,6 +154,7 @@ public interface Opcodes {
     int IF_ACMPEQ = 165; // -
     int IF_ACMPNE = 166; // -
     int GOTO = 167; // -
+    int JSR = 168; // -
     int RET = 169; // visitVarInsn
     int TABLESWITCH = 170; // visiTableSwitchInsn
     int LOOKUPSWITCH = 171; // visitLookupSwitch

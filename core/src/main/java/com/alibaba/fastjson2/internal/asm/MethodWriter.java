@@ -597,7 +597,32 @@ public final class MethodWriter {
         boolean nextInsnIsJumpTarget = false;
         if ((label.flags & Label.FLAG_RESOLVED) != 0
                 && label.bytecodeOffset - code.length < Short.MIN_VALUE) {
-            throw new JSONException("not supported");
+            // Case of a backward jump with an offset < -32768. In this case we automatically replace GOTO
+            // with GOTO_W, JSR with JSR_W and IFxxx <l> with IFNOTxxx <L> GOTO_W <l> L:..., where
+            // IFNOTxxx is the "opposite" opcode of IFxxx (e.g. IFNE for IFEQ) and where <L> designates
+            // the instruction just after the GOTO_W.
+            if (baseOpcode == Opcodes.GOTO) {
+                code.putByte(Constants.GOTO_W);
+            } else if (baseOpcode == Opcodes.JSR) {
+                code.putByte(Constants.JSR_W);
+            } else {
+                // Put the "opposite" opcode of baseOpcode. This can be done by flipping the least
+                // significant bit for IFNULL and IFNONNULL, and similarly for IFEQ ... IF_ACMPEQ (with a
+                // pre and post offset by 1). The jump offset is 8 bytes (3 for IFNOTxxx, 5 for GOTO_W).
+                code.putByte(baseOpcode >= Opcodes.IFNULL ? baseOpcode ^ 1 : ((baseOpcode + 1) ^ 1) - 1);
+                code.putShort(8);
+                // Here we could put a GOTO_W in theory, but if ASM specific instructions are used in this
+                // method or another one, and if the class has frames, we will need to insert a frame after
+                // this GOTO_W during the additional ClassReader -> ClassWriter round trip to remove the ASM
+                // specific instructions. To not miss this additional frame, we need to use an ASM_GOTO_W
+                // here, which has the unfortunate effect of forcing this additional round trip (which in
+                // some case would not have been really necessary, but we can't know this at this point).
+                code.putByte(Constants.ASM_GOTO_W);
+                hasAsmInstructions = true;
+                // The instruction after the GOTO_W becomes the target of the IFNOT instruction.
+                nextInsnIsJumpTarget = true;
+            }
+            label.put(code, code.length - 1, true);
         } else if (baseOpcode != opcode) {
             // Case of a GOTO_W or JSR_W specified by the user (normally ClassReader when used to remove
             // ASM specific instructions). In this case we keep the original instruction.
@@ -629,6 +654,9 @@ public final class MethodWriter {
             // If the next instruction starts a new basic block, call visitLabel to add the label of this
             // instruction as a successor of the current block, and to start a new basic block.
             if (nextBasicBlock != null) {
+                if (nextInsnIsJumpTarget) {
+                    nextBasicBlock.flags |= Label.FLAG_JUMP_TARGET;
+                }
                 visitLabel(nextBasicBlock);
             }
             if (baseOpcode == Opcodes.GOTO) {
