@@ -1491,12 +1491,6 @@ final class JSONReaderASCII
         stringValue = str;
     }
 
-    static String subString(byte[] bytes, int start, int index) {
-        return STRING_CREATOR_JDK11 != null
-                        ? STRING_CREATOR_JDK11.apply(Arrays.copyOfRange(bytes, start, index), LATIN1)
-                        : new String(bytes, start, index - start, StandardCharsets.ISO_8859_1);
-    }
-
     final String readEscaped(byte[] bytes, int offset, int start, int end, int valueLength, int quote) {
         for (;;) {
             if (offset >= end) {
