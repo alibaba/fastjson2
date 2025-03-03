@@ -4731,6 +4731,9 @@ class JSONReaderUTF8
                         valueEscape = true;
                         c = bytes[offset + 1];
                         offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
+                        if (ascii && (c == 'u' || c == 'x')) {
+                            ascii = false;
+                        }
                         continue;
                     }
 
@@ -4770,82 +4773,126 @@ class JSONReaderUTF8
 
             String str;
             if (valueEscape) {
-                char[] chars = new char[valueLength];
-                offset = start;
-                for (int i = 0; ; ++i) {
-                    int ch = bytes[offset];
-                    if (ch == '\\') {
-                        ch = bytes[++offset];
-                        switch (ch) {
-                            case 'u': {
-                                ch = hexDigit4(bytes, check3(offset + 1, end));
-                                offset += 4;
-                                break;
+                if (ascii && STRING_CREATOR_JDK11 != null) {
+                    byte[] chars = new byte[valueLength];
+                    offset = start;
+                    for (int i = 0; ; ++i) {
+                        byte ch = bytes[offset];
+                        if (ch == '\\') {
+                            ch = bytes[++offset];
+                            switch (ch) {
+                                case '\\':
+                                case '"':
+                                    break;
+                                case 'b':
+                                    ch = '\b';
+                                    break;
+                                case 't':
+                                    ch = '\t';
+                                    break;
+                                case 'n':
+                                    ch = '\n';
+                                    break;
+                                case 'f':
+                                    ch = '\f';
+                                    break;
+                                case 'r':
+                                    ch = '\r';
+                                    break;
+                                default:
+                                    ch = (byte) char1(ch);
+                                    break;
                             }
-                            case 'x': {
-                                ch = char2(bytes[offset + 1], bytes[offset + 2]);
-                                offset += 2;
-                                break;
-                            }
-                            case '\\':
-                            case '"':
-                                break;
-                            case 'b':
-                                ch = '\b';
-                                break;
-                            case 't':
-                                ch = '\t';
-                                break;
-                            case 'n':
-                                ch = '\n';
-                                break;
-                            case 'f':
-                                ch = '\f';
-                                break;
-                            case 'r':
-                                ch = '\r';
-                                break;
-                            default:
-                                ch = char1(ch);
-                                break;
                         }
-                        chars[i] = (char) ch;
+                        else if (ch == quote) {
+                            break;
+                        }
+                        chars[i] = ch;
                         offset++;
-                    } else if (ch == quote) {
-                        break;
-                    } else {
-                        if (ch >= 0) {
-                            chars[i] = (char) ch;
-                            offset++;
-                        } else {
-                            switch ((ch & 0xFF) >> 4) {
-                                case 12:
-                                case 13: {
-                                    /* 110x xxxx   10xx xxxx*/
-                                    chars[i] = (char) (((ch & 0x1F) << 6) | (bytes[offset + 1] & 0x3F));
+                    }
+
+                    str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
+                } else {
+                    char[] chars = new char[valueLength];
+                    offset = start;
+                    for (int i = 0; ; ++i) {
+                        int ch = bytes[offset];
+                        if (ch == '\\') {
+                            ch = bytes[++offset];
+                            switch (ch) {
+                                case 'u': {
+                                    ch = hexDigit4(bytes, check3(offset + 1, end));
+                                    offset += 4;
+                                    break;
+                                }
+                                case 'x': {
+                                    ch = char2(bytes[offset + 1], bytes[offset + 2]);
                                     offset += 2;
                                     break;
                                 }
-                                case 14: {
-                                    chars[i] = (char)
-                                            (((ch & 0x0F) << 12) |
-                                                    ((bytes[offset + 1] & 0x3F) << 6) |
-                                                    ((bytes[offset + 2] & 0x3F) << 0));
-                                    offset += 3;
+                                case '\\':
+                                case '"':
                                     break;
-                                }
-                                default: {
-                                    /* 10xx xxxx,  1111 xxxx */
-                                    char2_utf8(bytes, offset, ch, chars, i);
-                                    offset += 4;
-                                    i++;
+                                case 'b':
+                                    ch = '\b';
+                                    break;
+                                case 't':
+                                    ch = '\t';
+                                    break;
+                                case 'n':
+                                    ch = '\n';
+                                    break;
+                                case 'f':
+                                    ch = '\f';
+                                    break;
+                                case 'r':
+                                    ch = '\r';
+                                    break;
+                                default:
+                                    ch = char1(ch);
+                                    break;
+                            }
+                            chars[i] = (char) ch;
+                            offset++;
+                        }
+                        else if (ch == quote) {
+                            break;
+                        }
+                        else {
+                            if (ch >= 0) {
+                                chars[i] = (char) ch;
+                                offset++;
+                            }
+                            else {
+                                switch ((ch & 0xFF) >> 4) {
+                                    case 12:
+                                    case 13: {
+                                        /* 110x xxxx   10xx xxxx*/
+                                        chars[i] = (char) (((ch & 0x1F) << 6) | (bytes[offset + 1] & 0x3F));
+                                        offset += 2;
+                                        break;
+                                    }
+                                    case 14: {
+                                        chars[i] = (char)
+                                                (((ch & 0x0F) << 12) |
+                                                        ((bytes[offset + 1] & 0x3F) << 6) |
+                                                        ((bytes[offset + 2] & 0x3F) << 0));
+                                        offset += 3;
+                                        break;
+                                    }
+                                    default: {
+                                        /* 10xx xxxx,  1111 xxxx */
+                                        char2_utf8(bytes, offset, ch, chars, i);
+                                        offset += 4;
+                                        i++;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                str = new String(chars);
+                    str = new String(chars);
+                }
             } else if (ascii) {
                 int strlen = offset - start;
                 if (strlen == 1) {
