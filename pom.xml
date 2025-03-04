@@ -160,7 +160,7 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
-                <version>0.48.6-public</version>
+                <version>0.51.9-public</version>
             </dependency>
             <dependency>
                 <groupId>com.carrotsearch</groupId>
