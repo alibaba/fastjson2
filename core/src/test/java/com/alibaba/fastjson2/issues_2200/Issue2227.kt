@@ -9,14 +9,12 @@ class Issue2227 {
     @Test
     fun testAssertJSONObjectWithVersion2() {
         val jsonObject = JSON.toJSON(OuterClass()) as JSONObject
-        // 以下断言失败
         Assertions.assertTrue(jsonObject["nestedClass"] is JSONObject)
     }
 
     @Test
     fun testAssertJSONObjectWithVersion1() {
         val jsonObject = com.alibaba.fastjson.JSON.toJSON(OuterClass()) as com.alibaba.fastjson.JSONObject
-        // 以下断言成功
         Assertions.assertTrue(jsonObject["nestedClass"] is com.alibaba.fastjson.JSONObject)
     }
 
