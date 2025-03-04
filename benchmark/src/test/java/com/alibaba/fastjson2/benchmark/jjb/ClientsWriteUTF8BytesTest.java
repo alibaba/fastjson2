@@ -54,8 +54,8 @@ public class ClientsWriteUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-wast millis : " + millis);
-            // zulu8.70.0.23 :
-            // zulu17.40.19 : 1364
+            // zulu8.70.0.23 : 1420
+            // zulu17.40.19 : 1364 1055
             // zulu17.40.19_vec :
             // zulu17.40.19_reflect :
         }
@@ -97,11 +97,11 @@ public class ClientsWriteUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
+        fastjson2();
 //        wast();
 //        jsonb();
 //        jsonb_beanToArray();
-        fastjson2_str();
+//        fastjson2_str();
 //        dsljson();
 //        jackson();
     }
