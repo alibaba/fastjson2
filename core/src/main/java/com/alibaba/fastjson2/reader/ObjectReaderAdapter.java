@@ -445,6 +445,21 @@ public class ObjectReaderAdapter<T>
         return fieldReader;
     }
 
+    protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Map<Long, Object> map) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL);
+        }
+
+        if (fieldReader != null) {
+            map.put(hashCode, fieldReader.readFieldValue(jsonReader));
+        } else {
+            jsonReader.skipValue();
+        }
+    }
+
     protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {
         FieldReader fieldReader = getFieldReader(hashCode);
         if (fieldReader == null

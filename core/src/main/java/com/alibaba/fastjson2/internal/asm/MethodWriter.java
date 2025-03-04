@@ -293,6 +293,14 @@ public final class MethodWriter {
         visitInsn(Opcodes.I2L);
     }
 
+    public void i2f() {
+        visitInsn(Opcodes.I2F);
+    }
+
+    public void i2d() {
+        visitInsn(Opcodes.I2D);
+    }
+
     public void lxor() {
         visitInsn(Opcodes.LXOR);
     }

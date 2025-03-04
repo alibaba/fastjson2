@@ -22,6 +22,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 class JSONReaderUTF8
         extends JSONReader {
     static final int REF = BIG_ENDIAN ? 0x24726566 : 0x66657224;
+    static final int ESCAPE_INDEX_NOT_SET = -2;
+    protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
     protected final byte[] bytes;
     protected final int length;
@@ -117,6 +119,14 @@ class JSONReaderUTF8
         this.end = offset + length;
         this.cacheItem = null;
         next();
+    }
+
+    protected final int indexOfSlash(byte[] bytes, int offset, int end) {
+        int slashIndex = nextEscapeIndex;
+        if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
+            nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
+        }
+        return slashIndex;
     }
 
     private void char_utf8(int ch, int offset) {
@@ -4246,51 +4256,72 @@ class JSONReaderUTF8
 
     @Override
     public final boolean skipName() {
-        char quote = ch;
-        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+        int quote = ch;
+        int end = this.end;
+        if (checkNameBegin(quote)) {
+            return true;
+        }
+
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+
+        int ch;
+        int slashIndex = indexOfSlash(bytes, offset, end);
+        if (slashIndex == -1 || slashIndex > index) {
+            offset = index + 1;
+            ch = offset == end ? EOI : bytes[offset++];
+        } else {
+            for (; ; ) {
+                ch = bytes[offset++];
+                if (ch == '\\') {
+                    ch = bytes[offset];
+                    offset += (ch == 'u' ? 5 : (ch == 'x' ? 3 : 1));
+                    continue;
+                }
+
+                if (ch == quote) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                    break;
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (ch != ':') {
+            throw syntaxError(ch);
+        }
+
+        ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        return true;
+    }
+
+    private boolean checkNameBegin(int quote) {
+        long features = context.features;
+        if (quote == '\'' && ((features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
         }
         if (quote != '"' && quote != '\'') {
-            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+            if ((features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
                 readFieldNameHashCodeUnquote();
                 return true;
             }
             throw notSupportName();
         }
-
-        int offset = this.offset;
-        final byte[] bytes = this.bytes;
-        for (; ; ) {
-            int ch = bytes[offset++];
-            if (ch == '\\') {
-                ch = bytes[offset];
-                offset += (ch == 'u' ? 5 : (ch == 'x' ? 3 : 1));
-                continue;
-            }
-
-            if (ch == quote) {
-                ch = offset == end ? EOI : bytes[offset++];
-
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-                if (ch != ':') {
-                    throw syntaxError(ch);
-                }
-
-                ch = offset == end ? EOI : bytes[offset++];
-
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-
-                this.offset = offset;
-                this.ch = (char) ch;
-                break;
-            }
-        }
-
-        return true;
+        return false;
     }
 
     @Override
@@ -4379,30 +4410,21 @@ class JSONReaderUTF8
                 }
                 break;
             case 't':
-                if (offset + 3 > end) {
-                    throw error(offset, ch);
-                }
-                if (bytes[offset] != 'r' || bytes[offset + 1] != 'u' || bytes[offset + 2] != 'e') {
+                if (offset + 3 > end || !IOUtils.isTRUE(bytes, offset - 1)) {
                     throw error(offset, ch);
                 }
                 offset += 3;
                 ch = offset == end ? EOI : bytes[offset++];
                 break;
             case 'f':
-                if (offset + 4 > end) {
-                    throw error(offset, ch);
-                }
-                if (bytes[offset] != 'a' || bytes[offset + 1] != 'l' || bytes[offset + 2] != 's' || bytes[offset + 3] != 'e') {
+                if (offset + 4 > end || !IOUtils.isALSE(bytes, offset)) {
                     throw error(offset, ch);
                 }
                 offset += 4;
                 ch = offset == end ? EOI : bytes[offset++];
                 break;
             case 'n':
-                if (offset + 3 > end) {
-                    throw error(offset, ch);
-                }
-                if (bytes[offset] != 'u' || bytes[offset + 1] != 'l' || bytes[offset + 2] != 'l') {
+                if (offset + 3 > end || !IOUtils.isNULL(bytes, offset - 1)) {
                     throw error(offset, ch);
                 }
                 offset += 3;
@@ -4411,26 +4433,46 @@ class JSONReaderUTF8
             case '"':
             case '\'': {
                 int quote = ch;
-                ch = bytes[offset++];
-                for (; ; ) {
-                    if (ch == '\\') {
-                        ch = bytes[offset++];
-                        if (ch == 'u') {
-                            offset += 4;
-                        } else if (ch == 'x') {
-                            offset += 2;
-                        } else if (ch != '\\' && ch != '"') {
-                            char1(ch);
-                        }
-                        ch = bytes[offset++];
-                        continue;
+                int index;
+                if (INDEX_OF_CHAR_LATIN1 == null) {
+                    index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
+                } else {
+                    try {
+                        index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
                     }
-                    if (ch == quote) {
-                        ch = offset == end ? EOI : bytes[offset++];
-                        break;
+                    catch (Throwable e) {
+                        throw new JSONException(e.getMessage());
                     }
-
+                }
+                if (index == -1) {
+                    throw error("invalid escape character EOI");
+                }
+                int slashIndex = indexOfSlash(bytes, offset, end);
+                if (slashIndex == -1 || slashIndex > index) {
+                    offset = index + 1;
+                    ch = offset == end ? EOI : bytes[offset++];
+                } else {
                     ch = bytes[offset++];
+                    for (; ; ) {
+                        if (ch == '\\') {
+                            ch = bytes[offset++];
+                            if (ch == 'u') {
+                                offset += 4;
+                            } else if (ch == 'x') {
+                                offset += 2;
+                            } else if (ch != '\\' && ch != '"') {
+                                char1(ch);
+                            }
+                            ch = bytes[offset++];
+                            continue;
+                        }
+                        if (ch == quote) {
+                            ch = offset == end ? EOI : bytes[offset++];
+                            break;
+                        }
+
+                        ch = bytes[offset++];
+                    }
                 }
                 break;
             }
@@ -4453,9 +4495,10 @@ class JSONReaderUTF8
                 } else if (ch == '{') {
                     next();
                     for (; ; ) {
-                        if (this.ch == '}') {
+                        ch = this.ch;
+                        offset = this.offset;
+                        if (ch == '}') {
                             comma = false;
-                            offset = this.offset;
                             ch = offset == end ? EOI : bytes[offset++];
                             break switch_;
                         }

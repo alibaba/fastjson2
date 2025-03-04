@@ -17,8 +17,6 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 final class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
-    static final int ESCAPE_INDEX_NOT_SET = -2;
-    private int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, bytes, offset, length);
@@ -1398,14 +1396,6 @@ final class JSONReaderASCII
         }
 
         return readStringNotMatch();
-    }
-
-    private int indexOfSlash(byte[] bytes, int offset, int end) {
-        int slashIndex = nextEscapeIndex;
-        if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
-            nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
-        }
-        return slashIndex;
     }
 
     @Override

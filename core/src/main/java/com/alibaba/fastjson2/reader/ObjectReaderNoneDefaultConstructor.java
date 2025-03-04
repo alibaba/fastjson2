@@ -65,6 +65,11 @@ public class ObjectReaderNoneDefaultConstructor<T>
         return a;
     }
 
+    @SuppressWarnings("rawtypes")
+    public Collection<FieldReader> getParameterFieldReaders() {
+        return paramFieldReaderMap.values();
+    }
+
     @Override
     public T createInstanceNoneDefaultConstructor(Map<Long, Object> values) {
         return creator.apply(values);

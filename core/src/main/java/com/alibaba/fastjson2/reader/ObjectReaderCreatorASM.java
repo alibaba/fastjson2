@@ -23,7 +23,6 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.internal.CodeGenUtils.fieldReader;
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
-import static com.alibaba.fastjson2.internal.asm.Opcodes.*;
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -46,6 +45,7 @@ public class ObjectReaderCreatorASM
     static final String METHOD_DESC_READ_FIELD_VALUE = "(" + DESC_JSON_READER + "Ljava/lang/Object;)V";
     static final String GET_FIELD_READER_UL = "(J" + DESC_JSON_READER + "J)" + DESC_FIELD_READER;
     static final String READ_FIELD_READER_UL = "(J" + DESC_JSON_READER + "JLjava/lang/Object;)V";
+    static final String READ_FIELD_READER_MAP = "(J" + DESC_JSON_READER + "JLjava/util/Map;)V";
     static final String METHOD_DESC_ADD_RESOLVE_TASK = "(" + DESC_JSON_READER + "Ljava/lang/Object;Ljava/lang/String;)V";
     static final String METHOD_DESC_ADD_RESOLVE_TASK_2 = "(" + DESC_JSON_READER + "Ljava/util/List;ILjava/lang/String;)V";
     static final String METHOD_DESC_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
@@ -338,6 +338,105 @@ public class ObjectReaderCreatorASM
     }
 
     @Override
+    protected <T> ObjectReaderNoneDefaultConstructor createNoneDefaultConstructorObjectReader(
+            Class<T> objectClass,
+            BeanInfo beanInfo,
+            Function<Map<Long, Object>, T> constructorFunction,
+            List<Constructor> alternateConstructors,
+            String[] parameterNames,
+            FieldReader[] paramFieldReaders,
+            FieldReader[] fieldReaderArray
+    ) {
+        ObjectReaderNoneDefaultConstructor objectReaderAdapter = new ObjectReaderNoneDefaultConstructor(
+                objectClass,
+                beanInfo.typeKey,
+                beanInfo.typeName,
+                beanInfo.readerFeatures,
+                constructorFunction,
+                alternateConstructors,
+                parameterNames,
+                paramFieldReaders,
+                fieldReaderArray,
+                null,
+                null
+        );
+
+        if (fieldReaderArray.length != 0) {
+            return objectReaderAdapter;
+        }
+
+        boolean externalClass = objectClass != null && classLoader.isExternalClass(objectClass);
+        ClassWriter cw = new ClassWriter(
+                (e) -> objectClass.getName().equals(e) ? objectClass : null
+        );
+
+        beanInfo.readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
+        ObjectWriteContext context = new ObjectWriteContext(beanInfo, objectClass, cw, externalClass, paramFieldReaders, null);
+
+        genFields(paramFieldReaders, cw, TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR);
+
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER, context.classNameType, TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, new String[]{});
+
+        {
+            String MD_INIT = "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/function/Function;Ljava/util/List;[Ljava/lang/String;[Lcom/alibaba/fastjson2/reader/FieldReader;[Lcom/alibaba/fastjson2/reader/FieldReader;[Ljava/lang/Class;[Ljava/lang/String;)V";
+
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    "<init>",
+                    MD_INIT,
+                    fieldReaderArray.length <= 12 ? 32 : 128);
+            mw.aload(THIS);
+            mw.aload(1); // CLASS
+            mw.aload(2); // TYPE_KEY
+            mw.aload(3); // TYPE_NAME
+            mw.lload(4); // FEATURES
+            mw.aload(6); // CREATOR
+            mw.aload(7); // alternateConstructors
+            mw.aload(8); // paramNames
+            mw.aload(9); // paramFieldReaders
+            mw.aload(10); // setterFieldReaders
+            mw.aload(11); // seeAlso
+            mw.aload(12); // seeAlsoNames
+            mw.invokespecial(TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, "<init>", MD_INIT);
+
+            int FIELD_READER_ARRAY = 9;
+            genInitFields(paramFieldReaders, context.classNameType, true, THIS, FIELD_READER_ARRAY, mw, TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR);
+
+            mw.return_();
+            mw.visitMaxs(3, 3);
+        }
+
+        String TYPE_OBJECT = objectClass == null ? ASMUtils.TYPE_OBJECT : ASMUtils.type(objectClass);
+
+        genMethodReadObject(context, beanInfo.readerFeatures, TYPE_OBJECT, paramFieldReaders, cw, context.classNameType, objectReaderAdapter);
+
+        byte[] code = cw.toByteArray();
+        try {
+            Class<?> readerClass = classLoader.defineClassPublic(context.classNameFull, code, 0, code.length);
+
+            Constructor<?> constructor = readerClass.getConstructors()[0];
+            return (ObjectReaderNoneDefaultConstructor) constructor
+                    .newInstance(
+                            objectClass,
+                            beanInfo.typeKey,
+                            beanInfo.typeName,
+                            beanInfo.readerFeatures,
+                            constructorFunction,
+                            alternateConstructors,
+                            parameterNames,
+                            paramFieldReaders,
+                            fieldReaderArray,
+                            null,
+                            null
+                    );
+        } catch (Throwable e) {
+            throw new JSONException(
+                    "create objectReader error"
+                            + (objectClass == null ? "" : ", objectType " + objectClass.getTypeName()), e);
+        }
+    }
+
+    @Override
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             String typeKey,
@@ -401,34 +500,7 @@ public class ObjectReaderCreatorASM
                 (e) -> objectClass.getName().equals(e) ? objectClass : null
         );
 
-        ObjectWriteContext context = new ObjectWriteContext(beanInfo, objectClass, cw, externalClass, fieldReaderArray);
-
-        String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaderArray.length + (objectClass == null ? "" : "_" + objectClass.getSimpleName());
-        String classNameType;
-        String classNameFull;
-
-        Package pkg = ObjectReaderCreatorASM.class.getPackage();
-        if (pkg != null) {
-            String packageName = pkg.getName();
-            int packageNameLength = packageName.length();
-            int charsLength = packageNameLength + 1 + className.length();
-            char[] chars = new char[charsLength];
-            packageName.getChars(0, packageName.length(), chars, 0);
-            chars[packageNameLength] = '.';
-            className.getChars(0, className.length(), chars, packageNameLength + 1);
-            classNameFull = new String(chars);
-
-            chars[packageNameLength] = '/';
-            for (int i = 0; i < packageNameLength; ++i) {
-                if (chars[i] == '.') {
-                    chars[i] = '/';
-                }
-            }
-            classNameType = new String(chars);
-        } else {
-            classNameType = className;
-            classNameFull = className;
-        }
+        ObjectWriteContext context = new ObjectWriteContext(beanInfo, objectClass, cw, externalClass, fieldReaderArray, defaultConstructor);
 
         final boolean generatedFields = fieldReaderArray.length < 128;
 
@@ -479,7 +551,7 @@ public class ObjectReaderCreatorASM
             genFields(fieldReaderArray, cw, objectReaderSuper);
         }
 
-        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER, classNameType, objectReaderSuper, new String[]{});
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER, context.classNameType, objectReaderSuper, new String[]{});
 
         {
             final int CLASS = 1, SUPPLIER = 2, FIELD_READER_ARRAY = 3;
@@ -504,7 +576,7 @@ public class ObjectReaderCreatorASM
             mw.aload(FIELD_READER_ARRAY);
             mw.invokespecial(objectReaderSuper, "<init>", METHOD_DESC_ADAPTER_INIT);
 
-            genInitFields(fieldReaderArray, classNameType, generatedFields, THIS, FIELD_READER_ARRAY, mw, objectReaderSuper);
+            genInitFields(fieldReaderArray, context.classNameType, generatedFields, THIS, FIELD_READER_ARRAY, mw, objectReaderSuper);
 
             mw.return_();
             mw.visitMaxs(3, 3);
@@ -562,13 +634,13 @@ public class ObjectReaderCreatorASM
             ObjectReaderAdapter objectReaderAdapter = new ObjectReaderAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, readerFeatures, null, supplier, null, fieldReaderArray);
 
             if (!disableJSONB) {
-                genMethodReadJSONBObject(context, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+                genMethodReadJSONBObject(context, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, context.classNameType, objectReaderAdapter);
                 if (!disableArrayMapping) {
-                    genMethodReadJSONBObjectArrayMapping(context, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+                    genMethodReadJSONBObjectArrayMapping(context, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, context.classNameType, objectReaderAdapter);
                 }
             }
 
-            genMethodReadObject(context, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+            genMethodReadObject(context, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, context.classNameType, objectReaderAdapter);
 
             if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER
                     || objectReaderSuper == TYPE_OBJECT_READER_1
@@ -584,14 +656,14 @@ public class ObjectReaderCreatorASM
                     || objectReaderSuper == TYPE_OBJECT_READER_11
                     || objectReaderSuper == TYPE_OBJECT_READER_12
             ) {
-                genMethodGetFieldReader(fieldReaderArray, cw, classNameType, objectReaderAdapter);
-                genMethodGetFieldReaderLCase(fieldReaderArray, cw, classNameType, objectReaderAdapter);
+                genMethodGetFieldReader(fieldReaderArray, cw, context.classNameType, objectReaderAdapter);
+                genMethodGetFieldReaderLCase(fieldReaderArray, cw, context.classNameType, objectReaderAdapter);
             }
         }
 
         byte[] code = cw.toByteArray();
         try {
-            Class<?> readerClass = classLoader.defineClassPublic(classNameFull, code, 0, code.length);
+            Class<?> readerClass = classLoader.defineClassPublic(context.classNameFull, code, 0, code.length);
 
             Constructor<?> constructor = readerClass.getConstructors()[0];
             return (ObjectReaderBean) constructor
@@ -839,7 +911,7 @@ public class ObjectReaderCreatorASM
             MethodWriter mw,
             String objectReaderSuper
     ) {
-        if (objectReaderSuper != TYPE_OBJECT_READER_ADAPTER || !generatedFields) {
+        if ((objectReaderSuper != TYPE_OBJECT_READER_ADAPTER && objectReaderSuper != TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR) || !generatedFields) {
             return;
         }
 
@@ -853,7 +925,7 @@ public class ObjectReaderCreatorASM
     }
 
     private void genFields(FieldReader[] fieldReaderArray, ClassWriter cw, String objectReaderSuper) {
-        if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER) {
+        if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER || objectReaderSuper == TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR) {
             for (int i = 0; i < fieldReaderArray.length; i++) {
                 FieldWriter fv = cw.visitField(Opcodes.ACC_PUBLIC, fieldReader(i), DESC_FIELD_READER);
             }
@@ -873,7 +945,6 @@ public class ObjectReaderCreatorASM
 
     private <T> void genMethodReadJSONBObject(
             ObjectWriteContext context,
-            Constructor defaultConstructor,
             long readerFeatures,
             String TYPE_OBJECT,
             FieldReader[] fieldReaderArray,
@@ -883,6 +954,7 @@ public class ObjectReaderCreatorASM
     ) {
         Class objectClass = context.objectClass;
         boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+        Constructor defaultConstructor = context.defaultConstructor;
 
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
                 "readJSONBObject",
@@ -1259,7 +1331,6 @@ public class ObjectReaderCreatorASM
 
     private <T> void genMethodReadJSONBObjectArrayMapping(
             ObjectWriteContext context,
-            Constructor defaultConstructor,
             long readerFeatures,
             String TYPE_OBJECT,
             FieldReader[] fieldReaderArray,
@@ -1267,6 +1338,7 @@ public class ObjectReaderCreatorASM
             String classNameType,
             ObjectReaderAdapter objectReaderAdapter
     ) {
+        Constructor defaultConstructor = context.defaultConstructor;
         boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
 
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
@@ -1386,7 +1458,6 @@ public class ObjectReaderCreatorASM
 
     private <T> void genMethodReadObject(
             ObjectWriteContext context,
-            Constructor defaultConstructor,
             long readerFeatures,
             String TYPE_OBJECT,
             FieldReader[] fieldReaderArray,
@@ -1493,13 +1564,41 @@ public class ObjectReaderCreatorASM
         mw.ifeq(notNull_);
 
         mw.aconst_null();
-        mw.astore(OBJECT);
-        mw.goto_(end_);
+        mw.areturn();
 
         mw.visitLabel(notNull_);
 
-        genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
-        mw.astore(OBJECT);
+        if (context.defaultConstructor != null || fieldBased) {
+            genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, context.defaultConstructor, objectReaderAdapter.creator);
+            mw.astore(OBJECT);
+        } else if (objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+            for (FieldReader fieldReader : fieldReaderArray) {
+                Class fieldClass = fieldReader.fieldClass;
+                int var = mwc.var(fieldReader);
+                if (fieldClass == byte.class || fieldClass == short.class || fieldClass == int.class || fieldClass == boolean.class || fieldClass == char.class) {
+                    mw.iconst_0();
+                    mw.istore(var);
+                } else if (fieldClass == long.class) {
+                    mw.lconst_0();
+                    mw.lstore(var);
+                } else if (fieldClass == float.class) {
+                    mw.iconst_0();
+                    mw.i2f();
+                    mw.fstore(var);
+                } else if (fieldClass == double.class) {
+                    mw.iconst_0();
+                    mw.i2d();
+                    mw.dstore(var);
+                } else {
+                    mw.aconst_null();
+                    mw.astore(var);
+                }
+            }
+            mw.aconst_null();
+            mw.astore(mwc.var("map"));
+        } else {
+            throw new JSONException("not supported");
+        }
 
         // for (int i = 0; i < entry_cnt; ++i) {
         Label for_start_i_ = new Label(), for_end_i_ = new Label(), for_inc_i_ = new Label();
@@ -1598,12 +1697,21 @@ public class ObjectReaderCreatorASM
 
         // continue
         if (switchGen) {
-            mw.aload(THIS);
-            mw.lload(HASH_CODE64);
-            mw.aload(JSON_READER);
-            mw.lload(FEATURES);
-            mw.aload(OBJECT);
-            mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "readFieldValue", READ_FIELD_READER_UL);
+            if (context.defaultConstructor == null) {
+                mw.aload(THIS);
+                mw.lload(HASH_CODE64);
+                mw.aload(JSON_READER);
+                mw.lload(FEATURES);
+                mw.aload(mwc.var("map"));
+                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "readFieldValue", READ_FIELD_READER_MAP);
+            } else {
+                mw.aload(THIS);
+                mw.lload(HASH_CODE64);
+                mw.aload(JSON_READER);
+                mw.lload(FEATURES);
+                mw.aload(OBJECT);
+                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "readFieldValue", READ_FIELD_READER_UL);
+            }
             mw.goto_(for_inc_i_); // continue
         } else if (fieldReaderArray.length > 6) {
             // use switch
@@ -1842,7 +1950,20 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(end_);
 
-        mw.aload(OBJECT);
+        if (context.defaultConstructor == null && !fieldBased) {
+            mw.new_(TYPE_OBJECT);
+            mw.dup();
+            StringBuilder buf = new StringBuilder().append("(");
+            for (FieldReader fieldReader : fieldReaderArray) {
+                mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
+                buf.append(ASMUtils.desc(fieldReader.fieldClass));
+            }
+            buf.append(")V");
+            mw.invokespecial(TYPE_OBJECT, "<init>", buf.toString());
+            mw.areturn();
+        } else {
+            mw.aload(OBJECT);
+        }
         mw.areturn();
 
         mw.visitMaxs(5, 10);
@@ -2755,7 +2876,9 @@ public class ObjectReaderCreatorASM
         String TYPE_FIELD_CLASS = ASMUtils.type(fieldClass);
         String DESC_FIELD_CLASS = ASMUtils.desc(fieldClass);
 
-        mw.aload(OBJECT);
+        if (context.defaultConstructor != null || fieldBased) {
+            mw.aload(OBJECT);
+        }
         int fieldModifier = 0;
         if ((fieldBased || method == null) && field != null) {
             fieldModifier = field.getModifiers();
@@ -2962,7 +3085,8 @@ public class ObjectReaderCreatorASM
                         fieldFeatures,
                         itemType,
                         TYPE_FIELD_CLASS,
-                        context
+                        context,
+                        fieldBased
                 );
             } else {
                 final String FIELD_OBJECT_READER = fieldObjectReader(i);
@@ -3131,6 +3255,11 @@ public class ObjectReaderCreatorASM
                 mw.visitVarInsn(LOAD, FIELD_VALUE);
                 mw.invokevirtual("sun/misc/Unsafe", methodName, methodDes);
             }
+        } else if (context.defaultConstructor == null) {
+            if (!fieldClass.isPrimitive()) {
+                mw.checkcast(ASMUtils.type(fieldClass));
+            }
+            mw.storeLocal(fieldClass, mwc.var(fieldReader));
         } else {
             boolean invokeFieldReaderAccept = context.externalClass || method == null || !context.publicClass;
 
@@ -3526,7 +3655,8 @@ public class ObjectReaderCreatorASM
             long fieldFeatures,
             Type itemType,
             String TYPE_FIELD_CLASS,
-            ObjectWriteContext context
+            ObjectWriteContext context,
+            boolean fieldBased
     ) {
         if (itemType == null) {
             itemType = Object.class;
@@ -3536,7 +3666,12 @@ public class ObjectReaderCreatorASM
         String ITEM_OBJECT_READER = fieldItemObjectReader(i);
         MethodWriter mw = mwc.mw;
 
-        Integer LIST = mwc.var(fieldClass);
+        int LIST;
+        if (context.defaultConstructor != null || fieldBased) {
+            LIST = mwc.var(fieldReader);
+        } else {
+            LIST = mwc.var(fieldClass);
+        }
         Integer AUTO_TYPE_OBJECT_READER = mwc.var(ObjectReader.class);
 
         String LIST_TYPE = fieldClass.isInterface() ? "java/util/ArrayList" : TYPE_FIELD_CLASS;
@@ -3833,13 +3968,17 @@ public class ObjectReaderCreatorASM
         final boolean hasStringField;
         final int fieldNameLengthMin;
         final int fieldNameLengthMax;
+        final String classNameType;
+        final String classNameFull;
+        final Constructor defaultConstructor;
 
         public ObjectWriteContext(
                 BeanInfo beanInfo,
                 Class objectClass,
                 ClassWriter cw,
                 boolean externalClass,
-                FieldReader[] fieldReaders
+                FieldReader[] fieldReaders,
+                Constructor defaultConstructor
         ) {
             this.beanInfo = beanInfo;
             this.objectClass = objectClass;
@@ -3847,6 +3986,7 @@ public class ObjectReaderCreatorASM
             this.publicClass = objectClass == null || Modifier.isPublic(objectClass.getModifiers());
             this.externalClass = externalClass;
             this.fieldReaders = fieldReaders;
+            this.defaultConstructor = defaultConstructor;
 
             int fieldNameLengthMin = 0, fieldNameLengthMax = 0;
             boolean hasStringField = false;
@@ -3876,6 +4016,31 @@ public class ObjectReaderCreatorASM
             this.hasStringField = hasStringField;
             this.fieldNameLengthMin = fieldNameLengthMin;
             this.fieldNameLengthMax = fieldNameLengthMax;
+
+            String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaders.length + (objectClass == null ? "" : "_" + objectClass.getSimpleName());
+
+            Package pkg = ObjectReaderCreatorASM.class.getPackage();
+            if (pkg != null) {
+                String packageName = pkg.getName();
+                int packageNameLength = packageName.length();
+                int charsLength = packageNameLength + 1 + className.length();
+                char[] chars = new char[charsLength];
+                packageName.getChars(0, packageName.length(), chars, 0);
+                chars[packageNameLength] = '.';
+                className.getChars(0, className.length(), chars, packageNameLength + 1);
+                classNameFull = new String(chars);
+
+                chars[packageNameLength] = '/';
+                for (int i = 0; i < packageNameLength; ++i) {
+                    if (chars[i] == '.') {
+                        chars[i] = '/';
+                    }
+                }
+                classNameType = new String(chars);
+            } else {
+                classNameType = className;
+                classNameFull = className;
+            }
         }
 
         public boolean disableSupportArrayMapping() {
@@ -4288,6 +4453,24 @@ public class ObjectReaderCreatorASM
                 var = maxVariant;
                 variants.put(key, var);
                 if (key == long.class || key == double.class) {
+                    maxVariant += 2;
+                } else {
+                    maxVariant += 1;
+                }
+            }
+            return var;
+        }
+
+        int var(FieldReader fieldReader) {
+            return var("_param_" + fieldReader.fieldName, fieldReader.fieldClass);
+        }
+
+        int var(String name, Class type) {
+            Integer var = variants.get(name);
+            if (var == null) {
+                var = maxVariant;
+                variants.put(name, var);
+                if (type == long.class || type == double.class) {
                     maxVariant += 2;
                 } else {
                     maxVariant += 1;
