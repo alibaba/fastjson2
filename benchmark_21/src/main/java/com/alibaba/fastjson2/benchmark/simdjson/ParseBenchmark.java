@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.benchmark.simdjson;
 
-
 import com.alibaba.fastjson2.JSON;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -29,7 +28,6 @@ import static com.alibaba.fastjson2.benchmark.simdjson.SimdJsonPaddingUtil.padde
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class ParseBenchmark {
-
     @Param({"/data/simd-json/twitter.json", "/data/simd-json/gsoc-2018.json", "/data/simd-json/github_events.json"})
     String fileName;
 

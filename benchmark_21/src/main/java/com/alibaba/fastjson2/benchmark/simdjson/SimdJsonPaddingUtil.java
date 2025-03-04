@@ -5,7 +5,6 @@ import java.util.Arrays;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 class SimdJsonPaddingUtil {
-
     static byte[] padded(byte[] src) {
         byte[] bufferPadded = new byte[src.length + 64];
         System.arraycopy(src, 0, bufferPadded, 0, src.length);
