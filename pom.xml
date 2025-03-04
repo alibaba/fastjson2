@@ -1020,6 +1020,15 @@
             </modules>
         </profile>
         <profile>
+            <id>enable-for-jdk21+</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <modules>
+                <module>benchmark_21</module>
+            </modules>
+        </profile>
+        <profile>
             <id>enable-codegen</id>
             <activation>
                 <jdk>(,22]</jdk>
