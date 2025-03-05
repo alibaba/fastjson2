@@ -4493,6 +4493,24 @@ class JSONReaderUTF8
                         skipValue();
                     }
                 } else if (ch == '{') {
+                    if (INDEX_OF_CHAR_LATIN1 != null) {
+                        try {
+                            int index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, (int) '}', offset, end);
+                            if (index == -1) {
+                                throw error("invalid escape character EOI");
+                            }
+                            if ((int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, (int) '{', offset, index) == -1) {
+                                int slashIndex = indexOfSlash(bytes, offset, end);
+                                if (slashIndex == -1 || slashIndex > index) {
+                                    offset = index + 1;
+                                    ch = (char) (offset == end ? EOI : bytes[offset++]);
+                                    break;
+                                }
+                            }
+                        } catch (Throwable e) {
+                            throw new JSONException(e.getMessage());
+                        }
+                    }
                     next();
                     for (; ; ) {
                         ch = this.ch;
