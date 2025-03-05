@@ -19,6 +19,7 @@ import org.simdjson.SimdJsonParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -97,13 +98,13 @@ public class SchemaBasedParseAndSelectBenchmark {
         return defaultUsers.size();
     }
 
-    record SimdJsonUser(boolean default_profile, String screen_name) {
+    record SimdJsonUser(boolean default_profile, String screen_name) implements Serializable {
     }
 
-    record SimdJsonStatus(SimdJsonUser user) {
+    record SimdJsonStatus(SimdJsonUser user) implements Serializable {
     }
 
-    record SimdJsonTwitter(List<SimdJsonStatus> statuses) {
+    record SimdJsonTwitter(List<SimdJsonStatus> statuses) implements Serializable {
     }
 
     public static void main(String[] args) throws RunnerException {
