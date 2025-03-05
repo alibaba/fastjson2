@@ -98,15 +98,15 @@ public class SchemaBasedParseAndSelectBenchmark {
         return defaultUsers.size();
     }
 
-    record SimdJsonUser(boolean default_profile, String screen_name)
+    public record SimdJsonUser(boolean default_profile, String screen_name)
             implements Serializable {
     }
 
-    record SimdJsonStatus(SimdJsonUser user)
+    public record SimdJsonStatus(SimdJsonUser user)
             implements Serializable {
     }
 
-    record SimdJsonTwitter(List<SimdJsonStatus> statuses)
+    public record SimdJsonTwitter(List<SimdJsonStatus> statuses)
             implements Serializable {
     }
 
