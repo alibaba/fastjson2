@@ -3190,10 +3190,8 @@ final class JSONReaderUTF16
                 small = true;
                 ch = offset == end ? EOI : chars[offset++];
 
-                if (ch >= '0' && ch <= '9') {
-                    do {
-                        ch = offset == end ? EOI : chars[offset++];
-                    } while (ch >= '0' && ch <= '9');
+                while (ch >= '0' && ch <= '9') {
+                    ch = offset == end ? EOI : chars[offset++];
                 }
             }
 
