@@ -2229,7 +2229,7 @@ public class ObjectReaderCreator {
                 itemClass = TypeUtils.getClass(itemClass);
             }
         }
-        if (Collection.class.isAssignableFrom(fieldClassResolved) && itemType != null) {
+        if (fieldClassResolved != null && Collection.class.isAssignableFrom(fieldClassResolved) && itemType != null) {
             return new FieldReaderListParam(
                     fieldName,
                     fieldTypeResolved,

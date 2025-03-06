@@ -58,7 +58,7 @@ public class RecordTest {
         assertEquals(item.user.screen_name, item2.user.screen_name);
     }
 
-    public record User(boolean default_profile, String screen_name) implements Serializable {
+    public record User(boolean default_profile, String screen_name) {
     }
 
     public record Item3(User user) implements Serializable {

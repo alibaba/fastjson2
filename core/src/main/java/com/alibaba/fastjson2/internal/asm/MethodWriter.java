@@ -313,6 +313,10 @@ public final class MethodWriter {
         visitInsn(Opcodes.AALOAD);
     }
 
+    public void aastore() {
+        visitInsn(Opcodes.AASTORE);
+    }
+
     private void visitInsn(final int opcode) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
@@ -461,6 +465,10 @@ public final class MethodWriter {
 
     public void new_(final String type) {
         visitTypeInsn(Opcodes.NEW, type);
+    }
+
+    public void anewArray(final String type) {
+        visitTypeInsn(Opcodes.ANEWARRAY, type);
     }
 
     public void instanceOf(final String type) {
