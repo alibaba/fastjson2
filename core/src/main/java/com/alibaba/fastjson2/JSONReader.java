@@ -446,6 +446,10 @@ public abstract class JSONReader
         return (context.features & MASK_IGNORE_NONE_SERIALIZABLE) != 0;
     }
 
+    public boolean hasAutoTypeBeforeHandler() {
+        return context.autoTypeBeforeHandler != null;
+    }
+
     public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
         return null;
     }

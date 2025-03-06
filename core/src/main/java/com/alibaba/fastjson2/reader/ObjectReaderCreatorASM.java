@@ -369,6 +369,7 @@ public class ObjectReaderCreatorASM
                 || !(constructorFunction instanceof ConstructorFunction)
                 || !alternateConstructors.isEmpty()
                 || classLoader.isExternalClass(objectClass)
+                || (beanInfo.readerFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
         ) {
             match = false;
         }
@@ -1609,6 +1610,29 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(notNull_);
 
         if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+            Label L0 = new Label(), L1 = new Label();
+            mw.aload(JSON_READER);
+            mw.invokevirtual(TYPE_JSON_READER, "hasAutoTypeBeforeHandler", "()Z");
+            mw.ifne(L0);
+
+            mw.lload(FEATURES);
+            mw.visitLdcInsn(JSONReader.Feature.SupportSmartMatch.mask | JSONReader.Feature.SupportAutoType.mask);
+            mw.land();
+            mw.lconst_0();
+            mw.lcmp();
+            mw.ifeq(L1);
+
+            mw.visitLabel(L0);
+            mw.aload(THIS);
+            mw.aload(JSON_READER);
+            mw.aload(FIELD_TYPE);
+            mw.aload(FIELD_NAME);
+            mw.lload(FEATURES);
+            mw.invokespecial(TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, "readObject", METHOD_DESC_READ_OBJECT);
+            mw.areturn();
+
+            mw.visitLabel(L1);
+
             for (FieldReader fieldReader : fieldReaderArray) {
                 Class fieldClass = fieldReader.fieldClass;
                 int var = mwc.var(fieldReader);
@@ -1693,17 +1717,24 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(hashCode64Start);
 
-        mw.aload(JSON_READER);
-        mw.invokevirtual(TYPE_JSON_READER, "readFieldNameHashCode", "()J");
-        mw.dup2();
-        mw.lstore(HASH_CODE64);
-        mw.visitLdcInsn(-1L);
-        mw.lcmp();
-        mw.ifeq(for_end_i_);
+        if (switchGen && context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+            mw.aload(JSON_READER);
+            mw.invokevirtual(TYPE_JSON_READER, "skipName", "()Z");
+            mw.pop();
+        } else {
+            mw.aload(JSON_READER);
+            mw.invokevirtual(TYPE_JSON_READER, "readFieldNameHashCode", "()J");
+            mw.dup2();
+            mw.lstore(HASH_CODE64);
+
+            mw.visitLdcInsn(-1L);
+            mw.lcmp();
+            mw.ifeq(for_end_i_);
+        }
 
         mw.visitLabel(hashCode64End);
 
-        if (!disableAutoType) {
+        if (!disableAutoType && !(context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor)) {
             Label noneAutoType_ = new Label();
 
             // if (i != 0 && hash == HASH_TYPE && jsonReader.isSupportAutoType())
@@ -1736,12 +1767,8 @@ public class ObjectReaderCreatorASM
         // continue
         if (switchGen) {
             if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
-                mw.aload(THIS);
-                mw.lload(HASH_CODE64);
                 mw.aload(JSON_READER);
-                mw.lload(FEATURES);
-                mw.aload(mwc.var("map"));
-                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "readFieldValue", READ_FIELD_READER_MAP);
+                mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
             } else {
                 mw.aload(THIS);
                 mw.lload(HASH_CODE64);

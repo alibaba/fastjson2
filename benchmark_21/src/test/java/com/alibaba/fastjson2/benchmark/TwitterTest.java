@@ -15,7 +15,7 @@ public class TwitterTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("Twitter-fastjson2_parse : " + millis);
-            // zulu21.32.17 656 551 542 538
+            // zulu21.32.17 656 551 542 538 411
         }
     }
 

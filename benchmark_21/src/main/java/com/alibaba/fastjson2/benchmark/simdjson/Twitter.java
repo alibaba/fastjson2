@@ -24,19 +24,13 @@ public class Twitter {
     public void fastjson2_parse(Blackhole bh) {
         bh.consume(JSON.parseObject(bytes, SimdJsonTwitter.class));
     }
-//
-//    public record SimdJsonUser(boolean default_profile, String screen_name) implements Serializable {
-//    }
 
-    public static class SimdJsonUser
-            implements Serializable {
-        public boolean default_profile;
-        public String screen_name;
+    public record SimdJsonUser(boolean default_profile, String screen_name) {
     }
 
-    public record SimdJsonStatus(SimdJsonUser user) implements Serializable {
+    public record SimdJsonStatus(SimdJsonUser user) {
     }
 
-    public record SimdJsonTwitter(List<SimdJsonStatus> statuses) implements Serializable {
+    public record SimdJsonTwitter(List<SimdJsonStatus> statuses) {
     }
 }
