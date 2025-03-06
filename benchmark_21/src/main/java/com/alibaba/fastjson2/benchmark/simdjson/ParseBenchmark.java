@@ -57,6 +57,11 @@ public class ParseBenchmark {
     }
 
     @Benchmark
+    public Object wast() {
+        return io.github.wycst.wast.json.JSON.parse(buffer);
+    }
+
+    @Benchmark
     public JsonValue simdjsonPadded() {
         return simdJsonParser.parse(bufferPadded, buffer.length);
     }

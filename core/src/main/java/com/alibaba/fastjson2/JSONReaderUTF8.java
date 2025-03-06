@@ -4324,201 +4324,224 @@ class JSONReaderUTF8
         return false;
     }
 
-    @Override
-    public final void skipValue() {
+    private void skipNumber() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
         int offset = this.offset, end = this.end;
-        comma = false;
+        if (ch == '-' || ch == '+') {
+            if (offset < end) {
+                ch = bytes[offset++];
+            } else {
+                throw numberError(offset, ch);
+            }
+        }
+        boolean dot = ch == '.';
+        boolean num = false;
+        if (!dot && (ch >= '0' && ch <= '9')) {
+            num = true;
+            do {
+                ch = offset == end ? EOI : bytes[offset++];
+            } while (ch >= '0' && ch <= '9');
+        }
 
-        switch_:
-        switch (ch) {
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            case '.':
-                boolean sign = ch == '-' || ch == '+';
-                if (sign) {
+        if (num && (ch == 'L' | ch == 'F' | ch == 'D' | ch == 'B' | ch == 'S')) {
+            ch = bytes[offset++];
+        } else {
+            boolean small = false;
+            if (ch == '.') {
+                small = true;
+                ch = offset == end ? EOI : bytes[offset++];
+
+                if (ch >= '0' && ch <= '9') {
+                    do {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    } while (ch >= '0' && ch <= '9');
+                }
+            }
+
+            if (!num && !small) {
+                throw numberError(offset, ch);
+            }
+
+            if (ch == 'e' || ch == 'E') {
+                ch = bytes[offset++];
+
+                boolean eSign = false;
+                if (ch == '+' || ch == '-') {
+                    eSign = true;
                     if (offset < end) {
                         ch = bytes[offset++];
                     } else {
                         throw numberError(offset, ch);
                     }
                 }
-                boolean dot = ch == '.';
-                boolean num = false;
-                if (!dot && (ch >= '0' && ch <= '9')) {
-                    num = true;
+
+                if (ch >= '0' && ch <= '9') {
                     do {
                         ch = offset == end ? EOI : bytes[offset++];
                     } while (ch >= '0' && ch <= '9');
-                }
-
-                if (num && (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S')) {
-                    ch = bytes[offset++];
-                }
-
-                boolean small = false;
-                if (ch == '.') {
-                    small = true;
-                    ch = offset == end ? EOI : bytes[offset++];
-
-                    if (ch >= '0' && ch <= '9') {
-                        do {
-                            ch = offset == end ? EOI : bytes[offset++];
-                        } while (ch >= '0' && ch <= '9');
-                    }
-                }
-
-                if (!num && !small) {
+                } else if (eSign) {
                     throw numberError(offset, ch);
                 }
-
-                if (ch == 'e' || ch == 'E') {
-                    ch = bytes[offset++];
-
-                    boolean eSign = false;
-                    if (ch == '+' || ch == '-') {
-                        eSign = true;
-                        if (offset < end) {
-                            ch = bytes[offset++];
-                        } else {
-                            throw numberError(offset, ch);
-                        }
-                    }
-
-                    if (ch >= '0' && ch <= '9') {
-                        do {
-                            ch = offset == end ? EOI : bytes[offset++];
-                        } while (ch >= '0' && ch <= '9');
-                    } else if (eSign) {
-                        throw numberError(offset, ch);
-                    }
-                }
-
-                if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-                break;
-            case 't':
-                if (offset + 3 > end || !IOUtils.isTRUE(bytes, offset - 1)) {
-                    throw error(offset, ch);
-                }
-                offset += 3;
-                ch = offset == end ? EOI : bytes[offset++];
-                break;
-            case 'f':
-                if (offset + 4 > end || !IOUtils.isALSE(bytes, offset)) {
-                    throw error(offset, ch);
-                }
-                offset += 4;
-                ch = offset == end ? EOI : bytes[offset++];
-                break;
-            case 'n':
-                if (offset + 3 > end || !IOUtils.isNULL(bytes, offset - 1)) {
-                    throw error(offset, ch);
-                }
-                offset += 3;
-                ch = offset == end ? EOI : bytes[offset++];
-                break;
-            case '"':
-            case '\'': {
-                int quote = ch;
-                int index;
-                if (INDEX_OF_CHAR_LATIN1 == null) {
-                    index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
-                } else {
-                    try {
-                        index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
-                    }
-                    catch (Throwable e) {
-                        throw new JSONException(e.getMessage());
-                    }
-                }
-                if (index == -1) {
-                    throw error("invalid escape character EOI");
-                }
-                int slashIndex = indexOfSlash(bytes, offset, end);
-                if (slashIndex == -1 || slashIndex > index) {
-                    offset = index + 1;
-                    ch = offset == end ? EOI : bytes[offset++];
-                } else {
-                    ch = bytes[offset++];
-                    for (; ; ) {
-                        if (ch == '\\') {
-                            ch = bytes[offset++];
-                            if (ch == 'u') {
-                                offset += 4;
-                            } else if (ch == 'x') {
-                                offset += 2;
-                            } else if (ch != '\\' && ch != '"') {
-                                char1(ch);
-                            }
-                            ch = bytes[offset++];
-                            continue;
-                        }
-                        if (ch == quote) {
-                            ch = offset == end ? EOI : bytes[offset++];
-                            break;
-                        }
-
-                        ch = bytes[offset++];
-                    }
-                }
-                break;
             }
-            default:
-                if (ch == '[') {
-                    next();
-                    for (int i = 0; ; ++i) {
-                        if (this.ch == ']') {
-                            comma = false;
-                            offset = this.offset;
-                            ch = offset == end ? EOI : bytes[offset++];
-                            break switch_;
-                        }
-                        if (i != 0 && !comma) {
-                            throw valueError();
-                        }
-                        comma = false;
-                        skipValue();
-                    }
-                } else if (ch == '{') {
-                    next();
-                    for (; ; ) {
-                        ch = this.ch;
-                        offset = this.offset;
-                        if (ch == '}') {
-                            comma = false;
-                            ch = offset == end ? EOI : bytes[offset++];
-                            break switch_;
-                        }
-                        skipName();
-                        skipValue();
-                    }
-                } else if (ch == 'S' && nextIfSet()) {
-                    skipValue();
-                } else {
-                    throw error(offset, ch);
-                }
-                ch = this.ch;
-                offset = this.offset;
-                break;
+
+            if (ch == 'F' || ch == 'D') {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : bytes[offset++];
         }
 
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = (char) ch;
+        this.offset = offset;
+    }
+
+    private void skipString() {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        int offset = this.offset, end = this.end;
+        int quote = ch;
+        int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+        int slashIndex = indexOfSlash(bytes, offset, end);
+        if (slashIndex == -1 || slashIndex > index) {
+            offset = index + 1;
+            ch = offset == end ? EOI : bytes[offset++];
+        } else {
+            offset = skipStringEscaped(bytes, slashIndex, ch);
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = (char) ch;
+        this.offset = offset;
+    }
+
+    private int skipStringEscaped(byte[] bytes, int offset, int ch) {
+        int quote = ch;
+        ch = bytes[offset++];
+        for (; ; ) {
+            if (ch == '\\') {
+                ch = bytes[offset++];
+                if (ch == 'u') {
+                    offset += 4;
+                } else if (ch == 'x') {
+                    offset += 2;
+                } else if (ch != '\\' && ch != '"') {
+                    char1(ch);
+                }
+                ch = bytes[offset++];
+                continue;
+            }
+            if (ch == quote) {
+                return offset;
+            }
+
+            ch = bytes[offset++];
+        }
+    }
+
+    private void skipObject() {
+        next();
+        for (int i = 0; ; ++i) {
+            if (this.ch == '}') {
+                break;
+            }
+            if (i != 0 && !comma) {
+                throw valueError();
+            }
+            skipName();
+            skipValue();
+        }
+
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = (char) ch;
+        this.offset = offset;
+    }
+
+    private void skipArray() {
+        next();
+        for (int i = 0; ; ++i) {
+            if (this.ch == ']') {
+                break;
+            }
+            if (i != 0 && !comma) {
+                throw valueError();
+            }
+            skipValue();
+        }
+
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
         if (ch == ',') {
             comma = true;
             ch = offset == end ? EOI : bytes[offset++];
@@ -4535,8 +4558,153 @@ class JSONReaderUTF8
             throw error(offset, ch);
         }
 
+        this.comma = comma;
         this.ch = (char) ch;
         this.offset = offset;
+    }
+
+    private void skipFalse() {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        int offset = this.offset, end = this.end;
+
+        if (offset + 4 > end || !IOUtils.isALSE(bytes, offset)) {
+            throw error(offset, ch);
+        }
+        offset += 4;
+        ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = (char) ch;
+        this.offset = offset;
+    }
+
+    private void skipTrue() {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        int offset = this.offset, end = this.end;
+
+        if (offset + 3 > end || !IOUtils.isTRUE(bytes, offset - 1)) {
+            throw error(offset, ch);
+        }
+        offset += 3;
+        ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = (char) ch;
+        this.offset = offset;
+    }
+
+    private void skipNull() {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        int offset = this.offset, end = this.end;
+
+        if (offset + 3 > end || !IOUtils.isNULL(bytes, offset - 1)) {
+            throw error(offset, ch);
+        }
+        offset += 3;
+        ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = (char) ch;
+        this.offset = offset;
+    }
+
+    private void skipSet() {
+        if (nextIfSet()) {
+            skipArray();
+        } else {
+            throw error(offset, ch);
+        }
+    }
+
+    @Override
+    public final void skipValue() {
+        switch (ch) {
+            case 't':
+                skipTrue();
+                break;
+            case 'f':
+                skipFalse();
+                break;
+            case 'n':
+                skipNull();
+                break;
+            case '"':
+            case '\'':
+                skipString();
+                break;
+            case '{':
+                skipObject();
+                break;
+            case '[':
+                skipArray();
+                break;
+            case 'S':
+                skipSet();
+                break;
+            default:
+                skipNumber();
+                break;
+        }
     }
 
     @Override

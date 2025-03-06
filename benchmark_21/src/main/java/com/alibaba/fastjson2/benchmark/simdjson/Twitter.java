@@ -6,7 +6,6 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.List;
 
 public class Twitter {
@@ -23,6 +22,10 @@ public class Twitter {
 
     public void fastjson2_parse(Blackhole bh) {
         bh.consume(JSON.parseObject(bytes, SimdJsonTwitter.class));
+    }
+
+    public void wast_parse(Blackhole bh) {
+        bh.consume(io.github.wycst.wast.json.JSON.parseObject(bytes, SimdJsonTwitter.class));
     }
 
     public record SimdJsonUser(boolean default_profile, String screen_name) {

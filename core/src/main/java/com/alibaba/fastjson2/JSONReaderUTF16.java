@@ -3162,190 +3162,209 @@ final class JSONReaderUTF16
         return readStringNotMatch();
     }
 
-    @Override
-    public final void skipValue() {
+    private void skipNumber() {
         final char[] chars = this.chars;
         char ch = this.ch;
         int offset = this.offset, end = this.end;
-        comma = false;
+        if (ch == '-' || ch == '+') {
+            if (offset < end) {
+                ch = chars[offset++];
+            } else {
+                throw numberError(offset, ch);
+            }
+        }
+        boolean dot = ch == '.';
+        boolean num = false;
+        if (!dot && (ch >= '0' && ch <= '9')) {
+            num = true;
+            do {
+                ch = offset == end ? EOI : chars[offset++];
+            } while (ch >= '0' && ch <= '9');
+        }
 
-        switch_:
-        switch (ch) {
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            case '.':
-                boolean sign = ch == '-' || ch == '+';
-                if (sign) {
+        if (num && (ch == 'L' | ch == 'F' | ch == 'D' | ch == 'B' | ch == 'S')) {
+            ch = chars[offset++];
+        } else {
+            boolean small = false;
+            if (ch == '.') {
+                small = true;
+                ch = offset == end ? EOI : chars[offset++];
+
+                if (ch >= '0' && ch <= '9') {
+                    do {
+                        ch = offset == end ? EOI : chars[offset++];
+                    } while (ch >= '0' && ch <= '9');
+                }
+            }
+
+            if (!num && !small) {
+                throw numberError(offset, ch);
+            }
+
+            if (ch == 'e' || ch == 'E') {
+                ch = chars[offset++];
+
+                boolean eSign = false;
+                if (ch == '+' || ch == '-') {
+                    eSign = true;
                     if (offset < end) {
                         ch = chars[offset++];
                     } else {
                         throw numberError(offset, ch);
                     }
                 }
-                boolean dot = ch == '.';
-                boolean num = false;
-                if (!dot && (ch >= '0' && ch <= '9')) {
-                    num = true;
+
+                if (ch >= '0' && ch <= '9') {
                     do {
                         ch = offset == end ? EOI : chars[offset++];
                     } while (ch >= '0' && ch <= '9');
-                }
-
-                if (num && (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S')) {
-                    ch = chars[offset++];
-                }
-
-                boolean small = false;
-                if (ch == '.') {
-                    small = true;
-                    ch = offset == end ? EOI : chars[offset++];
-
-                    if (ch >= '0' && ch <= '9') {
-                        do {
-                            ch = offset == end ? EOI : chars[offset++];
-                        } while (ch >= '0' && ch <= '9');
-                    }
-                }
-
-                if (!num && !small) {
+                } else if (eSign) {
                     throw numberError(offset, ch);
                 }
-
-                if (ch == 'e' || ch == 'E') {
-                    ch = chars[offset++];
-
-                    boolean eSign = false;
-                    if (ch == '+' || ch == '-') {
-                        eSign = true;
-                        if (offset < end) {
-                            ch = chars[offset++];
-                        } else {
-                            throw numberError(offset, ch);
-                        }
-                    }
-
-                    if (ch >= '0' && ch <= '9') {
-                        do {
-                            ch = offset == end ? EOI : chars[offset++];
-                        } while (ch >= '0' && ch <= '9');
-                    } else if (eSign) {
-                        throw numberError(offset, ch);
-                    }
-                }
-
-                if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-                    ch = offset == end ? EOI : chars[offset++];
-                }
-                break;
-            case 't':
-                if (offset + 3 > end) {
-                    throw error(offset, ch);
-                }
-                if (chars[offset] != 'r' || chars[offset + 1] != 'u' || chars[offset + 2] != 'e') {
-                    throw error(offset, ch);
-                }
-                offset += 3;
-                ch = offset == end ? EOI : chars[offset++];
-                break;
-            case 'f':
-                if (offset + 4 > end) {
-                    throw error(offset, ch);
-                }
-                if (chars[offset] != 'a' || chars[offset + 1] != 'l' || chars[offset + 2] != 's' || chars[offset + 3] != 'e') {
-                    throw error(offset, ch);
-                }
-                offset += 4;
-                ch = offset == end ? EOI : chars[offset++];
-                break;
-            case 'n':
-                if (offset + 3 > end) {
-                    throw error(offset, ch);
-                }
-                if (chars[offset] != 'u' || chars[offset + 1] != 'l' || chars[offset + 2] != 'l') {
-                    throw error(offset, ch);
-                }
-                offset += 3;
-                ch = offset == end ? EOI : chars[offset++];
-                break;
-            case '"':
-            case '\'': {
-                char quote = ch;
-                ch = chars[offset++];
-                for (; ; ) {
-                    if (ch == '\\') {
-                        ch = chars[offset++];
-                        if (ch == 'u') {
-                            offset += 4;
-                        } else if (ch == 'x') {
-                            offset += 2;
-                        } else if (ch != '\\' && ch != '"') {
-                            char1(ch);
-                        }
-                        ch = chars[offset++];
-                        continue;
-                    }
-
-                    if (ch == quote) {
-                        ch = offset == end ? EOI : chars[offset++];
-                        break;
-                    }
-
-                    ch = chars[offset++];
-                }
-                break;
             }
-            default:
-                if (ch == '[') {
-                    next();
-                    for (int i = 0; ; ++i) {
-                        if (this.ch == ']') {
-                            comma = false;
-                            offset = this.offset;
-                            ch = offset == end ? EOI : chars[offset++];
-                            break switch_;
-                        }
-                        if (i != 0 && !comma) {
-                            throw valueError();
-                        }
-                        comma = false;
-                        skipValue();
-                    }
-                } else if (ch == '{') {
-                    next();
-                    for (; ; ) {
-                        if (this.ch == '}') {
-                            comma = false;
-                            offset = this.offset;
-                            ch = offset == end ? EOI : chars[offset++];
-                            break switch_;
-                        }
-                        skipName();
-                        skipValue();
-                    }
-                } else if (ch == 'S' && nextIfSet()) {
-                    skipValue();
-                } else {
-                    throw error(offset, ch);
-                }
-                ch = this.ch;
-                offset = this.offset;
-                break;
+
+            if (ch == 'F' || ch == 'D') {
+                ch = offset == end ? EOI : chars[offset++];
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
 
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = ch;
+        this.offset = offset;
+    }
+
+    private void skipString() {
+        final char[] chars = this.chars;
+        char quote = this.ch;
+        int offset = this.offset, end = this.end;
+        char ch = offset == end ? EOI : chars[offset++];
+        for (; ; ) {
+            if (ch == '\\') {
+                ch = chars[offset++];
+                if (ch == 'u') {
+                    offset += 4;
+                } else if (ch == 'x') {
+                    offset += 2;
+                } else if (ch != '\\' && ch != '"') {
+                    char1(ch);
+                }
+                ch = chars[offset++];
+                continue;
+            }
+
+            if (ch == quote) {
+                ch = offset == end ? EOI : chars[offset++];
+                break;
+            }
+
+            ch = chars[offset++];
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = ch;
+        this.offset = offset;
+    }
+
+    private void skipObject() {
+        next();
+        for (int i = 0; ; ++i) {
+            if (this.ch == '}') {
+                break;
+            }
+            if (i != 0 && !comma) {
+                throw valueError();
+            }
+            skipName();
+            skipValue();
+        }
+
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = offset == end ? EOI : chars[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = ch;
+        this.offset = offset;
+    }
+
+    private void skipArray() {
+        next();
+        for (int i = 0; ; ++i) {
+            if (this.ch == ']') {
+                break;
+            }
+            if (i != 0 && !comma) {
+                throw valueError();
+            }
+            skipValue();
+        }
+
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = offset == end ? EOI : chars[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
+
+        boolean comma = false;
         if (ch == ',') {
             comma = true;
             ch = offset == end ? EOI : chars[offset++];
@@ -3362,8 +3381,153 @@ final class JSONReaderUTF16
             throw error(offset, ch);
         }
 
+        this.comma = comma;
         this.ch = ch;
         this.offset = offset;
+    }
+
+    private void skipFalse() {
+        final char[] chars = this.chars;
+        char ch = this.ch;
+        int offset = this.offset, end = this.end;
+
+        if (offset + 4 > end || !IOUtils.isALSE(chars, offset)) {
+            throw error(offset, ch);
+        }
+        offset += 4;
+        ch = offset == end ? EOI : chars[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = ch;
+        this.offset = offset;
+    }
+
+    private void skipTrue() {
+        final char[] chars = this.chars;
+        char ch = this.ch;
+        int offset = this.offset, end = this.end;
+
+        if (offset + 3 > end || !IOUtils.isTRUE(chars, offset - 1)) {
+            throw error(offset, ch);
+        }
+        offset += 3;
+        ch = offset == end ? EOI : chars[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = ch;
+        this.offset = offset;
+    }
+
+    private void skipNull() {
+        final char[] chars = this.chars;
+        char ch = this.ch;
+        int offset = this.offset, end = this.end;
+
+        if (offset + 3 > end || !IOUtils.isNULL(chars, offset - 1)) {
+            throw error(offset, ch);
+        }
+        offset += 3;
+        ch = offset == end ? EOI : chars[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw error(offset, ch);
+        }
+
+        this.comma = comma;
+        this.ch = ch;
+        this.offset = offset;
+    }
+
+    private void skipSet() {
+        if (nextIfSet()) {
+            skipArray();
+        } else {
+            throw error(offset, ch);
+        }
+    }
+
+    @Override
+    public final void skipValue() {
+        switch (ch) {
+            case 't':
+                skipTrue();
+                break;
+            case 'f':
+                skipFalse();
+                break;
+            case 'n':
+                skipNull();
+                break;
+            case '"':
+            case '\'':
+                skipString();
+                break;
+            case '{':
+                skipObject();
+                break;
+            case '[':
+                skipArray();
+                break;
+            case 'S':
+                skipSet();
+                break;
+            default:
+                skipNumber();
+                break;
+        }
     }
 
     @Override

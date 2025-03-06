@@ -98,16 +98,26 @@ public class SchemaBasedParseAndSelectBenchmark {
         return defaultUsers.size();
     }
 
-    public record SimdJsonUser(boolean default_profile, String screen_name)
-            implements Serializable {
+    @Benchmark
+    public int countUniqueUsersWithDefaultProfile_wast() {
+        Set<String> defaultUsers = new HashSet<>();
+        SimdJsonTwitter twitter = io.github.wycst.wast.json.JSON.parseObject(buffer, SimdJsonTwitter.class);
+        for (SimdJsonStatus status : twitter.statuses()) {
+            SimdJsonUser user = status.user();
+            if (user.default_profile()) {
+                defaultUsers.add(user.screen_name());
+            }
+        }
+        return defaultUsers.size();
     }
 
-    public record SimdJsonStatus(SimdJsonUser user)
-            implements Serializable {
+    public record SimdJsonUser(boolean default_profile, String screen_name) {
     }
 
-    public record SimdJsonTwitter(List<SimdJsonStatus> statuses)
-            implements Serializable {
+    public record SimdJsonStatus(SimdJsonUser user) {
+    }
+
+    public record SimdJsonTwitter(List<SimdJsonStatus> statuses) {
     }
 
     public static void main(String[] args) throws RunnerException {
