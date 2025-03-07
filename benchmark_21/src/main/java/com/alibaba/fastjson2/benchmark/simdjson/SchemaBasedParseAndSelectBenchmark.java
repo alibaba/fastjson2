@@ -30,9 +30,19 @@ import static com.alibaba.fastjson2.benchmark.simdjson.SimdJsonPaddingUtil.padde
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class SchemaBasedParseAndSelectBenchmark {
-    private final SimdJsonParser simdJsonParser = new SimdJsonParser();
+    private final SimdJsonParser simdJsonParser;
     private final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    public SchemaBasedParseAndSelectBenchmark() {
+        SimdJsonParser p = null;
+        try {
+            p = new SimdJsonParser();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        simdJsonParser = p;
+    }
 
     private byte[] buffer;
     private byte[] bufferPadded;
