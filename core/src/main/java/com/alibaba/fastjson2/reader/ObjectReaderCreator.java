@@ -1273,18 +1273,14 @@ public class ObjectReaderCreator {
                         creatorConstructor.getParameters(),
                         parameterNames
                 );
-                return new ObjectReaderNoneDefaultConstructor(
+                return createNoneDefaultConstructorObjectReader(
                         objectClass,
-                        beanInfo.typeKey,
-                        beanInfo.typeName,
-                        beanInfo.readerFeatures,
+                        beanInfo,
                         constructorFunction,
                         alternateConstructors,
                         parameterNames,
                         paramFieldReaders,
-                        fieldReaderArray,
-                        null,
-                        null
+                        fieldReaderArray
                 );
             }
         }
@@ -1342,6 +1338,30 @@ public class ObjectReaderCreator {
         }
 
         return objectReader;
+    }
+
+    protected <T> ObjectReaderNoneDefaultConstructor createNoneDefaultConstructorObjectReader(
+            Class<T> objectClass,
+            BeanInfo beanInfo,
+            Function<Map<Long, Object>, T> constructorFunction,
+            List<Constructor> alternateConstructors,
+            String[] parameterNames,
+            FieldReader[] paramFieldReaders,
+            FieldReader[] fieldReaderArray
+    ) {
+        return new ObjectReaderNoneDefaultConstructor(
+                objectClass,
+                beanInfo.typeKey,
+                beanInfo.typeName,
+                beanInfo.readerFeatures,
+                constructorFunction,
+                alternateConstructors,
+                parameterNames,
+                paramFieldReaders,
+                fieldReaderArray,
+                null,
+                null
+        );
     }
 
     public <T> FieldReader[] createFieldReaders(Class<T> objectClass) {
@@ -2197,6 +2217,33 @@ public class ObjectReaderCreator {
         }
         if (fieldClassResolved == null) {
             fieldClassResolved = fieldClass;
+        }
+
+        Type itemType = null;
+        Class itemClass = null;
+        if (fieldTypeResolved instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) fieldTypeResolved;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (actualTypeArguments.length == 1) {
+                itemType = actualTypeArguments[0];
+                itemClass = TypeUtils.getClass(itemClass);
+            }
+        }
+        if (fieldClassResolved != null && Collection.class.isAssignableFrom(fieldClassResolved) && itemType != null) {
+            return new FieldReaderListParam(
+                    fieldName,
+                    fieldTypeResolved,
+                    paramName,
+                    parameter,
+                    fieldClassResolved,
+                    itemType,
+                    itemClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    schema);
         }
 
         return new FieldReaderObjectParam(

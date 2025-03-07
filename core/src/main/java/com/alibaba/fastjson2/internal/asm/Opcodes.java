@@ -91,6 +91,7 @@ public interface Opcodes {
     int DSTORE = 57; // -
     int ASTORE = 58; // -
     int IASTORE = 79; // visitInsn
+    int AASTORE = 83; // -
     int BASTORE = 84; // -
     int CASTORE = 85; // -
     int POP = 87; // visitInsn
@@ -126,6 +127,8 @@ public interface Opcodes {
     int LXOR = 131; // -
     int IINC = 132; // visitIincInsn
     int I2L = 133; // visitInsn
+    int I2F = 134; // -
+    int I2D = 135; // -
     int L2I = 136; //
     int F2I = 139; // -
     int F2L = 140; // -
@@ -173,6 +176,8 @@ public interface Opcodes {
     int INVOKESTATIC = 184; // -
     int INVOKEINTERFACE = 185; // -
     int NEW = 187; // visitTypeInsn
+    int NEWARRAY = 188; // -
+    int ANEWARRAY = 189; // -
     int ARRAYLENGTH = 190; // visitInsn
     int ATHROW = 191; // -
     int CHECKCAST = 192; // visitTypeInsn

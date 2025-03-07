@@ -293,6 +293,14 @@ public final class MethodWriter {
         visitInsn(Opcodes.I2L);
     }
 
+    public void i2f() {
+        visitInsn(Opcodes.I2F);
+    }
+
+    public void i2d() {
+        visitInsn(Opcodes.I2D);
+    }
+
     public void lxor() {
         visitInsn(Opcodes.LXOR);
     }
@@ -303,6 +311,10 @@ public final class MethodWriter {
 
     public void aaload() {
         visitInsn(Opcodes.AALOAD);
+    }
+
+    public void aastore() {
+        visitInsn(Opcodes.AASTORE);
     }
 
     private void visitInsn(final int opcode) {
@@ -453,6 +465,10 @@ public final class MethodWriter {
 
     public void new_(final String type) {
         visitTypeInsn(Opcodes.NEW, type);
+    }
+
+    public void anewArray(final String type) {
+        visitTypeInsn(Opcodes.ANEWARRAY, type);
     }
 
     public void instanceOf(final String type) {

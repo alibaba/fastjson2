@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
@@ -16,8 +17,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
         extends ObjectReaderAdapter<T> {
     final String[] paramNames;
     final FieldReader[] setterFieldReaders;
-    private final Function<Map<Long, Object>, T> creator;
+    final Function<Map<Long, Object>, T> creatorFunction;
     final Map<Long, FieldReader> paramFieldReaderMap;
+    final Constructor noneDefaultConstructor;
 
     public ObjectReaderNoneDefaultConstructor(
             Class objectClass,
@@ -47,11 +49,16 @@ public class ObjectReaderNoneDefaultConstructor<T>
         );
 
         this.paramNames = paramNames;
-        this.creator = creator;
+        this.creatorFunction = creator;
         this.setterFieldReaders = setterFieldReaders;
         this.paramFieldReaderMap = new HashMap<>();
         for (FieldReader paramFieldReader : paramFieldReaders) {
             paramFieldReaderMap.put(paramFieldReader.fieldNameHash, paramFieldReader);
+        }
+        if (creatorFunction instanceof ConstructorFunction) {
+            noneDefaultConstructor = ((ConstructorFunction) creator).constructor;
+        } else {
+            noneDefaultConstructor = null;
         }
     }
 
@@ -65,9 +72,14 @@ public class ObjectReaderNoneDefaultConstructor<T>
         return a;
     }
 
+    @SuppressWarnings("rawtypes")
+    public Collection<FieldReader> getParameterFieldReaders() {
+        return paramFieldReaderMap.values();
+    }
+
     @Override
     public T createInstanceNoneDefaultConstructor(Map<Long, Object> values) {
-        return creator.apply(values);
+        return creatorFunction.apply(values);
     }
 
     @Override
@@ -342,7 +354,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         Map<Long, Object> argsMap = valueMap == null ? Collections.emptyMap() : valueMap;
-        T object = creator.apply(argsMap);
+        T object = creatorFunction.apply(argsMap);
 
         if (setterFieldReaders != null && valueMap != null) {
             for (int i = 0; i < setterFieldReaders.length; i++) {
@@ -520,5 +532,14 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         return object;
+    }
+
+    public T createInstance(Object[] args) {
+        try {
+            return (T) noneDefaultConstructor.newInstance(args);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+                 InvocationTargetException e) {
+            throw new JSONException("invoke constructor error, " + constructor, e);
+        }
     }
 }

@@ -446,6 +446,10 @@ public abstract class JSONReader
         return (context.features & MASK_IGNORE_NONE_SERIALIZABLE) != 0;
     }
 
+    public boolean hasAutoTypeBeforeHandler() {
+        return context.autoTypeBeforeHandler != null;
+    }
+
     public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
         return null;
     }
@@ -4324,7 +4328,9 @@ public abstract class JSONReader
     protected static final long MASK_SUPPORT_AUTO_TYPE = 1L << 5;
     protected static final long MASK_SUPPORT_SMART_MATCH = 1L << 6;
     protected static final long MASK_TRIM_STRING = 1L << 14;
+    protected static final long MASK_ALLOW_UN_QUOTED_FIELD_NAMES = 1L << 17;
     protected static final long MASK_EMPTY_STRING_AS_NULL = 1L << 27;
+    protected static final long MASK_DISABLE_SINGLE_QUOTE = 1L << 31L;
     protected static final long MASK_DISABLE_REFERENCE_DETECT = 1L << 33;
 
     public enum Feature {
@@ -4352,7 +4358,7 @@ public abstract class JSONReader
         TrimString(MASK_TRIM_STRING),
         ErrorOnNotSupportAutoType(1 << 15),
         DuplicateKeyValueAsArray(1 << 16),
-        AllowUnQuotedFieldNames(1 << 17),
+        AllowUnQuotedFieldNames(MASK_ALLOW_UN_QUOTED_FIELD_NAMES),
         NonStringKeyAsString(1 << 18),
         /**
          * @since 2.0.13
@@ -4449,7 +4455,7 @@ public abstract class JSONReader
          * Feature that disables the support for single quote.
          * @since 2.0.53
          */
-        DisableSingleQuote(1L << 31L),
+        DisableSingleQuote(MASK_DISABLE_SINGLE_QUOTE),
 
         /**
          * @since 2.0.53
@@ -4518,6 +4524,21 @@ public abstract class JSONReader
         this.ch = (char) savePoint.current;
     }
 
+    final boolean checkNameBegin(int quote) {
+        long features = context.features;
+        if (quote == '\'' && ((features & MASK_DISABLE_SINGLE_QUOTE) != 0)) {
+            throw notSupportName();
+        }
+        if (quote != '"' && quote != '\'') {
+            if ((features & MASK_ALLOW_UN_QUOTED_FIELD_NAMES) != 0) {
+                readFieldNameHashCodeUnquote();
+                return true;
+            }
+            throw notSupportName();
+        }
+        return false;
+    }
+
     final JSONException notSupportName() {
         return new JSONException(info("not support unquoted name"));
     }
@@ -4532,6 +4553,10 @@ public abstract class JSONReader
 
     final JSONException error(String message, Exception cause) {
         return new JSONException(info(message), cause);
+    }
+
+    final JSONException error() {
+        throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
     }
 
     final JSONException error(int offset, int ch) {
