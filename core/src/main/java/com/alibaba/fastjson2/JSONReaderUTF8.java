@@ -4311,6 +4311,9 @@ class JSONReaderUTF8
         boolean num = false;
         if (!dot && (ch >= '0' && ch <= '9')) {
             num = true;
+            while (IOUtils.isDigit2(bytes, offset)) {
+                offset += 2;
+            }
             do {
                 ch = offset == end ? EOI : bytes[offset++];
             } while (ch >= '0' && ch <= '9');

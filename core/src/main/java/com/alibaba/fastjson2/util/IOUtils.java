@@ -1514,6 +1514,22 @@ public class IOUtils {
         return (d & 0xF) * 10 + (d >> 8);
     }
 
+    public static boolean isDigit2(byte[] bytes, int off) {
+        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            x = Short.reverseBytes(x);
+        }
+        return (((x & 0xF0F0) - 0x3030) | (((x & 0x0F0F) + 0x0606) & 0xF0F0)) == 0;
+    }
+
+    public static boolean isDigit2(char[] bytes, int off) {
+        int x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) off << 1));
+        if (BIG_ENDIAN) {
+            x = Integer.reverseBytes(x);
+        }
+        return ((((x & 0xFFF0FFF0) - 0x300030) | (((x & 0x0F000F) + 0x060006) & 0xF000F0)) == 0);
+    }
+
     public static int digit(int d) {
         return d >= 0 && d <= 9 ? d : -1;
     }
