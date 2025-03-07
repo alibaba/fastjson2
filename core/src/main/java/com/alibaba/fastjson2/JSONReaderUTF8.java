@@ -4263,7 +4263,7 @@ class JSONReaderUTF8
     private static int skipName(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
         int quote = jsonReader.ch;
         if (jsonReader.checkNameBegin(quote)) {
-            return offset;
+            return jsonReader.offset;
         }
 
         int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
@@ -4641,11 +4641,25 @@ class JSONReaderUTF8
     }
 
     private static int skipSet(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
-        if (jsonReader.nextIfSet()) {
+        if (nextIfSet(jsonReader, bytes, offset, end)) {
             return skipArray(jsonReader, bytes, jsonReader.offset, end);
         } else {
             throw jsonReader.error();
         }
+    }
+
+    private static boolean nextIfSet(JSONReaderUTF8 jsonReader, byte[] chars, int offset, int end) {
+        if (offset + 1 < end && chars[offset] == 'e' && chars[offset + 1] == 't') {
+            offset += 2;
+            int ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+            jsonReader.offset = offset;
+            jsonReader.ch = (char) ch;
+            return true;
+        }
+        return false;
     }
 
     private static int skipValue(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
