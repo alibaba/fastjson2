@@ -3355,7 +3355,7 @@ final class JSONReaderUTF16
     }
 
     public static int next(JSONReaderUTF16 jsonReader, char[] bytes, int offset, int end) {
-        int ch = offset >= end ? EOI : bytes[offset++];
+        int ch = offset == end ? EOI : bytes[offset++];
         while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             ch = offset == end ? EOI : bytes[offset++];
         }
