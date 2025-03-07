@@ -1357,7 +1357,7 @@ final class JSONReaderASCII
             if (index == -1) {
                 throw error("invalid escape character EOI");
             }
-            int slashIndex = indexOfSlash(bytes, offset, end);
+            int slashIndex = indexOfSlash(this, bytes, offset, end);
             if (slashIndex == -1 || slashIndex > index) {
                 offset = index + 1;
             } else {

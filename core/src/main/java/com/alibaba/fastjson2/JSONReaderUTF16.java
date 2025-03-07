@@ -2356,19 +2356,11 @@ final class JSONReaderUTF16
     @Override
     public final boolean skipName() {
         char quote = ch;
-        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
-            throw notSupportName();
+        if (checkNameBegin(quote)) {
+            return true;
         }
 
-        if (quote != '"' && quote != '\'') {
-            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
-                readFieldNameHashCodeUnquote();
-                return true;
-            }
-            throw notSupportName();
-        }
-
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         final char[] chars = this.chars;
         for (; ; ) {
             char ch = chars[offset++];

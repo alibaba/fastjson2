@@ -1356,6 +1356,10 @@ public class IOUtils {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
     }
 
+    public static boolean notALSE(byte[] buf, int pos) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != ALSE;
+    }
+
     public static boolean isALSE(char[] buf, int pos) {
         return getLongUnaligned(buf, pos) == ALSE_64;
     }
@@ -1364,8 +1368,16 @@ public class IOUtils {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == NULL_32;
     }
 
+    public static boolean notNULL(byte[] buf, int pos) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != NULL_32;
+    }
+
     public static boolean isTRUE(byte[] buf, int pos) {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == TRUE;
+    }
+
+    public static boolean notTRUE(byte[] buf, int pos) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != TRUE;
     }
 
     public static boolean isTRUE(char[] buf, int pos) {
