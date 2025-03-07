@@ -15,7 +15,7 @@ public class TwitterTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("Twitter-fastjson2_parse : " + millis);
-            // zulu21.32.17 656 551 542 538 411 385
+            // zulu21.32.17 520
         }
     }
 
@@ -27,12 +27,12 @@ public class TwitterTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("Twitter-wast_parse : " + millis);
-            // zulu21.32.17 365
+            // zulu21.32.17 463
         }
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_parse();
-//        wast_parse();
+//        fastjson2_parse();
+        wast_parse();
     }
 }
