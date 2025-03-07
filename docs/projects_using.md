@@ -146,3 +146,5 @@
 * https://github.com/elunez/eladmin-mp
 * https://github.com/LinQi0777/RiskEngine
 * https://github.com/niujt/Hospital
+* https://github.com/xbatis/xbatis
+* https://github.com/ageerle/ruoyi-ai
