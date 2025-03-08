@@ -442,7 +442,7 @@ public class LambdaMiscCodec {
                     METHOD_TYPE_FUNCTION,
                     METHOD_TYPE_OBJECT_OBJECT,
                     methodHandle,
-                    MethodType.methodType(declaringClass, param0)
+                    MethodType.methodType(declaringClass, box(param0))
             );
             return (Function) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {

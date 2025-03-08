@@ -8,6 +8,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_NULL;
@@ -20,6 +21,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
     final Function<Map<Long, Object>, T> creatorFunction;
     final Map<Long, FieldReader> paramFieldReaderMap;
     final Constructor noneDefaultConstructor;
+    final BiFunction bifunction;
+    final Function function;
 
     public ObjectReaderNoneDefaultConstructor(
             Class objectClass,
@@ -59,6 +62,13 @@ public class ObjectReaderNoneDefaultConstructor<T>
             noneDefaultConstructor = ((ConstructorFunction) creator).constructor;
         } else {
             noneDefaultConstructor = null;
+        }
+        if (creator instanceof ConstructorFunction) {
+            bifunction = ((ConstructorFunction<T>) creator).biFunction;
+            function = ((ConstructorFunction<T>) creator).function;
+        } else {
+            bifunction = null;
+            function = null;
         }
     }
 
@@ -536,6 +546,12 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
     public T createInstance(Object[] args) {
         try {
+            if (function != null) {
+                return (T) function.apply(args[0]);
+            }
+            if (bifunction != null) {
+                return (T) bifunction.apply(args[0], args[1]);
+            }
             return (T) noneDefaultConstructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
                  InvocationTargetException e) {

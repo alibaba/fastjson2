@@ -80,4 +80,21 @@ public class RecordTest {
 
     private record Item4(int value) {
     }
+
+
+    @Test
+    public void test5() {
+        Item5 item = new Item5(new User5(true, "abc"));
+        String str = JSON.toJSONString(item);
+        Item5 item2 = JSON.parseObject(str, Item5.class);
+        assertEquals(item.user.default_profile, item2.user.default_profile);
+        assertEquals(item.user.screen_name, item2.user.screen_name);
+    }
+
+    private record User5(boolean default_profile, String screen_name) {
+    }
+
+    private record Item5(User5 user) implements Serializable {
+    }
+
 }
