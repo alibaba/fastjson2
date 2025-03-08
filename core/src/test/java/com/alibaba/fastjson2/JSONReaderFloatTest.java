@@ -170,7 +170,7 @@ public class JSONReaderFloatTest {
             String str0 = new String(chars, 0, OFF + 3);
             float f0 = Float.parseFloat(str0);
             double d0 = Double.parseDouble(str0);
-            assertEquals(f0, JSON.parseObject(str0, Float.class));
+            assertEquals(f0, JSON.parseObject(str0, Float.class), str0);
             assertEquals(d0, JSON.parseObject(str0, Double.class));
             assertEquals(f0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForFloats)).floatValue());
             assertEquals(d0, ((BigDecimal) JSON.parse(str0, JSONReader.Feature.UseBigDecimalForDoubles)).doubleValue());

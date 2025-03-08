@@ -599,15 +599,6 @@ public class MutableBigInteger {
         return (int) carry;
     }
 
-    private long toLong() {
-        assert (intLen <= 2) : "this MutableBigInteger exceeds the range of long";
-        if (intLen == 0) {
-            return 0;
-        }
-        long d = value[offset] & LONG_MASK;
-        return (intLen == 2) ? d << 32 | (value[offset + 1] & LONG_MASK) : d;
-    }
-
     public long longValue(int sign) {
         if (intLen == 0 || sign == 0) {
             return 0;
@@ -619,6 +610,10 @@ public class MutableBigInteger {
             result = (result << 32) + (getInt(mag, sign, i) & LONG_MASK);
         }
         return result;
+    }
+
+    public int intValue() {
+        return value[value.length - 1];
     }
 
     private int[] getMagnitudeArray() {
