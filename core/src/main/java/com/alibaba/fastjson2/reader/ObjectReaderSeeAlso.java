@@ -215,7 +215,7 @@ final class ObjectReaderSeeAlso<T>
                     }
                 }
 
-                if (i != 0) {
+                if (i != 0 || fieldReader != null) {
                     jsonReader.reset(savePoint);
                 }
 
