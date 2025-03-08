@@ -63,4 +63,21 @@ public class RecordTest {
 
     public record Item3(User user) implements Serializable {
     }
+
+    @Test
+    public void test4() {
+        Item4 item = new Item4(123);
+        String str = JSON.toJSONString(item);
+        String str1 = JSON.toJSONString(item, JSONWriter.Feature.FieldBased);
+        assertEquals(str, str1);
+
+        JSONObject object = JSON.parseObject(str);
+        assertEquals(item.value, object.get("value"));
+
+        Item4 item2 = JSON.parseObject(str, Item4.class);
+        assertEquals(item.value, item2.value);
+    }
+
+    private record Item4(int value) {
+    }
 }

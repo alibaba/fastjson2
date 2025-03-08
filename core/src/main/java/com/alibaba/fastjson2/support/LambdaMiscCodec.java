@@ -529,7 +529,7 @@ public class LambdaMiscCodec {
                         method.getName(),
                         MethodType.methodType(objectClass, param0)
                 );
-                methodType = MethodType.methodType(objectClass, declaringClass, param0);
+                methodType = MethodType.methodType(objectClass, declaringClass, box(param0));
             }
 
             CallSite callSite = LambdaMetafactory.metafactory(
@@ -567,7 +567,7 @@ public class LambdaMiscCodec {
                     METHOD_TYPE_BI_FUNCTION,
                     METHOD_TYPE_OBJECT_OBJECT_OBJECT,
                     methodHandle,
-                    MethodType.methodType(declaringClass, param0, param1)
+                    MethodType.methodType(declaringClass, box(param0), box(param1))
             );
             return (BiFunction) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
@@ -575,6 +575,34 @@ public class LambdaMiscCodec {
         }
 
         return new ConstructorBiFunction(constructor);
+    }
+
+    static Class<?> box(Class cls) {
+        if (cls == int.class) {
+            return Integer.class;
+        }
+        if (cls == long.class) {
+            return Long.class;
+        }
+        if (cls == boolean.class) {
+            return Boolean.class;
+        }
+        if (cls == short.class) {
+            return Short.class;
+        }
+        if (cls == byte.class) {
+            return Byte.class;
+        }
+        if (cls == char.class) {
+            return Character.class;
+        }
+        if (cls == float.class) {
+            return Float.class;
+        }
+        if (cls == double.class) {
+            return Double.class;
+        }
+        return cls;
     }
 
     static final class ConstructorSupplier
