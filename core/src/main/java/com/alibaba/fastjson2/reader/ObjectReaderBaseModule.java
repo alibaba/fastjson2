@@ -33,6 +33,7 @@ import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectReaderBaseModule
         implements ObjectReaderModule {
+    static Method METHOD_getPermittedSubclasses;
     final ObjectReaderProvider provider;
     final ReaderAnnotationProcessor annotationProcessor;
 
@@ -296,6 +297,36 @@ public class ObjectReaderBaseModule
                         break;
                     default:
                         break;
+                }
+            }
+
+            if (JDKUtils.JVM_VERSION >= 17
+                    && beanInfo.seeAlso == null
+                    && objectClass.isAnnotationPresent(JSONType.class)
+            ) {
+                try {
+                    Method method = METHOD_getPermittedSubclasses;
+                    if (method == null) {
+                        method = Class.class.getMethod("getPermittedSubclasses");
+                        METHOD_getPermittedSubclasses = method;
+                    }
+                    Class[] classes = (Class[]) method.invoke(objectClass);
+                    beanInfo.seeAlso = classes;
+                    beanInfo.seeAlsoNames = new String[classes.length];
+                    for (int i = 0; i < classes.length; i++) {
+                        Class<?> item = classes[i];
+
+                        BeanInfo itemBeanInfo = new BeanInfo(provider);
+                        processSeeAlsoAnnotation(itemBeanInfo, item);
+                        String typeName = itemBeanInfo.typeName;
+                        if (typeName == null || typeName.isEmpty()) {
+                            typeName = item.getSimpleName();
+                        }
+                        beanInfo.seeAlsoNames[i] = typeName;
+                    }
+                    beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
+                } catch (Throwable ignored) {
+                    // ignore
                 }
             }
 

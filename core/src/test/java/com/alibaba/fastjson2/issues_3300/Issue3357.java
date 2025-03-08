@@ -23,7 +23,8 @@ public class Issue3357 {
     }
 
     @JSONType(typeName = "cat")
-    static class Cat {
+    static class Cat
+            implements Animal {
         private final String type;
         private final int age;
 
