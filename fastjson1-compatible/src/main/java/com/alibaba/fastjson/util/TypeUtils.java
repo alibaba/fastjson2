@@ -26,6 +26,7 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.util.KotlinUtils;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -46,17 +47,6 @@ public class TypeUtils {
     private static boolean setAccessibleEnable = true;
     public static boolean compatibleWithJavaBean;
     public static boolean compatibleWithFieldName;
-
-    private static volatile Class kotlin_metadata;
-    private static volatile boolean kotlin_metadata_error;
-    private static volatile boolean kotlin_class_klass_error;
-    private static volatile Constructor kotlin_kclass_constructor;
-    private static volatile Method kotlin_kclass_getConstructors;
-    private static volatile Method kotlin_kfunction_getParameters;
-    private static volatile Method kotlin_kparameter_getName;
-    private static volatile boolean kotlin_error;
-    private static volatile Map<Class, String[]> kotlinIgnores;
-    private static volatile boolean kotlinIgnores_error;
 
     private static boolean transientClassInited;
     private static Class<? extends Annotation> transientClass;
@@ -1123,14 +1113,7 @@ public class TypeUtils {
     }
 
     public static boolean isKotlin(Class clazz) {
-        if (kotlin_metadata == null && !kotlin_metadata_error) {
-            try {
-                kotlin_metadata = Class.forName("kotlin.Metadata");
-            } catch (Throwable e) {
-                kotlin_metadata_error = true;
-            }
-        }
-        return kotlin_metadata != null && clazz.isAnnotationPresent(kotlin_metadata);
+        return KotlinUtils.isKotlin(clazz);
     }
 
     public static Constructor getKotlinConstructor(Constructor[] constructors) {
@@ -1138,123 +1121,15 @@ public class TypeUtils {
     }
 
     public static Constructor getKotlinConstructor(Constructor[] constructors, String[] paramNames) {
-        Constructor creatorConstructor = null;
-        for (Constructor<?> constructor : constructors) {
-            Class<?>[] parameterTypes = constructor.getParameterTypes();
-            if (paramNames != null && parameterTypes.length != paramNames.length) {
-                continue;
-            }
-            // String equals to Class will always return false !
-            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1].getName())) {
-                continue;
-            }
-            if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
-                continue;
-            }
-            creatorConstructor = constructor;
-        }
-        return creatorConstructor;
+        return KotlinUtils.getKotlinConstructor(constructors, paramNames);
     }
 
     public static String[] getKoltinConstructorParameters(Class clazz) {
-        if (kotlin_kclass_constructor == null && !kotlin_class_klass_error) {
-            try {
-                Class class_kotlin_kclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
-                kotlin_kclass_constructor = class_kotlin_kclass.getConstructor(Class.class);
-            } catch (Throwable e) {
-                kotlin_class_klass_error = true;
-            }
-        }
-        if (kotlin_kclass_constructor == null) {
-            return null;
-        }
-
-        if (kotlin_kclass_getConstructors == null && !kotlin_class_klass_error) {
-            try {
-                Class class_kotlin_kclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
-                kotlin_kclass_getConstructors = class_kotlin_kclass.getMethod("getConstructors");
-            } catch (Throwable e) {
-                kotlin_class_klass_error = true;
-            }
-        }
-
-        if (kotlin_kfunction_getParameters == null && !kotlin_class_klass_error) {
-            try {
-                Class class_kotlin_kfunction = Class.forName("kotlin.reflect.KFunction");
-                kotlin_kfunction_getParameters = class_kotlin_kfunction.getMethod("getParameters");
-            } catch (Throwable e) {
-                kotlin_class_klass_error = true;
-            }
-        }
-
-        if (kotlin_kparameter_getName == null && !kotlin_class_klass_error) {
-            try {
-                Class class_kotlinn_kparameter = Class.forName("kotlin.reflect.KParameter");
-                kotlin_kparameter_getName = class_kotlinn_kparameter.getMethod("getName");
-            } catch (Throwable e) {
-                kotlin_class_klass_error = true;
-            }
-        }
-
-        if (kotlin_error) {
-            return null;
-        }
-
-        try {
-            Object constructor = null;
-            Object kclassImpl = kotlin_kclass_constructor.newInstance(clazz);
-            Iterable it = (Iterable) kotlin_kclass_getConstructors.invoke(kclassImpl);
-            for (Iterator iterator = it.iterator(); iterator.hasNext();) {
-                Object item = iterator.next();
-                List parameters = (List) kotlin_kfunction_getParameters.invoke(item);
-                if (constructor != null && parameters.size() == 0) {
-                    continue;
-                }
-                constructor = item;
-            }
-
-            if (constructor == null) {
-                return null;
-            }
-
-            List parameters = (List) kotlin_kfunction_getParameters.invoke(constructor);
-            String[] names = new String[parameters.size()];
-            for (int i = 0; i < parameters.size(); i++) {
-                Object param = parameters.get(i);
-                names[i] = (String) kotlin_kparameter_getName.invoke(param);
-            }
-            return names;
-        } catch (Throwable e) {
-            e.printStackTrace();
-            kotlin_error = true;
-        }
-        return null;
+        return KotlinUtils.getKoltinConstructorParameters(clazz);
     }
 
     static boolean isKotlinIgnore(Class clazz, String methodName) {
-        if (kotlinIgnores == null && !kotlinIgnores_error) {
-            try {
-                Map<Class, String[]> map = new HashMap<>();
-                Class charRangeClass = Class.forName("kotlin.ranges.CharRange");
-                map.put(charRangeClass, new String[]{"getEndInclusive", "isEmpty"});
-                Class intRangeClass = Class.forName("kotlin.ranges.IntRange");
-                map.put(intRangeClass, new String[]{"getEndInclusive", "isEmpty"});
-                Class longRangeClass = Class.forName("kotlin.ranges.LongRange");
-                map.put(longRangeClass, new String[]{"getEndInclusive", "isEmpty"});
-                Class floatRangeClass = Class.forName("kotlin.ranges.ClosedFloatRange");
-                map.put(floatRangeClass, new String[]{"getEndInclusive", "isEmpty"});
-                Class doubleRangeClass = Class.forName("kotlin.ranges.ClosedDoubleRange");
-                map.put(doubleRangeClass, new String[]{"getEndInclusive", "isEmpty"});
-                kotlinIgnores = map;
-            } catch (Throwable error) {
-                kotlinIgnores_error = true;
-            }
-        }
-        if (kotlinIgnores == null) {
-            return false;
-        }
-        String[] ignores = kotlinIgnores.get(clazz);
-        return ignores != null && Arrays.binarySearch(ignores, methodName) >= 0;
+        return KotlinUtils.isKotlinIgnore(clazz, methodName);
     }
 
     private static boolean isJSONTypeIgnore(Class<?> clazz, String propertyName) {
