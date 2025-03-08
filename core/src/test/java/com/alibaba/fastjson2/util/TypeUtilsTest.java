@@ -13,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 
+import static com.alibaba.fastjson2.util.JDKUtils.FIELD_BIGINTEGER_MAG_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_HIGH;
 import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_LOW;
 import static org.junit.jupiter.api.Assertions.*;
@@ -885,5 +887,33 @@ public class TypeUtilsTest {
         Double2 double2 = JSON.parseObject(json2Bytes, Double2.class);
         assertEquals(d1, double2.getV0000());
         assertEquals(d1, double2.getV0001());
+    }
+
+    @Test
+    public void test_gen_magic_table() {
+        BigInteger[] bigInts = new BigInteger[128];
+        bigInts[0] = BigInteger.ONE;
+        bigInts[1] = BigInteger.TEN;
+        long longValue = 10;
+        for (int i = 2; i < 19; ++i) {
+            longValue *= 10;
+            bigInts[i] = BigInteger.valueOf(longValue);
+        }
+        BigInteger bigInt = bigInts[18];
+        for (int i = 19; i < 128; ++i) {
+            bigInt = bigInt.multiply(BigInteger.TEN);
+            bigInts[i] = bigInt;
+        }
+
+        for (int i = 0; i < bigInts.length; i++) {
+            bigInt = bigInts[i];
+            int[] magic = (int[]) UNSAFE.getObject(bigInt, FIELD_BIGINTEGER_MAG_OFFSET);
+            String string = Arrays.toString(magic);
+            string = "{" + string.substring(1, string.length() - 1) + "}";
+            if (i != 0) {
+                string += ",";
+            }
+            System.out.println(string);
+        }
     }
 }
