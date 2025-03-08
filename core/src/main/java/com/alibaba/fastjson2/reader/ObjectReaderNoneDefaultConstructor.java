@@ -23,6 +23,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
     final Constructor noneDefaultConstructor;
     final BiFunction bifunction;
     final Function function;
+    final FactoryFunction factoryFunction;
 
     public ObjectReaderNoneDefaultConstructor(
             Class objectClass,
@@ -66,9 +67,15 @@ public class ObjectReaderNoneDefaultConstructor<T>
         if (creator instanceof ConstructorFunction) {
             bifunction = ((ConstructorFunction<T>) creator).biFunction;
             function = ((ConstructorFunction<T>) creator).function;
+            factoryFunction = null;
+        } else if (creator instanceof FactoryFunction) {
+            bifunction = ((FactoryFunction<T>) creator).biFunction;
+            function = ((FactoryFunction<T>) creator).function;
+            factoryFunction = (FactoryFunction) creator;
         } else {
             bifunction = null;
             function = null;
+            factoryFunction = null;
         }
     }
 
@@ -551,6 +558,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
             if (bifunction != null) {
                 return (T) bifunction.apply(args[0], args[1]);
+            }
+            if (factoryFunction != null) {
+                return (T) factoryFunction.createInstance(args);
             }
             return (T) noneDefaultConstructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException |

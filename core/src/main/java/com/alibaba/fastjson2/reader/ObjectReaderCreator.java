@@ -771,18 +771,14 @@ public class ObjectReaderCreator {
             setterFieldReaders = array;
         }
 
-        return (ObjectReader<T>) new ObjectReaderNoneDefaultConstructor(
+        return createNoneDefaultConstructorObjectReader(
                 objectClass,
-                beanInfo.typeKey,
-                beanInfo.typeName,
-                beanInfo.readerFeatures,
+                beanInfo,
                 function,
                 null,
                 paramNames,
                 toFieldReaderArray(fieldReaders),
-                setterFieldReaders,
-                beanInfo.seeAlso,
-                beanInfo.seeAlsoNames
+                setterFieldReaders
         );
     }
 
@@ -1341,7 +1337,7 @@ public class ObjectReaderCreator {
     }
 
     protected <T> ObjectReaderNoneDefaultConstructor createNoneDefaultConstructorObjectReader(
-            Class<T> objectClass,
+            Class objectClass,
             BeanInfo beanInfo,
             Function<Map<Long, Object>, T> constructorFunction,
             List<Constructor> alternateConstructors,
@@ -1359,8 +1355,8 @@ public class ObjectReaderCreator {
                 parameterNames,
                 paramFieldReaders,
                 fieldReaderArray,
-                null,
-                null
+                beanInfo.seeAlso,
+                beanInfo.seeAlsoNames
         );
     }
 

@@ -340,7 +340,7 @@ public class ObjectReaderCreatorASM
 
     @Override
     protected <T> ObjectReaderNoneDefaultConstructor createNoneDefaultConstructorObjectReader(
-            Class<T> objectClass,
+            Class objectClass,
             BeanInfo beanInfo,
             Function<Map<Long, Object>, T> constructorFunction,
             List<Constructor> alternateConstructors,
@@ -358,18 +358,20 @@ public class ObjectReaderCreatorASM
                 parameterNames,
                 paramFieldReaders,
                 fieldReaderArray,
-                null,
-                null
+                beanInfo.seeAlso,
+                beanInfo.seeAlsoNames
         );
 
         boolean match = true;
 
         if (beanInfo.autoTypeBeforeHandler != null
                 || fieldReaderArray.length != 0
-                || !(constructorFunction instanceof ConstructorFunction)
-                || !alternateConstructors.isEmpty()
+                || (!(constructorFunction instanceof ConstructorFunction) && (!(constructorFunction instanceof FactoryFunction)))
+                || (alternateConstructors != null && !alternateConstructors.isEmpty())
                 || classLoader.isExternalClass(objectClass)
                 || (beanInfo.readerFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                || (objectReaderAdapter.noneDefaultConstructor != null && objectReaderAdapter.noneDefaultConstructor.getParameterCount() != fieldReaderArray.length)
+                || (constructorFunction instanceof FactoryFunction && ((FactoryFunction<T>) constructorFunction).paramNames.length != fieldReaderArray.length)
         ) {
             match = false;
         }
@@ -2027,8 +2029,10 @@ public class ObjectReaderCreatorASM
             ObjectReaderNoneDefaultConstructor objectReaderNoneDefaultConstructor = (ObjectReaderNoneDefaultConstructor) context.objectReaderAdapter;
             boolean constructDirect = true;
             if (classLoader.isExternalClass(context.objectClass)
+                    || context.objectClass.getTypeParameters().length != 0
                     || (objectReaderNoneDefaultConstructor.constructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.constructor.getModifiers()))
                     || (context.objectClass != null && !Modifier.isPublic(context.objectClass.getModifiers()))
+                    || objectReaderNoneDefaultConstructor.factoryFunction != null
             ) {
                 constructDirect = false;
             }
