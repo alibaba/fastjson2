@@ -81,7 +81,6 @@ public class RecordTest {
     private record Item4(int value) {
     }
 
-
     @Test
     public void test5() {
         Item5 item = new Item5(new User5(true, "abc"));
@@ -96,5 +95,4 @@ public class RecordTest {
 
     private record Item5(User5 user) implements Serializable {
     }
-
 }
