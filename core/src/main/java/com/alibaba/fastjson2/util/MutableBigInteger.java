@@ -77,9 +77,9 @@ final class MutableBigInteger {
     static long divideKnuthLong(long intCompact, int ql, int scale) {
         int[] pow10 = MutableBigInteger.BIG_TEN_POWERS_MAGIC_TABLE[scale];
         int[] magic_a, magic_b;
+        int v0 = (int) (intCompact >>> 32), v1 = (int) intCompact;
         if (ql <= 0) {
             int n = -ql;
-            int v0 = (int) (intCompact >>> 32), v1 = (int) intCompact;
             int nInts = n >>> 5;
             int nBits = n & 0x1f;
             if (nBits == 0) {
@@ -101,10 +101,7 @@ final class MutableBigInteger {
             }
             magic_b = pow10;
         } else {
-            magic_a = new int[]{
-                    (int) (intCompact >>> 32),
-                    (int) intCompact
-            };
+            magic_a = new int[]{v0, v1};
             magic_b = shiftLeft(pow10, ql);
         }
 
@@ -112,19 +109,8 @@ final class MutableBigInteger {
             return 0;
         }
 
-        if (magic_a.length == magic_b.length) {
-            boolean equals = true;
-            // Add Integer.MIN_VALUE to make the comparison act as unsigned integer
-            // comparison.
-            for (int i = 0, j = 0; i < magic_a.length; i++, j++) {
-                if (magic_a[i] + 0x80000000 != magic_b[j] + 0x80000000) {
-                    equals = false;
-                    break;
-                }
-            }
-            if (equals) {
-                return 1;
-            }
+        if (magic_a.length == magic_b.length && equals(magic_a, magic_b)) {
+            return 1;
         }
 
         // Special case one word divisor
@@ -331,29 +317,16 @@ final class MutableBigInteger {
         return ((q[limit - 2] & LONG_MASK) << 32) + (q[limit - 1] & LONG_MASK);
     }
 
-    private static int[] shiftLeft(long intCompact, int n) {
-        int v0 = (int) (intCompact >>> 32), v1 = (int) intCompact;
-        int nInts = n >>> 5;
-        int nBits = n & 0x1f;
-        int[] newMag;
-        if (nBits == 0) {
-            newMag = new int[2 + nInts];
-            newMag[0] = v0;
-            newMag[1] = v1;
-        } else {
-            int i = 0;
-            int nBits2 = 32 - nBits;
-            int highBits = v0 >>> nBits2;
-            if (highBits != 0) {
-                newMag = new int[3 + nInts];
-                newMag[i++] = highBits;
-            } else {
-                newMag = new int[2 + nInts];
+    private static boolean equals(int[] magic_a, int[] magic_b) {
+        boolean equals = true;
+        // Add Integer.MIN_VALUE to make the comparison act as unsigned integer
+        // comparison.
+        for (int i = 0, j = 0; i < magic_a.length; i++, j++) {
+            if (magic_a[i] + 0x80000000 != magic_b[j] + 0x80000000) {
+                return false;
             }
-            newMag[i] = v0 << nBits | v1 >>> nBits2;
-            newMag[i + 1] = v1 << nBits;
         }
-        return newMag;
+        return true;
     }
 
     private static int[] shiftLeft(int[] mag, int n) {
