@@ -77,10 +77,10 @@ public class UsersParseUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
+        fastjson2();
 //        fastjson2_str();
 //        fastjson2_chars();
-        wast();
+//        wast();
 //        dsljson();
 //        jackson();
     }

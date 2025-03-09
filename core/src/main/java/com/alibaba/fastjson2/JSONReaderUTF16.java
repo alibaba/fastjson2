@@ -2631,7 +2631,7 @@ final class JSONReaderUTF16
                     value = false;
                 }
                 if (!value) {
-                    if (scale > 0 && scale < 128) {
+                    if (scale > 0 && scale < 64) {
                         doubleValue = TypeUtils.doubleValue(fc == '-' ? -1 : 1, Math.abs(result), scale);
                     } else {
                         result = 1; // invalid

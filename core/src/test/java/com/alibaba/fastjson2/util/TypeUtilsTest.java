@@ -891,7 +891,7 @@ public class TypeUtilsTest {
 
     @Test
     public void test_gen_magic_table() {
-        BigInteger[] bigInts = new BigInteger[128];
+        BigInteger[] bigInts = new BigInteger[64];
         bigInts[0] = BigInteger.ONE;
         bigInts[1] = BigInteger.TEN;
         long longValue = 10;
@@ -900,7 +900,7 @@ public class TypeUtilsTest {
             bigInts[i] = BigInteger.valueOf(longValue);
         }
         BigInteger bigInt = bigInts[18];
-        for (int i = 19; i < 128; ++i) {
+        for (int i = 19; i < 64; ++i) {
             bigInt = bigInt.multiply(BigInteger.TEN);
             bigInts[i] = bigInt;
         }
@@ -909,11 +909,27 @@ public class TypeUtilsTest {
             bigInt = bigInts[i];
             int[] magic = (int[]) UNSAFE.getObject(bigInt, FIELD_BIGINTEGER_MAG_OFFSET);
             String string = Arrays.toString(magic);
-            string = "{" + string.substring(1, string.length() - 1) + "}";
-            if (i != 0) {
-                string += ",";
-            }
+            string = "{" + string.substring(1, string.length() - 1) + "},";
             System.out.println(string);
+        }
+    }
+
+    @Test
+    public void test_double_value() {
+        String[] strings = {
+                "0.1E-23",
+                "0.1E-50",
+                "8388607.0",
+                "1.401298464324817E-112"
+        };
+
+        for (String str : strings) {
+            assertEquals(
+                    Float.parseFloat(str),
+                    JSONReader.of("\"" + str + "\"").readFloatValue());
+            assertEquals(
+                    Double.parseDouble(str),
+                    JSONReader.of("\"" + str + "\"").readDoubleValue());
         }
     }
 }
