@@ -701,7 +701,7 @@ public final class NumberUtils {
                 e10 = -e10;
             }
             if (e10 > 99) {
-                int n = e10 / 100;
+                int n = (int) (e10 * 1374389535L >> 37); //e10 / 100;
                 buf[off] = (byte) (n + 48);
                 e10 = e10 - n * 100;
                 IOUtils.putShortUnaligned(buf, off + 1, TWO_DIGITS_16_BITS[e10]);
@@ -804,7 +804,7 @@ public final class NumberUtils {
                 e10 = -e10;
             }
             if (e10 > 99) {
-                int n = e10 / 100;
+                int n = (int) (e10 * 1374389535L >> 37); //
                 buf[off] = (char) (n + 48);
                 e10 = e10 - n * 100;
                 IOUtils.putIntUnaligned(buf, off + 1, TWO_DIGITS_32_BITS[e10]);

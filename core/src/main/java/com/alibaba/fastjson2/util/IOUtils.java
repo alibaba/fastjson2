@@ -758,7 +758,7 @@ public class IOUtils {
         } else if (year > 9999) {
             bytes[off++] = '+';
         }
-        int y01 = year / 100;
+        int y01 = (int) (year * 1374389535L >> 37); //year / 100;
         int y23 = year - y01 * 100;
 
         if (year >= 0 && year < 10000) {
@@ -783,7 +783,7 @@ public class IOUtils {
         } else if (year > 9999) {
             chars[off++] = '+';
         }
-        int y01 = year / 100;
+        int y01 = (int) (year * 1374389535L >> 37); // year / 100;
         int y23 = year - y01 * 100;
 
         if (year >= 0 && year < 10000) {
@@ -819,8 +819,8 @@ public class IOUtils {
     }
 
     public static int writeNano(byte[] bytes, int off, int nano) {
-        final int div = nano / 1000;
-        final int div2 = div / 1000;
+        final int div = (int) (nano * 274877907L >> 38); //nano / 1000;
+        final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
         putIntLE(bytes, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
@@ -850,8 +850,8 @@ public class IOUtils {
     }
 
     public static int writeNano(char[] chars, int off, int nano) {
-        final int div = nano / 1000;
-        final int div2 = div / 1000;
+        final int div = (int) (nano * 274877907L >> 38); //nano / 1000;
+        final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
         putLongLE(chars, off, DIGITS_K_64[div2 & 0x3ff] & 0xffffffffffff0000L | DOT_X0);
@@ -897,23 +897,20 @@ public class IOUtils {
     }
 
     private static int writeInt4(byte[] buf, int off, int v) {
-        int v1 = v / 100;
-        putIntUnaligned(buf, off, mergeInt32(v - v1 * 100, v1));
+        int v1 = (int) (v * 1374389535L >> 37); // v / 100;
+        int v0 = v - v1 * 100;
+        int v2 = PACKED_DIGITS[v1 & 0x7f] | (PACKED_DIGITS[v0 & 0x7f] << 16);
+        if (BIG_ENDIAN) {
+            v2 = Integer.reverseBytes(v2);
+        }
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + off, v2);
         return off + 4;
     }
 
     private static int writeInt4(char[] buf, int off, int v) {
-        int v1 = v / 100;
+        int v1 = (int) (v * 1374389535L >> 37); // v / 100;
         putLongUnaligned(buf, off, mergeInt64(v - v1 * 100, v1));
         return off + 4;
-    }
-
-    private static int mergeInt32(int v1, int v2) {
-        int v = PACKED_DIGITS[v2 & 0x7f] | (PACKED_DIGITS[v1 & 0x7f] << 16);
-        if (BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        return v;
     }
 
     private static long mergeInt64(int v1, int v2) {
@@ -937,7 +934,8 @@ public class IOUtils {
     }
 
     private static int writeInt8(byte[] buf, int off, int v1, int v2) {
-        int r1 = v1 / 100, r2 = v2 / 100;
+        int r1 = (int) (v1 * 1374389535L >> 37); // v1 / 100;
+        int r2 = (int) (v2 * 1374389535L >> 37); // v2 / 100;
         long v = (PACKED_DIGITS[r1 & 0x7f])
                 | (PACKED_DIGITS[(v1 - r1 * 100) & 0x7f] << 16)
                 | ((long) PACKED_DIGITS[r2 & 0x7f] << 32)
@@ -950,10 +948,10 @@ public class IOUtils {
     }
 
     private static int writeInt8(char[] buf, int off, int v1, int v2) {
-        int r1 = v1 / 100;
+        int r1 = (int) (v1 * 1374389535L >> 37); // v1 / 100;
         long x1 = (PACKED_DIGITS_UTF16[r1 & 0x7f])
                 | ((long) PACKED_DIGITS_UTF16[(v1 - r1 * 100) & 0x7f] << 32);
-        int r2 = v2 / 100;
+        int r2 = (int) (v2 * 1374389535L >> 37); // v2 / 100;
         long x2 = (PACKED_DIGITS_UTF16[r2 & 0x7f])
                 | ((long) PACKED_DIGITS_UTF16[(v2 - r2 * 100) & 0x7f] << 32);
         if (BIG_ENDIAN) {
@@ -1137,7 +1135,7 @@ public class IOUtils {
             return pos + 1;
         }
 
-        final int q1 = i / 1000;
+        final int q1 = (int) (i * 274877907L >> 38); // i / 1000;
         final int v2 = DIGITS_K_32[q1 & 0x3ff];
         if ((byte) v2 == 1) {
             putByte(buf, pos++, (byte) (v2 >> 16));
@@ -1168,7 +1166,7 @@ public class IOUtils {
             return pos + 1;
         }
 
-        final int q1 = i / 1000;
+        final int q1 = (int) (i * 274877907L >> 38); // i / 1000;
         final long v2 = DIGITS_K_64[q1 & 0x3ff];
         if ((byte) v2 == 1) {
             putChar(buf, pos++, (char) (v2 >> 32));
@@ -1193,7 +1191,7 @@ public class IOUtils {
             return off;
         }
         long numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710cb296L) >> 12;  // numValue / 100;
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         v1 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1207,7 +1205,7 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // numValue / 10000
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         off = writeInt3(buf, off, (int) val);
         return writeInt8(buf, off, (int) (numValue - val * 10000), v1);
     }
@@ -1228,7 +1226,7 @@ public class IOUtils {
             return off;
         }
         long numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710cb296L) >> 12;  // numValue / 100;
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         v1 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1242,7 +1240,7 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // numValue / 10000
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         off = writeInt3(buf, off, (int) val);
         return writeInt8(buf, off, (int) (numValue - val * 10000), v1);
     }
