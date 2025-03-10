@@ -121,7 +121,7 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public final void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
