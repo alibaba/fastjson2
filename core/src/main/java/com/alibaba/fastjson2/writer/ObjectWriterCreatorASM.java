@@ -433,6 +433,9 @@ public class ObjectWriterCreatorASM
                 match = false;
             }
         }
+        if (fieldWriters.size() > 64) {
+            match = false;
+        }
 
         long writerFeatures = features | beanInfo.writerFeatures;
         if (!match) {

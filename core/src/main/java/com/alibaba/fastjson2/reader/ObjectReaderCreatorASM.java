@@ -228,7 +228,7 @@ public class ObjectReaderCreatorASM
         }
 
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, provider);
-        boolean match = true;
+        boolean match = fieldReaderArray.length <= 96;
 
         if (!fieldBased) {
             if (JVM_VERSION >= 9 && objectClass == StackTraceElement.class) {
@@ -372,6 +372,7 @@ public class ObjectReaderCreatorASM
                 || (beanInfo.readerFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                 || (objectReaderAdapter.noneDefaultConstructor != null && objectReaderAdapter.noneDefaultConstructor.getParameterCount() != fieldReaderArray.length)
                 || (constructorFunction instanceof FactoryFunction && ((FactoryFunction<T>) constructorFunction).paramNames.length != fieldReaderArray.length)
+                || paramFieldReaders.length > 64
         ) {
             match = false;
         }
@@ -550,7 +551,7 @@ public class ObjectReaderCreatorASM
 
         ObjectWriteContext context = new ObjectWriteContext(beanInfo, objectClass, cw, externalClass, fieldReaderArray, defaultConstructor);
 
-        final boolean generatedFields = fieldReaderArray.length < 128;
+        final boolean generatedFields = fieldReaderArray.length <= 96;
 
         String objectReaderSuper;
         switch (fieldReaderArray.length) {

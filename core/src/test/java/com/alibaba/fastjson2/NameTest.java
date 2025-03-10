@@ -176,7 +176,7 @@ public class NameTest {
     @Test
     public void testNameTest2() throws Exception {
         for (int i = 2; i < names.length; i++) {
-            int fieldNameCount = Math.min(i, 127);
+            int fieldNameCount = Math.min(i, 95);
             int start = i - fieldNameCount;
             String[] fieldNames = new String[fieldNameCount];
             int[] fieldValues = new int[fieldNameCount];
