@@ -69,17 +69,17 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public Type getItemType() {
+    public final Type getItemType() {
         return itemType;
     }
 
     @Override
-    public Class getItemClass() {
+    public final Class getItemClass() {
         return itemClass;
     }
 
     @Override
-    public ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
+    public final ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
         if (contentAs != null) {
             ObjectWriter itemObjectWriter = this.itemObjectWriter;
             if (itemObjectWriter != null) {
@@ -107,7 +107,7 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+    public final ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         ObjectWriter listWriter = this.listWriter;
         if (listWriter != null && fieldClass.isAssignableFrom(valueClass)) {
             return listWriter;
@@ -121,7 +121,7 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public final void writeListValueJSONB(JSONWriter jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -181,7 +181,7 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeListValue(JSONWriter jsonWriter, List list) {
+    public final void writeListValue(JSONWriter jsonWriter, List list) {
         if (jsonWriter.jsonb) {
             writeListJSONB(jsonWriter, list);
             return;
@@ -315,7 +315,7 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeList(JSONWriter jsonWriter, List list) {
+    public final void writeList(JSONWriter jsonWriter, List list) {
         if (jsonWriter.jsonb) {
             writeListJSONB(jsonWriter, list);
             return;
@@ -385,7 +385,7 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
+    public final void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
         if (writeFieldName) {
             writeFieldName(jsonWriter);
         }
