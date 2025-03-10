@@ -24,7 +24,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 
-class JSONWriterUTF8
+final class JSONWriterUTF8
         extends JSONWriter {
     static final long REF;
     static final short QUOTE2_COLON, QUOTE_COLON;
@@ -38,8 +38,8 @@ class JSONWriterUTF8
     }
 
     final CacheItem cacheItem;
-    protected byte[] bytes;
-    protected final long byteVectorQuote;
+    byte[] bytes;
+    private final long byteVectorQuote;
 
     JSONWriterUTF8(Context ctx) {
         super(ctx, null, false, StandardCharsets.UTF_8);
@@ -342,8 +342,21 @@ class JSONWriterUTF8
                 this.off = off + 1;
             }
 
-            writeString(
-                    list.get(i));
+            String str = list.get(i);
+            if (str == null) {
+                writeStringNull();
+            } else {
+                if (STRING_VALUE != null) {
+                    byte[] value = STRING_VALUE.apply(str);
+                    if (STRING_CODER.applyAsInt(str) == 0) {
+                        writeStringLatin1(value);
+                    } else {
+                        writeStringUTF16(value);
+                    }
+                } else {
+                    writeStringJDK8(str);
+                }
+            }
         }
 
         off = this.off;
@@ -419,6 +432,19 @@ class JSONWriterUTF8
             return;
         }
 
+        if (STRING_VALUE != null) {
+            byte[] value = STRING_VALUE.apply(str);
+            if (STRING_CODER.applyAsInt(str) == 0) {
+                writeStringLatin1(value);
+            } else {
+                writeStringUTF16(value);
+            }
+        } else {
+            writeStringJDK8(str);
+        }
+    }
+
+    private void writeStringJDK8(String str) {
         char[] chars = getCharArray(str);
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;

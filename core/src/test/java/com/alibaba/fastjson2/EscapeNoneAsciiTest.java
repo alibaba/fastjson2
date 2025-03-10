@@ -53,7 +53,7 @@ public class EscapeNoneAsciiTest {
             String STR = STRINGS[i];
             String JSON_STR = JSON_STRINGS[i];
             JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.EscapeNoneAscii);
-            JSONWriter jsonWriter = new JSONWriterUTF8JDK9(context);
+            JSONWriter jsonWriter = new JSONWriterUTF8(context);
             jsonWriter.writeString(STR);
             String str = jsonWriter.toString();
             assertEquals(JSON_STR, str);

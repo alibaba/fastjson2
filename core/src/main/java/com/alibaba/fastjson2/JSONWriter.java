@@ -605,11 +605,7 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK8(context);
             }
         } else if ((context.features & OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8(context);
-            }
+            jsonWriter = new JSONWriterUTF8(context);
         } else {
             if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
                 jsonWriter = new JSONWriterUTF16JDK9UF(context);
@@ -711,9 +707,7 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        return STRING_VALUE != null
-                ? new JSONWriterUTF8JDK9(context)
-                : new JSONWriterUTF8(context);
+        return new JSONWriterUTF8(context);
     }
 
     public static JSONWriter ofUTF8(Feature... features) {

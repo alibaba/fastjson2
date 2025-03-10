@@ -63,7 +63,7 @@ public class TestUtils {
         }
 
         return new JSONWriter[]{
-                new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
+                new JSONWriterUTF8(JSONFactory.createWriteContext()),
                 new JSONWriterUTF16(JSONFactory.createWriteContext()),
                 new JSONWriterUTF16JDK9UF(JSONFactory.createWriteContext())
         };
