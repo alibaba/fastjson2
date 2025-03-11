@@ -189,7 +189,7 @@ public class JSONObject
      * @param action
      * @deprecated Typo in the method name. Use {@link #forEachArrayObject(String, Consumer) forEachArrayObject} instead
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public void forEchArrayObject(String key, Consumer<JSONObject> action) {
         forEachArrayObject(key, action);
     }
