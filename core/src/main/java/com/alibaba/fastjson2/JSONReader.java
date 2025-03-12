@@ -3099,7 +3099,7 @@ public abstract class JSONReader
                         return Double.parseDouble(
                                 decimalStr + "E" + exponent);
                     }
-                    return new BigDecimal(decimalStr + "E" + exponent);
+                    return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
                 }
 
                 if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
