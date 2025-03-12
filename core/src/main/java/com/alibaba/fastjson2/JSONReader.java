@@ -3098,9 +3098,8 @@ public abstract class JSONReader
                     if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
                         return Double.parseDouble(
                                 decimalStr + "E" + exponent);
-                    } else {
-                        return new BigDecimal(decimalStr + "E" + exponent);
                     }
+                    return new BigDecimal(decimalStr + "E" + exponent);
                 }
 
                 if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
