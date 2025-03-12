@@ -3093,10 +3093,14 @@ public abstract class JSONReader
                     }
                 }
 
-                if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                if (exponent != 0) {
                     String decimalStr = decimal.toPlainString();
-                    return Double.parseDouble(
-                            decimalStr + "E" + exponent);
+                    if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                        return Double.parseDouble(
+                                decimalStr + "E" + exponent);
+                    } else {
+                        return new BigDecimal(decimalStr + "E" + exponent);
+                    }
                 }
 
                 if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
