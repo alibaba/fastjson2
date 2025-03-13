@@ -15,16 +15,16 @@ public class BigDecimalUtil {
         }
 
         int scale = value.scale();
-        DecimalFormat decimalFormat = null;
+        DecimalFormat decimalFormat;
         if (scale <= 2) {
             decimalFormat = DF_TWO;
-        } else if (scale > 2 && scale <= 4) {
+        } else if (scale <= 4) {
             // 保留四位小数
             decimalFormat = DF_FOUR;
-        } else if (scale > 4 && scale <= 6) {
+        } else if (scale <= 6) {
             // 保留六位小数
             decimalFormat = DF_SIX;
-        } else if (scale > 6 && scale <= 8) {
+        } else if (scale <= 8) {
             decimalFormat = EIGHT_SIX;
         } else {
             decimalFormat = null;
@@ -32,37 +32,32 @@ public class BigDecimalUtil {
 
         if (null == decimalFormat) {
             return value.toString();
-        } else {
-            return decimalFormat.format(value);
         }
+        // FIXME: decimalFormat is NOT thread safe
+        return decimalFormat.format(value);
     }
 
     public static BigDecimal castToBigDecimal(String value) {
-        if (null == value || value.length() < 1) {
+        final int len;
+        if (value == null || (len = value.length()) == 0) {
             return null;
         }
 
         // 只保留数字和小数点
-        StringBuilder sb = new StringBuilder();
-        char[] charArr = value.toCharArray();
-        for (char c : charArr) {
-            // 0-9
-            if (c >= 48 && c <= 57) {
-                sb.append((char) c);
-            }
-
-            // .
-            if (c == 46) {
-                sb.append((char) c);
+        final char[] validChars = new char[len];
+        int i = 0;
+        for (int j = 0; j < len; j++) {
+            final char c = value.charAt(j);
+            if (c >= '0' && c <= '9' || c == '.') {
+                validChars[i++] = c;
             }
         }
 
-        if (sb.length() < 1) {
+        if (i == 0) {
             return null;
         }
 
-        String decimal = sb.toString();
-        BigDecimal result = new BigDecimal(decimal);
-        return result;
+        // new BigDecimal( stringBuilder.toString() ) will call new BigDecimal( str.toCharArray() ) internally
+        return new BigDecimal(validChars);
     }
 }
