@@ -393,11 +393,9 @@ public final class ObjectWriterImplMap
     }
 
     static boolean isWriteAsString(Object val, long features) {
-        boolean writeAsString = (features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0 && ObjectWriterProvider.isPrimitiveOrEnum(val.getClass());
-        if (writeAsString && (val instanceof Temporal || val instanceof Date)) {
-            writeAsString = false;
-        }
-        return writeAsString;
+        return (features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0
+                && ObjectWriterProvider.isPrimitiveOrEnum(val.getClass())
+                && !(val instanceof Temporal || val instanceof Date);
     }
 
     String mapKeyToString(Object key, JSONWriter jsonWriter, long features) {
