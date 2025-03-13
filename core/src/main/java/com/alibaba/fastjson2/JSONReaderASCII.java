@@ -779,8 +779,12 @@ final class JSONReaderASCII
 
     @Override
     public final long getNameHashCodeLCase() {
+        byte quote = '"';
         final byte[] bytes = this.bytes;
         int offset = nameBegin, end = this.end;
+        if (offset > 0 && bytes[offset - 1] == '\'') {
+            quote = '\'';
+        }
         long nameValue = 0;
         for (int i = 0; offset < end; offset++) {
             int c = bytes[offset];
@@ -804,7 +808,7 @@ final class JSONReaderASCII
                         c = char1(c);
                         break;
                 }
-            } else if (c == '"') {
+            } else if (c == quote) {
                 break;
             }
 
@@ -883,7 +887,7 @@ final class JSONReaderASCII
                         c = char1(c);
                         break;
                 }
-            } else if (c == '"') {
+            } else if (c == quote) {
                 break;
             }
 
