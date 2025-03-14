@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -18,8 +19,9 @@ public class Issue3393 {
     @Test
     public void test() {
         String str = "{'date':'۲۰۲۵-۰۳-۱۰ ۰۱:۴۴:۵۵'}";
-        Bean bean = JSON.parseObject(str, Bean.class);
-        assertEquals("2025-03-10T01:44:55", bean.date.toString());
+        assertEquals("2025-03-10T01:44:55", JSON.parseObject(str, Bean.class).date.toString());
+        assertEquals("2025-03-10T01:44:55", JSON.parseObject(str.toCharArray(), Bean.class).date.toString());
+        assertEquals("2025-03-10T01:44:55", JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean.class).date.toString());
     }
 
     public static class Bean {
