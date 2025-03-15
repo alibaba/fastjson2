@@ -29,8 +29,8 @@ import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
 public abstract class JSONWriter
         implements Closeable {
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
-    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_2_SPACE = 2, PRETTY_4_SPACE = 4;
+    static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask | NotWriteEmptyArray.mask | NotWriteDefaultValue.mask;
 
     public final Context context;
     public final boolean utf8;
@@ -177,6 +177,27 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
+    public final String setPath0(FieldWriter fieldWriter, Object object) {
+        this.path = this.path == Path.ROOT
+                ? fieldWriter.getRootParentPath()
+                : fieldWriter.getPath(path);
+
+        Path previous;
+        if (object == rootObject) {
+            previous = Path.ROOT;
+        } else {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
+                refs.put(object, this.path);
+                return null;
+            }
+        }
+
+        return previous.toString();
+    }
+
     public final void addManagerReference(Object object) {
         if (refs == null) {
             refs = new IdentityHashMap(8);
@@ -199,6 +220,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        return setPath0(index, object);
+    }
+
+    public final String setPath0(int index, Object object) {
         this.path = index == 0
                 ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
                 : index == 1
@@ -211,7 +236,7 @@ public abstract class JSONWriter
         } else {
             if (refs == null || (previous = refs.get(object)) == null) {
                 if (refs == null) {
-                    refs = new IdentityHashMap(8);
+                    this.refs = new IdentityHashMap(8);
                 }
                 refs.put(object, this.path);
                 return null;
@@ -226,8 +251,12 @@ public abstract class JSONWriter
             return;
         }
 
+        popPath0(object);
+    }
+
+    public final void popPath0(Object object) {
         if (this.path == null
-                || (context.features & ReferenceDetection.mask) == 0
+                || (context.features & MASK_REFERENCE_DETECTION) == 0
                 || object == Collections.EMPTY_LIST
                 || object == Collections.EMPTY_SET
         ) {
@@ -546,19 +575,9 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
             }
         } else if ((defaultWriterFeatures & OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
+            jsonWriter = ofUTF8(writeContext);
         } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
+            if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
                 jsonWriter = new JSONWriterUTF16JDK9UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16(writeContext);
@@ -586,18 +605,10 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK8(context);
             }
         } else if ((context.features & OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(context);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(context);
-            }
+            jsonWriter = new JSONWriterUTF8(context);
         } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(context);
+            if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
+                jsonWriter = new JSONWriterUTF16JDK9UF(context);
             } else {
                 jsonWriter = new JSONWriterUTF16(context);
             }
@@ -616,18 +627,10 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
             }
         } else if ((writeContext.features & OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
+            jsonWriter = ofUTF8(writeContext);
         } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
+                jsonWriter = new JSONWriterUTF16JDK9UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16(writeContext);
             }
@@ -646,8 +649,8 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
             }
         } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
+                jsonWriter = new JSONWriterUTF16JDK9UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16(writeContext);
             }
@@ -698,51 +701,19 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8() {
-        Context context = createWriteContext();
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return ofUTF8(
+                createWriteContext()
+        );
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return new JSONWriterUTF8(context);
     }
 
     public static JSONWriter ofUTF8(Feature... features) {
-        Context context = createWriteContext(features);
-
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return ofUTF8(
+                createWriteContext(features)
+        );
     }
 
     public void writeBinary(byte[] bytes) {
@@ -841,30 +812,18 @@ public abstract class JSONWriter
     }
 
     protected static boolean isWriteAsString(long value, long features) {
-        if ((features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
-            return true;
-        }
-
-        return (features & BrowserCompatible.mask) != 0
-                && !isJavaScriptSupport(value);
+        return (features & (MASK_WRITE_NON_STRING_VALUE_AS_STRING | MASK_WRITE_LONG_AS_STRING)) != 0
+                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
 
     protected static boolean isWriteAsString(BigInteger value, long features) {
-        if ((features & WriteNonStringValueAsString.mask) != 0) {
-            return true;
-        }
-
-        return (features & BrowserCompatible.mask) != 0
-                && !isJavaScriptSupport(value);
+        return (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0
+                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
 
     protected static boolean isWriteAsString(BigDecimal value, long features) {
-        if ((features & WriteNonStringValueAsString.mask) != 0) {
-            return true;
-        }
-
-        return (features & BrowserCompatible.mask) != 0
-                && !isJavaScriptSupport(value);
+        return (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0
+                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
 
     public abstract void writeNameRaw(char[] chars);
@@ -1187,8 +1146,9 @@ public abstract class JSONWriter
 
     public void writeStringNull() {
         String raw;
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask)) != 0) {
-            raw = (this.context.features & UseSingleQuotes.mask) != 0 ? "''" : "\"\"";
+        long features = this.context.features;
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_STRING_AS_EMPTY)) != 0) {
+            raw = (features & MASK_USE_SINGLE_QUOTES) != 0 ? "''" : "\"\"";
         } else {
             raw = "null";
         }
@@ -1197,7 +1157,7 @@ public abstract class JSONWriter
 
     public void writeArrayNull() {
         String raw;
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
             raw = "[]";
         } else {
             raw = "null";
@@ -1206,7 +1166,7 @@ public abstract class JSONWriter
     }
 
     public final void writeNumberNull() {
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeInt32(0);
         } else {
             writeNull();
@@ -1214,7 +1174,7 @@ public abstract class JSONWriter
     }
 
     public final void writeInt64Null() {
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeInt64(0);
         } else {
             writeNull();
@@ -1222,7 +1182,7 @@ public abstract class JSONWriter
     }
 
     public final void writeBooleanNull() {
-        if ((this.context.features & (NullAsDefaultValue.mask | WriteNullBooleanAsFalse.mask)) != 0) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | WriteNullBooleanAsFalse.mask)) != 0) {
             writeBool(false);
         } else {
             writeNull();
@@ -1519,7 +1479,21 @@ public abstract class JSONWriter
         endArray();
     }
 
-    public abstract void writeString(String[] strings);
+    public void writeString(String[] strings) {
+        if (strings == null) {
+            writeArrayNull();
+            return;
+        }
+
+        startArray();
+        for (int i = 0; i < strings.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            writeString(strings[i]);
+        }
+        endArray();
+    }
 
     public void writeSymbol(String string) {
         writeString(string);
@@ -1614,47 +1588,11 @@ public abstract class JSONWriter
 
     public abstract void write(List array);
 
-    public void write(Map map) {
-        if (map == null) {
-            this.writeNull();
-            return;
-        }
-
-        if (map.isEmpty()) {
-            writeRaw('{', '}');
-            return;
-        }
-
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
-
-        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
-            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
-            objectWriter.write(this, map, null, null, 0);
-            return;
-        }
-
-        write0('{');
-        boolean first = true;
-        for (Map.Entry o : (Iterable<Map.Entry>) map.entrySet()) {
-            if (!first) {
-                write0(',');
-            }
-
-            writeAny(
-                    o.getKey());
-            write0(':');
-            writeAny(
-                    o.getValue());
-
-            first = false;
-        }
-        write0('}');
+    public final void write(JSONObject map) {
+        write((Map) map);
     }
 
-    public void write(JSONObject map) {
+    public void write(Map<?, ?> map) {
         if (map == null) {
             this.writeNull();
             return;
@@ -1664,10 +1602,6 @@ public abstract class JSONWriter
             writeRaw('{', '}');
             return;
         }
-
-        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | NotWriteEmptyArray.mask
-                | NotWriteDefaultValue.mask;
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
             ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
@@ -2188,29 +2122,52 @@ public abstract class JSONWriter
         }
     }
 
+    protected static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
+    protected static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
+    protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
+    protected static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
+    protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
+    protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
+    protected static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
+    protected static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
+    protected static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
+    protected static final long MASK_PRETTY_FORMAT = 1 << 16;
+    protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
+    protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
+    protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
+    protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
+    protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    protected static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
+    protected static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
+    protected static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
+    protected static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
+    protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
+    protected static final long MASK_BROWSER_SECURE = 1L << 35;
+    protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+
     public enum Feature {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
         ErrorOnNoneSerializable(1 << 2),
         BeanToArray(1 << 3),
-        WriteNulls(1 << 4),
-        WriteMapNullValue(1 << 4),
-        BrowserCompatible(1 << 5),
-        NullAsDefaultValue(1 << 6),
-        WriteBooleanAsNumber(1 << 7),
-        WriteNonStringValueAsString(1 << 8),
-        WriteClassName(1 << 9),
+        WriteNulls(MASK_WRITE_MAP_NULL_VALUE),
+        WriteMapNullValue(MASK_WRITE_MAP_NULL_VALUE),
+        BrowserCompatible(MASK_BROWSER_COMPATIBLE),
+        NullAsDefaultValue(MASK_NULL_AS_DEFAULT_VALUE),
+        WriteBooleanAsNumber(MASK_WRITE_BOOLEAN_AS_NUMBER),
+        WriteNonStringValueAsString(MASK_WRITE_NON_STRING_VALUE_AS_STRING),
+        WriteClassName(MASK_WRITE_CLASS_NAME),
         NotWriteRootClassName(1 << 10),
         NotWriteHashMapArrayListClassName(1 << 11),
-        NotWriteDefaultValue(1 << 12),
-        WriteEnumsUsingName(1 << 13),
-        WriteEnumUsingToString(1 << 14),
+        NotWriteDefaultValue(MASK_NOT_WRITE_DEFAULT_VALUE),
+        WriteEnumsUsingName(MASK_WRITE_ENUMS_USING_NAME),
+        WriteEnumUsingToString(MASK_WRITE_ENUM_USING_TO_STRING),
         IgnoreErrorGetter(1 << 15),
-        PrettyFormat(1 << 16),
-        ReferenceDetection(1 << 17),
+        PrettyFormat(MASK_PRETTY_FORMAT),
+        ReferenceDetection(MASK_REFERENCE_DETECTION),
         WriteNameAsSymbol(1 << 18),
         WriteBigDecimalAsPlain(1 << 19),
-        UseSingleQuotes(1 << 20),
+        UseSingleQuotes(MASK_USE_SINGLE_QUOTES),
 
         /**
          * The serialized Map will first be sorted according to Key,
@@ -2220,30 +2177,30 @@ public abstract class JSONWriter
          * @deprecated Use {@link Feature#SortMapEntriesByKeys} instead.
          */
         MapSortField(1 << 21),
-        WriteNullListAsEmpty(1 << 22),
+        WriteNullListAsEmpty(MASK_WRITE_NULL_LIST_AS_EMPTY),
         /**
          * @since 1.1
          */
-        WriteNullStringAsEmpty(1 << 23),
+        WriteNullStringAsEmpty(MASK_WRITE_NULL_STRING_AS_EMPTY),
         /**
          * @since 1.1
          */
-        WriteNullNumberAsZero(1 << 24),
+        WriteNullNumberAsZero(MASK_WRITE_NULL_NUMBER_AS_ZERO),
         /**
          * @since 1.1
          */
-        WriteNullBooleanAsFalse(1 << 25),
+        WriteNullBooleanAsFalse(MASK_WRITE_NULL_BOOLEAN_AS_FALSE),
 
         /**
          * @since 2.0.7
          * @deprecated use IgnoreEmpty
          */
-        NotWriteEmptyArray(1 << 26),
+        NotWriteEmptyArray(MASK_NOT_WRITE_EMPTY_ARRAY),
 
         /**
          * @since 2.0.51
          */
-        IgnoreEmpty(1L << 26),
+        IgnoreEmpty(MASK_NOT_WRITE_EMPTY_ARRAY),
 
         WriteNonStringKeyAsString(1 << 27),
         /**
@@ -2262,7 +2219,7 @@ public abstract class JSONWriter
          * if format uses escaping mechanisms (which is generally true for textual formats but not for binary formats).
          * Feature is disabled by default.
          */
-        EscapeNoneAscii(1L << 30),
+        EscapeNoneAscii(MASK_ESCAPE_NONE_ASCII),
         /**
          * @since 2.0.13
          */
@@ -2271,7 +2228,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.13
          */
-        IgnoreNonFieldGetter(1L << 32),
+        IgnoreNonFieldGetter(MASK_IGNORE_NON_FIELD_GETTER),
 
         /**
          * @since 2.0.16
@@ -2281,12 +2238,12 @@ public abstract class JSONWriter
         /**
          * @since 2.0.17
          */
-        WriteLongAsString(1L << 34),
+        WriteLongAsString(MASK_WRITE_LONG_AS_STRING),
 
         /**
          * @since 2.0.20
          */
-        BrowserSecure(1L << 35),
+        BrowserSecure(MASK_BROWSER_SECURE),
         WriteEnumUsingOrdinal(1L << 36),
 
         /**
@@ -2307,7 +2264,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.34
          */
-        NotWriteNumberClassName(1L << 40),
+        NotWriteNumberClassName(MASK_NOT_WRITE_NUMBER_CLASS_NAME),
 
         /**
          * The serialized Map will first be sorted according to Key,
@@ -2732,6 +2689,21 @@ public abstract class JSONWriter
         }
     }
 
+    protected final int newCapacity(int minCapacity, int oldCapacity) {
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        if (newCapacity > maxArraySize) {
+            if (minCapacity < maxArraySize) {
+                newCapacity = maxArraySize;
+            } else {
+                throw new OutOfMemoryError("try enabling LargeObject feature instead");
+            }
+        }
+        return newCapacity;
+    }
+
     public Object getAttachment() {
         return attachment;
     }
@@ -2739,4 +2711,18 @@ public abstract class JSONWriter
     public void setAttachment(Object attachment) {
         this.attachment = attachment;
     }
+
+    protected final void overflowLevel() {
+        throw new JSONException("level too large : " + level);
+    }
+
+    public int getOffset() {
+        return off;
+    }
+
+    public void setOffset(int offset) {
+        this.off = offset;
+    }
+
+    public abstract Object ensureCapacity(int minCapacity);
 }

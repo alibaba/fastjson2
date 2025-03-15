@@ -32,6 +32,7 @@ public class Issue2392 {
         Bean bean = new Bean();
         bean.value = (List<String>) constructor.newInstance();
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
+        System.out.println(JSONB.toJSONString(bytes));
         Bean parsed = JSONB.parseObject(bytes, Bean.class, JSONReader.Feature.SupportAutoType);
         assertEquals(clazz, parsed.value.getClass());
 

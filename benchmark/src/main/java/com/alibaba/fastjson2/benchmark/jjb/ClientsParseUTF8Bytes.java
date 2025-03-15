@@ -58,6 +58,11 @@ public class ClientsParseUTF8Bytes {
         );
     }
 
+    @Benchmark
+    public void wast(Blackhole bh) {
+        bh.consume(io.github.wycst.wast.json.JSON.parseObject(utf8Bytes, Clients.class));
+    }
+
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(ClientsParseUTF8Bytes.class.getName())

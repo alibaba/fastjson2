@@ -14,9 +14,9 @@ public class TaobaoH5ApiTreeTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("TaobaoH5ApiTree-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 1940 1592 1423
-            // zulu11.52.13 : 2836 1701 2257
-            // zulu17.32.13 : 1516
+            // zulu8.62.0.19 : 1940 1592 1423 1168
+            // zulu11.52.13 : 2836 1701 2257 1194
+            // zulu17.32.13 : 1516 1240
             // zulu18.28.13 : 1527
             // zulu19.0.47 :
             // corretto-8 :

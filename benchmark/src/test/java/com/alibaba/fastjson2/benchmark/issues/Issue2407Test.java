@@ -14,7 +14,7 @@ public class Issue2407Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("Issue2407-parseArray millis : " + millis);
-            // zulu17.40.19 : 2639
+            // zulu17.40.19 : 2639 2557
         }
     }
 
@@ -26,11 +26,25 @@ public class Issue2407Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("Issue2407-parseArray1 millis : " + millis);
-            // zulu17.40.19 : 2461
+            // zulu17.40.19 : 2461 2312
+        }
+    }
+
+    public static void parseArray1_utf8() throws Exception {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.parseArray1_utf8(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("Issue2407-parseArray1_utf8 millis : " + millis);
+            // zulu17.40.19 : 2422 2245
         }
     }
 
     public static void main(String[] args) throws Exception {
-        parseArray1();
+//        parseArray();
+//        parseArray1();
+        parseArray1_utf8();
     }
 }

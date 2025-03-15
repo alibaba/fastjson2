@@ -12,7 +12,7 @@ import java.util.List;
  * @author liuming
  */
 public class PropertyPreFilters {
-    private List<MySimplePropertyPreFilter> filters = new ArrayList<MySimplePropertyPreFilter>();
+    private List<MySimplePropertyPreFilter> filters = new ArrayList<>();
 
     public MySimplePropertyPreFilter addFilter() {
         MySimplePropertyPreFilter filter = new MySimplePropertyPreFilter();

@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -94,6 +95,26 @@ public abstract class ObjectReaderBean<T>
 
     protected void processExtra(JSONReader jsonReader, Object object) {
         processExtra(jsonReader, object, 0);
+    }
+
+    protected void processExtra(JSONReader jsonReader, Map<Long, Object> map, long features) {
+        if ((jsonReader.features(this.features | features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+            String fieldName = jsonReader.getFieldName();
+            if (fieldName.startsWith("is")) {
+                String fieldName1 = fieldName.substring(2);
+                long hashCode64LCase = Fnv.hashCode64LCase(fieldName1);
+                FieldReader fieldReader = getFieldReaderLCase(hashCode64LCase);
+                if (fieldReader != null) {
+                    Class fieldClass = fieldReader.fieldClass;
+                    if (fieldClass == Boolean.class || fieldClass == boolean.class) {
+                        map.put(fieldReader.fieldNameHash, fieldReader.readFieldValue(jsonReader));
+                        return;
+                    }
+                }
+            }
+        }
+
+        jsonReader.skipValue();
     }
 
     protected void processExtra(JSONReader jsonReader, Object object, long features) {

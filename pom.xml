@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.54-SNAPSHOT</version>
+    <version>2.0.57-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -32,7 +32,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
-        <jackson.version>2.18.0</jackson.version>
+        <jackson.version>2.18.3</jackson.version>
         <jetty.version>11.0.15</jetty.version>
         <jersey.version>2.44</jersey.version>
         <solon.version>3.0.1</solon.version>
@@ -47,13 +47,13 @@
         <arrow.version>17.0.0</arrow.version>
 
         <!-- Requires kotlin minor version less than the latest version -->
-        <kotlin.version>2.0.10</kotlin.version>
+        <kotlin.version>2.1.10</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
         <kotlin.compiler.apiVersion>1.9</kotlin.compiler.apiVersion>
 
-        <junit5.version>5.11.0</junit5.version>
+        <junit5.version>5.12.0</junit5.version>
         <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.37</jmh.version>
 
@@ -62,28 +62,14 @@
     </properties>
 
     <modules>
-        <!--
-        <module>adapter</module>
-        -->
         <module>benchmark</module>
-        <module>codegen</module>
-        <module>codegen-test</module>
         <module>core</module>
-        <!--
-            <module>example-graalvm-native</module>
-        -->
         <module>example-solon-test</module>
         <module>example-spring-test</module>
-        <!--
-            <module>example-spring6-test</module>
-        -->
         <module>extension</module>
         <module>extension-jaxrs</module>
         <module>extension-solon</module>
         <module>extension-spring5</module>
-        <!--
-        <module>extension-spring6</module>
-        -->
         <module>fastjson1-compatible</module>
         <module>kotlin</module>
         <module>safemode-test</module>
@@ -169,12 +155,12 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-core</artifactId>
-                <version>0.50.1-public</version>
+                <version>0.51.10-public</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
-                <version>0.48.6-public</version>
+                <version>0.51.9-public</version>
             </dependency>
             <dependency>
                 <groupId>com.carrotsearch</groupId>
@@ -206,12 +192,12 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.11.0</version>
+                <version>2.12.1</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.3.0-jre</version>
+                <version>33.4.0-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -243,7 +229,7 @@
             <dependency>
                 <groupId>com.opencsv</groupId>
                 <artifactId>opencsv</artifactId>
-                <version>5.9</version>
+                <version>5.10</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle.ojdbc</groupId>
@@ -294,7 +280,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
-                <version>3.6.9</version>
+                <version>3.7.1</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -317,7 +303,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.12.7</version>
+                <version>2.13.1</version>
             </dependency>
 
 
@@ -329,7 +315,7 @@
             <dependency>
                 <groupId>net.minidev</groupId>
                 <artifactId>json-smart</artifactId>
-                <version>2.5.1</version>
+                <version>2.5.2</version>
             </dependency>
             <dependency>
                 <groupId>net.sf.json-lib</groupId>
@@ -374,7 +360,7 @@
             <dependency>
                 <groupId>org.gitlab4j</groupId>
                 <artifactId>gitlab4j-api</artifactId>
-                <version>5.6.0</version>
+                <version>5.8.0</version>
             </dependency>
 
             <dependency>
@@ -426,7 +412,7 @@
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
-                <version>20240303</version>
+                <version>20250107</version>
             </dependency>
 
             <dependency>
@@ -447,7 +433,7 @@
             <dependency>
                 <groupId>org.msgpack</groupId>
                 <artifactId>msgpack-core</artifactId>
-                <version>0.9.8</version>
+                <version>0.9.9</version>
             </dependency>
 
             <dependency>
@@ -464,7 +450,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.34</version>
+                <version>1.18.36</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -580,7 +566,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
@@ -674,7 +660,7 @@
             <plugin>
                 <groupId>org.gaul</groupId>
                 <artifactId>modernizer-maven-plugin</artifactId>
-                <version>2.9.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <violationsFiles>
                         <violationsFile>${maven.multiModuleProjectDirectory}/src/violations.xml</violationsFile>
@@ -741,7 +727,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -761,11 +747,11 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>3.11.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.5.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -773,7 +759,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.20.0</version>
+                    <version>3.21.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-gpg-plugin</artifactId>
@@ -1030,8 +1016,26 @@
                 <module>example-graalvm-native</module>
                 <module>extension-spring6</module>
                 <module>example-spring6-test</module>
-                <module>incubator-vector</module>
                 <module>test-jdk17</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>enable-for-jdk21+</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <modules>
+                <module>benchmark_21</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>enable-codegen</id>
+            <activation>
+                <jdk>(,22]</jdk>
+            </activation>
+            <modules>
+                <module>codegen</module>
+                <module>codegen-test</module>
             </modules>
         </profile>
         <profile>

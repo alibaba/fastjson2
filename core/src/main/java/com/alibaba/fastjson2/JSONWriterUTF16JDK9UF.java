@@ -1,11 +1,8 @@
 package com.alibaba.fastjson2;
 
-import sun.misc.Unsafe;
+import com.alibaba.fastjson2.util.IOUtils;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteBooleanAsNumber;
-import static com.alibaba.fastjson2.util.IOUtils.ALSE_64;
-import static com.alibaba.fastjson2.util.IOUtils.TRUE_64;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF16JDK9UF
@@ -21,57 +18,18 @@ final class JSONWriterUTF16JDK9UF
             return;
         }
 
-        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
-        boolean escape = false;
-        final char quote = this.quote;
-
-        final int strlen = str.length();
-        int minCapacity = off + strlen + 2;
-        if (minCapacity >= chars.length) {
-            ensureCapacity(minCapacity);
-        }
-
-        final int coder = STRING_CODER.applyAsInt(str);
         final byte[] value = STRING_VALUE.apply(str);
-
-        int off = this.off;
-        final char[] chars = this.chars;
-        chars[off++] = quote;
-
-        for (int i = 0; i < strlen; ++i) {
-            int c;
-            if (coder == 0) {
-                c = value[i];
-            } else {
-                c = UNSAFE.getChar(str, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + i * 2);
-            }
-            if (c == '\\'
-                    || c == quote
-                    || c < ' '
-                    || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
-                    || (escapeNoneAscii && c > 0x007F)
-            ) {
-                escape = true;
-                break;
-            }
-
-            chars[off++] = (char) c;
+        if (STRING_CODER.applyAsInt(str) == 0) {
+            writeStringLatin1(value);
+        } else {
+            writeStringUTF16(value);
         }
-
-        if (!escape) {
-            chars[off++] = quote;
-            this.off = off;
-            return;
-        }
-
-        writeStringEscape(str);
     }
 
     public void writeBool(boolean value) {
         int minCapacity = off + 5;
         if (minCapacity >= this.chars.length) {
-            ensureCapacity(minCapacity);
+            grow0(minCapacity);
         }
 
         char[] chars = this.chars;
@@ -79,11 +37,7 @@ final class JSONWriterUTF16JDK9UF
         if ((context.features & WriteBooleanAsNumber.mask) != 0) {
             chars[off++] = value ? '1' : '0';
         } else {
-            if (!value) {
-                chars[off++] = 'f';
-            }
-            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), value ? TRUE_64 : ALSE_64);
-            off += 4;
+            off = IOUtils.putBoolean(chars, off, value);
         }
         this.off = off;
     }

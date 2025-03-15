@@ -43,7 +43,7 @@ final class JSONWriterUTF16JDK8
             // inline ensureCapacity(off + strlen + 2);
             int minCapacity = off + strlen + 2;
             if (minCapacity >= chars.length) {
-                ensureCapacity(minCapacity);
+                grow0(minCapacity);
             }
 
             chars[off++] = quote;

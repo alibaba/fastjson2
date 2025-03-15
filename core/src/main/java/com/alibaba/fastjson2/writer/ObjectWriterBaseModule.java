@@ -303,6 +303,26 @@ public class ObjectWriterBaseModule
 
             JSONField jsonField = null;
             Annotation[] annotations = getAnnotations(field);
+            if (annotations.length == 0 && KotlinUtils.isKotlin(objectClass)) {
+                annotations = getAnnotations(field.getType());
+                Constructor kotlinConstructor = KotlinUtils.getKotlinConstructor(getConstructor(objectClass));
+                if (kotlinConstructor != null) {
+                    String[] paramNames = KotlinUtils.getKoltinConstructorParameters(objectClass);
+                    for (int i = 0; i < paramNames.length; i++) {
+                        if (paramNames[i].equals(field.getName())) {
+                            annotations = kotlinConstructor.getParameterAnnotations()[i];
+                            break;
+                        }
+                    }
+                    if (fieldInfo.ignore) {
+                        for (Annotation annotation : annotations) {
+                            if (annotation.annotationType() == JSONField.class) {
+                                fieldInfo.ignore = !((JSONField) annotation).serialize();
+                            }
+                        }
+                    }
+                }
+            }
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 if (jsonField == null) {
@@ -539,6 +559,12 @@ public class ObjectWriterBaseModule
                             Class valueUsing = processUsing((Class) result);
                             if (valueUsing != null) {
                                 fieldInfo.valueUsing = valueUsing;
+                            }
+                            break;
+                        case "contentAs":
+                            Class<?> contentAs = (Class) result;
+                            if (contentAs != Void.class) {
+                                fieldInfo.contentAs = contentAs;
                             }
                             break;
                         default:
@@ -967,6 +993,11 @@ public class ObjectWriterBaseModule
             if (ObjectWriter.class.isAssignableFrom(serializeUsing)) {
                 fieldInfo.writeUsing = serializeUsing;
             }
+
+            Class contentAs = jsonField.contentAs();
+            if (contentAs != Void.class) {
+                fieldInfo.contentAs = contentAs;
+            }
         }
 
         /**
@@ -980,7 +1011,7 @@ public class ObjectWriterBaseModule
                 jsonFieldFormat = jsonFieldFormat.trim();
 
                 if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
-                    jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
+                    jsonFieldFormat = jsonFieldFormat.replace("T", "'T'");
                 }
 
                 if (!jsonFieldFormat.isEmpty()) {

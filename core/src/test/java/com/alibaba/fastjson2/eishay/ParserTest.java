@@ -250,7 +250,41 @@ public class ParserTest {
 //        System.out.println(jsonWriter);
 
         byte[] jsonbBytes = jsonWriter.getBytes();
-        JSONB.dump(jsonbBytes, symbolTable);
+        assertEquals(
+                "{\n" +
+                        "\t\"#-10\":[\n" +
+                        "\t\t{\n" +
+                        "\t\t\t\"#-9\":768,\n" +
+                        "\t\t\t\"#-14\":{\"$symbol\":-3},\n" +
+                        "\t\t\t\"#-15\":\"Javaone Keynote\",\n" +
+                        "\t\t\t\"#-16\":\"http://javaone.com/keynote_large.jpg\",\n" +
+                        "\t\t\t\"#-17\":1024\n" +
+                        "\t\t},\n" +
+                        "\t\t{\n" +
+                        "\t\t\t\"#-9\":240,\n" +
+                        "\t\t\t\"#-14\":{\"$symbol\":-4},\n" +
+                        "\t\t\t\"#-15\":\"Javaone Keynote\",\n" +
+                        "\t\t\t\"#-16\":\"http://javaone.com/keynote_small.jpg\",\n" +
+                        "\t\t\t\"#-17\":320\n" +
+                        "\t\t}\n" +
+                        "\t],\n" +
+                        "\t\"#-11\":{\n" +
+                        "\t\t\"#-5\":262144,\n" +
+                        "\t\t\"#-7\":18000000,\n" +
+                        "\t\t\"#-8\":\"video/mpg4\",\n" +
+                        "\t\t\"#-9\":480,\n" +
+                        "\t\t\"#-12\":[\n" +
+                        "\t\t\t\"Bill Gates\",\n" +
+                        "\t\t\t\"Steve Jobs\"\n" +
+                        "\t\t],\n" +
+                        "\t\t\"#-13\":{\"$symbol\":-2},\n" +
+                        "\t\t\"#-14\":58982400,\n" +
+                        "\t\t\"#-15\":\"Javaone Keynote\",\n" +
+                        "\t\t\"#-16\":\"http://javaone.com/keynote.mpg\",\n" +
+                        "\t\t\"#-17\":640\n" +
+                        "\t}\n" +
+                        "}",
+                JSONB.toJSONString(jsonbBytes, symbolTable, true));
 
         assertEquals(276, jsonbBytes.length);
         // 260 273 277 276

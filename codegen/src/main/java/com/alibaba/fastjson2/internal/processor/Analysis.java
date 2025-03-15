@@ -168,9 +168,9 @@ public class Analysis {
                     }
 
                     ExecutableElement getter = null, setter = null;
-                    TypeMirror type = null;
-                    String name = null;
-                    if (parameters.size() == 0 && (methodName.startsWith("get") || methodName.startsWith("is"))) {
+                    TypeMirror type;
+                    String name;
+                    if (parameters.isEmpty() && (methodName.startsWith("get") || methodName.startsWith("is"))) {
                         name = BeanUtils.getterName(methodName, null);
                         getter = method;
                         type = method.getReturnType();
@@ -188,8 +188,8 @@ public class Analysis {
     }
 
     private List<TypeElement> getTypeHierarchy(TypeElement element) {
-        List<TypeElement> result = new ArrayList<TypeElement>();
-        getAllTypes(element, result, new HashSet<TypeElement>());
+        List<TypeElement> result = new ArrayList<>();
+        getAllTypes(element, result, new HashSet<>());
         return result;
     }
 

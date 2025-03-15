@@ -269,6 +269,17 @@ public class FloatValueTest {
     }
 
     @Test
+    public void test_max() {
+        Float id = Float.MAX_VALUE;
+        FloatValue1 vo = new FloatValue1();
+        vo.setV0000(id);
+        byte[] utf8Bytes = JSON.toJSONBytes(vo);
+
+        FloatValue1 v1 = JSON.parseObject(utf8Bytes, FloatValue1.class);
+        assertEquals(vo.getV0000(), v1.getV0000());
+    }
+
+    @Test
     public void test_ascii() {
         for (Float id : values) {
             FloatValue1 vo = new FloatValue1();

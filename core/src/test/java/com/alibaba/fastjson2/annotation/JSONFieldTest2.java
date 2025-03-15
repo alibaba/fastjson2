@@ -63,4 +63,30 @@ public class JSONFieldTest2 {
             return id;
         }
     }
+
+    @Test
+    public void test_alternateNames_4() {
+        VO4 vo = JSON.parseObject("{\"id\":101}", VO4.class);
+        assertEquals(101, vo.id);
+
+        VO4 vo2 = JSON.parseObject("{\"uid\":101}", VO4.class);
+        assertEquals(101, vo2.id);
+    }
+
+    public static class VO4 {
+        private int id;
+
+        private VO4(int id) {
+            this.id = id;
+        }
+
+        @JSONCreator
+        public static VO4 valueOf(@JSONField(name = "id", alternateNames = "uid") int id) {
+            return new VO4(id);
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
 }

@@ -394,9 +394,11 @@ public class ObjectWriterProvider
             if (fieldBased) {
                 fieldBased = false;
                 objectWriter = cacheFieldBased.get(objectType);
-                if (objectWriter != null) {
-                    return objectWriter;
-                }
+            } else {
+                objectWriter = cache.get(objectType);
+            }
+            if (objectWriter != null) {
+                return objectWriter;
             }
         }
 
@@ -661,5 +663,18 @@ public class ObjectWriterProvider
 
     protected BeanInfo createBeanInfo() {
         return new BeanInfo(this);
+    }
+
+    /**
+     * Configure the Enum classes as a JavaBean
+     * @since 2.0.55
+     * @param enumClasses enum classes
+     */
+    @SuppressWarnings("rawtypes")
+    @SafeVarargs
+    public final void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        for (Class<? extends Enum> enumClass : enumClasses) {
+            register(enumClass, getCreator().createObjectWriter(enumClass));
+        }
     }
 }

@@ -47,6 +47,11 @@ public class UsersWriteUTF8Bytes {
     }
 
     @Benchmark
+    public void wast(Blackhole bh) {
+        bh.consume(io.github.wycst.wast.json.JSON.toJsonBytes(users));
+    }
+
+    //    @Benchmark
     public void fastjson2_str(Blackhole bh) {
         bh.consume(JSON.toJSONString(users));
     }

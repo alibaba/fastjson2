@@ -66,6 +66,10 @@ final class FactoryFunction<T>
         for (int i = 0; i < args.length; i++) {
             args[i] = values.get(hashCodes[i]);
         }
+        return createInstance(args);
+    }
+
+    public T createInstance(Object[] args) {
         try {
             return (T) factoryMethod.invoke(null, args);
         } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {

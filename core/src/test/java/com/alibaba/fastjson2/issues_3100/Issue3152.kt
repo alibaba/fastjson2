@@ -8,12 +8,13 @@ import org.junit.jupiter.api.Test
 class Issue3152 {
 
     data class Foo(val int: Int = 1, val bar: Bar)
+    data class Foo2(val int: Int, val bar: Bar)
     data class Bar(val text: String)
 
     @Test
     fun test() {
         Assertions.assertEquals(
-            Foo(1, Bar("hello")),
+            Foo(bar = Bar("hello")),
             JSON.parseObject(
                 """
                     {
@@ -23,6 +24,20 @@ class Issue3152 {
                     }
                 """.trimIndent()
             ).toJavaObject(Foo::class.java)
+        )
+
+        Assertions.assertEquals(
+            Foo2(1, Bar("hello")),
+            JSON.parseObject(
+                """
+                    {
+                        "int": 1,
+                        "bar": {
+                            "text" : "hello"
+                        }
+                    }
+                """.trimIndent()
+            ).to(Foo2::class.java)
         )
     }
 }

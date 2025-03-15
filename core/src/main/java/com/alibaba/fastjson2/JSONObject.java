@@ -187,8 +187,18 @@ public class JSONObject
      * @since 2.0.52
      * @param key
      * @param action
+     * @deprecated Typo in the method name. Use {@link #forEachArrayObject(String, Consumer) forEachArrayObject} instead
      */
+    @Deprecated
     public void forEchArrayObject(String key, Consumer<JSONObject> action) {
+        forEachArrayObject(key, action);
+    }
+
+    /**
+     * @param key
+     * @param action
+     */
+    public void forEachArrayObject(String key, Consumer<JSONObject> action) {
         JSONArray array = getJSONArray(key);
         if (array == null) {
             return;
@@ -1147,6 +1157,10 @@ public class JSONObject
 
         if (clazz == JSON.class) {
             return (T) this;
+        }
+
+        if (clazz == Void.class || clazz == void.class) {
+            return null;
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();

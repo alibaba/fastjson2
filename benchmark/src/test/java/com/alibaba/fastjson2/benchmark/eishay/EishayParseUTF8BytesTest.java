@@ -6,16 +6,18 @@ public class EishayParseUTF8BytesTest {
     static final EishayParseUTF8Bytes benchmark = new EishayParseUTF8Bytes();
 
     public static void fastjson2() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
                 benchmark.fastjson2(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.62.0.19 : 703 746 710 706 700 682 717 698 526 500 474
-            // zulu11.52.13 : 579 565 552 541 554 553 554 538 420 424 434
-            // zulu17.40.19 : 600 604 597 593 578 567 447 420
+            // zulu8.62.0.19 : 703 746 710 706 700 682 717 698 526 500 474 445 425
+            // zulu11.52.13 : 579 565 552 541 554 553 554 538 420 424 434 370
+            // zulu17.40.19 : 600 604 597 593 578 567 447 420 380 379
+            // zulu21.37.17 : 364
+            // graalvm 21+35.1 : 403
         }
     }
 
@@ -63,8 +65,8 @@ public class EishayParseUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        fastjson2_features();
+        fastjson2();
+//        fastjson2_features();
 //        dsljson();
 //        jackson();
     }

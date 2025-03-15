@@ -21,6 +21,8 @@ public class MapGhostTest {
         byte[] bytes1 = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         assertArrayEquals(bytes, bytes1);
 
+        System.out.println(JSONB.toJSONString(bytes, true));
+
         MapGhost mapGhost = (MapGhost) JSONB.parseObject(
                 bytes, Object.class,
                 JSONReader.Feature.FieldBased,

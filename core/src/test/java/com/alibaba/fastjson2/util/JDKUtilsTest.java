@@ -7,8 +7,7 @@ import java.lang.invoke.*;
 import java.util.function.ToIntFunction;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JDKUtilsTest {
     @Test

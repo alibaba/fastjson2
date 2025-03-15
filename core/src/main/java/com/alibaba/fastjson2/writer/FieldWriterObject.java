@@ -97,7 +97,7 @@ public class FieldWriterObject<T>
         }
     }
 
-    private ObjectWriter getObjectWriterVoid(JSONWriter jsonWriter, Class valueClass) {
+    protected final ObjectWriter getObjectWriterVoid(JSONWriter jsonWriter, Class valueClass) {
         ObjectWriter formattedWriter = null;
         if (BeanUtils.isExtendedMap(valueClass) && SUPER.equals(fieldName)) {
             JSONWriter.Context context = jsonWriter.context;

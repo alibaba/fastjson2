@@ -1,19 +1,25 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
+import java.time.*;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
-import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
+import static com.alibaba.fastjson2.JSONWriterUTF16.BYTE_VEC_64_DOUBLE_QUOTE;
+import static com.alibaba.fastjson2.JSONWriterUTF16.BYTE_VEC_64_SINGLE_QUOTE;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterUTF16Test {
     @Test
@@ -740,6 +746,552 @@ public class JSONWriterUTF16Test {
                 jsonWriter.chars = new char[initSize];
                 jsonWriter.off = initOffset;
                 jsonWriter.writeName7Raw(nameValue);
+            }
+        }
+    }
+
+    @Test
+    public void grow() {
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNull();
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeReference("$.abc");
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBase64(new byte[3]);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(Arrays.asList("abc"));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16(BrowserSecure);
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {1, '>', '<'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16(BrowserSecure);
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {'a', 'b', 'c'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(new char[] {'a', 'b', 'c'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(new char[] {'a', 'b', 'c'}, 0, 3);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeUUID(UUID.randomUUID());
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt32(123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt8((byte) 123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt8(new byte[]{1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt16((short) 123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt32(new int[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeListInt32(Arrays.asList(1, 2, null));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt64(123L);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt64(new long[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeListInt64(Arrays.asList(1L, 2L, null));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeFloat(123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDouble(123L);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNameRaw(new char[] {'a', 'b', 'c'});
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNameRaw(new char[] {'a', 'b', 'c'}, 0, 3);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeRaw(new char[] {'a', 'b', 'c'});
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeRaw('a', 'b');
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTime14(2014, 4, 5, 6, 7, 8);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTime19(2014, 4, 5, 6, 7, 8);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalDate(LocalDate.MIN);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalDateTime(LocalDateTime.MIN);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateYYYMMDD8(2014, 4, 5);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateYYYMMDD10(2014, 4, 5);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeTimeHHMMSS8(3, 4, 5);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalTime(LocalTime.MIN);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            ZonedDateTime now = ZonedDateTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeZonedDateTime(now);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            OffsetDateTime now = OffsetDateTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeOffsetDateTime(now);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            OffsetTime now = OffsetTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeOffsetTime(now);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            OffsetTime now = OffsetTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTimeISO8601(2014, 3, 4, 5, 6, 7, 8, 9, true);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBigInt(new BigInteger("123456789012345678901234567890"), 0);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDecimal(new BigDecimal("12345678901234567890.1234567890"), 0, new DecimalFormat("###.##"));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1, 2));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1, 2, 3));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBool(true);
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(JSONObject.of());
+            }
+        }
+    }
+
+    @Test
+    public void testEscaped() {
+        char[] chars = new char[] {'"', '"', '"', '"'};
+        byte[] bytes = toBytes(chars);
+
+        JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+        jsonWriter.writeStringUTF16(bytes);
+        String str = jsonWriter.toString();
+        System.out.println(str);
+        assertEquals("\"\\\"\\\"\\\"\\\"\"", str);
+    }
+
+    @Test
+    public void testEscaped_1() {
+        String str = "😀😉";
+        char[] chars = str.toCharArray();
+        byte[] bytes = toBytes(chars);
+
+        JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+        jsonWriter.writeStringUTF16(bytes);
+        assertEquals("\"" + str + "\"", jsonWriter.toString());
+    }
+
+    static boolean containsEscapedUTF16(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) data;
+            if (c == quote || c == '\\' || c < ' ') {
+                return true;
+            }
+            data >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
+        long x5c = v ^ 0x005C005C_005C005CL;
+
+        x22 = (x22 - 0x00010001_00010001L) & ~x22;
+        x5c = (x5c - 0x00010001_00010001L) & ~x5c;
+
+        return ((x22 | x5c | (0x007F007F_007F007FL - v + 0x00100010_00100010L) | v) & 0x00800080_00800080L) != 0;
+    }
+
+    @Test
+    public void testEscaped_2() {
+        String str = "abcd";
+        char[] chars = str.toCharArray();
+        byte[] bytes = toBytes(chars);
+
+        long v = IOUtils.getLongLE(bytes, 0);
+        assertFalse(
+                containsEscapedUTF16(
+                        v,
+                        BYTE_VEC_64_DOUBLE_QUOTE));
+
+        JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+        jsonWriter.writeStringUTF16(bytes);
+        assertEquals("\"" + str + "\"", jsonWriter.toString());
+    }
+
+    @Test
+    public void test_containsEscapedUTF16() {
+        char[] chars = new char[4];
+        char[] specials_double = new char[]{'\\', '"', '\r', '\n'};
+        char[] specials_single = new char[]{'\\', '\'', '\r', '\n'};
+        {
+            Arrays.fill(chars, 'A');
+            {
+                long v = IOUtils.getLongLE(
+                        toBytes(chars),
+                        0);
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            }
+
+            {
+                chars[0] = '"';
+                long v = IOUtils.getLongLE(
+                        toBytes(chars),
+                        0);
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            }
+            {
+                chars[0] = '\'';
+                long v = IOUtils.getLongLE(
+                        toBytes(chars),
+                        0);
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            }
+        }
+        {
+            Arrays.fill(chars, '中');
+            {
+                long v = IOUtils.getLongLE(
+                        toBytes(chars),
+                        0);
+                assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            }
+        }
+        {
+            Arrays.fill(chars, '®');
+            {
+                long v = IOUtils.getLongLE(
+                        toBytes(chars),
+                        0);
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            Arrays.fill(chars, 'A');
+            for (char c : specials_double) {
+                chars[i] = c;
+                long v = IOUtils.getLongLE(
+                        toBytes(chars),
+                        0);
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+            }
+            for (char c : specials_single) {
+                chars[i] = c;
+                long v = IOUtils.getLongLE(
+                        toBytes(chars),
+                        0);
+                assertTrue(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+            }
+        }
+        {
+            chars = new char[]{'a', 'b', 'c', 'd'};
+            long v = IOUtils.getLongLE(
+                    toBytes(chars),
+                    0);
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+        }
+        {
+            chars = new char[]{'A', 'B', 'C', 'D'};
+            long v = IOUtils.getLongLE(
+                    toBytes(chars),
+                    0);
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_SINGLE_QUOTE));
+            assertFalse(containsEscapedUTF16(v, BYTE_VEC_64_DOUBLE_QUOTE));
+        }
+    }
+
+    static byte[] toBytes(char[] chars) {
+        if (chars.length != 4) {
+            throw new UnsupportedOperationException();
+        }
+        byte[] bytes = new byte[chars.length << 1];
+        long x = IOUtils.getLongLE(chars, 0);
+        IOUtils.putLongLE(bytes, 0, x);
+        return bytes;
+    }
+
+    @Test
+    public void write2() {
+        char[] chars = new char[4];
+        StringUtils.writeEscapedChar(chars, 0, '\r');
+        StringUtils.writeEscapedChar(chars, 2, '\n');
+        assertEquals("\\r\\n", new String(chars));
+    }
+
+    @Test
+    public void writeU4() {
+        char[] chars = new char[6];
+        StringUtils.writeU4Hex2(chars, 0, 1);
+        assertEquals("\\u0001", new String(chars));
+
+        IOUtils.putLongUnaligned(chars, 2, IOUtils.utf16Hex4U(1));
+        assertEquals("\\u0001", new String(chars));
+
+        chars = new char[] {'0', '1', '2', '3'};
+        assertEquals(0, IOUtils.getLongLE(chars, 0) & 0xFF00FF00FF00FF00L);
+
+        chars = new char[] {'中', '1', '2', '3'};
+        assertNotEquals(0, IOUtils.getLongLE(chars, 0) & 0xFF00FF00FF00FF00L);
+    }
+
+    @Test
+    public void testUTF16() {
+        char[] chars = new char[32];
+        for (int i = 0; i < chars.length; i++) {
+            {
+                Arrays.fill(chars, 'A');
+                chars[chars.length - 1] = '中';
+                String str = new String(chars);
+                String json = JSON.toJSONString(str);
+                assertEquals(str, JSON.parse(json));
+            }
+            {
+                Arrays.fill(chars, 'A');
+                chars[chars.length - 1] = '中';
+                chars[i] = '\r';
+                String str = new String(chars);
+                String json = JSON.toJSONString(str);
+                assertEquals(str, JSON.parse(json));
+            }
+
+            {
+                Arrays.fill(chars, '中');
+                chars[i] = '\r';
+                String str = new String(chars);
+                String json = JSON.toJSONString(str);
+                assertEquals(str, JSON.parse(json));
             }
         }
     }

@@ -254,6 +254,10 @@ public class ObjectReaderAdapter<T>
 
     @Override
     public T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.jsonb) {
+            return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         if (!serializable) {
             jsonReader.errorOnNoneSerializable(objectClass);
         }
@@ -439,6 +443,21 @@ public class ObjectReaderAdapter<T>
             fieldReader = getFieldReaderLCase(hashCodeL);
         }
         return fieldReader;
+    }
+
+    protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Map<Long, Object> map) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL);
+        }
+
+        if (fieldReader != null) {
+            map.put(hashCode, fieldReader.readFieldValue(jsonReader));
+        } else {
+            jsonReader.skipValue();
+        }
     }
 
     protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {

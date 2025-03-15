@@ -742,6 +742,21 @@ public abstract class BeanUtils {
                                     // ignored
                                 }
                             });
+                        } else if ("com.fasterxml.jackson.annotation.JsonProperty".equals(annotationTypeName)) {
+                            BeanUtils.annotationMethods(annotationType, m -> {
+                                String name = m.getName();
+                                try {
+                                    Object result = m.invoke(annotation);
+                                    if ("value".equals(name)) {
+                                        String annotationName = (String) result;
+                                        if (annotationName.length() != 0 && !annotationName.equals(enumName)) {
+                                            annotationNames[enumIndex] = annotationName;
+                                        }
+                                    }
+                                } catch (Exception ignored) {
+                                    // ignored
+                                }
+                            });
                         }
                     }
                     break;
@@ -1297,6 +1312,10 @@ public abstract class BeanUtils {
         }
 
         String fieldName = getterName(methodName, namingStrategy);
+        int subIndex;
+        if (kotlin && (subIndex = fieldName.indexOf('-')) != -1) {
+            fieldName = fieldName.substring(0, subIndex);
+        }
 
         if (fieldName.length() > 2
                 && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'
@@ -1312,6 +1331,16 @@ public abstract class BeanUtils {
         }
 
         return fieldName;
+    }
+
+    public static Field getField(Class objectClass, String fieldName) {
+        Field[] fields = new Field[1];
+        declaredFields(objectClass, field -> {
+            if (field.getName().equals(fieldName)) {
+                fields[0] = field;
+            }
+        });
+        return fields[0];
     }
 
     public static Field getField(Class objectClass, Method method) {

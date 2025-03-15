@@ -59,6 +59,7 @@ public class JDKUtils {
 
     public static final MethodHandle METHOD_HANDLE_HAS_NEGATIVE;
     public static final Predicate<byte[]> PREDICATE_IS_ASCII;
+    public static final MethodHandle INDEX_OF_CHAR_LATIN1;
 
     static final MethodHandles.Lookup IMPL_LOOKUP;
     static volatile MethodHandle CONSTRUCTOR_LOOKUP;
@@ -337,6 +338,21 @@ public class JDKUtils {
             METHOD_HANDLE_HAS_NEGATIVE = handle;
         }
 
+        MethodHandle indexOfCharLatin1 = null;
+        if (JVM_VERSION > 9) {
+            try {
+                Class<?> cStringLatin1 = Class.forName("java.lang.StringLatin1");
+                MethodHandles.Lookup lookup = trustedLookup(cStringLatin1);
+                indexOfCharLatin1 = lookup.findStatic(
+                        cStringLatin1,
+                        "indexOfChar",
+                        MethodType.methodType(int.class, byte[].class, int.class, int.class, int.class));
+            } catch (Throwable ignored) {
+                // ignore
+            }
+        }
+        INDEX_OF_CHAR_LATIN1 = indexOfCharLatin1;
+
         Boolean compact_strings = null;
         try {
             if (JVM_VERSION == 8) {
@@ -489,5 +505,21 @@ public class JDKUtils {
         }
 
         return IMPL_LOOKUP.in(objectClass);
+    }
+
+    public static String asciiStringJDK8(byte[] bytes, int offset, int strlen) {
+        char[] chars = new char[strlen];
+        for (int i = 0; i < strlen; ++i) {
+            chars[i] = (char) bytes[offset + i];
+        }
+        return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+    }
+
+    public static String latin1StringJDK8(byte[] bytes, int offset, int strlen) {
+        char[] chars = new char[strlen];
+        for (int i = 0; i < strlen; ++i) {
+            chars[i] = (char) (bytes[offset + i] & 0xff);
+        }
+        return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
     }
 }

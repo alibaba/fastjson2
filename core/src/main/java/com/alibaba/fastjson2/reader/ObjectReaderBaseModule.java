@@ -33,6 +33,7 @@ import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectReaderBaseModule
         implements ObjectReaderModule {
+    static Method METHOD_getPermittedSubclasses;
     final ObjectReaderProvider provider;
     final ReaderAnnotationProcessor annotationProcessor;
 
@@ -296,6 +297,36 @@ public class ObjectReaderBaseModule
                         break;
                     default:
                         break;
+                }
+            }
+
+            if (JDKUtils.JVM_VERSION >= 17
+                    && beanInfo.seeAlso == null
+                    && objectClass.isAnnotationPresent(JSONType.class)
+            ) {
+                try {
+                    Method method = METHOD_getPermittedSubclasses;
+                    if (method == null) {
+                        method = Class.class.getMethod("getPermittedSubclasses");
+                        METHOD_getPermittedSubclasses = method;
+                    }
+                    Class[] classes = (Class[]) method.invoke(objectClass);
+                    beanInfo.seeAlso = classes;
+                    beanInfo.seeAlsoNames = new String[classes.length];
+                    for (int i = 0; i < classes.length; i++) {
+                        Class<?> item = classes[i];
+
+                        BeanInfo itemBeanInfo = new BeanInfo(provider);
+                        processSeeAlsoAnnotation(itemBeanInfo, item);
+                        String typeName = itemBeanInfo.typeName;
+                        if (typeName == null || typeName.isEmpty()) {
+                            typeName = item.getSimpleName();
+                        }
+                        beanInfo.seeAlsoNames[i] = typeName;
+                    }
+                    beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
+                } catch (Throwable ignored) {
+                    // ignore
                 }
             }
 
@@ -1122,7 +1153,7 @@ public class ObjectReaderBaseModule
                                 format = format.trim();
 
                                 if (format.indexOf('T') != -1 && !format.contains("'T'")) {
-                                    format = format.replaceAll("T", "'T'");
+                                    format = format.replace("T", "'T'");
                                 }
 
                                 fieldInfo.format = format;
@@ -1227,7 +1258,7 @@ public class ObjectReaderBaseModule
             if (!jsonFieldFormat.isEmpty()) {
                 jsonFieldFormat = jsonFieldFormat.trim();
                 if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
-                    jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
+                    jsonFieldFormat = jsonFieldFormat.replace("T", "'T'");
                 }
 
                 fieldInfo.format = jsonFieldFormat;
@@ -1257,9 +1288,9 @@ public class ObjectReaderBaseModule
                 if (fieldInfo.alternateNames == null) {
                     fieldInfo.alternateNames = alternateNames;
                 } else {
-                    Set<String> nameSet = new LinkedHashSet<>();
-                    nameSet.addAll(Arrays.asList(alternateNames));
-                    nameSet.addAll(Arrays.asList(fieldInfo.alternateNames));
+                    Set<String> nameSet = new LinkedHashSet<>(alternateNames.length + fieldInfo.alternateNames.length, 1F);
+                    Collections.addAll(nameSet, alternateNames);
+                    Collections.addAll(nameSet, fieldInfo.alternateNames);
                     fieldInfo.alternateNames = nameSet.toArray(new String[nameSet.size()]);
                 }
             }
@@ -1308,9 +1339,15 @@ public class ObjectReaderBaseModule
             if (!keyName.isEmpty()) {
                 fieldInfo.arrayToMapKey = keyName;
             }
+
             Class<?> arrayToMapDuplicateHandler = jsonField.arrayToMapDuplicateHandler();
             if (arrayToMapDuplicateHandler != Void.class) {
                 fieldInfo.arrayToMapDuplicateHandler = arrayToMapDuplicateHandler;
+            }
+
+            Class<?> contentAs = jsonField.contentAs();
+            if (contentAs != Void.class) {
+                fieldInfo.contentAs = contentAs;
             }
         }
     }

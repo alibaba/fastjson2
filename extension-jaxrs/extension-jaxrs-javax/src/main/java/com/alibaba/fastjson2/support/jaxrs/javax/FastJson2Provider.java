@@ -73,7 +73,7 @@ public class FastJson2Provider
      * Can serialize/deserialize all types.
      */
     public FastJson2Provider() {
-        this((Class<?>[]) null);
+        this(null);
     }
 
     /**

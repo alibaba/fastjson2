@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.Feature;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.DoubleToDecimal;
+import com.alibaba.fastjson2.util.NumberUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -110,7 +110,7 @@ public class DoubleTest3_random {
         char[] chars = new char[64];
         for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
-            int len = DoubleToDecimal.toString(val, chars, 0, false);
+            int len = NumberUtils.writeDouble(chars, 0, val, false);
             JSONReader jsonReader = JSONReader.of(chars, 0, len);
             assertEquals(val, jsonReader.readDoubleValue());
         }

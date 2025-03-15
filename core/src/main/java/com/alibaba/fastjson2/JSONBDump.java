@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigDecimal;
@@ -279,11 +280,9 @@ final class JSONBDump {
                         );
                         break;
                     case BC_INT64:
-                        long unscaledValueLong = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                         unscaledValue = BigInteger.valueOf(
-                                BIG_ENDIAN
-                                        ? unscaledValueLong
-                                        : Long.reverseBytes(unscaledValueLong));
+                                IOUtils.getLongBE(bytes, offset)
+                        );
                         offset += 8;
                         break;
                     default:
