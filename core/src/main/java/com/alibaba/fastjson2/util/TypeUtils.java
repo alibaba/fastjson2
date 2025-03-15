@@ -3755,8 +3755,23 @@ public class TypeUtils {
         return i >= LONG_JAVASCRIPT_LOW && i <= LONG_JAVASCRIPT_HIGH;
     }
 
-    public static boolean isJavaScriptSupport(BigDecimal i) {
-        return i.precision() >= 16 && isJavaScriptSupport(i.unscaledValue());
+    public static boolean isJavaScriptSupport(BigDecimal decimal) {
+        boolean jsSupport = decimal.precision() < 16 || isJavaScriptSupport(decimal.unscaledValue());
+        if (!jsSupport && decimal.scale() != 0) {
+            //Use double for comparison
+            //double and javascript number have the same precision
+            //In extreme cases, precision loss may occur.
+            //There will be a loss of precision between [4.9e-324, 5e-324), which will be converted to 5e-324 by JavaScript.
+            //This situation can be ignored
+            double doubleValue;
+            try {
+                doubleValue = decimal.doubleValue();
+            } catch (Exception ex) {
+                return false;
+            }
+            jsSupport = decimal.compareTo(BigDecimal.valueOf(doubleValue)) == 0;
+        }
+        return jsSupport;
     }
 
     public static boolean isJavaScriptSupport(BigInteger i) {

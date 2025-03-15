@@ -823,7 +823,7 @@ public abstract class JSONWriter
 
     protected static boolean isWriteAsString(BigDecimal value, long features) {
         return (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0
-                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && value.precision() >= 16 && !isJavaScriptSupport(value.unscaledValue()));
+                || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
 
     public abstract void writeNameRaw(char[] chars);
