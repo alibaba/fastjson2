@@ -11,10 +11,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.temporal.Temporal;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriter.Feature.SortMapEntriesByKeys;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public final class ObjectWriterImplMap
         extends ObjectWriterPrimitiveImpl {
@@ -29,6 +30,7 @@ public final class ObjectWriterImplMap
 
     final Type keyType;
     final Type valueType;
+    final String format;
     final boolean valueTypeRefDetect;
     volatile ObjectWriter keyWriter;
     volatile ObjectWriter valueWriter;
@@ -51,8 +53,13 @@ public final class ObjectWriterImplMap
     }
 
     public ObjectWriterImplMap(Type keyType, Type valueType, Class objectClass, Type objectType, long features) {
+        this(keyType, valueType, null, objectClass, objectType, features);
+    }
+
+    public ObjectWriterImplMap(Type keyType, Type valueType, String format, Class objectClass, Type objectType, long features) {
         this.keyType = keyType;
         this.valueType = valueType;
+        this.format = format;
         this.objectClass = objectClass;
         this.objectType = objectType;
         this.features = features;
@@ -72,11 +79,12 @@ public final class ObjectWriterImplMap
         jsonObject1 = "JO1".equals(typeName);
         this.jsonbTypeInfo = JSONB.toBytes(typeName);
         this.typeNameHash = Fnv.hashCode64(typeName);
+        long jsonObject1InnerMapOffset = -1;
         if (jsonObject1) {
             jsonObject1InnerMap = BeanUtils.getDeclaredField(objectClass, "map");
             if (jsonObject1InnerMap != null) {
                 jsonObject1InnerMap.setAccessible(true);
-                jsonObject1InnerMapOffset = JDKUtils.UNSAFE.objectFieldOffset(jsonObject1InnerMap);
+                jsonObject1InnerMapOffset = UNSAFE.objectFieldOffset(jsonObject1InnerMap);
             }
         } else {
             jsonObject1InnerMap = null;
@@ -113,6 +121,10 @@ public final class ObjectWriterImplMap
     }
 
     public static ObjectWriterImplMap of(Type type, Class defineClass) {
+        return of(type, null, defineClass);
+    }
+
+    public static ObjectWriterImplMap of(Type type, String format, Class defineClass) {
         Type keyType = null, valueType = null;
 
         if (type instanceof ParameterizedType) {
@@ -125,7 +137,7 @@ public final class ObjectWriterImplMap
             }
         }
 
-        return new ObjectWriterImplMap(keyType, valueType, defineClass, type, 0);
+        return new ObjectWriterImplMap(keyType, valueType, format, defineClass, type, 0);
     }
 
     @Override
@@ -138,8 +150,7 @@ public final class ObjectWriterImplMap
 
         jsonWriter.startObject();
         boolean writeNulls = jsonWriter.isWriteNulls();
-        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Object> entry = it.next();
+        for (Map.Entry<String, Object> entry : (Iterable<Map.Entry<String, Object>>) map.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value == null) {
@@ -152,12 +163,7 @@ public final class ObjectWriterImplMap
 
             jsonWriter.writeString(key);
 
-            Class valueType;
-            if (contentAs) {
-                valueType = (Class) this.valueType;
-            } else {
-                valueType = value.getClass();
-            }
+            Class<?> valueType = value.getClass();
             if (valueType == String.class) {
                 jsonWriter.writeString((String) value);
             } else {
@@ -177,7 +183,7 @@ public final class ObjectWriterImplMap
             boolean ordered = false;
             if (jsonObject1InnerMap != null) {
                 if (jsonObject1InnerMapOffset != -1) {
-                    Object innerMap = JDKUtils.UNSAFE.getObject(object, jsonObject1InnerMapOffset);
+                    Object innerMap = UNSAFE.getObject(object, jsonObject1InnerMapOffset);
                     ordered = innerMap instanceof LinkedHashMap;
                 } else {
                     try {
@@ -354,11 +360,7 @@ public final class ObjectWriterImplMap
             } else {
                 if (valueClass == JSONObject.class) {
                     valueWriter = ObjectWriterImplMap.INSTANCE;
-                } else if (valueClass == JSONFactory.getClassJSONObject1x()) {
-                    valueWriter = ObjectWriterImplMap.getINSTANCE1();
                 } else if (valueClass == JSONArray.class) {
-                    valueWriter = ObjectWriterImplList.INSTANCE;
-                } else if (valueClass == JSONFactory.getClassJSONArray1x()) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                 } else {
                     valueWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
@@ -388,6 +390,60 @@ public final class ObjectWriterImplMap
         jsonWriter.endObject();
     }
 
+    static boolean isWriteAsString(Object val, long features) {
+        return (features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0
+                && ObjectWriterProvider.isPrimitiveOrEnum(val.getClass())
+                && !(val instanceof Temporal || val instanceof Date);
+    }
+
+    String mapKeyToString(Object key, JSONWriter jsonWriter, long features) {
+        if (key == null) {
+            return null;
+        } else if (key instanceof String) {
+            return (String) key;
+        } else if (key instanceof Integer || key instanceof Long) {
+            return key.toString();
+        }
+        if (isWriteAsString(key, features)) {
+            return key.toString();
+        }
+
+        final JSONWriter.Context context = jsonWriter.getContext();
+        String str = JSON.toJSONString(key, context);
+        if (str != null) {
+            final int length = str.length();
+            if (length > 1) {
+                final char quote = jsonWriter.useSingleQuote ? '\'' : '"';
+                if (str.charAt(0) == quote && str.charAt(length - 1) == quote) {
+                    return str.substring(1, length - 1);
+                }
+            }
+        }
+        return str;
+    }
+
+    String writeMapKey(Object key, JSONWriter jsonWriter, long features) {
+        String strKey = null;
+        if (key == null) {
+            jsonWriter.writeName("null");
+        } else if (key instanceof String) {
+            jsonWriter.writeName(strKey = (String) key);
+        } else {
+            if (isWriteAsString(key, features)) {
+                jsonWriter.writeName(strKey = key.toString());
+            } else {
+                if (key instanceof Integer) {
+                    jsonWriter.writeName((Integer) key);
+                } else if (key instanceof Long) {
+                    jsonWriter.writeName((Long) key);
+                } else {
+                    jsonWriter.writeNameAny(key);
+                }
+            }
+        }
+        return strKey;
+    }
+
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
         if (jsonWriter.utf8) {
@@ -409,7 +465,6 @@ public final class ObjectWriterImplMap
             writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
-
         Map map = (Map) object;
 
         boolean refDetect = jsonWriter.isRefDetect();
@@ -434,30 +489,13 @@ public final class ObjectWriterImplMap
         }
 
         ObjectWriterProvider provider = jsonWriter.context.provider;
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
-            Object value = entry.getValue();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
+            final Object value = entry.getValue();
             Object key = entry.getKey();
 
             if (value == null) {
                 if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
-                    if (key == null) {
-                        jsonWriter.writeName("null");
-                    } else if (key instanceof String) {
-                        jsonWriter.writeName((String) key);
-                    } else {
-                        if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-                            jsonWriter.writeName(key.toString());
-                        } else {
-                            if (key instanceof Integer) {
-                                jsonWriter.writeName(((Integer) key).intValue());
-                            } else if (key instanceof Long) {
-                                jsonWriter.writeName(((Long) key).longValue());
-                            } else {
-                                jsonWriter.writeNameAny(key);
-                            }
-                        }
-                    }
+                    writeMapKey(key, jsonWriter, features);
                     jsonWriter.writeColon();
                     jsonWriter.writeNull();
                 }
@@ -474,29 +512,14 @@ public final class ObjectWriterImplMap
             String strKey = null;
             if (keyWriter != null) {
                 keyWriter.write(jsonWriter, key, null, null, 0);
-            } else if (key == null) {
-                jsonWriter.writeName("null");
-            } else if (key instanceof String) {
-                jsonWriter.writeName(strKey = (String) key);
             } else {
-                if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
-                    jsonWriter.writeName(strKey = key.toString());
-                } else {
-                    if (key instanceof Integer) {
-                        jsonWriter.writeName(((Integer) key).intValue());
-                    } else if (key instanceof Long) {
-                        long longKey = (Long) key;
-                        jsonWriter.writeName(longKey);
-                    } else {
-                        jsonWriter.writeNameAny(key);
-                    }
-                }
+                strKey = writeMapKey(key, jsonWriter, features);
             }
             jsonWriter.writeColon();
 
-            Class valueClass;
+            Class<?> valueClass;
             if (contentAs) {
-                valueClass = (Class) this.valueType;
+                valueClass = (Class<?>) this.valueType;
             } else {
                 valueClass = value.getClass();
             }
@@ -510,7 +533,7 @@ public final class ObjectWriterImplMap
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) == 0) {
                     jsonWriter.writeInt64((Long) value);
                 } else {
-                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
                     valueWriter.write(jsonWriter, value, strKey, Long.class, features);
                 }
                 continue;
@@ -521,37 +544,31 @@ public final class ObjectWriterImplMap
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) == 0) {
                     jsonWriter.writeDecimal((BigDecimal) value, features, null);
                 } else {
-                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
                     valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
                 }
                 continue;
             }
 
             boolean isPrimitiveOrEnum;
-            ObjectWriter valueWriter;
+            ObjectWriter<?> valueWriter;
             if (valueClass == this.valueType) {
                 if (this.valueWriter != null) {
                     valueWriter = this.valueWriter;
                 } else {
-                    valueWriter = this.valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    valueWriter = jsonWriter.getObjectWriter(valueClass);
                 }
                 isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
             } else {
                 if (valueClass == JSONObject.class) {
                     valueWriter = ObjectWriterImplMap.INSTANCE;
                     isPrimitiveOrEnum = false;
-                } else if (valueClass == JSONFactory.getClassJSONObject1x()) {
-                    valueWriter = ObjectWriterImplMap.getINSTANCE1();
-                    isPrimitiveOrEnum = false;
                 } else if (valueClass == JSONArray.class) {
-                    valueWriter = ObjectWriterImplList.INSTANCE;
-                    isPrimitiveOrEnum = false;
-                } else if (valueClass == JSONFactory.getClassJSONArray1x()) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                     isPrimitiveOrEnum = false;
                 } else {
                     valueWriter = jsonWriter.getObjectWriter(valueClass);
-                    isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
+                    isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(valueClass);
                 }
             }
 
@@ -620,14 +637,7 @@ public final class ObjectWriterImplMap
             }
 
             Object entryKey = entry.getKey();
-            String key;
-            if (entryKey == null) {
-                key = null;
-            } else if (entryKey instanceof String) {
-                key = (String) entryKey;
-            } else {
-                key = JSON.toJSONString(entryKey, jsonWriter.getContext());
-            }
+            String key = mapKeyToString(entryKey, jsonWriter, features);
 
             if (refDetect) {
                 String refPath = jsonWriter.setPath(key, value);
