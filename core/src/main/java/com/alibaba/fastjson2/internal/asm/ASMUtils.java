@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
-public class ASMUtils {
+public final class ASMUtils {
     public static final String TYPE_UNSAFE_UTILS = JDKUtils.class.getName().replace('.', '/');
 
     public static final String TYPE_OBJECT_WRITER_ADAPTER
