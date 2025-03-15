@@ -16,25 +16,20 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicLong;
 
-class JSONPathCompilerReflectASM
+import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
+
+final class JSONPathCompilerReflectASM
         extends JSONPathCompilerReflect {
     // GraalVM not support
     // Android not support
-    static final AtomicLong seed = new AtomicLong();
+    private static final AtomicLong seed = new AtomicLong();
     static final JSONPathCompilerReflectASM INSTANCE = new JSONPathCompilerReflectASM(
             DynamicClassLoader.getInstance()
     );
 
-    static final String DESC_OBJECT_READER = ASMUtils.desc(ObjectReader.class);
-    static final String DESC_FIELD_READER = ASMUtils.desc(FieldReader.class);
-    static final String DESC_OBJECT_WRITER = ASMUtils.desc(ObjectWriter.class);
-    static final String DESC_FIELD_WRITER = ASMUtils.desc(FieldWriter.class);
-    static final String TYPE_SINGLE_NAME_PATH_TYPED = ASMUtils.type(SingleNamePathTyped.class);
-    static final String METHOD_SINGLE_NAME_PATH_TYPED_INIT = "(Ljava/lang/String;Ljava/lang/Class;" + DESC_OBJECT_READER + DESC_FIELD_READER + DESC_OBJECT_WRITER + DESC_FIELD_WRITER + ")V";
-
-    static final int THIS = 0;
-
-    protected final DynamicClassLoader classLoader;
+    private static final String TYPE_SINGLE_NAME_PATH_TYPED = ASMUtils.type(SingleNamePathTyped.class);
+    private static final String METHOD_SINGLE_NAME_PATH_TYPED_INIT = "(Ljava/lang/String;Ljava/lang/Class;" + DESC_OBJECT_READER + DESC_FIELD_READER + DESC_OBJECT_WRITER + DESC_FIELD_WRITER + ")V";
+    private final DynamicClassLoader classLoader;
 
     public JSONPathCompilerReflectASM(DynamicClassLoader classLoader) {
         this.classLoader = classLoader;
@@ -97,7 +92,7 @@ class JSONPathCompilerReflectASM
         cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER, classNameType, TYPE_SINGLE_NAME_PATH_TYPED, new String[]{});
 
         {
-            final int PATH = 1, CLASS = 2, OBJECT_READER = 3, FIELD_READER = 4, OBJECT_WRITER = 5, FIELD_WRITER = 6;
+            final int THIS = 0, PATH = 1, CLASS = 2, OBJECT_READER = 3, FIELD_READER = 4, OBJECT_WRITER = 5, FIELD_WRITER = 6;
 
             MethodWriter mw = cw.visitMethod(
                     Opcodes.ACC_PUBLIC,
