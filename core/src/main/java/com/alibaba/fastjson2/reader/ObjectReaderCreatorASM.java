@@ -46,7 +46,7 @@ public class ObjectReaderCreatorASM
     static final String METHOD_DESC_READ_FIELD_VALUE = "(" + DESC_JSON_READER + "Ljava/lang/Object;)V";
     static final String GET_FIELD_READER_UL = "(J" + DESC_JSON_READER + "J)" + DESC_FIELD_READER;
     static final String READ_FIELD_READER_UL = "(J" + DESC_JSON_READER + "JLjava/lang/Object;)V";
-    static final String READ_FIELD_READER_MAP = "(J" + DESC_JSON_READER + "JLjava/util/Map;)V";
+    static final String READ_FIELD_READER_MAP = "(J" + DESC_JSON_READER + "JLjava/util/Map;)Ljava/util/Map;";
     static final String METHOD_DESC_ADD_RESOLVE_TASK = "(" + DESC_JSON_READER + "Ljava/lang/Object;Ljava/lang/String;)V";
     static final String METHOD_DESC_ADD_RESOLVE_TASK_2 = "(" + DESC_JSON_READER + "Ljava/util/List;ILjava/lang/String;)V";
     static final String METHOD_DESC_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
@@ -371,8 +371,8 @@ public class ObjectReaderCreatorASM
                 || (alternateConstructors != null && !alternateConstructors.isEmpty())
                 || classLoader.isExternalClass(objectClass)
                 || (beanInfo.readerFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
-                || (objectReaderAdapter.noneDefaultConstructor != null && objectReaderAdapter.noneDefaultConstructor.getParameterCount() != fieldReaderArray.length)
-                || (constructorFunction instanceof FactoryFunction && ((FactoryFunction<T>) constructorFunction).paramNames.length != fieldReaderArray.length)
+                || (objectReaderAdapter.noneDefaultConstructor != null && objectReaderAdapter.noneDefaultConstructor.getParameterCount() != paramFieldReaders.length)
+                || (constructorFunction instanceof FactoryFunction && ((FactoryFunction<T>) constructorFunction).paramNames.length != paramFieldReaders.length)
                 || paramFieldReaders.length > 64
         ) {
             match = false;
@@ -1430,6 +1430,7 @@ public class ObjectReaderCreatorASM
                 METHOD_DESC_READ_OBJECT,
                 2048
         );
+        Integer MAP = null;
 
         MethodWriterContext mwc = new MethodWriterContext(mw, 6, false);
 
@@ -1602,17 +1603,22 @@ public class ObjectReaderCreatorASM
                 }
             }
 
+            MAP = mwc.var("map");
             /*
              * Map<String, Object> map = null;
              */
             mw.aconst_null();
-            mw.astore(mwc.var("map"));
+            mw.astore(MAP);
         } else {
             genCreateObject(mw, context, classNameType);
             mw.astore(OBJECT);
         }
 
-        // for (int i = 0; i < entry_cnt; ++i) {
+        /*
+         * for (int i = 0; i < entry_cnt; ++i) {
+         *    long hashCode64 = jsonReader.readFieldNameHashCode();
+         * }
+         */
         Label L_FOR_START = new Label(), L_FOR_END = new Label(), L_FOR_INC = new Label();
 
         if (!disableAutoType) {
@@ -1621,7 +1627,7 @@ public class ObjectReaderCreatorASM
         }
         mw.visitLabel(L_FOR_START);
 
-        Label hashCode64Start = new Label(), hashCode64End = new Label();
+        Label hashCode64Start = new Label();
 
         mw.aload(JSON_READER);
         mw.invokevirtual(TYPE_JSON_READER, "nextIfObjectEnd", "()Z");
@@ -1652,11 +1658,13 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(hashCode64Start);
 
-        if (switchGen && context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
-            mw.aload(JSON_READER);
-            mw.invokevirtual(TYPE_JSON_READER, "skipName", "()Z");
-            mw.pop();
-        } else {
+        {
+            /*
+             * long hashCode64 = jsonReader.readFieldNameHashCode();
+             * if (hashCode64 == -1) {
+             *     break;
+             * }
+             */
             mw.aload(JSON_READER);
             mw.invokevirtual(TYPE_JSON_READER, "readFieldNameHashCode", "()J");
             mw.dup2();
@@ -1666,8 +1674,6 @@ public class ObjectReaderCreatorASM
             mw.lcmp();
             mw.ifeq(L_FOR_END);
         }
-
-        mw.visitLabel(hashCode64End);
 
         if (!disableAutoType && !(context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor)) {
             Label noneAutoType_ = new Label();
@@ -1702,9 +1708,46 @@ public class ObjectReaderCreatorASM
         // continue
         if (switchGen) {
             if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+                int ORIDINAL = mwc.var("ordinal");
+                mw.aload(THIS);
+                mw.lload(HASH_CODE64);
+                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "getFieldOrdinal", "(J)I");
+                mw.istore(ORIDINAL);
+
+                Label dflt = new Label();
+                Label[] labels = new Label[fieldReaderArray.length];
+                int[] switchKeys = new int[fieldReaderArray.length];
+                for (int i = 0; i < fieldReaderArray.length; i++) {
+                    labels[i] = new Label();
+                    switchKeys[i] = i;
+                }
+
+                mw.iload(ORIDINAL);
+                mw.visitLookupSwitchInsn(dflt, switchKeys, labels);
+
+                for (int i = 0; i < fieldReaderArray.length; i++) {
+                    mw.visitLabel(labels[i]);
+                    FieldReader fieldReader = fieldReaderArray[i];
+                    genReadFieldValue(
+                            context,
+                            fieldReader,
+                            fieldBased,
+                            mwc,
+                            OBJECT,
+                            i,
+                            false
+                    );
+                    mw.goto_(L_FOR_INC);
+                }
+
+                // jsonReader.skipValue();
+                mw.visitLabel(dflt);
                 mw.aload(JSON_READER);
                 mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
             } else {
+                /*
+                 * this.readFieldValue(hashCode64, jsonReader, features, object);
+                 */
                 mw.aload(THIS);
                 mw.lload(HASH_CODE64);
                 mw.aload(JSON_READER);
@@ -1911,7 +1954,7 @@ public class ObjectReaderCreatorASM
             if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
                 mw.aload(THIS);
                 mw.aload(JSON_READER);
-                mw.aload(mwc.var("map"));
+                mw.aload(MAP);
                 mw.lload(FEATURES);
                 mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA_2);
             } else {
@@ -1942,6 +1985,7 @@ public class ObjectReaderCreatorASM
                     || (objectReaderNoneDefaultConstructor.constructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.constructor.getModifiers()))
                     || (context.objectClass != null && !Modifier.isPublic(context.objectClass.getModifiers()))
                     || objectReaderNoneDefaultConstructor.factoryFunction != null
+                    || objectReaderNoneDefaultConstructor.noneDefaultConstructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.noneDefaultConstructor.getModifiers())
             ) {
                 constructDirect = false;
             }
@@ -2705,10 +2749,16 @@ public class ObjectReaderCreatorASM
             boolean fieldBased,
             MethodWriterContext mwc,
             int OBJECT,
-            Label for_inc_i_,
+            Label L_FOR_INC,
             Label hashCode64Start
     ) {
         FieldReader[] fieldReaderArray = context.fieldReaders;
+        /*
+         * long rawLong = jsonReader.getRawLong();
+         * if (rawLong == 0) {
+         *     goto hashCode64Start;
+         * }
+         */
         int RAW_LONG = mwc.var2("RAW_LONG");
         MethodWriter mw = mwc.mw;
 
@@ -2769,7 +2819,7 @@ public class ObjectReaderCreatorASM
                     false // arrayMapping
             );
 
-            mw.goto_(for_inc_i_); // continue
+            mw.goto_(L_FOR_INC); // continue
 
             mw.visitLabel(next_);
         }

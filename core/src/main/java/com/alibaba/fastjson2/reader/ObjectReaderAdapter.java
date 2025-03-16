@@ -445,7 +445,7 @@ public class ObjectReaderAdapter<T>
         return fieldReader;
     }
 
-    protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Map<Long, Object> map) {
+    protected final Map<Long, Object> readFieldValue(long hashCode, JSONReader jsonReader, long features, Map<Long, Object> map) {
         FieldReader fieldReader = getFieldReader(hashCode);
         if (fieldReader == null
                 && jsonReader.isSupportSmartMatch(this.features | features)) {
@@ -454,10 +454,14 @@ public class ObjectReaderAdapter<T>
         }
 
         if (fieldReader != null) {
-            map.put(hashCode, fieldReader.readFieldValue(jsonReader));
+            if (map == null) {
+                map = new LinkedHashMap<>();
+            }
+            map.put(fieldReader.fieldNameHash, fieldReader.readFieldValue(jsonReader));
         } else {
             jsonReader.skipValue();
         }
+        return map;
     }
 
     protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {

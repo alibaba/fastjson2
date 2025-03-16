@@ -220,6 +220,40 @@ public class ObjectReaderNoneDefaultConstructor<T>
     }
 
     @Override
+    public T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.jsonb) {
+            return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
+        jsonReader.nextIfArrayStart();
+        LinkedHashMap<Long, Object> valueMap = null;
+
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fieldReader = fieldReaders[i];
+            Object fieldValue = fieldReader.readFieldValue(jsonReader);
+            if (valueMap == null) {
+                valueMap = new LinkedHashMap<>();
+            }
+            long hash = fieldReader.fieldNameHash;
+            valueMap.put(hash, fieldValue);
+        }
+
+        if (!jsonReader.nextIfArrayEnd()) {
+            throw new JSONException(jsonReader.info("array not end, " + jsonReader.current()));
+        }
+
+        jsonReader.nextIfComma();
+        return createInstanceNoneDefaultConstructor(
+                valueMap == null
+                        ? Collections.emptyMap()
+                        : valueMap);
+    }
+
+    @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (!serializable) {
             jsonReader.errorOnNoneSerializable(objectClass);
