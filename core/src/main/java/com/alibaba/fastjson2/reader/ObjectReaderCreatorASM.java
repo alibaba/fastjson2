@@ -44,14 +44,10 @@ public class ObjectReaderCreatorASM
     static final String METHOD_DESC_READ_OBJECT = "(" + DESC_JSON_READER + "Ljava/lang/reflect/Type;Ljava/lang/Object;J)Ljava/lang/Object;";
     static final String METHOD_DESC_GET_FIELD_READER = "(J)" + DESC_FIELD_READER;
     static final String METHOD_DESC_READ_FIELD_VALUE = "(" + DESC_JSON_READER + "Ljava/lang/Object;)V";
-    static final String GET_FIELD_READER_UL = "(J" + DESC_JSON_READER + "J)" + DESC_FIELD_READER;
     static final String READ_FIELD_READER_UL = "(J" + DESC_JSON_READER + "JLjava/lang/Object;)V";
-    static final String READ_FIELD_READER_MAP = "(J" + DESC_JSON_READER + "JLjava/util/Map;)Ljava/util/Map;";
     static final String METHOD_DESC_ADD_RESOLVE_TASK = "(" + DESC_JSON_READER + "Ljava/lang/Object;Ljava/lang/String;)V";
-    static final String METHOD_DESC_ADD_RESOLVE_TASK_2 = "(" + DESC_JSON_READER + "Ljava/util/List;ILjava/lang/String;)V";
     static final String METHOD_DESC_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_PROCESS_EXTRA = "(" + DESC_JSON_READER + "Ljava/lang/Object;J)V";
-    static final String METHOD_DESC_PROCESS_EXTRA_2 = "(" + DESC_JSON_READER + "Ljava/util/Map;J)V";
 
     static final String METHOD_DESC_JSON_READER_CHECK_ARRAY_AUTO_TYPE = "(" + DESC_JSON_READER + "J)" + DESC_OBJECT_READER;
     static final String METHOD_DESC_READ_ARRAY_MAPPING_JSONB_OBJECT0 = "(" + DESC_JSON_READER + "Ljava/lang/Object;I)V";
@@ -1952,11 +1948,8 @@ public class ObjectReaderCreatorASM
         }
         if (!switchGen) {
             if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
-                mw.aload(THIS);
                 mw.aload(JSON_READER);
-                mw.aload(MAP);
-                mw.lload(FEATURES);
-                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA_2);
+                mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
             } else {
                 mw.aload(THIS);
                 mw.aload(JSON_READER);
