@@ -29,9 +29,16 @@ public class RecordTest {
     @Test
     public void test1() {
         Item1 item = new Item1(Arrays.asList("abc"));
-        String str = JSON.toJSONString(item);
-        Item1 item2 = JSON.parseObject(str, Item1.class);
-        assertEquals(item.value, item2.value);
+        {
+            String str = JSON.toJSONString(item);
+            Item1 item2 = JSON.parseObject(str, Item1.class);
+            assertEquals(item.value, item2.value);
+        }
+        {
+            String str = JSON.toJSONString(item, JSONWriter.Feature.UseSingleQuotes);
+            Item1 item2 = JSON.parseObject(str, Item1.class);
+            assertEquals(item.value, item2.value);
+        }
     }
 
     public record Item1(List<String> value) {
