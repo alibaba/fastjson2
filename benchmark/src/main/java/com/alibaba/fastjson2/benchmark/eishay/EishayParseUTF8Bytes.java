@@ -55,6 +55,11 @@ public class EishayParseUTF8Bytes {
         bh.consume(JSON.parseObject(utf8Bytes, MediaContent.class));
     }
 
+//    @Benchmark
+    public void fastjson2_charset(Blackhole bh) {
+        bh.consume(JSON.parseObject(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.ISO_8859_1, MediaContent.class));
+    }
+
     public void fastjson2_features(Blackhole bh) {
         bh.consume(JSON.parseObject(utf8Bytes, MediaContent.class, featuresContext));
     }

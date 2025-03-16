@@ -129,7 +129,11 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public final boolean hasFilter(JSONWriter jsonWriter) {
-        return hasFilter || jsonWriter.hasFilter(containsNoneFieldGetter);
+        return hasFilter | jsonWriter.hasFilter(containsNoneFieldGetter);
+    }
+
+    protected final boolean hasFilter0(JSONWriter jsonWriter) {
+        return hasFilter | jsonWriter.hasFilter();
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {
@@ -670,6 +674,16 @@ public class ObjectWriterAdapter<T>
 
             if (fieldValue == object) {
                 fieldValue = jsonObject;
+            }
+            if (fieldWriter instanceof FieldWriterObject && !(fieldValue instanceof Map)) {
+                ObjectWriter valueWriter = fieldWriter.getInitWriter();
+                if (valueWriter == null) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
+                }
+                if (valueWriter instanceof ObjectWriterAdapter) {
+                    ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
+                    fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                }
             }
             jsonObject.put(fieldWriter.fieldName, fieldValue);
         }

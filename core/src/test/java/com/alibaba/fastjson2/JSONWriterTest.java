@@ -1011,6 +1011,17 @@ public class JSONWriterTest {
     }
 
     @Test
+    public void writeObjectNonStringKey() {
+        JSONObject object = new JSONObject();
+        ((Map) object).put(123, "123");
+        JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
+        jsonWriter.write(object);
+        assertEquals("{\n" +
+                "\t123:\"123\"\n" +
+                "}", jsonWriter.toString());
+    }
+
+    @Test
     public void writeString1() {
         char[] chars = "01234567890".toCharArray();
 
@@ -1657,6 +1668,24 @@ public class JSONWriterTest {
                 assertEquals(v, jsonWriter.toString());
             }
         });
+    }
+
+    @Test
+    public void test_writeStringLatin1Escape() {
+        String str = "1234567890\rabcde";
+        byte[] bytes = str.getBytes();
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeStringLatin1(bytes);
+            String json = jsonWriter.toString();
+            assertEquals("\"1234567890\\rabcde\"", json);
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeStringLatin1(bytes);
+            String json = jsonWriter.toString();
+            assertEquals("\"1234567890\\rabcde\"", json);
+        }
     }
 
     @Test
@@ -2862,5 +2891,68 @@ public class JSONWriterTest {
         long features = 123456L;
         context.setFeatures(features);
         assertEquals(features, context.getFeatures());
+    }
+
+    @Test
+    public void writeNull() {
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofPretty();
+            jsonWriter.write((JSONObject) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofPretty();
+            jsonWriter.write((Map) null);
+            assertEquals("null", jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void startArrayN() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        assertThrows(JSONException.class, () -> jsonWriter.startArray(0));
+        assertThrows(JSONException.class, () -> jsonWriter.startArray0());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray1());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray2());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray3());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray4());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray5());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray6());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray7());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray8());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray9());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray10());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray11());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray12());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray13());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray14());
+        assertThrows(JSONException.class, () -> jsonWriter.startArray15());
+    }
+
+    @Test
+    public void test() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        assertFalse(jsonWriter.hasFilter());
+        assertFalse(jsonWriter.removeReference(new Object()));
+        assertEquals("$", jsonWriter.getPath(new Object()));
+        assertNull(jsonWriter.getPath());
+        jsonWriter.writeReference(new Object());
+        jsonWriter.setAttachment(new Object());
+        jsonWriter.getAttachment();
     }
 }

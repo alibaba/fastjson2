@@ -2,24 +2,21 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.JSONWriter.Context;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Date;
+import java.text.DecimalFormat;
+import java.time.*;
+import java.util.*;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
-import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterUTF8Test {
     @Test
@@ -744,6 +741,486 @@ public class JSONWriterUTF8Test {
             jsonWriter.bytes = new byte[0];
             jsonWriter.off = 0;
             jsonWriter.writeName16Raw(nameValue, 1);
+        }
+    }
+
+    @Test
+    public void writeInt32() {
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.writeInt32((Integer) null);
+            jsonWriter.writeComma();
+            jsonWriter.writeInt32((int[]) null);
+            jsonWriter.close();
+            assertEquals("null,null", jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void writeInt8() {
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.writeInt8(null);
+            jsonWriter.writeComma();
+            jsonWriter.writeInt8(new byte[]{1, 2, 3});
+            jsonWriter.close();
+            assertEquals("null,[1,2,3]", jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void grow() {
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNull();
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeReference("$.abc");
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBase64(new byte[3]);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(Arrays.asList("abc"));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8(BrowserSecure);
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {1, '>', '<'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8(BrowserSecure);
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {'a', 'b', 'c'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(new char[] {'a', 'b', 'c'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(new char[] {'a', 'b', 'c'}, 0, 3);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeUUID(UUID.randomUUID());
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt32(123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt8((byte) 123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt8(new byte[]{1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt16((short) 123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt32(new int[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeListInt32(Arrays.asList(1, 2, null));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt64(123L);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt64(new long[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeListInt64(Arrays.asList(1L, 2L, null));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeFloat(123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDouble(123L);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNameRaw(new byte[] {'a', 'b', 'c'});
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNameRaw(new byte[] {'a', 'b', 'c'}, 0, 3);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeRaw(new byte[] {'a', 'b', 'c'});
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeRaw('a', 'b');
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTime14(2014, 4, 5, 6, 7, 8);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTime19(2014, 4, 5, 6, 7, 8);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalDate(LocalDate.MIN);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalDateTime(LocalDateTime.MIN);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateYYYMMDD8(2014, 4, 5);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateYYYMMDD10(2014, 4, 5);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeTimeHHMMSS8(3, 4, 5);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalTime(LocalTime.MIN);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            ZonedDateTime now = ZonedDateTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeZonedDateTime(now);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            OffsetDateTime now = OffsetDateTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeOffsetDateTime(now);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            OffsetTime now = OffsetTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeOffsetTime(now);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            OffsetTime now = OffsetTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTimeISO8601(2014, 3, 4, 5, 6, 7, 8, 9, true);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBigInt(new BigInteger("123456789012345678901234567890"), 0);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDecimal(new BigDecimal("12345678901234567890.1234567890"), 0, new DecimalFormat("###.##"));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1, 2));
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1, 2, 3));
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBool(true);
+            }
+        }
+        {
+            JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(JSONObject.of());
+            }
+        }
+    }
+
+    @Test
+    public void testSpecial() {
+        assertEquals("'\\'01234567890123456789'", new String(JSON.toJSONBytes("'01234567890123456789", UseSingleQuotes)));
+        assertEquals("\"'01234567890123456789\"", new String(JSON.toJSONBytes("'01234567890123456789")));
+
+        assertEquals("\"\\\"01234567890123456789\"", new String(JSON.toJSONBytes("\"01234567890123456789")));
+        assertEquals("'\"01234567890123456789'", new String(JSON.toJSONBytes("\"01234567890123456789", UseSingleQuotes)));
+    }
+
+    @Test
+    public void write2() {
+        byte[] bytes = new byte[4];
+        StringUtils.writeEscapedChar(bytes, 0, '\r');
+        StringUtils.writeEscapedChar(bytes, 2, '\n');
+        assertEquals("\\r\\n", new String(bytes));
+    }
+
+    @Test
+    public void writeU4() {
+        byte[] bytes = new byte[6];
+        StringUtils.writeU4Hex2(bytes, 0, 1);
+        assertEquals("\\u0001", new String(bytes));
+
+        IOUtils.putIntUnaligned(bytes, 2, IOUtils.hex4U(1));
+        assertEquals("\\u0001", new String(bytes));
+    }
+
+    static boolean containsEscaped(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) data;
+            if (c == quote || c == '\\' || c < ' ') {
+                return true;
+            }
+            data >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22, ' -> 0x27
+        long x5c = v ^ 0x5C5C5C5C5C5C5C5CL;
+
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x5c = (x5c - 0x0101010101010101L) & ~x5c;
+
+        return ((x22 | x5c | (0x7F7F7F7F7F7F7F7FL - v + 0x2020202020202020L) | v) & 0x8080808080808080L) != 0;
+    }
+
+    @Test
+    public void testSpecial_false() {
+        long quote = 0x2222_2222_2222_2222L;
+        byte[] escaped = new byte[32 + 2 + 128];
+        for (int i = 0; i < 32; i++) {
+            escaped[i] = (byte) i;
+        }
+        escaped[32] = (byte) quote;
+        escaped[33] = '\\';
+        for (int i = 0; i < 128; i++) {
+            escaped[i + 32 + 2] = (byte) (i + 128);
+        }
+
+        byte[] buf = new byte[8];
+        for (byte c : escaped) {
+            for (int i = 0; i < 8; i++) {
+                Arrays.fill(buf, (byte) 'a');
+                buf[i] = c;
+                long v = IOUtils.getLongUnaligned(buf, 0);
+                assertTrue(containsEscaped(v, quote));
+                assertFalse(StringUtils.noneEscaped(v, ~quote));
+            }
+        }
+
+        quote = 0x2727_2727_2727_2727L;
+        escaped[32] = (byte) quote;
+
+        for (byte c : escaped) {
+            for (int i = 0; i < 8; i++) {
+                Arrays.fill(buf, (byte) 'a');
+                buf[i] = c;
+                long v = IOUtils.getLongUnaligned(buf, 0);
+                assertTrue(containsEscaped(v, quote));
+                assertFalse(StringUtils.noneEscaped(v, ~quote));
+            }
+        }
+    }
+
+    @Test
+    public void testSpecial_true() {
+        long vectorQuote = 0x2222_2222_2222_2222L;
+        byte quote = (byte) vectorQuote;
+        byte[] buf = new byte[8];
+
+        for (int i = 33; i < 128; i++) {
+            if (i == quote || i == '\\') {
+                continue;
+            }
+            Arrays.fill(buf, (byte) i);
+            long v = IOUtils.getLongUnaligned(buf, 0);
+            assertTrue(StringUtils.noneEscaped(v, ~vectorQuote));
+            assertFalse(containsEscaped(v, vectorQuote));
+        }
+    }
+
+    @Test
+    public void testSpecial_true_singleQuote() {
+        long vectorQuote = 0x2727_2727_2727_2727L;
+        byte quote = (byte) vectorQuote;
+        byte[] buf = new byte[8];
+
+        for (int i = 33; i < 128; i++) {
+            if (i == quote || i == '\\') {
+                continue;
+            }
+            Arrays.fill(buf, (byte) i);
+            long v = IOUtils.getLongUnaligned(buf, 0);
+            assertTrue(StringUtils.noneEscaped(v, ~vectorQuote));
+            assertFalse(containsEscaped(v, vectorQuote));
         }
     }
 }

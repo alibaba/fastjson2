@@ -329,18 +329,7 @@ public final class ArraySchema
             object.put("uniqueItems", uniqueItems);
         }
 
-        if (allOf != null) {
-            object.put("allOf", allOf);
-        }
-
-        if (anyOf != null) {
-            object.put("anyOf", anyOf);
-        }
-
-        if (oneOf != null) {
-            object.put("oneOf", oneOf);
-        }
-        return object;
+        return injectIfPresent(object, allOf, anyOf, oneOf);
     }
 
     @Override

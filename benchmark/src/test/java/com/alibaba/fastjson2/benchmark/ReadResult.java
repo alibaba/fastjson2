@@ -21,9 +21,9 @@ public class ReadResult {
         files.put("aliyun_ecs.g8y.large", "/Users/wenshao/Downloads/result_" + version + "_g8y.out");
 //        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.41_aws_c6g.out");
 //        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_" + version + "_aws_c7g.out");
-//        files.put("orangepi5p", "/Users/wenshao/Downloads/result_" + version + "_orangepi5.out");
-//        files.put("orangepi_aipro", "/Users/wenshao/Downloads/result_" + version + "_orangepi_aipro.out");
-//        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + version + "_applem1pro.out");
+        files.put("orangepi5p", "/Users/wenshao/Downloads/result_" + version + "_orangepi5.out");
+        files.put("orangepi_aipro", "/Users/wenshao/Downloads/result_" + version + "_orangepi_aipro.out");
+        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + version + "_applem1pro.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
@@ -105,6 +105,12 @@ public class ReadResult {
                         vm = "graalvm-ce-1" + vm.substring("graalvm-ce-java1".length());
                     } else if (vm.startsWith("graalvm-ee-java1")) {
                         vm = "graalvm-ee-1" + vm.substring("graalvm-ee-java1".length());
+                    } else if (vm.startsWith("zulu8.68.0.21")) {
+                        vm = "zulu8.68.0.21";
+                    } else if (vm.startsWith("zulu8.82.0.21")) {
+                        vm = "zulu8.82.0.21";
+                    } else if (vm.startsWith("zulu17.54.21")) {
+                        vm = "zulu17.54.21";
                     }
                     String title = "# " + spec + "-" + vm;
                     blockLines.add(title);

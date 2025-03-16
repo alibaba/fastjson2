@@ -289,6 +289,9 @@ public final class ObjectReaderImplObject
             case 'n':
                 value = jsonReader.readNullOrNewDate();
                 break;
+            case 'x':
+                value = jsonReader.readBinary();
+                break;
             case 'S':
                 if (jsonReader.nextIfSet()) {
                     HashSet<Object> set = new HashSet<>();

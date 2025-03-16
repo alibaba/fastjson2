@@ -81,7 +81,7 @@ public class Fastjson2ActionExecutor
             return super.changeValue(ctx, p, pi, pt, bodyObj);
         }
 
-        if (p.spec().isRequiredBody() == false && ctx.paramMap().containsKey(p.spec().getName())) {
+        if (!p.spec().isRequiredBody() && ctx.paramMap().containsKey(p.spec().getName())) {
             //If path、queryString?
             return super.changeValue(ctx, p, pi, pt, bodyObj);
         }
@@ -93,7 +93,7 @@ public class Fastjson2ActionExecutor
         if (bodyObj instanceof JSONObject) {
             JSONObject tmp = (JSONObject) bodyObj;
 
-            if (p.spec().isRequiredBody() == false) {
+            if (!p.spec().isRequiredBody()) {
                 //
                 //If there is no body requirement; Try to find by attribute
                 //

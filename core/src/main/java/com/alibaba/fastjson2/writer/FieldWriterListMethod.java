@@ -23,9 +23,10 @@ final class FieldWriterListMethod<T>
             Field field,
             Method method,
             Type fieldType,
-            Class fieldClass
+            Class fieldClass,
+            Class<?> contentAs
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, contentAs);
     }
 
     @Override

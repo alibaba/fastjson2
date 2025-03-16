@@ -1,24 +1,30 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
-abstract class FieldWriterList<T>
+public abstract class FieldWriterList<T>
         extends FieldWriter<T> {
+    private static final Class<?> EMPTY_LIST_CLASS = Collections.emptyList().getClass();
+    private static final Class<?> EMPTY_SET_CLASS = Collections.emptySet().getClass();
+
     final Type itemType;
     final Class itemClass;
     final boolean itemClassNotReferenceDetect;
     ObjectWriter listWriter;
     ObjectWriter itemObjectWriter;
     final boolean writeAsString;
+    final Class<?> contentAs;
 
     FieldWriterList(
             String name,
@@ -30,9 +36,11 @@ abstract class FieldWriterList<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Class<?> contentAs
     ) {
         super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        this.contentAs = contentAs;
 
         writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
 
@@ -61,17 +69,24 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public Type getItemType() {
+    public final Type getItemType() {
         return itemType;
     }
 
     @Override
-    public Class getItemClass() {
+    public final Class getItemClass() {
         return itemClass;
     }
 
     @Override
-    public ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
+    public final ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
+        if (contentAs != null) {
+            ObjectWriter itemObjectWriter = this.itemObjectWriter;
+            if (itemObjectWriter != null) {
+                return itemObjectWriter;
+            }
+            return this.itemObjectWriter = jsonWriter.getObjectWriter(this.contentAs, contentAs);
+        }
         if (itemType == null || itemType == this.itemType) {
             if (itemObjectWriter != null) {
                 return itemObjectWriter;
@@ -92,7 +107,7 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+    public final ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         ObjectWriter listWriter = this.listWriter;
         if (listWriter != null && fieldClass.isAssignableFrom(valueClass)) {
             return listWriter;
@@ -106,7 +121,7 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public final void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -166,7 +181,7 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeListValue(JSONWriter jsonWriter, List list) {
+    public final void writeListValue(JSONWriter jsonWriter, List list) {
         if (jsonWriter.jsonb) {
             writeListJSONB(jsonWriter, list);
             return;
@@ -300,7 +315,7 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeList(JSONWriter jsonWriter, List list) {
+    public final void writeList(JSONWriter jsonWriter, List list) {
         if (jsonWriter.jsonb) {
             writeListJSONB(jsonWriter, list);
             return;
@@ -370,7 +385,7 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
+    public final void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
         if (writeFieldName) {
             writeFieldName(jsonWriter);
         }
@@ -383,5 +398,14 @@ abstract class FieldWriterList<T>
         }
 
         jsonWriter.writeString(list);
+    }
+
+    public final boolean isRefDetect(Object object, long features) {
+        Class<?> objectClass;
+        features |= this.features;
+        return (features & ReferenceDetection.mask) != 0
+                && (features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
+                && object != null
+                && ((objectClass = object.getClass()) != EMPTY_LIST_CLASS) && (objectClass != EMPTY_SET_CLASS);
     }
 }

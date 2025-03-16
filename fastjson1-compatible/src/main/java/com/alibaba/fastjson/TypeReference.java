@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class TypeReference<T> {
     static ConcurrentMap<Type, Type> classTypeCache
-            = new ConcurrentHashMap<Type, Type>(16, 0.75f, 1);
+            = new ConcurrentHashMap<>(16, 0.75f, 1);
 
     protected final Type type;
 

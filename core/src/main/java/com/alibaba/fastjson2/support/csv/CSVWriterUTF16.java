@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.util.DoubleToDecimal;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.NumberUtils;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -12,17 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static com.alibaba.fastjson2.util.IOUtils.PACKED_DIGITS_UTF16;
-import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 final class CSVWriterUTF16
         extends CSVWriter {
-    static final char[] BYTES_TRUE = "true".toCharArray();
-    static final char[] BYTES_FALSE = "false".toCharArray();
-
     final Writer out;
     final char[] chars;
+    private static final int DOUBLE_QUOTE_2_UTF16 = '"' | ('"' << 16);
 
     CSVWriterUTF16(
             Writer out,
@@ -31,7 +25,7 @@ final class CSVWriterUTF16
     ) {
         super(zoneId, features);
         this.out = out;
-        this.chars = new char[1024 * 64];
+        this.chars = new char[1024 * 512];
     }
 
     void writeDirect(char[] bytes, int off, int len) {
@@ -57,9 +51,9 @@ final class CSVWriterUTF16
         chars[off++] = '\n';
     }
 
-    public void writeBoolean(boolean booleanValue) {
-        char[] valueBytes = booleanValue ? BYTES_TRUE : BYTES_FALSE;
-        writeRaw(valueBytes);
+    public void writeBoolean(boolean v) {
+        checkCapacity(5);
+        this.off = IOUtils.putBoolean(chars, off, v);
     }
 
     public void writeInt64(long longValue) {
@@ -85,11 +79,7 @@ final class CSVWriterUTF16
         int off = this.off;
         off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
         chars[off] = ' ';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[hour]);
-        chars[off + 3] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[minute]);
-        chars[off + 6] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 7) << 1), PACKED_DIGITS_UTF16[second]);
+        IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
         this.off = off + 9;
     }
 
@@ -150,8 +140,8 @@ final class CSVWriterUTF16
         for (int i = 0; i < len; ) {
             char ch = str.charAt(i++);
             if (ch == '"') {
-                chars[off++] = '"';
-                chars[off++] = '"';
+                IOUtils.putIntUnaligned(chars, off, DOUBLE_QUOTE_2_UTF16);
+                off += 2;
             } else {
                 chars[off++] = ch;
             }
@@ -160,8 +150,8 @@ final class CSVWriterUTF16
                 off = this.off;
             }
         }
-        chars[off++] = '"';
-        this.off = off;
+        chars[off] = '"';
+        this.off = off + 1;
     }
 
     public void writeInt32(int intValue) {
@@ -172,15 +162,12 @@ final class CSVWriterUTF16
     public void writeDouble(double value) {
         checkCapacity(24);
 
-        int size = DoubleToDecimal.toString(value, this.chars, off, true);
-        off += size;
+        off = NumberUtils.writeDouble(this.chars, off, value, true);
     }
 
     public void writeFloat(float value) {
         checkCapacity(15);
-
-        int size = DoubleToDecimal.toString(value, this.chars, off, true);
-        off += size;
+        off = NumberUtils.writeFloat(chars, off, value, true);
     }
 
     public void flush() {
@@ -227,9 +214,13 @@ final class CSVWriterUTF16
             return;
         }
 
-        checkCapacity(24);
-
-        off = IOUtils.writeDecimal(chars, off, unscaledVal, scale);
+        int off = this.off;
+        char[] chars = this.chars;
+        if (off + 24 > chars.length) {
+            flush();
+            off = 0;
+        }
+        this.off = IOUtils.writeDecimal(chars, off, unscaledVal, scale);
     }
 
     void writeRaw(char[] chars) {
@@ -253,11 +244,15 @@ final class CSVWriterUTF16
         }
 
         // "yyyy-MM-dd HH:mm:ss"
-        checkCapacity(19);
-
+        int off = this.off;
+        char[] chars = this.chars;
+        if (off + 19 > chars.length) {
+            flush();
+            off = 0;
+        }
         off = IOUtils.writeLocalDate(chars, off, ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth());
         chars[off++] = ' ';
-        off = IOUtils.writeLocalTime(chars, off, ldt.toLocalTime());
+        this.off = IOUtils.writeLocalTime(chars, off, ldt.toLocalTime());
     }
 
     protected void writeRaw(String str) {

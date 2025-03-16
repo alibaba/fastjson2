@@ -12,8 +12,8 @@ import java.util.function.Supplier;
 
 public final class ObjectReaderRootName<T>
         extends ObjectReaderAdapter<T> {
-    protected final String rootName;
-    protected final long rootNameHashCode;
+    final String rootName;
+    final long rootNameHashCode;
 
     public ObjectReaderRootName(
             Class objectClass,

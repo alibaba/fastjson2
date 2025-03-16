@@ -70,8 +70,10 @@ public abstract class FieldReader<T>
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
-        this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass)
-                || Modifier.isInterface(fieldClass.getModifiers()));
+        this.fieldClassSerializable = fieldClass != null
+                && (Serializable.class.isAssignableFrom(fieldClass)
+                || Modifier.isInterface(fieldClass.getModifiers())
+                || BeanUtils.isRecord(fieldClass));
         this.features = features;
         this.fieldNameHash = Fnv.hashCode64(fieldName);
         this.fieldNameHashLCase = Fnv.hashCode64LCase(fieldName);
@@ -268,6 +270,16 @@ public abstract class FieldReader<T>
                         return -1;
                     }
 
+                    // Collection first
+                    if (Collection.class.isAssignableFrom(otherParamType) && !Collection.class.isAssignableFrom(thisParamType)) {
+                        return 1;
+                    }
+
+                    if (Collection.class.isAssignableFrom(thisParamType) && !Collection.class.isAssignableFrom(otherParamType)) {
+                        return -1;
+                    }
+
+                    // field class compare
                     if (needCompareToActualFieldClass(thisParamType) || needCompareToActualFieldClass(otherParamType)) {
                         Class actualFieldClass = null;
                         try {

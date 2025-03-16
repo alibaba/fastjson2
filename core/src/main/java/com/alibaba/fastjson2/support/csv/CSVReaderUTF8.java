@@ -24,6 +24,9 @@ import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 final class CSVReaderUTF8<T>
         extends CSVReader<T> {
+    static final int ESCAPE_INDEX_NOT_SET = -2;
+    int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
+
     static final Map<Long, Function<Consumer, ByteArrayValueConsumer>> valueConsumerCreators
             = new ConcurrentHashMap<>();
 
@@ -87,32 +90,118 @@ final class CSVReaderUTF8<T>
         this.valueConsumer = valueConsumer;
     }
 
-    protected boolean seekLine() throws IOException {
-        byte[] buf = this.buf;
-        int off = this.off;
-        if (buf == null) {
-            if (input != null) {
-                buf = this.buf = new byte[SIZE_512K];
-                int cnt = input.read(buf);
-                if (cnt == -1) {
-                    inputEnd = true;
-                    return false;
-                }
-                this.end = cnt;
+    static boolean containsQuoteOrLineSeparator(long v) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) v;
+            if (c == '"' || c == '\n' || c == '\r') {
+                return true;
+            }
+            v >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ 0x2222222222222222L; // " -> 0x22
+        long x0a = v ^ 0x0A0A0A0A0A0A0A0AL; // \n -> 0x0a
+        long x0d = v ^ 0x0D0D0D0D0D0D0D0DL; // \r -> 0x0d
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x0a = (x0a - 0x0101010101010101L) & ~x0a;
+        x0d = (x0d - 0x0101010101010101L) & ~x0d;
+        return ((x22 | x0a | x0d) & 0x8080808080808080L) != 0;
+    }
 
-                if (end > 3) {
-                    // UTF8-BOM EF BB BF
-                    if (buf[0] == -17 && buf[1] == -69 && buf[2] == -65) {
-                        off = 3;
-                        lineNextStart = off;
+    private byte[] getBuf() throws IOException {
+        byte[] buf = this.buf;
+        if (buf != null) {
+            return buf;
+        }
+        return initBuf();
+    }
+
+    private byte[] initBuf() throws IOException {
+        if (input == null) {
+            throw new JSONException("init buf error");
+        }
+        byte[] buf = new byte[SIZE_512K];
+        int end = 0;
+        while (end < buf.length) {
+            int cnt = input.read(buf, off, buf.length - off);
+            if (cnt == -1) {
+                inputEnd = true;
+                break;
+            }
+            end += cnt;
+        }
+        this.end = end;
+        if (end > 4 && IOUtils.isUTF8BOM(buf, 0)) {
+            off = 3;
+            lineNextStart = 3;
+        }
+        this.buf = buf;
+        return buf;
+    }
+
+    protected boolean seekLine() throws IOException {
+        byte[] buf = getBuf();
+        int off = this.off, end = this.end;
+
+        int escapeIndex = this.nextEscapeIndex;
+        if (escapeIndex == ESCAPE_INDEX_NOT_SET || (escapeIndex != -1 && escapeIndex < off)) {
+            nextEscapeIndex = escapeIndex = IOUtils.indexOfDoubleQuote(buf, off, end);
+        }
+
+        int lineSeparatorIndex = IOUtils.indexOfLineSeparator(buf, off, end);
+        if (lineSeparatorIndex == -1) {
+            if (input != null) {
+                if (!inputEnd) {
+                    int rest = end - off;
+                    if (rest > 0) {
+                        System.arraycopy(buf, off, buf, 0, rest);
                     }
+                    end = rest;
+
+                    while (end < buf.length) {
+                        int cnt = input.read(buf, end, buf.length - end);
+                        if (cnt != -1) {
+                            end += cnt;
+                        } else {
+                            inputEnd = true;
+                            break;
+                        }
+                    }
+                    this.nextEscapeIndex = escapeIndex >= off
+                            ? escapeIndex - off
+                            : IOUtils.indexOfDoubleQuote(buf, rest, end);
+                    lineSeparatorIndex = IOUtils.indexOfLineSeparator(buf, rest, end);
+                    this.off = off = 0;
+                    this.end = end;
+                }
+            }
+            if (lineSeparatorIndex == -1 && inputEnd) {
+                if (off < end) {
+                    lineSeparatorIndex = end;
+                } else {
+                    return false;
                 }
             }
         }
+        if ((lineSeparatorIndex != -1) && (escapeIndex == -1 || escapeIndex > lineSeparatorIndex)) {
+            this.lineTerminated = true;
+            this.lineStart = off;
+            this.lineEnd = lineSeparatorIndex != off && buf[lineSeparatorIndex - 1] == '\r'
+                    ? lineSeparatorIndex - 1
+                    : lineSeparatorIndex;
+            this.off = lineSeparatorIndex + 1;
+            return true;
+        }
 
+        return seekLine0(buf, off, end);
+    }
+
+    private boolean seekLine0(byte[] buf, int off, int end) throws IOException {
+        int lineNextStart = off;
         for (int k = 0; k < 3; ++k) {
             lineTerminated = false;
-
             for (int i = off; i < end; i++) {
                 byte ch = buf[i];
                 if (ch == '"') {
@@ -139,18 +228,7 @@ final class CSVReaderUTF8<T>
                     continue;
                 }
 
-                if (ch == '\n') {
-                    if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
-                        rowCount++;
-                    }
-                    lineTerminated = true;
-                    lineSize = 0;
-                    lineEnd = i;
-                    lineStart = lineNextStart;
-                    lineNextStart = off = i + 1;
-
-                    break;
-                } else if (ch == '\r') {
+                if (ch == '\r' || ch == '\n') {
                     if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
                         rowCount++;
                     }
@@ -159,12 +237,14 @@ final class CSVReaderUTF8<T>
                     lineSize = 0;
                     lineEnd = i;
 
-                    int n = i + 1;
-                    if (n >= end) {
-                        break;
-                    }
-                    if (buf[n] == '\n') {
-                        i++;
+                    if (ch == '\r') {
+                        int n = i + 1;
+                        if (n >= end) {
+                            break;
+                        }
+                        if (buf[n] == '\n') {
+                            i++;
+                        }
                     }
 
                     lineStart = lineNextStart;
@@ -179,9 +259,11 @@ final class CSVReaderUTF8<T>
             if (!lineTerminated) {
                 if (input != null && !inputEnd) {
                     int len = end - off;
+                    int escapedIndex = this.nextEscapeIndex;
                     if (off > 0) {
                         if (len > 0) {
                             System.arraycopy(buf, off, buf, 0, len);
+                            this.nextEscapeIndex = escapedIndex >= off ? escapedIndex - off : ESCAPE_INDEX_NOT_SET;
                         }
                         lineStart = lineNextStart = 0;
                         off = 0;
@@ -198,6 +280,7 @@ final class CSVReaderUTF8<T>
                         }
                     } else {
                         end += cnt;
+                        this.end = end;
                         continue;
                     }
                 }
@@ -261,7 +344,7 @@ final class CSVReaderUTF8<T>
 
     public Object[] readLineValues(boolean strings) {
         try {
-            if (inputEnd) {
+            if (inputEnd && off == end) {
                 return null;
             }
 
@@ -280,21 +363,113 @@ final class CSVReaderUTF8<T>
             throw new JSONException("seekLine error", e);
         }
 
+        int escapedIndex = this.nextEscapeIndex;
+        return escapedIndex == -1 || escapedIndex >= lineEnd
+                ? readLineValue(strings)
+                : readLineValueEscaped(strings);
+    }
+
+    private Object[] readLineValue(boolean strings) {
+        List<String> columns = this.columns;
         Object[] values = null;
         List<Object> valueList = null;
         if (columns != null) {
-            if (strings) {
-                values = new String[columns.size()];
-            } else {
-                values = new Object[columns.size()];
+            int size = columns.size();
+            values = strings ? new String[size] : new Object[size];
+        } else {
+            valueList = new ArrayList<>();
+        }
+
+        int valueStart = lineStart, lineEnd = this.lineEnd;
+        int valueSize = 0;
+        int columnIndex = 0;
+        byte[] buf = this.buf;
+        for (int i = lineStart; i < lineEnd; ++i) {
+            if (buf[i] == ',') {
+                readValue(strings, columnIndex, valueSize, buf, valueStart, values, valueList);
+                valueStart = i + 1;
+                valueSize = 0;
+                columnIndex++;
+                continue;
+            }
+
+            valueSize++;
+        }
+
+        if (valueSize > 0) {
+            readValue(strings, columnIndex, valueSize, buf, valueStart, values, valueList);
+        }
+
+        if (values == null) {
+            if (valueList != null) {
+                int size = valueList.size();
+                valueList.toArray(
+                        values = strings ? new String[size] : new Object[size]
+                );
             }
         }
 
+        if (input == null && off == end) {
+            inputEnd = true;
+        }
+
+        return values;
+    }
+
+    private void readValue(boolean strings,
+                           int columnIndex,
+                           int valueSize,
+                           byte[] buf,
+                           int valueStart,
+                           Object[] values,
+                           List<Object> valueList) {
+        Type type = types != null && columnIndex < types.length ? types[columnIndex] : null;
+
+        Object value;
+        if (type == null || type == String.class || type == Object.class || strings) {
+            byte c0, c1;
+            if (valueSize == 1 && (c0 = buf[valueStart]) >= 0) {
+                value = TypeUtils.toString((char) c0);
+            } else if (valueSize == 2
+                    && (c0 = buf[valueStart]) >= 0
+                    && (c1 = buf[valueStart + 1]) >= 0
+            ) {
+                value = TypeUtils.toString((char) c0, (char) c1);
+            } else {
+                value = new String(buf, valueStart, valueSize, charset);
+            }
+        } else {
+            try {
+                value = readValue(buf, valueStart, valueSize, type);
+            } catch (Exception e) {
+                value = error(columnIndex, e);
+            }
+        }
+
+        if (values != null) {
+            if (columnIndex < values.length) {
+                values[columnIndex] = value;
+            }
+        } else {
+            valueList.add(value);
+        }
+    }
+
+    private Object[] readLineValueEscaped(boolean strings) {
+        List<String> columns = this.columns;
+        Object[] values = null;
+        List<Object> valueList = null;
+        if (columns != null) {
+            int size = columns.size();
+            values = strings ? new String[size] : new Object[size];
+        }
+
         boolean quote = false;
-        int valueStart = lineStart;
+        int valueStart = lineStart, lineEnd = this.lineEnd;
         int valueSize = 0;
         int escapeCount = 0;
         int columnIndex = 0;
+        byte[] buf = this.buf;
         for (int i = lineStart; i < lineEnd; ++i) {
             byte ch = buf[i];
 
@@ -353,7 +528,7 @@ final class CSVReaderUTF8<T>
                         }
 
                         if (type == null || type == String.class || type == Object.class) {
-                            value = new String(bytes, 0, bytes.length, charset);
+                            value = new String(bytes, charset);
                         } else {
                             try {
                                 value = readValue(bytes, 0, bytes.length, type);
@@ -478,12 +653,10 @@ final class CSVReaderUTF8<T>
 
         if (values == null) {
             if (valueList != null) {
-                if (strings) {
-                    values = new String[valueList.size()];
-                } else {
-                    values = new Object[valueList.size()];
-                }
-                valueList.toArray(values);
+                int size = valueList.size();
+                valueList.toArray(
+                        values = strings ? new String[size] : new Object[size]
+                );
             }
         }
 
@@ -627,7 +800,7 @@ final class CSVReaderUTF8<T>
 
         for (int r = 0; r < maxRows || maxRows < 0; ++r) {
             try {
-                if (inputEnd) {
+                if (inputEnd & off == end) {
                     break;
                 }
 
@@ -648,80 +821,78 @@ final class CSVReaderUTF8<T>
 
             consumer.beforeRow(rowCount);
 
-            boolean quote = false;
-            int valueStart = lineStart;
-            int valueSize = 0;
-            int escapeCount = 0;
-            int columnIndex = 0;
-            for (int i = lineStart; i < lineEnd; ++i) {
-                byte ch = buf[i];
-
-                if (quote) {
-                    if (ch == '"') {
-                        int n = i + 1;
-                        if (n < lineEnd) {
-                            byte c1 = buf[n];
-                            if (c1 == '"') {
-                                valueSize += 2;
-                                escapeCount++;
-                                ++i;
-                                continue;
-                            } else if (c1 == ',') {
-                                ++i;
-                                ch = c1;
-                            }
-                        } else if (n == lineEnd) {
-                            break;
-                        }
-                    } else {
-                        valueSize++;
-                        continue;
-                    }
-                } else {
-                    if (ch == '"') {
-                        quote = true;
-                        continue;
-                    }
-                }
-
-                if (ch == ',') {
-                    byte[] columnBuf = buf;
-                    int columnStart = 0;
-                    int columnSize = valueSize;
-                    if (quote) {
-                        if (escapeCount == 0) {
-                            columnStart = valueStart + 1;
-                        } else {
-                            byte[] bytes = new byte[valueSize - escapeCount];
-                            int valueEnd = valueStart + valueSize;
-                            for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
-                                byte c = buf[j];
-                                bytes[k++] = c;
-                                if (c == '"' && buf[j + 1] == '"') {
-                                    ++j;
-                                }
-                            }
-
-                            columnBuf = bytes;
-                            columnSize = bytes.length;
-                        }
-                    } else {
-                        columnStart = valueStart;
-                    }
-                    consumer.accept(rowCount, columnIndex, columnBuf, columnStart, columnSize, charset);
-
-                    quote = false;
-                    valueStart = i + 1;
-                    valueSize = 0;
-                    escapeCount = 0;
-                    columnIndex++;
-                    continue;
-                }
-
-                valueSize++;
+            int escapedIndex = this.nextEscapeIndex;
+            if (escapedIndex == -1 || escapedIndex >= lineEnd) {
+                readLine(consumer);
+            } else {
+                readLineEscaped(consumer);
             }
 
-            if (valueSize > 0) {
+            consumer.afterRow(rowCount);
+        }
+        consumer.end();
+    }
+
+    private void readLine(ByteArrayValueConsumer consumer) {
+        int valueStart = lineStart;
+        int valueSize = 0;
+        int columnIndex = 0;
+        byte[] buf = this.buf;
+        for (int i = lineStart; i < lineEnd; ++i) {
+            if (buf[i] == ',') {
+                consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize, charset);
+                valueStart = i + 1;
+                valueSize = 0;
+                columnIndex++;
+                continue;
+            }
+
+            valueSize++;
+        }
+
+        if (valueSize > 0) {
+            consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize, charset);
+        }
+    }
+
+    private void readLineEscaped(ByteArrayValueConsumer consumer) {
+        boolean quote = false;
+        int valueStart = lineStart;
+        int valueSize = 0;
+        int escapeCount = 0;
+        int columnIndex = 0;
+        for (int i = lineStart; i < lineEnd; ++i) {
+            byte ch = buf[i];
+
+            if (quote) {
+                if (ch == '"') {
+                    int n = i + 1;
+                    if (n < lineEnd) {
+                        byte c1 = buf[n];
+                        if (c1 == '"') {
+                            valueSize += 2;
+                            escapeCount++;
+                            ++i;
+                            continue;
+                        } else if (c1 == ',') {
+                            ++i;
+                            ch = c1;
+                        }
+                    } else if (n == lineEnd) {
+                        break;
+                    }
+                } else {
+                    valueSize++;
+                    continue;
+                }
+            } else {
+                if (ch == '"') {
+                    quote = true;
+                    continue;
+                }
+            }
+
+            if (ch == ',') {
                 byte[] columnBuf = buf;
                 int columnStart = 0;
                 int columnSize = valueSize;
@@ -730,7 +901,7 @@ final class CSVReaderUTF8<T>
                         columnStart = valueStart + 1;
                     } else {
                         byte[] bytes = new byte[valueSize - escapeCount];
-                        int valueEnd = lineEnd;
+                        int valueEnd = valueStart + valueSize;
                         for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                             byte c = buf[j];
                             bytes[k++] = c;
@@ -746,9 +917,43 @@ final class CSVReaderUTF8<T>
                     columnStart = valueStart;
                 }
                 consumer.accept(rowCount, columnIndex, columnBuf, columnStart, columnSize, charset);
+
+                quote = false;
+                valueStart = i + 1;
+                valueSize = 0;
+                escapeCount = 0;
+                columnIndex++;
+                continue;
             }
-            consumer.afterRow(rowCount);
+
+            valueSize++;
         }
-        consumer.end();
+
+        if (valueSize > 0) {
+            byte[] columnBuf = buf;
+            int columnStart = 0;
+            int columnSize = valueSize;
+            if (quote) {
+                if (escapeCount == 0) {
+                    columnStart = valueStart + 1;
+                } else {
+                    byte[] bytes = new byte[valueSize - escapeCount];
+                    int valueEnd = lineEnd;
+                    for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
+                        byte c = buf[j];
+                        bytes[k++] = c;
+                        if (c == '"' && buf[j + 1] == '"') {
+                            ++j;
+                        }
+                    }
+
+                    columnBuf = bytes;
+                    columnSize = bytes.length;
+                }
+            } else {
+                columnStart = valueStart;
+            }
+            consumer.accept(rowCount, columnIndex, columnBuf, columnStart, columnSize, charset);
+        }
     }
 }

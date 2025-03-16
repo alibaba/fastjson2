@@ -24,12 +24,33 @@ public class NonDefaulConstructorTest {
             assertEquals("bill", vo.name);
         }
         {
+            VO vo = objectReader.readObject(JSONReader.of("{'id':1001,'name':'bill'}"), 0);
+            assertEquals(1001, vo.id);
+            assertEquals("bill", vo.name);
+        }
+        {
             Map map = new LinkedHashMap<>();
             map.put("id", 1001);
             map.put("name", "bill");
             byte[] jsonbBytes = JSONB.toBytes(map);
 
             VO vo = objectReader.readObject(JSONReader.ofJSONB(jsonbBytes), 0);
+            assertEquals(1001, vo.id);
+            assertEquals("bill", vo.name);
+        }
+    }
+
+    @Test
+    public void testBuild_1() throws Exception {
+        {
+            String str = "{\"id\":1001,\"name\":\"bill\"}";
+            VO vo = JSON.parseObject(str, VO.class);
+            assertEquals(1001, vo.id);
+            assertEquals("bill", vo.name);
+        }
+        {
+            String str = "{'id':1001,'name':'bill'}";
+            VO vo = JSON.parseObject(str, VO.class);
             assertEquals(1001, vo.id);
             assertEquals("bill", vo.name);
         }

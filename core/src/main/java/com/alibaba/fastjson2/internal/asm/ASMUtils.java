@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
-public class ASMUtils {
+public final class ASMUtils {
     public static final String TYPE_UNSAFE_UTILS = JDKUtils.class.getName().replace('.', '/');
 
     public static final String TYPE_OBJECT_WRITER_ADAPTER
@@ -58,6 +58,7 @@ public class ASMUtils {
     public static final String TYPE_OBJECT_READER_10 = ObjectReader10.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_READER_11 = ObjectReader11.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_READER_12 = ObjectReader12.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR = ObjectReaderNoneDefaultConstructor.class.getName().replace('.', '/');
     public static final String TYPE_BYTE_ARRAY_VALUE_CONSUMER = ByteArrayValueConsumer.class.getName().replace('.', '/');
     public static final String TYPE_CHAR_ARRAY_VALUE_CONSUMER = CharArrayValueConsumer.class.getName().replace('.', '/');
     public static final String TYPE_TYPE_UTILS = TypeUtils.class.getName().replace('.', '/');
@@ -65,7 +66,9 @@ public class ASMUtils {
 
     public static final String TYPE_OBJECT_WRITER = ObjectWriter.class.getName().replace('.', '/');
     public static final String TYPE_JSON_WRITER = JSONWriter.class.getName().replace('.', '/');
+    public static final String TYPE_JSONB_IO = JSONB.IO.class.getName().replace('.', '/');
     public static final String TYPE_FIELD_WRITER = FieldWriter.class.getName().replace('.', '/');
+    public static final String TYPE_IO_UTILS = IOUtils.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT = "java/lang/Object";
 
     public static final String DESC_FIELD_WRITER = 'L' + FieldWriter.class.getName().replace('.', '/') + ';';

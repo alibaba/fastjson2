@@ -124,7 +124,7 @@ public class TypeUtilsTest2 {
         assertNull(TypeUtils.parseBoolean(new byte[0], 0, 0));
 
         String[] trueStrings = new String[]{
-                "1", "Y", "true"
+                "1", "Y", "true", "TRUE", "tRUE", "TrUe"
         };
 
         for (String str : trueStrings) {
@@ -133,7 +133,7 @@ public class TypeUtilsTest2 {
         }
 
         String[] falseStrings = new String[]{
-                "0", "N", "false"
+                "0", "N", "false", "FALSE"
         };
 
         for (String str : falseStrings) {

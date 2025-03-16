@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -31,6 +32,13 @@ public class NonDefaulConstructorTestTest2 {
     @Test
     public void test_ab() {
         String str = JSONObject.of("id", 3).fluentPut("name", "DataWorks").toString();
+        B a = JSON.parseObject(str, B.class);
+        assertEquals(3, a.id);
+    }
+
+    @Test
+    public void test_ab_1() {
+        String str = JSONObject.of("id", 3).fluentPut("name", "DataWorks").toString(JSONWriter.Feature.UseSingleQuotes);
         B a = JSON.parseObject(str, B.class);
         assertEquals(3, a.id);
     }

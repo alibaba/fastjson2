@@ -182,9 +182,7 @@ public class PrettyTest {
         JSONWriter jw = JSONWriter.ofPretty();
         jw.writeAny(Collections.emptyMap());
 
-        assertEquals("{\n" +
-                        "\t\n" +
-                        "}",
+        assertEquals("{}",
                 jw.toString());
     }
 
@@ -201,12 +199,8 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"id\":1001,\n" +
                         "\t\"name\":\"DataWorks\",\n" +
-                        "\t\"array\":[\n" +
-                        "\t\t\n" +
-                        "\t],\n" +
-                        "\t\"object\":{\n" +
-                        "\t\t\n" +
-                        "\t}\n" +
+                        "\t\"array\":[],\n" +
+                        "\t\"object\":{}\n" +
                         "}",
                 jw.toString());
     }
@@ -215,7 +209,7 @@ public class PrettyTest {
     public void test_pretty_array() {
         JSONWriter jw = JSONWriter.ofPretty();
         jw.writeAny(Collections.emptyList());
-        assertEquals("[\n\t\n]", jw.toString());
+        assertEquals("[]", jw.toString());
     }
 
     @Test

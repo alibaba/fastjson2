@@ -110,11 +110,11 @@ public class FieldInfo
 
         nameHashCode = nameHashCode64(name, annotation);
 
-        boolean jsonDirect = false;
+        boolean jsonDirect;
         if (annotation != null) {
             format = annotation.format();
 
-            if (format.trim().length() == 0) {
+            if (format.trim().isEmpty()) {
                 format = null;
             }
             jsonDirect = annotation.jsonDirect();
@@ -288,7 +288,7 @@ public class FieldInfo
     }
 
     private static boolean getArgument(Type[] typeArgs, Map<TypeVariable, Type> genericInfo) {
-        if (genericInfo == null || genericInfo.size() == 0) {
+        if (genericInfo == null || genericInfo.isEmpty()) {
             return false;
         }
         boolean changed = false;
@@ -305,8 +305,9 @@ public class FieldInfo
                     changed = true;
                 }
             } else if (typeArg instanceof TypeVariable) {
-                if (genericInfo.containsKey(typeArg)) {
-                    typeArgs[i] = genericInfo.get(typeArg);
+                Type type = genericInfo.get(typeArg);
+                if (type != null) { // genericInfo should NOT contain null value
+                    typeArgs[i] = type;
                     changed = true;
                 }
             }

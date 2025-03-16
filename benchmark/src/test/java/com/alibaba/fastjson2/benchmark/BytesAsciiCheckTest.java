@@ -34,6 +34,19 @@ public class BytesAsciiCheckTest {
         }
     }
 
+    public static void isASCII() throws Throwable {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < LOOP_COUNT; ++i) {
+                benchmark.isASCII(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("BytesAsciiCheck-isASCII : " + millis);
+
+            // zulu17.40.19 : 118
+        }
+    }
+
     public static void direct() throws Throwable {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
@@ -47,14 +60,14 @@ public class BytesAsciiCheckTest {
         }
     }
 
-    public static void direct8() throws Throwable {
+    public static void isLatin1() throws Throwable {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP_COUNT; ++i) {
-                benchmark.direct8(BH);
+                benchmark.isLatin1(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("BytesAsciiCheck-direct8 : " + millis);
+            System.out.println("BytesAsciiCheck-isASCII_chars : " + millis);
 
             // zulu17.40.19 : 478
         }
@@ -75,6 +88,7 @@ public class BytesAsciiCheckTest {
 //        handler();
 //        lambda();
 //        direct();
-//        direct8();
+        isLatin1();
+//        isASCII();
     }
 }

@@ -26,8 +26,11 @@ public class JSONFactoryTest {
     @Test
     public void test1() {
         JSONFactory.setUseJacksonAnnotation(false);
+        JSONFactory.setUseGsonAnnotation(false);
+        assertFalse(JSONFactory.isUseGsonAnnotation());
         assertFalse(JSONFactory.isUseJacksonAnnotation());
         JSONFactory.setUseJacksonAnnotation(true);
+        JSONFactory.setUseGsonAnnotation(true);
         assertTrue(JSONFactory.isUseJacksonAnnotation());
 
         ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();

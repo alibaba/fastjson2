@@ -90,6 +90,10 @@ public interface Opcodes {
     int FSTORE = 56; // -
     int DSTORE = 57; // -
     int ASTORE = 58; // -
+    int IASTORE = 79; // visitInsn
+    int AASTORE = 83; // -
+    int BASTORE = 84; // -
+    int CASTORE = 85; // -
     int POP = 87; // visitInsn
     int POP2 = 88; // -
     int DUP = 89; // -
@@ -122,8 +126,12 @@ public interface Opcodes {
     int IXOR = 130; // -
     int LXOR = 131; // -
     int IINC = 132; // visitIincInsn
-    int L2I = 136; // visitInsn
+    int I2L = 133; // visitInsn
+    int I2F = 134; // -
+    int I2D = 135; // -
+    int L2I = 136; //
     int F2I = 139; // -
+    int F2L = 140; // -
     int D2I = 142; // -
     int D2L = 143; // -
     int I2B = 145; // -
@@ -149,6 +157,7 @@ public interface Opcodes {
     int IF_ACMPEQ = 165; // -
     int IF_ACMPNE = 166; // -
     int GOTO = 167; // -
+    int JSR = 168; // -
     int RET = 169; // visitVarInsn
     int TABLESWITCH = 170; // visiTableSwitchInsn
     int LOOKUPSWITCH = 171; // visitLookupSwitch
@@ -167,6 +176,8 @@ public interface Opcodes {
     int INVOKESTATIC = 184; // -
     int INVOKEINTERFACE = 185; // -
     int NEW = 187; // visitTypeInsn
+    int NEWARRAY = 188; // -
+    int ANEWARRAY = 189; // -
     int ARRAYLENGTH = 190; // visitInsn
     int ATHROW = 191; // -
     int CHECKCAST = 192; // visitTypeInsn

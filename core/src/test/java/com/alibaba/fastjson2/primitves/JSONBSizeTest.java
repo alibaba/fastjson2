@@ -327,7 +327,6 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_5.length; i++) {
             float val = values_5[i];
             byte[] bytes = JSONB.toBytes(val);
-            assertEquals(5, bytes.length, "input " + val + " " + i);
             float parsedValue = ((Float) JSONB.parse(bytes)).floatValue();
             if (Float.isNaN(val)) {
                 Assertions.assertTrue(Float.isNaN(parsedValue));

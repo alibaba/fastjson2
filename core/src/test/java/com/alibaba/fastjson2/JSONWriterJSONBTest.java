@@ -5,13 +5,15 @@ import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.text.DecimalFormat;
+import java.time.*;
 import java.util.Arrays;
+import java.util.UUID;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterJSONBTest {
@@ -158,7 +160,8 @@ public class JSONWriterJSONBTest {
             jsonWriter.writeTypeName("abc");
 
             bytes.set(jsonWriter, new byte[0]);
-            jsonWriter.off = 0;
+            jsonWriter.setOffset(0);
+            assertEquals(0, jsonWriter.getOffset());
             jsonWriter.ensureCapacity(1);
         }
 
@@ -404,7 +407,40 @@ public class JSONWriterJSONBTest {
         JSONWriter jsonWriter = JSONWriter.ofJSONB();
         jsonWriter.writeString(chars, 256, 512);
         byte[] jsonbBytes = jsonWriter.getBytes();
-        assertEquals(new String(chars), JSONB.parse(jsonbBytes));
+        assertEquals(
+                new String(chars, 256, 512),
+                JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeChars2() {
+        char[] chars = new char[] {'A', 'A'};
+        Arrays.fill(chars, 'A');
+        for (int i = 128; i < 256; i++) {
+            chars[1] = (char) (i - 256);
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.writeString(chars, 1, 1);
+            byte[] jsonbBytes = jsonWriter.getBytes();
+            assertEquals(
+                    new String(chars, 1, 1),
+                    JSONB.parse(jsonbBytes));
+        }
+    }
+
+    @Test
+    public void writeChars3() {
+        char[] chars = new char[128];
+        for (int i = 128; i < 256; i++) {
+            Arrays.fill(chars, (char) (i - 256));
+            chars[0] = 'A';
+            int strlen = chars.length - 1;
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.writeString(chars, 1, strlen);
+            byte[] jsonbBytes = jsonWriter.getBytes();
+            assertEquals(
+                    new String(chars, 1, strlen),
+                    JSONB.parse(jsonbBytes));
+        }
     }
 
     @Test
@@ -453,5 +489,432 @@ public class JSONWriterJSONBTest {
         String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
         byte[] jsonbBytes = jsonWriter.getBytes();
         assertEquals(str, JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void grow() {
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNull();
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeReference("$.abc");
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(Arrays.asList("abc"));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB(BrowserSecure);
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {1, '>', '<'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB(BrowserSecure);
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeStringLatin1(new byte[] {'a', 'b', 'c'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(new char[] {'a', 'b', 'c'});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeString(new char[] {'a', 'b', 'c'}, 0, 3);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeUUID(UUID.randomUUID());
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt32(123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt8((byte) 123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt8(new byte[]{1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt16((short) 123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt32(new int[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeListInt32(Arrays.asList(1, 2, null));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt64(123L);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeInt64(new long[] {1, 2, 3});
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeListInt64(Arrays.asList(1L, 2L, null));
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeFloat(123);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDouble(123L);
+            }
+            jsonWriter.close();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeNameRaw(new byte[] {'a', 'b', 'c'});
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTime14(2014, 4, 5, 6, 7, 8);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateTime19(2014, 4, 5, 6, 7, 8);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalDate(LocalDate.MIN);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalDateTime(LocalDateTime.MIN);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateYYYMMDD8(2014, 4, 5);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDateYYYMMDD10(2014, 4, 5);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeLocalTime(LocalTime.MIN);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            ZonedDateTime now = ZonedDateTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeZonedDateTime(now);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            OffsetDateTime now = OffsetDateTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeOffsetDateTime(now);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            OffsetTime now = OffsetTime.now();
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeOffsetTime(now);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBigInt(new BigInteger("123456789012345678901234567890"), 0);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeDecimal(new BigDecimal("12345678901234567890.1234567890"), 0, new DecimalFormat("###.##"));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1));
+            }
+        }
+        {
+            JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16();
+            jsonWriter.chars = new char[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1, 2));
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(Arrays.asList(1, 2, 3));
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.writeBool(true);
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.write(JSONObject.of());
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray0();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray1();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray2();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray3();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray4();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray4();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray5();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray6();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray7();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray8();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray9();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray10();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray11();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray12();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray13();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray14();
+            }
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            jsonWriter.bytes = new byte[0];
+            for (int i = 0; i < 1000; i++) {
+                jsonWriter.startArray15();
+            }
+        }
+    }
+
+    @Test
+    public void println() {
+        JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+        jsonWriter.bytes = new byte[0];
+        jsonWriter.println();
+        assertEquals("<empty>", jsonWriter.toString());
+    }
+
+    @Test
+    public void unsupport() {
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        assertThrows(JSONException.class, () -> jsonWriter.writeRaw('a', 'b'));
+        JSONWriter.illegalYear(Integer.MAX_VALUE);
     }
 }

@@ -1141,4 +1141,15 @@ public class JSONBTest {
         JSONB.parseObject(
                 JSONB.toBytes(new BeanD(100)), Bean0.class);
     }
+
+    @Test
+    public void test_int64() {
+//        long[] values = {-2049, -2048, -1024, -64, -32, -16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2047, 2048};
+//        for (long value : values) {
+//            long v =  (Math.abs(value) - (value >>> 63)) & ~0x7FF;
+////            boolean isInt64Short = ((Math.abs(value) - (value >>> 63)) & ~0xFFF) != 0;
+//            System.out.println(value + "\t" + Long.toHexString(v));
+//        }
+        System.out.println(Long.toHexString(23));
+    }
 }

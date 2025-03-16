@@ -46,6 +46,11 @@ public class ClientsWriteUTF8Bytes {
         bh.consume(JSON.toJSONBytes(clients));
     }
 
+    @Benchmark
+    public void wast(Blackhole bh) {
+        bh.consume(io.github.wycst.wast.json.JSON.toJsonBytes(clients));
+    }
+
     public void jsonb(Blackhole bh) {
         bh.consume(JSONB.toBytes(clients));
     }

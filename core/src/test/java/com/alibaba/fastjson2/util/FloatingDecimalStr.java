@@ -23,7 +23,7 @@ public class FloatingDecimalStr {
                     signSeen = true;
             }
 
-            char[] digits = new char[len];
+            byte[] digits = new byte[len];
 
             int nDigits = 0;
             boolean decSeen = false;
@@ -54,10 +54,10 @@ public class FloatingDecimalStr {
             while (i < end) {
                 c = in.charAt(i);
                 if (c >= '1' && c <= '9') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero = 0;
                 } else if (c == '0') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero++;
                 } else if (c == '.') {
                     if (decSeen) {
@@ -158,7 +158,7 @@ public class FloatingDecimalStr {
                     signSeen = true;
             }
 
-            char[] digits = new char[len];
+            byte[] digits = new byte[len];
 
             int nDigits = 0;
             boolean decSeen = false;
@@ -189,10 +189,10 @@ public class FloatingDecimalStr {
             while (i < end) {
                 c = in.charAt(i);
                 if (c >= '1' && c <= '9') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero = 0;
                 } else if (c == '0') {
-                    digits[nDigits++] = c;
+                    digits[nDigits++] = (byte) c;
                     nTrailZero++;
                 } else if (c == '.') {
                     if (decSeen) {

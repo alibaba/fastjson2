@@ -121,4 +121,9 @@ public @interface JSONField {
      * @since 2.0.52
      */
     Class<?> arrayToMapDuplicateHandler() default Void.class;
+
+    /**
+     * @since 2.0.56
+     */
+    Class<?> contentAs() default Void.class;
 }

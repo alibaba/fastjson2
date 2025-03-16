@@ -77,6 +77,8 @@ class Frame {
 
     // Constants to manipulate the DIM field of an abstract type.
 
+    private static final int ARRAY_OF = +1 << DIM_SHIFT;
+
     /**
      * The constant to be added to an abstract type to get one with one less array dimension.
      */
@@ -874,6 +876,12 @@ class Frame {
                     }
                 }
                 break;
+            case Opcodes.IASTORE:
+            case Opcodes.BASTORE:
+            case Opcodes.CASTORE:
+            case Opcodes.AASTORE:
+                pop(3);
+                break;
             case Opcodes.POP:
             case Opcodes.IFEQ:
             case Opcodes.IFNE:
@@ -969,6 +977,21 @@ class Frame {
             case Opcodes.IINC:
                 setLocal(arg, INTEGER);
                 break;
+            case Opcodes.I2L:
+            case Opcodes.F2L:
+                pop(1);
+                push(LONG);
+                push(TOP);
+                break;
+            case Opcodes.I2F:
+                pop(1);
+                push(FLOAT);
+                break;
+            case Opcodes.I2D:
+                pop(1);
+                push(DOUBLE);
+                push(TOP);
+                break;
             case Opcodes.F2I:
             case Opcodes.ARRAYLENGTH:
             case Opcodes.INSTANCEOF:
@@ -1010,6 +1033,15 @@ class Frame {
                 break;
             case Opcodes.NEW:
                 push(UNINITIALIZED_KIND | symbolTable.addUninitializedType(argSymbol.value, arg));
+                break;
+            case Opcodes.ANEWARRAY:
+                String arrayElementType = argSymbol.value;
+                pop();
+                if (arrayElementType.charAt(0) == '[') {
+                    push(symbolTable, '[' + arrayElementType);
+                } else {
+                    push(ARRAY_OF | REFERENCE_KIND | symbolTable.addType(arrayElementType));
+                }
                 break;
             case Opcodes.CHECKCAST:
                 String castType = argSymbol.value;

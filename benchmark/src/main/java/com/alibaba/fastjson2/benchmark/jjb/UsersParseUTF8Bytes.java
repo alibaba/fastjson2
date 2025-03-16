@@ -22,13 +22,17 @@ import java.util.concurrent.TimeUnit;
 
 public class UsersParseUTF8Bytes {
     static byte[] utf8Bytes;
+    static char[] chars;
+    static String str;
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
     static final DslJson<Object> dslJson = new DslJson<>(Settings.withRuntime().includeServiceLoader());
     static {
         try {
             InputStream is = UsersParseUTF8Bytes.class.getClassLoader().getResourceAsStream("data/jjb/user.json");
-            utf8Bytes = IOUtils.toString(is, "UTF-8").getBytes(StandardCharsets.UTF_8);
+            str = IOUtils.toString(is, "UTF-8");
+            utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
+            chars = str.toCharArray();
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -37,11 +41,27 @@ public class UsersParseUTF8Bytes {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.parseObject(utf8Bytes, Users.class));
-        // zulu17.40.19 : 3515
+        // zulu17.40.19 : 3515 4708
         // zulu17.40.19_vec : 338
     }
 
+//    @Benchmark
+    public void fastjson2_str(Blackhole bh) {
+        bh.consume(JSON.parseObject(str, Users.class));
+    }
+
+//    @Benchmark
+    public void fastjson2_chars(Blackhole bh) {
+        bh.consume(JSON.parseObject(chars, Users.class));
+    }
+
     @Benchmark
+    public void wast(Blackhole bh) {
+        // zulu17.40.19 : 3221
+        bh.consume(io.github.wycst.wast.json.JSON.parseObject(utf8Bytes, Users.class));
+    }
+
+//    @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
         bh.consume(dslJson.deserialize(Users.class, utf8Bytes, utf8Bytes.length));
         // zulu17.40.19 : 3560

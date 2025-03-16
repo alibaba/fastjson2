@@ -495,7 +495,7 @@ public class CodeGenUtils {
         if (!jsonFieldFormat.isEmpty()) {
             jsonFieldFormat = jsonFieldFormat.trim();
             if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
-                jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
+                jsonFieldFormat = jsonFieldFormat.replace("T", "'T'");
             }
 
             fieldInfo.format = jsonFieldFormat;
