@@ -201,6 +201,12 @@ public class FieldReaderObject<T>
         }
 
         Object value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        if (value == null
+                && (jsonReader.features(this.features) & JSONReader.Feature.ErrorOnNullForPrimitives.mask) != 0
+                && fieldClass.isPrimitive()
+        ) {
+            throw new JSONException(jsonReader.info("primitive value not support input null"));
+        }
         accept(object, value);
     }
 

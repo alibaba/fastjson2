@@ -454,6 +454,10 @@ public class ObjectReaderCreatorASM
 
         genMethodReadObject(context, beanInfo.readerFeatures);
 
+        if (!context.disableJSONB()) {
+            genMethodReadJSONBObject(context, beanInfo.readerFeatures);
+        }
+
         byte[] code = cw.toByteArray();
         try {
             Class<?> readerClass = classLoader.defineClassPublic(context.classNameFull, code, 0, code.length);
@@ -1028,14 +1032,14 @@ public class ObjectReaderCreatorASM
         }
 
         if (!disableArrayMapping) {
-            Label object_ = new Label();
+            Label L0 = new Label();
 
             // if (jsonReader.isArray() && jsonReader.isSupportBeanArray()) {
             {
                 Label startArray_ = new Label(), endArray_ = new Label();
                 mw.aload(JSON_READER);
                 mw.invokevirtual(TYPE_JSON_READER, "isArray", "()Z");
-                mw.ifeq(object_);
+                mw.ifeq(L0);
 
                 mw.aload(JSON_READER);
                 mw.invokevirtual(TYPE_JSON_READER, "isSupportBeanArray", "()Z");
@@ -1052,40 +1056,99 @@ public class ObjectReaderCreatorASM
                 mw.visitLabel(endArray_);
             }
 
-            mw.visitLabel(object_);
+            mw.visitLabel(L0);
         }
 
-        genCreateObject(mw, context, classNameType);
-        mw.astore(OBJECT);
+        if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+            {
+                /*
+                 * if (jsonReader.hasAutoTypeBeforeHandler()
+                 *      || (features & (JSONReader.Feature.SupportSmartMatch.mask | JSONReader.Feature.SupportAutoType.mask)) != 0
+                 * ) {
+                 *     return super.readObject(jsonReader, fieldType, fieldName, features);
+                 * }
+                 */
+                Label L3 = new Label(), L4 = new Label();
+                mw.aload(JSON_READER);
+                mw.invokevirtual(TYPE_JSON_READER, "hasAutoTypeBeforeHandler", "()Z");
+                mw.ifne(L3);
+
+                mw.lload(FEATURES);
+                mw.visitLdcInsn(JSONReader.Feature.SupportSmartMatch.mask | JSONReader.Feature.SupportAutoType.mask);
+                mw.land();
+                mw.lconst_0();
+                mw.lcmp();
+                mw.ifeq(L4);
+
+                mw.visitLabel(L3);
+                mw.aload(THIS);
+                mw.aload(JSON_READER);
+                mw.aload(FIELD_TYPE);
+                mw.aload(FIELD_NAME);
+                mw.lload(FEATURES);
+                mw.invokespecial(TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, "readJSONBObject", METHOD_DESC_READ_OBJECT);
+                mw.areturn();
+
+                mw.visitLabel(L4);
+            }
+
+            for (FieldReader fieldReader : fieldReaderArray) {
+                Class fieldClass = fieldReader.fieldClass;
+                int var = mwc.var(fieldReader);
+                if (fieldClass == byte.class || fieldClass == short.class || fieldClass == int.class || fieldClass == boolean.class || fieldClass == char.class) {
+                    mw.iconst_0();
+                    mw.istore(var);
+                } else if (fieldClass == long.class) {
+                    mw.lconst_0();
+                    mw.lstore(var);
+                } else if (fieldClass == float.class) {
+                    mw.iconst_0();
+                    mw.i2f();
+                    mw.fstore(var);
+                } else if (fieldClass == double.class) {
+                    mw.iconst_0();
+                    mw.i2d();
+                    mw.dstore(var);
+                } else {
+                    mw.aconst_null();
+                    mw.astore(var);
+                }
+            }
+        } else {
+            genCreateObject(mw, context, classNameType);
+            mw.astore(OBJECT);
+        }
 
         mw.aload(JSON_READER);
         mw.invokevirtual(TYPE_JSON_READER, "nextIfObjectStart", "()Z");
         mw.pop();
 
         // for (int i = 0; i < entry_cnt; ++i) {
-        Label for_start_i_ = new Label(), for_end_i_ = new Label(), for_inc_i_ = new Label();
+        Label L_FOR_START = new Label(), L_FOR_END = new Label(), L_FOR_INC = new Label();
         if (!disableAutoType) {
             mw.iconst_0();
             mw.istore(I);
         }
 
-        mw.visitLabel(for_start_i_);
+        mw.visitLabel(L_FOR_START);
 
         Label hashCode64Start = new Label();
 
         mw.aload(JSON_READER);
         mw.invokevirtual(TYPE_JSON_READER, "nextIfObjectEnd", "()Z");
-        mw.ifne(for_end_i_);
+        mw.ifne(L_FOR_END);
 
+        boolean switchGen = false;
         if (context.fieldNameLengthMin >= 2 && context.fieldNameLengthMax <= 43) {
             genRead243(
                     context,
                     fieldBased,
                     mwc,
                     OBJECT,
-                    for_inc_i_,
+                    L_FOR_INC,
                     hashCode64Start
             );
+            switchGen = true;
         }
 
         mw.visitLabel(hashCode64Start);
@@ -1096,9 +1159,14 @@ public class ObjectReaderCreatorASM
         mw.lstore(HASH_CODE64);
         mw.lconst_0();
         mw.lcmp();
-        mw.ifeq(for_inc_i_);
+        mw.ifeq(L_FOR_INC);
 
-        if (!disableAutoType) {
+        if (!disableAutoType && !(context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor)) {
+            /*
+             * if (hashCode64 == this.typeKeyHashCode() && hashCode64 != 0) {
+             *      object = this.autoType(jsonReader);
+             * }
+             */
             Label endAutoType_ = new Label();
             mw.lload(HASH_CODE64);
             mw.aload(THIS);
@@ -1116,13 +1184,63 @@ public class ObjectReaderCreatorASM
             mw.aload(JSON_READER);
             mw.invokevirtual(classNameType, "autoType", "(" + DESC_JSON_READER + ")Ljava/lang/Object;");
             mw.astore(OBJECT);
-            mw.goto_(for_end_i_);
+            mw.goto_(L_FOR_END);
 
             mw.visitLabel(endAutoType_);
         }
 
-        // continue
-        if (fieldReaderArray.length > 6) {
+        if (switchGen) {
+            if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+                int ORIDINAL = mwc.var("ordinal");
+                mw.aload(THIS);
+                mw.lload(HASH_CODE64);
+                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "getFieldOrdinal", "(J)I");
+                mw.istore(ORIDINAL);
+
+                Label dflt = new Label();
+                Label[] labels = new Label[fieldReaderArray.length];
+                int[] switchKeys = new int[fieldReaderArray.length];
+                for (int i = 0; i < fieldReaderArray.length; i++) {
+                    labels[i] = new Label();
+                    switchKeys[i] = i;
+                }
+
+                mw.iload(ORIDINAL);
+                mw.visitLookupSwitchInsn(dflt, switchKeys, labels);
+
+                for (int i = 0; i < fieldReaderArray.length; i++) {
+                    mw.visitLabel(labels[i]);
+                    FieldReader fieldReader = fieldReaderArray[i];
+                    genReadFieldValue(
+                            context,
+                            fieldReader,
+                            fieldBased,
+                            mwc,
+                            OBJECT,
+                            i,
+                            false
+                    );
+                    mw.goto_(L_FOR_INC);
+                }
+
+                // jsonReader.skipValue();
+                mw.visitLabel(dflt);
+                mw.aload(JSON_READER);
+                mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
+            } else {
+                /*
+                 * this.readFieldValue(hashCode64, jsonReader, features, object);
+                 */
+                mw.aload(THIS);
+                mw.lload(HASH_CODE64);
+                mw.aload(JSON_READER);
+                mw.lload(FEATURES);
+                mw.aload(OBJECT);
+                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "readFieldValue", READ_FIELD_READER_UL);
+            }
+            mw.goto_(L_FOR_INC); // continue
+            // continue
+        } else if (fieldReaderArray.length > 6) {
             // use switch
             Map<Integer, List<Long>> map = new TreeMap();
 
@@ -1188,14 +1306,14 @@ public class ObjectReaderCreatorASM
                             index,
                             true // JSONB
                     );
-                    mw.goto_(for_inc_i_);
+                    mw.goto_(L_FOR_INC);
 
                     if (next != dflt) {
                         mw.visitLabel(next);
                     }
                 }
 
-                mw.goto_(for_inc_i_);
+                mw.goto_(L_FOR_INC);
             }
 
             // switch_default
@@ -1222,7 +1340,7 @@ public class ObjectReaderCreatorASM
             mw.aload(JSON_READER);
             mw.aload(OBJECT);
             mw.invokevirtual(TYPE_FIELD_READE, "readFieldValueJSONB", METHOD_DESC_READ_FIELD_VALUE);
-            mw.goto_(for_inc_i_); // continue
+            mw.goto_(L_FOR_INC); // continue
 
             mw.visitLabel(fieldReaderNull_);
         } else {
@@ -1248,7 +1366,7 @@ public class ObjectReaderCreatorASM
                         false // arrayMapping
                 );
 
-                mw.goto_(for_inc_i_); // continue
+                mw.goto_(L_FOR_INC); // continue
 
                 mw.visitLabel(next_);
             }
@@ -1288,29 +1406,89 @@ public class ObjectReaderCreatorASM
                         false // arrayMapping
                 );
 
-                mw.goto_(for_inc_i_); // continue
+                mw.goto_(L_FOR_INC); // continue
 
                 mw.visitLabel(next_);
             }
             mw.visitLabel(processExtra_);
         }
 
-        mw.aload(THIS);
-        mw.aload(JSON_READER);
-        mw.aload(OBJECT);
-        mw.lload(FEATURES);
-        mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA);
-        mw.goto_(for_inc_i_); // continue
+        if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+            mw.aload(JSON_READER);
+            mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
+        } else {
+            mw.aload(THIS);
+            mw.aload(JSON_READER);
+            mw.aload(OBJECT);
+            mw.lload(FEATURES);
+            mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA);
+        }
+        mw.goto_(L_FOR_INC); // continue
 
-        mw.visitLabel(for_inc_i_);
+        mw.visitLabel(L_FOR_INC);
         if (!disableAutoType) {
             mw.visitIincInsn(I, 1);
         }
-        mw.goto_(for_start_i_);
+        mw.goto_(L_FOR_START);
 
-        mw.visitLabel(for_end_i_);
+        mw.visitLabel(L_FOR_END);
 
-        mw.aload(OBJECT);
+        if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
+            ObjectReaderNoneDefaultConstructor objectReaderNoneDefaultConstructor = (ObjectReaderNoneDefaultConstructor) context.objectReaderAdapter;
+            boolean constructDirect = true;
+            if (classLoader.isExternalClass(context.objectClass)
+                    || context.objectClass.getTypeParameters().length != 0
+                    || (objectReaderNoneDefaultConstructor.constructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.constructor.getModifiers()))
+                    || (context.objectClass != null && !Modifier.isPublic(context.objectClass.getModifiers()))
+                    || objectReaderNoneDefaultConstructor.factoryFunction != null
+                    || objectReaderNoneDefaultConstructor.noneDefaultConstructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.noneDefaultConstructor.getModifiers())
+            ) {
+                constructDirect = false;
+            }
+
+            if (constructDirect) {
+                mw.new_(context.objectType);
+                mw.dup();
+                StringBuilder buf = new StringBuilder().append("(");
+                for (FieldReader fieldReader : fieldReaderArray) {
+                    mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
+                    buf.append(ASMUtils.desc(fieldReader.fieldClass));
+                }
+                buf.append(")V");
+                mw.invokespecial(context.objectType, "<init>", buf.toString());
+            } else {
+                mw.aload(THIS);
+                mw.iconst_n(fieldReaderArray.length);
+                mw.anewArray("java/lang/Object");
+                for (int i = 0; i < fieldReaderArray.length; i++) {
+                    FieldReader fieldReader = fieldReaderArray[i];
+                    mw.dup();
+                    mw.iconst_n(i);
+                    mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
+                    if (fieldReader.fieldClass == int.class) {
+                        mw.invokestatic("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                    } else if (fieldReader.fieldClass == long.class) {
+                        mw.invokestatic("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                    } else if (fieldReader.fieldClass == float.class) {
+                        mw.invokestatic("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                    } else if (fieldReader.fieldClass == double.class) {
+                        mw.invokestatic("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                    } else if (fieldReader.fieldClass == boolean.class) {
+                        mw.invokestatic("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+                    } else if (fieldReader.fieldClass == short.class) {
+                        mw.invokestatic("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                    } else if (fieldReader.fieldClass == byte.class) {
+                        mw.invokestatic("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                    } else if (fieldReader.fieldClass == char.class) {
+                        mw.invokestatic("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                    }
+                    mw.aastore();
+                }
+                mw.invokevirtual(TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, "createInstance", "([Ljava/lang/Object;)Ljava/lang/Object;");
+            }
+        } else {
+            mw.aload(OBJECT);
+        }
         mw.areturn();
 
         mw.visitMaxs(5, 10);
