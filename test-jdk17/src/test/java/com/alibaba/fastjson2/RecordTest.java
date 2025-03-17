@@ -21,6 +21,10 @@ public class RecordTest {
 
         Item item2 = JSON.parseObject(str, Item.class);
         assertEquals(item.value, item2.value);
+
+        byte[] jsonb = JSONB.toBytes(item, JSONWriter.Feature.UseSingleQuotes);
+        Item item3 = JSONB.parseObject(jsonb, Item.class);
+        assertEquals(item.value, item2.value);
     }
 
     public record Item(int value) {
@@ -39,6 +43,11 @@ public class RecordTest {
             Item1 item2 = JSON.parseObject(str, Item1.class);
             assertEquals(item.value, item2.value);
         }
+        {
+            byte[] jsonb = JSONB.toBytes(item, JSONWriter.Feature.UseSingleQuotes);
+            Item1 item2 = JSONB.parseObject(jsonb, Item1.class);
+            assertEquals(item.value, item2.value);
+        }
     }
 
     public record Item1(List<String> value) {
@@ -51,6 +60,11 @@ public class RecordTest {
         Item2 item2 = JSON.parseObject(str, Item2.class);
         assertEquals(item.value.size(), item2.value.size());
         assertEquals(item.value.get(0).value, item2.value.get(0).value);
+
+        byte[] jsonb = JSONB.toBytes(item, JSONWriter.Feature.UseSingleQuotes);
+        Item2 item3 = JSONB.parseObject(jsonb, Item2.class);
+        assertEquals(item.value.size(), item3.value.size());
+        assertEquals(item.value.get(0).value, item3.value.get(0).value);
     }
 
     public record Item2(List<Item> value) {
@@ -95,6 +109,11 @@ public class RecordTest {
         Item5 item2 = JSON.parseObject(str, Item5.class);
         assertEquals(item.user.default_profile, item2.user.default_profile);
         assertEquals(item.user.screen_name, item2.user.screen_name);
+
+        byte[] jsonb = JSONB.toBytes(item);
+        Item5 item3 = JSONB.parseObject(jsonb, Item5.class);
+        assertEquals(item.user.default_profile, item3.user.default_profile);
+        assertEquals(item.user.screen_name, item3.user.screen_name);
     }
 
     private record User5(boolean default_profile, String screen_name) {
