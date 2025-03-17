@@ -1092,28 +1092,7 @@ public class ObjectReaderCreatorASM
                 mw.visitLabel(L4);
             }
 
-            for (FieldReader fieldReader : fieldReaderArray) {
-                Class fieldClass = fieldReader.fieldClass;
-                int var = mwc.var(fieldReader);
-                if (fieldClass == byte.class || fieldClass == short.class || fieldClass == int.class || fieldClass == boolean.class || fieldClass == char.class) {
-                    mw.iconst_0();
-                    mw.istore(var);
-                } else if (fieldClass == long.class) {
-                    mw.lconst_0();
-                    mw.lstore(var);
-                } else if (fieldClass == float.class) {
-                    mw.iconst_0();
-                    mw.i2f();
-                    mw.fstore(var);
-                } else if (fieldClass == double.class) {
-                    mw.iconst_0();
-                    mw.i2d();
-                    mw.dstore(var);
-                } else {
-                    mw.aconst_null();
-                    mw.astore(var);
-                }
-            }
+            genInitForNonDefaultConstructor(fieldReaderArray, mwc);
         } else {
             genCreateObject(mw, context, classNameType);
             mw.astore(OBJECT);
@@ -1191,42 +1170,7 @@ public class ObjectReaderCreatorASM
 
         if (switchGen) {
             if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
-                int ORIDINAL = mwc.var("ordinal");
-                mw.aload(THIS);
-                mw.lload(HASH_CODE64);
-                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "getFieldOrdinal", "(J)I");
-                mw.istore(ORIDINAL);
-
-                Label dflt = new Label();
-                Label[] labels = new Label[fieldReaderArray.length];
-                int[] switchKeys = new int[fieldReaderArray.length];
-                for (int i = 0; i < fieldReaderArray.length; i++) {
-                    labels[i] = new Label();
-                    switchKeys[i] = i;
-                }
-
-                mw.iload(ORIDINAL);
-                mw.visitLookupSwitchInsn(dflt, switchKeys, labels);
-
-                for (int i = 0; i < fieldReaderArray.length; i++) {
-                    mw.visitLabel(labels[i]);
-                    FieldReader fieldReader = fieldReaderArray[i];
-                    genReadFieldValue(
-                            context,
-                            fieldReader,
-                            fieldBased,
-                            mwc,
-                            OBJECT,
-                            i,
-                            false
-                    );
-                    mw.goto_(L_FOR_INC);
-                }
-
-                // jsonReader.skipValue();
-                mw.visitLabel(dflt);
-                mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
+                genReadHashCode64ValueForNonDefaultConstructor(context, mwc, HASH_CODE64, fieldBased, OBJECT, L_FOR_INC);
             } else {
                 /*
                  * this.readFieldValue(hashCode64, jsonReader, features, object);
@@ -1434,64 +1378,61 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(L_FOR_END);
 
         if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
-            ObjectReaderNoneDefaultConstructor objectReaderNoneDefaultConstructor = (ObjectReaderNoneDefaultConstructor) context.objectReaderAdapter;
-            boolean constructDirect = true;
-            if (classLoader.isExternalClass(context.objectClass)
-                    || context.objectClass.getTypeParameters().length != 0
-                    || (objectReaderNoneDefaultConstructor.constructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.constructor.getModifiers()))
-                    || (context.objectClass != null && !Modifier.isPublic(context.objectClass.getModifiers()))
-                    || objectReaderNoneDefaultConstructor.factoryFunction != null
-                    || objectReaderNoneDefaultConstructor.noneDefaultConstructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.noneDefaultConstructor.getModifiers())
-            ) {
-                constructDirect = false;
-            }
-
-            if (constructDirect) {
-                mw.new_(context.objectType);
-                mw.dup();
-                StringBuilder buf = new StringBuilder().append("(");
-                for (FieldReader fieldReader : fieldReaderArray) {
-                    mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
-                    buf.append(ASMUtils.desc(fieldReader.fieldClass));
-                }
-                buf.append(")V");
-                mw.invokespecial(context.objectType, "<init>", buf.toString());
-            } else {
-                mw.aload(THIS);
-                mw.iconst_n(fieldReaderArray.length);
-                mw.anewArray("java/lang/Object");
-                for (int i = 0; i < fieldReaderArray.length; i++) {
-                    FieldReader fieldReader = fieldReaderArray[i];
-                    mw.dup();
-                    mw.iconst_n(i);
-                    mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
-                    if (fieldReader.fieldClass == int.class) {
-                        mw.invokestatic("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
-                    } else if (fieldReader.fieldClass == long.class) {
-                        mw.invokestatic("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
-                    } else if (fieldReader.fieldClass == float.class) {
-                        mw.invokestatic("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
-                    } else if (fieldReader.fieldClass == double.class) {
-                        mw.invokestatic("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
-                    } else if (fieldReader.fieldClass == boolean.class) {
-                        mw.invokestatic("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
-                    } else if (fieldReader.fieldClass == short.class) {
-                        mw.invokestatic("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
-                    } else if (fieldReader.fieldClass == byte.class) {
-                        mw.invokestatic("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
-                    } else if (fieldReader.fieldClass == char.class) {
-                        mw.invokestatic("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
-                    }
-                    mw.aastore();
-                }
-                mw.invokevirtual(TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, "createInstance", "([Ljava/lang/Object;)Ljava/lang/Object;");
-            }
+            createObjectForNonConstructor(context, mwc);
         } else {
             mw.aload(OBJECT);
         }
         mw.areturn();
 
         mw.visitMaxs(5, 10);
+    }
+
+    private void genReadHashCode64ValueForNonDefaultConstructor(
+            ObjectReadContext context,
+            MethodWriterContext mwc,
+            int HASH_CODE64,
+            boolean fieldBased,
+            int OBJECT,
+            Label L_FOR_INC
+    ) {
+        FieldReader[] fieldReaderArray = context.fieldReaders;
+        MethodWriter mw = mwc.mw;
+        int ORIDINAL = mwc.var("ordinal");
+        mw.aload(THIS);
+        mw.lload(HASH_CODE64);
+        mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "getFieldOrdinal", "(J)I");
+        mw.istore(ORIDINAL);
+
+        Label dflt = new Label();
+        Label[] labels = new Label[fieldReaderArray.length];
+        int[] switchKeys = new int[fieldReaderArray.length];
+        for (int i = 0; i < fieldReaderArray.length; i++) {
+            labels[i] = new Label();
+            switchKeys[i] = i;
+        }
+
+        mw.iload(ORIDINAL);
+        mw.visitLookupSwitchInsn(dflt, switchKeys, labels);
+
+        for (int i = 0; i < fieldReaderArray.length; i++) {
+            mw.visitLabel(labels[i]);
+            FieldReader fieldReader = fieldReaderArray[i];
+            genReadFieldValue(
+                    context,
+                    fieldReader,
+                    fieldBased,
+                    mwc,
+                    OBJECT,
+                    i,
+                    false
+            );
+            mw.goto_(L_FOR_INC);
+        }
+
+        // jsonReader.skipValue();
+        mw.visitLabel(dflt);
+        mw.aload(JSON_READER);
+        mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
     }
 
     private <T> void genMethodReadJSONBObjectArrayMapping(ObjectReadContext context, long readerFeatures) {
@@ -1604,7 +1545,6 @@ public class ObjectReaderCreatorASM
                 METHOD_DESC_READ_OBJECT,
                 2048
         );
-        Integer MAP = null;
 
         MethodWriterContext mwc = new MethodWriterContext(mw, 6, false);
 
@@ -1754,35 +1694,7 @@ public class ObjectReaderCreatorASM
                 mw.visitLabel(L4);
             }
 
-            for (FieldReader fieldReader : fieldReaderArray) {
-                Class fieldClass = fieldReader.fieldClass;
-                int var = mwc.var(fieldReader);
-                if (fieldClass == byte.class || fieldClass == short.class || fieldClass == int.class || fieldClass == boolean.class || fieldClass == char.class) {
-                    mw.iconst_0();
-                    mw.istore(var);
-                } else if (fieldClass == long.class) {
-                    mw.lconst_0();
-                    mw.lstore(var);
-                } else if (fieldClass == float.class) {
-                    mw.iconst_0();
-                    mw.i2f();
-                    mw.fstore(var);
-                } else if (fieldClass == double.class) {
-                    mw.iconst_0();
-                    mw.i2d();
-                    mw.dstore(var);
-                } else {
-                    mw.aconst_null();
-                    mw.astore(var);
-                }
-            }
-
-            MAP = mwc.var("map");
-            /*
-             * Map<String, Object> map = null;
-             */
-            mw.aconst_null();
-            mw.astore(MAP);
+            genInitForNonDefaultConstructor(fieldReaderArray, mwc);
         } else {
             genCreateObject(mw, context, classNameType);
             mw.astore(OBJECT);
@@ -1882,42 +1794,7 @@ public class ObjectReaderCreatorASM
         // continue
         if (switchGen) {
             if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
-                int ORIDINAL = mwc.var("ordinal");
-                mw.aload(THIS);
-                mw.lload(HASH_CODE64);
-                mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "getFieldOrdinal", "(J)I");
-                mw.istore(ORIDINAL);
-
-                Label dflt = new Label();
-                Label[] labels = new Label[fieldReaderArray.length];
-                int[] switchKeys = new int[fieldReaderArray.length];
-                for (int i = 0; i < fieldReaderArray.length; i++) {
-                    labels[i] = new Label();
-                    switchKeys[i] = i;
-                }
-
-                mw.iload(ORIDINAL);
-                mw.visitLookupSwitchInsn(dflt, switchKeys, labels);
-
-                for (int i = 0; i < fieldReaderArray.length; i++) {
-                    mw.visitLabel(labels[i]);
-                    FieldReader fieldReader = fieldReaderArray[i];
-                    genReadFieldValue(
-                            context,
-                            fieldReader,
-                            fieldBased,
-                            mwc,
-                            OBJECT,
-                            i,
-                            false
-                    );
-                    mw.goto_(L_FOR_INC);
-                }
-
-                // jsonReader.skipValue();
-                mw.visitLabel(dflt);
-                mw.aload(JSON_READER);
-                mw.invokevirtual(TYPE_JSON_READER, "skipValue", "()V");
+                genReadHashCode64ValueForNonDefaultConstructor(context, mwc, HASH_CODE64, fieldBased, OBJECT, L_FOR_INC);
             } else {
                 /*
                  * this.readFieldValue(hashCode64, jsonReader, features, object);
@@ -2149,65 +2026,96 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(end_);
 
         if (context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor) {
-            ObjectReaderNoneDefaultConstructor objectReaderNoneDefaultConstructor = (ObjectReaderNoneDefaultConstructor) context.objectReaderAdapter;
-            boolean constructDirect = true;
-            if (classLoader.isExternalClass(context.objectClass)
-                    || context.objectClass.getTypeParameters().length != 0
-                    || (objectReaderNoneDefaultConstructor.constructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.constructor.getModifiers()))
-                    || (context.objectClass != null && !Modifier.isPublic(context.objectClass.getModifiers()))
-                    || objectReaderNoneDefaultConstructor.factoryFunction != null
-                    || objectReaderNoneDefaultConstructor.noneDefaultConstructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.noneDefaultConstructor.getModifiers())
-            ) {
-                constructDirect = false;
-            }
-
-            if (constructDirect) {
-                mw.new_(context.objectType);
-                mw.dup();
-                StringBuilder buf = new StringBuilder().append("(");
-                for (FieldReader fieldReader : fieldReaderArray) {
-                    mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
-                    buf.append(ASMUtils.desc(fieldReader.fieldClass));
-                }
-                buf.append(")V");
-                mw.invokespecial(context.objectType, "<init>", buf.toString());
-            } else {
-                mw.aload(THIS);
-                mw.iconst_n(fieldReaderArray.length);
-                mw.anewArray("java/lang/Object");
-                for (int i = 0; i < fieldReaderArray.length; i++) {
-                    FieldReader fieldReader = fieldReaderArray[i];
-                    mw.dup();
-                    mw.iconst_n(i);
-                    mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
-                    if (fieldReader.fieldClass == int.class) {
-                        mw.invokestatic("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
-                    } else if (fieldReader.fieldClass == long.class) {
-                        mw.invokestatic("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
-                    } else if (fieldReader.fieldClass == float.class) {
-                        mw.invokestatic("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
-                    } else if (fieldReader.fieldClass == double.class) {
-                        mw.invokestatic("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
-                    } else if (fieldReader.fieldClass == boolean.class) {
-                        mw.invokestatic("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
-                    } else if (fieldReader.fieldClass == short.class) {
-                        mw.invokestatic("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
-                    } else if (fieldReader.fieldClass == byte.class) {
-                        mw.invokestatic("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
-                    } else if (fieldReader.fieldClass == char.class) {
-                        mw.invokestatic("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
-                    }
-                    mw.aastore();
-                }
-                mw.invokevirtual(TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, "createInstance", "([Ljava/lang/Object;)Ljava/lang/Object;");
-            }
-            mw.areturn();
+            createObjectForNonConstructor(context, mwc);
         } else {
             mw.aload(OBJECT);
         }
         mw.areturn();
 
         mw.visitMaxs(5, 10);
+    }
+
+    private void createObjectForNonConstructor(ObjectReadContext context, MethodWriterContext mwc) {
+        FieldReader[] fieldReaderArray = context.fieldReaders;
+        MethodWriter mw = mwc.mw;
+        ObjectReaderNoneDefaultConstructor objectReaderNoneDefaultConstructor = (ObjectReaderNoneDefaultConstructor) context.objectReaderAdapter;
+        boolean constructDirect = true;
+        if (classLoader.isExternalClass(context.objectClass)
+                || context.objectClass.getTypeParameters().length != 0
+                || (objectReaderNoneDefaultConstructor.constructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.constructor.getModifiers()))
+                || (context.objectClass != null && !Modifier.isPublic(context.objectClass.getModifiers()))
+                || objectReaderNoneDefaultConstructor.factoryFunction != null
+                || objectReaderNoneDefaultConstructor.noneDefaultConstructor != null && !Modifier.isPublic(objectReaderNoneDefaultConstructor.noneDefaultConstructor.getModifiers())
+        ) {
+            constructDirect = false;
+        }
+
+        if (constructDirect) {
+            mw.new_(context.objectType);
+            mw.dup();
+            StringBuilder buf = new StringBuilder().append("(");
+            for (FieldReader fieldReader : fieldReaderArray) {
+                mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
+                buf.append(ASMUtils.desc(fieldReader.fieldClass));
+            }
+            buf.append(")V");
+            mw.invokespecial(context.objectType, "<init>", buf.toString());
+        } else {
+            mw.aload(THIS);
+            mw.iconst_n(fieldReaderArray.length);
+            mw.anewArray("java/lang/Object");
+            for (int i = 0; i < fieldReaderArray.length; i++) {
+                FieldReader fieldReader = fieldReaderArray[i];
+                mw.dup();
+                mw.iconst_n(i);
+                mw.loadLocal(fieldReader.fieldClass, mwc.var(fieldReader));
+                if (fieldReader.fieldClass == int.class) {
+                    mw.invokestatic("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                } else if (fieldReader.fieldClass == long.class) {
+                    mw.invokestatic("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                } else if (fieldReader.fieldClass == float.class) {
+                    mw.invokestatic("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                } else if (fieldReader.fieldClass == double.class) {
+                    mw.invokestatic("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                } else if (fieldReader.fieldClass == boolean.class) {
+                    mw.invokestatic("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+                } else if (fieldReader.fieldClass == short.class) {
+                    mw.invokestatic("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                } else if (fieldReader.fieldClass == byte.class) {
+                    mw.invokestatic("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                } else if (fieldReader.fieldClass == char.class) {
+                    mw.invokestatic("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                }
+                mw.aastore();
+            }
+            mw.invokevirtual(TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR, "createInstance", "([Ljava/lang/Object;)Ljava/lang/Object;");
+        }
+    }
+
+    private static void genInitForNonDefaultConstructor(FieldReader[] fieldReaderArray, MethodWriterContext mwc) {
+        MethodWriter mw = mwc.mw;
+        for (FieldReader fieldReader : fieldReaderArray) {
+            Class fieldClass = fieldReader.fieldClass;
+            int var = mwc.var(fieldReader);
+            if (fieldClass == byte.class || fieldClass == short.class || fieldClass == int.class || fieldClass == boolean.class || fieldClass == char.class) {
+                mw.iconst_0();
+                mw.istore(var);
+            } else if (fieldClass == long.class) {
+                mw.lconst_0();
+                mw.lstore(var);
+            } else if (fieldClass == float.class) {
+                mw.iconst_0();
+                mw.i2f();
+                mw.fstore(var);
+            } else if (fieldClass == double.class) {
+                mw.iconst_0();
+                mw.i2d();
+                mw.dstore(var);
+            } else {
+                mw.aconst_null();
+                mw.astore(var);
+            }
+        }
     }
 
     private void genRead243(
