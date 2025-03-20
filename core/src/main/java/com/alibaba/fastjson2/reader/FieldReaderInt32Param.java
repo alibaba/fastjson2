@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
@@ -24,6 +25,12 @@ final class FieldReaderInt32Param<T>
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        return jsonReader.readInt32();
+        Integer value = jsonReader.readInt32();
+        if (value == null
+                && fieldClass == int.class
+                && (jsonReader.features(this.features) & JSONReader.Feature.ErrorOnNullForPrimitives.mask) != 0) {
+            throw new JSONException(jsonReader.info("int value not support input null"));
+        }
+        return value;
     }
 }

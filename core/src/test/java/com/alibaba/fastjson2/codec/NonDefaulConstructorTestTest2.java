@@ -1,15 +1,13 @@
 package com.alibaba.fastjson2.codec;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NonDefaulConstructorTestTest2 {
     @Test
@@ -95,6 +93,78 @@ public class NonDefaulConstructorTestTest2 {
                 throw new IllegalArgumentException("name is null");
             }
             this.name = name;
+        }
+    }
+
+    @Test
+    public void test_bean1() {
+        JSONObject jsonObject = JSONObject.of("v0", 3);
+
+        {
+            String str = jsonObject.toString();
+            Bean1 a = JSON.parseObject(str, Bean1.class);
+            assertEquals(3, a.v0);
+        }
+
+        {
+            byte[] jsonb = JSONB.toBytes(jsonObject);
+            Bean1 a = JSONB.parseObject(jsonb, Bean1.class);
+            assertEquals(3, a.v0);
+        }
+    }
+
+    @Test
+    public void test_bean1_eror() {
+        byte[] jsonb = JSONObject.of("v0", null).toJSONBBytes(JSONWriter.Feature.WriteNulls);
+        assertThrows(
+                JSONException.class,
+                () -> JSONB.parseObject(jsonb, Bean1.class, JSONReader.Feature.ErrorOnNullForPrimitives));
+    }
+
+    public static class Bean1 {
+        final byte v0;
+        public Bean1(byte v0) {
+            this.v0 = v0;
+        }
+    }
+
+    @Test
+    public void test_ben6() {
+        JSONObject jsonObject = JSONObject.of("v0", 3);
+
+        String str = jsonObject.toString();
+        Bean6 a = JSON.parseObject(str, Bean6.class);
+        assertEquals(3, a.v0);
+
+        byte[] jsonb = JSONB.toBytes(jsonObject);
+        a = JSONB.parseObject(jsonb, Bean6.class);
+        assertEquals(3, a.v0);
+    }
+
+    @Test
+    public void test_ben6_error() {
+        byte[] jsonb = JSONObject.of("v0", null).toJSONBBytes(JSONWriter.Feature.WriteNulls);
+        assertThrows(
+                JSONException.class,
+                () -> JSONB.parseObject(jsonb, Bean6.class, JSONReader.Feature.ErrorOnNullForPrimitives));
+    }
+
+    public static class Bean6 {
+        final int v0;
+        final int v1;
+        final int v2;
+        final int v3;
+        final int v4;
+        final int v5;
+        final int v6;
+        public Bean6(int v0, int v1, int v2, int v3, int v4, int v5, int v6) {
+            this.v0 = v0;
+            this.v1 = v1;
+            this.v2 = v2;
+            this.v3 = v3;
+            this.v4 = v4;
+            this.v5 = v5;
+            this.v6 = v6;
         }
     }
 }
