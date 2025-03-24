@@ -38,8 +38,8 @@
         <solon.version>3.0.1</solon.version>
         <springframework5.version>5.3.31</springframework5.version>
         <springframework6.version>6.1.3</springframework6.version>
-        <springsecurity5.version>5.8.8</springsecurity5.version>
-        <springsecurity6.version>6.2.1</springsecurity6.version>
+        <springsecurity5.version>6.4.4</springsecurity5.version>
+        <springsecurity6.version>6.4.4</springsecurity6.version>
         <springboot2.version>2.7.18</springboot2.version>
         <springboot3.version>3.2.2</springboot3.version>
         <springdata2021.version>2021.2.18</springdata2021.version>
