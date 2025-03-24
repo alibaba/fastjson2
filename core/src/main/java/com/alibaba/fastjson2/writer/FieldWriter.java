@@ -106,10 +106,23 @@ public abstract class FieldWriter<T>
         this.decimalFormat = decimalFormat;
 
         long fieldOffset = -1L;
-        if (field != null) {
-            fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
+        if (field != null && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
+            if (JDKUtils.ANDROID_SDK_INT >= 24
+                    || fieldClass == int.class
+                    || fieldClass == long.class
+                    || !fieldClass.isPrimitive()
+            ) {
+                fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
+            }
         }
         this.fieldOffset = fieldOffset;
+        if (fieldOffset == -1 && field != null && method == null) {
+            try {
+                field.setAccessible(true);
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        }
 
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
