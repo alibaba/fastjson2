@@ -219,7 +219,13 @@ public class ObjectReaderAdapter<T>
 
     public void apply(Consumer<FieldReader> fieldReaderConsumer) {
         for (FieldReader fieldReader : fieldReaders) {
-            fieldReaderConsumer.accept(fieldReader);
+            try {
+                fieldReaderConsumer.accept(fieldReader);
+            } catch (RuntimeException e) {
+                if (!ignoreError(fieldReader)) {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -266,7 +272,14 @@ public class ObjectReaderAdapter<T>
         Object object = creator.get();
 
         for (int i = 0; i < fieldReaders.length; i++) {
-            fieldReaders[i].readFieldValue(jsonReader, object);
+            FieldReader fieldReader = fieldReaders[i];
+            try {
+                fieldReader.readFieldValue(jsonReader, object);
+            } catch (RuntimeException e) {
+                if (!ignoreError(fieldReader)) {
+                    throw e;
+                }
+            }
         }
 
         if (!jsonReader.nextIfArrayEnd()) {
@@ -299,7 +312,13 @@ public class ObjectReaderAdapter<T>
         if (entryCnt == fieldReaders.length) {
             for (int i = 0; i < fieldReaders.length; i++) {
                 FieldReader fieldReader = fieldReaders[i];
-                fieldReader.readFieldValue(jsonReader, object);
+                try {
+                    fieldReader.readFieldValue(jsonReader, object);
+                } catch (RuntimeException e) {
+                    if (!ignoreError(fieldReader)) {
+                        throw e;
+                    }
+                }
             }
         } else {
             readArrayMappingJSONBObject0(jsonReader, object, entryCnt);
@@ -318,7 +337,13 @@ public class ObjectReaderAdapter<T>
                 continue;
             }
             FieldReader fieldReader = fieldReaders[i];
-            fieldReader.readFieldValue(jsonReader, object);
+            try {
+                fieldReader.readFieldValue(jsonReader, object);
+            } catch (RuntimeException e) {
+                if (!ignoreError(fieldReader)) {
+                    throw e;
+                }
+            }
         }
 
         for (int i = fieldReaders.length; i < entryCnt; i++) {
@@ -417,6 +442,10 @@ public class ObjectReaderAdapter<T>
         }
 
         throw new JSONException("create instance error, " + objectClass, error);
+    }
+
+    protected final boolean ignoreError(FieldReader fieldReader) {
+        return (fieldReader.features & JSONReader.Feature.NullOnError.mask) != 0;
     }
 
     @Override
@@ -668,28 +697,34 @@ public class ObjectReaderAdapter<T>
                     continue;
                 }
 
-                if (fieldValue.getClass() == fieldReader.fieldType) {
-                    fieldReader.accept(object, fieldValue);
-                } else {
-                    if ((fieldReader instanceof FieldReaderList)
-                            && fieldValue instanceof JSONArray
-                    ) {
-                        ObjectReader objectReader = fieldReader.getObjectReader(provider);
-                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue, features);
-                        fieldReader.accept(object, fieldValueList);
-                        continue;
-                    } else if (fieldValue instanceof JSONObject
-                            && fieldReader.fieldType != JSONObject.class
-                    ) {
-                        JSONObject jsonObject = (JSONObject) fieldValue;
-                        Object fieldValueJavaBean = provider
-                                .getObjectReader(fieldReader.fieldType, fieldBased)
-                                .createInstance(jsonObject, features);
-                        fieldReader.accept(object, fieldValueJavaBean);
-                        continue;
-                    }
+                try {
+                    if (fieldValue.getClass() == fieldReader.fieldType) {
+                        fieldReader.accept(object, fieldValue);
+                    } else {
+                        if ((fieldReader instanceof FieldReaderList)
+                                && fieldValue instanceof JSONArray
+                        ) {
+                            ObjectReader objectReader = fieldReader.getObjectReader(provider);
+                            Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue, features);
+                            fieldReader.accept(object, fieldValueList);
+                            continue;
+                        } else if (fieldValue instanceof JSONObject
+                                && fieldReader.fieldType != JSONObject.class
+                        ) {
+                            JSONObject jsonObject = (JSONObject) fieldValue;
+                            Object fieldValueJavaBean = provider
+                                    .getObjectReader(fieldReader.fieldType, fieldBased)
+                                    .createInstance(jsonObject, features);
+                            fieldReader.accept(object, fieldValueJavaBean);
+                            continue;
+                        }
 
-                    fieldReader.acceptAny(object, fieldValue, features);
+                        fieldReader.acceptAny(object, fieldValue, features);
+                    }
+                } catch (RuntimeException e) {
+                    if (!ignoreError(fieldReader)) {
+                        throw e;
+                    }
                 }
             }
         } else {
