@@ -86,6 +86,24 @@ public class JSONPathTypedMultiNamesTest {
         assertThrows(JSONException.class, () -> jsonPath.extract("["));
     }
 
+    @Test
+    public void testArrayNullOnError() {
+        JSONPath jsonPath = JSONPath.of(
+                new String[]{"$.a[0].x0", "$.a[0].x1"},
+                new Type[]{Long.class, String.class},
+                null,
+                new long[]{
+                        NullOnError.mask,
+                        NullOnError.mask
+                },
+                ZoneId.systemDefault()
+        );
+
+        Object[] result = (Object[]) jsonPath.extract("{\"a\":[{\"x0\":\"xx\",\"x1\":\"xx\"}]}");
+        assertNull(result[0]);
+        assertNotNull(result[1]);
+    }
+
     static class Bean {
         int f0;
         int f1;
