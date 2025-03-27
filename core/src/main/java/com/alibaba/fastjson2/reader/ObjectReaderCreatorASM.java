@@ -977,11 +977,72 @@ public class ObjectReaderCreatorASM
         for (int i = 0; i < fieldReaderArray.length; i++) {
             Class fieldClass = fieldReaderArray[i].fieldClass;
             if (List.class.isAssignableFrom(fieldClass)) {
-                FieldWriter fv = cw.visitField(Opcodes.ACC_PUBLIC, fieldItemObjectReader(i), DESC_OBJECT_READER);
+                cw.visitField(Opcodes.ACC_PUBLIC, fieldItemObjectReader(i), DESC_OBJECT_READER);
             }
         }
     }
 
+    /**
+     *  <blockquote><pre>
+     *      class Bean {
+     *          private String field1;
+     *          private int field2;
+     *      }
+     *
+     *      public void readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+     *          features = jsonReader.features(features);
+     *          if (nextIfNull()) {
+     *              return null;
+     *          }
+     *
+     *          jsonReader.errorOnNoneSerializable(this.objectClass);
+     *
+     *          if (jsonReader.isArray() && jsonReader.isSupportBeanArray()) {
+     *              return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
+     *          }
+     *
+     *          Bean object = new Bean();
+     *
+     *          jsonReader.nextIfObjectStart();
+     *
+     *          for (;;) {
+     *              if (jsonReader.nextIfObjectEnd()) {
+     *                  break;
+     *              }
+     *              switch(jsonReader.getRawInt()) {
+     *                  case field1NameHash32:
+     *                      if(jsonReader.nextIfName4Match2()) {
+     *                          object.field1 = jsonReader.readString();
+     *                          break;
+     *                      }
+     *                      goto hashCode64Start;
+     *                  case field2NameHash32:
+     *                      if(jsonReader.nextIfName4Match2()) {
+     *                          object.field2 = jsonReader.readInt();
+     *                          break;
+     *                      }
+     *                      goto hashCode64Start;
+     *                  default:
+     *                      goto hashCode64Start;
+     *              }
+     *
+     *              hashCode64Start:
+     *              long hashCode64 = readFieldNameHashCode();
+     *
+     *              if (this.typeKeyHashCode == hashCode64) {
+     *                  object = this.autoType(jsonReader);
+     *              }
+     *
+     *              switch(jsonReader.getFieldOrdinal(hashCode64)) {
+     *                  case 0:
+     *                      object.field1 = jsonReader.readString();
+     *              }
+     *          }
+     *
+     *
+     *      }
+     *  </pre></blockquote>
+     */
     private <T> void genMethodReadJSONBObject(ObjectReadContext context, long readerFeatures) {
         String classNameType = context.classNameType;
         FieldReader[] fieldReaderArray = context.fieldReaders;
@@ -1015,6 +1076,11 @@ public class ObjectReaderCreatorASM
         }
 
         {
+            /*
+             * if (jsonReader.nextIfNull()) {
+             *      return null;
+             * }
+             */
             Label notNull_ = new Label();
             mw.aload(JSON_READER);
             mw.invokevirtual(TYPE_JSON_READER, "nextIfNull", "()Z");
@@ -1395,13 +1461,25 @@ public class ObjectReaderCreatorASM
             int OBJECT,
             Label L_FOR_INC
     ) {
+        /*
+         *  swith(this.getFieldOrdinal(hashCode64)) {
+         *      case 0:
+         *          fieldValue0 = ...;
+         *          break;
+         *      case 1:
+         *          fieldValue0 = ...;
+         *          break;
+         *      default:
+         *          skipValue();
+         *          break;
+         *  }
+         *  goto
+         */
         FieldReader[] fieldReaderArray = context.fieldReaders;
         MethodWriter mw = mwc.mw;
-        int ORIDINAL = mwc.var("ordinal");
         mw.aload(THIS);
         mw.lload(HASH_CODE64);
         mw.invokevirtual(TYPE_OBJECT_READER_ADAPTER, "getFieldOrdinal", "(J)I");
-        mw.istore(ORIDINAL);
 
         Label dflt = new Label();
         Label[] labels = new Label[fieldReaderArray.length];
@@ -1411,7 +1489,6 @@ public class ObjectReaderCreatorASM
             switchKeys[i] = i;
         }
 
-        mw.iload(ORIDINAL);
         mw.visitLookupSwitchInsn(dflt, switchKeys, labels);
 
         for (int i = 0; i < fieldReaderArray.length; i++) {
@@ -4127,22 +4204,8 @@ public class ObjectReaderCreatorASM
 
             Package pkg = ObjectReaderCreatorASM.class.getPackage();
             if (pkg != null) {
-                String packageName = pkg.getName();
-                int packageNameLength = packageName.length();
-                int charsLength = packageNameLength + 1 + className.length();
-                char[] chars = new char[charsLength];
-                packageName.getChars(0, packageName.length(), chars, 0);
-                chars[packageNameLength] = '.';
-                className.getChars(0, className.length(), chars, packageNameLength + 1);
-                classNameFull = new String(chars);
-
-                chars[packageNameLength] = '/';
-                for (int i = 0; i < packageNameLength; ++i) {
-                    if (chars[i] == '.') {
-                        chars[i] = '/';
-                    }
-                }
-                classNameType = new String(chars);
+                classNameFull = packageName + '.' + className;
+                classNameType = classNameFull.replace('.', '/');
             } else {
                 classNameType = className;
                 classNameFull = className;
@@ -4207,22 +4270,8 @@ public class ObjectReaderCreatorASM
 
         Package pkg = ObjectReaderCreatorASM.class.getPackage();
         if (pkg != null) {
-            String packageName = pkg.getName();
-            int packageNameLength = packageName.length();
-            int charsLength = packageNameLength + 1 + className.length();
-            char[] chars = new char[charsLength];
-            packageName.getChars(0, packageName.length(), chars, 0);
-            chars[packageNameLength] = '.';
-            className.getChars(0, className.length(), chars, packageNameLength + 1);
-            classNameFull = new String(chars);
-
-            chars[packageNameLength] = '/';
-            for (int i = 0; i < packageNameLength; ++i) {
-                if (chars[i] == '.') {
-                    chars[i] = '/';
-                }
-            }
-            classNameType = new String(chars);
+            classNameFull = packageName + '.' + className;
+            classNameType = classNameFull.replace('.', '/');
         } else {
             classNameType = className;
             classNameFull = className;
