@@ -1329,30 +1329,33 @@ public class ObjectReaderCreatorASM
             // switch_default
             mw.visitLabel(dflt);
 
-            Label fieldReaderNull_ = new Label();
+            boolean disableSmartMatch = context.disableSmartMatch();
+            if (!disableSmartMatch && !(context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor)) {
+                Label fieldReaderNull_ = new Label();
 
-            if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
+                if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
+                    mw.aload(JSON_READER);
+                    mw.lload(FEATURES);
+                    mw.invokevirtual(TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z");
+                    mw.ifeq(fieldReaderNull_);
+                }
+
+                mw.aload(THIS);
                 mw.aload(JSON_READER);
-                mw.lload(FEATURES);
-                mw.invokevirtual(TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z");
-                mw.ifeq(fieldReaderNull_);
+                mw.invokevirtual(TYPE_JSON_READER, "getNameHashCodeLCase", "()J");
+                mw.invokeinterface(TYPE_OBJECT_READER, "getFieldReaderLCase", METHOD_DESC_GET_FIELD_READER);
+                mw.dup();
+                mw.astore(FIELD_READER);
+                mw.ifnull(fieldReaderNull_);
+
+                mw.aload(FIELD_READER);
+                mw.aload(JSON_READER);
+                mw.aload(OBJECT);
+                mw.invokevirtual(TYPE_FIELD_READE, "readFieldValueJSONB", METHOD_DESC_READ_FIELD_VALUE);
+                mw.goto_(L_FOR_INC); // continue
+
+                mw.visitLabel(fieldReaderNull_);
             }
-
-            mw.aload(THIS);
-            mw.aload(JSON_READER);
-            mw.invokevirtual(TYPE_JSON_READER, "getNameHashCodeLCase", "()J");
-            mw.invokeinterface(TYPE_OBJECT_READER, "getFieldReaderLCase", METHOD_DESC_GET_FIELD_READER);
-            mw.dup();
-            mw.astore(FIELD_READER);
-            mw.ifnull(fieldReaderNull_);
-
-            mw.aload(FIELD_READER);
-            mw.aload(JSON_READER);
-            mw.aload(OBJECT);
-            mw.invokevirtual(TYPE_FIELD_READE, "readFieldValueJSONB", METHOD_DESC_READ_FIELD_VALUE);
-            mw.goto_(L_FOR_INC); // continue
-
-            mw.visitLabel(fieldReaderNull_);
         } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label();
@@ -1961,7 +1964,7 @@ public class ObjectReaderCreatorASM
 
             mw.visitLabel(dflt);
 
-            if (!disableSmartMatch) {
+            if (!disableSmartMatch && !(context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor)) {
                 Label fieldReaderNull_ = new Label();
                 if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
                     mw.lload(FEATURES);
