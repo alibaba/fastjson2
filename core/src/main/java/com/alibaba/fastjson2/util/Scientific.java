@@ -11,6 +11,8 @@ public class Scientific {
     public final boolean b;
 
     public static final Scientific SCIENTIFIC_NULL = new Scientific(0, true);
+    public static final Scientific ZERO = new Scientific(0, 3, 0);
+    public static final Scientific NEGATIVE_ZERO = new Scientific(0, 3, 0);
     public static final Scientific DOUBLE_MIN = new Scientific(49, 2, -324);  // 4.9E-324
 
     public Scientific(long output, int count, int e10) {
@@ -31,6 +33,12 @@ public class Scientific {
     public String toString() {
         if (this == SCIENTIFIC_NULL) {
             return "null";
+        }
+        if (this == ZERO) {
+            return "0.0";
+        }
+        if (this == NEGATIVE_ZERO) {
+            return "-0.0";
         }
         if (b) {
             return "1e" + e10;

@@ -106,7 +106,7 @@ public final class NumberUtils {
         }
     }
 
-    static final int MOD_DOUBLE_EXP = (1 << 12) - 1;
+    static final int MOD_DOUBLE_EXP = (1 << 11) - 1;
     static final long MOD_DOUBLE_MANTISSA = (1L << 52) - 1;
 
     /**
@@ -184,12 +184,17 @@ public final class NumberUtils {
         long rawOutput, /*d2, */d3, d4;
         int e10, adl;
         if (e2 > 0) {
+            // Double.NaN/Double.POSITIVE_INFINITY/Double.NEGATIVE_INFINITY -> NULL
             if (e2 == 2047) {
                 return Scientific.SCIENTIFIC_NULL;
             }
             mantissa0 = 1L << 52 | mantissa0;
             e52 = e2 - 1075;
         } else {
+            if (mantissa0 == 0) {
+                // Dealing with error issues with doubleValue=0.0(-0.0) Or make sure doubleValue is greater than 0 before calling
+                return bits == 0 ? Scientific.ZERO : Scientific.NEGATIVE_ZERO;
+            }
             int lz52 = Long.numberOfLeadingZeros(mantissa0) - 11;
             mantissa0 <<= lz52;
             e52 = -1074 - lz52;
@@ -513,7 +518,7 @@ public final class NumberUtils {
         return off + 8;
     }
 
-    static final int MOD_FLOAT_EXP = (1 << 9) - 1;
+    static final int MOD_FLOAT_EXP = (1 << 8) - 1;
     static final int MOD_FLOAT_MANTISSA = (1 << 23) - 1;
 
     public static Scientific floatToScientific(float floatValue) {
@@ -527,10 +532,16 @@ public final class NumberUtils {
         int e10, adl;
         boolean accurate = false;
         if (e2 > 0) {
+            if (e2 == MOD_FLOAT_EXP) {
+                return Scientific.SCIENTIFIC_NULL;
+            }
             mantissa0 = 1 << 23 | mantissa0;
             e23 = e2 - 150;   // 1023 - 52
         } else {
             // e2 == 0
+            if (mantissa0 == 0) {
+                return bits == 0 ? Scientific.ZERO : Scientific.NEGATIVE_ZERO;
+            }
             int l = Integer.numberOfLeadingZeros(mantissa0) - 8;
             mantissa0 <<= l;
             e23 = -149 - l;
