@@ -22,11 +22,22 @@ import static java.time.ZoneOffset.UTC;
 public class DateUtils {
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     public static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
-    public static final ZoneId SHANGHAI_ZONE_ID
-            = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId())
-            ? DEFAULT_ZONE_ID
-            : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
-    public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
+    public static final ZoneId SHANGHAI_ZONE_ID;
+    public static final ZoneRules SHANGHAI_ZONE_RULES;
+    static {
+        ZoneId zoneId = null;
+        ZoneRules zoneRules = null;
+        try {
+            zoneId = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId())
+                    ? DEFAULT_ZONE_ID
+                    : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
+            zoneRules = zoneId.getRules();
+        } catch (Exception ignored) {
+            // ignore
+        }
+        SHANGHAI_ZONE_ID = zoneId;
+        SHANGHAI_ZONE_RULES = zoneRules;
+    }
     public static final String OFFSET_8_ZONE_ID_NAME = "+08:00";
     public static final ZoneId OFFSET_8_ZONE_ID = ZoneId.of(OFFSET_8_ZONE_ID_NAME);
     public static final LocalDate LOCAL_DATE_19700101 = LocalDate.of(1970, 1, 1);
