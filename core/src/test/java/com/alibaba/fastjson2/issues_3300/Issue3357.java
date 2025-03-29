@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_3300;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +12,19 @@ public class Issue3357 {
     public void cat() {
         String s1 = "{\"age\": 20, \"type\": \"cat\"}";  // type comes second
         Cat c1 = (Cat) JSON.parseObject(s1, Animal.class);
-        assertEquals("cat", c1.type);  // succeeds
+        assertEquals("cat", c1.type);
+
+        byte[] jsonb = JSONB.toBytes(c1);
+        assertEquals("cat",
+                ((Cat) JSONB.parseObject(jsonb, Animal.class)).type);
 
         String s2 = "{\"type\": \"cat\", \"age\": 20}";  // type comes first
         Cat c2 = (Cat) JSON.parseObject(s2, Animal.class);
-        assertEquals("cat", c2.type);  // fails
+        assertEquals("cat", c2.type);
+
+        byte[] jsonb_c2 = JSONB.toBytes(c2);
+        assertEquals("cat",
+                ((Cat) JSONB.parseObject(jsonb_c2, Animal.class)).type);
     }
 
     @JSONType(typeKey = "type", seeAlso = Cat.class)
