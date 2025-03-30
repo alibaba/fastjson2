@@ -622,6 +622,31 @@ public class DateUtils {
         }
     }
 
+    public static LocalTime parseLocalTime15(byte[] str, int off) {
+        long hms;
+        if (off + 15 > str.length || (hms = hms(str, off)) == -1L || str[off + 8] != '.') {
+            return null;
+        }
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
+        int nanos = readNanos(str, 6, off + 9);
+        return nanos < 0 ? null : LocalTime.of(hour, minute, second, nanos);
+    }
+
+    public static LocalTime parseLocalTime15(char[] str, int off) {
+        if (off + 15 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
+            return null;
+        }
+        int hour = digit2(str, off);
+        int minute = digit2(str, off + 3);
+        int second = digit2(str, off + 6);
+        int nanos = readNanos(str, 6, off + 9);
+        return (hour | minute | second | nanos) < 0
+                ? null
+                : LocalTime.of(hour, minute, second, nanos);
+    }
+
     public static LocalTime parseLocalTime18(byte[] str, int off) {
         long hms;
         if (off + 18 > str.length || (hms = hms(str, off)) == -1L || str[off + 8] != '.') {
@@ -9007,9 +9032,8 @@ public class DateUtils {
 
     public static int readNanos(final byte[] bytes, final int len, final int offset) {
         int v = 0;
-        long address = ARRAY_BYTE_BASE_OFFSET + offset;
         for (int i = 0; i < len; i++) {
-            int d = UNSAFE.getByte(bytes, address + i) - '0';
+            int d = bytes[offset + i] - '0';
             if (d < 0 | d > 9) {
                 return -1;
             }

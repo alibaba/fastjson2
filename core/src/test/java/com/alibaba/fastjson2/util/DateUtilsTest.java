@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -2863,6 +2864,15 @@ public class DateUtilsTest {
         LocalDateTime ldt = LocalDateTime.of(2023, 4, 3, 12, 13, 14);
         long millis = ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli();
         assertEquals(millis, DateUtils.parseMillis(str, DateUtils.DEFAULT_ZONE_ID));
+    }
+
+    @Test
+    public void parseLocalTime15() {
+        String str = "\"10:01:26.775328\"";
+        LocalTime ldt = LocalTime.of(10, 1, 26, 775328000);
+        assertEquals(ldt, JSON.parseObject(str, LocalTime.class));
+        assertEquals(ldt, JSON.parseObject(str.toCharArray(), LocalTime.class));
+        assertEquals(ldt, JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), LocalTime.class));
     }
 
     @Test

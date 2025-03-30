@@ -14,7 +14,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
+import java.time.*;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Function;
@@ -900,6 +900,144 @@ public class JSONArray
         }
 
         return TypeUtils.toInstant(value);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(int index) {
+        return getLocalDate(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(int index, LocalDate defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDate) {
+            return (LocalDate) value;
+        }
+        return TypeUtils.cast(value, LocalDate.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(int index) {
+        return getLocalTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(int index, LocalTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalTime) {
+            return (LocalTime) value;
+        }
+        return TypeUtils.cast(value, LocalTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(int index) {
+        return getOffsetTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(int index, OffsetTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetTime) {
+            return (OffsetTime) value;
+        }
+        return TypeUtils.cast(value, OffsetTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(int index) {
+        return getLocalDateTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(int index, LocalDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return TypeUtils.cast(value, LocalDateTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(int index) {
+        return getOffsetDateTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(int index, OffsetDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetDateTime) {
+            return (OffsetDateTime) value;
+        }
+        return TypeUtils.cast(value, OffsetDateTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(int index) {
+        return getZonedDateTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(int index, ZonedDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof ZonedDateTime) {
+            return (ZonedDateTime) value;
+        }
+        return TypeUtils.cast(value, ZonedDateTime.class);
     }
 
     /**
