@@ -68,7 +68,8 @@ public abstract class BeanUtils {
             4882459834864833642L,
             6033839080488254886L,
             7981148566008458638L,
-            8344106065386396833L
+            8344106065386396833L,
+            9215465129261900012L
     };
 
     public static String[] getRecordFieldNames(Class<?> recordType) {
@@ -119,7 +120,9 @@ public abstract class BeanUtils {
             if (Modifier.isStatic(modifiers) && !enumClass) {
                 continue;
             }
-
+            if (ignore(field.getType())) {
+                continue;
+            }
             fieldReaders.accept(field);
         }
     }
