@@ -4733,7 +4733,12 @@ public abstract class JSONReader
                 List array = readArray();
                 if (array.size() == 1) {
                     Object item = array.get(0);
-                    return item == null ? null : item.toString();
+                    if (item == null) {
+                        return null;
+                    }
+                    if (item instanceof String) {
+                        return item.toString();
+                    }
                 }
                 return toString(array);
             case '{':
