@@ -814,7 +814,7 @@ public class ObjectWriterBaseModule
                 Class[] interfaces = objectClass.getInterfaces();
                 for (Class anInterface : interfaces) {
                     Method interfaceMethod = BeanUtils.getMethod(anInterface, method);
-                    if (interfaceMethod != null) {
+                    if (superclass != null && interfaceMethod != null) {
                         getFieldInfo(beanInfo, fieldInfo, superclass, interfaceMethod);
                     }
                 }
