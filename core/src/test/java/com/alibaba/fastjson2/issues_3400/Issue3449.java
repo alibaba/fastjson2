@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.issues_3300;
+package com.alibaba.fastjson2.issues_3400;
 
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
