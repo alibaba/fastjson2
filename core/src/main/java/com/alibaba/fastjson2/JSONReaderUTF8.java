@@ -783,6 +783,10 @@ class JSONReaderUTF8
     public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
         if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
         }

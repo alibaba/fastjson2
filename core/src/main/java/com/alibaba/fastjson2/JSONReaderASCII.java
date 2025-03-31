@@ -113,6 +113,11 @@ final class JSONReaderASCII
     @Override
     public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
         if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
         }
@@ -134,7 +139,7 @@ final class JSONReaderASCII
             throw new JSONException(info(errorMsg));
         }
 
-        final char quote = ch;
+        final int quote = ch;
 
         this.stringValue = null;
         this.nameEscape = false;
@@ -350,7 +355,7 @@ final class JSONReaderASCII
             }
         }
 
-        int ch = offset == end ? EOI : bytes[offset++];
+        ch = offset == end ? EOI : bytes[offset++];
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : bytes[offset++];
         }
