@@ -166,7 +166,7 @@ public abstract class BeanUtils {
         boolean enumClass = Enum.class.isAssignableFrom(objectClass);
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers) && !enumClass) {
+            if (field.getType() == ClassLoader.class || (Modifier.isStatic(modifiers) && !enumClass)) {
                 continue;
             }
 
@@ -405,7 +405,7 @@ public abstract class BeanUtils {
 
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if ((modifiers & STATIC) != 0) {
+            if ((modifiers & STATIC) != 0 || field.getType() == ClassLoader.class) {
                 continue;
             }
 
@@ -973,7 +973,7 @@ public abstract class BeanUtils {
             }
 
             Class<?> returnClass = method.getReturnType();
-            if (returnClass == Void.class) {
+            if (returnClass == Void.class || returnClass == ClassLoader.class) {
                 continue;
             }
 
