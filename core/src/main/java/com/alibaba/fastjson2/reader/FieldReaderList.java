@@ -174,7 +174,7 @@ public class FieldReaderList<T, V>
                 }
 
                 list.add(
-                        itemObjectReader.readObject(jsonReader, null, null, 0)
+                        itemObjectReader.readObject(jsonReader, fieldType, fieldName, 0)
                 );
 
                 jsonReader.nextIfComma();

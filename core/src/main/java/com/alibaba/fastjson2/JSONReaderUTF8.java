@@ -1302,8 +1302,11 @@ class JSONReaderUTF8
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
         int offset = nameBegin;
+        byte quote = '"';
         final byte[] bytes = this.bytes;
-
+        if (offset > 0 && bytes[offset - 1] == '\'') {
+            quote = '\'';
+        }
         long nameValue = 0;
         for (int i = 0; offset < end; offset++) {
             int ch = bytes[offset];
@@ -1329,7 +1332,7 @@ class JSONReaderUTF8
                 }
             } else if (ch == -61 || ch == -62) {
                 ch = ((ch & 0x1F) << 6) | (bytes[++offset] & 0x3F);
-            } else if (ch == '"') {
+            } else if (ch == quote) {
                 break;
             }
 
@@ -1427,7 +1430,7 @@ class JSONReaderUTF8
                         break;
                 }
                 offset++;
-            } else if (ch == '"') {
+            } else if (ch == quote) {
                 break;
             } else {
                 if (ch >= 0) {

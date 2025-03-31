@@ -1548,7 +1548,11 @@ final class JSONReaderUTF16
     public long getNameHashCodeLCase() {
         int offset = nameBegin;
         long nameValue = 0;
+        char quote = '"';
         final char[] chars = this.chars;
+        if (offset > 0 && chars[offset - 1] == '\'') {
+            quote = '\'';
+        }
         for (int i = 0; offset < end; offset++) {
             char c = chars[offset];
 
@@ -1571,7 +1575,7 @@ final class JSONReaderUTF16
                         c = char1(c);
                         break;
                 }
-            } else if (c == '"') {
+            } else if (c == quote) {
                 break;
             }
 
@@ -1650,7 +1654,7 @@ final class JSONReaderUTF16
                         c = char1(c);
                         break;
                 }
-            } else if (c == '"') {
+            } else if (c == quote) {
                 break;
             }
 
