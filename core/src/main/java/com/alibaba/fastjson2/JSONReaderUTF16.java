@@ -1101,6 +1101,11 @@ final class JSONReaderUTF16
     @Override
     public long readFieldNameHashCode() {
         final char[] chars = this.chars;
+        char ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
         if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
         }
