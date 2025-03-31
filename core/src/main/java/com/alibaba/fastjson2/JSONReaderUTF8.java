@@ -2987,8 +2987,8 @@ class JSONReaderUTF8
     @Override
     public String readString() {
         final byte[] bytes = this.bytes;
-        if (ch == '"' || ch == '\'') {
-            char quote = this.ch;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
             int valueLength;
             int offset = this.offset;
             final int start = offset, end = this.end;

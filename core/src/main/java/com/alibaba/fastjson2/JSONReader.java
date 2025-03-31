@@ -783,7 +783,6 @@ public abstract class JSONReader
 
                 values[size++] = readInt64Value();
             }
-            nextIfComma();
 
             long[] array;
             if (size == values.length) {
@@ -800,7 +799,7 @@ public abstract class JSONReader
                 return null;
             }
 
-            throw new JSONException(info("not support input " + str));
+            throw error("not support input ".concat(str));
         }
 
         throw new JSONException(info("TODO"));
@@ -1540,7 +1539,6 @@ public abstract class JSONReader
 
                 values[size++] = readString();
             }
-            nextIfComma();
 
             if (values.length == size) {
                 return values;
@@ -2610,10 +2608,13 @@ public abstract class JSONReader
                     }
                 }
 
-                if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                if (exponent != 0) {
                     String decimalStr = decimal.toPlainString();
-                    return Double.parseDouble(
-                            decimalStr + "E" + exponent);
+                    if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                        return Double.parseDouble(
+                                decimalStr + "E" + exponent);
+                    }
+                    return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
                 }
 
                 if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
@@ -4217,6 +4218,14 @@ public abstract class JSONReader
 
     protected JSONException error() {
         return new JSONException(info("illegal ch " + ch));
+    }
+
+    final JSONException error(String message) {
+        return new JSONException(info(message));
+    }
+
+    final JSONException error(String message, Exception cause) {
+        return new JSONException(info(message), cause);
     }
 
     protected final String readStringNotMatch() {

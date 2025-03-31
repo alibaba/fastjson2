@@ -1347,9 +1347,9 @@ final class JSONReaderASCII
 
     @Override
     public String readString() {
-        if (ch == '"' || ch == '\'') {
+        final byte quote = (byte) ch;
+        if (quote == '"' || quote == '\'') {
             final byte[] bytes = this.bytes;
-            final byte quote = (byte) ch;
             final byte slash = (byte) '\\';
 
             int offset = this.offset;

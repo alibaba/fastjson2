@@ -3089,8 +3089,8 @@ final class JSONReaderUTF16
     @Override
     public String readString() {
         final char[] chars = this.chars;
-        if (ch == '"' || ch == '\'') {
-            final char quote = ch;
+        final char quote = ch;
+        if (quote == '"' || quote == '\'') {
             int offset = this.offset;
             int start = offset;
             int valueLength;

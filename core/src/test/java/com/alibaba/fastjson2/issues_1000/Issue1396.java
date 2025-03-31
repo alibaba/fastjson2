@@ -2,10 +2,10 @@ package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Issue1396 {
     @Test
@@ -33,7 +33,7 @@ public class Issue1396 {
 
         // Unknown instance type
         LivingObject living = JSONObject.parseObject(userJsonString, LivingObject.class);
-        assertNull(living.getSignature().toString());            // -> "null"
+        assertEquals(name, living.getSignature().toString());            // -> "null"
         assertEquals(name, living.getSignatureString());                 // -> "bob"
         assertEquals(name, living.withSignatureString());                // -> This method 'withSignatureString' is not a getter
     }
@@ -59,8 +59,12 @@ public class Issue1396 {
     public static class Signature {
         private String sign;
 
-        public Signature(String sign) {
+        public Signature(@JSONField(name = "sign") String sign) {
             this.sign = sign;
+        }
+
+        public String getSign() {
+            return sign;
         }
 
         @Override
