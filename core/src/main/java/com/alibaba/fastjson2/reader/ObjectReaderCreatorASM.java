@@ -633,7 +633,8 @@ public class ObjectReaderCreatorASM
         {
             String methodName = fieldBased && defaultConstructor == null ? "createInstance0" : "createInstance";
 
-            if (fieldBased && (defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers()) || !Modifier.isPublic(objectClass.getModifiers()))) {
+            if ((externalClass && defaultConstructor != null)
+                    || fieldBased && (defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers()) || !Modifier.isPublic(objectClass.getModifiers()))) {
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         methodName,
