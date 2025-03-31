@@ -23,7 +23,7 @@ public abstract class ObjectReaderBean<T>
     protected final Function buildFunction;
     protected final long features;
     protected String typeName;
-    private long typeNameHash;
+    protected long typeNameHash;
 
     protected FieldReader extraFieldReader;
 

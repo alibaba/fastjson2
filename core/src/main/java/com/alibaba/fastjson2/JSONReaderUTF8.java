@@ -11,6 +11,7 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -2988,8 +2989,8 @@ class JSONReaderUTF8
     @Override
     public String readString() {
         final byte[] bytes = this.bytes;
-        if (ch == '"' || ch == '\'') {
-            char quote = this.ch;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
             int valueLength;
             int offset = this.offset;
             final int start = offset, end = this.end;
@@ -3740,134 +3741,76 @@ class JSONReaderUTF8
 
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
-        final int offset = this.offset;
-        final Context context = this.context;
-        if (this.ch == '"' || this.ch == '\'') {
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = this.ch;
+        int offset = this.offset, end = this.end;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
                 byte c10;
                 int off21 = offset + 19;
+                int yy;
+                long ymd, hms;
                 if (off21 < bytes.length
                         && off21 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
-                        && bytes[offset + 13] == ':'
-                        && bytes[offset + 16] == ':'
+                        && ((hms = hms(bytes, offset + 11))) != -1L
                 ) {
-                    byte y0 = bytes[offset];
-                    byte y1 = bytes[offset + 1];
-                    byte y2 = bytes[offset + 2];
-                    byte y3 = bytes[offset + 3];
-                    byte m0 = bytes[offset + 5];
-                    byte m1 = bytes[offset + 6];
-                    byte d0 = bytes[offset + 8];
-                    byte d1 = bytes[offset + 9];
-                    byte h0 = bytes[offset + 11];
-                    byte h1 = bytes[offset + 12];
-                    byte i0 = bytes[offset + 14];
-                    byte i1 = bytes[offset + 15];
-                    byte s0 = bytes[offset + 17];
-                    byte s1 = bytes[offset + 18];
-
-                    int year;
-                    int month;
-                    if (y0 >= '0' && y0 <= '9'
-                            && y1 >= '0' && y1 <= '9'
-                            && y2 >= '0' && y2 <= '9'
-                            && y3 >= '0' && y3 <= '9'
-                    ) {
-                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    int nanos = 0, nanoSize = 0;
+                    offset += 19;
+                    int ch = bytes[offset++];
+                    if (ch == '.') {
+                        ch = bytes[offset++];
                     }
-
-                    if (m0 >= '0' && m0 <= '9'
-                            && m1 >= '0' && m1 <= '9'
-                    ) {
-                        month = (m0 - '0') * 10 + (m1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int dom;
-                    if (d0 >= '0' && d0 <= '9'
-                            && d1 >= '0' && d1 <= '9'
-                    ) {
-                        dom = (d0 - '0') * 10 + (d1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int hour;
-                    if (h0 >= '0' && h0 <= '9'
-                            && h1 >= '0' && h1 <= '9'
-                    ) {
-                        hour = (h0 - '0') * 10 + (h1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int minute;
-                    if (i0 >= '0' && i0 <= '9'
-                            && i1 >= '0' && i1 <= '9'
-                    ) {
-                        minute = (i0 - '0') * 10 + (i1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int second;
-                    if (s0 >= '0' && s0 <= '9'
-                            && s1 >= '0' && s1 <= '9'
-                    ) {
-                        second = (s0 - '0') * 10 + (s1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    LocalDate localDate;
-                    try {
-                        if (year == 0 && month == 0 && dom == 0) {
-                            localDate = null;
+                    while (ch >= '0' && ch <= '9') {
+                        nanos = nanos * 10 + (ch - '0');
+                        nanoSize++;
+                        if (offset < end) {
+                            ch = bytes[offset++];
                         } else {
-                            localDate = LocalDate.of(year, month, dom);
-                        }
-                    } catch (DateTimeException ex) {
-                        throw new JSONException(info("read date error"), ex);
-                    }
-
-                    int nanoSize = -1;
-                    int len = 0;
-                    for (int start = offset + 19, i = start, end = offset + 31; i < end && i < this.end && i < bytes.length; ++i) {
-                        if (bytes[i] == quote && bytes[i - 1] == 'Z') {
-                            nanoSize = i - start - 2;
-                            len = i - offset + 1;
                             break;
                         }
                     }
-                    if (nanoSize != -1 || len == 21) {
-                        int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 20);
-                        LocalTime localTime = LocalTime.of(hour, minute, second, nano);
-                        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
-                        OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                        this.offset += len;
-                        next();
-                        if (comma = (this.ch == ',')) {
-                            next();
+                    if (nanoSize != 0) {
+                        nanos = DateUtils.nanos(nanos, nanoSize);
+                    }
+                    ZoneOffset zoneOffset = ZoneOffset.UTC;
+                    if (ch == 'Z') {
+                        ch = bytes[offset++];
+                    } else if (ch != quote) {
+                        int quoteIndex = IOUtils.indexOfChar(bytes, '"', offset, end);
+                        if (quoteIndex != -1) {
+                            zoneOffset = DateUtils.zoneOffset(bytes, offset - 1, quoteIndex - offset + 1);
+                            offset = quoteIndex + 1;
+                            ch = quote;
                         }
-                        return oft;
+                    }
+                    if (ch == quote) {
+                        ch = offset >= end ? EOI : bytes[offset++];
+                        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                            ch = offset == end ? EOI : bytes[offset++];
+                        }
+                        if (comma = (ch == ',')) {
+                            ch = offset == end ? EOI : (char) bytes[offset++];
+                            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                                ch = offset == end ? EOI : bytes[offset++];
+                            }
+                        }
+                        if (ch < 0) {
+                            char_utf8(ch, offset);
+                        } else {
+                            this.offset = offset;
+                            this.ch = (char) ch;
+                        }
+                        return OffsetDateTime.of(
+                                yy + ((int) ymd & 0xFF),
+                                (int) (ymd >> 24) & 0xFF,
+                                (int) (ymd >> 48) & 0xFF,
+                                (int) hms & 0xFF,
+                                (int) (hms >> 24) & 0xFF,
+                                (int) (hms >> 48) & 0xFF,
+                                nanos,
+                                zoneOffset);
                     }
                 }
             }

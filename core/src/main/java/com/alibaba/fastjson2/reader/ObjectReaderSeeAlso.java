@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
@@ -74,6 +75,91 @@ final class ObjectReaderSeeAlso<T>
             return null;
         }
         return creator.get();
+    }
+
+    @Override
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
+
+        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
+        if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
+            return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
+        if (jsonReader.isArray()) {
+            if (jsonReader.isSupportBeanArray()) {
+                return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+            } else {
+                throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
+            }
+        }
+
+        JSONReader.SavePoint savePoint = jsonReader.mark();
+        jsonReader.nextIfObjectStart();
+
+        T object = null;
+        for (int i = 0; ; ++i) {
+            if (jsonReader.nextIfObjectEnd()) {
+                break;
+            }
+
+            long hash = jsonReader.readFieldNameHashCode();
+            if (hash == typeKeyHashCode) {
+                long typeHash = jsonReader.readValueHashCode();
+                JSONReader.Context context = jsonReader.getContext();
+                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
+                if (autoTypeObjectReader == null) {
+                    String typeName = jsonReader.getString();
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+
+                    if (autoTypeObjectReader == null) {
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                    }
+                }
+
+                if (autoTypeObjectReader == this) {
+                    continue;
+                }
+                if (i != 0) {
+                    jsonReader.reset(savePoint);
+                }
+
+                jsonReader.setTypeRedirect(true);
+                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+            }
+
+            if (hash == 0) {
+                continue;
+            }
+
+            FieldReader fieldReader = getFieldReader(hash);
+            if (fieldReader == null && jsonReader.isSupportSmartMatch(features | this.features)) {
+                long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
+                fieldReader = getFieldReaderLCase(nameHashCodeLCase);
+            }
+            if (fieldReader == null) {
+                processExtra(jsonReader, object);
+                continue;
+            }
+
+            if (object == null) {
+                object = createInstance(jsonReader.getContext().getFeatures() | features);
+            }
+
+            fieldReader.readFieldValue(jsonReader, object);
+        }
+
+        if (object == null) {
+            object = createInstance(jsonReader.getContext().getFeatures() | features);
+        }
+
+        return object;
     }
 
     @Override
@@ -207,7 +293,7 @@ final class ObjectReaderSeeAlso<T>
                     }
                 }
 
-                if (i != 0) {
+                if (i != 0 || fieldReader != null) {
                     jsonReader.reset(savePoint);
                 }
 

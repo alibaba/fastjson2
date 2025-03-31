@@ -160,6 +160,8 @@ public final class ObjectReaderImplList
                     builder = (Function<SortedSet, SortedSet>) Collections::synchronizedSortedSet;
                     break;
                 case "java.util.RandomAccessSubList":
+                case "java.util.SubList":
+                case "java.util.AbstractList$SubList":
                 case "java.util.AbstractList$RandomAccessSubList":
                     instanceClass = ArrayList.class;
                     break;

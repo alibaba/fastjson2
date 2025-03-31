@@ -1306,4 +1306,34 @@ public class IOUtils {
     public static boolean isALSE(char[] buf, int pos) {
         return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) == ALSE_64;
     }
+
+    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
+        for (int i = fromIndex; i < max; i++) {
+            if (value[i] == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int indexOfChar(char[] value, int ch, int fromIndex, int max) {
+        for (int i = fromIndex; i < max; i++) {
+            if (value[i] == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int digit4(char[] chars, int off) {
+        long x = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+        if (BIG_ENDIAN) {
+            x = Long.reverseBytes(x);
+        }
+        long d;
+        if ((((x & 0xFFF0FFF0FFF0FFF0L) - 0x30003000300030L) | (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L)) != 0) {
+            return -1;
+        }
+        return (int) ((((d & 0xF) * 10 + ((d >> 16) & 0xF)) * 10 + ((d >> 32) & 0xF)) * 10 + (d >> 48));
+    }
 }
