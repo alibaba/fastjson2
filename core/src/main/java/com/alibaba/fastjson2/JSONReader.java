@@ -2531,10 +2531,21 @@ public abstract class JSONReader
 
             boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
             ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
-            for (Object item; !nextIfArrayEnd(); list.add(item)) {
+            for (int i = 0; !nextIfArrayEnd(); i++) {
                 int mark = offset;
-                item = objectReader.readObject(this, null, null, 0);
-
+                Object item;
+                if (isReference()) {
+                    String reference = readReference();
+                    if ("..".equals(reference)) {
+                        item = list;
+                    } else {
+                        item = null;
+                        addResolveTask(list, i, JSONPath.of(reference));
+                    }
+                } else {
+                    item = objectReader.readObject(this, null, null, 0);
+                }
+                list.add(item);
                 if (mark == offset || ch == '}' || ch == EOI) {
                     throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
                 }
