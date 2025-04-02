@@ -981,7 +981,7 @@
                         -->
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.12</version>
+                        <version>0.8.13</version>
                         <configuration>
                             <excludes>
                                 <exclude>com/alibaba/fastjson2/benchmark</exclude>
