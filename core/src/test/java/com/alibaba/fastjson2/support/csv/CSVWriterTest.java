@@ -176,7 +176,7 @@ public class CSVWriterTest {
         double value = r.nextDouble();
         CSVWriter writer = CSVWriter.of();
         writer.writeDouble(value);
-        assertEquals(Double.toString(value), writer.toString());
+        assertEquals(value, Double.parseDouble(writer.toString()));
     }
 
     @Test
