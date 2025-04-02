@@ -3669,6 +3669,10 @@ final class JSONReaderJSONB
                 }
                 return decimal.intValue();
             }
+            case BC_TIMESTAMP_MILLIS:
+                long millis = getLongBE(bytes, check7(offset, end));
+                offset += 8;
+                return (int) millis;
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
