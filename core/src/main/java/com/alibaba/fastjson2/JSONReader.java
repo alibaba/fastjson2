@@ -2746,6 +2746,7 @@ public abstract class JSONReader
                 }
                 case '/':
                     skipComment();
+                    --i;
                     continue;
                 default:
                     throw new JSONException(info());
