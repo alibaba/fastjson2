@@ -177,9 +177,7 @@ public interface ObjectReader<T> {
 
         if (fieldReader == null) {
             long fieldNameHashLCase = Fnv.hashCode64LCase(fieldName);
-            if (fieldNameHashLCase != fieldNameHash) {
-                fieldReader = getFieldReaderLCase(fieldNameHashLCase);
-            }
+            fieldReader = getFieldReaderLCase(fieldNameHashLCase);
         }
 
         return fieldReader;
