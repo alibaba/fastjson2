@@ -1,0 +1,29 @@
+package com.alibaba.fastjson2.issues_3400;
+
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3419 {
+    @Test
+    public void test() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("str", new float[] {1.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+        map.put("str2", new float[] {2.0f, 2.0f, 2.0f, 2.0f, 2.0f});
+
+        JSONObject jo = new JSONObject();
+        JSONArray ja = new JSONArray();
+        ja.addAll(map.entrySet());
+        jo.put("content", ja);
+
+        JSONObject obj = jo.getJSONArray("content").getJSONObject(0);
+        assertEquals(obj.toString(), "{\"str\":[1.0,1.0,1.0,1.0,1.0]}");
+        JSONObject obj2 = jo.getJSONArray("content").getJSONObject(1);
+        assertEquals(obj2.toString(), "{\"str2\":[2.0,2.0,2.0,2.0,2.0]}");
+    }
+}
