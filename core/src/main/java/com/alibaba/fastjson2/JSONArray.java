@@ -203,6 +203,14 @@ public class JSONArray
             return object;
         }
 
+        if (value instanceof Map.Entry) {
+            Map.Entry entry = (Map.Entry) value;
+            JSONObject object = new JSONObject();
+            object.put(entry.getKey().toString(), entry.getValue());
+            set(index, object);
+            return object;
+        }
+
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
         if (objectWriter instanceof ObjectWriterAdapter) {
