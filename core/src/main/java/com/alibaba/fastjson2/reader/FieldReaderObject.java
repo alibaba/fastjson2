@@ -182,7 +182,9 @@ public class FieldReaderObject<T>
                 jsonReader.skipValue();
                 return;
             } else if ((contextFeatures & JSONReader.Feature.ErrorOnNoneSerializable.mask) != 0) {
-                throw new JSONException("not support none-Serializable");
+                if (fieldClass != Object.class || (jsonReader.isObject() || jsonReader.isArray())) {
+                    throw new JSONException("not support none-Serializable");
+                }
             }
         }
 
