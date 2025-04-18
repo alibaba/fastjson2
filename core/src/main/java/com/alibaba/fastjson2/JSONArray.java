@@ -218,7 +218,7 @@ public class JSONArray
             return writerAdapter.toJSONObject(value);
         }
 
-        return null;
+        return (JSONObject) JSON.toJSON(value);
     }
 
     /**

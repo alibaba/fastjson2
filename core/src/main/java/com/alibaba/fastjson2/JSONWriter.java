@@ -224,6 +224,9 @@ public abstract class JSONWriter
     }
 
     public final String setPath0(int index, Object object) {
+        if (path == null) {
+            return null;
+        }
         this.path = index == 0
                 ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
                 : index == 1
