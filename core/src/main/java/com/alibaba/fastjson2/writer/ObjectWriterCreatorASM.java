@@ -4792,7 +4792,11 @@ public class ObjectWriterCreatorASM
         if (member instanceof Method) {
             mw.aload(OBJECT);
             mw.checkcast(TYPE_OBJECT);
-            mw.invokevirtual(TYPE_OBJECT, member.getName(), "()" + ASMUtils.desc(fieldClass));
+            if (objectClass.isInterface()) {
+                mw.invokeinterface(TYPE_OBJECT, member.getName(), "()" + ASMUtils.desc(fieldClass));
+            } else {
+                mw.invokevirtual(TYPE_OBJECT, member.getName(), "()" + ASMUtils.desc(fieldClass));
+            }
             return;
         }
 
