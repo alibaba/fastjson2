@@ -9,6 +9,8 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.noear.solon.Utils;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
+import org.noear.solon.core.util.MimeType;
+import org.noear.solon.lang.Nullable;
 import org.noear.solon.serialization.ContextSerializer;
 
 import java.io.IOException;
@@ -86,11 +88,19 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * Getting the content type
+     * Content type
      */
     @Override
-    public String getContentType() {
+    public String mimeType() {
         return "application/json";
+    }
+
+    /**
+     * Data type
+     */
+    @Override
+    public Class<String> dataType() {
+        return String.class;
     }
 
     /**
@@ -104,7 +114,7 @@ public class Fastjson2StringSerializer
         if (mime == null) {
             return false;
         } else {
-            return mime.contains(label);
+            return mime.contains(label) || mime.startsWith(MimeType.APPLICATION_X_NDJSON_VALUE);
         }
     }
 
@@ -149,7 +159,10 @@ public class Fastjson2StringSerializer
      */
     @Override
     public void serializeToBody(Context ctx, Object data) throws IOException {
-        ctx.contentType(getContentType());
+        // If not set, use default // such as ndjson,sse or deliberately change mime (can be controlled externally)
+        if (ctx.contentTypeNew() == null) {
+            ctx.contentType(this.mimeType());
+        }
 
         if (data instanceof ModelAndView) {
             ctx.output(serialize(((ModelAndView) data).model()));
@@ -164,7 +177,7 @@ public class Fastjson2StringSerializer
      * @param ctx Handling context
      */
     @Override
-    public Object deserializeFromBody(Context ctx) throws IOException {
+    public Object deserializeFromBody(Context ctx, @Nullable Type bodyType) throws IOException {
         String data = ctx.bodyNew();
 
         if (Utils.isNotEmpty(data)) {

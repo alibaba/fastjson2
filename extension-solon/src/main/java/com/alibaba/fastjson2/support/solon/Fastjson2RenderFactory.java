@@ -67,10 +67,6 @@ public class Fastjson2RenderFactory
         }
 
         if (JsonPropsUtil.apply(this, jsonProps)) {
-            if (jsonProps.longAsString) {
-                this.addFeatures(JSONWriter.Feature.WriteLongAsString);
-            }
-
             boolean writeNulls = jsonProps.nullAsWriteable ||
                     jsonProps.nullNumberAsZero ||
                     jsonProps.nullArrayAsEmpty ||
