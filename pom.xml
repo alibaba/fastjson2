@@ -36,7 +36,7 @@
         <jetty.version>11.0.15</jetty.version>
         <jersey.version>2.44</jersey.version>
         <solon.version>3.2.0</solon.version>
-        <springframework5.version>5.3.31</springframework5.version>
+        <springframework5.version>6.2.6</springframework5.version>
         <springframework6.version>6.1.3</springframework6.version>
         <springsecurity5.version>5.8.8</springsecurity5.version>
         <springsecurity6.version>6.2.1</springsecurity6.version>
