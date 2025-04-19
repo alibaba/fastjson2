@@ -6,12 +6,12 @@ import com.alibaba.fastjson2.JSONWriter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.junit.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
-public class Issue3464 {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class Issue3464 {
     @Test
     public void test() {
         Data data = new Data(TimeUnit.MINUTES);
