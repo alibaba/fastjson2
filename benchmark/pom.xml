@@ -89,7 +89,7 @@
         <dependency>
             <groupId>io.github.wycst</groupId>
             <artifactId>wast</artifactId>
-            <version>0.0.25</version>
+            <version>0.0.25.1</version>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
