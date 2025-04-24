@@ -1147,6 +1147,18 @@ public abstract class JSONWriter
 
     public abstract void writeNull();
 
+    public void writeObjectNull(Class<?> fieldClass) {
+        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE)) != 0) {
+            if (fieldClass == Character.class) {
+                writeString("\u0000");
+            } else {
+                writeRaw('{', '}');
+            }
+        } else {
+            writeNull();
+        }
+    }
+
     public void writeStringNull() {
         String raw;
         long features = this.context.features;
@@ -1170,6 +1182,16 @@ public abstract class JSONWriter
 
     public final void writeNumberNull() {
         if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+            writeInt32(0);
+        } else {
+            writeNull();
+        }
+    }
+
+    public final void writeDecimalNull() {
+        if ((this.context.features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
+            writeDouble(0.0);
+        } else if ((this.context.features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
             writeInt32(0);
         } else {
             writeNull();

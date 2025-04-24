@@ -2371,7 +2371,7 @@ final class JSONWriterUTF8
     @Override
     public final void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         if (value == null) {
-            writeNumberNull();
+            writeDecimalNull();
             return;
         }
 

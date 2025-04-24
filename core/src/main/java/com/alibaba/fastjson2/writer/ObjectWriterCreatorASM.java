@@ -2526,7 +2526,7 @@ public class ObjectWriterCreatorASM
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
 
-        // jw.writeNulll
+        // jw.writeNull
         mw.aload(JSON_WRITER);
         mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
 
@@ -2813,6 +2813,8 @@ public class ObjectWriterCreatorASM
             } else if (fieldClass == String.class) {
                 nullFeatures |= WriteNullStringAsEmpty.mask;
                 nullFeatures |= NullAsDefaultValue.mask;
+            } else {
+                nullFeatures |= NullAsDefaultValue.mask;
             }
             mwc.genIsEnabled(nullFeatures, notNull_);
 //            mw.iload(mwc.var(WRITE_NULLS));
@@ -2822,13 +2824,19 @@ public class ObjectWriterCreatorASM
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
 
-        // jw.writeNulll
+        // jw.writeNull
+        mw.aload(JSON_WRITER);
         String WRITE_NULL_METHOD;
+        String WRITE_NULL_DESC = "()V";
         if (fieldClass == AtomicLongArray.class
                 || fieldClass == AtomicIntegerArray.class
                 || Collection.class.isAssignableFrom(fieldClass)
                 || fieldClass.isArray()) {
             WRITE_NULL_METHOD = "writeArrayNull";
+        } else if (fieldClass == Float.class
+                || fieldClass == Double.class
+                || fieldClass == BigDecimal.class) {
+            WRITE_NULL_METHOD = "writeDecimalNull";
         } else if (Number.class.isAssignableFrom(fieldClass)) {
             WRITE_NULL_METHOD = "writeNumberNull";
         } else if (fieldClass == Boolean.class) {
@@ -2839,10 +2847,11 @@ public class ObjectWriterCreatorASM
                 || fieldClass == StringBuilder.class) {
             WRITE_NULL_METHOD = "writeStringNull";
         } else {
-            WRITE_NULL_METHOD = "writeNull";
+            WRITE_NULL_METHOD = "writeObjectNull";
+            WRITE_NULL_DESC = "(Ljava/lang/Class;)V";
+            mwc.loadFieldClass(i, fieldClass);
         }
-        mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, WRITE_NULL_METHOD, "()V");
+        mw.invokevirtual(TYPE_JSON_WRITER, WRITE_NULL_METHOD, WRITE_NULL_DESC);
 
         mw.visitLabel(notNull_);
     }
@@ -3005,7 +3014,7 @@ public class ObjectWriterCreatorASM
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
 
-        // jw.writeNulll
+        // jw.writeNull
         mw.aload(JSON_WRITER);
         mw.invokevirtual(TYPE_JSON_WRITER, "writeArrayNull", "()V");
 
@@ -3239,7 +3248,7 @@ public class ObjectWriterCreatorASM
         gwFieldName(mwc, fieldWriter, i);
 
         mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeNumberNull", "()V");
+        mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
 
         mw.goto_(endIfNull_);
 
@@ -3300,7 +3309,7 @@ public class ObjectWriterCreatorASM
         gwFieldName(mwc, fieldWriter, i);
 
         mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeNumberNull", "()V");
+        mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
 
         mw.goto_(endIfNull_);
 
@@ -3484,7 +3493,7 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(writeNull_);
         gwFieldName(mwc, fieldWriter, i);
 
-        // jw.writeNulll
+        // jw.writeNull
         mw.aload(JSON_WRITER);
         mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
 
@@ -4190,7 +4199,7 @@ public class ObjectWriterCreatorASM
         mw.invokevirtual(TYPE_JSON_WRITER, "writeString", "(Ljava/lang/String;)V");
         mw.goto_(endIfNull_);
 
-        // jw.writeNulll
+        // jw.writeNull
         mw.visitLabel(writeNullValue_);
         mw.aload(JSON_WRITER);
         mw.invokevirtual(TYPE_JSON_WRITER, "writeStringNull", "()V");
