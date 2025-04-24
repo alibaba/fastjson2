@@ -272,7 +272,10 @@ public class FieldWriterObject<T>
 
         // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
         if (value == null) {
-            if ((features & WriteNulls.mask) != 0 && (features & NotWriteDefaultValue.mask) == 0) {
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
+                return false;
+            }
+            if ((features & NotWriteDefaultValue.mask) == 0) {
                 writeFieldName(jsonWriter);
                 if (array) {
                     jsonWriter.writeArrayNull();
@@ -283,7 +286,7 @@ public class FieldWriterObject<T>
                         || fieldClass == StringBuilder.class) {
                     jsonWriter.writeStringNull();
                 } else {
-                    jsonWriter.writeNull();
+                    jsonWriter.writeObjectNull(fieldClass);
                 }
                 return true;
             } else {

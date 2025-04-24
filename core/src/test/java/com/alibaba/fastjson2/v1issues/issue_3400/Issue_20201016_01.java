@@ -19,7 +19,7 @@ public class Issue_20201016_01 {
 
         String s = JSON.toJSONString(config, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
 
-        assertEquals("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
+        assertEquals("{\"agent\":{},\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
     }
 
     @Test
