@@ -301,7 +301,7 @@ public final class MethodWriter {
         visitInsn(Opcodes.I2D);
     }
 
-    public void o2i(Class<?> fieldClass) {
+    public void cmpWithZero(Class<?> fieldClass) {
         if (fieldClass == long.class) {
             visitInsn(Opcodes.LCONST_0);
             visitInsn(Opcodes.LCMP);

@@ -3939,7 +3939,7 @@ public class ObjectWriterCreatorASM
         genGetObject(mwc, fieldWriter, i, OBJECT);
         mw.dup2();
         mw.storeLocal(fieldClass, FIELD_VALUE);
-        mw.o2i(fieldClass);
+        mw.cmpWithZero(fieldClass);
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
@@ -4043,7 +4043,7 @@ public class ObjectWriterCreatorASM
         genGetObject(mwc, fieldWriter, i, OBJECT);
         mw.dup(fieldClass);
         mw.storeLocal(fieldClass, FIELD_VALUE);
-        mw.o2i(fieldClass);
+        mw.cmpWithZero(fieldClass);
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
