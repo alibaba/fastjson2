@@ -1907,6 +1907,20 @@ public class ObjectWriterCreatorASM
 
         boolean writeAsString = (fieldWriter.features & WriteNonStringValueAsString.mask) != 0;
 
+        if (fieldClass == int.class && !writeAsString) {
+            String format = fieldWriter.format;
+            if ("string".equals(format)) {
+                mw.invokestatic("java/lang/Integer", "toString", "(I)Ljava/lang/String;");
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeString", "(Ljava/lang/String;)V");
+            } else if (format != null) {
+                mw.visitLdcInsn(format);
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(ILjava/lang/String;)V");
+            } else {
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
+            }
+            return;
+        }
+
         String methodName, methodDesc;
         if (fieldClass == boolean.class) {
             methodName = "writeBool";
@@ -2446,21 +2460,18 @@ public class ObjectWriterCreatorASM
                 || fieldClass == double[].class
         ) {
             gwFieldValueArray(mwc, fieldWriter, OBJECT, i);
-        } else if (fieldClass == int.class && !writeAsString) {
-            gwFieldValueInt32V(mwc, fieldWriter, OBJECT, i, false);
         } else if (fieldClass == char.class
                 || fieldClass == byte.class
                 || fieldClass == int.class
                 || fieldClass == short.class
                 || fieldClass == float.class
-                || fieldClass == double.class
         ) {
-            gwFieldName(mwc, fieldWriter, i);
-            gwValue(mwc, fieldWriter, OBJECT, i);
+            gwFieldValueInt32V(mwc, fieldWriter, OBJECT, i, false);
         } else if (fieldClass == int[].class) {
             gwFieldValueIntVA(mwc, fieldWriter, OBJECT, i, false);
-        } else if (fieldClass == long.class) {
-            gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, false);
+        } else if (fieldClass == long.class
+                || fieldClass == double.class) {
+            gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, true);
         } else if (fieldClass == long[].class
                 && mwc.provider.getObjectWriter(Long.class) == ObjectWriterImplInt64.INSTANCE
         ) {
@@ -3041,20 +3052,17 @@ public class ObjectWriterCreatorASM
                 || fieldClass == double[].class
         ) {
             gwFieldValueArray(mwc, fieldWriter, OBJECT, i);
-        } else if (fieldClass == int.class && !writeAsString) {
-            gwFieldValueInt32V(mwc, fieldWriter, OBJECT, i, true);
         } else if (fieldClass == char.class
                 || fieldClass == byte.class
                 || fieldClass == short.class
                 || fieldClass == int.class
                 || fieldClass == float.class
-                || fieldClass == double.class
         ) {
-            gwFieldName(mwc, fieldWriter, i);
-            gwValue(mwc, fieldWriter, OBJECT, i);
+            gwFieldValueInt32V(mwc, fieldWriter, OBJECT, i, true);
         } else if (fieldClass == int[].class) {
             gwFieldValueIntVA(mwc, fieldWriter, OBJECT, i, true);
-        } else if (fieldClass == long.class) {
+        } else if (fieldClass == long.class
+                || fieldClass == double.class) {
             gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, true);
         } else if (fieldClass == long[].class
                 && mwc.provider.getObjectWriter(Long.class) == ObjectWriterImplInt64.INSTANCE
@@ -3931,16 +3939,16 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = mwc.mw;
         String format = fieldWriter.format;
         String classNameType = mwc.classNameType;
+        Class fieldClass = fieldWriter.fieldClass;
 
-        int FIELD_VALUE = mwc.var(long.class);
+        int FIELD_VALUE = mwc.var(fieldClass);
         int WRITE_DEFAULT_VALUE = mwc.var(NOT_WRITE_DEFAULT_VALUE);
         Label notDefaultValue_ = new Label(), endWriteValue_ = new Label();
 
         genGetObject(mwc, fieldWriter, i, OBJECT);
         mw.dup2();
-        mw.lstore(FIELD_VALUE);
-        mw.lconst_0();
-        mw.lcmp();
+        mw.storeLocal(fieldClass, FIELD_VALUE);
+        mw.cmpWithZero(fieldClass);
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
@@ -3950,21 +3958,28 @@ public class ObjectWriterCreatorASM
         }
         mw.visitLabel(notDefaultValue_);
 
-        boolean iso8601 = "iso8601".equals(format);
-        if (iso8601 || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
-            mw.aload(THIS);
-            mw.getfield(classNameType, fieldWriter(i), DESC_FIELD_WRITER);
+        if (fieldClass == long.class) {
+            boolean iso8601 = "iso8601".equals(format);
+            if (iso8601 || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
+                mw.aload(THIS);
+                mw.getfield(classNameType, fieldWriter(i), DESC_FIELD_WRITER);
 
-            mw.aload(JSON_WRITER);
-            mw.lload(FIELD_VALUE);
+                mw.aload(JSON_WRITER);
+                mw.lload(FIELD_VALUE);
 
-            mw.invokevirtual(TYPE_FIELD_WRITER, iso8601 ? "writeDate" : "writeInt64", METHOD_DESC_WRITE_J);
-        } else {
+                mw.invokevirtual(TYPE_FIELD_WRITER, iso8601 ? "writeDate" : "writeInt64", METHOD_DESC_WRITE_J);
+            } else {
+                gwFieldName(mwc, fieldWriter, i);
+
+                mw.aload(JSON_WRITER);
+                mw.lload(FIELD_VALUE);
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64", "(J)V");
+            }
+        } else if (fieldClass == double.class) {
             gwFieldName(mwc, fieldWriter, i);
-
-            mw.aload(JSON_WRITER);
-            mw.lload(FIELD_VALUE);
-            mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64", "(J)V");
+            gwValue(mwc, fieldWriter, OBJECT, i);
+        } else {
+            throw new UnsupportedOperationException();
         }
 
         mw.visitLabel(endWriteValue_);
@@ -4028,14 +4043,16 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = mwc.mw;
         String format = fieldWriter.format;
         String classNameType = mwc.classNameType;
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
-        int FIELD_VALUE = mwc.var(int.class);
+        int FIELD_VALUE = mwc.var(fieldClass);
         int WRITE_DEFAULT_VALUE = mwc.var(NOT_WRITE_DEFAULT_VALUE);
         Label notDefaultValue_ = new Label(), endWriteValue_ = new Label();
 
         genGetObject(mwc, fieldWriter, i, OBJECT);
-        mw.dup();
-        mw.istore(FIELD_VALUE);
+        mw.dup(fieldClass);
+        mw.storeLocal(fieldClass, FIELD_VALUE);
+        mw.cmpWithZero(fieldClass);
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
@@ -4047,17 +4064,7 @@ public class ObjectWriterCreatorASM
 
         gwFieldName(mwc, fieldWriter, i);
 
-        mw.aload(JSON_WRITER);
-        mw.iload(FIELD_VALUE);
-        if ("string".equals(format)) {
-            mw.invokestatic("java/lang/Integer", "toString", "(I)Ljava/lang/String;");
-            mw.invokevirtual(TYPE_JSON_WRITER, "writeString", "(Ljava/lang/String;)V");
-        } else if (format != null) {
-            mw.visitLdcInsn(format);
-            mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(ILjava/lang/String;)V");
-        } else {
-            mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
-        }
+        gwValue(mwc, fieldWriter, OBJECT, i);
 
         mw.visitLabel(endWriteValue_);
     }
