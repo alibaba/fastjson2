@@ -3981,7 +3981,7 @@ public class ObjectWriterCreatorASM
             }
         } else if (fieldClass == double.class) {
             gwFieldName(mwc, fieldWriter, i);
-            gwValue(mwc, fieldWriter, OBJECT, i, null);
+            gwValue(mwc, fieldWriter, OBJECT, i, FIELD_VALUE);
         } else {
             throw new UnsupportedOperationException();
         }
