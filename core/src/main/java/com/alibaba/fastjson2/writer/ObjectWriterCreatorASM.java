@@ -1622,7 +1622,7 @@ public class ObjectWriterCreatorASM
                 || fieldClass == BigDecimal.class
                 || fieldClass.isEnum()
         ) {
-            gwValue(mwc, fieldWriter, OBJECT, i);
+            gwValue(mwc, fieldWriter, OBJECT, i, null);
         } else if (fieldClass == Date.class) {
             gwDate(mwc, fieldWriter, OBJECT, i);
         } else if (fieldWriter instanceof FieldWriterList) {
@@ -1865,7 +1865,7 @@ public class ObjectWriterCreatorASM
         mw.invokevirtual(TYPE_FIELD_WRITER, "writeDate", METHOD_DESC_WRITE_DATE_WITH_FIELD_NAME);
     }
 
-    private void gwValue(MethodWriterContext mwc, FieldWriter fieldWriter, int OBJECT, int i) {
+    private void gwValue(MethodWriterContext mwc, FieldWriter fieldWriter, int OBJECT, int i, Integer LOCAL_FIELD_VALUE) {
         MethodWriter mw = mwc.mw;
         Class fieldClass = fieldWriter.fieldClass;
 
@@ -1880,7 +1880,11 @@ public class ObjectWriterCreatorASM
         }
 
         mw.aload(JSON_WRITER);
-        genGetObject(mwc, fieldWriter, i, OBJECT);
+        if (LOCAL_FIELD_VALUE != null) {
+            mw.loadLocal(fieldClass, LOCAL_FIELD_VALUE);
+        } else {
+            genGetObject(mwc, fieldWriter, i, OBJECT);
+        }
 
         if (fieldWriter.decimalFormat != null) {
             if (fieldClass == double.class) {
@@ -2148,7 +2152,7 @@ public class ObjectWriterCreatorASM
                 || fieldClass == BigDecimal.class
                 || fieldClass.isEnum()
         ) {
-            gwValue(mwc, fieldWriter, OBJECT, i);
+            gwValue(mwc, fieldWriter, OBJECT, i, null);
         } else if (fieldClass == Date.class) {
             gwDate(mwc, fieldWriter, OBJECT, i);
         } else if (fieldWriter instanceof FieldWriterList) {
@@ -3977,7 +3981,7 @@ public class ObjectWriterCreatorASM
             }
         } else if (fieldClass == double.class) {
             gwFieldName(mwc, fieldWriter, i);
-            gwValue(mwc, fieldWriter, OBJECT, i);
+            gwValue(mwc, fieldWriter, OBJECT, i, FIELD_VALUE);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -4064,7 +4068,7 @@ public class ObjectWriterCreatorASM
 
         gwFieldName(mwc, fieldWriter, i);
 
-        gwValue(mwc, fieldWriter, OBJECT, i);
+        gwValue(mwc, fieldWriter, OBJECT, i, FIELD_VALUE);
 
         mw.visitLabel(endWriteValue_);
     }
