@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public class JSONObjectTest5 {
+public class JSONObjectTest6 {
 
     @Test
     public void testBase64HavePrefix() {
