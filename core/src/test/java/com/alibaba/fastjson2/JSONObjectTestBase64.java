@@ -1,15 +1,10 @@
 package com.alibaba.fastjson2;
-
-
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
 public class JSONObjectTestBase64 {
     @Test
     public void testBase64HavePrefix() {
