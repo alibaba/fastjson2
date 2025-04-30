@@ -23,8 +23,8 @@ public class Issue3185 {
         list1.add(map2);
         map1.put("list1", list1);
 
-        JSONObject o1 = (JSONObject) JSON.toJSON(map1);
-        JSONArray jsonArray = (JSONArray) o1.get("list1");
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(map1);
+        JSONArray jsonArray = (JSONArray) jsonObject.get("list1");
         for (Object subJsonObject : jsonArray) {
             assertTrue(subJsonObject instanceof JSONObject);
         }
