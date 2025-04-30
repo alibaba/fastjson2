@@ -10,15 +10,15 @@ import java.util.Date;
 public class Issue2529 {
     @Test
     public void test() {
-        final String format = JSON.DEFFAULT_DATE_FORMAT;
+        final String format = JSON.DEFAULT_DATE_FORMAT;
         try {
-            JSONObject.DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+            JSONObject.DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
             ResultVo rv = ResultVo.sucessReturn("测试Date转换");
             String str = JSONObject.toJSONString(rv);
             ResultVo rvnew = JSON.parseObject(str, ResultVo.class);
             System.out.println(JSONObject.toJSONString(rvnew));
         } finally {
-            JSON.DEFFAULT_DATE_FORMAT = format;
+            JSON.DEFAULT_DATE_FORMAT = format;
         }
     }
 
