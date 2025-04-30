@@ -46,9 +46,6 @@ public abstract class JSON
     public static TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
     public static Locale defaultLocale = Locale.getDefault();
     public static String DEFAULT_TYPE_KEY = "@type";
-    /**
-     * Typo in field name, use {@value DEFAULT_DATE_FORMAT} instead.
-     */
     @Deprecated
     public static String DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
