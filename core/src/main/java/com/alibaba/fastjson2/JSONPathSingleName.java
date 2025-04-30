@@ -115,6 +115,11 @@ final class JSONPathSingleName
             return ((Map) root).containsKey(name);
         }
 
+        if (root instanceof List) {
+            List list = (List) root;
+            return !list.isEmpty() && contains(list.get(0));
+        }
+
         ObjectWriterProvider provider = getWriterContext().provider;
 
         ObjectWriter objectWriter = provider.getObjectWriter(root.getClass());
