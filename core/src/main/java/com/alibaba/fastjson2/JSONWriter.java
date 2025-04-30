@@ -1171,8 +1171,12 @@ public abstract class JSONWriter
     }
 
     public void writeArrayNull() {
+        writeArrayNull(this.context.features);
+    }
+
+    public void writeArrayNull(long features) {
         String raw;
-        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
             raw = "[]";
         } else {
             raw = "null";

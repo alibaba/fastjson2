@@ -2452,7 +2452,6 @@ public class ObjectWriterCreatorASM
             int i
     ) {
         Class<?> fieldClass = fieldWriter.fieldClass;
-        boolean writeAsString = (fieldWriter.features & WriteNonStringValueAsString.mask) != 0;
 
         if (fieldClass == boolean.class) {
             gwFieldValueBooleanV(mwc, fieldWriter, OBJECT, i, false);
@@ -3024,14 +3023,17 @@ public class ObjectWriterCreatorASM
         mw.goto_(notNull_);
 
         mw.visitLabel(null_);
-        mwc.genIsEnabled(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask, notNull_);
+        mwc.genIsEnabled(fieldWriter.features, WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask, notNull_);
 
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
 
         // jw.writeNull
         mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeArrayNull", "()V");
+        mw.lload(mwc.var2(CONTEXT_FEATURES));
+        mw.visitLdcInsn(fieldWriter.features);
+        mw.lor();
+        mw.invokevirtual(TYPE_JSON_WRITER, "writeArrayNull", "(J)V");
 
         mw.visitLabel(notNull_);
     }
@@ -5009,6 +5011,19 @@ public class ObjectWriterCreatorASM
 
         void genIsEnabled(long features, Label elseLabel) {
             mw.lload(var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(features);
+            mw.land();
+            mw.lconst_0();
+            mw.lcmp();
+            if (elseLabel != null) {
+                mw.ifeq(elseLabel);
+            }
+        }
+
+        void genIsEnabled(long fieldFeatures, long features, Label elseLabel) {
+            mw.lload(var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(fieldFeatures);
+            mw.lor();
             mw.visitLdcInsn(features);
             mw.land();
             mw.lconst_0();
