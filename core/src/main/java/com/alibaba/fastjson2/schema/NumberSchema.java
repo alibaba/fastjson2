@@ -280,7 +280,7 @@ public final class NumberSchema
         }
 
         if (maximumLongValue != Long.MIN_VALUE) {
-            object.put(exclusiveMaximum ? "exclusiveMaximum" : "maximum", minimumLongValue);
+            object.put(exclusiveMaximum ? "exclusiveMaximum" : "maximum", maximumLongValue);
         } else if (maximum != null) {
             object.put(exclusiveMaximum ? "exclusiveMaximum" : "maximum", maximum);
         }
