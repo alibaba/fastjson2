@@ -86,10 +86,6 @@ public class BeanInfo {
         if (provider.isDisableSmartMatch()) {
             readerFeatures |= FieldInfo.DISABLE_SMART_MATCH;
         }
-        PropertyNamingStrategy naming = provider.getNamingStrategy();
-        if (naming != null) {
-            namingStrategy = naming.name();
-        }
     }
 
     public BeanInfo(ObjectWriterProvider provider) {

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,6 @@ public class NamingStrategyTest {
     @BeforeEach
     public void setUp() {
         writerProvider = new ObjectWriterProvider(PropertyNamingStrategy.SnakeCase);
-        readerProvider = new ObjectReaderProvider();
-        readerProvider.setNamingStrategy(PropertyNamingStrategy.SnakeCase);
     }
 
     @Test
@@ -33,8 +32,7 @@ public class NamingStrategyTest {
         String snakeExpected = "{\"item\":{\"item_id\":1001},\"user_id\":123}";
         assertEquals(snakeExpected, JSON.toJSONString(bean, writeContext));
 
-        JSONReader.Context readContext = JSONFactory.createReadContext(readerProvider);
-        Bean bean1 = JSON.parseObject(snakeExpected, Bean.class, readContext);
+        Bean bean1 = JSON.parseObject(snakeExpected, Bean.class, NameFilter.of(PropertyNamingStrategy.SnakeCase));
         assertEquals(bean.userId, bean1.userId);
     }
 
