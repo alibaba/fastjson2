@@ -4004,6 +4004,7 @@ public abstract class JSONReader
             boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
             return provider.getObjectReader(type, fieldBased, filters);
         }
+
         public ObjectReaderProvider getProvider() {
             return provider;
         }
