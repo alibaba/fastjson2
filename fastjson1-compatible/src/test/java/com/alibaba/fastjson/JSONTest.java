@@ -335,7 +335,7 @@ public class JSONTest {
                                 Collections.emptyList(),
                                 SerializeConfig.global,
                                 new SerializeFilter[0],
-                                JSON.DEFFAULT_DATE_FORMAT,
+                                JSON.DEFAULT_DATE_FORMAT,
                                 JSON.DEFAULT_GENERATE_FEATURE,
                                 SerializerFeature.BrowserSecure)
                 )
