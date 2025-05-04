@@ -76,16 +76,14 @@ class ObjectReaderImplInt8ValueArray
         if (jsonReader.isString()) {
             byte[] bytes;
             if ((jsonReader.features(this.features | features) & Base64StringAsByteArray.mask) != 0) {
-                String str = jsonReader.readString();
-                if (str != null) {
-                    String prefix = "data:image/jpeg;base64,";
-                    if (str.startsWith(prefix)) {
-                        str = str.substring(prefix.length());
-                    }
-                }
-                bytes = Base64.getDecoder().decode(str);
+                bytes = jsonReader.readBase64();
             } else {
-                bytes = jsonReader.readBinary();
+                String str = jsonReader.readString();
+                if (str.isEmpty()) {
+                    bytes = null;
+                } else {
+                    throw new JSONException(jsonReader.info("illegal input : " + str));
+                }
             }
 
             if (builder != null) {

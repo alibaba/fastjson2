@@ -7406,6 +7406,55 @@ class JSONReaderUTF8
         return val;
     }
 
+    public final byte[] readBase64() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset, end = this.end;
+        int ch = this.ch;
+        int index = IOUtils.indexOfQuote(bytes, ch, offset, end);
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+
+        int slashIndex = indexOfSlash(this, bytes, offset, end);
+        if (slashIndex != -1) {
+            throw error("invalid base64 string");
+        }
+
+        byte[] decoded;
+        if (index != offset) {
+            boolean hasPrefix = true;
+            String prefix = "data:image/jpeg;base64,";
+            for (int i = 0; i < prefix.length(); i++) {
+                if (bytes[offset + i] != prefix.charAt(i)) {
+                    hasPrefix = false;
+                    break;
+                }
+            }
+            if (hasPrefix) {
+                offset += prefix.length();
+            }
+
+            byte[] src = Arrays.copyOfRange(bytes, offset, index);
+            decoded = Base64.getDecoder().decode(src);
+        } else {
+            decoded = new byte[0];
+        }
+
+        offset = index + 1;
+
+        ch = offset == end ? EOI : (char) bytes[offset++];
+        if (comma = ch == ',') {
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+        }
+
+        this.ch = (char) ch;
+        this.offset = offset;
+        return decoded;
+    }
+
     @Override
     public final String info(String message) {
         int line = 1, column = 0;
