@@ -78,11 +78,9 @@ class ObjectReaderImplInt8ValueArray
             if ((jsonReader.features(this.features | features) & Base64StringAsByteArray.mask) != 0) {
                 String str = jsonReader.readString();
                 if (str != null) {
-                    String[] strArray = str.split(",");
-                    if (strArray.length == 1) {
-                        str = strArray[0];
-                    } else if (strArray.length == 2) {
-                        str = strArray[1];
+                    String prefix = "data:image/jpeg;base64,";
+                    if (str.startsWith(prefix)) {
+                        str = str.substring(prefix.length());
                     }
                 }
                 bytes = Base64.getDecoder().decode(str);
@@ -114,11 +112,9 @@ class ObjectReaderImplInt8ValueArray
         } else if (jsonReader.isString()) {
             String str = jsonReader.readString();
             if (str != null) {
-                String[] strArray = str.split(",");
-                if (strArray.length == 1) {
-                    str = strArray[0];
-                } else if (strArray.length == 2) {
-                    str = strArray[1];
+                String prefix = "data:image/jpeg;base64,";
+                if (str.startsWith(prefix)) {
+                    str = str.substring(prefix.length());
                 }
             }
             bytes = Base64.getDecoder().decode(str);
