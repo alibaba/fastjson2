@@ -1,20 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.PropertyNamingStrategy;
-import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.ObjBoolConsumer;
-import com.alibaba.fastjson2.function.ObjByteConsumer;
-import com.alibaba.fastjson2.function.ObjCharConsumer;
-import com.alibaba.fastjson2.function.ObjFloatConsumer;
-import com.alibaba.fastjson2.function.ObjShortConsumer;
+import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
@@ -25,57 +15,18 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.invoke.CallSite;
-import java.lang.invoke.LambdaMetafactory;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.invoke.*;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerArray;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicLongArray;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.ObjDoubleConsumer;
-import java.util.function.ObjIntConsumer;
-import java.util.function.ObjLongConsumer;
-import java.util.function.Supplier;
+import java.time.*;
+import java.util.*;
+import java.util.concurrent.atomic.*;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
-import static com.alibaba.fastjson2.util.BeanUtils.*;
+import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
+import static com.alibaba.fastjson2.util.BeanUtils.getField;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 public class ObjectReaderCreator {
@@ -1426,6 +1377,10 @@ public class ObjectReaderCreator {
             }
         }
 
+        if (provider.getNameFilter() != null) {
+            fieldName = provider.getNameFilter().process(null, fieldName, null);
+        }
+
         Type fieldType = field.getGenericType();
         Class<?> fieldClass = field.getType();
 
@@ -1555,6 +1510,10 @@ public class ObjectReaderCreator {
                     fieldInfo.ordinal = orders.length;
                 }
             }
+        }
+
+        if (provider.getNameFilter() != null) {
+            fieldName = provider.getNameFilter().process(null, fieldName, null);
         }
 
         int parameterCount = method.getParameterCount();
