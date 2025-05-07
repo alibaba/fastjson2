@@ -150,8 +150,8 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, Filter[]> cacheFilter = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, Filter[]> cacheFieldBasedFilter = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, Filter> cacheFilter = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, Filter> cacheFieldBasedFilter = new ConcurrentHashMap<>();
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -349,6 +349,8 @@ public class ObjectReaderProvider
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
+        cacheFilter.remove(objectClass);
+        cacheFieldBasedFilter.remove(objectClass);
         for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
             for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Long, ObjectReader> entry = it.next();
@@ -755,8 +757,9 @@ public class ObjectReaderProvider
     }
 
     public ObjectReader getObjectReader(Type objectType, boolean fieldBased, Filter... filters) {
-        if (filters != null && filters.length > 0 && Arrays.stream(filters).anyMatch(Objects::nonNull)) {
-            return getObjectReaderByFilters(objectType, fieldBased, filters);
+        Filter filter = getRequiredFilter(filters);
+        if (filter != null) {
+            return getObjectReaderByFilter(objectType, fieldBased, filter);
         }
 
         if (objectType == null) {
@@ -780,7 +783,7 @@ public class ObjectReaderProvider
                 : getObjectReaderInternal(objectType, fieldBased);
     }
 
-    private ObjectReader getObjectReaderByFilters(Type objectType, boolean fieldBased, Filter... filters) {
+    private ObjectReader getObjectReaderByFilter(Type objectType, boolean fieldBased, Filter filter) {
         if (objectType == null) {
             objectType = Object.class;
         } else if (objectType instanceof WildcardType) {
@@ -790,16 +793,16 @@ public class ObjectReaderProvider
             }
         }
 
-        Filter[] curFilters = fieldBased
-                ? cacheFieldBasedFilter.getOrDefault(objectType, new Filter[]{})
-                : cacheFilter.getOrDefault(objectType, new Filter[]{});
-        if (!Arrays.equals(curFilters, filters)) {
+        Filter curFilter = fieldBased
+                ? cacheFieldBasedFilter.get(objectType)
+                : cacheFilter.get(objectType);
+        if (!filter.equals(curFilter)) {
             cleanup((Class) objectType);
         }
         if (fieldBased) {
-            cacheFieldBasedFilter.put(objectType, filters);
+            cacheFieldBasedFilter.put(objectType, filter);
         } else {
-            cacheFilter.put(objectType, filters);
+            cacheFilter.put(objectType, filter);
         }
         return getObjectReader(objectType, fieldBased);
     }
@@ -1082,5 +1085,15 @@ public class ObjectReaderProvider
 
     public void setDisableSmartMatch(boolean disableSmartMatch) {
         this.disableSmartMatch = disableSmartMatch;
+    }
+
+    private Filter getRequiredFilter(Filter... filters) {
+        Filter nameFilter = null;
+        for (Filter filter : filters) {
+            if (filter instanceof NameFilter) {
+                nameFilter = filter;
+            }
+        }
+        return nameFilter;
     }
 }

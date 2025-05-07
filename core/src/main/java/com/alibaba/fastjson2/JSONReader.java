@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.*;
 
@@ -4261,6 +4262,10 @@ public abstract class JSONReader
 
                 if (filter instanceof ExtraProcessor) {
                     extraProcessor = (ExtraProcessor) filter;
+                }
+
+                if (filter instanceof NameFilter) {
+                    provider.setNameFilter((NameFilter) filter);
                 }
             }
         }

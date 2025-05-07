@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.issues_2400;
 
-import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -39,11 +41,8 @@ public class Issue2478 {
 
     @Test
     public void jsonFastSerializationTest2() {
-        User user = new User(123L, "First", "Last");
-        String jsonString = JSON.toJSONString(user, JSONWriter.Feature.WriteClassName);
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(User.class.getName());
-        Filter nameFilter = NameFilter.of(PropertyNamingStrategy.CamelCase);
         ObjectReader objectReader = provider.getObjectReader(User.class, false, autoTypeFilter);
         ObjectReader objectReader2 = provider.getObjectReader(User.class, false, autoTypeFilter);
         assertSame(objectReader, objectReader2);
