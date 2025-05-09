@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Issue3537 {
     @Test
@@ -14,6 +15,9 @@ public class Issue3537 {
         String json = "{\"value\":\"\"}";
         SimpleTestValue s = JSON.parseObject(json, SimpleTestValue.class);
         assertEquals("", s.getValue());
+        json = "{\"value\":null}";
+        s = JSON.parseObject(json, SimpleTestValue.class);
+        assertNull(s.getValue());
     }
 
     public static class SimpleTestValue {
