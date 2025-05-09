@@ -243,7 +243,7 @@ final class ObjectReaderSeeAlso<T>
             JSONReader.Context context = jsonReader.getContext();
             long features3, hash = jsonReader.readFieldNameHashCode();
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
-            if ((hash == getTypeKeyHash() || seeAlsoDefault != null)
+            if ((hash == getTypeKeyHash() || (seeAlsoDefault != null && seeAlsoDefault != Void.class))
                     && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
                 ObjectReader reader = null;
