@@ -123,6 +123,7 @@ public class FieldReaderObject<T>
 
         Object value;
         try {
+            char first = jsonReader.current();
             if (jsonReader.nextIfNullOrEmptyString()) {
                 if (defaultValue != null) {
                     value = defaultValue;
@@ -135,7 +136,7 @@ public class FieldReaderObject<T>
                 } else if (fieldClass == Optional.class) {
                     value = Optional.empty();
                 } else {
-                    value = null;
+                    value = first == 'n' ? null : "";
                 }
             } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
