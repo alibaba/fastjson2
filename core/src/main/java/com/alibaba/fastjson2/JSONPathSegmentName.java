@@ -333,6 +333,10 @@ class JSONPathSegmentName
                 ? context.root
                 : context.parent.value;
 
+        if (object instanceof JSONPath.Sequence) {
+            object = ((JSONPath.Sequence) object).values;
+        }
+
         if (object instanceof Map) {
             Map map = (Map) object;
             Object origin = map.put(name, value);

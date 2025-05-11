@@ -387,10 +387,20 @@ public class ObjectWriterProvider
         }
 
         if (TypeUtils.isProxy(objectClass)) {
-            if (objectClass == objectType) {
-                objectType = superclass;
+            Class<?> proxyTarget = superclass;
+            if (proxyTarget == Object.class) {
+                Class[] interfaces = objectClass.getInterfaces();
+                for (Class<?> i : interfaces) {
+                    if (!TypeUtils.isProxy(i)) {
+                        proxyTarget = i;
+                        break;
+                    }
+                }
             }
-            objectClass = superclass;
+            if (objectClass == objectType) {
+                objectType = proxyTarget;
+            }
+            objectClass = proxyTarget;
             if (fieldBased) {
                 fieldBased = false;
                 objectWriter = cacheFieldBased.get(objectType);

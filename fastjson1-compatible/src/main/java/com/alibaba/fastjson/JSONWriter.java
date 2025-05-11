@@ -57,7 +57,7 @@ public class JSONWriter {
                 break;
             case WriteDateUseDateFormat:
                 if (state) {
-                    ctx.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
+                    ctx.setDateFormat(JSON.DEFAULT_DATE_FORMAT);
                 }
                 break;
             case BeanToArray:

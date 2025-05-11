@@ -1881,6 +1881,20 @@ public abstract class JSONReader
 
     public abstract String readString();
 
+    public byte[] readBase64() {
+        String str = readString();
+        if (str != null) {
+            String prefix = "data:image/jpeg;base64,";
+            if (str.startsWith(prefix)) {
+                str = str.substring(prefix.length());
+            }
+        }
+        if (str.isEmpty()) {
+            return new byte[0];
+        }
+        return Base64.getDecoder().decode(str);
+    }
+
     public String[] readStringArray() {
         if ((ch == 'n') && nextIfNull()) {
             return null;

@@ -59,20 +59,18 @@ abstract class FieldWriterObjectFinal<T>
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
-                writeFieldName(jsonWriter);
-
-                if (fieldClass.isArray()) {
-                    jsonWriter.writeArrayNull();
-                } else if (fieldClass == StringBuffer.class || fieldClass == StringBuilder.class) {
-                    jsonWriter.writeStringNull();
-                } else {
-                    jsonWriter.writeNull();
-                }
-                return true;
-            } else {
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
                 return false;
             }
+            writeFieldName(jsonWriter);
+            if (fieldClass.isArray()) {
+                jsonWriter.writeArrayNull();
+            } else if (fieldClass == StringBuffer.class || fieldClass == StringBuilder.class) {
+                jsonWriter.writeStringNull();
+            } else {
+                jsonWriter.writeObjectNull(fieldClass);
+            }
+            return true;
         }
 
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
