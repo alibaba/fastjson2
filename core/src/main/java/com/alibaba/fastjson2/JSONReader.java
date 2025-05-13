@@ -1319,6 +1319,7 @@ public abstract class JSONReader
 
         String str = readString();
         if (str.isEmpty() || "null".equals(str)) {
+            wasNull = true;
             return null;
         }
 
@@ -2520,6 +2521,7 @@ public abstract class JSONReader
             return null;
         }
 
+        wasNull = false;
         boolean boolValue = readBoolValue();
         if (!boolValue && wasNull) {
             return null;
