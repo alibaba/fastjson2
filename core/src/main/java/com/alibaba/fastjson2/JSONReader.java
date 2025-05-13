@@ -1319,7 +1319,6 @@ public abstract class JSONReader
 
         String str = readString();
         if (str.isEmpty() || "null".equals(str)) {
-            wasNull = true;
             return null;
         }
 
