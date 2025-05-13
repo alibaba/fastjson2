@@ -1045,7 +1045,7 @@ class JSONWriterUTF16
 
     public final void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         if (value == null) {
-            writeNumberNull();
+            writeDecimalNull();
             return;
         }
 
@@ -1061,7 +1061,7 @@ class JSONWriterUTF16
         boolean writeAsString = isWriteAsString(value, features);
 
         int off = this.off;
-        int minCapacity = off + precision + value.scale() + 7;
+        int minCapacity = off + precision + Math.abs(value.scale()) + 7;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);

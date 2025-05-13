@@ -37,7 +37,8 @@ import java.util.function.Supplier;
 
 public abstract class JSON
         implements JSONAware {
-    private static TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
+    private static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
+    private static final int MAX_LEVEL = 2048;
     public static final String VERSION = com.alibaba.fastjson2.JSON.VERSION;
     static final Cache CACHE = new Cache();
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
@@ -45,7 +46,9 @@ public abstract class JSON
     public static TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
     public static Locale defaultLocale = Locale.getDefault();
     public static String DEFAULT_TYPE_KEY = "@type";
+    @Deprecated
     public static String DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static int DEFAULT_PARSER_FEATURE;
     public static int DEFAULT_GENERATE_FEATURE;
 
@@ -158,7 +161,7 @@ public abstract class JSON
             context.config(JSONReader.Feature.SupportAutoType);
         }
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             context.setDateFormat(defaultDateFormat);
         }
@@ -213,7 +216,7 @@ public abstract class JSON
         );
         JSONReader reader = JSONReader.of(text, context);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             context.setDateFormat(defaultDateFormat);
         }
@@ -1304,7 +1307,7 @@ public abstract class JSON
         }
 
         if ((featuresValue & SerializerFeature.WriteDateUseDateFormat.mask) != 0) {
-            context.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
+            context.setDateFormat(JSON.DEFAULT_DATE_FORMAT);
         }
 
         if ((featuresValue & SerializerFeature.BeanToArray.mask) != 0) {
@@ -2304,22 +2307,37 @@ public abstract class JSON
             return javaObject;
         }
 
-        Object json;
         try {
-            json = com.alibaba.fastjson2.JSON.toJSON(javaObject);
+            return adaptResult(com.alibaba.fastjson2.JSON.toJSON(javaObject));
         } catch (com.alibaba.fastjson2.JSONException e) {
             throw new JSONException(e.getMessage(), e);
         }
+    }
 
-        if (json instanceof com.alibaba.fastjson2.JSONObject) {
-            return new JSONObject((com.alibaba.fastjson2.JSONObject) json);
+    public static Object adaptResult(Object result) {
+        return adaptResult(result, 0);
+    }
+
+    private static Object adaptResult(Object result, int level) {
+        if (level > MAX_LEVEL) {
+            throw new JSONException("level too large : " + level);
         }
-
-        if (json instanceof com.alibaba.fastjson2.JSONArray) {
-            return new JSONArray((com.alibaba.fastjson2.JSONArray) json);
+        if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            JSONObject jsonObject = new JSONObject();
+            com.alibaba.fastjson2.JSONObject object = (com.alibaba.fastjson2.JSONObject) result;
+            for (Map.Entry<String, Object> entry : object.entrySet()) {
+                jsonObject.put(entry.getKey(), adaptResult(entry.getValue(), level + 1));
+            }
+            return jsonObject;
+        } else if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            JSONArray jsonArray = new JSONArray();
+            com.alibaba.fastjson2.JSONArray array = (com.alibaba.fastjson2.JSONArray) result;
+            for (int i = 0; i < array.size(); ++i) {
+                jsonArray.set(i, adaptResult(array.get(i), level + 1));
+            }
+            return jsonArray;
         }
-
-        return json;
+        return result;
     }
 
     public static Object toJSON(Object javaObject, SerializeConfig config) {

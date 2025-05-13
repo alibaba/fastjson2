@@ -30,7 +30,7 @@ final class AllOf
                 itemSchema = (Boolean) item ? Any.INSTANCE : Any.NOT_ANY;
             } else {
                 JSONObject itemObject = (JSONObject) item;
-                if (!itemObject.containsKey("type") && type != null) {
+                if (!itemObject.containsKey("$ref") && !itemObject.containsKey("type") && type != null) {
                     switch (type) {
                         case String:
                             itemSchema = new StringSchema(itemObject);

@@ -96,7 +96,7 @@ public class JSONSerializer {
                 ctx.config(JSONWriter.Feature.IgnoreErrorGetter);
                 break;
             case WriteDateUseDateFormat:
-                ctx.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
+                ctx.setDateFormat(JSON.DEFAULT_DATE_FORMAT);
                 break;
             case BeanToArray:
                 ctx.config(JSONWriter.Feature.BeanToArray);

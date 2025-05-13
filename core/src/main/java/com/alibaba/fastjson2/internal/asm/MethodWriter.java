@@ -301,6 +301,19 @@ public final class MethodWriter {
         visitInsn(Opcodes.I2D);
     }
 
+    public void cmpWithZero(Class<?> fieldClass) {
+        if (fieldClass == long.class) {
+            visitInsn(Opcodes.LCONST_0);
+            visitInsn(Opcodes.LCMP);
+        } else if (fieldClass == double.class) {
+            visitInsn(Opcodes.DCONST_0);
+            visitInsn(Opcodes.DCMPL);
+        } else if (fieldClass == float.class) {
+            visitInsn(Opcodes.FCONST_0);
+            visitInsn(Opcodes.FCMPL);
+        }
+    }
+
     public void lxor() {
         visitInsn(Opcodes.LXOR);
     }
@@ -414,6 +427,14 @@ public final class MethodWriter {
 
     public void dup() {
         visitInsn(Opcodes.DUP);
+    }
+
+    public void dup(Class<?> fieldClass) {
+        if (fieldClass == long.class || fieldClass == double.class) {
+            visitInsn(Opcodes.DUP2);
+        } else {
+            visitInsn(Opcodes.DUP);
+        }
     }
 
     public void dup2() {

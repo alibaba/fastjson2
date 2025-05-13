@@ -243,7 +243,7 @@ public class FastJsonJsonView
     /**
      * Set extractValueFromSingleKeyModel.
      *
-     * @param extractValueFromSingleKeyModel
+     * @param extractValueFromSingleKeyModel extractValueFromSingleKeyModel
      */
     public void setExtractValueFromSingleKeyModel(boolean extractValueFromSingleKeyModel) {
         this.extractValueFromSingleKeyModel = extractValueFromSingleKeyModel;

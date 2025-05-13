@@ -22,7 +22,7 @@ public class TimestampTest {
     public void test_0() throws Exception {
         long millis = 1668216743000L;
 
-        SimpleDateFormat format = new SimpleDateFormat(JSON.DEFFAULT_DATE_FORMAT, JSON.defaultLocale);
+        SimpleDateFormat format = new SimpleDateFormat(JSON.DEFAULT_DATE_FORMAT, JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
         String text = "\"" + format.format(new Date(millis)) + "\"";
         System.out.println(text);
@@ -34,14 +34,14 @@ public class TimestampTest {
                 "\"2022-11-12 00:00:00\"",
                 JSON.toJSONStringWithDateFormat(
                         JSON.parseObject(text, java.sql.Date.class),
-                        JSON.DEFFAULT_DATE_FORMAT
+                        JSON.DEFAULT_DATE_FORMAT
                 )
         );
         assertEquals(
                 "\"2022-11-12 09:32:23\"",
                 JSON.toJSONStringWithDateFormat(
                         JSON.parseObject(text, java.util.Date.class),
-                        JSON.DEFFAULT_DATE_FORMAT
+                        JSON.DEFAULT_DATE_FORMAT
                 )
         );
     }

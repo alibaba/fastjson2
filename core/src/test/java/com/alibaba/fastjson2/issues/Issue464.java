@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Issue464 {
@@ -46,5 +48,7 @@ public class Issue464 {
         assertNull(JSON.parseObject("\"\"", Boolean[].class));
 
         assertNull(JSON.parseObject("\"\"", Object[].class));
+
+        assertEquals(0, JSON.parseObject("\"\"", byte[].class, JSONReader.Feature.Base64StringAsByteArray).length);
     }
 }

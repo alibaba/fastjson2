@@ -340,7 +340,7 @@ public abstract class FieldWriter<T>
         }
 
         if (fieldClass == boolean.class) {
-            if (fieldValue == Boolean.FALSE) {
+            if (fieldValue.equals(Boolean.FALSE)) {
                 return;
             }
         } else if (fieldClass == byte.class
