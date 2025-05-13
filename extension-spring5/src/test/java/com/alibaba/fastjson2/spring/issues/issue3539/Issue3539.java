@@ -62,7 +62,7 @@ public class Issue3539 {
 
     @RestController
     public static class TestController {
-        @PostMapping(value = "/issue3539", produces = {"application/json"})
+        @PostMapping(value = "/issue3539", produces = "application/json")
         public void issue3539(@RequestBody TestData testData) {
             assertEquals(testData.abc, false);
         }
@@ -72,7 +72,8 @@ public class Issue3539 {
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
     @EnableWebMvc
-    public static class WebMvcConfig implements WebMvcConfigurer {
+    public static class WebMvcConfig
+            implements WebMvcConfigurer {
         @Override
         public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
             FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
