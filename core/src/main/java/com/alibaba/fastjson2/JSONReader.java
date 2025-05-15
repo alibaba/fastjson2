@@ -2521,6 +2521,7 @@ public abstract class JSONReader
             return null;
         }
 
+        wasNull = false;
         boolean boolValue = readBoolValue();
         if (!boolValue && wasNull) {
             return null;
