@@ -855,6 +855,7 @@ public abstract class JSONWriter
 
     public final void writeNameValue(String name, Object value) {
         writeName(name);
+        writeColon();
         writeAny(value);
     }
 
