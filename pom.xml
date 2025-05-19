@@ -57,6 +57,9 @@
         <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.37</jmh.version>
 
+        <!-- Maven Central Portal -->
+        <central.publishing.maven.version>0.7.0</central.publishing.maven.version>
+
         <!-- overridden by submodule that need skip deploy -->
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
@@ -123,17 +126,6 @@
             <url>https://github.com/kraity</url>
         </developer>
     </developers>
-
-    <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
@@ -1049,39 +1041,12 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central.publishing.maven.version}</version>
                         <extensions>true</extensions>
-                        <!--
-                            In multi-module builds using the deploy-at-end feature,
-                            the deployment of all components is performed in the last module based on the reactor order.
-                            If this property is set to true in the last module,
-                            all staging deployment for all modules will be skipped.
-                            so, we'll config nexus deploy after deploy phase of every module
-                            see: https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin#configuring-the-plugin
-                        -->
-                        <executions>
-                            <execution>
-                                <id>default-deploy</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>deploy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                            <!--
-                            If you are deploying to Maven Central,
-                            it is the Nexus Staging Plugin that is doing the deployment instead of the `deploy` plugin,
-                            so the configuration of the `deploy` plugin has no effect.
-                            To make the Nexus deploy plugin skip,
-                            set skipNexusStagingDeployMojo in its configuration to true.
-                            see: https://stackoverflow.com/questions/59552549/preventing-maven-modules-from-being-deployed
-                        -->
-                            <skipNexusStagingDeployMojo>${maven.deploy.skip}</skipNexusStagingDeployMojo>
+                            <publishingServerId>central</publishingServerId>
                         </configuration>
                     </plugin>
                 </plugins>

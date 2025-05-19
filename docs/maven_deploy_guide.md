@@ -4,12 +4,12 @@
 
 ## 0. 前置准备与配置
 
-在`Maven`的`settting.xml`中配置`oss.sonatype.org`账号：
+在`Maven`的`settting.xml`中配置`https://central.sonatype.com`账号：
 
 ```xml
 <servers>
     <server>
-        <id>ossrh</id>
+        <id>central</id>
         <username>__YOUR_USERNAME__</username>
         <password>__YOUR_PASSWORD__</password>
     </server>
@@ -18,15 +18,15 @@
 
 更多发布操作说明（如用于`GPG`签名的`GPG`安装与配置），参见：
 
-- OSSRH Guide  
-  https://central.sonatype.org/pages/ossrh-guide.html
-- Deploying to OSSRH with Apache Maven - Introduction  
-  https://central.sonatype.org/pages/apache-maven.html
+- Maven Central Portal Getting Started
+  https://central.sonatype.org/publish/publish-portal-guide/
+- Maven Central Portal Publishing By Using the Maven Plugin
+  https://central.sonatype.org/publish/publish-portal-maven/
 
 发布过程与发布文件的查看地址：
 
-- sonatype的发布控制台  
-  https://oss.sonatype.org/index.html
+- Maven Central Portal 的发布控制台  
+  https://central.sonatype.com
 - Maven中央库的文件查看  
   https://repo1.maven.org/maven2/com/alibaba/fastjson2/
 
