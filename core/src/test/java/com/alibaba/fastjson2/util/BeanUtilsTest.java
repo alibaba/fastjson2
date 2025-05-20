@@ -307,7 +307,8 @@ public class BeanUtilsTest {
                 "java.util.concurrent.locks.Lock",
                 "java.util.concurrent.locks.ReentrantLock",
                 "java.security.ProtectionDomain",
-                "java.lang.ref.ReferenceQueue"
+                "java.lang.ref.ReferenceQueue",
+                "java.io.OutputStream"
         };
 
         long[] hashCodes = new long[names.length];

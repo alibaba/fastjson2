@@ -12,7 +12,6 @@ import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.File;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -792,8 +791,7 @@ public class ObjectWriterBaseModule
                 fieldInfo.fieldClassMixIn = true;
             }
 
-            if ((JDKUtils.CLASS_TRANSIENT != null && method.getAnnotation(JDKUtils.CLASS_TRANSIENT) != null)
-                    || OutputStream.class.isAssignableFrom(method.getReturnType())) {
+            if (JDKUtils.CLASS_TRANSIENT != null && method.getAnnotation(JDKUtils.CLASS_TRANSIENT) != null) {
                 fieldInfo.ignore = true;
             }
 
