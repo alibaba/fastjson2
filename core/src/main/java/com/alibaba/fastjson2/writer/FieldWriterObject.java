@@ -25,6 +25,7 @@ public class FieldWriterObject<T>
     final boolean unwrapped;
     final boolean array;
     final boolean number;
+    protected boolean writeUsing;
 
     static final AtomicReferenceFieldUpdater<FieldWriterObject, Class> initValueClassUpdater = AtomicReferenceFieldUpdater.newUpdater(
             FieldWriterObject.class,
@@ -76,7 +77,7 @@ public class FieldWriterObject<T>
             return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
             boolean typeMatch = initValueClass == valueClass
-                    || (initValueClass.isAssignableFrom(valueClass) && !jsonWriter.isEnabled(WriteClassName) && fieldType instanceof Class)
+                    || (writeUsing && initValueClass.isAssignableFrom(valueClass))
                     || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass))
                     || (initValueClass == List.class && initValueClass.isAssignableFrom(valueClass));
             if (!typeMatch && initValueClass.isPrimitive()) {

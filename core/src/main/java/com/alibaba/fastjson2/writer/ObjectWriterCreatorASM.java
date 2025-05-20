@@ -226,6 +226,9 @@ public class ObjectWriterCreatorASM
 
                         FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
+                            if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                                ((FieldWriterObject) fieldWriter).writeUsing = true;
+                            }
                             FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                             if (origin != null) {
                                 int cmp = origin.compareTo(fieldWriter);
@@ -347,6 +350,9 @@ public class ObjectWriterCreatorASM
                         );
                     }
 
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     FieldWriter origin = fieldWriterMap.putIfAbsent(fieldName, fieldWriter);
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
@@ -374,6 +380,9 @@ public class ObjectWriterCreatorASM
                 fieldInfo.init();
                 FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });
