@@ -173,7 +173,7 @@ public class ObjectReaderProvider
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
-    private NameFilter nameFilter;
+    private ThreadLocal<NameFilter> nameFilterLocal = new ThreadLocal<>();
 
     {
         long[] hashCodes;
@@ -239,11 +239,11 @@ public class ObjectReaderProvider
     }
 
     public NameFilter getNameFilter() {
-        return nameFilter;
+        return nameFilterLocal.get();
     }
 
     public void setNameFilter(NameFilter nameFilter) {
-        this.nameFilter = nameFilter;
+        this.nameFilterLocal.set(nameFilter);
     }
 
     public Class getMixIn(Class target) {
@@ -793,18 +793,20 @@ public class ObjectReaderProvider
             }
         }
 
-        Filter curFilter = fieldBased
-                ? cacheFieldBasedFilter.get(objectType)
-                : cacheFilter.get(objectType);
-        if (!filter.equals(curFilter)) {
-            cleanup((Class) objectType);
+        synchronized (objectType.getClass()) {
+            Filter curFilter = fieldBased
+                    ? cacheFieldBasedFilter.get(objectType)
+                    : cacheFilter.get(objectType);
+            if (!filter.equals(curFilter)) {
+                cleanup((Class) objectType);
+            }
+            if (fieldBased) {
+                cacheFieldBasedFilter.put(objectType, filter);
+            } else {
+                cacheFilter.put(objectType, filter);
+            }
+            return getObjectReader(objectType, fieldBased);
         }
-        if (fieldBased) {
-            cacheFieldBasedFilter.put(objectType, filter);
-        } else {
-            cacheFilter.put(objectType, filter);
-        }
-        return getObjectReader(objectType, fieldBased);
     }
 
     private ObjectReader getObjectReaderInternal(Type objectType, boolean fieldBased) {

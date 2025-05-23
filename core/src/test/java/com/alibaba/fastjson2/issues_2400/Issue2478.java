@@ -35,9 +35,21 @@ public class Issue2478 {
             User deserializedUser = JSON.parseObject(userAsJsonString, User.class, namingStrategy);
             assertEquals(user, deserializedUser);
         });
+        Arrays.stream(PropertyNamingStrategy.values()).parallel().forEach(naming -> {
+            NameFilter namingStrategy = NameFilter.of(naming);
+            String userAsJsonString = JSON.toJSONString(user, namingStrategy);
+            User deserializedUser = JSON.parseObject(userAsJsonString, User.class, namingStrategy);
+            assertEquals(user, deserializedUser);
+        });
 
         JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(User.class.getName());
         Arrays.stream(PropertyNamingStrategy.values()).forEach(naming -> {
+            NameFilter namingStrategy = NameFilter.of(naming);
+            String userAsJsonString = JSON.toJSONString(user, namingStrategy);
+            User deserializedUser = JSON.parseObject(userAsJsonString, User.class, null, new Filter[]{namingStrategy, autoTypeFilter});
+            assertEquals(user, deserializedUser);
+        });
+        Arrays.stream(PropertyNamingStrategy.values()).parallel().forEach(naming -> {
             NameFilter namingStrategy = NameFilter.of(naming);
             String userAsJsonString = JSON.toJSONString(user, namingStrategy);
             User deserializedUser = JSON.parseObject(userAsJsonString, User.class, null, new Filter[]{namingStrategy, autoTypeFilter});
