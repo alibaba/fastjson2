@@ -687,7 +687,11 @@ public class ObjectWriterAdapter<T>
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
-                    fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                    if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                    } else {
+                        fieldValue = JSON.toJSON(fieldValue);
+                    }
                 }
             }
             jsonObject.put(fieldWriter.fieldName, fieldValue);
