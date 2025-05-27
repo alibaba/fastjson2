@@ -103,8 +103,8 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 | com.alibaba.fastjson.serializer.SerializeConfig             | com.alibaba.fastjson2.writer.ObjectWriterProvider     |
 | com.alibaba.fastjson.serializer.ToStringSerializer          | com.alibaba.fastjson2.writer.ObjectWriterImplToString |
 | com.alibaba.fastjson.serializer.ValueFilter                 | com.alibaba.fastjson2.filter.ValueFilter              |
-| com.alibaba.fastjson.serializer.SerializerFeature           | com.alibaba.fastjson2.JSONReader.Feature              |
-| com.alibaba.fastjson.parser.Feature                         | com.alibaba.fastjson2.JSONWriter.Feature              |
+| com.alibaba.fastjson.serializer.SerializerFeature           | com.alibaba.fastjson2.JSONWriter.Feature              |
+| com.alibaba.fastjson.parser.Feature                         | com.alibaba.fastjson2.JSONReader.Feature              |
 
 
 ### 3.4 SerializerFeature.UseISO8601DateFormat在fastjson2的替代方案
