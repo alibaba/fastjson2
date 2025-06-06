@@ -282,11 +282,6 @@ public class ObjectReaderBaseModule
                             processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
-                    case "com.fasterxml.jackson.annotation.JsonInclude":
-                        if (useJacksonAnnotation) {
-                            processJacksonJsonInclude(beanInfo, annotation);
-                        }
-                        break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSubTypes(beanInfo, annotation);
@@ -857,11 +852,6 @@ public class ObjectReaderBaseModule
                     case "com.google.gson.annotations.SerializedName":
                         if (JSONFactory.isUseGsonAnnotation()) {
                             processGsonSerializedName(fieldInfo, annotation);
-                        }
-                        break;
-                    case "com.fasterxml.jackson.annotation.JsonInclude":
-                        if (useJacksonAnnotation) {
-                            processJacksonJsonInclude(fieldInfo, annotation);
                         }
                         break;
                     default:
