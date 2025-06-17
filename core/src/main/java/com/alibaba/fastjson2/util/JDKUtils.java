@@ -75,17 +75,15 @@ public class JDKUtils {
             Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
-            offset = unsafe.arrayBaseOffset(byte[].class);
-            charOffset = unsafe.arrayBaseOffset(char[].class);
+            ARRAY_BYTE_BASE_OFFSET = unsafe.arrayBaseOffset(byte[].class);
+            ARRAY_CHAR_BASE_OFFSET = unsafe.arrayBaseOffset(char[].class);
         } catch (Throwable e) {
             throw new JSONException("init unsafe error", e);
         }
 
         UNSAFE = unsafe;
-        ARRAY_BYTE_BASE_OFFSET = offset;
-        ARRAY_CHAR_BASE_OFFSET = charOffset;
 
-        if (offset == -1) {
+        if (ARRAY_BYTE_BASE_OFFSET == -1) {
             throw new JSONException("init JDKUtils error", initErrorLast);
         }
 
