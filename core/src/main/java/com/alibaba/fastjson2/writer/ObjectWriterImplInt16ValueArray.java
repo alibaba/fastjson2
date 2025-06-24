@@ -7,6 +7,8 @@ import com.alibaba.fastjson2.util.Fnv;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 final class ObjectWriterImplInt16ValueArray
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt16ValueArray INSTANCE = new ObjectWriterImplInt16ValueArray(null);
@@ -32,10 +34,13 @@ final class ObjectWriterImplInt16ValueArray
             shorts = (short[]) object;
         }
 
-        jsonWriter.startArray(shorts.length);
-        for (int i = 0; i < shorts.length; i++) {
-            jsonWriter.writeInt16(shorts[i]);
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+        if (writeAsString) {
+            jsonWriter.writeString(shorts);
+            return;
         }
+
+        jsonWriter.writeInt16(shorts);
     }
 
     @Override
@@ -52,13 +57,12 @@ final class ObjectWriterImplInt16ValueArray
             shorts = (short[]) object;
         }
 
-        jsonWriter.startArray();
-        for (int i = 0; i < shorts.length; i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-            jsonWriter.writeInt16(shorts[i]);
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+        if (writeAsString) {
+            jsonWriter.writeString(shorts);
+            return;
         }
-        jsonWriter.endArray();
+
+        jsonWriter.writeInt16(shorts);
     }
 }

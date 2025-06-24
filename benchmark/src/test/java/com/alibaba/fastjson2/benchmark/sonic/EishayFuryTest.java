@@ -39,11 +39,11 @@ public class EishayFuryTest {
 
         MediaContent mediaContent = JSON.parseObject(str, MediaContent.class);
 //
-//        io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
-//                .withLanguage(io.fury.Language.JAVA)
+//        org.apache.fury.ThreadSafeFury furyCompatible = org.apache.fury.Fury.builder()
+//                .withLanguage(org.apache.fury.Language.JAVA)
 //                .withReferenceTracking(true)
 //                .disableSecureMode()
-//                .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+//                .withCompatibleMode(org.apache.fury.serializers.CompatibleMode.COMPATIBLE)
 //                .buildThreadSafeFury();
 //
 //        byte[] furyBytes = furyCompatible.serialize(mediaContent);

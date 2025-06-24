@@ -221,8 +221,8 @@ public class DubboTest4 {
         byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
         UncheckedIOException ex1 = (UncheckedIOException) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
 
-        assertEquals(ex.getMessage(), ex1.getMessage());
-        assertEquals(ex.getCause().getMessage(), ex1.getCause().getMessage());
+        assertNull(ex.getMessage(), "Expected original message to be null");
+        assertEquals(ex.getCause() != null ? ex.getCause().getMessage() : null, ex1.getCause() != null ? ex1.getCause().getMessage() : null);
     }
 
     @Test

@@ -4,7 +4,7 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class CSVBankTest {
     static final CSVBank benchmark = new CSVBank();
-    static final int LOOP = 1000;
+    static final int LOOP = 10000;
 
     public static void fastjson2() {
         for (int j = 0; j < 5; j++) {
@@ -16,7 +16,7 @@ public class CSVBankTest {
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.68.0.21 : 213
             // zulu11.62.17 : 148
-            // zulu17.40.19 : 150
+            // zulu17.40.19 : 150 1746 1639
         }
     }
 
@@ -49,8 +49,8 @@ public class CSVBankTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        univocity();
+        fastjson2();
+//        univocity();
 //        cainiao();
     }
 }

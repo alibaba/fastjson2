@@ -247,4 +247,20 @@ public class SerializeWriter
         raw.writeRaw(c);
         return this;
     }
+
+    public JSONWriter getJSONWriter() {
+        return raw;
+    }
+
+    public SerializeWriter append(CharSequence csq) {
+        String s = (csq == null ? "null" : csq.toString());
+        raw.writeRaw(s);
+        return this;
+    }
+
+    public SerializeWriter append(CharSequence csq, int start, int end) {
+        String s = (csq == null ? "null" : csq).subSequence(start, end).toString();
+        raw.writeRaw(s);
+        return this;
+    }
 }

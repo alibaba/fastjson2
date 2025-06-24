@@ -41,7 +41,7 @@ public class ObjectReaderGen {
         this.className = objectClass.getSimpleName() + "_ObjectReader";
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        beanInfo = new BeanInfo();
+        beanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
         for (ObjectReaderModule module : provider.getModules()) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
@@ -263,7 +263,7 @@ public class ObjectReaderGen {
         println("\t\t\t\t\tautoTypeObjectReader = context.getObjectReaderAutoType(typeName, " + className(objectClass) + ".class);");
         println();
         println("\t\t\t\t\tif (autoTypeObjectReader == null) {");
-        println("\t\t\t\t\t\tthrow new JSONException(\"auotype not support : \" + typeName);");
+        println("\t\t\t\t\t\tthrow new JSONException(\"autoType not support : \" + typeName);");
         println("\t\t\t\t\t}");
         println("\t\t\t\t}");
         println();

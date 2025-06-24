@@ -78,9 +78,9 @@ public class JSONObject
 
     public JSONObject(int initialCapacity, boolean ordered) {
         if (ordered) {
-            map = new LinkedHashMap<String, Object>(initialCapacity);
+            map = new LinkedHashMap<>(initialCapacity);
         } else {
-            map = new HashMap<String, Object>(initialCapacity);
+            map = new HashMap<>(initialCapacity);
         }
     }
 
@@ -127,7 +127,7 @@ public class JSONObject
             val = map.get(key.toString());
         }
 
-        return val;
+        return adaptResult(val);
     }
 
     public JSONObject getJSONObject(String key) {
@@ -241,7 +241,7 @@ public class JSONObject
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
@@ -282,7 +282,7 @@ public class JSONObject
         ObjectReader objectReader = provider.getObjectReader(type);
         JSONReader jsonReader = JSONReader.of(json);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
@@ -400,7 +400,7 @@ public class JSONObject
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
@@ -417,7 +417,7 @@ public class JSONObject
             return false;
         }
 
-        return booleanVal.booleanValue();
+        return booleanVal;
     }
 
     public byte getByteValue(String key) {
@@ -523,6 +523,10 @@ public class JSONObject
             }
 
             return Integer.parseInt(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
@@ -739,12 +743,12 @@ public class JSONObject
             }
 
             if (value instanceof Float) {
-                float floatValue = ((Float) value).floatValue();
+                float floatValue = (Float) value;
                 return toBigDecimal(floatValue);
             }
 
             if (value instanceof Double) {
-                double doubleValue = ((Double) value).doubleValue();
+                double doubleValue = (Double) value;
                 return toBigDecimal(doubleValue);
             }
 
@@ -754,6 +758,10 @@ public class JSONObject
 
         if (value instanceof String) {
             return toBigDecimal((String) value);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
@@ -787,6 +795,10 @@ public class JSONObject
             }
 
             return new BigInteger(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
@@ -836,11 +848,11 @@ public class JSONObject
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Object> m) {
+    public void putAll(Map<? extends String, ?> m) {
         map.putAll(m);
     }
 
-    public JSONObject fluentPutAll(Map<? extends String, ? extends Object> m) {
+    public JSONObject fluentPutAll(Map<? extends String, ?> m) {
         map.putAll(m);
         return this;
     }
@@ -883,8 +895,8 @@ public class JSONObject
     @Override
     public Object clone() {
         return new JSONObject(map instanceof LinkedHashMap //
-                ? new LinkedHashMap<String, Object>(map) //
-                : new HashMap<String, Object>(map)
+                ? new LinkedHashMap<>(map) //
+                : new HashMap<>(map)
         );
     }
 

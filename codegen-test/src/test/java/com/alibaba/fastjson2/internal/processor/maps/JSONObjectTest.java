@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.internal.processor.maps;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
+import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,8 @@ public class JSONObjectTest {
         assertEquals(bean.v01, bean1.v01);
     }
 
-    @JSONCompiled(referenceDetect = false)
+    @JSONCompiled
+    @JSONType
     public static class Bean1 {
         public JSONObject v01;
     }

@@ -40,7 +40,7 @@ public final class ObjectReaderImplListStr
     }
 
     @Override
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         if (listType.isInstance(collection)) {
             boolean typeMatch = true;
             for (Object item : collection) {
@@ -139,6 +139,12 @@ public final class ObjectReaderImplListStr
                     break;
                 case "com.google.common.collect.Lists.TransformingSequentialList":
                     list = new LinkedList();
+                    break;
+                case "kotlin.collections.EmptyList":
+                    list = getKotlinEmptyList(instanceType);
+                    break;
+                case "kotlin.collections.EmptySet":
+                    list = getKotlinEmptySet(instanceType);
                     break;
                 default:
                     try {

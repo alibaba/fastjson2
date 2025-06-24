@@ -18,10 +18,16 @@ final class ObjectWriterImplDouble
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
-            jsonWriter.writeNull();
+            jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeDouble((Double) object);
+
+        double value = (Double) object;
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 
     @Override
@@ -34,7 +40,7 @@ final class ObjectWriterImplDouble
         DecimalFormat decimalFormat = this.format;
         if (decimalFormat == null) {
             String format = jsonWriter.getContext().getDateFormat();
-            if (format != null && format.indexOf("#") != -1) {
+            if (format != null && format.indexOf('#') != -1) {
                 decimalFormat = new DecimalFormat(format);
             }
         }
@@ -45,7 +51,13 @@ final class ObjectWriterImplDouble
             return;
         }
 
-        jsonWriter.writeDouble((Double) object);
+        double value = (Double) object;
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+            return;
+        }
+
+        jsonWriter.writeDouble(value);
         long features2 = jsonWriter.getFeatures(features);
         if ((features2 & JSONWriter.Feature.WriteClassName.mask) != 0
                 && (features2 & JSONWriter.Feature.WriteNonStringKeyAsString.mask) == 0

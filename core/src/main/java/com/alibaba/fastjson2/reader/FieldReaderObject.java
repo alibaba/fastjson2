@@ -1,12 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -125,6 +123,7 @@ public class FieldReaderObject<T>
 
         Object value;
         try {
+            char first = jsonReader.current();
             if (jsonReader.nextIfNullOrEmptyString()) {
                 if (defaultValue != null) {
                     value = defaultValue;
@@ -137,7 +136,7 @@ public class FieldReaderObject<T>
                 } else if (fieldClass == Optional.class) {
                     value = Optional.empty();
                 } else {
-                    value = null;
+                    value = first == 'n' ? null : "";
                 }
             } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
@@ -184,7 +183,9 @@ public class FieldReaderObject<T>
                 jsonReader.skipValue();
                 return;
             } else if ((contextFeatures & JSONReader.Feature.ErrorOnNoneSerializable.mask) != 0) {
-                throw new JSONException("not support none-Serializable");
+                if (fieldClass != Object.class || (jsonReader.isObject() || jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY)) {
+                    throw new JSONException("not support none-Serializable");
+                }
             }
         }
 
@@ -203,6 +204,12 @@ public class FieldReaderObject<T>
         }
 
         Object value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        if (value == null
+                && (jsonReader.features(this.features) & JSONReader.Feature.ErrorOnNullForPrimitives.mask) != 0
+                && fieldClass.isPrimitive()
+        ) {
+            throw new JSONException(jsonReader.info("primitive value not support input null"));
+        }
         accept(object, value);
     }
 
@@ -331,5 +338,41 @@ public class FieldReaderObject<T>
     @Override
     public BiConsumer getFunction() {
         return function;
+    }
+
+    static void arrayToMap(
+            Map object,
+            Collection values,
+            String keyName,
+            PropertyNamingStrategy namingStrategy,
+            ObjectReader valueReader,
+            BiConsumer duplicateHandler
+    ) {
+        values.forEach(item -> {
+            Object key;
+            if (item instanceof Map) {
+                key = ((Map<?, ?>) item).get(keyName);
+            } else if (item != null) {
+                ObjectWriter itemWriter = JSONFactory.getObjectWriter(item.getClass(), 0);
+                key = itemWriter.getFieldValue(item, keyName);
+            } else {
+                throw new JSONException("key not found " + keyName);
+            }
+            if (namingStrategy != null && key instanceof String) {
+                key = namingStrategy.fieldName((String) key);
+            }
+            Object mapValue;
+            if (valueReader.getObjectClass().isInstance(item)) {
+                mapValue = item;
+            } else if (item instanceof Map) {
+                mapValue = valueReader.createInstance((Map) item);
+            } else {
+                throw new JSONException("can not accept " + JSON.toJSONString(item, JSONWriter.Feature.ReferenceDetection));
+            }
+            Object origin = object.putIfAbsent(key, mapValue);
+            if (origin != null & duplicateHandler != null) {
+                duplicateHandler.accept(origin, mapValue);
+            }
+        });
     }
 }

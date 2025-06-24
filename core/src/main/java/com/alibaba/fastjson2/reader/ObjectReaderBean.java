@@ -93,12 +93,11 @@ public abstract class ObjectReaderBean<T>
     }
 
     protected void processExtra(JSONReader jsonReader, Object object) {
-        if (extraFieldReader != null && object != null) {
-            extraFieldReader.processExtra(jsonReader, object);
-            return;
-        }
+        processExtra(jsonReader, object, 0);
+    }
 
-        if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+    protected void processExtra(JSONReader jsonReader, Object object, long features) {
+        if ((jsonReader.features(this.features | features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
             String fieldName = jsonReader.getFieldName();
             if (fieldName.startsWith("is")) {
                 String fieldName1 = fieldName.substring(2);
@@ -112,6 +111,11 @@ public abstract class ObjectReaderBean<T>
                     }
                 }
             }
+        }
+
+        if (extraFieldReader != null && object != null) {
+            extraFieldReader.processExtra(jsonReader, object);
+            return;
         }
 
         ExtraProcessor extraProcessor = jsonReader.getContext().getExtraProcessor();
@@ -226,7 +230,7 @@ public abstract class ObjectReaderBean<T>
     }
 
     private JSONException auotypeError(JSONReader jsonReader) {
-        return new JSONException(jsonReader.info("auotype not support"));
+        return new JSONException(jsonReader.info("autoType not support"));
     }
 
     protected void initDefaultValue(T object) {
@@ -348,7 +352,7 @@ public abstract class ObjectReaderBean<T>
                     );
 
                     if (reader == null) {
-                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
+                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for " + typeName));
                     }
                 }
 

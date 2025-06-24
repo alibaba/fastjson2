@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.internal.processor.eishay;
 
 import com.alibaba.fastjson2.annotation.JSONCompiled;
+import com.alibaba.fastjson2.annotation.JSONType;
 
 import java.util.Objects;
 
-@JSONCompiled(referenceDetect = false)
+@JSONCompiled
+@JSONType
 public class Image
         implements java.io.Serializable {
     private static final long serialVersionUID = 1L;

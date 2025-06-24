@@ -1105,4 +1105,51 @@ public class JSONBTest {
     public static class Bean {
         public int id;
     }
+
+    public static class Bean0 {
+    }
+
+    public static class BeanD {
+        public double id;
+
+        public BeanD(double id) {
+            this.id = id;
+        }
+    }
+
+    public static class BeanF {
+        public float id;
+
+        public BeanF(float id) {
+            this.id = id;
+        }
+    }
+
+    @Test
+    public void testSkip() {
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanF(0)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanF(1)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanF(100)), Bean0.class);
+
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanD(0)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanD(1)), Bean0.class);
+        JSONB.parseObject(
+                JSONB.toBytes(new BeanD(100)), Bean0.class);
+    }
+
+    @Test
+    public void test_int64() {
+//        long[] values = {-2049, -2048, -1024, -64, -32, -16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2047, 2048};
+//        for (long value : values) {
+//            long v =  (Math.abs(value) - (value >>> 63)) & ~0x7FF;
+////            boolean isInt64Short = ((Math.abs(value) - (value >>> 63)) & ~0xFFF) != 0;
+//            System.out.println(value + "\t" + Long.toHexString(v));
+//        }
+        System.out.println(Long.toHexString(23));
+    }
 }

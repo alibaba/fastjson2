@@ -11,7 +11,7 @@ public class EscapeNoneAsciiTest {
     };
 
     static final String[] JSON_STRINGS = new String[] {
-            "\"\\u4e2d\\u56fd\"", "\"\\u4e2d\"", "\"01234567\\u4e2d\"", "\"0123\\u4e2d\"", "\"01\\u4e2d\""
+            "\"\\u4E2D\\u56FD\"", "\"\\u4E2D\"", "\"01234567\\u4E2D\"", "\"0123\\u4E2D\"", "\"01\\u4E2D\""
     };
 
     @Test
@@ -53,7 +53,7 @@ public class EscapeNoneAsciiTest {
             String STR = STRINGS[i];
             String JSON_STR = JSON_STRINGS[i];
             JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.EscapeNoneAscii);
-            JSONWriter jsonWriter = new JSONWriterUTF8JDK9(context);
+            JSONWriter jsonWriter = new JSONWriterUTF8(context);
             jsonWriter.writeString(STR);
             String str = jsonWriter.toString();
             assertEquals(JSON_STR, str);

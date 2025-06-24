@@ -78,7 +78,7 @@ public class DateWrite {
     static String formatYYYYMMDDHHMMSS19(ZoneId zoneId, Date date) throws Throwable {
         long millis = date.getTime();
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         long epochSecond = Math.floorDiv(millis, 1000L);
         int offsetTotalSeconds;
@@ -90,8 +90,8 @@ public class DateWrite {
         }
 
         long localSecond = epochSecond + offsetTotalSeconds;
-        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
         int year, month, dayOfMonth;
         {
             final int DAYS_PER_CYCLE = 146097;

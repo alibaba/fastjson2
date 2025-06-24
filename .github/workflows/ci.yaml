@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ]
+        os: [ ubuntu-24.04, windows-latest, macos-latest ]
         java: [ 8, 11, 17, 21 ]
       fail-fast: false
       max-parallel: 16
@@ -33,6 +33,8 @@ jobs:
           cache: maven
       - name: Build with Maven and generate code coverage
         run: ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+        env:
+          JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai
       # https://github.com/marketplace/actions/codecov
       - uses: codecov/codecov-action@v3
         with:

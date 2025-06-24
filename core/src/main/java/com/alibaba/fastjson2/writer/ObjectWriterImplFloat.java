@@ -21,7 +21,13 @@ final class ObjectWriterImplFloat
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeFloat(((Float) object).floatValue());
+
+        float value = (Float) object;
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 
     @Override
@@ -37,7 +43,14 @@ final class ObjectWriterImplFloat
             return;
         }
 
-        jsonWriter.writeFloat(((Float) object).floatValue());
+        float value = (Float) object;
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+            return;
+        }
+
+        jsonWriter.writeFloat(value);
+
         long features2 = jsonWriter.getFeatures(features);
         if ((features2 & JSONWriter.Feature.WriteClassName.mask) != 0
                 && (features2 & JSONWriter.Feature.WriteNonStringKeyAsString.mask) == 0

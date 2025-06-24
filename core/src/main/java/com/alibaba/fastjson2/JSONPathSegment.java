@@ -1285,10 +1285,7 @@ abstract class JSONPathSegment {
                     context.value = values;
                 }
                 context.eval = true;
-                return;
             }
-
-            throw new JSONException("TODO");
         }
     }
 
@@ -1413,7 +1410,7 @@ abstract class JSONPathSegment {
             action.accept(object);
         }
 
-        protected boolean shouldRecursive() {
+        boolean shouldRecursive() {
             return nameHashCode == HASH_STAR || nameHashCode == HASH_EMPTY;
         }
 

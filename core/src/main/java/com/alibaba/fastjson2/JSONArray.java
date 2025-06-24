@@ -14,7 +14,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
+import java.time.*;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Function;
@@ -135,6 +135,10 @@ public class JSONArray
                 return null;
             }
 
+            if (str.charAt(0) != '[') {
+                return JSONArray.of(str);
+            }
+
             JSONReader reader = JSONReader.of(str);
             return JSONFactory.ARRAY_READER.readObject(reader, null, null, 0);
         }
@@ -206,7 +210,7 @@ public class JSONArray
             return writerAdapter.toJSONObject(value);
         }
 
-        return null;
+        return (JSONObject) JSON.toJSON(value);
     }
 
     /**
@@ -417,6 +421,10 @@ public class JSONArray
             return Long.parseLong(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? Long.valueOf(1) : Long.valueOf(0);
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to Long");
     }
 
@@ -484,6 +492,10 @@ public class JSONArray
             }
 
             return Integer.parseInt(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
@@ -764,6 +776,10 @@ public class JSONArray
             return new BigInteger(str);
         }
 
+        if (value instanceof Boolean) {
+            return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
@@ -887,6 +903,144 @@ public class JSONArray
     }
 
     /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(int index) {
+        return getLocalDate(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(int index, LocalDate defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDate) {
+            return (LocalDate) value;
+        }
+        return TypeUtils.cast(value, LocalDate.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(int index) {
+        return getLocalTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(int index, LocalTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalTime) {
+            return (LocalTime) value;
+        }
+        return TypeUtils.cast(value, LocalTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(int index) {
+        return getOffsetTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(int index, OffsetTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetTime) {
+            return (OffsetTime) value;
+        }
+        return TypeUtils.cast(value, OffsetTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(int index) {
+        return getLocalDateTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(int index, LocalDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return TypeUtils.cast(value, LocalDateTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(int index) {
+        return getOffsetDateTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(int index, OffsetDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetDateTime) {
+            return (OffsetDateTime) value;
+        }
+        return TypeUtils.cast(value, OffsetDateTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(int index) {
+        return getZonedDateTime(index, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(int index, ZonedDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof ZonedDateTime) {
+            return (ZonedDateTime) value;
+        }
+        return TypeUtils.cast(value, ZonedDateTime.class);
+    }
+
+    /**
      * Serialize to JSON {@link String}
      *
      * @return JSON {@link String}
@@ -968,15 +1122,30 @@ public class JSONArray
      * @param type specify the {@link Type} to be converted
      * @since 2.0.4
      */
-    @SuppressWarnings("unchecked")
     public <T> T to(Type type) {
+        return to(type, 0L);
+    }
+
+    /**
+     * Convert this {@link JSONArray} to the specified Object
+     *
+     * <pre>{@code
+     * JSONArray array = ...
+     * List<User> users = array.to(new TypeReference<ArrayList<User>>(){}.getType());
+     * }</pre>
+     *
+     * @param type specify the {@link Type} to be converted
+     * @since 2.0.51
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T to(Type type, long features) {
         if (type == String.class) {
             return (T) toString();
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this);
+        return objectReader.createInstance(this, features);
     }
 
     /**
@@ -986,6 +1155,10 @@ public class JSONArray
     public <T> T to(Class<T> type) {
         if (type == String.class) {
             return (T) toString();
+        }
+
+        if (type == JSON.class) {
+            return (T) this;
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -1175,7 +1348,7 @@ public class JSONArray
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, featuresValue);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -1234,7 +1407,7 @@ public class JSONArray
 
         if (value instanceof Collection) {
             ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value);
+            return objectReader.createInstance((Collection) value, featuresValue);
         }
 
         Class clazz = TypeUtils.getMapping(type);

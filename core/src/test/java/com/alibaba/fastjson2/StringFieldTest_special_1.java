@@ -56,7 +56,7 @@ public class StringFieldTest_special_1 {
         Model model = new Model();
         model.name = "<>";
         String str = JSON.toJSONString(model, JSONWriter.Feature.BrowserSecure);
-        assertEquals("{\"name\":\"\\u003c\\u003e\"}", str);
+        assertEquals("{\"name\":\"\\u003C\\u003E\"}", str);
     }
 
     public static class Model {

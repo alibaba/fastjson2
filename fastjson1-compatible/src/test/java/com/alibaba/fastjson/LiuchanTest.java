@@ -11,7 +11,7 @@ public class LiuchanTest {
     @Test
     public void test4() {
         Object a = JSON.parseObject("{\"@type\":\"com.alibaba.fastjson.JSONObject\",\"success\":true}",
-                new TypeReference<Map<String, Object>>(){}//, Feature.DisableSpecialKeyDetect
+                new TypeReference<Map<String, Object>>(){}, Feature.SupportAutoType
         );
         assertEquals(com.alibaba.fastjson.JSONObject.class, a.getClass());
     }

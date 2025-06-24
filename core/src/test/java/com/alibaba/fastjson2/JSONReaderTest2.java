@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
-import sun.misc.Unsafe;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -830,7 +829,7 @@ public class JSONReaderTest2 {
                 assertEquals(nameLength, name.length());
                 String json = JSONObject.of(name, value).toJSONString();
                 byte[] jsonbBytes = json.getBytes(StandardCharsets.UTF_8);
-                int name0 = UNSAFE.getInt(jsonbBytes, Unsafe.ARRAY_BYTE_BASE_OFFSET + 1);
+                int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
 
                 JSONReader[] jsonReaders = new JSONReader[] {
                         JSONReader.of(jsonbBytes),
@@ -868,7 +867,7 @@ public class JSONReaderTest2 {
                             } else {
                                 byteIndex += 4;
                             }
-                            args[i] = UNSAFE.getInt(bytes, Unsafe.ARRAY_BYTE_BASE_OFFSET);
+                            args[i] = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET);
                         } else if (paramType == long.class) {
                             byte[] bytes = Arrays.copyOfRange(jsonbBytes, byteIndex + 2, byteIndex + 10);
                             if (nameLength - byteIndex == 6) {
@@ -878,7 +877,7 @@ public class JSONReaderTest2 {
                             } else {
                                 byteIndex += 8;
                             }
-                            args[i] = UNSAFE.getLong(bytes, Unsafe.ARRAY_BYTE_BASE_OFFSET);
+                            args[i] = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
                         } else {
                             throw new UnsupportedOperationException();
                         }
@@ -1601,5 +1600,13 @@ public class JSONReaderTest2 {
             JSONReader jsonReader = JSONReader.of(str);
             assertFalse(jsonReader.isReference());
         }
+    }
+
+    @Test
+    public void setFeatures() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+        long features = 123456L;
+        context.setFeatures(features);
+        assertEquals(features, context.getFeatures());
     }
 }

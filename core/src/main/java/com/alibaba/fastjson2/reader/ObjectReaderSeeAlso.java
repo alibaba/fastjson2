@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
@@ -7,6 +8,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -76,6 +79,95 @@ final class ObjectReaderSeeAlso<T>
     }
 
     @Override
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
+
+        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
+        if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
+            return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
+        if (jsonReader.isArray()) {
+            if (jsonReader.isSupportBeanArray()) {
+                return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+            } else {
+                throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
+            }
+        }
+
+        JSONReader.SavePoint savePoint = jsonReader.mark();
+        jsonReader.nextIfObjectStart();
+
+        T object = null;
+        for (int i = 0; ; ++i) {
+            if (jsonReader.nextIfObjectEnd()) {
+                break;
+            }
+
+            long hash = jsonReader.readFieldNameHashCode();
+            if (hash == typeKeyHashCode) {
+                long typeHash = jsonReader.readValueHashCode();
+                JSONReader.Context context = jsonReader.getContext();
+                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
+                if (autoTypeObjectReader == null) {
+                    String typeName = jsonReader.getString();
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+
+                    if (autoTypeObjectReader == null) {
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                    }
+                }
+
+                if (autoTypeObjectReader == this) {
+                    continue;
+                }
+                if (i != 0) {
+                    jsonReader.reset(savePoint);
+                }
+
+                jsonReader.setTypeRedirect(true);
+                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+            }
+
+            if (hash == 0) {
+                continue;
+            }
+
+            FieldReader fieldReader = getFieldReader(hash);
+            if (fieldReader == null && jsonReader.isSupportSmartMatch(features | this.features)) {
+                long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
+                fieldReader = getFieldReaderLCase(nameHashCodeLCase);
+            }
+            if (fieldReader == null) {
+                processExtra(jsonReader, object);
+                continue;
+            }
+
+            if (object == null) {
+                object = createInstance(jsonReader.getContext().getFeatures() | features);
+            }
+
+            fieldReader.readFieldValue(jsonReader, object);
+        }
+
+        if (object == null) {
+            object = createInstance(jsonReader.getContext().getFeatures() | features);
+        }
+
+        if (schema != null) {
+            schema.assertValidate(object);
+        }
+
+        return object;
+    }
+
+    @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
@@ -139,6 +231,7 @@ final class ObjectReaderSeeAlso<T>
             }
         }
 
+        Map<Long, Object> fieldValues = null;
         for (int i = 0; ; i++) {
             if (jsonReader.nextIfObjectEnd()) {
                 if (object == null) {
@@ -150,7 +243,7 @@ final class ObjectReaderSeeAlso<T>
             JSONReader.Context context = jsonReader.getContext();
             long features3, hash = jsonReader.readFieldNameHashCode();
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
-            if (hash == getTypeKeyHash()
+            if ((hash == getTypeKeyHash() || (seeAlsoDefault != null && seeAlsoDefault != Void.class))
                     && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
                 ObjectReader reader = null;
@@ -173,11 +266,14 @@ final class ObjectReaderSeeAlso<T>
                     }
                 }
 
+                String typeName = null;
                 if (reader == null) {
                     reader = autoType(context, typeHash);
+                    if (reader != null && hash != HASH_TYPE) {
+                        typeName = jsonReader.getString();
+                    }
                 }
 
-                String typeName = null;
                 if (reader == null) {
                     typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(
@@ -198,6 +294,9 @@ final class ObjectReaderSeeAlso<T>
                 }
 
                 FieldReader fieldReader = reader.getFieldReader(hash);
+                if (fieldReader == null && hash != HASH_TYPE) {
+                    fieldReader = reader.getFieldReader(typeKey);
+                }
                 if (fieldReader != null && typeName == null) {
                     if (typeNumberStr != null) {
                         typeName = typeNumberStr;
@@ -206,7 +305,7 @@ final class ObjectReaderSeeAlso<T>
                     }
                 }
 
-                if (i != 0) {
+                if (i != 0 || fieldReader != null) {
                     jsonReader.reset(savePoint);
                 }
 
@@ -240,7 +339,22 @@ final class ObjectReaderSeeAlso<T>
                 continue;
             }
 
-            fieldReader.readFieldValue(jsonReader, object);
+            if (object == null) {
+                Object fieldValue = fieldReader.readFieldValue(jsonReader);
+                if (fieldValues == null) {
+                    fieldValues = new LinkedHashMap<>();
+                }
+                fieldValues.put(hash, fieldValue);
+            } else {
+                fieldReader.readFieldValue(jsonReader, object);
+            }
+        }
+
+        if (fieldValues != null) {
+            for (Map.Entry<Long, Object> entry : fieldValues.entrySet()) {
+                FieldReader fieldReader = getFieldReader(entry.getKey());
+                fieldReader.accept(object, entry.getValue());
+            }
         }
 
         jsonReader.nextIfComma();

@@ -25,7 +25,7 @@ public final class ObjectReaderImplObject
         return new JSONObject();
     }
 
-    public Object createInstance(Collection collection) {
+    public Object createInstance(Collection collection, long features) {
         return collection;
     }
 
@@ -102,8 +102,8 @@ public final class ObjectReaderImplObject
                                         contextClass = classLoader.loadClass(typeName);
                                     } catch (ClassNotFoundException ignored) {
                                     }
-
-                                    if (!objectClass.equals(contextClass)) {
+                                    //明确contextClass类型与objectClass不一致时才更改reader
+                                    if (contextClass != null && !objectClass.equals(contextClass)) {
                                         autoTypeObjectReader = context.getObjectReader(contextClass);
                                     }
                                 }
@@ -205,7 +205,17 @@ public final class ObjectReaderImplObject
                         value = jsonReader.readArray();
                         break;
                     case '{':
-                        value = jsonReader.readObject();
+                        if (jsonReader.isReference()) {
+                            String reference = jsonReader.readReference();
+                            if ("..".equals(reference)) {
+                                value = object;
+                            } else {
+                                jsonReader.addResolveTask(object, name, JSONPath.of(reference));
+                                continue;
+                            }
+                        } else {
+                            value = jsonReader.readObject();
+                        }
                         break;
                     case '"':
                     case '\'':
@@ -288,6 +298,9 @@ public final class ObjectReaderImplObject
                 break;
             case 'n':
                 value = jsonReader.readNullOrNewDate();
+                break;
+            case 'x':
+                value = jsonReader.readBinary();
                 break;
             case 'S':
                 if (jsonReader.nextIfSet()) {

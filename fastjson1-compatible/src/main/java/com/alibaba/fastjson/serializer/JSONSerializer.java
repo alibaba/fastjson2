@@ -34,6 +34,20 @@ public class JSONSerializer {
         this.raw = out.raw;
     }
 
+    public static JSONSerializer getJSONSerializer(JSONWriter writer) {
+        JSONSerializer serializer = null;
+        Object attachment = writer.getAttachment();
+        if (attachment == null) {
+            attachment = serializer = new JSONSerializer(writer);
+            writer.setAttachment(attachment);
+        } else if (attachment instanceof JSONSerializer) {
+            serializer = (JSONSerializer) attachment;
+        } else {
+            serializer = new JSONSerializer(writer);
+        }
+        return serializer;
+    }
+
     public void config(SerializerFeature feature, boolean state) {
         if (!state) {
             throw new JSONException("not support");
@@ -82,7 +96,7 @@ public class JSONSerializer {
                 ctx.config(JSONWriter.Feature.IgnoreErrorGetter);
                 break;
             case WriteDateUseDateFormat:
-                ctx.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
+                ctx.setDateFormat(JSON.DEFAULT_DATE_FORMAT);
                 break;
             case BeanToArray:
                 ctx.config(JSONWriter.Feature.BeanToArray);
@@ -170,5 +184,32 @@ public class JSONSerializer {
 
     public void setContext(SerialContext context) {
         this.context = context;
+    }
+
+    public final boolean containsReference(Object value) {
+        return out.raw.containsReference(value);
+    }
+
+    public final void writeReference(Object object) {
+        out.raw.writeReference(object);
+    }
+
+    public final void incrementIndent() {
+        out.raw.incrementIndent();
+    }
+
+    public final void decrementIdent() {
+        out.raw.decrementIdent();
+    }
+
+    public void println() {
+    }
+
+    public void setContext(SerialContext parent, Object object, Object fieldName, int features) {
+        this.setContext(parent, object, fieldName, features, 0);
+    }
+
+    public void setContext(SerialContext parent, Object object, Object fieldName, int features, int fieldFeatures) {
+        this.setContext(new SerialContext(parent, object, fieldName, features, fieldFeatures));
     }
 }

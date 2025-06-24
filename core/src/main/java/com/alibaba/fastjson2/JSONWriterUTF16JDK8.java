@@ -2,8 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.JDKUtils;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
-import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 final class JSONWriterUTF16JDK8
         extends JSONWriterUTF16 {
@@ -44,7 +43,7 @@ final class JSONWriterUTF16JDK8
             // inline ensureCapacity(off + strlen + 2);
             int minCapacity = off + strlen + 2;
             if (minCapacity >= chars.length) {
-                ensureCapacity(minCapacity);
+                grow0(minCapacity);
             }
 
             chars[off++] = quote;

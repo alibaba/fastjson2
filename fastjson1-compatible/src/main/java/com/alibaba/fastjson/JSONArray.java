@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
@@ -14,6 +15,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Function;
 
@@ -190,12 +192,12 @@ public class JSONArray
             }
 
             if (value instanceof Float) {
-                float floatValue = ((Float) value).floatValue();
+                float floatValue = (Float) value;
                 return toBigDecimal(floatValue);
             }
 
             if (value instanceof Double) {
-                double doubleValue = ((Double) value).doubleValue();
+                double doubleValue = (Double) value;
                 return toBigDecimal(doubleValue);
             }
 
@@ -206,6 +208,10 @@ public class JSONArray
         if (value instanceof String) {
             String str = (String) value;
             return toBigDecimal(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
@@ -257,6 +263,10 @@ public class JSONArray
             }
 
             return Integer.parseInt(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? Integer.valueOf(1) : Integer.valueOf(0);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
@@ -582,7 +592,7 @@ public class JSONArray
 
     @Override
     public Object get(int index) {
-        return list.get(index);
+        return adaptResult(list.get(index));
     }
 
     /**
@@ -646,6 +656,10 @@ public class JSONArray
             }
 
             return new BigInteger(str);
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
@@ -746,6 +760,20 @@ public class JSONArray
             return (String) value;
         }
 
+        if (value instanceof Date) {
+            long timeMillis = ((Date) value).getTime();
+            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
+        }
+
+        if (value instanceof Boolean
+                || value instanceof Character
+                || value instanceof Number
+                || value instanceof UUID
+                || value instanceof Enum
+                || value instanceof TemporalAccessor) {
+            return value.toString();
+        }
+
         return com.alibaba.fastjson2.JSON.toJSONString(value);
     }
 
@@ -783,7 +811,7 @@ public class JSONArray
             return (T) TypeUtils.cast(obj, (Class) type);
         } else {
             String json = JSON.toJSONString(obj);
-            return (T) JSON.parseObject(json, type);
+            return JSON.parseObject(json, type);
         }
     }
 
@@ -807,7 +835,7 @@ public class JSONArray
         ObjectReader objectReader = provider.getObjectReader(clazz);
         JSONReader jsonReader = JSONReader.of(json);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
@@ -818,7 +846,7 @@ public class JSONArray
     }
 
     public <T> List<T> toJavaList(Class<T> clazz) {
-        List<T> list = new ArrayList<T>(this.size());
+        List<T> list = new ArrayList<>(this.size());
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader objectReader = provider.getObjectReader(clazz);
@@ -839,10 +867,8 @@ public class JSONArray
                     list.add((T) converted);
                     continue;
                 }
-
-                throw new com.alibaba.fastjson2.JSONException(
-                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
-                );
+                // item is NOT null here
+                throw new com.alibaba.fastjson2.JSONException(item.getClass() + " cannot be converted to " + clazz);
             }
             list.add(classItem);
         }

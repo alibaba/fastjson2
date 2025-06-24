@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,11 +22,33 @@ public class JSONFieldTest {
 
         String str1 = "{\"UserId\":123}";
         assertEquals(0, JSON.parseObject(str1, Bean.class).id);
-        assertEquals(0, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
+        assertEquals(123, JSON.parseObject(str1, Bean.class, JSONReader.Feature.SupportSmartMatch).id);
     }
 
-    @JSONCompiled(smartMatch = false)
+    @JSONCompiled
+    @JSONType
     public static class Bean {
+        @JSONField(name = "userId")
+        public int id;
+    }
+
+    @Test
+    public void test1() {
+        Bean1 bean = new Bean1();
+        bean.id = 123;
+
+        String str = JSON.toJSONString(bean);
+
+        Bean1 bean1 = JSON.parseObject(str, Bean1.class);
+        assertEquals(bean.id, bean1.id);
+
+        String str1 = "{\"UserId\":123}";
+        assertEquals(0, JSON.parseObject(str1, Bean1.class).id);
+        assertEquals(123, JSON.parseObject(str1, Bean1.class, JSONReader.Feature.SupportSmartMatch).id);
+    }
+
+    @JSONType
+    public static class Bean1 {
         @JSONField(name = "userId")
         public int id;
     }

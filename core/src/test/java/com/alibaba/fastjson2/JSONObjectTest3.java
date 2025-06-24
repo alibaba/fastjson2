@@ -88,6 +88,8 @@ public class JSONObjectTest3 {
         assertEquals(3, JSONObject.of("k0", 0, "k1", 1, "k2", 2).size());
         assertEquals(4, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3).size());
         assertEquals(5, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3, "k4", 4).size());
+        assertEquals(6, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5).size());
+        assertEquals(7, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6).size());
     }
 
     @Test

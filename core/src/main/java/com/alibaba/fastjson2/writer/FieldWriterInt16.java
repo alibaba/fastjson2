@@ -21,7 +21,7 @@ abstract class FieldWriterInt16<T>
     }
 
     protected final void writeInt16(JSONWriter jsonWriter, short value) {
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeNonStringValueAsString = (jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
         if (writeNonStringValueAsString) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(Short.toString(value));
@@ -46,7 +46,7 @@ abstract class FieldWriterInt16<T>
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.WriteNulls.mask) == 0) {
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
                 return false;
             }
             writeFieldName(jsonWriter);
@@ -70,6 +70,9 @@ abstract class FieldWriterInt16<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        return ObjectWriterImplInt16.INSTANCE;
+        if (valueClass == fieldClass) {
+            return ObjectWriterImplInt16.INSTANCE;
+        }
+        return jsonWriter.getObjectWriter(valueClass);
     }
 }

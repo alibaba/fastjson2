@@ -7,17 +7,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.IOUtils.ALSE;
+import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
+import static com.alibaba.fastjson2.util.DateUtils.*;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 class JSONReaderUTF8
         extends JSONReader {
+    static final int REF = BIG_ENDIAN ? 0x24726566 : 0x66657224;
+    static final int ESCAPE_INDEX_NOT_SET = -2;
+    protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
+
     protected final byte[] bytes;
     protected final int length;
     protected final int start;
@@ -101,7 +108,7 @@ class JSONReaderUTF8
         }
     }
 
-    JSONReaderUTF8(Context ctx, String str, byte[] bytes, int offset, int length) {
+    JSONReaderUTF8(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx, false, true);
 
         this.bytes = bytes;
@@ -112,6 +119,14 @@ class JSONReaderUTF8
         this.end = offset + length;
         this.cacheItem = null;
         next();
+    }
+
+    static int indexOfSlash(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        int slashIndex = jsonReader.nextEscapeIndex;
+        if (slashIndex == ESCAPE_INDEX_NOT_SET || (slashIndex != -1 && slashIndex < offset)) {
+            jsonReader.nextEscapeIndex = slashIndex = IOUtils.indexOfSlash(bytes, offset, end);
+        }
+        return slashIndex;
     }
 
     private void char_utf8(int ch, int offset) {
@@ -457,6 +472,23 @@ class JSONReaderUTF8
         }
     }
 
+    public final void nextWithoutComment() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = offset >= end ? EOI : bytes[offset++];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch < 0) {
+            char_utf8(ch, offset);
+            return;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+    }
+
     @Override
     public long readFieldNameHashCodeUnquote() {
         this.nameEscape = false;
@@ -492,6 +524,8 @@ class JSONReaderUTF8
                 case ')':
                 case ',':
                 case ':':
+                case '|':
+                case '&':
                 case EOI:
                     nameLength = i;
                     this.nameEnd = ch == EOI ? offset : offset - 1;
@@ -508,7 +542,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[offset++];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                        ch = hexDigit4(bytes, check3(offset, end));
                         offset += 4;
                         break;
                     }
@@ -621,7 +655,7 @@ class JSONReaderUTF8
                     ch = bytes[offset++];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                            ch = hexDigit4(bytes, check3(offset, end));
                             offset += 4;
                             break;
                         }
@@ -732,11 +766,10 @@ class JSONReaderUTF8
 
                     int c1 = (ch & 0x3ff) + '\uDC00'; // Character.lowSurrogate(uc);
                     hashCode ^= c1;
-                    hashCode *= Fnv.MAGIC_PRIME;
                 } else {
                     hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
                 }
+                hashCode *= Fnv.MAGIC_PRIME;
 
                 ch = offset == end ? EOI : bytes[offset++];
             }
@@ -777,18 +810,13 @@ class JSONReaderUTF8
         int offset = this.offset;
         offset += 9;
 
-        if (offset >= end) {
+        if (offset >= end || bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
             return false;
         }
 
-        if (bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
-            return false;
-        }
-
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -803,18 +831,13 @@ class JSONReaderUTF8
         int offset = this.offset;
         offset += 8;
 
-        if (offset >= end) {
+        if (offset >= end || bytes[offset - 1] != ':') {
             return false;
         }
 
-        if (bytes[offset - 1] != ':') {
-            return false;
-        }
-
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -834,10 +857,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -849,17 +871,13 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match2() {
         byte[] bytes = this.bytes;
         int offset = this.offset + 4;
-        if (offset >= end) {
+        if (offset >= end || bytes[offset - 1] != ':') {
             return false;
         }
 
-        if (bytes[offset - 1] != ':') {
-            return false;
-        }
-
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -872,18 +890,13 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match3() {
         byte[] bytes = this.bytes;
         int offset = this.offset + 5;
-        if (offset >= end) {
+        if (offset >= end || bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
             return false;
         }
 
-        if (bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
-            return false;
-        }
-
-        int c = bytes[offset] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        int c;
+        while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            c = bytes[offset] & 0xff;
         }
 
         this.offset = offset + 1;
@@ -900,9 +913,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -919,9 +932,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -940,9 +953,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -955,20 +968,17 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match7(int name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 9;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name1
+        if (offset >= end
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name1
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -980,22 +990,18 @@ class JSONReaderUTF8
     @Override
     public final boolean nextIfName4Match8(int name1, byte c8) {
         int offset = this.offset + 10;
-        if (offset >= end) {
-            return false;
-        }
-
         byte[] bytes = this.bytes;
-        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name1
+        if (offset >= end
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name1
                 || bytes[offset - 3] != c8
                 || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1008,17 +1014,13 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match9(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 11;
-        if (offset >= end) {
+        if (offset >= end || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name1) {
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name1) {
-            return false;
-        }
-
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1031,19 +1033,16 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match10(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 12;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name1
                 || bytes[offset - 1] != ':'
         ) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1056,20 +1055,16 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match11(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 13;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name1
                 || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1082,11 +1077,8 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match12(long name1, byte name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 14;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name1
                 || bytes[offset - 3] != name2
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1094,9 +1086,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1109,19 +1101,16 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match13(long name1, int name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 15;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name1
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name2
         ) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1134,20 +1123,17 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match14(long name1, int name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 16;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name1
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name2
                 || bytes[offset - 1] != ':'
         ) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1160,11 +1146,8 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match15(long name1, int name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 17;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name1
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name2
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1172,9 +1155,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1187,11 +1170,8 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match16(long name1, int name2, byte name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 18;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name1
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name2
                 || bytes[offset - 3] != name3
                 || bytes[offset - 2] != '"'
@@ -1200,9 +1180,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1225,9 +1205,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1251,9 +1231,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1278,9 +1258,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1306,9 +1286,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1332,9 +1312,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1359,9 +1339,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1387,9 +1367,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1416,9 +1396,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1431,20 +1411,16 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match25(long name1, long name2, long name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 27;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name3
-        ) {
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name3) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1457,21 +1433,17 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match26(long name1, long name2, long name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 28;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name3
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1484,22 +1456,18 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match27(long name1, long name2, long name3) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 29;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name3
                 || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1512,23 +1480,19 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match28(long name1, long name2, long name3, byte c29) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 30;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name3
                 || bytes[offset - 3] != c29
                 || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1541,21 +1505,17 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match29(long name1, long name2, long name3, int name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 31;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name3
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name4
-        ) {
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name4) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1568,22 +1528,18 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match30(long name1, long name2, long name3, int name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 32;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name3
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name4
-                || bytes[offset - 1] != ':'
-        ) {
+                || bytes[offset - 1] != ':') {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1596,23 +1552,20 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match31(long name1, long name2, long name3, int name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 33;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name1
+        if (offset >= end
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name3
                 || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name4
-                || bytes[offset - 2] != '"'
-                || bytes[offset - 1] != ':'
         ) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1640,9 +1593,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1655,21 +1608,17 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match33(long name1, long name2, long name3, long name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 35;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name1
+        if (offset >= end
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name4
-        ) {
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name4) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1682,22 +1631,19 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match34(long name1, long name2, long name3, long name4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 36;
-        if (offset >= end) {
-            return false;
-        }
-
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name1
+        if (offset >= end
+                || bytes[offset - 1] != ':'
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name1
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name2
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name3
                 || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name4
-                || bytes[offset - 1] != ':'
         ) {
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1724,9 +1670,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1754,9 +1700,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1781,9 +1727,9 @@ class JSONReaderUTF8
         ) {
             return false;
         }
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1810,9 +1756,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1840,9 +1786,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1871,9 +1817,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1899,9 +1845,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1928,9 +1874,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -1958,9 +1904,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c = bytes[offset++] & 0xff;
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-            c = bytes[offset++] & 0xff;
+        int c;
+        while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
+            // empty  loop
         }
 
         this.offset = offset;
@@ -2321,6 +2267,13 @@ class JSONReaderUTF8
     public long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -2471,7 +2424,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2545,7 +2498,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2659,7 +2612,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -2726,7 +2679,7 @@ class JSONReaderUTF8
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            ch = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -2836,9 +2789,12 @@ class JSONReaderUTF8
     @Override
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
-        int offset = nameBegin;
+        int offset = nameBegin, end = this.end;
+        byte quote = '"';
         final byte[] bytes = this.bytes;
-
+        if (offset > 0 && bytes[offset - 1] == '\'') {
+            quote = '\'';
+        }
         long nameValue = 0;
         for (int i = 0; offset < end; offset++) {
             int ch = bytes[offset];
@@ -2847,7 +2803,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -2864,7 +2820,7 @@ class JSONReaderUTF8
                 }
             } else if (ch == -61 || ch == -62) {
                 ch = ((ch & 0x1F) << 6) | (bytes[++offset] & 0x3F);
-            } else if (ch == '"') {
+            } else if (ch == quote) {
                 break;
             }
 
@@ -2946,7 +2902,7 @@ class JSONReaderUTF8
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -2962,7 +2918,7 @@ class JSONReaderUTF8
                         break;
                 }
                 offset++;
-            } else if (ch == '"') {
+            } else if (ch == quote) {
                 break;
             } else {
                 if (ch >= 0) {
@@ -3038,11 +2994,7 @@ class JSONReaderUTF8
         if (!nameEscape) {
             if (nameAscii) {
                 if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[length];
-                    for (int i = 0; i < length; ++i) {
-                        chars[i] = (char) bytes[offset + i];
-                    }
-                    return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    return JDKUtils.asciiStringJDK8(bytes, offset, length);
                 } else if (STRING_CREATOR_JDK11 != null) {
                     return STRING_CREATOR_JDK11.apply(
                             Arrays.copyOfRange(bytes, offset, nameEnd),
@@ -3057,7 +3009,7 @@ class JSONReaderUTF8
 
         char[] chars = new char[nameLength];
 
-        for (int i = 0; offset < nameEnd; ++i) {
+        for (int i = 0, end = this.end; offset < nameEnd; ++i) {
             int ch = bytes[offset];
             if (ch < 0) {
                 ch &= 0xFF;
@@ -3086,7 +3038,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                        ch = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -3125,6 +3077,9 @@ class JSONReaderUTF8
     @Override
     public String readFieldName() {
         final char quote = ch;
+        if (quote == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
         if (quote != '"' && quote != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(quote)) {
                 return readFieldNameUnquote();
@@ -3355,7 +3310,7 @@ class JSONReaderUTF8
                                 + (((long) bytes[nameBegin + 10]) << 32)
                                 + (((long) bytes[nameBegin + 9]) << 24)
                                 + (((long) bytes[nameBegin + 8]) << 16)
-                                + (((long) bytes[nameBegin + 8]) << 8)
+                                + (((long) bytes[nameBegin + 7]) << 8)
                                 + ((long) bytes[nameBegin + 6]);
                         break;
                     case 15:
@@ -3409,11 +3364,7 @@ class JSONReaderUTF8
                         if (entry == null) {
                             String name;
                             if (STRING_CREATOR_JDK8 != null) {
-                                char[] chars = new char[length];
-                                for (int i = 0; i < length; ++i) {
-                                    chars[i] = (char) bytes[nameBegin + i];
-                                }
-                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                                name = asciiStringJDK8(bytes, nameBegin, length);
                             } else if (ANDROID) {
                                 name = getLatin1String(nameBegin, length);
                             } else {
@@ -3431,11 +3382,7 @@ class JSONReaderUTF8
                         if (entry == null) {
                             String name;
                             if (STRING_CREATOR_JDK8 != null) {
-                                char[] chars = new char[length];
-                                for (int i = 0; i < length; ++i) {
-                                    chars[i] = (char) bytes[nameBegin + i];
-                                }
-                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                                name = asciiStringJDK8(bytes, nameBegin, length);
                             } else if (ANDROID) {
                                 name = getLatin1String(nameBegin, length);
                             } else {
@@ -3451,11 +3398,7 @@ class JSONReaderUTF8
                 }
 
                 if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[length];
-                    for (int i = 0; i < length; ++i) {
-                        chars[i] = (char) bytes[nameBegin + i];
-                    }
-                    return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    return asciiStringJDK8(bytes, nameBegin, length);
                 } else if (ANDROID) {
                     return getLatin1String(nameBegin, nameEnd - nameBegin);
                 } else if (STRING_CREATOR_JDK11 != null) {
@@ -3479,574 +3422,299 @@ class JSONReaderUTF8
 
     @Override
     public final int readInt32Value() {
-        boolean negative = false;
         int ch = this.ch;
         int offset = this.offset, end = this.end;
         final byte[] bytes = this.bytes;
 
-        int intValue = 0;
-
         int quote = '\0';
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = bytes[offset++];
         }
-
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else if (ch == '+') {
-            ch = bytes[offset++];
-        } else if (ch == ',') {
-            throw numberError();
+        int fc = ch;
+        int result = ch >= '0' && ch <= '9'
+                ? '0' - ch
+                : ch == '-' || ch == '+'
+                ? 0
+                : 1;  // or any value > 0
+        int d;
+        while (offset + 1 < end
+                && (d = IOUtils.digit2(bytes, offset)) != -1
+                && Integer.MIN_VALUE / 100 <= result & result <= 0) {
+            result = result * 100 - d;  // overflow from d => result > 0
+            offset += 2;
+        }
+        if (offset < end && IOUtils.isDigit(ch = bytes[offset]) && Integer.MIN_VALUE / 10 <= result & result <= 0) {
+            result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+            offset++;
         }
 
-        boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            int intValue10 = intValue * 10 + (ch - '0');
-            if (intValue10 < intValue) {
-                overflow = true;
-                break;
-            } else {
-                intValue = intValue10;
-            }
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || (quote != 0 && ch != quote)
+        ch = offset == end ? EOI : bytes[offset++];
+        if (result <= 0 && (Integer.MIN_VALUE < result || fc == '-')
+                && INT_VALUE_END[ch & 0xff]
+                && (quote == 0 || ch == quote)
         ) {
-            overflow = true;
-        }
-
-        if (overflow) {
-            readNumber0();
-            return getInt32Value();
-        }
-
-        if (quote != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (quote != 0) {
                 ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-
-        return negative ? -intValue : intValue;
-    }
-
-    @Override
-    public final Integer readInt32() {
-        boolean negative = false;
-        int ch = this.ch;
-        int offset = this.offset;
-        final byte[] bytes = this.bytes;
-
-        int intValue = 0;
-
-        int quote = '\0';
-        if (ch == '"' || ch == '\'') {
-            quote = ch;
-            ch = bytes[offset++];
-        }
-
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else if (ch == '+') {
-            ch = bytes[offset++];
-        } else if (ch == ',') {
-            throw numberError();
-        }
-
-        boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            int intValue10 = intValue * 10 + (ch - '0');
-            if (intValue10 < intValue) {
-                overflow = true;
-                break;
-            } else {
-                intValue = intValue10;
-            }
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || (quote != 0 && ch != quote)
-        ) {
-            overflow = true;
-        }
-
-        if (overflow) {
-            readNumber0();
-            if (wasNull) {
-                return null;
-            }
-            return getInt32Value();
-        }
-
-        if (quote != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-
-        return negative ? -intValue : intValue;
-    }
-
-    @Override
-    public final long readInt64Value() {
-        boolean negative = false;
-        int ch = this.ch;
-        int offset = this.offset;
-        final byte[] bytes = this.bytes;
-
-        long longValue = 0;
-
-        int quote = '\0';
-        if (ch == '"' || ch == '\'') {
-            quote = ch;
-            ch = bytes[offset++];
-        }
-
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else if (ch == '+') {
-            ch = bytes[offset++];
-        } else if (ch == ',') {
-            throw numberError();
-        }
-
-        boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            long intValue10 = longValue * 10 + (ch - '0');
-            if (intValue10 < longValue) {
-                overflow = true;
-                break;
-            } else {
-                longValue = intValue10;
-            }
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || (quote != 0 && ch != quote)
-        ) {
-            overflow = true;
-        }
-
-        if (overflow) {
-            readNumber0();
-            return getInt64Value();
-        }
-
-        if (quote != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : (char) bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-
-        return negative ? -longValue : longValue;
-    }
-
-    @Override
-    public final Long readInt64() {
-        boolean negative = false;
-        int ch = this.ch;
-        int offset = this.offset;
-        final byte[] bytes = this.bytes;
-
-        long longValue = 0;
-
-        int quote = '\0';
-        if (ch == '"' || ch == '\'') {
-            quote = ch;
-            ch = bytes[offset++];
-        }
-
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else if (ch == '+') {
-            ch = bytes[offset++];
-        } else if (ch == ',') {
-            throw numberError();
-        }
-
-        boolean overflow = ch < '0' || ch > '9';
-        while (ch >= '0' && ch <= '9') {
-            long intValue10 = longValue * 10 + (ch - '0');
-            if (intValue10 < longValue) {
-                overflow = true;
-                break;
-            } else {
-                longValue = intValue10;
-            }
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || (quote != 0 && ch != quote)
-        ) {
-            overflow = true;
-        }
-
-        if (overflow) {
-            readNumber0();
-            if (wasNull) {
-                return null;
-            }
-            return getInt64Value();
-        } else {
-            wasNull = false;
-        }
-
-        if (quote != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : (char) bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-
-        return negative ? -longValue : longValue;
-    }
-
-    @Override
-    public final double readDoubleValue() {
-        boolean valid = false;
-        this.wasNull = false;
-
-        boolean value = false;
-        double doubleValue = 0;
-
-        final byte[] bytes = this.bytes;
-        int quote = '\0';
-        int ch = this.ch;
-        int offset = this.offset;
-        if (ch == '"' || ch == '\'') {
-            quote = ch;
-            ch = bytes[offset++];
-
-            if (ch == quote) {
-                ch = offset == end ? EOI : bytes[offset++];
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-                this.ch = (char) ch;
-                this.offset = offset;
-                nextIfComma();
-                wasNull = true;
-                return 0;
-            }
-        }
-
-        final int start = offset;
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else {
-            negative = false;
-            if (ch == '+') {
-                ch = bytes[offset++];
-            }
-        }
-
-        valueType = JSON_TYPE_INT;
-        boolean overflow = false;
-        long longValue = 0;
-        while (ch >= '0' && ch <= '9') {
-            valid = true;
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                } else {
-                    longValue = intValue10;
-                }
-            }
-
-            if (offset == end) {
-                ch = EOI;
-                offset++;
-                break;
-            }
-            ch = bytes[offset++];
-        }
-
-        this.scale = 0;
-        if (ch == '.') {
-            valueType = JSON_TYPE_DEC;
-            ch = bytes[offset++];
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                this.scale++;
-                if (!overflow) {
-                    long intValue10 = longValue * 10 + (ch - '0');
-                    if (intValue10 < longValue) {
-                        overflow = true;
-                    } else {
-                        longValue = intValue10;
-                    }
-                }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = bytes[offset++];
-            }
-        }
-
-        int expValue = 0;
-        if (ch == 'e' || ch == 'E') {
-            boolean negativeExp = false;
-            ch = bytes[offset++];
-
-            if (ch == '-') {
-                negativeExp = true;
-                ch = bytes[offset++];
-            } else if (ch == '+') {
-                ch = bytes[offset++];
-            }
-
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                int byteVal = (ch - '0');
-                expValue = expValue * 10 + byteVal;
-                if (expValue > MAX_EXP) {
-                    throw new JSONException("too large exp value : " + expValue);
-                }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = bytes[offset++];
-            }
-
-            if (negativeExp) {
-                expValue = -expValue;
-            }
-
-            this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
-        }
-
-        if (offset == start) {
-            if (ch == 'n' && bytes[offset] == 'u' && bytes[offset + 1] == 'l' && bytes[offset + 2] == 'l') {
-                offset += 3;
-                valid = true;
-                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
-                    throw new JSONException(info("long value not support input null"));
-                }
-
-                wasNull = true;
-                value = true;
-                ch = offset == end ? EOI : bytes[offset++];
-            } else if (ch == 't' && bytes[offset] == 'r' && bytes[offset + 1] == 'u' && bytes[offset + 2] == 'e') {
-                offset += 3;
-                valid = true;
-                value = true;
-                doubleValue = 1;
-                ch = offset == end ? EOI : bytes[offset++];
-            } else if (ch == 'f' && bytes[offset] == 'a' && bytes[offset + 1] == 'l' && bytes[offset + 2] == 's' && bytes[offset + 3] == 'e') {
-                valid = true;
-                offset += 4;
-                doubleValue = 0;
-                value = true;
-                ch = offset == end ? EOI : bytes[offset++];
-            } else if (ch == 'N' && bytes[offset] == 'a' && bytes[offset + 1] == 'N') {
-                valid = true;
-                offset += 2;
-                doubleValue = Double.NaN;
-                value = true;
-                ch = offset == end ? EOI : bytes[offset++];
-            } else if (ch == '{' && quote == 0) {
-                valid = true;
-                this.ch = (char) ch;
-                this.offset = offset;
-                Map<String, Object> obj = readObject();
-                if (!obj.isEmpty()) {
-                    throw new JSONException(info());
-                }
-                offset = this.offset;
-                ch = this.ch;
-                value = true;
-                wasNull = true;
-            } else if (ch == '[' && quote == 0) {
-                valid = true;
-                this.ch = (char) ch;
-                this.offset = offset;
-                List array = readArray();
-                if (!array.isEmpty()) {
-                    throw new JSONException(info());
-                }
-                offset = this.offset;
-                ch = this.ch;
-                value = true;
-                wasNull = true;
-            }
-        }
-
-        int len = offset - start;
-
-        String str = null;
-        if (quote != 0) {
-            if (ch != quote) {
-                this.offset = offset - 1;
-                this.ch = (char) quote;
-                str = readString();
-                offset = this.offset;
-            }
-
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (!value) {
-            if (!overflow) {
-                if (longValue == 0) {
-                    if (scale == 1) {
-                        doubleValue = 0;
-                        value = true;
-                    }
-                } else {
-                    int scale = this.scale - expValue;
-                    if (scale == 0) {
-                        doubleValue = (double) longValue;
-                        if (negative) {
-                            doubleValue = -doubleValue;
-                        }
-                        value = true;
-                    } else if ((long) (double) longValue == longValue) {
-                        if (0 < scale && scale < DOUBLE_10_POW.length) {
-                            doubleValue = (double) longValue / DOUBLE_10_POW[scale];
-                            if (negative) {
-                                doubleValue = -doubleValue;
-                            }
-                            value = true;
-                        } else if (0 > scale && scale > -DOUBLE_10_POW.length) {
-                            doubleValue = (double) longValue * DOUBLE_10_POW[-scale];
-                            if (negative) {
-                                doubleValue = -doubleValue;
-                            }
-                            value = true;
-                        }
-                    }
-
-                    if (!value && scale > -128 && scale < 128) {
-                        doubleValue = TypeUtils.doubleValue(negative ? -1 : 1, longValue, scale);
-                        value = true;
-                    }
-                }
-            }
-
-            if (!value) {
-                if (str != null) {
-                    try {
-                        doubleValue = Double.parseDouble(str);
-                    } catch (NumberFormatException ex) {
-                        throw new JSONException(info(), ex);
-                    }
-                } else {
-                    doubleValue = TypeUtils.parseDouble(bytes, start - 1, len);
-                }
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
                 ch = offset == end ? EOI : bytes[offset++];
             }
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if (comma = (ch == ',')) {
+                ch = offset == end ? EOI : (char) bytes[offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            this.ch = (char) ch;
+            this.offset = offset;
+
+            return fc == '-' ? result : -result;
+        } else {
+            return readInt32ValueOverflow();
+        }
+    }
+
+    @Override
+    public final Integer readInt32() {
+        int ch = this.ch;
+        if ((ch == '"' || ch == '\'' || ch == 'n') && nextIfNullOrEmptyString()) {
+            return null;
+        }
+        return readInt32Value();
+    }
+
+    @Override
+    public final long readInt64Value() {
+        int ch = this.ch;
+        int offset = this.offset, end = this.end;
+        final byte[] bytes = this.bytes;
+
+        int quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = bytes[offset++];
+        }
+        int fc = ch;
+        long result = ch >= '0' && ch <= '9'
+                ? '0' - ch
+                : ch == '-' || ch == '+'
+                ? 0
+                : 1;  // or any value > 0
+        int d;
+        while (offset + 1 < end
+                && (d = IOUtils.digit2(bytes, offset)) != -1
+                && Long.MIN_VALUE / 100 <= result & result <= 0) {
+            result = result * 100 - d;  // overflow from d => result > 0
+            offset += 2;
+        }
+        if (offset < end && IOUtils.isDigit(ch = bytes[offset]) && Long.MIN_VALUE / 10 <= result & result <= 0) {
+            result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+            offset++;
+        }
+
+        ch = offset == end ? EOI : bytes[offset++];
+        if (result <= 0 && (Long.MIN_VALUE < result || fc == '-')
+                && INT_VALUE_END[ch & 0xff]
+                && (quote == 0 || ch == quote)
+        ) {
+            if (quote != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if (comma = (ch == ',')) {
+                ch = offset == end ? EOI : (char) bytes[offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            this.ch = (char) ch;
+            this.offset = offset;
+
+            return fc == '-' ? result : -result;
+        } else {
+            return readInt64ValueOverflow();
+        }
+    }
+
+    @Override
+    public final Long readInt64() {
+        int ch = this.ch;
+        if ((ch == '"' || ch == '\'' || ch == 'n') && nextIfNullOrEmptyString()) {
+            return null;
+        }
+        return readInt64Value();
+    }
+
+    @Override
+    public final double readDoubleValue() {
+        double doubleValue = 0;
+
+        final byte[] bytes = this.bytes;
+        int quote = '\0';
+        int ch = this.ch;
+        int offset = this.offset, end = this.end;
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        long result;
+        boolean wasNull = false;
+        if (quote != 0 && ch == quote) {
+            ch = offset == end ? EOI : bytes[offset++];
+            wasNull = true;
+            result = 0;
+        } else {
+            int fc = ch;
+            result = ch >= '0' && ch <= '9'
+                    ? '0' - ch
+                    : ch == '-' || ch == '+'
+                    ? 0
+                    : 1;  // or any value > 0
+
+            int d;
+            while (result <= 0
+                    && offset + 1 < end
+                    && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                if (Long.MIN_VALUE / 100 <= result) {
+                    result = result * 100 - d;  // overflow from d => result > 0
+                    offset += 2;
+                } else {
+                    result = 1; // overflow
+                }
+            }
+            if (result <= 0 && offset < end && IOUtils.isDigit(ch = bytes[offset])) {
+                if (Long.MIN_VALUE / 10 <= result) {
+                    result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+                    offset++;
+                } else {
+                    result = 1; // overflow
+                }
+            }
+
+            int scale = 0;
+            if (result <= 0
+                    && offset < end
+                    && bytes[offset] == '.'
+            ) {
+                offset++;
+                while (result <= 0
+                        && offset + 1 < end
+                        && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                    if (Long.MIN_VALUE / 100 <= result) {
+                        result = result * 100 - d;  // overflow from d => result > 0
+                        offset += 2;
+                        scale += 2;
+                    } else {
+                        result = 1; // overflow
+                    }
+                }
+                if (result <= 0 && offset < end && IOUtils.isDigit(ch = bytes[offset])) {
+                    if (Long.MIN_VALUE / 10 <= result) {
+                        result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+                        offset++;
+                        scale++;
+                    } else {
+                        result = 1; // overflow
+                    }
+                }
+            }
+            if (result <= 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            int expValue;
+            if (result <= 0) {
+                if (ch == 'e' || ch == 'E') {
+                    boolean negativeExp;
+                    ch = offset == end ? EOI : bytes[offset++];
+                    if ((negativeExp = (ch == '-')) || ch == '+') {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    } else if (ch == ',') {
+                        throw numberError();
+                    }
+                    if (IOUtils.isDigit(ch)) {
+                        expValue = ch - '0';
+                        while (offset < end
+                                && IOUtils.isDigit((ch = bytes[offset]))
+                        ) {
+                            d = ch - '0';
+                            expValue = expValue * 10 + d;
+                            if (expValue > MAX_EXP) {
+                                throw new JSONException("too large exp value : " + expValue);
+                            }
+                            offset++;
+                        }
+                        if (negativeExp) {
+                            expValue = -expValue;
+                        }
+                        scale -= expValue;
+                        ch = offset == end ? EOI : bytes[offset++];
+                    } else {
+                        result = 1; // invalid
+                    }
+                } else if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            if (result <= 0 && quote != 0) {
+                if (ch == quote) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                } else {
+                    result = 1; // invalid
+                }
+            }
+
+            if (result <= 0) {
+                boolean value = true;
+                if (scale == 0) {
+                    doubleValue = (double) result;
+                } else if ((long) (double) result == result) {
+                    if (0 < scale && scale < DOUBLE_10_POW.length) {
+                        doubleValue = (double) result / DOUBLE_10_POW[scale];
+                    } else if (0 > scale && scale > -DOUBLE_10_POW.length) {
+                        doubleValue = (double) result * DOUBLE_10_POW[-scale];
+                    } else {
+                        value = false;
+                    }
+                } else {
+                    value = false;
+                }
+                if (!value) {
+                    if (scale > 0 && scale < 64) {
+                        doubleValue = TypeUtils.doubleValue(fc == '-' ? -1 : 1, Math.abs(result), scale);
+                    } else {
+                        result = 1; // invalid
+                    }
+                } else {
+                    if (fc != '-' && doubleValue != 0) {
+                        doubleValue = -doubleValue;
+                    }
+                }
+            }
+        }
+
+        if (result > 0) {
+            readNumber0();
+            return getDoubleValue();
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -4060,10 +3728,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (!valid) {
-            throw new JSONException(info("illegal input error"));
-        }
-
+        this.wasNull = wasNull;
         this.ch = (char) ch;
         this.offset = offset;
         return doubleValue;
@@ -4071,263 +3736,171 @@ class JSONReaderUTF8
 
     @Override
     public final float readFloatValue() {
-        boolean valid = false;
-        this.wasNull = false;
-
-        boolean value = false;
         float floatValue = 0;
-        final byte[] chars = this.bytes;
 
+        final byte[] bytes = this.bytes;
         int quote = '\0';
         int ch = this.ch;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         if (ch == '"' || ch == '\'') {
             quote = ch;
-            ch = chars[offset++];
-
-            if (ch == quote) {
-                ch = offset == end ? EOI : chars[offset++];
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : chars[offset++];
-                }
-                this.ch = (char) ch;
-                this.offset = offset;
-                nextIfComma();
-                wasNull = true;
-                return 0;
-            }
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
-        final int start = offset;
-        if (ch == '-') {
-            negative = true;
-            ch = chars[offset++];
+        long result;
+        boolean wasNull = false;
+        if (quote != 0 && ch == quote) {
+            ch = offset == end ? EOI : bytes[offset++];
+            wasNull = true;
+            result = 0;
         } else {
-            negative = false;
-            if (ch == '+') {
-                ch = chars[offset++];
-            }
-        }
+            int fc = ch;
+            result = ch >= '0' && ch <= '9'
+                    ? '0' - ch
+                    : ch == '-' || ch == '+'
+                    ? 0
+                    : 1;  // or any value > 0
 
-        valueType = JSON_TYPE_INT;
-        boolean overflow = false;
-        long longValue = 0;
-
-        while (ch >= '0' && ch <= '9') {
-            valid = true;
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
+            int d;
+            while (result <= 0
+                    && offset + 1 < end
+                    && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                if (Long.MIN_VALUE / 100 <= result) {
+                    result = result * 100 - d;  // overflow from d => result > 0
+                    offset += 2;
                 } else {
-                    longValue = intValue10;
+                    result = 1; // overflow
+                }
+            }
+            if (result <= 0 && offset < end && IOUtils.isDigit(ch = bytes[offset])) {
+                if (Long.MIN_VALUE / 10 <= result) {
+                    result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+                    offset++;
+                } else {
+                    result = 1; // overflow
                 }
             }
 
-            if (offset == end) {
-                ch = EOI;
+            int scale = 0;
+            if (result <= 0
+                    && offset < end
+                    && bytes[offset] == '.'
+            ) {
                 offset++;
-                break;
-            }
-            ch = chars[offset++];
-        }
-
-        this.scale = 0;
-        if (ch == '.') {
-            valueType = JSON_TYPE_DEC;
-            ch = chars[offset++];
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                this.scale++;
-                if (!overflow) {
-                    long intValue10 = longValue * 10 + (ch - '0');
-                    if (intValue10 < longValue) {
-                        overflow = true;
+                while (result <= 0
+                        && offset + 1 < end
+                        && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                    if (Long.MIN_VALUE / 100 <= result) {
+                        result = result * 100 - d;  // overflow from d => result > 0
+                        offset += 2;
+                        scale += 2;
                     } else {
-                        longValue = intValue10;
+                        result = 1; // overflow
                     }
                 }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
+                if (result <= 0 && offset < end && IOUtils.isDigit(ch = bytes[offset])) {
+                    if (Long.MIN_VALUE / 10 <= result) {
+                        result = result * 10 + '0' - ch;  // overflow from '0' - d => result > 0
+                        offset++;
+                        scale++;
+                    } else {
+                        result = 1; // overflow
+                    }
                 }
-                ch = chars[offset++];
             }
-        }
-
-        int expValue = 0;
-        if (ch == 'e' || ch == 'E') {
-            boolean negativeExp = false;
-            ch = chars[offset++];
-
-            if (ch == '-') {
-                negativeExp = true;
-                ch = chars[offset++];
-            } else if (ch == '+') {
-                ch = chars[offset++];
+            if (result <= 0) {
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                int byteVal = (ch - '0');
-                expValue = expValue * 10 + byteVal;
-                if (expValue > MAX_EXP) {
-                    throw new JSONException("too large exp value : " + expValue);
+            int expValue;
+            if (result <= 0) {
+                if (ch == 'e' || ch == 'E') {
+                    boolean negativeExp;
+                    ch = offset == end ? EOI : bytes[offset++];
+                    if ((negativeExp = (ch == '-')) || ch == '+') {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    } else if (ch == ',') {
+                        throw numberError();
+                    }
+                    if (IOUtils.isDigit(ch)) {
+                        expValue = ch - '0';
+                        while (offset < end
+                                && IOUtils.isDigit((ch = bytes[offset]))
+                        ) {
+                            d = ch - '0';
+                            expValue = expValue * 10 + d;
+                            if (expValue > MAX_EXP) {
+                                throw new JSONException("too large exp value : " + expValue);
+                            }
+                            offset++;
+                        }
+                        if (negativeExp) {
+                            expValue = -expValue;
+                        }
+                        scale -= expValue;
+                        ch = offset == end ? EOI : bytes[offset++];
+                    } else {
+                        result = 1; // invalid
+                    }
+                } else if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                    ch = offset == end ? EOI : bytes[offset++];
                 }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = chars[offset++];
             }
 
-            if (negativeExp) {
-                expValue = -expValue;
+            if (result <= 0 && quote != 0) {
+                if (ch == quote) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                } else {
+                    result = 1; // invalid
+                }
             }
 
-            this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
-        }
-
-        if (offset == start) {
-            if (ch == 'n' && chars[offset] == 'u' && chars[offset + 1] == 'l' && chars[offset + 2] == 'l') {
-                offset += 3;
-                valid = true;
-                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
-                    throw new JSONException(info("long value not support input null"));
-                }
-                wasNull = true;
-                value = true;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == 't' && chars[offset] == 'r' && chars[offset + 1] == 'u' && chars[offset + 2] == 'e') {
-                offset += 3;
-                valid = true;
-                value = true;
-                floatValue = 1;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == 'f'
-                    && chars[offset] == 'a'
-                    && chars[offset + 1] == 'l'
-                    && chars[offset + 2] == 's'
-                    && chars[offset + 3] == 'e') {
-                offset += 4;
-                valid = true;
-                floatValue = 0;
-                value = true;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == 'N' && chars[offset] == 'a' && chars[offset + 1] == 'N') {
-                offset += 2;
-                valid = true;
-                value = true;
-                floatValue = Float.NaN;
-                ch = offset == end ? EOI : chars[offset++];
-            } else if (ch == '{' && quote == 0) {
-                valid = true;
-                this.ch = (char) ch;
-                this.offset = offset;
-                Map<String, Object> obj = readObject();
-                if (!obj.isEmpty()) {
-                    throw new JSONException(info());
-                }
-                ch = this.ch;
-                offset = this.offset;
-                value = true;
-                wasNull = true;
-            } else if (ch == '[' && quote == 0) {
-                this.ch = (char) ch;
-                this.offset = offset;
-                valid = true;
-                List array = readArray();
-                if (!array.isEmpty()) {
-                    throw new JSONException(info());
-                }
-                ch = this.ch;
-                offset = this.offset;
-                value = true;
-                wasNull = true;
-            }
-        }
-
-        int len = offset - start;
-
-        String str = null;
-        if (quote != 0) {
-            if (ch != quote) {
-                overflow = true;
-                this.offset = offset - 1;
-                this.ch = (char) quote;
-                str = readString();
-                offset = this.offset;
-            }
-
-            ch = offset >= end ? EOI : chars[offset++];
-        }
-
-        if (!value) {
-            if (!overflow) {
-                int scale = this.scale - expValue;
+            if (result <= 0) {
+                boolean value = true;
                 if (scale == 0) {
-                    floatValue = (float) longValue;
-                    if (negative) {
+                    floatValue = (float) result;
+                } else if ((long) (float) result == result) {
+                    if (0 < scale && scale < FLOAT_10_POW.length) {
+                        floatValue = (float) result / FLOAT_10_POW[scale];
+                    } else if (0 > scale && scale > -FLOAT_10_POW.length) {
+                        floatValue = (float) result * FLOAT_10_POW[-scale];
+                    } else {
+                        value = false;
+                    }
+                } else {
+                    value = false;
+                }
+                if (!value) {
+                    if (scale > 0 && scale < 128) {
+                        floatValue = TypeUtils.floatValue(fc == '-' ? -1 : 1, Math.abs(result), scale);
+                    } else {
+                        result = 1; // invalid
+                    }
+                } else {
+                    if (fc != '-' && floatValue != 0) {
                         floatValue = -floatValue;
                     }
-                    value = true;
-                } else if ((long) (float) longValue == longValue) {
-                    if (0 < scale && scale < FLOAT_10_POW.length) {
-                        floatValue = (float) longValue / FLOAT_10_POW[scale];
-                        if (negative) {
-                            floatValue = -floatValue;
-                        }
-                    } else if (0 > scale && scale > -FLOAT_10_POW.length) {
-                        floatValue = (float) longValue * FLOAT_10_POW[-scale];
-                        if (negative) {
-                            floatValue = -floatValue;
-                        }
-                    }
-                }
-
-                if (!value && scale > -128 && scale < 128) {
-                    floatValue = TypeUtils.floatValue(negative ? -1 : 1, longValue, scale);
-                    value = true;
                 }
             }
+        }
 
-            if (!value) {
-                if (str != null) {
-                    try {
-                        floatValue = Float.parseFloat(str);
-                    } catch (NumberFormatException ex) {
-                        throw new JSONException(info(), ex);
-                    }
-                } else {
-                    floatValue = TypeUtils.parseFloat(chars, start - 1, len);
-                }
-            }
-
-            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-                ch = offset >= end ? EOI : chars[offset++];
-            }
+        if (result > 0) {
+            readNumber0();
+            return getFloatValue();
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset >= end ? EOI : chars[offset++];
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
-        if (this.comma = ch == ',') {
-            ch = offset >= end ? EOI : chars[offset++];
+        if (comma = (ch == ',')) {
+            ch = offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset >= end ? EOI : chars[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
             }
         }
 
-        if (!valid) {
-            throw new JSONException(info("illegal input error"));
-        }
-
+        this.wasNull = wasNull;
         this.ch = (char) ch;
         this.offset = offset;
         return floatValue;
@@ -4398,13 +3971,13 @@ class JSONReaderUTF8
 
             char[] chars = new char[valueLength];
             offset = start;
-            for (int i = 0; ; ++i) {
+            for (int i = 0, end = this.end; ; ++i) {
                 int c = bytes[offset];
                 if (c == '\\') {
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            c = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -4521,7 +4094,7 @@ class JSONReaderUTF8
         char quote = this.ch;
         int valueLength;
         int offset = this.offset;
-        int start = offset;
+        int start = offset, end = this.end;
         boolean ascii = true;
         valueEscape = false;
         final byte[] bytes = this.bytes;
@@ -4580,7 +4153,7 @@ class JSONReaderUTF8
                     c = bytes[++offset];
                     switch (c) {
                         case 'u': {
-                            c = char4(bytes[offset + 1], bytes[offset + 2], bytes[offset + 3], bytes[offset + 4]);
+                            c = hexDigit4(bytes, check3(offset + 1, end));
                             offset += 4;
                             break;
                         }
@@ -4690,233 +4263,279 @@ class JSONReaderUTF8
 
     @Override
     public final boolean skipName() {
-        char quote = ch;
-        if (quote != '"' && quote != '\'') {
-            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
-                readFieldNameHashCodeUnquote();
-                return true;
-            }
-            throw notSupportName();
-        }
-
-        int offset = this.offset;
-        final byte[] bytes = this.bytes;
-        for (; ; ) {
-            int ch = bytes[offset++];
-            if (ch == '\\') {
-                ch = bytes[offset];
-                offset += (ch == 'u' ? 5 : (ch == 'x' ? 3 : 1));
-                continue;
-            }
-
-            if (ch == quote) {
-                ch = offset == end ? EOI : bytes[offset++];
-
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-                if (ch != ':') {
-                    throw syntaxError(ch);
-                }
-
-                ch = offset == end ? EOI : bytes[offset++];
-
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-
-                this.offset = offset;
-                this.ch = (char) ch;
-                break;
-            }
-        }
-
+        this.offset = skipName(this, bytes, offset, end);
         return true;
     }
 
-    @Override
-    public final void skipValue() {
-        final byte[] bytes = this.bytes;
-        int ch = this.ch;
-        int offset = this.offset, end = this.end;
-        comma = false;
+    private static int skipName(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        int quote = jsonReader.ch;
+        if (jsonReader.checkNameBegin(quote)) {
+            return jsonReader.offset;
+        }
 
-        switch_:
-        switch (ch) {
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            case '.':
-                boolean sign = ch == '-' || ch == '+';
-                if (sign) {
+        int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
+        if (index == -1) {
+            throw jsonReader.error("invalid escape character EOI");
+        }
+
+        int ch;
+        int slashIndex = indexOfSlash(jsonReader, bytes, offset, end);
+        if (slashIndex == -1 || slashIndex > index) {
+            offset = index + 1;
+            ch = offset == end ? EOI : bytes[offset++];
+        } else {
+            offset = skipStringEscaped(jsonReader, bytes, slashIndex, quote);
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (ch != ':') {
+            throw syntaxError(ch);
+        }
+
+        ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    private static int skipNumber(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        int ch = jsonReader.ch;
+        if (ch == '-' || ch == '+') {
+            if (offset < end) {
+                ch = bytes[offset++];
+            } else {
+                throw jsonReader.error();
+            }
+        }
+        boolean dot = ch == '.';
+        boolean num = false;
+        if (!dot && (ch >= '0' && ch <= '9')) {
+            num = true;
+            while (IOUtils.isDigit2(bytes, offset)) {
+                offset += 2;
+            }
+            do {
+                ch = offset == end ? EOI : bytes[offset++];
+            } while (ch >= '0' && ch <= '9');
+        }
+
+        if (num && (ch == 'L' | ch == 'F' | ch == 'D' | ch == 'B' | ch == 'S')) {
+            ch = bytes[offset++];
+        } else {
+            boolean small = false;
+            if (ch == '.') {
+                small = true;
+                ch = offset == end ? EOI : bytes[offset++];
+
+                while (ch >= '0' && ch <= '9') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            }
+
+            if (!num && !small) {
+                throw numberError(offset, ch);
+            }
+
+            if (ch == 'e' || ch == 'E') {
+                ch = bytes[offset++];
+
+                boolean eSign = false;
+                if (ch == '+' || ch == '-') {
+                    eSign = true;
                     if (offset < end) {
                         ch = bytes[offset++];
                     } else {
                         throw numberError(offset, ch);
                     }
                 }
-                boolean dot = ch == '.';
-                boolean num = false;
-                if (!dot && (ch >= '0' && ch <= '9')) {
-                    num = true;
+
+                if (ch >= '0' && ch <= '9') {
                     do {
                         ch = offset == end ? EOI : bytes[offset++];
                     } while (ch >= '0' && ch <= '9');
-                }
-
-                if (num && (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S')) {
-                    ch = bytes[offset++];
-                }
-
-                boolean small = false;
-                if (ch == '.') {
-                    small = true;
-                    ch = offset == end ? EOI : bytes[offset++];
-
-                    if (ch >= '0' && ch <= '9') {
-                        do {
-                            ch = offset == end ? EOI : bytes[offset++];
-                        } while (ch >= '0' && ch <= '9');
-                    }
-                }
-
-                if (!num && !small) {
+                } else if (eSign) {
                     throw numberError(offset, ch);
                 }
-
-                if (ch == 'e' || ch == 'E') {
-                    ch = bytes[offset++];
-
-                    boolean eSign = false;
-                    if (ch == '+' || ch == '-') {
-                        eSign = true;
-                        if (offset < end) {
-                            ch = bytes[offset++];
-                        } else {
-                            throw numberError(offset, ch);
-                        }
-                    }
-
-                    if (ch >= '0' && ch <= '9') {
-                        do {
-                            ch = offset == end ? EOI : bytes[offset++];
-                        } while (ch >= '0' && ch <= '9');
-                    } else if (eSign) {
-                        throw numberError(offset, ch);
-                    }
-                }
-
-                if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-                break;
-            case 't':
-                if (offset + 3 > end) {
-                    throw error(offset, ch);
-                }
-                if (bytes[offset] != 'r' || bytes[offset + 1] != 'u' || bytes[offset + 2] != 'e') {
-                    throw error(offset, ch);
-                }
-                offset += 3;
-                ch = offset == end ? EOI : bytes[offset++];
-                break;
-            case 'f':
-                if (offset + 4 > end) {
-                    throw error(offset, ch);
-                }
-                if (bytes[offset] != 'a' || bytes[offset + 1] != 'l' || bytes[offset + 2] != 's' || bytes[offset + 3] != 'e') {
-                    throw error(offset, ch);
-                }
-                offset += 4;
-                ch = offset == end ? EOI : bytes[offset++];
-                break;
-            case 'n':
-                if (offset + 3 > end) {
-                    throw error(offset, ch);
-                }
-                if (bytes[offset] != 'u' || bytes[offset + 1] != 'l' || bytes[offset + 2] != 'l') {
-                    throw error(offset, ch);
-                }
-                offset += 3;
-                ch = offset == end ? EOI : bytes[offset++];
-                break;
-            case '"':
-            case '\'': {
-                int quote = ch;
-                ch = bytes[offset++];
-                for (; ; ) {
-                    if (ch == '\\') {
-                        ch = bytes[offset++];
-                        if (ch == 'u') {
-                            offset += 4;
-                        } else if (ch == 'x') {
-                            offset += 2;
-                        } else if (ch != '\\' && ch != '"') {
-                            char1(ch);
-                        }
-                        ch = bytes[offset++];
-                        continue;
-                    }
-                    if (ch == quote) {
-                        ch = offset == end ? EOI : bytes[offset++];
-                        break;
-                    }
-
-                    ch = bytes[offset++];
-                }
-                break;
             }
-            default:
-                if (ch == '[') {
-                    next();
-                    for (int i = 0; ; ++i) {
-                        if (this.ch == ']') {
-                            comma = false;
-                            offset = this.offset;
-                            ch = offset == end ? EOI : bytes[offset++];
-                            break switch_;
-                        }
-                        if (i != 0 && !comma) {
-                            throw valueError();
-                        }
-                        comma = false;
-                        skipValue();
-                    }
-                } else if (ch == '{') {
-                    next();
-                    for (; ; ) {
-                        if (this.ch == '}') {
-                            comma = false;
-                            offset = this.offset;
-                            ch = offset == end ? EOI : bytes[offset++];
-                            break switch_;
-                        }
-                        skipName();
-                        skipValue();
-                    }
-                } else if (ch == 'S' && nextIfSet()) {
-                    skipValue();
-                } else {
-                    throw error(offset, ch);
-                }
-                ch = this.ch;
-                offset = this.offset;
-                break;
+
+            if (ch == 'F' || ch == 'D') {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : bytes[offset++];
         }
 
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw jsonReader.error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw jsonReader.error(offset, ch);
+        }
+
+        jsonReader.comma = comma;
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    private static int skipString(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        int ch = jsonReader.ch;
+        int quote = ch;
+        int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
+        if (index == -1) {
+            throw jsonReader.error("invalid escape character EOI");
+        }
+        int slashIndex = indexOfSlash(jsonReader, bytes, offset, end);
+        if (slashIndex == -1 || slashIndex > index) {
+            offset = index + 1;
+            ch = offset == end ? EOI : bytes[offset++];
+        } else {
+            offset = skipStringEscaped(jsonReader, bytes, slashIndex, quote);
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw jsonReader.error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw jsonReader.error(offset, ch);
+        }
+
+        jsonReader.comma = comma;
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    private static int skipStringEscaped(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int quote) {
+        int ch = bytes[offset++];
+        for (; ; ) {
+            if (ch == '\\') {
+                ch = bytes[offset++];
+                if (ch == 'u') {
+                    offset += 4;
+                } else if (ch == 'x') {
+                    offset += 2;
+                } else if (ch != '\\' && ch != '"') {
+                    jsonReader.char1(ch);
+                }
+                ch = bytes[offset++];
+                continue;
+            }
+            if (ch == quote) {
+                return offset;
+            }
+
+            ch = bytes[offset++];
+        }
+    }
+
+    private static int skipObject(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        offset = next(jsonReader, bytes, offset, end);
+        for (int i = 0; ; ++i) {
+            if (jsonReader.ch == '}') {
+                break;
+            }
+            if (i != 0 && !jsonReader.comma) {
+                throw jsonReader.valueError();
+            }
+            offset = skipName(jsonReader, bytes, offset, end);
+            offset = skipValue(jsonReader, bytes, offset, end);
+        }
+
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw jsonReader.error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw jsonReader.error(offset, ch);
+        }
+
+        jsonReader.comma = comma;
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    public static int next(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        int ch = offset == end ? EOI : bytes[offset++];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch < 0) {
+            jsonReader.char_utf8(ch, offset);
+            return jsonReader.offset;
+        }
+
+        jsonReader.ch = (char) ch;
+        if (ch == '/') {
+            jsonReader.offset = offset;
+            jsonReader.skipComment();
+            return jsonReader.offset;
+        } else {
+            return offset;
+        }
+    }
+
+    private static int skipArray(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        offset = next(jsonReader, bytes, offset, end);
+        for (int i = 0; ; ++i) {
+            if (jsonReader.ch == ']') {
+                break;
+            }
+            if (i != 0 && !jsonReader.comma) {
+                throw jsonReader.valueError();
+            }
+            offset = skipValue(jsonReader, bytes, offset, end);
+        }
+
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
         if (ch == ',') {
             comma = true;
             ch = offset == end ? EOI : bytes[offset++];
@@ -4925,12 +4544,159 @@ class JSONReaderUTF8
             }
         }
 
-        if (!comma && ch != EOI && ch != '}' && ch != ']' && ch != EOI) {
-            throw error(offset, ch);
+        if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw jsonReader.error(offset, ch);
         }
 
-        this.ch = (char) ch;
-        this.offset = offset;
+        if (comma && (ch == '}' || ch == ']' || ch == EOI)) {
+            throw jsonReader.error(offset, ch);
+        }
+
+        jsonReader.comma = comma;
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    private static int skipFalse(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        if (offset + 4 > end || IOUtils.notALSE(bytes, offset)) {
+            throw jsonReader.error();
+        }
+        offset += 4;
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw jsonReader.error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw jsonReader.error(offset, ch);
+        }
+
+        jsonReader.comma = comma;
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    private static int skipTrue(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        if (offset + 3 > end || IOUtils.notTRUE(bytes, offset - 1)) {
+            throw jsonReader.error();
+        }
+        offset += 3;
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw jsonReader.error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw jsonReader.error(offset, ch);
+        }
+
+        jsonReader.comma = comma;
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    private static int skipNull(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        if (offset + 3 > end || IOUtils.notNULL(bytes, offset - 1)) {
+            throw jsonReader.error();
+        }
+        offset += 3;
+        int ch = offset == end ? EOI : bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        boolean comma = false;
+        if (ch == ',') {
+            comma = true;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+
+            if ((ch == '}' || ch == ']' || ch == EOI)) {
+                throw jsonReader.error(offset, ch);
+            }
+        } else if (ch != '}' && ch != ']' && ch != EOI) {
+            throw jsonReader.error(offset, ch);
+        }
+
+        jsonReader.comma = comma;
+        jsonReader.ch = (char) ch;
+        return offset;
+    }
+
+    private static int skipSet(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        if (nextIfSet(jsonReader, bytes, offset, end)) {
+            return skipArray(jsonReader, bytes, jsonReader.offset, end);
+        } else {
+            throw jsonReader.error();
+        }
+    }
+
+    private static boolean nextIfSet(JSONReaderUTF8 jsonReader, byte[] chars, int offset, int end) {
+        if (offset + 1 < end && chars[offset] == 'e' && chars[offset + 1] == 't') {
+            offset += 2;
+            int ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+            jsonReader.offset = offset;
+            jsonReader.ch = (char) ch;
+            return true;
+        }
+        return false;
+    }
+
+    private static int skipValue(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
+        switch (jsonReader.ch) {
+            case 't':
+                return skipTrue(jsonReader, bytes, offset, end);
+            case 'f':
+                return skipFalse(jsonReader, bytes, offset, end);
+            case 'n':
+                return skipNull(jsonReader, bytes, offset, end);
+            case '"':
+            case '\'':
+                return skipString(jsonReader, bytes, offset, end);
+            case '{':
+                return skipObject(jsonReader, bytes, offset, end);
+            case '[':
+                return skipArray(jsonReader, bytes, offset, end);
+            case 'S':
+                return skipSet(jsonReader, bytes, offset, end);
+            default:
+                return skipNumber(jsonReader, bytes, offset, end);
+        }
+    }
+
+    @Override
+    public final void skipValue() {
+        this.offset = skipValue(this, bytes, offset, end);
     }
 
     @Override
@@ -4939,7 +4705,7 @@ class JSONReaderUTF8
             return stringValue;
         }
         final byte[] bytes = this.bytes;
-        int offset = nameBegin;
+        int offset = nameBegin, end = this.end;
         int length = nameEnd - offset;
         if (!nameEscape) {
             if (ANDROID) {
@@ -5017,11 +4783,7 @@ class JSONReaderUTF8
                 c = (char) bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        int c1 = bytes[offset + 1];
-                        int c2 = bytes[offset + 2];
-                        int c3 = bytes[offset + 3];
-                        int c4 = bytes[offset + 4];
-                        c = char4(c1, c2, c3, c4);
+                        c = hexDigit4(bytes, check3(offset + 1, end));
                         offset += 4;
                         break;
                     }
@@ -5065,7 +4827,7 @@ class JSONReaderUTF8
         } else if (ch == '/') {
             multi = false;
         } else {
-            return;
+            throw new JSONException(info("parse comment error"));
         }
 
         ch = bytes[offset++];
@@ -5118,58 +4880,95 @@ class JSONReaderUTF8
         }
     }
 
+    static boolean containsSlashOrQuote(long v, long quote) {
+        /*
+          for (int i = 0; i < 8; ++i) {
+            byte c = (byte) v;
+            if (c == '"' || c == '\\') {
+                return true;
+            }
+            v >>>= 8;
+          }
+          return false;
+         */
+        long x22 = v ^ quote; // " -> 0x22
+        long x5c = v ^ 0x5C5C5C5C5C5C5C5CL; // \n -> 0x0a
+        x22 = (x22 - 0x0101010101010101L) & ~x22;
+        x5c = (x5c - 0x0101010101010101L) & ~x5c;
+        return ((x22 | x5c) & 0x8080808080808080L) != 0;
+    }
+
     @Override
     public String readString() {
-        final byte[] bytes = this.bytes;
-        if (ch == '"' || ch == '\'') {
-            char quote = this.ch;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
+            final byte[] bytes = this.bytes;
             int valueLength;
             int offset = this.offset;
             final int start = offset, end = this.end;
+            final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
             boolean ascii = true;
             valueEscape = false;
 
-            for (int i = 0; ; ++i) {
-                if (offset >= end) {
-                    throw new JSONException("invalid escape character EOI");
-                }
-
-                int ch = bytes[offset];
-                if (ch == '\\') {
-                    valueEscape = true;
-                    ch = bytes[offset + 1];
-                    offset += (ch == 'u' ? 6 : (ch == 'x' ? 4 : 2));
-                    continue;
-                }
-
-                if (ch >= 0) {
-                    if (ch == quote) {
-                        valueLength = i;
+            {
+                int i = 0;
+                int upperBound = offset + ((end - offset) & ~7);
+                while (offset < upperBound) {
+                    long v = getLongLE(bytes, offset);
+                    if ((v & 0x8080808080808080L) != 0 || JSONReaderUTF8.containsSlashOrQuote(v, byteVectorQuote)) {
                         break;
                     }
-                    offset++;
-                } else {
-                    ascii = false;
-                    switch ((ch & 0xFF) >> 4) {
-                        case 12:
-                        case 13: {
-                            /* 110x xxxx   10xx xxxx*/
-                            offset += 2;
+
+                    offset += 8;
+                    i += 8;
+                }
+                // ...
+
+                for (; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
+                    }
+
+                    int c = bytes[offset];
+                    if (c == '\\') {
+                        valueEscape = true;
+                        c = bytes[offset + 1];
+                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
+                        if (ascii && (c == 'u' || c == 'x')) {
+                            ascii = false;
+                        }
+                        continue;
+                    }
+
+                    if (c >= 0) {
+                        if (c == quote) {
+                            valueLength = i;
                             break;
                         }
-                        case 14: {
-                            offset += 3;
-                            break;
-                        }
-                        default: {
-                            /* 10xx xxxx,  1111 xxxx */
-                            if ((ch >> 3) == -2) {
-                                offset += 4;
-                                i++;
+                        offset++;
+                    } else {
+                        ascii = false;
+                        switch ((c & 0xFF) >> 4) {
+                            case 12:
+                            case 13: {
+                                /* 110x xxxx   10xx xxxx*/
+                                offset += 2;
                                 break;
                             }
+                            case 14: {
+                                offset += 3;
+                                break;
+                            }
+                            default: {
+                                /* 10xx xxxx,  1111 xxxx */
+                                if ((c >> 3) == -2) {
+                                    offset += 4;
+                                    i++;
+                                    break;
+                                }
 
-                            throw new JSONException("malformed input around byte " + offset);
+                                throw new JSONException("malformed input around byte " + offset);
+                            }
                         }
                     }
                 }
@@ -5177,86 +4976,126 @@ class JSONReaderUTF8
 
             String str;
             if (valueEscape) {
-                char[] chars = new char[valueLength];
-                offset = start;
-                for (int i = 0; ; ++i) {
-                    int ch = bytes[offset];
-                    if (ch == '\\') {
-                        ch = bytes[++offset];
-                        switch (ch) {
-                            case 'u': {
-                                ch = DIGITS2[bytes[offset + 1]] * 0x1000
-                                        + DIGITS2[bytes[offset + 2]] * 0x100
-                                        + DIGITS2[bytes[offset + 3]] * 0x10
-                                        + DIGITS2[bytes[offset + 4]];
-                                offset += 4;
-                                break;
+                if (ascii && STRING_CREATOR_JDK11 != null) {
+                    byte[] chars = new byte[valueLength];
+                    offset = start;
+                    for (int i = 0; ; ++i) {
+                        byte ch = bytes[offset];
+                        if (ch == '\\') {
+                            ch = bytes[++offset];
+                            switch (ch) {
+                                case '\\':
+                                case '"':
+                                    break;
+                                case 'b':
+                                    ch = '\b';
+                                    break;
+                                case 't':
+                                    ch = '\t';
+                                    break;
+                                case 'n':
+                                    ch = '\n';
+                                    break;
+                                case 'f':
+                                    ch = '\f';
+                                    break;
+                                case 'r':
+                                    ch = '\r';
+                                    break;
+                                default:
+                                    ch = (byte) char1(ch);
+                                    break;
                             }
-                            case 'x': {
-                                ch = DIGITS2[bytes[offset + 1]] * 0x10 + DIGITS2[bytes[offset + 2]];
-                                offset += 2;
-                                break;
-                            }
-                            case '\\':
-                            case '"':
-                                break;
-                            case 'b':
-                                ch = '\b';
-                                break;
-                            case 't':
-                                ch = '\t';
-                                break;
-                            case 'n':
-                                ch = '\n';
-                                break;
-                            case 'f':
-                                ch = '\f';
-                                break;
-                            case 'r':
-                                ch = '\r';
-                                break;
-                            default:
-                                ch = char1(ch);
-                                break;
                         }
-                        chars[i] = (char) ch;
+                        else if (ch == quote) {
+                            break;
+                        }
+                        chars[i] = ch;
                         offset++;
-                    } else if (ch == quote) {
-                        break;
-                    } else {
-                        if (ch >= 0) {
-                            chars[i] = (char) ch;
-                            offset++;
-                        } else {
-                            switch ((ch & 0xFF) >> 4) {
-                                case 0b1100:
-                                case 0b1101: {
-                                    /* 110x xxxx   10xx xxxx*/
-                                    int c2 = bytes[offset + 1];
-                                    chars[i] = (char) (
-                                            ((ch & 0x1F) << 6) | (c2 & 0x3F));
+                    }
+
+                    str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
+                } else {
+                    char[] chars = new char[valueLength];
+                    offset = start;
+                    for (int i = 0; ; ++i) {
+                        int ch = bytes[offset];
+                        if (ch == '\\') {
+                            ch = bytes[++offset];
+                            switch (ch) {
+                                case 'u': {
+                                    ch = hexDigit4(bytes, check3(offset + 1, end));
+                                    offset += 4;
+                                    break;
+                                }
+                                case 'x': {
+                                    ch = char2(bytes[offset + 1], bytes[offset + 2]);
                                     offset += 2;
                                     break;
                                 }
-                                case 0b1110: {
-                                    chars[i] = (char)
-                                            (((ch & 0x0F) << 12) |
-                                                    ((bytes[offset + 1] & 0x3F) << 6) |
-                                                    ((bytes[offset + 2] & 0x3F)));
-                                    offset += 3;
+                                case '\\':
+                                case '"':
                                     break;
-                                }
-                                default: {
-                                    char2_utf8(bytes, offset, ch, chars, i);
-                                    offset += 4;
-                                    i++;
+                                case 'b':
+                                    ch = '\b';
+                                    break;
+                                case 't':
+                                    ch = '\t';
+                                    break;
+                                case 'n':
+                                    ch = '\n';
+                                    break;
+                                case 'f':
+                                    ch = '\f';
+                                    break;
+                                case 'r':
+                                    ch = '\r';
+                                    break;
+                                default:
+                                    ch = char1(ch);
+                                    break;
+                            }
+                            chars[i] = (char) ch;
+                            offset++;
+                        }
+                        else if (ch == quote) {
+                            break;
+                        }
+                        else {
+                            if (ch >= 0) {
+                                chars[i] = (char) ch;
+                                offset++;
+                            }
+                            else {
+                                switch ((ch & 0xFF) >> 4) {
+                                    case 12:
+                                    case 13: {
+                                        /* 110x xxxx   10xx xxxx*/
+                                        chars[i] = (char) (((ch & 0x1F) << 6) | (bytes[offset + 1] & 0x3F));
+                                        offset += 2;
+                                        break;
+                                    }
+                                    case 14: {
+                                        chars[i] = (char)
+                                                (((ch & 0x0F) << 12) |
+                                                        ((bytes[offset + 1] & 0x3F) << 6) |
+                                                        ((bytes[offset + 2] & 0x3F) << 0));
+                                        offset += 3;
+                                        break;
+                                    }
+                                    default: {
+                                        /* 10xx xxxx,  1111 xxxx */
+                                        char2_utf8(bytes, offset, ch, chars, i);
+                                        offset += 4;
+                                        i++;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                str = new String(chars);
+                    str = new String(chars);
+                }
             } else if (ascii) {
                 int strlen = offset - start;
                 if (strlen == 1) {
@@ -5266,31 +5105,20 @@ class JSONReaderUTF8
                             (char) (bytes[start] & 0xff),
                             (char) (bytes[start + 1] & 0xff)
                     );
-                } else if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[strlen];
-                    for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[start + i];
-                    }
-
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] buf = Arrays.copyOfRange(bytes, start, offset);
-                    str = STRING_CREATOR_JDK11.apply(buf, LATIN1);
-                } else if (ANDROID) {
-                    str = getLatin1String(start, offset - start);
+                    str = STRING_CREATOR_JDK11.apply(
+                            Arrays.copyOfRange(this.bytes, this.offset, offset),
+                            LATIN1);
                 } else {
-                    str = new String(bytes, start, offset - start, ISO_8859_1);
+                    str = new String(bytes, start, offset - start, StandardCharsets.US_ASCII);
                 }
             } else {
-                str = new String(bytes, start, offset - start, UTF_8);
+                str = new String(bytes, start, offset - start, StandardCharsets.UTF_8);
             }
 
-            if ((context.features & Feature.TrimString.mask) != 0) {
-                str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
+            long features = context.features;
+            if ((features & (MASK_TRIM_STRING | MASK_EMPTY_STRING_AS_NULL)) != 0) {
+                str = stringValue(str, features);
             }
 
             int ch = ++offset == end ? EOI : bytes[offset++];
@@ -5308,6 +5136,9 @@ class JSONReaderUTF8
             this.ch = (char) ch;
             this.offset = offset;
             return str;
+        } else if (quote == 'n') {
+            readNull();
+            return null;
         }
 
         return readStringNotMatch();
@@ -5327,6 +5158,7 @@ class JSONReaderUTF8
         int firstOffset = offset;
 
         final byte[] bytes = this.bytes;
+        final int end = this.end;
         int ch = this.ch;
         int offset = this.offset;
         int quote = '\0';
@@ -5351,12 +5183,10 @@ class JSONReaderUTF8
 
         final int start = offset;
 
-        final int multmin;
         if (ch == '-') {
             if (offset == end) {
                 throw new JSONException(info("illegal input"));
             }
-            multmin = -214748364; // limit / 10;
             negative = true;
             ch = bytes[offset++];
         } else {
@@ -5366,7 +5196,6 @@ class JSONReaderUTF8
                 }
                 ch = bytes[offset++];
             }
-            multmin = -214748364; // limit / 10;
         }
 
         // if (result < limit + digit) {
@@ -5377,11 +5206,11 @@ class JSONReaderUTF8
             if (!intOverflow) {
                 int digit = ch - '0';
                 mag3 *= 10;
-                if (mag3 < multmin) {
+                if (mag3 < Integer.MIN_VALUE / 10) {
                     intOverflow = true;
                 } else {
                     mag3 -= digit;
-                    if (mag3 < multmin) {
+                    if (mag3 < Integer.MIN_VALUE / 10) {
                         intOverflow = true;
                     }
                 }
@@ -5402,11 +5231,11 @@ class JSONReaderUTF8
                 if (!intOverflow) {
                     int digit = ch - '0';
                     mag3 *= 10;
-                    if (mag3 < multmin) {
+                    if (mag3 < Integer.MIN_VALUE / 10) {
                         intOverflow = true;
                     } else {
                         mag3 -= digit;
-                        if (mag3 < multmin) {
+                        if (mag3 < Integer.MIN_VALUE / 10) {
                             intOverflow = true;
                         }
                     }
@@ -5491,14 +5320,18 @@ class JSONReaderUTF8
                 boolValue = true;
                 valueType = JSON_TYPE_BOOL;
                 ch = offset == end ? EOI : bytes[offset++];
-            } else if (ch == 'f') {
-                if (offset + 4 <= end && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == ALSE) {
-                    valid = true;
-                    offset += 4;
-                    boolValue = false;
-                    valueType = JSON_TYPE_BOOL;
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
+            } else if (ch == 'f' && offset + 3 < end && IOUtils.isALSE(bytes, offset)) {
+                valid = true;
+                offset += 4;
+                boolValue = false;
+                valueType = JSON_TYPE_BOOL;
+                ch = offset == end ? EOI : bytes[offset++];
+            } else if (ch == 'N' && bytes[offset] == 'a' && bytes[offset + 1] == 'N') {
+                offset += 2;
+                valid = true;
+                boolValue = true;
+                valueType = JSON_TYPE_NaN;
+                ch = offset == end ? EOI : bytes[offset++];
             } else if (ch == '{' && quote == 0) {
                 this.offset = offset;
                 this.ch = (char) ch;
@@ -5527,26 +5360,30 @@ class JSONReaderUTF8
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-            if (!intOverflow) {
-                switch (ch) {
-                    case 'B':
+            switch (ch) {
+                case 'B':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT8;
-                        break;
-                    case 'S':
+                    }
+                    break;
+                case 'S':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT16;
-                        break;
-                    case 'L':
+                    }
+                    break;
+                case 'L':
+                    if (offset - start < 19 && valueType != JSON_TYPE_DEC) {
                         valueType = JSON_TYPE_INT64;
-                        break;
-                    case 'F':
-                        valueType = JSON_TYPE_FLOAT;
-                        break;
-                    case 'D':
-                        valueType = JSON_TYPE_DOUBLE;
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
             }
             ch = offset == end ? EOI : bytes[offset++];
         }
@@ -5583,6 +5420,7 @@ class JSONReaderUTF8
         this.exponent = 0;
         this.scale = 0;
 
+        final int end = this.end;
         final byte[] bytes = this.bytes;
         char quote = '\0';
         if (ch == '"' || ch == '\'') {
@@ -5688,14 +5526,12 @@ class JSONReaderUTF8
                     valueType = JSON_TYPE_BOOL;
                     ch = (char) bytes[offset++];
                 }
-            } else if (ch == 'f') {
-                if (offset + 4 <= end && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == ALSE) {
-                    valid = true;
-                    offset += 4;
-                    boolValue = false;
-                    valueType = JSON_TYPE_BOOL;
-                    ch = (char) bytes[offset++];
-                }
+            } else if (ch == 'f' && offset + 3 < end && IOUtils.isALSE(bytes, offset)) {
+                valid = true;
+                offset += 4;
+                boolValue = false;
+                valueType = JSON_TYPE_BOOL;
+                ch = (char) bytes[offset++];
             } else if (ch == '{' && quote == 0) {
                 this.complex = readObject();
                 valueType = JSON_TYPE_OBJECT;
@@ -5817,7 +5653,7 @@ class JSONReaderUTF8
     @Override
     public final Date readNullOrNewDate() {
         final byte[] bytes = this.bytes;
-        int ch = this.ch;
+        int ch;
         int offset = this.offset;
 
         Date date = null;
@@ -5919,7 +5755,7 @@ class JSONReaderUTF8
     public final void readNull() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        int ch = this.ch;
+        int ch;
         if (bytes[offset] == 'u'
                 && bytes[offset + 1] == 'l'
                 && bytes[offset + 2] == 'l') {
@@ -5945,7 +5781,7 @@ class JSONReaderUTF8
     @Override
     public final int getStringLength() {
         if (ch != '"' && ch != '\'') {
-            throw new JSONException("string length only support string input");
+            throw new JSONException("string length only support string input " + ch);
         }
         final char quote = ch;
 
@@ -5980,197 +5816,146 @@ class JSONReaderUTF8
     public final LocalDate readLocalDate() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        if (ch == '"' || ch == '\'') {
-            Context context = this.context;
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = ch;
+        char quote = ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
+                int yy;
+                long ymd;
                 int c10 = offset + 10;
                 if (c10 < bytes.length
                         && c10 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && bytes[offset + 10] == quote
                 ) {
-                    byte y0 = bytes[offset];
-                    byte y1 = bytes[offset + 1];
-                    byte y2 = bytes[offset + 2];
-                    byte y3 = bytes[offset + 3];
-                    byte m0 = bytes[offset + 5];
-                    byte m1 = bytes[offset + 6];
-                    byte d0 = bytes[offset + 8];
-                    byte d1 = bytes[offset + 9];
+                    int year = yy + ((int) ymd & 0xFF);
+                    int month = (int) (ymd >> 24) & 0xFF;
+                    int dom = (int) (ymd >> 48) & 0xFF;
 
-                    int year;
-                    int month;
-                    if (y0 >= '0' && y0 <= '9'
-                            && y1 >= '0' && y1 <= '9'
-                            && y2 >= '0' && y2 <= '9'
-                            && y3 >= '0' && y3 <= '9'
-                    ) {
-                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-                        if (m0 >= '0' && m0 <= '9' && m1 >= '0' && m1 <= '9') {
-                            month = (m0 - '0') * 10 + (m1 - '0');
-                            int dom;
-                            if (d0 >= '0' && d0 <= '9' && d1 >= '0' && d1 <= '9') {
-                                dom = (d0 - '0') * 10 + (d1 - '0');
-
-                                LocalDate ldt;
-                                try {
-                                    ldt = year == 0 && month == 0 && dom == 0
-                                            ? null
-                                            : LocalDate.of(year, month, dom);
-                                } catch (DateTimeException ex) {
-                                    throw new JSONException(info("read date error"), ex);
-                                }
-
-                                this.offset = offset + 11;
-                                next();
-                                if (comma = (this.ch == ',')) {
-                                    next();
-                                }
-                                return ldt;
-                            }
-                        }
+                    LocalDate ldt;
+                    try {
+                        ldt = (year | month | dom) == 0
+                                ? null
+                                : LocalDate.of(year, month, dom);
+                    } catch (DateTimeException ex) {
+                        throw error("read date error", ex);
                     }
+
+                    this.offset = offset + 11;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return ldt;
+                }
+
+                LocalDate localDate = readLocalDate0(offset, bytes, quote);
+                if (localDate != null) {
+                    return localDate;
                 }
             }
         }
         return super.readLocalDate();
     }
 
+    private LocalDate readLocalDate0(int offset, byte[] bytes, char quote) {
+        int nextQuoteOffset = -1;
+        for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
+            if (bytes[i] == quote) {
+                nextQuoteOffset = i;
+            }
+        }
+        if (nextQuoteOffset != -1
+                && nextQuoteOffset - offset > 10
+                && bytes[nextQuoteOffset - 6] == '-'
+                && bytes[nextQuoteOffset - 3] == '-'
+        ) {
+            int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
+            int month = IOUtils.digit2(bytes, nextQuoteOffset - 5);
+            int dayOfMonth = IOUtils.digit2(bytes, nextQuoteOffset - 2);
+            LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+            this.offset = nextQuoteOffset + 1;
+            next();
+            if (comma = (this.ch == ',')) {
+                next();
+            }
+            return localDate;
+        }
+        return null;
+    }
+
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
-        final int offset = this.offset;
-        final Context context = this.context;
-        if (this.ch == '"' || this.ch == '\'') {
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601
-            ) {
-                char quote = this.ch;
+        int offset = this.offset, end = this.end;
+        char quote = this.ch;
+        if (quote == '"' || quote == '\'') {
+            if (!this.context.formatComplex) {
                 byte c10;
                 int off21 = offset + 19;
+                int yy;
+                long ymd, hms;
                 if (off21 < bytes.length
                         && off21 < end
-                        && bytes[offset + 4] == '-'
-                        && bytes[offset + 7] == '-'
+                        && (yy = yy(bytes, offset)) != -1
+                        && ((ymd = ymd(bytes, offset + 2))) != -1L
                         && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
-                        && bytes[offset + 13] == ':'
-                        && bytes[offset + 16] == ':'
+                        && ((hms = hms(bytes, offset + 11))) != -1L
                 ) {
-                    byte y0 = bytes[offset];
-                    byte y1 = bytes[offset + 1];
-                    byte y2 = bytes[offset + 2];
-                    byte y3 = bytes[offset + 3];
-                    byte m0 = bytes[offset + 5];
-                    byte m1 = bytes[offset + 6];
-                    byte d0 = bytes[offset + 8];
-                    byte d1 = bytes[offset + 9];
-                    byte h0 = bytes[offset + 11];
-                    byte h1 = bytes[offset + 12];
-                    byte i0 = bytes[offset + 14];
-                    byte i1 = bytes[offset + 15];
-                    byte s0 = bytes[offset + 17];
-                    byte s1 = bytes[offset + 18];
-
-                    int year;
-                    int month;
-                    if (y0 >= '0' && y0 <= '9'
-                            && y1 >= '0' && y1 <= '9'
-                            && y2 >= '0' && y2 <= '9'
-                            && y3 >= '0' && y3 <= '9'
-                    ) {
-                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
+                    int nanos = 0, nanoSize = 0;
+                    offset += 19;
+                    int ch = bytes[offset++];
+                    if (ch == '.') {
+                        ch = bytes[offset++];
                     }
-
-                    if (m0 >= '0' && m0 <= '9'
-                            && m1 >= '0' && m1 <= '9'
-                    ) {
-                        month = (m0 - '0') * 10 + (m1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int dom;
-                    if (d0 >= '0' && d0 <= '9'
-                            && d1 >= '0' && d1 <= '9'
-                    ) {
-                        dom = (d0 - '0') * 10 + (d1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int hour;
-                    if (h0 >= '0' && h0 <= '9'
-                            && h1 >= '0' && h1 <= '9'
-                    ) {
-                        hour = (h0 - '0') * 10 + (h1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int minute;
-                    if (i0 >= '0' && i0 <= '9'
-                            && i1 >= '0' && i1 <= '9'
-                    ) {
-                        minute = (i0 - '0') * 10 + (i1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    int second;
-                    if (s0 >= '0' && s0 <= '9'
-                            && s1 >= '0' && s1 <= '9'
-                    ) {
-                        second = (s0 - '0') * 10 + (s1 - '0');
-                    } else {
-                        ZonedDateTime zdt = readZonedDateTime();
-                        return zdt == null ? null : zdt.toOffsetDateTime();
-                    }
-
-                    LocalDate localDate;
-                    try {
-                        localDate = year == 0 && month == 0 && dom == 0
-                                ? null
-                                : LocalDate.of(year, month, dom);
-                    } catch (DateTimeException ex) {
-                        throw new JSONException(info("read date error"), ex);
-                    }
-
-                    int nanoSize = -1;
-                    int len = 0;
-                    for (int start = offset + 19, i = start, end = offset + 31; i < end && i < this.end && i < bytes.length; ++i) {
-                        if (bytes[i] == quote && bytes[i - 1] == 'Z') {
-                            nanoSize = i - start - 2;
-                            len = i - offset + 1;
+                    while (ch >= '0' && ch <= '9') {
+                        nanos = nanos * 10 + (ch - '0');
+                        nanoSize++;
+                        if (offset < end) {
+                            ch = bytes[offset++];
+                        } else {
                             break;
                         }
                     }
-                    if (nanoSize != -1 || len == 21) {
-                        int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 20);
-                        LocalTime localTime = LocalTime.of(hour, minute, second, nano);
-                        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
-                        OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                        this.offset += len;
-                        next();
-                        if (comma = (this.ch == ',')) {
-                            next();
+                    if (nanoSize != 0) {
+                        nanos = DateUtils.nanos(nanos, nanoSize);
+                    }
+                    ZoneOffset zoneOffset = ZoneOffset.UTC;
+                    if (ch == 'Z') {
+                        ch = bytes[offset++];
+                    } else if (ch != quote) {
+                        int quoteIndex = IOUtils.indexOfChar(bytes, '"', offset, end);
+                        if (quoteIndex != -1) {
+                            zoneOffset = DateUtils.zoneOffset(bytes, offset - 1, quoteIndex - offset + 1);
+                            offset = quoteIndex + 1;
+                            ch = quote;
                         }
-                        return oft;
+                    }
+                    if (ch == quote) {
+                        ch = offset >= end ? EOI : bytes[offset++];
+                        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                            ch = offset == end ? EOI : bytes[offset++];
+                        }
+                        if (comma = (ch == ',')) {
+                            ch = offset == end ? EOI : (char) bytes[offset++];
+                            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                                ch = offset == end ? EOI : bytes[offset++];
+                            }
+                        }
+                        if (ch < 0) {
+                            char_utf8(ch, offset);
+                        } else {
+                            this.offset = offset;
+                            this.ch = (char) ch;
+                        }
+                        return OffsetDateTime.of(
+                                yy + ((int) ymd & 0xFF),
+                                (int) (ymd >> 24) & 0xFF,
+                                (int) (ymd >> 48) & 0xFF,
+                                (int) hms & 0xFF,
+                                (int) (hms >> 24) & 0xFF,
+                                (int) (hms >> 48) & 0xFF,
+                                nanos,
+                                zoneOffset);
                     }
                 }
             }
@@ -6568,6 +6353,26 @@ class JSONReaderUTF8
     }
 
     @Override
+    protected final LocalTime readLocalTime15() {
+        if (!isString()) {
+            throw new JSONException("localTime only support string input");
+        }
+
+        LocalTime time = DateUtils.parseLocalTime15(bytes, offset);
+        if (time == null) {
+            return null;
+        }
+
+        offset += 16;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return time;
+    }
+
+    @Override
     protected final LocalTime readLocalTime18() {
         if (!isString()) {
             throw new JSONException("localTime only support string input");
@@ -6754,7 +6559,7 @@ class JSONReaderUTF8
         boolean valid = false;
         final byte[] bytes = this.bytes;
         int ch = this.ch;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         boolean value = false;
 
         BigDecimal decimal = null;
@@ -6802,6 +6607,10 @@ class JSONReaderUTF8
                 break;
             }
             ch = bytes[offset++];
+        }
+
+        if (longValue < 0) {
+            overflow = true;
         }
 
         this.scale = 0;
@@ -6879,11 +6688,7 @@ class JSONReaderUTF8
                 decimal = BigDecimal.ONE;
                 ch = offset == end ? EOI : bytes[offset];
                 offset++;
-            } else if (ch == 'f' && offset + 4 <= end
-                    && bytes[offset] == 'a'
-                    && bytes[offset + 1] == 'l'
-                    && bytes[offset + 2] == 's'
-                    && bytes[offset + 3] == 'e') {
+            } else if (ch == 'f' && offset + 4 <= end && IOUtils.isALSE(bytes, offset)) {
                 valid = true;
                 offset += 4;
                 decimal = BigDecimal.ZERO;
@@ -6957,50 +6762,30 @@ class JSONReaderUTF8
 
     @Override
     public final UUID readUUID() {
-        int ch = this.ch;
+        int ch = this.ch, end = this.end;
         if (ch == 'n') {
             readNull();
             return null;
         }
 
         if (ch != '"' && ch != '\'') {
-            throw new JSONException(info("syntax error, can not read uuid"));
+            throw error("syntax error, can not read uuid");
         }
         final int quote = ch;
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        long hi = 0, lo = 0;
-        if (offset + 36 < bytes.length
+        UUID uuid;
+        if (offset + 36 < end
                 && bytes[offset + 36] == quote
                 && bytes[offset + 8] == '-'
                 && bytes[offset + 13] == '-'
                 && bytes[offset + 18] == '-'
                 && bytes[offset + 23] == '-'
         ) {
-            for (int i = 0; i < 8; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 9; i < 13; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 14; i < 18; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-
-            for (int i = 19; i < 23; i++) {
-                lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 24; i < 36; i++) {
-                lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
+            uuid = readUUID36(bytes, offset);
             offset += 37;
-        } else if (offset + 32 < bytes.length && bytes[offset + 32] == quote) {
-            for (int i = 0; i < 16; i++) {
-                hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
-            for (int i = 16; i < 32; i++) {
-                lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
-            }
+        } else if (offset + 32 < end && bytes[offset + 32] == quote) {
+            uuid = readUUID32(bytes, offset);
             offset += 33;
         } else {
             String str = readString();
@@ -7022,7 +6807,54 @@ class JSONReaderUTF8
             this.ch = (char) ch;
         }
 
-        return new UUID(hi, lo);
+        return uuid;
+    }
+
+    static UUID readUUID32(byte[] bytes, int offset) {
+        long msb1 = parse4Nibbles(bytes, offset);
+        long msb2 = parse4Nibbles(bytes, offset + 4);
+        long msb3 = parse4Nibbles(bytes, offset + 8);
+        long msb4 = parse4Nibbles(bytes, offset + 12);
+        long lsb1 = parse4Nibbles(bytes, offset + 16);
+        long lsb2 = parse4Nibbles(bytes, offset + 20);
+        long lsb3 = parse4Nibbles(bytes, offset + 24);
+        long lsb4 = parse4Nibbles(bytes, offset + 28);
+
+        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) < 0) {
+            throw new JSONException("Invalid UUID string:  ".concat(new String(bytes, offset, 32, ISO_8859_1)));
+        }
+
+        return new UUID(
+                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
+                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+    }
+
+    static UUID readUUID36(byte[] bytes, int offset) {
+        long msb1 = parse4Nibbles(bytes, offset);
+        long msb2 = parse4Nibbles(bytes, offset + 4);
+        long msb3 = parse4Nibbles(bytes, offset + 9);
+        long msb4 = parse4Nibbles(bytes, offset + 14);
+        long lsb1 = parse4Nibbles(bytes, offset + 19);
+        long lsb2 = parse4Nibbles(bytes, offset + 24);
+        long lsb3 = parse4Nibbles(bytes, offset + 28);
+        long lsb4 = parse4Nibbles(bytes, offset + 32);
+
+        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) < 0) {
+            throw new JSONException("Invalid UUID string:  ".concat(new String(bytes, offset, 36, ISO_8859_1)));
+        }
+
+        return new UUID(
+                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
+                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+    }
+
+    static long parse4Nibbles(byte[] bytes, int offset) {
+        int x = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            x = Integer.reverseBytes(x);
+        }
+        byte[] ns = NIBBLES;
+        return ns[x & 0xFF] << 12 | ns[(x >> 8) & 0xFF] << 8 | ns[(x >> 16) & 0xFF] << 4 | ns[(x >> 24) & 0xFF];
     }
 
     @Override
@@ -7071,8 +6903,17 @@ class JSONReaderUTF8
                 && bytes[offset + 2] == 'l'
         ) {
             offset += 3;
-        } else if ((first == '"' || first == '\'') && offset < end && bytes[offset] == first) {
-            offset++;
+        } else if (first == '"' || first == '\'') {
+            if (offset < end && bytes[offset] == first) {
+                offset++;
+            } else if (offset + 4 < end
+                    && IOUtils.isNULL(bytes, offset)
+                    && bytes[offset + 4] == first
+            ) {
+                offset += 5;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -7094,6 +6935,32 @@ class JSONReaderUTF8
         if (ch < 0) {
             char_utf8(ch, offset);
             return true;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfMatchIdent(char c0, char c1) {
+        if (ch != c0) {
+            return false;
+        }
+
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (offset + 1 > end || bytes[offset] != c1) {
+            return false;
+        }
+
+        offset += 1;
+        int ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+        if (offset == this.offset + 2 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
+            return false;
         }
 
         this.offset = offset;
@@ -7289,8 +7156,11 @@ class JSONReaderUTF8
     }
 
     @Override
-    public boolean isReference() {
+    public final boolean isReference() {
         // should be codeSize <= FreqInlineSize 325, current : 284
+        if ((context.features & MASK_DISABLE_REFERENCE_DETECT) != 0) {
+            return false;
+        }
         final byte[] bytes = this.bytes;
         int ch = this.ch;
         if (ch != '{') {
@@ -7311,17 +7181,18 @@ class JSONReaderUTF8
             ch = bytes[offset];
         }
 
-        int quote = ch;
         if (offset + 6 >= end
-                || bytes[offset + 1] != '$'
-                || bytes[offset + 2] != 'r'
-                || bytes[offset + 3] != 'e'
-                || bytes[offset + 4] != 'f'
-                || bytes[offset + 5] != quote
+                || bytes[offset + 5] != ch
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1) != REF
         ) {
             return false;
         }
 
+        return isReference0(bytes, offset, end, ch);
+    }
+
+    private boolean isReference0(byte[] bytes, int offset, int end, int quote) {
+        int ch;
         offset += 6;
         ch = bytes[offset];
         while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -7345,7 +7216,9 @@ class JSONReaderUTF8
             ch = bytes[offset];
         }
 
-        if (ch != quote || (offset + 1 < end && bytes[offset + 1] == '#')) {
+        if (ch != quote
+                || (offset + 1 < end && (ch = bytes[offset + 1]) != '$' && ch != '.' && ch != '@')
+        ) {
             return false;
         }
 
@@ -7394,6 +7267,46 @@ class JSONReaderUTF8
     }
 
     public final boolean readBoolValue() {
+        boolean val = false;
+        int end = this.end;
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        if (ch == 't'
+                && offset + 2 < bytes.length
+                && bytes[offset] == 'r'
+                && bytes[offset + 1] == 'u'
+                && bytes[offset + 2] == 'e'
+        ) {
+            offset += 3;
+            val = true;
+        } else if (ch == 'f' && offset + 3 < end && isALSE(bytes, offset)) {
+            offset += 4;
+        } else if ((ch == '1' || ch == '0') && offset < end && !IOUtils.isDigit(ch)) {
+            val = ch == '1';
+        } else {
+            return readBoolValue0();
+        }
+
+        ch = offset == end ? EOI : (char) bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset >= end ? EOI : bytes[offset++];
+        }
+
+        if (comma = (ch == ',')) {
+            ch = offset >= end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset >= end ? EOI : bytes[offset++];
+            }
+        }
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        return val;
+    }
+
+    private boolean readBoolValue0() {
         wasNull = false;
         boolean val;
         final byte[] bytes = this.bytes;
@@ -7407,10 +7320,7 @@ class JSONReaderUTF8
         ) {
             offset += 3;
             val = true;
-        } else if (ch == 'f'
-                && offset + 4 <= bytes.length
-                && UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset) == ALSE
-        ) {
+        } else if (ch == 'f' && offset + 3 < end && isALSE(bytes, offset)) {
             offset += 4;
             val = false;
         } else if (ch == '-' || (ch >= '0' && ch <= '9')) {
@@ -7438,9 +7348,9 @@ class JSONReaderUTF8
             wasNull = true;
             offset += 3;
             val = false;
-        } else if (ch == '"') {
+        } else if (ch == '"' || ch == '\'') {
             if (offset + 1 < bytes.length
-                    && bytes[offset + 1] == '"'
+                    && bytes[offset + 1] == ch
             ) {
                 byte c0 = bytes[offset];
                 offset += 2;
@@ -7467,6 +7377,13 @@ class JSONReaderUTF8
                 }
                 throw new JSONException("can not convert to boolean : " + str);
             }
+        } else if (ch == '[') {
+            next();
+            val = readBoolValue();
+            if (!nextIfMatch(']')) {
+                throw new JSONException("not closed square brackets, expect ] but found : " + (char) ch);
+            }
+            return val;
         } else {
             throw new JSONException("syntax error : " + ch);
         }
@@ -7489,6 +7406,55 @@ class JSONReaderUTF8
         return val;
     }
 
+    public final byte[] readBase64() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset, end = this.end;
+        int ch = this.ch;
+        int index = IOUtils.indexOfQuote(bytes, ch, offset, end);
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+
+        int slashIndex = indexOfSlash(this, bytes, offset, end);
+        if (slashIndex != -1) {
+            throw error("invalid base64 string");
+        }
+
+        byte[] decoded;
+        if (index != offset) {
+            boolean hasPrefix = true;
+            String prefix = "data:image/jpeg;base64,";
+            for (int i = 0; i < prefix.length(); i++) {
+                if (bytes[offset + i] != prefix.charAt(i)) {
+                    hasPrefix = false;
+                    break;
+                }
+            }
+            if (hasPrefix) {
+                offset += prefix.length();
+            }
+
+            byte[] src = Arrays.copyOfRange(bytes, offset, index);
+            decoded = Base64.getDecoder().decode(src);
+        } else {
+            decoded = new byte[0];
+        }
+
+        offset = index + 1;
+
+        ch = offset == end ? EOI : (char) bytes[offset++];
+        if (comma = ch == ',') {
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+        }
+
+        this.ch = (char) ch;
+        this.offset = offset;
+        return decoded;
+    }
+
     @Override
     public final String info(String message) {
         int line = 1, column = 0;
@@ -7505,16 +7471,14 @@ class JSONReaderUTF8
             buf.append(message).append(", ");
         }
 
-        buf.append("offset ").append(offset)
+        return buf.append("offset ").append(offset)
                 .append(", character ").append(ch)
                 .append(", line ").append(line)
                 .append(", column ").append(column)
                 .append(", fastjson-version ").append(JSON.VERSION)
-                .append(line > 1 ? '\n' : ' ');
-
-        String str = new String(bytes, this.start, Math.min(length, 65535));
-        buf.append(str);
-        return buf.toString();
+                .append(line > 1 ? '\n' : ' ')
+                .append(new String(bytes, this.start, Math.min(length, 65535)))
+                .toString();
     }
 
     @Override
@@ -7536,5 +7500,22 @@ class JSONReaderUTF8
                 // ignored
             }
         }
+    }
+
+    public static JSONReaderUTF8 of(byte[] bytes, int off, int len, JSONReader.Context context) {
+        boolean ascii = false;
+        if (METHOD_HANDLE_HAS_NEGATIVE != null) {
+            try {
+                ascii = !(boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len);
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        } else {
+            ascii = IOUtils.isASCII(bytes, off, len);
+        }
+        if (ascii) {
+            return new JSONReaderASCII(context, null, bytes, off, len);
+        }
+        return new JSONReaderUTF8(context, bytes, off, len);
     }
 }

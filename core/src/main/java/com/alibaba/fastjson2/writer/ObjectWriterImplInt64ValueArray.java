@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
 final class ObjectWriterImplInt64ValueArray
@@ -40,7 +41,12 @@ final class ObjectWriterImplInt64ValueArray
             array = (long[]) object;
         }
 
-        jsonWriter.writeInt64(array);
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+        if (writeAsString) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeInt64(array);
+        }
     }
 
     @Override

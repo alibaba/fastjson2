@@ -46,4 +46,8 @@ final class AnyOf
         }
         return FAIL_ANY_OF;
     }
+
+    public JSONObject toJSONObject() {
+        return JSONObject.of("anyOf", this.items);
+    }
 }

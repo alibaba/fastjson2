@@ -38,7 +38,7 @@ public final class FDBigInteger {
         trimLeadingZeros();
     }
 
-    public FDBigInteger(long lValue, char[] digits, int kDigits, int nDigits) {
+    public FDBigInteger(long lValue, byte[] digits, int kDigits, int nDigits) {
         int n = Math.max((nDigits + 8) / 9, 2);        // estimate size needed.
         data = new int[n];      // allocate enough space
         data[0] = (int) lValue;    // starting value
@@ -164,7 +164,7 @@ public final class FDBigInteger {
     }
 
     private static void mult(int[] src, int srcLen, int value, int[] dst) {
-        long val = value & 0XFFFFFFFFL;
+        final long val = value & 0XFFFFFFFFL;
         long carry = 0;
         for (int i = 0; i < srcLen; i++) {
             long product = (src[i] & 0XFFFFFFFFL) * val + carry;
@@ -188,16 +188,9 @@ public final class FDBigInteger {
     }
 
     private static void mult(int[] src, int srcLen, int v0, int v1, int[] dst) {
-        long v = v0 & 0XFFFFFFFFL;
+        mult(src, srcLen, v0, dst);
+        long v = v1 & 0XFFFFFFFFL;
         long carry = 0;
-        for (int j = 0; j < srcLen; j++) {
-            long product = v * (src[j] & 0XFFFFFFFFL) + carry;
-            dst[j] = (int) product;
-            carry = product >>> 32;
-        }
-        dst[srcLen] = (int) carry;
-        v = v1 & 0XFFFFFFFFL;
-        carry = 0;
         for (int j = 0; j < srcLen; j++) {
             long product = (dst[j + 1] & 0XFFFFFFFFL) + v * (src[j] & 0XFFFFFFFFL) + carry;
             dst[j + 1] = (int) product;
@@ -267,14 +260,13 @@ public final class FDBigInteger {
                     int prev = data[idx];
                     int hi = prev >>> anticount;
                     int[] result = data;
-                    int[] src = data;
                     if (hi != 0) {
                         if (nWords == data.length) {
                             this.data = result = new int[nWords + 1];
                         }
                         result[nWords++] = hi;
                     }
-                    leftShift(src, idx, result, bitcount, anticount, prev);
+                    leftShift(data, idx, result, bitcount, anticount, prev);
                 }
             }
             this.nWords = nWords;

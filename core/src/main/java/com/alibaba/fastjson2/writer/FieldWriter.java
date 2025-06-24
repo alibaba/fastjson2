@@ -50,6 +50,8 @@ public abstract class FieldWriter<T>
     final boolean symbol;
     final boolean trim;
     final boolean raw;
+    final boolean managedReference;
+    final boolean backReference;
 
     transient JSONWriter.Path path;
     volatile ObjectWriter initObjectWriter;
@@ -120,6 +122,8 @@ public abstract class FieldWriter<T>
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
+        this.managedReference = (features & ReferenceDetection.mask) != 0;
+        this.backReference = (features & FieldInfo.BACKR_EFERENCE) != 0;
         this.rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
 
         int nameLength = name.length();
@@ -176,6 +180,10 @@ public abstract class FieldWriter<T>
         return false;
     }
 
+    public int writeEnumValueJSONB(byte[] bytes, int off, Enum e, SymbolTable symbolTable, long features) {
+        throw new UnsupportedOperationException();
+    }
+
     public void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
         throw new UnsupportedOperationException();
     }
@@ -194,6 +202,15 @@ public abstract class FieldWriter<T>
             return;
         }
         jsonWriter.writeNameRaw(nameJSONB, hashCode);
+    }
+
+    public final int writeFieldNameJSONB(byte[] bytes, int off) {
+        System.arraycopy(nameJSONB, 0, bytes, off, nameJSONB.length);
+        return off + nameJSONB.length;
+    }
+
+    public final int writeFieldNameJSONB(byte[] bytes, int off, JSONWriter jsonWriter) {
+        return JSONB.IO.writeNameRaw(bytes, off, nameJSONB, hashCode, jsonWriter);
     }
 
     public final void writeFieldName(JSONWriter jsonWriter) {
@@ -243,6 +260,32 @@ public abstract class FieldWriter<T>
             return true;
         }
         return false;
+    }
+
+    public int writeFieldNameSymbol(SymbolTable symbolTable) {
+        int symbolTableIdentity = System.identityHashCode(symbolTable);
+
+        int symbol;
+        if (nameSymbolCache == 0) {
+            symbol = symbolTable.getOrdinalByHashCode(hashCode);
+            nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+        } else {
+            if ((int) nameSymbolCache == symbolTableIdentity) {
+                symbol = (int) (nameSymbolCache >> 32);
+            } else {
+                symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+            }
+        }
+        return symbol;
+    }
+
+    public boolean isRefDetect(Object object, long features) {
+        features |= this.features;
+        return (features & ReferenceDetection.mask) != 0
+                && (features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
+                && object != null
+                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
 
     public final JSONWriter.Path getRootParentPath() {
@@ -297,7 +340,7 @@ public abstract class FieldWriter<T>
         }
 
         if (fieldClass == boolean.class) {
-            if (fieldValue == Boolean.FALSE) {
+            if (fieldValue.equals(Boolean.FALSE)) {
                 return;
             }
         } else if (fieldClass == byte.class
@@ -479,6 +522,14 @@ public abstract class FieldWriter<T>
             return 1;
         }
 
+        if (this.method != null && other.method == null) {
+            return -1;
+        }
+
+        if (this.method == null && other.method != null) {
+            return 1;
+        }
+
         return nameCompare;
     }
 
@@ -498,7 +549,9 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        if ("base64".equals(format)
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else if ("base64".equals(format)
                 || (format == null && (jsonWriter.getFeatures(this.features) & WriteByteArrayAsBase64.mask) != 0)
         ) {
             jsonWriter.writeBase64(value);
@@ -534,7 +587,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeInt16(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeInt16(value);
+        }
     }
 
     public void writeInt32(JSONWriter jsonWriter, int value) {
@@ -593,7 +650,11 @@ public abstract class FieldWriter<T>
         if (decimalFormat != null) {
             jsonWriter.writeFloat(value, decimalFormat);
         } else {
-            jsonWriter.writeFloat(value);
+            if ((features & WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(Float.toString(value));
+            } else {
+                jsonWriter.writeFloat(value);
+            }
         }
     }
 
@@ -602,7 +663,12 @@ public abstract class FieldWriter<T>
         if (decimalFormat != null) {
             jsonWriter.writeDouble(value, decimalFormat);
         } else {
-            jsonWriter.writeDouble(value);
+            boolean writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(Double.toString(value));
+            } else {
+                jsonWriter.writeDouble(value);
+            }
         }
     }
 
@@ -616,7 +682,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeBool(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeBool(value);
+        }
     }
 
     public void writeFloat(JSONWriter jsonWriter, float[] value) {
@@ -625,7 +695,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeFloat(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 
     public void writeDouble(JSONWriter jsonWriter, double[] value) {
@@ -634,7 +708,11 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDouble(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(value);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 
     public void writeDouble(JSONWriter jsonWriter, Double value) {
@@ -676,7 +754,7 @@ public abstract class FieldWriter<T>
             return;
         }
 
-        final int SECONDS_PER_DAY = 60 * 60 * 24;
+        final long SECONDS_PER_DAY = 60 * 60 * 24;
 
         JSONWriter.Context ctx = jsonWriter.context;
         if (isDateFormatMillis() || ctx.isDateFormatMillis()) {
@@ -698,8 +776,8 @@ public abstract class FieldWriter<T>
                     .getOffset(instant);
 
             long localSecond = epochSecond + offset.getTotalSeconds();
-            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+            int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;

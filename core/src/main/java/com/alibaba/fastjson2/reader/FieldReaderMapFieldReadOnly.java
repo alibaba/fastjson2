@@ -1,18 +1,45 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 class FieldReaderMapFieldReadOnly<T>
-        extends FieldReaderObjectField<T> {
-    FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, field);
+        extends FieldReaderMapField<T> {
+    FieldReaderMapFieldReadOnly(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            JSONSchema schema,
+            Field field,
+            String arrayToMapKey,
+            BiConsumer arrayToMapDuplicateHandler
+    ) {
+        super(
+                fieldName,
+                fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                null,
+                null,
+                schema,
+                field,
+                arrayToMapKey,
+                arrayToMapDuplicateHandler);
     }
 
     @Override
@@ -94,6 +121,23 @@ class FieldReaderMapFieldReadOnly<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        if (arrayToMapKey != null && jsonReader.isArray()) {
+            Map map;
+            try {
+                map = (Map) field.get(object);
+            } catch (Exception e) {
+                throw new JSONException("set " + fieldName + " error");
+            }
+            List array = jsonReader.readArray(valueType);
+            arrayToMap(map,
+                    array,
+                    arrayToMapKey,
+                    namingStrategy,
+                    JSONFactory.getObjectReader(valueType, features),
+                    arrayToMapDuplicateHandler);
+            return;
+        }
+
         if (initReader == null) {
             initReader = jsonReader
                     .getContext()
@@ -108,5 +152,26 @@ class FieldReaderMapFieldReadOnly<T>
         }
 
         accept(object, value);
+    }
+
+    protected void acceptAny(T object, Object fieldValue, long features) {
+        if (arrayToMapKey != null && fieldValue instanceof Collection) {
+            Map map;
+            try {
+                map = (Map) field.get(object);
+            } catch (Exception e) {
+                throw new JSONException("set " + fieldName + " error");
+            }
+
+            arrayToMap(map,
+                    (Collection) fieldValue,
+                    arrayToMapKey,
+                    namingStrategy,
+                    JSONFactory.getObjectReader(valueType, this.features | features),
+                    arrayToMapDuplicateHandler);
+            return;
+        }
+
+        super.acceptAny(object, fieldValue, features);
     }
 }

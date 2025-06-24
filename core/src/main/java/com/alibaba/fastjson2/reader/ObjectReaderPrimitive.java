@@ -20,7 +20,7 @@ abstract class ObjectReaderPrimitive<T>
 
     @Override
     public T createInstance(long features) {
-        throw new JSONException("UnsupportedOperation");
+        throw new JSONException("createInstance not supported " + objectClass.getName());
     }
 
     @Override

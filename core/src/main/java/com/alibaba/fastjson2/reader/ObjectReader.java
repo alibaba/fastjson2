@@ -34,6 +34,22 @@ public interface ObjectReader<T> {
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
     default T createInstance(Collection collection) {
+        return createInstance(collection, 0L);
+    }
+
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
+    default T createInstance(Collection collection, JSONReader.Feature... features) {
+        return createInstance(collection, JSONReader.Feature.of(features));
+    }
+
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
+    default T createInstance(Collection collection, long features) {
         throw new UnsupportedOperationException(this.getClass().getName());
     }
 
@@ -80,6 +96,10 @@ public interface ObjectReader<T> {
         }
 
         T object = createInstance(0L);
+        return accept(object, map, features);
+    }
+
+    default T accept(T object, Map map, long features) {
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String entryKey = entry.getKey().toString();
             Object fieldValue = entry.getValue();
@@ -156,13 +176,25 @@ public interface ObjectReader<T> {
         FieldReader fieldReader = getFieldReader(fieldNameHash);
 
         if (fieldReader == null) {
-            long fieldNameHashLCase = Fnv.hashCode64LCase(fieldName);
-            if (fieldNameHashLCase != fieldNameHash) {
-                fieldReader = getFieldReaderLCase(fieldNameHashLCase);
+            fieldReader = getFieldReaderLCase(fieldNameHash);
+            if (fieldReader == null) {
+                long fieldNameHashLCase = Fnv.hashCode64LCase(fieldName);
+                if (fieldNameHashLCase != fieldNameHash) {
+                    fieldReader = getFieldReaderLCase(fieldNameHashLCase);
+                }
             }
         }
 
         return fieldReader;
+    }
+
+    default boolean setFieldValue(Object object, String fieldName, Object value) {
+        FieldReader fieldReader = getFieldReader(fieldName);
+        if (fieldReader == null) {
+            return false;
+        }
+        fieldReader.accept(object, value);
+        return true;
     }
 
     default Function getBuildFunction() {
@@ -207,7 +239,7 @@ public interface ObjectReader<T> {
                     reader = context.getObjectReaderAutoType(typeName, null);
 
                     if (reader == null) {
-                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
+                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for " + typeName));
                     }
                 }
 
@@ -261,6 +293,15 @@ public interface ObjectReader<T> {
      */
     default T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return {@link T}
+     */
+    default T readObject(String str, JSONReader.Feature... features) {
+        try (JSONReader jsonReader = JSONReader.of(str, JSONFactory.createReadContext(features))) {
+            return readObject(jsonReader, null, null, getFeatures());
+        }
     }
 
     /**

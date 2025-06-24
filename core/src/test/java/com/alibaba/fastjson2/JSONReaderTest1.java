@@ -943,20 +943,20 @@ public class JSONReaderTest1 {
     @Test
     public void test_readPattern() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/")) {
-            jsonReader.next();
+            jsonReader.nextWithoutComment();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/ , ")) {
-            jsonReader.next();
+            jsonReader.nextWithoutComment();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/ , 1")) {
-            jsonReader.next();
+            jsonReader.nextWithoutComment();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
@@ -1626,7 +1626,7 @@ public class JSONReaderTest1 {
         for (String name : names) {
             String str = "{\"" + name + "\":123456789}";
             byte[] bytes = str.getBytes();
-            JSONReaderASCII jsonReader = new JSONReaderASCII(JSONFactory.createReadContext(), str, bytes, 0, bytes.length);
+            JSONReaderASCII jsonReader = JSONReaderASCII.of(JSONFactory.createReadContext(), str, bytes, 0, bytes.length);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(
                     Fnv.hashCode64(name),
@@ -1646,7 +1646,7 @@ public class JSONReaderTest1 {
                 bytes[2] = (byte) i0;
                 bytes[3] = (byte) i1;
                 String name = new String(new char[]{(char) i0, (char) i1});
-                JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                JSONReaderASCII jsonReader = JSONReaderASCII.of(context, null, bytes, 0, bytes.length);
                 assertTrue(jsonReader.nextIfObjectStart());
                 assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
             }
@@ -1665,7 +1665,7 @@ public class JSONReaderTest1 {
                     bytes[3] = (byte) i1;
                     bytes[4] = (byte) i2;
                     String name = new String(new char[]{(char) i0, (char) i1, (char) i2});
-                    JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                    JSONReaderASCII jsonReader = JSONReaderASCII.of(context, null, bytes, 0, bytes.length);
                     assertTrue(jsonReader.nextIfObjectStart());
                     assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
                 }
@@ -1680,7 +1680,7 @@ public class JSONReaderTest1 {
                     bytes[3] = (byte) i1;
                     bytes[4] = (byte) i2;
                     String name = new String(new char[]{(char) i0, (char) i1, (char) i2});
-                    JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                    JSONReaderASCII jsonReader = JSONReaderASCII.of(context, null, bytes, 0, bytes.length);
                     assertTrue(jsonReader.nextIfObjectStart());
                     assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
                 }
@@ -1703,7 +1703,7 @@ public class JSONReaderTest1 {
                         bytes[5] = (byte) i3;
 
                         String name = new String(new char[]{(char) i0, (char) i1, (char) i2, (char) i3});
-                        JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                        JSONReaderASCII jsonReader = JSONReaderASCII.of(context, null, bytes, 0, bytes.length);
                         assertTrue(jsonReader.nextIfObjectStart());
                         assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
                     }
@@ -1728,7 +1728,7 @@ public class JSONReaderTest1 {
             assertTrue(utf16Reader.nextIfObjectStart());
             String name0 = utf16Reader.readFieldName();
 
-            JSONReaderASCII asciiReader = new JSONReaderASCII(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
+            JSONReaderASCII asciiReader = JSONReaderASCII.of(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
             assertTrue(asciiReader.nextIfObjectStart());
             String name1 = asciiReader.readFieldName();
 
@@ -1756,14 +1756,14 @@ public class JSONReaderTest1 {
                 assertTrue(utf16Reader.nextIfObjectStart());
                 String name0 = utf16Reader.readFieldName();
 
-                JSONReaderASCII asciiReader = new JSONReaderASCII(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
+                JSONReaderASCII asciiReader = JSONReaderASCII.of(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
                 assertTrue(asciiReader.nextIfObjectStart());
                 String name1 = asciiReader.readFieldName();
 
                 assertEquals(name0, name1);
 
                 byte[] ut8Bytes = new String(chars).getBytes(StandardCharsets.UTF_8);
-                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), null, ut8Bytes, 0, ut8Bytes.length);
+                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), ut8Bytes, 0, ut8Bytes.length);
                 assertTrue(utf8Reader.nextIfObjectStart());
                 String name2 = utf8Reader.readFieldName();
                 assertEquals(name0, name2);
@@ -1996,7 +1996,7 @@ public class JSONReaderTest1 {
             String json = JSON.toJSONString(JSONObject.of(s1, s1));
             byte[] bytes = json.getBytes(StandardCharsets.ISO_8859_1);
             JSONReader.Context ctx = JSONFactory.createReadContext();
-            JSONReaderASCII jsonReader = new JSONReaderASCII(ctx, json, bytes, 0, bytes.length);
+            JSONReaderASCII jsonReader = JSONReaderASCII.of(ctx, json, bytes, 0, bytes.length);
             JSONObject object = (JSONObject) jsonReader.readObject();
             Object v1 = object.get(s1);
             assertEquals(s1, v1, Integer.toString(i));
@@ -2008,7 +2008,7 @@ public class JSONReaderTest1 {
                 String json = JSON.toJSONString(JSONObject.of(s2, s2));
                 byte[] bytes = json.getBytes(StandardCharsets.ISO_8859_1);
                 JSONReader.Context ctx = JSONFactory.createReadContext();
-                JSONReaderASCII jsonReader = new JSONReaderASCII(ctx, json, bytes, 0, bytes.length);
+                JSONReaderASCII jsonReader = JSONReaderASCII.of(ctx, json, bytes, 0, bytes.length);
                 JSONObject object = (JSONObject) jsonReader.readObject();
                 Object v1 = object.get(s2);
                 assertEquals(s2, v1);
@@ -2023,7 +2023,7 @@ public class JSONReaderTest1 {
             String json = JSON.toJSONString(JSONObject.of(s1, s1));
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
             JSONReader.Context ctx = JSONFactory.createReadContext();
-            JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, s1, bytes, 0, bytes.length);
+            JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, bytes, 0, bytes.length);
             JSONObject object = (JSONObject) jsonReader.readObject();
             Object v1 = object.get(s1);
             assertEquals(s1, v1);
@@ -2035,7 +2035,7 @@ public class JSONReaderTest1 {
                 String json = JSON.toJSONString(JSONObject.of(s2, s2));
                 byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
                 JSONReader.Context ctx = JSONFactory.createReadContext();
-                JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, s2, bytes, 0, bytes.length);
+                JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, bytes, 0, bytes.length);
                 JSONObject object = (JSONObject) jsonReader.readObject();
                 Object v1 = object.get(s2);
                 assertEquals(s2, v1);

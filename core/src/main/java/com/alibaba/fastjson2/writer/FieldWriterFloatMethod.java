@@ -8,6 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 class FieldWriterFloatMethod<T>
         extends FieldWriter<T> {
     protected FieldWriterFloatMethod(
@@ -63,7 +65,11 @@ class FieldWriterFloatMethod<T>
         if (decimalFormat != null) {
             jsonWriter.writeFloat(floatValue, decimalFormat);
         } else {
-            jsonWriter.writeFloat(floatValue);
+            if ((features & WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(floatValue);
+            } else {
+                jsonWriter.writeFloat(floatValue);
+            }
         }
 
         return true;

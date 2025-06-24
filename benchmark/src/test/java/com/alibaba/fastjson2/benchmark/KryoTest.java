@@ -14,11 +14,11 @@ public class KryoTest {
     Kryo kryo = new Kryo();
     Output output = new Output(1024, -1);
 //
-//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
+//    static org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
+//            .withLanguage(org.apache.fury.Language.JAVA)
 //            .withReferenceTracking(true)
 //            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+//            .withCompatibleMode(org.apache.fury.serializers.CompatibleMode.COMPATIBLE)
 //            .buildThreadSafeFury();
 
     @Test

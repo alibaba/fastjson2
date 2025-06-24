@@ -196,7 +196,7 @@ public class ParserConfig {
     /**
      * fieldName,field ，先生成fieldName的快照，减少之后的findField的轮询
      *
-     * @param clazz
+     * @param clazz the specified goal class
      * @param fieldCacheMap :map&lt;fieldName ,Field&gt;
      */
     public static void parserAllFieldToCache(Class<?> clazz, Map<String, Field> fieldCacheMap) {

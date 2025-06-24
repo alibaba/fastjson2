@@ -6,8 +6,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNullListAsEmpty;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 final class ObjectWriterImplInt64Array
         extends ObjectWriterPrimitiveImpl {
@@ -27,6 +26,8 @@ final class ObjectWriterImplInt64Array
             return;
         }
 
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+
         Long[] array = (Long[]) object;
 
         jsonWriter.startArray();
@@ -40,7 +41,13 @@ final class ObjectWriterImplInt64Array
                 jsonWriter.writeNull();
                 continue;
             }
-            jsonWriter.writeInt64(item);
+
+            long longValue = item;
+            if (writeAsString) {
+                jsonWriter.writeString(longValue);
+            } else {
+                jsonWriter.writeInt64(longValue);
+            }
         }
         jsonWriter.endArray();
     }
@@ -56,6 +63,8 @@ final class ObjectWriterImplInt64Array
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
 
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
+
         Long[] array = (Long[]) object;
 
         jsonWriter.startArray(array.length);
@@ -64,7 +73,13 @@ final class ObjectWriterImplInt64Array
                 jsonWriter.writeNull();
                 continue;
             }
-            jsonWriter.writeInt64(item);
+
+            long longValue = item;
+            if (writeAsString) {
+                jsonWriter.writeString(longValue);
+            } else {
+                jsonWriter.writeInt64(longValue);
+            }
         }
     }
 }

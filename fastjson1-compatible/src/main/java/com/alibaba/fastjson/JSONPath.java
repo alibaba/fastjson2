@@ -37,7 +37,9 @@ public class JSONPath {
 
     public static <T> T read(String json, String path, Type clazz, ParserConfig parserConfig) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        Object r = jsonPath.extract(JSONReader.of(json));
+        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader jsonReader = JSONReader.of(json, context);
+        Object r = jsonPath.extract(jsonReader);
         return TypeUtils.cast(r, clazz, parserConfig);
     }
 
@@ -47,9 +49,12 @@ public class JSONPath {
         return TypeUtils.cast(r, clazz, ParserConfig.global);
     }
 
+    public static Object eval(String rootObject, String path) {
+        return JSON.adaptResult(com.alibaba.fastjson2.JSONPath.eval(rootObject, path));
+    }
+
     public static Object eval(Object rootObject, String path) {
-        com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        return jsonPath.eval(rootObject);
+        return JSON.adaptResult(com.alibaba.fastjson2.JSONPath.of(path).eval(rootObject));
     }
 
     public static boolean set(Object rootObject, String path, Object value) {
@@ -70,8 +75,10 @@ public class JSONPath {
 
     public static Object extract(String json, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        JSONReader jsonReader = JSONReader.of(json);
-        return jsonPath.extract(jsonReader);
+        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader jsonReader = JSONReader.of(json, context);
+        Object result = jsonPath.extract(jsonReader);
+        return JSON.adaptResult(result);
     }
 
     public static boolean remove(Object root, String path) {
@@ -81,11 +88,17 @@ public class JSONPath {
     }
 
     public static boolean contains(Object rootObject, String path) {
+        if (rootObject == null) {
+            return false;
+        }
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         return jsonPath.contains(rootObject);
     }
 
     public static Object read(String json, String path) {
-        return com.alibaba.fastjson2.JSONPath.extract(json, path);
+        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader jsonReader = JSONReader.of(json, context);
+        com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
+        return jsonPath.extract(jsonReader);
     }
 }

@@ -345,7 +345,7 @@ public abstract class CSVReader<T>
         if (!objectSupport) {
             throw new UnsupportedOperationException("this method should not be called, try specify objectClass or method readLineValues instead ?");
         }
-        if (inputEnd) {
+        if (inputEnd && off == end) {
             return null;
         }
 

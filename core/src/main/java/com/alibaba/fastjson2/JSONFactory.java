@@ -7,21 +7,53 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.util.JDKUtils.VECTOR_BIT_LENGTH;
-
 public final class JSONFactory {
+    public static final class Conf {
+        static final Properties DEFAULT_PROPERTIES;
+
+        static {
+            Properties properties = new Properties();
+
+            InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+                final String resourceFile = "fastjson2.properties";
+
+                if (cl != null) {
+                    return cl.getResourceAsStream(resourceFile);
+                } else {
+                    return ClassLoader.getSystemResourceAsStream(resourceFile);
+                }
+            });
+            if (inputStream != null) {
+                try {
+                    properties.load(inputStream);
+                } catch (java.io.IOException ignored) {
+                } finally {
+                    IOUtils.close(inputStream);
+                }
+            }
+            DEFAULT_PROPERTIES = properties;
+        }
+
+        public static String getProperty(String key) {
+            return DEFAULT_PROPERTIES.getProperty(key);
+        }
+    }
     static volatile Throwable initErrorLast;
 
     public static final String CREATOR;
@@ -35,7 +67,7 @@ public final class JSONFactory {
     static boolean useGsonAnnotation;
 
     public static String getProperty(String key) {
-        return DEFAULT_PROPERTIES.getProperty(key);
+        return Conf.getProperty(key);
     }
 
     static long defaultReaderFeatures;
@@ -45,18 +77,18 @@ public final class JSONFactory {
     static long defaultWriterFeatures;
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
+    static boolean defaultWriterAlphabetic;
+    static final boolean disableReferenceDetect;
+    static final boolean disableArrayMapping;
+    static final boolean disableJSONB;
+    static final boolean disableAutoType;
+    static final boolean disableSmartMatch;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
-
-    static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF8;
-    static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF16;
-    static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_ASCII;
-    static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
-    static final JSONReaderUTF16Creator INCUBATOR_VECTOR_READER_CREATOR_UTF16;
 
     static int defaultDecimalMaxScale = 2048;
 
@@ -124,32 +156,8 @@ public final class JSONFactory {
             1.0e20, 1.0e21, 1.0e22
     };
 
-    static final Double DOUBLE_ZERO = (double) 0;
-
     static {
-        Properties properties = new Properties();
-
-        InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-            final String resourceFile = "fastjson2.properties";
-
-            if (cl != null) {
-                return cl.getResourceAsStream(resourceFile);
-            } else {
-                return ClassLoader.getSystemResourceAsStream(resourceFile);
-            }
-        });
-        if (inputStream != null) {
-            try {
-                properties.load(inputStream);
-            } catch (java.io.IOException ignored) {
-            } finally {
-                IOUtils.close(inputStream);
-            }
-        }
-        DEFAULT_PROPERTIES = properties;
-
+        Properties properties = Conf.DEFAULT_PROPERTIES;
         {
             String property = System.getProperty("fastjson2.creator");
             if (property != null) {
@@ -165,106 +173,91 @@ public final class JSONFactory {
 
             CREATOR = property == null ? "asm" : property;
         }
-
         {
-            String property = System.getProperty("fastjson2.useJacksonAnnotation");
-            if (property != null) {
-                property = property.trim();
+            boolean disableReferenceDetect0 = false,
+                    disableArrayMapping0 = false,
+                    disableJSONB0 = false,
+                    disableAutoType0 = false,
+                    disableSmartMatch0 = false;
+            String features = System.getProperty("fastjson2.features");
+            if (features == null) {
+                features = getProperty("fastjson2.features");
+            }
+            if (features != null) {
+                for (String feature : features.split(",")) {
+                    switch (feature) {
+                        case "disableReferenceDetect":
+                            disableReferenceDetect0 = true;
+                            break;
+                        case "disableArrayMapping":
+                            disableArrayMapping0 = true;
+                            break;
+                        case "disableJSONB":
+                            disableJSONB0 = true;
+                            break;
+                        case "disableAutoType":
+                            disableAutoType0 = true;
+                            break;
+                        case "disableSmartMatch":
+                            disableSmartMatch0 = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
-            if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.useJacksonAnnotation");
+            disableReferenceDetect = disableReferenceDetect0;
+            disableArrayMapping = disableArrayMapping0;
+            disableJSONB = disableJSONB0;
+            disableAutoType = disableAutoType0;
+            disableSmartMatch = disableSmartMatch0;
+        }
+
+        useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
+        useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
+        defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
+    }
+
+    private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
+        boolean propertyValue = defaultValue;
+
+        String property = System.getProperty(name);
+        if (property != null) {
+            property = property.trim();
+            if (property.isEmpty()) {
+                property = properties.getProperty(name);
                 if (property != null) {
                     property = property.trim();
                 }
             }
-
-            useJacksonAnnotation = !"false".equals(property);
+            if (defaultValue) {
+                if ("false".equals(property)) {
+                    propertyValue = false;
+                }
+            } else {
+                if ("true".equals(property)) {
+                    propertyValue = true;
+                }
+            }
         }
 
-        {
-            String property = System.getProperty("fastjson2.useGsonAnnotation");
-            if (property != null) {
-                property = property.trim();
-            }
+        return propertyValue;
+    }
 
-            if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.useGsonAnnotation");
+    private static String getProperty(Properties properties, String name) {
+        String property = System.getProperty(name);
+        if (property != null) {
+            property = property.trim();
+            if (property.isEmpty()) {
+                property = properties.getProperty(name);
                 if (property != null) {
                     property = property.trim();
                 }
             }
-
-            useGsonAnnotation = !"false".equals(property);
         }
 
-        boolean readerVector = false;
-        {
-            String property = System.getProperty("fastjson2.readerVector");
-            if (property != null) {
-                property = property.trim();
-                if (property.isEmpty()) {
-                    property = properties.getProperty("fastjson2.readerVector");
-                    if (property != null) {
-                        property = property.trim();
-                    }
-                }
-                readerVector = !"false".equals(property);
-            }
-        }
-
-        Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF8 = null;
-        Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF16 = null;
-        JSONReaderUTF8Creator readerCreatorASCII = null;
-        JSONReaderUTF8Creator readerCreatorUTF8 = null;
-        JSONReaderUTF16Creator readerCreatorUTF16 = null;
-        if (JDKUtils.VECTOR_SUPPORT) {
-            if (VECTOR_BIT_LENGTH >= 64) {
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
-                    incubatorVectorCreatorUTF8 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-                } catch (Throwable e) {
-                    initErrorLast = e;
-                }
-
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF16Vector$Factory");
-                    incubatorVectorCreatorUTF16 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-                } catch (Throwable e) {
-                    initErrorLast = e;
-                }
-
-                if (readerVector) {
-                    try {
-                        Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderASCIIVector$Factory");
-                        readerCreatorASCII = (JSONReaderUTF8Creator) factoryClass.newInstance();
-                    } catch (Throwable e) {
-                        initErrorLast = e;
-                    }
-
-                    try {
-                        Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
-                        readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
-                    } catch (Throwable e) {
-                        initErrorLast = e;
-                    }
-                }
-            }
-
-            if (VECTOR_BIT_LENGTH >= 128 && readerVector) {
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
-                    readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
-                } catch (Throwable e) {
-                    initErrorLast = e;
-                }
-            }
-        }
-        INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 = incubatorVectorCreatorUTF8;
-        INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 = incubatorVectorCreatorUTF16;
-        INCUBATOR_VECTOR_READER_CREATOR_ASCII = readerCreatorASCII;
-        INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;
-        INCUBATOR_VECTOR_READER_CREATOR_UTF16 = readerCreatorUTF16;
+        return property;
     }
 
     public static boolean isUseJacksonAnnotation() {
@@ -279,6 +272,10 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
+    public static void setUseGsonAnnotation(boolean useGsonAnnotation) {
+        JSONFactory.useGsonAnnotation = useGsonAnnotation;
+    }
+
     static final CacheItem[] CACHE_ITEMS;
 
     static {
@@ -289,7 +286,7 @@ public final class JSONFactory {
         CACHE_ITEMS = items;
     }
 
-    static final int CACHE_THRESHOLD = 1024 * 1024 * 4;
+    static final int CACHE_THRESHOLD = 1024 * 1024 * 8;
     static final AtomicReferenceFieldUpdater<CacheItem, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, char[].class, "chars");
     static final AtomicReferenceFieldUpdater<CacheItem, byte[]> BYTES_UPDATER
@@ -299,8 +296,6 @@ public final class JSONFactory {
         volatile char[] chars;
         volatile byte[] bytes;
     }
-
-    static final Properties DEFAULT_PROPERTIES;
 
     static final ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static final ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
@@ -339,19 +334,34 @@ public final class JSONFactory {
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
-    static final byte[] UUID_VALUES;
+    static final byte[] NIBBLES;
 
     static {
-        UUID_VALUES = new byte['f' + 1 - '0'];
-        for (char c = '0'; c <= '9'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - '0');
-        }
-        for (char c = 'a'; c <= 'f'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - 'a' + 10);
-        }
-        for (char c = 'A'; c <= 'F'; c++) {
-            UUID_VALUES[c - '0'] = (byte) (c - 'A' + 10);
-        }
+        byte[] ns = new byte[256];
+        Arrays.fill(ns, (byte) -1);
+        ns['0'] = 0;
+        ns['1'] = 1;
+        ns['2'] = 2;
+        ns['3'] = 3;
+        ns['4'] = 4;
+        ns['5'] = 5;
+        ns['6'] = 6;
+        ns['7'] = 7;
+        ns['8'] = 8;
+        ns['9'] = 9;
+        ns['A'] = 10;
+        ns['B'] = 11;
+        ns['C'] = 12;
+        ns['D'] = 13;
+        ns['E'] = 14;
+        ns['F'] = 15;
+        ns['a'] = 10;
+        ns['b'] = 11;
+        ns['c'] = 12;
+        ns['d'] = 13;
+        ns['e'] = 14;
+        ns['f'] = 15;
+        NIBBLES = ns;
     }
 
     /**
@@ -413,9 +423,8 @@ public final class JSONFactory {
     }
 
     public static JSONReader.Context createReadContext(Filter filter, JSONReader.Feature... features) {
-        JSONReader.Context context = new JSONReader.Context(
-                JSONFactory.getDefaultObjectReaderProvider()
-        );
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider);
 
         if (filter instanceof JSONReader.AutoTypeBeforeHandler) {
             context.autoTypeBeforeHandler = (JSONReader.AutoTypeBeforeHandler) filter;
@@ -464,13 +473,24 @@ public final class JSONFactory {
     public static JSONReader.Context createReadContext(
             Supplier<Map> objectSupplier,
             Supplier<List> arraySupplier,
-            JSONReader.Feature... features) {
+            JSONReader.Feature... features
+    ) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
         context.setObjectSupplier(objectSupplier);
         context.setArraySupplier(arraySupplier);
         context.config(features);
         return context;
+    }
+
+    public static ObjectReader getObjectReader(Type type, long features) {
+        return getDefaultObjectReaderProvider()
+                .getObjectReader(type, JSONReader.Feature.FieldBased.isEnabled(features));
+    }
+
+    public static ObjectWriter getObjectWriter(Type type, long features) {
+        return getDefaultObjectWriterProvider()
+                .getObjectWriter(type, TypeUtils.getClass(type), JSONWriter.Feature.FieldBased.isEnabled(features));
     }
 
     public static ObjectWriterProvider getDefaultObjectWriterProvider() {
@@ -521,5 +541,81 @@ public final class JSONFactory {
 
     public interface JSONPathCompiler {
         JSONPath compile(Class objectClass, JSONPath path);
+    }
+
+    public static long getDefaultReaderFeatures() {
+        return defaultReaderFeatures;
+    }
+
+    public static ZoneId getDefaultReaderZoneId() {
+        return defaultReaderZoneId;
+    }
+
+    public static String getDefaultReaderFormat() {
+        return defaultReaderFormat;
+    }
+
+    public static long getDefaultWriterFeatures() {
+        return defaultWriterFeatures;
+    }
+
+    public static ZoneId getDefaultWriterZoneId() {
+        return defaultWriterZoneId;
+    }
+
+    public static String getDefaultWriterFormat() {
+        return defaultWriterFormat;
+    }
+
+    public static boolean isDefaultWriterAlphabetic() {
+        return defaultWriterAlphabetic;
+    }
+
+    public static void setDefaultWriterAlphabetic(boolean defaultWriterAlphabetic) {
+        JSONFactory.defaultWriterAlphabetic = defaultWriterAlphabetic;
+    }
+
+    public static boolean isDisableReferenceDetect() {
+        return disableReferenceDetect;
+    }
+
+    public static boolean isDisableAutoType() {
+        return disableAutoType;
+    }
+
+    public static boolean isDisableJSONB() {
+        return disableJSONB;
+    }
+
+    public static boolean isDisableArrayMapping() {
+        return disableArrayMapping;
+    }
+
+    public static void setDisableReferenceDetect(boolean disableReferenceDetect) {
+        defaultObjectWriterProvider.setDisableReferenceDetect(disableReferenceDetect);
+        defaultObjectReaderProvider.setDisableReferenceDetect(disableReferenceDetect);
+    }
+
+    public static void setDisableArrayMapping(boolean disableArrayMapping) {
+        defaultObjectWriterProvider.setDisableArrayMapping(disableArrayMapping);
+        defaultObjectReaderProvider.setDisableArrayMapping(disableArrayMapping);
+    }
+
+    public static void setDisableJSONB(boolean disableJSONB) {
+        defaultObjectWriterProvider.setDisableJSONB(disableJSONB);
+        defaultObjectReaderProvider.setDisableJSONB(disableJSONB);
+    }
+
+    public static void setDisableAutoType(boolean disableAutoType) {
+        defaultObjectWriterProvider.setDisableAutoType(disableAutoType);
+        defaultObjectReaderProvider.setDisableAutoType(disableAutoType);
+    }
+
+    public static boolean isDisableSmartMatch() {
+        return disableSmartMatch;
+    }
+
+    public static void setDisableSmartMatch(boolean disableSmartMatch) {
+        defaultObjectReaderProvider.setDisableSmartMatch(disableSmartMatch);
     }
 }

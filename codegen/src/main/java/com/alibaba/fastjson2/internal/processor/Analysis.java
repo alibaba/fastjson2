@@ -22,7 +22,8 @@ public class Analysis {
     private final Types types;
     final TypeElement jsonCompiledElement;
     final TypeElement jsonTypeElement;
-    public final DeclaredType compiledJsonType;
+    public final DeclaredType jsonCompiledDeclaredType;
+    public final DeclaredType jsonTypeDeclaredType;
     final Map<String, StructInfo> structs = new LinkedHashMap<>();
 
     public Analysis(ProcessingEnvironment processingEnv) {
@@ -30,8 +31,9 @@ public class Analysis {
         this.elements = processingEnv.getElementUtils();
         this.types = processingEnv.getTypeUtils();
         this.jsonCompiledElement = elements.getTypeElement(JSONCompiled.class.getName());
-        this.compiledJsonType = types.getDeclaredType(jsonCompiledElement);
+        this.jsonCompiledDeclaredType = types.getDeclaredType(jsonCompiledElement);
         this.jsonTypeElement = elements.getTypeElement(JSONType.class.getName());
+        this.jsonTypeDeclaredType = types.getDeclaredType(jsonTypeElement);
     }
 
     public void processAnnotation(DeclaredType currentAnnotationType, Set<? extends Element> targets) {
@@ -79,7 +81,7 @@ public class Analysis {
         final TypeElement element = (TypeElement) el;
         String name = "struct" + structs.size();
         String binaryName = elements.getBinaryName(element).toString();
-        StructInfo info = new StructInfo(types, element, discoveredBy, name, binaryName);
+        StructInfo info = new StructInfo(types, element, jsonCompiledDeclaredType, jsonTypeDeclaredType, name, binaryName);
         structs.put(typeName, info);
     }
 
@@ -166,9 +168,9 @@ public class Analysis {
                     }
 
                     ExecutableElement getter = null, setter = null;
-                    TypeMirror type = null;
-                    String name = null;
-                    if (parameters.size() == 0 && (methodName.startsWith("get") || methodName.startsWith("is"))) {
+                    TypeMirror type;
+                    String name;
+                    if (parameters.isEmpty() && (methodName.startsWith("get") || methodName.startsWith("is"))) {
                         name = BeanUtils.getterName(methodName, null);
                         getter = method;
                         type = method.getReturnType();
@@ -186,8 +188,8 @@ public class Analysis {
     }
 
     private List<TypeElement> getTypeHierarchy(TypeElement element) {
-        List<TypeElement> result = new ArrayList<TypeElement>();
-        getAllTypes(element, result, new HashSet<TypeElement>());
+        List<TypeElement> result = new ArrayList<>();
+        getAllTypes(element, result, new HashSet<>());
         return result;
     }
 

@@ -17,6 +17,7 @@ import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,10 +56,10 @@ public class FastJsonProvider
     };
 
     @Deprecated
-    protected Charset charset = Charset.forName("UTF-8");
+    protected Charset charset = StandardCharsets.UTF_8;
 
     @Deprecated
-    protected SerializerFeature[] features = new SerializerFeature[0];
+    protected SerializerFeature[] features = SerializerFeature.EMPTY;
 
     @Deprecated
     protected SerializeFilter[] filters = new SerializeFilter[0];
@@ -358,7 +359,7 @@ public class FastJsonProvider
             if (serializerFeatures == null) {
                 serializerFeatures = new SerializerFeature[]{SerializerFeature.PrettyFormat};
             } else {
-                List<SerializerFeature> featureList = new ArrayList<SerializerFeature>(Arrays.asList(serializerFeatures));
+                List<SerializerFeature> featureList = new ArrayList<>(Arrays.asList(serializerFeatures));
                 featureList.add(SerializerFeature.PrettyFormat);
                 serializerFeatures = featureList.toArray(serializerFeatures);
             }
@@ -397,10 +398,8 @@ public class FastJsonProvider
         }
 
         JSONWriter.Context context = JSON.createWriteContext(config, defaultFeatures, features);
-        com.alibaba.fastjson2.JSONWriter writer = com.alibaba.fastjson2.JSONWriter.ofUTF8(context);
         context.setDateFormat(dateFormat);
-
-        try {
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
             if (filters != null) {
                 for (SerializeFilter filter : filters) {
                     JSON.configFilter(context, filter);
@@ -409,10 +408,7 @@ public class FastJsonProvider
 
             writer.writeAny(object);
 
-            int len = writer.flushTo(os, charset);
-            return len;
-        } finally {
-            writer.close();
+            return writer.flushTo(os, charset);
         }
     }
 

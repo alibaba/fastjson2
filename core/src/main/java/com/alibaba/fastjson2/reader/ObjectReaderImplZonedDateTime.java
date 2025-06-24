@@ -39,7 +39,11 @@ class ObjectReaderImplZonedDateTime
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        return jsonReader.readZonedDateTime();
+        ZonedDateTime zdt = jsonReader.readZonedDateTime();
+        if (builder != null && zdt != null) {
+            return builder.apply(zdt);
+        }
+        return zdt;
     }
 
     @Override

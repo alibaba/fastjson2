@@ -111,7 +111,7 @@ final class ObjectWriterImplDate
         }
 
         if (dateFormat == null) {
-            final int SECONDS_PER_DAY = 60 * 60 * 24;
+            final long SECONDS_PER_DAY = 60 * 60 * 24;
 
             long epochSecond = Math.floorDiv(millis, 1000L);
             int offsetTotalSeconds;
@@ -123,8 +123,8 @@ final class ObjectWriterImplDate
             }
 
             long localSecond = epochSecond + offsetTotalSeconds;
-            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+            int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;

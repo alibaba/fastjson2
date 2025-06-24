@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codegen.ObjectReaderGen;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
@@ -26,7 +27,7 @@ public class ObjectReaderCreatorDynamicCompile
 
     @Override
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, ObjectReaderProvider provider) {
-        BeanInfo beanInfo = new BeanInfo();
+        BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
 
         for (ObjectReaderModule module : provider.modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();

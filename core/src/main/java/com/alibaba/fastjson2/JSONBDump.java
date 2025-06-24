@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigDecimal;
@@ -14,8 +15,7 @@ import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
-import static com.alibaba.fastjson2.util.JDKUtils.UTF16;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONBDump {
     static Charset GB18030;
@@ -267,19 +267,41 @@ final class JSONBDump {
             case BC_DECIMAL: {
                 int scale = readInt32Value();
                 BigInteger unscaledValue;
-                int type = bytes[offset++]; // bigInt
+                int type = bytes[offset++];
                 switch (type) {
                     case BC_BIGINT_LONG:
                         unscaledValue = BigInteger.valueOf(
                                 readInt64Value()
                         );
                         break;
+                    case BC_INT32:
+                        unscaledValue = BigInteger.valueOf(
+                                readInt32Value()
+                        );
+                        break;
+                    case BC_INT64:
+                        unscaledValue = BigInteger.valueOf(
+                                IOUtils.getLongBE(bytes, offset)
+                        );
+                        offset += 8;
+                        break;
                     default:
-                        int len = readInt32Value();
-                        byte[] bytes = new byte[len];
-                        System.arraycopy(this.bytes, offset, bytes, 0, len);
-                        offset += len;
-                        unscaledValue = new BigInteger(bytes);
+                        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                            unscaledValue = BigInteger.valueOf(type);
+                        } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+                            unscaledValue = BigInteger.valueOf(((type - BC_INT32_BYTE_ZERO) << 8)
+                                    + (bytes[offset++] & 0xFF));
+                        } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+                            unscaledValue = BigInteger.valueOf(((type - BC_INT32_SHORT_ZERO) << 16)
+                                    + ((bytes[offset++] & 0xFF) << 8)
+                                    + (bytes[offset++] & 0xFF));
+                        } else {
+                            int len = readInt32Value();
+                            byte[] bytes = new byte[len];
+                            System.arraycopy(this.bytes, offset, bytes, 0, len);
+                            offset += len;
+                            unscaledValue = new BigInteger(bytes);
+                        }
                         break;
                 }
 

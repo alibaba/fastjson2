@@ -12,9 +12,9 @@ public class Int2Decoder {
         if (hashCode == V0) {
             int fieldInt = jsonReader.readInt32Value();
             object.setV0000(fieldInt);
-        } else if (hashCode == V0) {
+        } else if (hashCode == V1) {
             int fieldInt = jsonReader.readInt32Value();
-            object.setV0000(fieldInt);
+            object.setV0001(fieldInt);
         }
     }
 }

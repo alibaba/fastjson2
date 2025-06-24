@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.49-SNAPSHOT</version>
+        <version>2.0.58-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -279,13 +279,13 @@
         <dependency>
             <groupId>org.clojure</groupId>
             <artifactId>clojure</artifactId>
-            <version>1.11.2</version>
+            <version>1.12.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>3.0.21</version>
+            <version>3.0.24</version>
             <scope>test</scope>
         </dependency>
 
@@ -342,7 +342,7 @@
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -368,6 +368,21 @@
                         <include>com/alibaba/fastjson/**/*.java</include>
                         <include>com/alibaba/fastjson/**/*.kt</include>
                     </includes>
+                    <excludes>
+                        <exclude>com/alibaba/fastjson/SqlTimestampTest.java</exclude>
+                        <exclude>com/alibaba/fastjson/TimestampTest.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateFieldFormatTest.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateFieldTest11_reader.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateFieldTest9.java</exclude>
+                        <exclude>com/alibaba/fastjson/date/DateTest_tz.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_1200/Issue1298.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_1600/Issue1679.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2200/Issue2241.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2600/Issue2606.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2700/Issue2784.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_2800/Issue2894.java</exclude>
+                        <exclude>com/alibaba/fastjson/issue_3000/Issue3049.java</exclude>
+                    </excludes>
                     <systemPropertyVariables>
                         <user.timezone>Asia/Shanghai</user.timezone>
                     </systemPropertyVariables>

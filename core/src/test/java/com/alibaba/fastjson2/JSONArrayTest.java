@@ -5,6 +5,7 @@ import com.alibaba.fastjson2_vo.Integer1;
 import com.alibaba.fastjson2_vo.Long1;
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -168,6 +169,13 @@ public class JSONArrayTest {
         assertEquals("123", jsonArray.getString(0));
         assertEquals(Integer.valueOf(123), jsonArray.getInteger(0));
         assertEquals(Long.valueOf(123), jsonArray.getLong(0));
+    }
+
+    @Test
+    public void test_parse_from_reader() {
+        String str = "[12,34]";
+        JSONArray jsonArray = JSON.parseArray(new StringReader(str));
+        assertEquals(34, jsonArray.getInteger(1));
     }
 
     @Test
@@ -1473,5 +1481,18 @@ public class JSONArrayTest {
         List<Long> integers = JSONArray.parseArray("[1,2]", Long.class, JSONReader.Feature.Base64StringAsByteArray);
         assertEquals(1L, integers.get(0));
         assertEquals(2L, integers.get(1));
+    }
+
+    @Test
+    public void getJSONArray() {
+        JSONArray jsonArray = JSONObject.of("k", "v").getJSONArray("k");
+        assertNotNull(jsonArray);
+        assertEquals(1, jsonArray.size());
+        assertEquals("v", jsonArray.getString(0));
+
+        jsonArray = jsonArray.getJSONArray(0);
+        assertNotNull(jsonArray);
+        assertEquals(1, jsonArray.size());
+        assertEquals("v", jsonArray.getString(0));
     }
 }

@@ -106,7 +106,7 @@ class JSONStreamReaderUTF8<T>
             }
 
             if (!lineTerminated) {
-                if (input != null && !inputEnd) {
+                if (input != null && !(inputEnd && off >= end)) {
                     int len = end - off;
                     if (off > 0) {
                         if (len > 0) {
@@ -145,7 +145,7 @@ class JSONStreamReaderUTF8<T>
 
     public <T> T readLineObject() {
         try {
-            if (inputEnd) {
+            if (inputEnd && off >= end) {
                 return null;
             }
 

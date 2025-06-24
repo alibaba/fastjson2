@@ -130,7 +130,7 @@ public abstract class JSONPath {
         return paths;
     }
 
-    void paths(Map<Object, String> values, Map<String, Object> paths, String parent, Object javaObject) {
+    void paths(Map<Object, String> values, Map paths, String parent, Object javaObject) {
         if (javaObject == null) {
             return;
         }
@@ -878,7 +878,7 @@ public abstract class JSONPath {
             case '=':
                 jsonReader.next();
                 if (jsonReader.ch == '~') {
-                    jsonReader.next();
+                    jsonReader.nextWithoutComment();
                     operator = JSONPathFilter.Operator.REG_MATCH;
                 } else if (jsonReader.ch == '=') {
                     jsonReader.next();

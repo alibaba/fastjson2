@@ -81,7 +81,7 @@ public class Fastjson2Encoder
     }
 
     private void configFilter(JSONWriter.Context context, Filter... filters) {
-        if (filters == null || filters.length == 0) {
+        if (filters == null) {
             return;
         }
         for (Filter filter : filters) {

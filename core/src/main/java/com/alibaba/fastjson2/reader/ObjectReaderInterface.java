@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
@@ -63,7 +60,7 @@ public final class ObjectReaderInterface<T>
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                     }
                 }
 
@@ -234,6 +231,19 @@ public final class ObjectReaderInterface<T>
             object = (JSONObject) map;
         } else {
             object = new JSONObject(map);
+        }
+        for (FieldReader fieldReader : fieldReaders) {
+            Object fieldValue = object.get(fieldReader.fieldName);
+            if (fieldValue instanceof Map) {
+                ObjectReader objectReader = fieldReader.getObjectReader(JSONFactory.getDefaultObjectReaderProvider());
+                if (objectReader instanceof ObjectReaderAdapter) {
+                    if (object == map) {
+                        object = new JSONObject(map);
+                    }
+                    Object fieldValue1 = objectReader.createInstance((Map) fieldValue, features);
+                    object.put(fieldReader.fieldName, fieldValue1);
+                }
+            }
         }
         return (T) TypeUtils.newProxyInstance(objectClass, object);
     }

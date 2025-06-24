@@ -2,7 +2,9 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
@@ -22,8 +24,16 @@ public class EishayWriteUTF8Bytes {
     static MediaContent mc;
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
-
+    static final ObjectWriterProvider featuresProvider;
+    static final JSONWriter.Context featuresContext;
     static {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.setDisableReferenceDetect(true);
+        provider.setDisableJSONB(true);
+        provider.setDisableArrayMapping(true);
+        provider.setDisableAutoType(true);
+        featuresProvider = provider;
+        featuresContext = new JSONWriter.Context(provider);
         try {
             InputStream is = EishayWriteUTF8Bytes.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
@@ -44,6 +54,14 @@ public class EishayWriteUTF8Bytes {
         bh.consume(JSON.toJSONBytes(mc));
     }
 
+    public void fastjson2_features(Blackhole bh) {
+        bh.consume(JSON.toJSONBytes(mc, StandardCharsets.UTF_8, featuresContext));
+    }
+
+    public void wast(Blackhole bh) {
+        bh.consume(io.github.wycst.wast.json.JSON.toJsonBytes(mc, StandardCharsets.UTF_8));
+    }
+
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.writeValueAsBytes(mc));
@@ -60,6 +78,7 @@ public class EishayWriteUTF8Bytes {
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(EishayWriteUTF8Bytes.class.getName())
+                .exclude(EishayWriteUTF8BytesTree.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

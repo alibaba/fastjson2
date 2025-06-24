@@ -129,7 +129,11 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public final boolean hasFilter(JSONWriter jsonWriter) {
-        return hasFilter || jsonWriter.hasFilter(containsNoneFieldGetter);
+        return hasFilter | jsonWriter.hasFilter(containsNoneFieldGetter);
+    }
+
+    protected final boolean hasFilter0(JSONWriter jsonWriter) {
+        return hasFilter | jsonWriter.hasFilter();
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {
@@ -616,7 +620,11 @@ public class ObjectWriterAdapter<T>
             Class fieldClass = fieldWriter.fieldClass;
             if (format != null) {
                 if (fieldClass == Date.class) {
-                    fieldValue = DateUtils.format((Date) fieldValue, format);
+                    if ("millis".equals(format)) {
+                        fieldValue = ((Date) fieldValue).getTime();
+                    } else {
+                        fieldValue = DateUtils.format((Date) fieldValue, format);
+                    }
                 } else if (fieldClass == LocalDate.class) {
                     fieldValue = DateUtils.format((LocalDate) fieldValue, format);
                 } else if (fieldClass == LocalDateTime.class) {
@@ -666,6 +674,25 @@ public class ObjectWriterAdapter<T>
 
             if (fieldValue == object) {
                 fieldValue = jsonObject;
+            }
+            if (fieldValue instanceof Enum) {
+                if ((features & WriteEnumsUsingName.mask) != 0) {
+                    fieldValue = ((Enum) fieldValue).name();
+                }
+            }
+            if (fieldWriter instanceof FieldWriterObject && !(fieldValue instanceof Map)) {
+                ObjectWriter valueWriter = fieldWriter.getInitWriter();
+                if (valueWriter == null) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
+                }
+                if (valueWriter instanceof ObjectWriterAdapter) {
+                    ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
+                    if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                    } else {
+                        fieldValue = JSON.toJSON(fieldValue);
+                    }
+                }
             }
             jsonObject.put(fieldWriter.fieldName, fieldValue);
         }

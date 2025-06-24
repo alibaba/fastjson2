@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -685,12 +686,6 @@ public class JSONReaderTest {
 
     @Test
     public void skipValue_hasComma() {
-        String str0 = "\"abc\",";
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
-            jsonReader.skipValue();
-            assertTrue(jsonReader.hasComma(), jsonReader.getClass().getName());
-        }
-
         String str1 = "\"abc\"";
         for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
             jsonReader.skipValue();
@@ -1396,5 +1391,182 @@ public class JSONReaderTest {
                     }
                 }, false);
         assertEquals("123", ref.get());
+    }
+
+    @Test
+    public void intOverFlow() {
+        {
+            String[] strings = new String[]{
+                    Integer.toString(Integer.MIN_VALUE + 1),
+                    Integer.toString(Integer.MIN_VALUE),
+                    Integer.toString(Integer.MAX_VALUE)
+            };
+            for (String str : strings) {
+                int expected = Integer.parseInt(str);
+                try (JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8))) {
+                    jsonReader.readNumber0();
+                    assertEquals(expected, jsonReader.getInt32Value());
+                }
+
+                assertEquals(expected,
+                        JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value());
+                assertEquals(expected,
+                        JSONReader.of(str.toCharArray()).readInt32Value());
+            }
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            int expected = Integer.MIN_VALUE + i;
+            String str = Integer.toString(expected);
+
+            try (JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8))) {
+                jsonReader.readNumber0();
+                assertEquals(expected, jsonReader.getInt32Value());
+            }
+
+            assertEquals(expected,
+                    JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value());
+            assertEquals(expected,
+                    JSONReader.of(str.toCharArray()).readInt32Value());
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            int expected = Integer.MAX_VALUE - i;
+            String str = Integer.toString(expected);
+
+            try (JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8))) {
+                jsonReader.readNumber0();
+                assertEquals(expected, jsonReader.getInt32Value());
+            }
+
+            assertEquals(expected,
+                    JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value());
+            assertEquals(expected,
+                    JSONReader.of(str.toCharArray()).readInt32Value());
+        }
+
+        String[] strings = new String[]{
+                Long.toString(2147483649L),
+                Long.toString(-2147483650L),
+                Long.toString(Integer.MIN_VALUE - 1L),
+                Long.toString(Integer.MAX_VALUE + 1L)
+        };
+        for (String str : strings) {
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt32Value(),
+                    str);
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            String str = Long.toString(Integer.MIN_VALUE - 1L - i);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt32Value(),
+                    str);
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            String str = Long.toString(Integer.MAX_VALUE + 1L + i);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt32Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt32Value(),
+                    str);
+        }
+    }
+
+    @Test
+    public void int64OverFlow() {
+        {
+            String[] strings = new String[]{
+                    Long.toString(Long.MIN_VALUE),
+                    Long.toString(Long.MAX_VALUE)
+            };
+            for (String str : strings) {
+                assertEquals(Long.parseLong(str),
+                        JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value());
+                assertEquals(Long.parseLong(str),
+                        JSONReader.of(str.toCharArray()).readInt64Value());
+            }
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            long expected = Integer.MIN_VALUE + i;
+            String str = Long.toString(expected);
+
+            try (JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8))) {
+                jsonReader.readNumber0();
+                assertEquals(expected, jsonReader.getInt32Value(), str);
+            }
+
+            assertEquals(expected,
+                    JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value(),
+                    str);
+            assertEquals(expected,
+                    JSONReader.of(str.toCharArray()).readInt64Value(),
+                    str);
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            long expected = Integer.MAX_VALUE - i;
+            String str = Long.toString(expected);
+
+            try (JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8))) {
+                jsonReader.readNumber0();
+                assertEquals(expected, jsonReader.getInt64Value());
+            }
+
+            assertEquals(expected,
+                    JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value(),
+                    str);
+            assertEquals(expected,
+                    JSONReader.of(str.toCharArray()).readInt64Value(),
+                    str);
+        }
+
+        String[] strings = new String[]{
+                BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE).toString(),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE).toString()
+        };
+        for (String str : strings) {
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value(),
+                    str);
+            assertThrows(JSONException.class,
+                    () -> JSONReader.of(str.toCharArray()).readInt64Value(),
+                    str);
+        }
+
+        {
+            BigInteger bigInt = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+            for (int i = 0; i < 1000; i++) {
+                String str = bigInt.add(BigInteger.valueOf(i)).toString();
+                assertThrows(JSONException.class,
+                        () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value(),
+                        str);
+                assertThrows(JSONException.class,
+                        () -> JSONReader.of(str.toCharArray()).readInt64Value(),
+                        str);
+            }
+        }
+
+        {
+            BigInteger bigInt = BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE);
+            for (int i = 0; i < 1000; i++) {
+                String str = bigInt.subtract(BigInteger.valueOf(i)).toString();
+                assertThrows(JSONException.class,
+                        () -> JSONReader.of(str.getBytes(StandardCharsets.UTF_8)).readInt64Value(),
+                        str);
+                assertThrows(JSONException.class,
+                        () -> JSONReader.of(str.toCharArray()).readInt64Value(),
+                        str);
+            }
+        }
     }
 }

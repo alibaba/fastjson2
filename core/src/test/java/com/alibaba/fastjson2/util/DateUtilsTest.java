@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
@@ -2037,13 +2039,30 @@ public class DateUtilsTest {
 
     @Test
     public void parseLocalDateTime16_2() {
+        LocalDateTime expected = LocalDateTime.of(2021, 7, 8, 4, 5, 6);
         assertEquals(
-                LocalDateTime.of(2021, 7, 8, 4, 5, 6),
+                expected,
                 DateUtils.parseLocalDateTime("2021-07-08T4:5:6", 0, 16)
         );
         assertEquals(
-                LocalDateTime.of(2021, 7, 8, 4, 5, 6),
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08T4:5:6".getBytes(StandardCharsets.UTF_8), 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08T4:5:6".toCharArray(), 0, 16)
+        );
+        assertEquals(
+                expected,
                 DateUtils.parseLocalDateTime("2021-07-08 4:5:6", 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08 4:5:6".toCharArray(), 0, 16)
+        );
+        assertEquals(
+                expected,
+                DateUtils.parseLocalDateTime("2021-07-08 4:5:6".getBytes(StandardCharsets.UTF_8), 0, 16)
         );
     }
 
@@ -2625,27 +2644,27 @@ public class DateUtilsTest {
 
     @Test
     public void month() {
-        assertEquals(0, DateUtils.month('J', 'u', 'a'));
-        assertEquals(0, DateUtils.month('J', 'a', 'a'));
-        assertEquals(0, DateUtils.month('F', 'a', 'a'));
-        assertEquals(0, DateUtils.month('F', 'e', 'a'));
-        assertEquals(0, DateUtils.month('A', 'e', 'a'));
-        assertEquals(0, DateUtils.month('A', 'p', 'a'));
-        assertEquals(0, DateUtils.month('M', 'p', 'a'));
-        assertEquals(0, DateUtils.month('M', 'a', 'a'));
-        assertEquals(0, DateUtils.month('J', 'a', 'a'));
-        assertEquals(0, DateUtils.month('J', 'u', 'a'));
-        assertEquals(0, DateUtils.month('A', 'a', 'a'));
-        assertEquals(0, DateUtils.month('A', 'u', 'a'));
-        assertEquals(0, DateUtils.month('S', 'u', 'a'));
-        assertEquals(0, DateUtils.month('S', 'e', 'a'));
-        assertEquals(0, DateUtils.month('O', 'e', 'a'));
-        assertEquals(0, DateUtils.month('O', 'c', 'a'));
-        assertEquals(0, DateUtils.month('N', 'c', 'a'));
-        assertEquals(0, DateUtils.month('N', 'o', 'a'));
-        assertEquals(0, DateUtils.month('D', 'o', 'a'));
-        assertEquals(0, DateUtils.month('D', 'e', 'a'));
-        assertEquals(0, DateUtils.month('K', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('F', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('F', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'p', 'a'));
+        assertEquals(-1, DateUtils.month('M', 'p', 'a'));
+        assertEquals(-1, DateUtils.month('M', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('J', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'a', 'a'));
+        assertEquals(-1, DateUtils.month('A', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('S', 'u', 'a'));
+        assertEquals(-1, DateUtils.month('S', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('O', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('O', 'c', 'a'));
+        assertEquals(-1, DateUtils.month('N', 'c', 'a'));
+        assertEquals(-1, DateUtils.month('N', 'o', 'a'));
+        assertEquals(-1, DateUtils.month('D', 'o', 'a'));
+        assertEquals(-1, DateUtils.month('D', 'e', 'a'));
+        assertEquals(-1, DateUtils.month('K', 'e', 'a'));
 
         String[] strings = new String[]{
                 "Jan",
@@ -2848,6 +2867,15 @@ public class DateUtilsTest {
     }
 
     @Test
+    public void parseLocalTime15() {
+        String str = "\"10:01:26.775328\"";
+        LocalTime ldt = LocalTime.of(10, 1, 26, 775328000);
+        assertEquals(ldt, JSON.parseObject(str, LocalTime.class));
+        assertEquals(ldt, JSON.parseObject(str.toCharArray(), LocalTime.class));
+        assertEquals(ldt, JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), LocalTime.class));
+    }
+
+    @Test
     public void testNull() {
         assertNull(DateUtils.parseDateYMDHMS19(null));
         assertNull(DateUtils.parseDateYMDHMS19(""));
@@ -2858,5 +2886,45 @@ public class DateUtilsTest {
 
         assertNull(DateUtils.parseLocalDateTime(bytes, 0, bytes.length));
         assertNull(DateUtils.parseLocalDateTime(chars, 0, bytes.length));
+    }
+
+    static long timeV(long x) {
+        long d;
+        if ((((x & 0xF0F0F0F0_F0F0F0F0L) - 0x30303030_30303030L) | (((d = x & 0x0F0F0F0F_0F0F0F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0
+                || (d & 0x00000F00_000F0000L) != 0x00000a00_000a0000L
+        ) {
+            return -1;
+        }
+//        return ((d & 0xF) << 3) + ((d & 0xF) << 1)  // (d & 0xF) * 10
+//                + (d >> 8);
+        return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
+    }
+
+    static long MonthDay(long timeV) {
+        long d;
+        if (((timeV & 0x0000FF00_00FF0000L) != 0x00002d00_002d0000L)
+                || (((timeV & 0xF0F000F0_F000F0F0L) - 0x30300030_30003030L) | (((d = timeV & 0x0F0F000F_0F000F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0) {
+            return -1;
+        }
+        return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
+    }
+
+    @Test
+    public void timeV() {
+//        byte[] bytes = new byte[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':'};
+//        for (byte b : bytes) {
+//            System.out.println((char) b + "\t" + b + "\t" + Integer.toHexString(b) + "\t" + Integer.toBinaryString(b));
+//        }
+//        long x = 0;
+//
+//        System.out.println(Integer.toHexString(0b11_0000));
+        byte[] bytes = "1978-12-13".getBytes();
+        long x = IOUtils.getLongLE(bytes, 2);
+        long t = MonthDay(x);
+        System.out.println(Long.toHexString(t));
+        System.out.println(t & 0xFF);
+        System.out.println((t >> 24) & 0xFF);
+        System.out.println((t >> 48) & 0xFF);
+//        System.out.println(Integer.toString('-') + "\t" + Integer.toBinaryString('-'));
     }
 }

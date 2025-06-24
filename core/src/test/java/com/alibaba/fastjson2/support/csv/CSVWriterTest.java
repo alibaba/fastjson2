@@ -3,11 +3,10 @@ package com.alibaba.fastjson2.support.csv;
 import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
 import com.alibaba.fastjson2.reader.CharArrayValueConsumer;
 import com.alibaba.fastjson2.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.StringWriter;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -177,7 +176,7 @@ public class CSVWriterTest {
         double value = r.nextDouble();
         CSVWriter writer = CSVWriter.of();
         writer.writeDouble(value);
-        assertEquals(Double.toString(value), writer.toString());
+        assertEquals(value, Double.parseDouble(writer.toString()));
     }
 
     @Test
@@ -335,6 +334,42 @@ public class CSVWriterTest {
     }
 
     @Test
+    public void test7() throws Exception {
+        try (CSVWriter csvWriter = CSVWriter.of(new StringWriter())) {
+            csvWriter.writeString(",abc".getBytes());
+            assertEquals("\",abc\"", csvWriter.toString());
+        }
+    }
+
+    @Test
+    public void test7UTF8() throws Exception {
+        try (CSVWriter csvWriter = CSVWriter.of(new ByteArrayOutputStream())) {
+            csvWriter.writeString(",abc".getBytes());
+            assertEquals("\",abc\"", csvWriter.toString());
+        }
+    }
+
+    @Test
+    public void testBoolean() throws Exception {
+        try (CSVWriter csvWriter = CSVWriter.of(new StringWriter())) {
+            csvWriter.writeBoolean(true);
+            csvWriter.writeComma();
+            csvWriter.writeBoolean(false);
+            assertEquals("true,false", csvWriter.toString());
+        }
+    }
+
+    @Test
+    public void testBooleanUTF8() throws Exception {
+        try (CSVWriter csvWriter = CSVWriter.of(new ByteArrayOutputStream())) {
+            csvWriter.writeBoolean(true);
+            csvWriter.writeComma();
+            csvWriter.writeBoolean(false);
+            assertEquals("true,false", csvWriter.toString());
+        }
+    }
+
+    @Test
     public void testWriteInstant() throws Exception {
         LocalDate date = LocalDate.of(2018, 7, 12);
         LocalTime time = LocalTime.of(11, 9, 10);
@@ -387,6 +422,36 @@ public class CSVWriterTest {
         }
     }
 
+    @Test
+    public void testWriteStringForIssue2848() throws IOException {
+        // see issue#2848
+        OutputStreamWriter out = new OutputStreamWriter(new ByteArrayOutputStream(), StandardCharsets.UTF_8);
+        try (CSVWriter writer = CSVWriter.of(out)) {
+            writer.writeValue(StringUtils.repeat('1', 65534));
+            writer.writeComma();
+            writer.writeString("123"); // java.lang.StringIndexOutOfBoundsException: offset 65535, count 3, length 65536
+        }
+    }
+
+    @Test
+    public void testWriteLocalDateTimeForIssue2848() throws IOException {
+        OutputStreamWriter out = new OutputStreamWriter(new ByteArrayOutputStream(), StandardCharsets.UTF_8);
+        try (CSVWriter writer = CSVWriter.of(out)) {
+            writer.writeValue(StringUtils.repeat('1', 65534));
+            writer.writeComma();
+            writer.writeLocalDateTime(LocalDateTime.now()); // java.lang.ArrayIndexOutOfBoundsException: Index 65539 out of bounds for length 65536
+        }
+    }
+
+    @Test
+    public void testWriteLargeStringForIssue2848() throws IOException {
+        OutputStreamWriter out = new OutputStreamWriter(new ByteArrayOutputStream(), StandardCharsets.UTF_8);
+        try (CSVWriter writer = CSVWriter.of(out)) {
+            writer.writeValue(StringUtils.repeat('1', 65534));
+            writer.writeComma();
+            writer.writeString(StringUtils.repeat('1', 65537)); // java.lang.StringIndexOutOfBoundsException: offset 65535, count 65537, length 65536
+        }
+    }
     public static class Bean {
         public int id;
         public String name;

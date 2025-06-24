@@ -111,4 +111,19 @@ public @interface JSONField {
      * @since 2.0.20
      */
     boolean required() default false;
+
+    /**
+     * @since 2.0.52
+     */
+    String arrayToMapKey() default "";
+
+    /**
+     * @since 2.0.52
+     */
+    Class<?> arrayToMapDuplicateHandler() default Void.class;
+
+    /**
+     * @since 2.0.56
+     */
+    Class<?> contentAs() default Void.class;
 }

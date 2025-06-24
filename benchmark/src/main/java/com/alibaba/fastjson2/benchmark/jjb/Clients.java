@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @CompiledJson
+//@com.alibaba.fastjson2.annotation.JSONCompiled
 public class Clients {
     private List<Client> clients;
 
@@ -23,6 +24,7 @@ public class Clients {
     }
 
     @CompiledJson
+//    @com.alibaba.fastjson2.annotation.JSONCompiled
     public static final class Client {
         private long id;
         private int index;

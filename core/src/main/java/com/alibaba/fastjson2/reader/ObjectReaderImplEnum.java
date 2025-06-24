@@ -49,9 +49,8 @@ public final class ObjectReaderImplEnum
         this.valueFieldType = valueFieldType;
 
         if (valueFieldType != null) {
-            if (valueFieldType == String.class) {
-                stringValues = new String[enums.length];
-            } else {
+            stringValues = new String[enums.length];
+            if (valueFieldType != String.class) {
                 intValues = new long[enums.length];
             }
 
@@ -67,8 +66,11 @@ public final class ObjectReaderImplEnum
 
                     if (valueFieldType == String.class) {
                         stringValues[i] = (String) fieldValue;
-                    } else if (fieldValue instanceof Number) {
-                        intValues[i] = ((Number) fieldValue).longValue();
+                    } else {
+                        stringValues[i] = fieldValue == null ? null : fieldValue.toString();
+                        if (fieldValue instanceof Number) {
+                            intValues[i] = ((Number) fieldValue).longValue();
+                        }
                     }
                 } catch (Exception ignored) {
                     // ignored
@@ -268,7 +270,7 @@ public final class ObjectReaderImplEnum
                         // ignored
                     }
                 }
-            } else if (intValues != null && jsonReader.isString()) {
+            } else if (intValues != null && jsonReader.isInt()) {
                 int intValue = jsonReader.readInt32Value();
                 for (int i = 0; i < intValues.length; i++) {
                     if (intValues[i] == intValue) {

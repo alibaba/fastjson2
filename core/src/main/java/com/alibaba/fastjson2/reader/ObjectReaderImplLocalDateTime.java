@@ -29,13 +29,20 @@ class ObjectReaderImplLocalDateTime
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        // 若使用的是JSONReaderJSONB则使用JSONReaderJSONB定义的时间序反列化方法
+        if (jsonReader.jsonb) {
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         JSONReader.Context context = jsonReader.getContext();
 
         if (jsonReader.isInt()) {
-            DateTimeFormatter formatter = getDateFormatter();
-            if (formatter != null) {
-                String str = jsonReader.readString();
-                return LocalDateTime.parse(str, formatter);
+            if (!yyyyMMddhhmmss19 && !formatMillis && !formatISO8601 && !formatUnixTime) {
+                DateTimeFormatter formatter = getDateFormatter();
+                if (formatter != null) {
+                    String str = jsonReader.readString();
+                    return LocalDateTime.parse(str, formatter);
+                }
             }
 
             long millis = jsonReader.readInt64Value();
@@ -53,7 +60,7 @@ class ObjectReaderImplLocalDateTime
             return null;
         }
 
-        if (format == null || yyyyMMddhhmmss19 || formatISO8601) {
+        if (format == null || yyyyMMdd8 || yyyyMMdd10 || yyyyMMddhhmmss19 || formatISO8601) {
             return jsonReader.readLocalDateTime();
         }
 

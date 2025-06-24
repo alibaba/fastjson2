@@ -58,7 +58,14 @@ public final class FieldReaderLocalDateTime<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, Object object) {
-        LocalDateTime date = (LocalDateTime) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        // 若使用的是JSONReaderJSONB则使用JSONReaderJSONB定义的时间反序列化方法
+        LocalDateTime date;
+        if (jsonReader.jsonb) {
+            date = (LocalDateTime) dateReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        } else {
+            date = (LocalDateTime) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        }
+        // LocalDateTime date = (LocalDateTime) dateReader.readObject(jsonReader, fieldType, fieldName, features);
         accept(object, date);
     }
 

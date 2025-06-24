@@ -2,11 +2,14 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ToByteFunction;
+import com.alibaba.fastjson2.function.ToCharFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -163,6 +166,10 @@ public class ObjectWriters {
         return INSTANCE.createFieldWriter(fieldName, function);
     }
 
+    public static <T> FieldWriter fieldWriter(String fieldName, ToCharFunction<T> function) {
+        return INSTANCE.createFieldWriter(fieldName, function);
+    }
+
     public static <T> FieldWriter fieldWriter(String fieldName, Predicate<T> function) {
         return INSTANCE.createFieldWriter(fieldName, function);
     }
@@ -173,6 +180,18 @@ public class ObjectWriters {
 
     public static <T, V> FieldWriter fieldWriter(String fieldName, Class<V> fieldClass, Function<T, V> function) {
         return INSTANCE.createFieldWriter(fieldName, fieldClass, function);
+    }
+
+    public static <T, V> FieldWriter fieldWriter(String fieldName, Field field) {
+        return INSTANCE.createFieldWriter(fieldName, null, field);
+    }
+
+    public static <T, V> FieldWriter fieldWriter(String fieldName, Method method) {
+        return INSTANCE.createFieldWriter(method.getDeclaringClass(), fieldName, null, method);
+    }
+
+    public static <T, V> FieldWriter fieldWriter(Class objectClass, String fieldName, Method method) {
+        return INSTANCE.createFieldWriter(objectClass, fieldName, null, method);
     }
 
     public static <T, V> FieldWriter fieldWriter(String fieldName,

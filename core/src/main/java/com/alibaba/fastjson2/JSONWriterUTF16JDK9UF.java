@@ -1,11 +1,9 @@
 package com.alibaba.fastjson2;
 
-import sun.misc.Unsafe;
+import com.alibaba.fastjson2.util.IOUtils;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteBooleanAsNumber;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF16JDK9UF
         extends JSONWriterUTF16 {
@@ -20,50 +18,27 @@ final class JSONWriterUTF16JDK9UF
             return;
         }
 
-        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
-        boolean escape = false;
-        final char quote = this.quote;
-
-        final int strlen = str.length();
-        int minCapacity = off + strlen + 2;
-        if (minCapacity >= chars.length) {
-            ensureCapacity(minCapacity);
-        }
-
-        final int coder = STRING_CODER.applyAsInt(str);
         final byte[] value = STRING_VALUE.apply(str);
+        if (STRING_CODER.applyAsInt(str) == 0) {
+            writeStringLatin1(value);
+        } else {
+            writeStringUTF16(value);
+        }
+    }
 
+    public void writeBool(boolean value) {
+        int minCapacity = off + 5;
+        if (minCapacity >= this.chars.length) {
+            grow0(minCapacity);
+        }
+
+        char[] chars = this.chars;
         int off = this.off;
-        final char[] chars = this.chars;
-        chars[off++] = quote;
-
-        for (int i = 0; i < strlen; ++i) {
-            int c;
-            if (coder == 0) {
-                c = value[i];
-            } else {
-                c = UNSAFE.getChar(str, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + i * 2);
-            }
-            if (c == '\\'
-                    || c == quote
-                    || c < ' '
-                    || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
-                    || (escapeNoneAscii && c > 0x007F)
-            ) {
-                escape = true;
-                break;
-            }
-
-            chars[off++] = (char) c;
+        if ((context.features & WriteBooleanAsNumber.mask) != 0) {
+            chars[off++] = value ? '1' : '0';
+        } else {
+            off = IOUtils.putBoolean(chars, off, value);
         }
-
-        if (!escape) {
-            chars[off++] = quote;
-            this.off = off;
-            return;
-        }
-
-        writeStringEscape(str);
+        this.off = off;
     }
 }

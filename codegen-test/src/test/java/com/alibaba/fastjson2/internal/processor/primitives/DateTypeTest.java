@@ -2,11 +2,27 @@ package com.alibaba.fastjson2.internal.processor.primitives;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
+
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTypeTest {
+    private TimeZone timeZone;
+    @Before
+    public void setUp() {
+        timeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+    @After
+    public void tearDown() {
+        TimeZone.setDefault(timeZone);
+    }
+
     @Test
     public void test() {
         Bean bean = new Bean();

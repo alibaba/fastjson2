@@ -302,7 +302,13 @@ public class BeanUtilsTest {
                 "org.apache.commons.collections.functors.ChainedTransformer",
                 "org.mockito.internal.creation.bytebuddy.MockMethodInterceptor",
                 "sun.nio.ch.FileChannelImpl",
-                "java.io.InputStream"
+                "java.io.InputStream",
+                "java.lang.ClassLoader",
+                "java.util.concurrent.locks.Lock",
+                "java.util.concurrent.locks.ReentrantLock",
+                "java.security.ProtectionDomain",
+                "java.lang.ref.ReferenceQueue",
+                "java.io.OutputStream"
         };
 
         long[] hashCodes = new long[names.length];

@@ -583,4 +583,44 @@ final class JSONPathFunction
             return value.equals(item.toString());
         }
     }
+
+    static final class IndexValue
+            implements Function {
+        final int index;
+
+        public IndexValue(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return null;
+            }
+
+            if (o instanceof List) {
+                return ((List) o).get(index);
+            }
+
+            if (o.getClass().isArray()) {
+                return Array.get(o, index);
+            }
+
+            return null;
+        }
+    }
+
+    static final class FilterFunction
+            implements Function {
+        final JSONPathFilter filter;
+
+        FilterFunction(JSONPathFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            return null;
+        }
+    }
 }

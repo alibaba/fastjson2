@@ -25,6 +25,7 @@ public class FieldWriterObject<T>
     final boolean unwrapped;
     final boolean array;
     final boolean number;
+    protected boolean writeUsing;
 
     static final AtomicReferenceFieldUpdater<FieldWriterObject, Class> initValueClassUpdater = AtomicReferenceFieldUpdater.newUpdater(
             FieldWriterObject.class,
@@ -76,7 +77,7 @@ public class FieldWriterObject<T>
             return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
             boolean typeMatch = initValueClass == valueClass
-                    || (initValueClass.isAssignableFrom(valueClass) && !jsonWriter.isEnabled(WriteClassName) && fieldType instanceof Class)
+                    || (writeUsing && initValueClass.isAssignableFrom(valueClass))
                     || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass))
                     || (initValueClass == List.class && initValueClass.isAssignableFrom(valueClass));
             if (!typeMatch && initValueClass.isPrimitive()) {
@@ -97,7 +98,7 @@ public class FieldWriterObject<T>
         }
     }
 
-    private ObjectWriter getObjectWriterVoid(JSONWriter jsonWriter, Class valueClass) {
+    protected final ObjectWriter getObjectWriterVoid(JSONWriter jsonWriter, Class valueClass) {
         ObjectWriter formattedWriter = null;
         if (BeanUtils.isExtendedMap(valueClass) && SUPER.equals(fieldName)) {
             JSONWriter.Context context = jsonWriter.context;
@@ -241,9 +242,22 @@ public class FieldWriterObject<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        long features = this.features | jsonWriter.getFeatures();
+        JSONWriter.Context context = jsonWriter.context;
+        long oldFeatures = context.getFeatures();
+        context.setFeatures(this.features | oldFeatures);
+        boolean result = writeInternal(jsonWriter, object);
+        context.setFeatures(oldFeatures);
+        return result;
+    }
+
+    private boolean writeInternal(JSONWriter jsonWriter, T object) {
+        long features = jsonWriter.getFeatures();
 
         if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+            return false;
+        }
+
+        if (backReference && jsonWriter.containsReference(object)) {
             return false;
         }
 
@@ -259,7 +273,10 @@ public class FieldWriterObject<T>
 
         // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
         if (value == null) {
-            if ((features & WriteNulls.mask) != 0 && (features & NotWriteDefaultValue.mask) == 0) {
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
+                return false;
+            }
+            if ((features & NotWriteDefaultValue.mask) == 0) {
                 writeFieldName(jsonWriter);
                 if (array) {
                     jsonWriter.writeArrayNull();
@@ -270,7 +287,7 @@ public class FieldWriterObject<T>
                         || fieldClass == StringBuilder.class) {
                     jsonWriter.writeStringNull();
                 } else {
-                    jsonWriter.writeNull();
+                    jsonWriter.writeObjectNull(fieldClass);
                 }
                 return true;
             } else {
@@ -302,6 +319,16 @@ public class FieldWriterObject<T>
             return false;
         }
 
+        if ((features & JSONWriter.Feature.IgnoreEmpty.mask) != 0) {
+            if ((value instanceof Collection) && ((Collection<?>) value).isEmpty()) {
+                return false;
+            }
+
+            if ((value instanceof Map) && ((Map<?, ?>) value).isEmpty()) {
+                return false;
+            }
+        }
+
         boolean refDetect = jsonWriter.isRefDetect(value);
         if (refDetect) {
             if (value == object) {
@@ -330,45 +357,9 @@ public class FieldWriterObject<T>
             throw new JSONException("get objectWriter error : " + valueClass);
         }
 
-        if (unwrapped) {
-            if (value instanceof Map) {
-                boolean jsonb = jsonWriter.jsonb;
-                for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) value).entrySet()) {
-                    String entryKey = entry.getKey().toString();
-                    Object entryValue = entry.getValue();
-                    if (entryValue == null) {
-                        if ((features & WriteNulls.mask) == 0) {
-                            continue;
-                        }
-                    }
-
-                    jsonWriter.writeName(entryKey);
-                    if (!jsonb) {
-                        jsonWriter.writeColon();
-                    }
-                    if (entryValue == null) {
-                        jsonWriter.writeNull();
-                    } else {
-                        Class<?> entryValueClass = entryValue.getClass();
-                        ObjectWriter entryValueWriter = jsonWriter.getObjectWriter(entryValueClass);
-                        entryValueWriter.write(jsonWriter, entryValue);
-                    }
-                }
-
-                if (refDetect) {
-                    jsonWriter.popPath(value);
-                }
-                return true;
-            }
-
-            if (valueWriter instanceof ObjectWriterAdapter) {
-                ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) valueWriter;
-                List<FieldWriter> fieldWriters = writerAdapter.fieldWriters;
-                for (FieldWriter fieldWriter : fieldWriters) {
-                    fieldWriter.write(jsonWriter, value);
-                }
-                return true;
-            }
+        if (unwrapped
+                && writeWithUnwrapped(jsonWriter, value, features, refDetect, valueWriter)) {
+            return true;
         }
 
         writeFieldName(jsonWriter);
@@ -391,6 +382,54 @@ public class FieldWriterObject<T>
             jsonWriter.popPath(value);
         }
         return true;
+    }
+
+    protected final boolean writeWithUnwrapped(
+            JSONWriter jsonWriter,
+            Object value,
+            long features,
+            boolean refDetect,
+            ObjectWriter valueWriter
+    ) {
+        if (value instanceof Map) {
+            boolean jsonb = jsonWriter.jsonb;
+            for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) value).entrySet()) {
+                String entryKey = entry.getKey().toString();
+                Object entryValue = entry.getValue();
+                if (entryValue == null) {
+                    if ((features & WriteNulls.mask) == 0) {
+                        continue;
+                    }
+                }
+
+                jsonWriter.writeName(entryKey);
+                if (!jsonb) {
+                    jsonWriter.writeColon();
+                }
+                if (entryValue == null) {
+                    jsonWriter.writeNull();
+                } else {
+                    Class<?> entryValueClass = entryValue.getClass();
+                    ObjectWriter entryValueWriter = jsonWriter.getObjectWriter(entryValueClass);
+                    entryValueWriter.write(jsonWriter, entryValue);
+                }
+            }
+
+            if (refDetect) {
+                jsonWriter.popPath(value);
+            }
+            return true;
+        }
+
+        if (valueWriter instanceof ObjectWriterAdapter) {
+            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) valueWriter;
+            List<FieldWriter> fieldWriters = writerAdapter.fieldWriters;
+            for (FieldWriter fieldWriter : fieldWriters) {
+                fieldWriter.write(jsonWriter, value);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

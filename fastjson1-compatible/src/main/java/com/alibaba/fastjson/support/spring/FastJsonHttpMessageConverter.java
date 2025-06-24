@@ -3,7 +3,9 @@ package com.alibaba.fastjson.support.spring;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONPObject;
+import com.alibaba.fastjson2.JSONReader;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -20,6 +22,8 @@ import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+
+import static com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
 
 /**
  * Fastjson for Spring MVC Converter.
@@ -123,7 +127,18 @@ public class FastJsonHttpMessageConverter
             }
             byte[] bytes = baos.toByteArray();
 
-            return JSON.parseObject(bytes, type, fastJsonConfig.getFeatures());
+            JSONReader.Context context = JSON.createReadContext(
+                    JSONFactory.getDefaultObjectReaderProvider(),
+                    DEFAULT_PARSER_FEATURE,
+                    fastJsonConfig.getFeatures()
+            );
+
+            String dateFormat = fastJsonConfig.getDateFormat();
+            if (dateFormat != null) {
+                context.setDateFormat(dateFormat);
+            }
+
+            return JSON.parseObject(bytes, type, context);
         } catch (JSONException ex) {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex);
         } catch (IOException ex) {
@@ -155,6 +170,7 @@ public class FastJsonHttpMessageConverter
 
                 contentLength = JSON.writeJSONString(
                         baos, object,
+                        fastJsonConfig.getDateFormat(),
                         fastJsonConfig.getSerializeFilters(),
                         fastJsonConfig.getSerializerFeatures()
                 );
