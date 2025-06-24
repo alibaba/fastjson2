@@ -28,6 +28,12 @@ final class ObjectWriterImplBoolean
             return;
         }
 
+        ObjectWriter customWriter = jsonWriter.getObjectWriter(Boolean.class);
+        if (customWriter != null && !(customWriter instanceof ObjectWriterImplBoolean)) {
+            customWriter.write(jsonWriter, value, fieldName, fieldType, features);
+            return;
+        }
+
         jsonWriter.writeBool(value);
     }
 }

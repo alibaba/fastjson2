@@ -106,6 +106,16 @@ abstract class FieldWriterBoolean
             return;
         }
 
+        ObjectWriter customWriter = jsonWriter.getObjectWriter(boolean.class);
+        if (customWriter != null) {
+            String className = customWriter.getClass().getName();
+            if (!className.startsWith("com.alibaba.fastjson2.writer")) {
+                writeFieldName(jsonWriter);
+                customWriter.write(jsonWriter, value, fieldName, fieldType, features);
+                return;
+            }
+        }
+
         if (jsonWriter.utf8) {
             jsonWriter.writeNameRaw(
                     (features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0
