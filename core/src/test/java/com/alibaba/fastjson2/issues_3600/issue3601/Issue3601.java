@@ -14,7 +14,7 @@ public class Issue3601 {
         FastJson2Reader.init();
 
         var game = new Game();
-        game.players.addAll(List.of(new Player(1, 100), new Player(2, 200)));
+        game.players.addAll(Arrays.asList(new Player(1, 100), new Player(2, 200)));
 
         var gameJson = JSON.toJSONString(game);
         var deserializedGame1 = JSON.parseObject(gameJson, Game.class);

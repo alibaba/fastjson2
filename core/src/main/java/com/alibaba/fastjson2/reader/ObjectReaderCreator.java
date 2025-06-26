@@ -3398,7 +3398,9 @@ public class ObjectReaderCreator {
             }
         }
         if (initReader == null && Collection.class.isAssignableFrom(fieldClass)) {
-            initReader = provider.getObjectReader(fieldType);
+            if (!fieldClass.getName().startsWith("java.util.")) {
+                initReader = provider.getObjectReader(fieldType);
+            }
         }
         if (initReader == null) {
             if (fieldClass == long.class || fieldClass == Long.class) {
