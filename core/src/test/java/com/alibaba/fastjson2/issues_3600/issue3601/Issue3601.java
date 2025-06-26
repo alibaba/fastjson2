@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import lombok.var;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
