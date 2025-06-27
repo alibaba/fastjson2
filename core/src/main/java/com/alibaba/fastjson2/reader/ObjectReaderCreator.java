@@ -2568,9 +2568,7 @@ public class ObjectReaderCreator {
             }
         }
 
-        boolean list = fieldClass == List.class
-                || fieldClass == ArrayList.class
-                || fieldClass == LinkedList.class
+        boolean list = List.class.isAssignableFrom(fieldClass)
                 || "cn.hutool.json.JSONArray".equals(fieldClass.getName());
         if (list) {
             if (fieldTypeResolved instanceof ParameterizedType) {
