@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.function.FieldBiConsumer;
 import com.alibaba.fastjson2.function.FieldConsumer;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
@@ -148,6 +150,8 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, Filter> cacheFilter = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, Filter> cacheFieldBasedFilter = new ConcurrentHashMap<>();
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -169,7 +173,7 @@ public class ObjectReaderProvider
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
-    PropertyNamingStrategy namingStrategy;
+    private ThreadLocal<NameFilter> nameFilterLocal = new ThreadLocal<>();
 
     {
         long[] hashCodes;
@@ -232,6 +236,14 @@ public class ObjectReaderProvider
 
     public void setAutoTypeHandler(Consumer<Class> autoTypeHandler) {
         this.autoTypeHandler = autoTypeHandler;
+    }
+
+    public NameFilter getNameFilter() {
+        return nameFilterLocal.get();
+    }
+
+    public void setNameFilter(NameFilter nameFilter) {
+        this.nameFilterLocal.set(nameFilter);
     }
 
     public Class getMixIn(Class target) {
@@ -337,6 +349,8 @@ public class ObjectReaderProvider
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
+        cacheFilter.remove(objectClass);
+        cacheFieldBasedFilter.remove(objectClass);
         for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
             for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Long, ObjectReader> entry = it.next();
@@ -742,7 +756,12 @@ public class ObjectReaderProvider
         return creator.createCharArrayValueConsumerCreator(objectClass, fieldReaderArray);
     }
 
-    public ObjectReader getObjectReader(Type objectType, boolean fieldBased) {
+    public ObjectReader getObjectReader(Type objectType, boolean fieldBased, Filter... filters) {
+        Filter filter = getRequiredFilter(filters);
+        if (filter != null) {
+            return getObjectReaderByFilter(objectType, fieldBased, filter);
+        }
+
         if (objectType == null) {
             objectType = Object.class;
         }
@@ -762,6 +781,32 @@ public class ObjectReaderProvider
         return objectReader != null
                 ? objectReader
                 : getObjectReaderInternal(objectType, fieldBased);
+    }
+
+    private ObjectReader getObjectReaderByFilter(Type objectType, boolean fieldBased, Filter filter) {
+        if (objectType == null) {
+            objectType = Object.class;
+        } else if (objectType instanceof WildcardType) {
+            Type[] upperBounds = ((WildcardType) objectType).getUpperBounds();
+            if (upperBounds.length == 1) {
+                objectType = upperBounds[0];
+            }
+        }
+
+        synchronized (objectType.getClass()) {
+            Filter curFilter = fieldBased
+                    ? cacheFieldBasedFilter.get(objectType)
+                    : cacheFilter.get(objectType);
+            if (!filter.equals(curFilter)) {
+                cleanup((Class) objectType);
+            }
+            if (fieldBased) {
+                cacheFieldBasedFilter.put(objectType, filter);
+            } else {
+                cacheFilter.put(objectType, filter);
+            }
+            return getObjectReader(objectType, fieldBased);
+        }
     }
 
     private ObjectReader getObjectReaderInternal(Type objectType, boolean fieldBased) {
@@ -1044,17 +1089,13 @@ public class ObjectReaderProvider
         this.disableSmartMatch = disableSmartMatch;
     }
 
-    /**
-     * @since 2.0.52
-     */
-    public PropertyNamingStrategy getNamingStrategy() {
-        return namingStrategy;
-    }
-
-    /**
-     * @since 2.0.52
-     */
-    public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
-        this.namingStrategy = namingStrategy;
+    private Filter getRequiredFilter(Filter... filters) {
+        Filter nameFilter = null;
+        for (Filter filter : filters) {
+            if (filter instanceof NameFilter) {
+                nameFilter = filter;
+            }
+        }
+        return nameFilter;
     }
 }

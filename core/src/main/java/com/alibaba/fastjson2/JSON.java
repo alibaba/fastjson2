@@ -896,7 +896,7 @@ public interface JSON {
 
         final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased, filter);
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             if (reader.nextIfNull()) {
@@ -911,6 +911,8 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } finally {
+            context.provider.setNameFilter(null);
         }
     }
 
@@ -947,7 +949,7 @@ public interface JSON {
         context.setDateFormat(format);
 
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased, filters);
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             if (reader.nextIfNull()) {
@@ -962,6 +964,8 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } finally {
+            context.provider.setNameFilter(null);
         }
     }
 
@@ -1133,7 +1137,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
         Type type = typeReference.getType();
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased, filter);
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             T object = objectReader.readObject(reader, type, null, 0);
@@ -1144,6 +1148,8 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } finally {
+            context.provider.setNameFilter(null);
         }
     }
 
@@ -1331,7 +1337,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
-        ObjectReader<T> objectReader = context.getObjectReader(type);
+        ObjectReader<T> objectReader = context.getObjectReader(type, filter);
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             T object = objectReader.readObject(reader, type, null, 0);
@@ -1342,6 +1348,8 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } finally {
+            context.provider.setNameFilter(null);
         }
     }
 
@@ -1566,7 +1574,7 @@ public interface JSON {
 
         final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased, filter);
 
         try (JSONReader reader = JSONReader.of(bytes, context)) {
             T object = objectReader.readObject(reader, clazz, null, 0);
@@ -1577,6 +1585,8 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } finally {
+            context.provider.setNameFilter(null);
         }
     }
 
@@ -1649,7 +1659,7 @@ public interface JSON {
         context.setDateFormat(format);
 
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased, filters);
 
         try (JSONReader reader = JSONReader.of(bytes, context)) {
             T object = objectReader.readObject(reader, type, null, 0);
@@ -1660,6 +1670,8 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } finally {
+            context.provider.setNameFilter(null);
         }
     }
 
@@ -1805,7 +1817,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
-        final ObjectReader<T> objectReader = context.getObjectReader(type);
+        final ObjectReader<T> objectReader = context.getObjectReader(type, filter);
 
         try (JSONReader reader = JSONReader.of(bytes, context)) {
             T object = objectReader.readObject(reader, type, null, 0);
@@ -1816,6 +1828,8 @@ public interface JSON {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } finally {
+            context.provider.setNameFilter(null);
         }
     }
 
