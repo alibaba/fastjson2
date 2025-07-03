@@ -33,7 +33,6 @@ public class Issue3601 {
     }
 
     public static class Game {
-//        private ArrayList<Player> players = new ArrayList<>();
         private MyArrayList<Player> players = new MyArrayList<>();
         public MyArrayList<Player> getPlayers() {
             return players;
