@@ -888,8 +888,8 @@ public class ObjectReaderProvider
     }
 
     public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectReaderAnnotationProcessor annotationProcessor = modules.get(i).getAnnotationProcessor();
             if (annotationProcessor == null) {
                 continue;
             }

@@ -2728,7 +2728,8 @@ public abstract class JSONWriter
             if (minCapacity < maxArraySize) {
                 newCapacity = maxArraySize;
             } else {
-                throw new OutOfMemoryError("try enabling LargeObject feature instead");
+                throw new JSONLargeObjectException("Maximum array size exceeded. Try enabling LargeObject feature instead. "
+                        + "Requested size: " + minCapacity + ", max size: " + maxArraySize);
             }
         }
         return newCapacity;
