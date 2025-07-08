@@ -61,7 +61,8 @@ public class IOUtils {
     };
 
     private static final short ZERO_DOT_LATIN1;
-    private static final int ZERO_DOT_UTF16;
+    private static final int ZERO_UTF16;
+    private static final int DOT_UTF16;
 
     static {
         short[] shorts = new short[]{
@@ -105,7 +106,8 @@ public class IOUtils {
             DIGITS_K_64[i] = c0 + v;
         }
         ZERO_DOT_LATIN1 = UNSAFE.getShort(new byte[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
-        ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_CHAR_BASE_OFFSET);
+        ZERO_UTF16 = UNSAFE.getInt(new char[] {'0'}, ARRAY_CHAR_BASE_OFFSET);
+        DOT_UTF16 = UNSAFE.getInt(new char[] {'.'}, ARRAY_CHAR_BASE_OFFSET);
     }
 
     private static short digitPair(int value) {
@@ -343,10 +345,12 @@ public class IOUtils {
             int unscaleValSize = stringSize(unscaledVal);
             int insertionPoint = unscaleValSize - scale;
             if (insertionPoint == 0) {
-                putIntUnaligned(buf, off, ZERO_DOT_UTF16);
+                putIntUnaligned(buf, off, ZERO_UTF16);
+                putIntUnaligned(buf, off + 1, DOT_UTF16);
                 off += 2;
             } else if (insertionPoint < 0) {
-                putIntUnaligned(buf, off, ZERO_DOT_UTF16);
+                putIntUnaligned(buf, off, ZERO_UTF16);
+                putIntUnaligned(buf, off + 1, DOT_UTF16);
                 off += 2;
 
                 for (int i = 0; i < -insertionPoint; i++) {
@@ -485,9 +489,9 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isNumber(char[] chars, int off, int len) {
+    public static boolean isNumber(char[] buf, int off, int len) {
         for (int i = off, end = off + len; i < end; ++i) {
-            char ch = chars[i];
+            char ch = buf[i];
             if (ch == '+' || ch == '-') {
                 if (i != 0) {
                     return false;
@@ -499,9 +503,9 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isNumber(byte[] chars, int off, int len) {
+    public static boolean isNumber(byte[] buf, int off, int len) {
         for (int i = off, end = off + len; i < end; ++i) {
-            char ch = (char) chars[i];
+            char ch = (char) buf[i];
             if (ch == '+' || ch == '-') {
                 if (i != 0) {
                     return false;
@@ -751,24 +755,24 @@ public class IOUtils {
         return lines;
     }
 
-    public static int writeLocalDate(byte[] bytes, int off, int year, int month, int dayOfMonth) {
+    public static int writeLocalDate(byte[] buf, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
-            bytes[off++] = '-';
+            buf[off++] = '-';
             year = -year;
         } else if (year > 9999) {
-            bytes[off++] = '+';
+            buf[off++] = '+';
         }
         int y01 = (int) (year * 1374389535L >> 37); //year / 100;
         int y23 = year - y01 * 100;
 
         if (year >= 0 && year < 10000) {
-            writeDigitPair(bytes, off, y01);
+            writeDigitPair(buf, off, y01);
             off += 2;
         } else {
-            off = IOUtils.writeInt32(bytes, off, y01);
+            off = IOUtils.writeInt32(buf, off, y01);
         }
 
-        putLongLE(bytes, off,
+        putLongLE(buf, off,
                 0x2d00002d0000L
                         | digitPair(y23)
                         | ((long) digitPair(month) << 24)
@@ -776,34 +780,34 @@ public class IOUtils {
         return off + 8;
     }
 
-    public static int writeLocalDate(char[] chars, int off, int year, int month, int dayOfMonth) {
+    public static int writeLocalDate(char[] buf, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
-            chars[off++] = '-';
+            buf[off++] = '-';
             year = -year;
         } else if (year > 9999) {
-            chars[off++] = '+';
+            buf[off++] = '+';
         }
         int y01 = (int) (year * 1374389535L >> 37); // year / 100;
         int y23 = year - y01 * 100;
 
         if (year >= 0 && year < 10000) {
-            writeDigitPair(chars, off, y01);
+            writeDigitPair(buf, off, y01);
             off += 2;
         } else {
-            off = IOUtils.writeInt32(chars, off, y01);
+            off = IOUtils.writeInt32(buf, off, y01);
         }
 
         int p1 = PACKED_DIGITS_UTF16[month & 0x7f];
-        putLongLE(chars, off,
+        putLongLE(buf, off,
                 ((long) (p1 & 0xFFFF) << 48) | ((long) '-' << 32) | PACKED_DIGITS_UTF16[y23 & 0x7f]);
-        putLongLE(chars, off + 4,
+        putLongLE(buf, off + 4,
                 ((long) (p1 & 0xFFFF0000) >> 16) | ((long) '-' << 16) | ((long) PACKED_DIGITS_UTF16[dayOfMonth & 0x7f] << 32));
         return off + 8;
     }
 
-    public static void writeLocalTime(byte[] bytes, int off, int hour, int minute, int second) {
+    public static void writeLocalTime(byte[] buf, int off, int hour, int minute, int second) {
         putLongLE(
-                bytes,
+                buf,
                 off,
                 0x3a00003a0000L
                         | digitPair(hour)
@@ -811,19 +815,19 @@ public class IOUtils {
                         | ((long) digitPair(second) << 48));
     }
 
-    public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
-        writeLocalTime(bytes, off, time.getHour(), time.getMinute(), time.getSecond());
+    public static int writeLocalTime(byte[] buf, int off, LocalTime time) {
+        writeLocalTime(buf, off, time.getHour(), time.getMinute(), time.getSecond());
         off += 8;
         int nano = time.getNano();
-        return nano != 0 ? writeNano(bytes, off, nano) : off;
+        return nano != 0 ? writeNano(buf, off, nano) : off;
     }
 
-    public static int writeNano(byte[] bytes, int off, int nano) {
+    public static int writeNano(byte[] buf, int off, int nano) {
         final int div = (int) (nano * 274877907L >> 38); //nano / 1000;
         final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putIntLE(bytes, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
+        putIntLE(buf, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
         off += 4;
 
         int v;
@@ -838,23 +842,23 @@ public class IOUtils {
             v = DIGITS_K_32[(div - div2 * 1000) & 0x3ff];
         }
 
-        putShortLE(bytes, off, (short) (v >> 8));
+        putShortLE(buf, off, (short) (v >> 8));
         off += 2;
         if (rem1 == 0) {
-            putByte(bytes, off, (byte) (v >> 24));
+            putByte(buf, off, (byte) (v >> 24));
             return off + 1;
         }
 
-        putIntLE(bytes, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
+        putIntLE(buf, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
         return off + 4;
     }
 
-    public static int writeNano(char[] chars, int off, int nano) {
+    public static int writeNano(char[] buf, int off, int nano) {
         final int div = (int) (nano * 274877907L >> 38); //nano / 1000;
         final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putLongLE(chars, off, DIGITS_K_64[div2 & 0x3ff] & 0xffffffffffff0000L | DOT_X0);
+        putLongLE(buf, off, DIGITS_K_64[div2 & 0x3ff] & 0xffffffffffff0000L | DOT_X0);
         off += 4;
 
         long v;
@@ -869,31 +873,31 @@ public class IOUtils {
             v = DIGITS_K_64[(div - div2 * 1000) & 0x3ff];
         }
 
-        putIntLE(chars, off, (int) (v >> 16));
+        putIntLE(buf, off, (int) (v >> 16));
         off += 2;
         if (rem1 == 0) {
-            putChar(chars, off, (char) (v >> 48));
+            putChar(buf, off, (char) (v >> 48));
             return off + 1;
         }
 
-        putLongLE(chars, off, DIGITS_K_64[rem1 & 0x3ff] & 0xffffffffffff0000L | (v >> 48));
+        putLongLE(buf, off, DIGITS_K_64[rem1 & 0x3ff] & 0xffffffffffff0000L | (v >> 48));
         return off + 4;
     }
 
-    public static void writeLocalTime(char[] chars, int off, int hour, int minute, int second) {
-        writeDigitPair(chars, off, hour);
-        putChar(chars, off + 2, ':');
-        writeDigitPair(chars, off + 3, minute);
-        putChar(chars, off + 5, ':');
-        writeDigitPair(chars, off + 6, second);
+    public static void writeLocalTime(char[] buf, int off, int hour, int minute, int second) {
+        writeDigitPair(buf, off, hour);
+        putChar(buf, off + 2, ':');
+        writeDigitPair(buf, off + 3, minute);
+        putChar(buf, off + 5, ':');
+        writeDigitPair(buf, off + 6, second);
     }
 
-    public static int writeLocalTime(char[] chars, int off, LocalTime time) {
-        writeLocalTime(chars, off, time.getHour(), time.getMinute(), time.getSecond());
+    public static int writeLocalTime(char[] buf, int off, LocalTime time) {
+        writeLocalTime(buf, off, time.getHour(), time.getMinute(), time.getSecond());
         off += 8;
 
         int nano = time.getNano();
-        return nano != 0 ? writeNano(chars, off, nano) : off;
+        return nano != 0 ? writeNano(buf, off, nano) : off;
     }
 
     private static int writeInt4(byte[] buf, int off, int v) {
@@ -1245,20 +1249,20 @@ public class IOUtils {
         return writeInt8(buf, off, (int) (numValue - val * 10000), v1);
     }
 
-    public static byte getByte(byte[] str, int pos) {
-        return UNSAFE.getByte(str, ARRAY_CHAR_BASE_OFFSET + pos);
+    public static byte getByte(byte[] buf, int pos) {
+        return UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + pos);
     }
 
     public static char getChar(char[] buf, int pos) {
         return UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
     }
 
-    public static char getChar(byte[] str, int pos) {
-        return UNSAFE.getChar(str, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
+    public static char getChar(byte[] buf, int pos) {
+        return UNSAFE.getChar(buf, ARRAY_BYTE_BASE_OFFSET + ((long) pos << 1));
     }
 
     private static void putByte(byte[] buf, int pos, byte v) {
-        UNSAFE.putByte(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
+        UNSAFE.putByte(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
     private static void putChar(char[] buf, int pos, char v) {
@@ -1295,7 +1299,7 @@ public class IOUtils {
     }
 
     public static void putShortUnaligned(byte[] buf, int pos, short v) {
-        UNSAFE.putShort(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
     public static void putIntUnaligned(char[] buf, int pos, int v) {
@@ -1326,14 +1330,14 @@ public class IOUtils {
         UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
 
-    public static int putBoolean(byte[] bytes, int off, boolean v) {
+    public static int putBoolean(byte[] buf, int off, boolean v) {
         long address = ARRAY_BYTE_BASE_OFFSET + off;
         if (v) {
-            UNSAFE.putInt(bytes, address, TRUE);
+            UNSAFE.putInt(buf, address, TRUE);
             return off + 4;
         } else {
-            UNSAFE.putByte(bytes, address, (byte) 'f');
-            UNSAFE.putInt(bytes, address + 1, ALSE);
+            UNSAFE.putByte(buf, address, (byte) 'f');
+            UNSAFE.putInt(buf, address + 1, ALSE);
             return off + 5;
         }
     }
@@ -1383,11 +1387,11 @@ public class IOUtils {
     }
 
     public static boolean isTRUE(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + ((long) pos << 1)) == TRUE_64;
+        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) == TRUE_64;
     }
 
     public static boolean notTRUE(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + ((long) pos << 1)) != TRUE_64;
+        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) != TRUE_64;
     }
 
     public static boolean isNULL(char[] buf, int pos) {
@@ -1399,15 +1403,15 @@ public class IOUtils {
     }
 
     public static void putNULL(byte[] buf, int pos) {
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + pos, NULL_32);
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, NULL_32);
     }
 
     public static void putNULL(char[] buf, int pos) {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), NULL_64);
     }
 
-    public static int digit4(char[] chars, int off) {
-        long x = getLongLE(chars, off);
+    public static int digit4(char[] buf, int off) {
+        long x = getLongLE(buf, off);
         long d;
         if ((((x & 0xFFF0FFF0FFF0FFF0L) - 0x30003000300030L) | (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L)) != 0) {
             return -1;
@@ -1419,9 +1423,9 @@ public class IOUtils {
                 (d >> 48));
     }
 
-    public static int digit4(byte[] bytes, int off) {
+    public static int digit4(byte[] buf, int off) {
         return digit4(
-                getIntLE(bytes, off)
+                getIntLE(buf, off)
         );
     }
 
@@ -1465,8 +1469,8 @@ public class IOUtils {
                 (d >> 24);
     }
 
-    public static int digit3(char[] chars, int off) {
-        long x = getIntLE(chars, off) + (((long) getChar(chars, off + 2)) << 32);
+    public static int digit3(char[] buf, int off) {
+        long x = getIntLE(buf, off) + (((long) getChar(buf, off + 2)) << 32);
         long d;
         if ((((x & 0xFFF0FFF0FFF0L) - 0x3000300030L) | (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L)) != 0) {
             return -1;
@@ -1474,9 +1478,9 @@ public class IOUtils {
         return (int) (((d & 0xF) * 10 + ((d >> 16) & 0xF)) * 10 + (d >> 32));
     }
 
-    public static int digit3(byte[] bytes, int off) {
+    public static int digit3(byte[] buf, int off) {
         return digit3(
-                getShortLE(bytes, off) | (getByte(bytes, off + 2) << 16)
+                getShortLE(buf, off) | (getByte(buf, off + 2) << 16)
         );
     }
 
@@ -1488,8 +1492,8 @@ public class IOUtils {
         return ((d & 0xF) * 10 + ((d >> 8) & 0xF)) * 10 + (d >> 16);
     }
 
-    public static int digit2(char[] chars, int off) {
-        int x = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+    public static int digit2(char[] buf, int off) {
+        int x = UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
@@ -1500,8 +1504,8 @@ public class IOUtils {
         return (d & 0xF) * 10 + (d >> 16);
     }
 
-    public static int digit2(byte[] bytes, int off) {
-        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+    public static int digit2(byte[] buf, int off) {
+        short x = UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + off);
         if (BIG_ENDIAN) {
             x = Short.reverseBytes(x);
         }
@@ -1512,16 +1516,16 @@ public class IOUtils {
         return (d & 0xF) * 10 + (d >> 8);
     }
 
-    public static boolean isDigit2(byte[] bytes, int off) {
-        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+    public static boolean isDigit2(byte[] buf, int off) {
+        short x = UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + off);
         if (BIG_ENDIAN) {
             x = Short.reverseBytes(x);
         }
         return (((x & 0xF0F0) - 0x3030) | (((x & 0x0F0F) + 0x0606) & 0xF0F0)) == 0;
     }
 
-    public static boolean isDigit2(char[] bytes, int off) {
-        int x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + ((long) off << 1));
+    public static boolean isDigit2(char[] buf, int off) {
+        int x = UNSAFE.getShort(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
@@ -1532,117 +1536,117 @@ public class IOUtils {
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int digit1(char[] chars, int off) {
-        int d = UNSAFE.getByte(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
+    public static int digit1(char[] buf, int off) {
+        int d = UNSAFE.getByte(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int digit1(byte[] bytes, int off) {
-        int d = UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off) - '0';
+    public static int digit1(byte[] buf, int off) {
+        int d = UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + off) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int indexOfQuote(byte[] value, int quote, int fromIndex, int max) {
+    public static int indexOfQuote(byte[] buf, int quote, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfQuoteV(value, quote, fromIndex, max);
+            return indexOfQuoteV(buf, quote, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, quote, fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, quote, fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfQuoteV(byte[] value, int quote, int fromIndex, int max) {
+    public static int indexOfQuoteV(byte[] buf, int quote, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
         long vectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), vectorQuote)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), vectorQuote)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar(value, quote, i, max);
+        return indexOfChar(buf, quote, i, max);
     }
 
-    public static int indexOfDoubleQuote(byte[] value, int fromIndex, int max) {
+    public static int indexOfDoubleQuote(byte[] buf, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfDoubleQuoteV(value, fromIndex, max);
+            return indexOfDoubleQuoteV(buf, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '"', fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, (int) '"', fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfDoubleQuoteV(byte[] value, int fromIndex, int max) {
+    public static int indexOfDoubleQuoteV(byte[] buf, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x2222_2222_2222_2222L)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x2222_2222_2222_2222L)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar(value, '"', i, max);
+        return indexOfChar(buf, '"', i, max);
     }
 
-    public static int indexOfLineSeparator(byte[] value, int fromIndex, int max) {
+    public static int indexOfLineSeparator(byte[] buf, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfLineSeparatorV(value, fromIndex, max);
+            return indexOfLineSeparatorV(buf, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\n', fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, (int) '\n', fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfLineSeparatorV(byte[] value, int fromIndex, int max) {
+    public static int indexOfLineSeparatorV(byte[] buf, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x0A0A0A0A0A0A0A0AL)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x0A0A0A0A0A0A0A0AL)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar(value, '\n', i, max);
+        return indexOfChar(buf, '\n', i, max);
     }
 
-    public static int indexOfSlash(byte[] value, int fromIndex, int max) {
+    public static int indexOfSlash(byte[] buf, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfSlashV(value, fromIndex, max);
+            return indexOfSlashV(buf, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\\', fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, (int) '\\', fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfSlashV(byte[] value, int fromIndex, int max) {
+    public static int indexOfSlashV(byte[] buf, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x5C5C5C5C5C5C5C5CL)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x5C5C5C5C5C5C5C5CL)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar(value, '\\', i, max);
+        return indexOfChar(buf, '\\', i, max);
     }
 
-    public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
+    public static int indexOfChar(byte[] buf, int ch, int fromIndex, int max) {
         for (int i = fromIndex; i < max; i++) {
-            if (value[i] == ch) {
+            if (buf[i] == ch) {
                 return i;
             }
         }
         return -1;
     }
 
-    public static int indexOfChar(char[] value, int ch, int fromIndex, int max) {
+    public static int indexOfChar(char[] buf, int ch, int fromIndex, int max) {
         for (int i = fromIndex; i < max; i++) {
-            if (value[i] == ch) {
+            if (buf[i] == ch) {
                 return i;
             }
         }
@@ -1664,14 +1668,14 @@ public class IOUtils {
         return (((x - 0x0101010101010101L) & ~x) & 0x8080808080808080L) == 0;
     }
 
-    public static int hexDigit4(byte[] bytes, int offset) {
-        int v = getIntLE(bytes, offset);
+    public static int hexDigit4(byte[] buf, int offset) {
+        int v = getIntLE(buf, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
         return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
     }
 
-    public static int hexDigit4(char[] bytes, int offset) {
-        long v = getLongLE(bytes, offset);
+    public static int hexDigit4(char[] buf, int offset) {
+        long v = getLongLE(buf, offset);
         v = (v & 0x000F_000F_000F_000FL) + ((((v & 0x0004_0004_0004_00040L) >> 2) | ((v & 0x0004_0004_0004_00040L) << 1)) >>> 4);
         return (int) (((v & 0xF_0000_0000_0000L) >>> 48) + ((v & 0xF_0000_0000L) >>> 28) + ((v & 0xF_0000) >> 8) + ((v & 0xF) << 12));
     }
@@ -1680,80 +1684,80 @@ public class IOUtils {
         return ch >= '0' && ch <= '9';
     }
 
-    public static short getShortUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    public static short getShortUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
-    public static short getShortBE(byte[] bytes, int offset) {
+    public static short getShortBE(byte[] buf, int offset) {
         return convEndian(true,
-                UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static short getShortLE(byte[] bytes, int offset) {
+    public static short getShortLE(byte[] buf, int offset) {
         return convEndian(false,
-                UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static boolean isUTF8BOM(byte[] bytes, int off) {
+    public static boolean isUTF8BOM(byte[] buf, int off) {
         // EF BB BF
-        return ((getIntLE(bytes, off)) & 0xFFFFFF) == 0xBFBBEF;
+        return ((getIntLE(buf, off)) & 0xFFFFFF) == 0xBFBBEF;
     }
 
-    public static int getIntBE(byte[] bytes, int offset) {
-        int v = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    public static int getIntBE(byte[] buf, int offset) {
+        int v = UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
         if (!BIG_ENDIAN) {
             v = Integer.reverseBytes(v);
         }
         return v;
     }
 
-    public static int getIntLE(byte[] bytes, int offset) {
-        int v = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    public static int getIntLE(byte[] buf, int offset) {
+        int v = UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
         if (BIG_ENDIAN) {
             v = Integer.reverseBytes(v);
         }
         return v;
     }
 
-    public static int getIntLE(char[] bytes, int offset) {
-        int v = UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    public static int getIntLE(char[] buf, int offset) {
+        int v = UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
         if (BIG_ENDIAN) {
             v = Integer.reverseBytes(v);
         }
         return v;
     }
 
-    public static int getIntUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    public static int getIntUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
-    public static int getIntUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    public static int getIntUnaligned(char[] buf, int offset) {
+        return UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
     }
 
-    public static long getLongBE(byte[] bytes, int offset) {
-        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    public static long getLongBE(byte[] buf, int offset) {
+        long v = UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset);
         if (!BIG_ENDIAN) {
             v = Long.reverseBytes(v);
         }
         return v;
     }
 
-    public static long getLongUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    public static long getLongUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
-    public static long getLongUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    public static long getLongUnaligned(char[] buf, int offset) {
+        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
     }
 
-    public static long getLongLE(byte[] bytes, int offset) {
+    public static long getLongLE(byte[] buf, int offset) {
         return convEndian(false,
-                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+                UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static long getLongLE(char[] bytes, int offset) {
-        long v = UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    public static long getLongLE(char[] buf, int offset) {
+        long v = UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
         if (BIG_ENDIAN) {
             v = Long.reverseBytes(v);
         }
@@ -1854,18 +1858,18 @@ public class IOUtils {
         return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
     }
 
-    public static boolean isLatin1(char[] chars, int off, int len) {
+    public static boolean isLatin1(char[] buf, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
         long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         while (off < upperBound
-                && (convEndian(false, UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8)) & 0xFF00FF00FF00FF00L) == 0
+                && (convEndian(false, UNSAFE.getLong(buf, address) | UNSAFE.getLong(buf, address + 8)) & 0xFF00FF00FF00FF00L) == 0
         ) {
             address += 16;
             off += 8;
         }
         while (off++ < end) {
-            if ((convEndian(false, UNSAFE.getShort(chars, address)) & 0xFF00) != 0) {
+            if ((convEndian(false, UNSAFE.getShort(buf, address)) & 0xFF00) != 0) {
                 return false;
             }
             address += 2;
@@ -1885,40 +1889,40 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isASCII(byte[] bytes) {
-        return isASCII(bytes, 0, bytes.length);
+    public static boolean isASCII(byte[] buf) {
+        return isASCII(buf, 0, buf.length);
     }
 
-    public static boolean isASCII(byte[] bytes, int off, int len) {
+    public static boolean isASCII(byte[] buf, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
         long address = ARRAY_BYTE_BASE_OFFSET + off;
-        while (off < upperBound && (UNSAFE.getLong(bytes, address) & 0x8080808080808080L) == 0) {
+        while (off < upperBound && (UNSAFE.getLong(buf, address) & 0x8080808080808080L) == 0) {
             address += 8;
             off += 8;
         }
 
         while (off++ < end) {
-            if ((UNSAFE.getByte(bytes, address++) & 0x80) != 0) {
+            if ((UNSAFE.getByte(buf, address++) & 0x80) != 0) {
                 return false;
             }
         }
         return true;
     }
 
-    public static boolean isNonSlashASCII(byte[] bytes, int off, int len) {
+    public static boolean isNonSlashASCII(byte[] buf, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
         long addr = ARRAY_BYTE_BASE_OFFSET + off;
         long d, x;
         while (off < upperBound
-                && (((d = UNSAFE.getLong(bytes, addr)) | (((x = d ^ 0x5C5C5C5C5C5C5C5CL) - 0x0101010101010101L) & ~x)) & 0x8080808080808080L) == 0) {
+                && (((d = UNSAFE.getLong(buf, addr)) | (((x = d ^ 0x5C5C5C5C5C5C5C5CL) - 0x0101010101010101L) & ~x)) & 0x8080808080808080L) == 0) {
             addr += 8;
             off += 8;
         }
         while (off++ < end) {
             byte b;
-            if (((b = UNSAFE.getByte(bytes, addr++)) & 0x80) != 0 || b == '\\') {
+            if (((b = UNSAFE.getByte(buf, addr++)) & 0x80) != 0 || b == '\\') {
                 return false;
             }
         }
@@ -1929,8 +1933,8 @@ public class IOUtils {
         return c >= '0' && c <= '9';
     }
 
-    public static int parseInt(byte[] bytes, int off, int len) {
-        int fc = bytes[off];
+    public static int parseInt(byte[] buf, int off, int len) {
+        int fc = buf[off];
         int result = isDigitLatin1(fc)
                 ? '0' - fc
                 : len != 1 && (fc == '-' || fc == '+')
@@ -1940,13 +1944,13 @@ public class IOUtils {
         off++;
         int d;
         while (off + 1 < end
-                && (d = IOUtils.digit2(bytes, off)) != -1
+                && (d = IOUtils.digit2(buf, off)) != -1
                 && Integer.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             off += 2;
         }
         if (off < end
-                && isDigitLatin1(d = bytes[off])
+                && isDigitLatin1(d = buf[off])
                 && Integer.MIN_VALUE / 10 <= result & result <= 0) {
             result = result * 10 + '0' - d;  // overflow from '0' - d => result > 0
             off += 1;
@@ -1956,6 +1960,6 @@ public class IOUtils {
                 & (Integer.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException(new String(bytes, off, len));
+        throw new NumberFormatException(new String(buf, off, len));
     }
 }
