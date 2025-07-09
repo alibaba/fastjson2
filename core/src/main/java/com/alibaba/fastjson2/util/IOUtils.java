@@ -61,7 +61,6 @@ public class IOUtils {
     };
 
     private static final short ZERO_DOT_LATIN1;
-    private static final int ZERO_DOT_UTF16;
 
     static {
         short[] shorts = new short[]{
@@ -105,7 +104,6 @@ public class IOUtils {
             DIGITS_K_64[i] = c0 + v;
         }
         ZERO_DOT_LATIN1 = UNSAFE.getShort(new byte[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
-        ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_CHAR_BASE_OFFSET);
     }
 
     private static short digitPair(int value) {
@@ -343,11 +341,11 @@ public class IOUtils {
             int unscaleValSize = stringSize(unscaledVal);
             int insertionPoint = unscaleValSize - scale;
             if (insertionPoint == 0) {
-                putIntUnaligned(buf, off, ZERO_DOT_UTF16);
-                off += 2;
+                buf[off++] = '0';
+                buf[off++] = '.';
             } else if (insertionPoint < 0) {
-                putIntUnaligned(buf, off, ZERO_DOT_UTF16);
-                off += 2;
+                buf[off++] = '0';
+                buf[off++] = '.';
 
                 for (int i = 0; i < -insertionPoint; i++) {
                     putChar(buf, off++, '0');
