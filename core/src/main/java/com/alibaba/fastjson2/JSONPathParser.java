@@ -640,6 +640,7 @@ class JSONPathParser {
 
         String fieldName = null;
         long hashCode = 0;
+        boolean hasOperator = false;
         if (at) {
             if (jsonReader.ch == '[') {
                 JSONPathSegment segment = parseArrayAccess();
@@ -687,106 +688,114 @@ class JSONPathParser {
                     return segment;
                 }
             } else {
-                jsonReader.next();
-            }
-        }
-
-        if (fieldName == null) {
-            hashCode = jsonReader.readFieldNameHashCodeUnquote();
-            fieldName = jsonReader.getFieldName();
-        }
-
-        if (parentheses) {
-            if (jsonReader.nextIfMatch(')')) {
-                if (filterNests > 0) {
-                    filterNests--;
+                char ch = jsonReader.ch;
+                if (ch == 'i' || ch == 'I') {
+                    hasOperator = true;
+                } else {
+                    jsonReader.next();
                 }
-                return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
             }
-        }
-
-        String functionName = null;
-
-        long[] hashCode2 = null;
-        String[] fieldName2 = null;
-        while (jsonReader.ch == '.') {
-            jsonReader.next();
-            long hash = jsonReader.readFieldNameHashCodeUnquote();
-            String str = jsonReader.getFieldName();
-
-            if (jsonReader.ch == '(') {
-                functionName = str;
-                break;
-            }
-
-            if (hashCode2 == null) {
-                hashCode2 = new long[]{hash};
-                fieldName2 = new String[]{str};
-            } else {
-                hashCode2 = Arrays.copyOf(hashCode2, hashCode2.length + 1);
-                hashCode2[hashCode2.length - 1] = hash;
-                fieldName2 = Arrays.copyOf(fieldName2, fieldName2.length + 1);
-                fieldName2[fieldName2.length - 1] = str;
-            }
-        }
-
-        if (fieldName2 == null && !parentheses
-                && (jsonReader.ch == ']' || jsonReader.ch == '|' || jsonReader.ch == '&')
-        ) {
-            return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
         }
 
         JSONPathFilter.Operator operator = null;
         Function function = null;
-        if (jsonReader.ch == '(') {
-            if (functionName == null) {
-                functionName = fieldName;
-                fieldName = null;
+        String functionName = null;
+        long[] hashCode2 = null;
+        String[] fieldName2 = null;
+        if (!hasOperator) {
+            if (fieldName == null) {
+                hashCode = jsonReader.readFieldNameHashCodeUnquote();
+                fieldName = jsonReader.getFieldName();
             }
 
-            switch (functionName) {
-                case "type":
-                    hashCode = 0;
-                    function = JSONPathFunction.TypeFunction.INSTANCE;
-                    break;
-                case "size":
-                    hashCode = 0;
-                    function = JSONPathFunction.SizeFunction.INSTANCE;
-                    break;
-                case "contains":
-                    hashCode = 0;
-                    operator = JSONPathFilter.Operator.CONTAINS;
-                    break;
-                default:
-                    throw new JSONException("syntax error, function not support " + fieldName);
-            }
-
-            if (function != null) {
-                jsonReader.next();
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException("syntax error, function " + functionName);
+            if (parentheses) {
+                if (jsonReader.nextIfMatch(')')) {
+                    if (filterNests > 0) {
+                        filterNests--;
+                    }
+                    return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
                 }
             }
-        }
 
-        if (function == null && jsonReader.ch == '[') {
-            jsonReader.next();
-            if (jsonReader.ch == '?') {
+            while (jsonReader.ch == '.') {
                 jsonReader.next();
-                JSONPathFilter subFilter = (JSONPathFilter) parseFilter();
-                function = new JSONPathFunction.FilterFunction(subFilter);
-            } else {
-                int index = jsonReader.readInt32Value();
-                function = new JSONPathFunction.IndexValue(index);
+                long hash = jsonReader.readFieldNameHashCodeUnquote();
+                String str = jsonReader.getFieldName();
+
+                if (jsonReader.ch == '(') {
+                    functionName = str;
+                    break;
+                }
+
+                if (hashCode2 == null) {
+                    hashCode2 = new long[]{hash};
+                    fieldName2 = new String[]{str};
+                } else {
+                    hashCode2 = Arrays.copyOf(hashCode2, hashCode2.length + 1);
+                    hashCode2[hashCode2.length - 1] = hash;
+                    fieldName2 = Arrays.copyOf(fieldName2, fieldName2.length + 1);
+                    fieldName2[fieldName2.length - 1] = str;
+                }
             }
-            if (!jsonReader.nextIfMatch(']')) {
-                throw new JSONException("syntax error");
-            }
-        }
-        if (operator == null) {
-            if (parentheses && jsonReader.nextIfMatch(')')) {
+
+            if (fieldName2 == null && !parentheses
+                    && (jsonReader.ch == ']' || jsonReader.ch == '|' || jsonReader.ch == '&')
+            ) {
                 return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
             }
+
+            if (jsonReader.ch == '(') {
+                if (functionName == null) {
+                    functionName = fieldName;
+                    fieldName = null;
+                }
+
+                switch (functionName) {
+                    case "type":
+                        hashCode = 0;
+                        function = JSONPathFunction.TypeFunction.INSTANCE;
+                        break;
+                    case "size":
+                        hashCode = 0;
+                        function = JSONPathFunction.SizeFunction.INSTANCE;
+                        break;
+                    case "contains":
+                        hashCode = 0;
+                        operator = JSONPathFilter.Operator.CONTAINS;
+                        break;
+                    default:
+                        throw new JSONException("syntax error, function not support " + fieldName);
+                }
+
+                if (function != null) {
+                    jsonReader.next();
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException("syntax error, function " + functionName);
+                    }
+                }
+            }
+
+            if (function == null && jsonReader.ch == '[') {
+                jsonReader.next();
+                if (jsonReader.ch == '?') {
+                    jsonReader.next();
+                    JSONPathFilter subFilter = (JSONPathFilter) parseFilter();
+                    function = new JSONPathFunction.FilterFunction(subFilter);
+                } else {
+                    int index = jsonReader.readInt32Value();
+                    function = new JSONPathFunction.IndexValue(index);
+                }
+                if (!jsonReader.nextIfMatch(']')) {
+                    throw new JSONException("syntax error");
+                }
+            }
+            if (operator == null) {
+                if (parentheses && jsonReader.nextIfMatch(')')) {
+                    return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
+                }
+                operator = JSONPath.parseOperator(jsonReader);
+            }
+        } else {
             operator = JSONPath.parseOperator(jsonReader);
         }
 
@@ -820,12 +829,30 @@ class JSONPathParser {
             }
             case IN:
             case NOT_IN: {
-                if (jsonReader.ch != '(') {
+                JSONPathSegment segment;
+                char ch = jsonReader.ch;
+                if (ch == '$') {
+                    StringBuilder sb = new StringBuilder();
+                    int filterNests = 0;
+                    while (ch != ')' || filterNests != 0) {
+                        sb.append(ch);
+                        if (ch == '(') {
+                            filterNests++;
+                        } else if (ch == ')') {
+                            filterNests--;
+                        }
+                        jsonReader.next();
+                        ch = jsonReader.ch;
+                    }
+                    jsonReader.next();
+                    JSONPath parentPath = JSONPath.of(sb.toString());
+                    return new JSONPathFilter.NameIntInSegment(fieldName, hashCode, fieldName2, hashCode2, function, null, operator == JSONPathFilter.Operator.NOT_IN).setParentPath(parentPath);
+                }
+                if (!(ch == '(' || ch == '[')) {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
                 jsonReader.next();
 
-                JSONPathSegment segment;
                 if (jsonReader.isString()) {
                     List<String> list = new ArrayList<>();
                     while (jsonReader.isString()) {
@@ -853,14 +880,14 @@ class JSONPathParser {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
 
-                if (!jsonReader.nextIfMatch(')')) {
+                if (!(jsonReader.nextIfMatch(')') || jsonReader.nextIfMatch(']'))) {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
                 if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (!jsonReader.nextIfMatch(')')) {
+                if (!(jsonReader.nextIfMatch(')') || jsonReader.nextIfMatch(']'))) {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
 
