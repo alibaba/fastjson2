@@ -19,7 +19,7 @@ public class Issue1543_1544 {
             JSON.toJSONString(map);
         } catch (Exception e) {
             assertTrue(e instanceof JSONException);
-            assertEquals("level too large : 2049", e.getMessage());
+            assertEquals("level too large : 4097", e.getMessage());
         }
     }
 
@@ -32,7 +32,7 @@ public class Issue1543_1544 {
         } catch (Exception e) {
             e.printStackTrace();
             assertTrue(e instanceof JSONException);
-            assertEquals("level too large : 2049", e.getMessage());
+            assertEquals("level too large : 4097", e.getMessage());
         }
     }
 }
