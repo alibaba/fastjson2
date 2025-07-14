@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,5 +71,29 @@ public class Issue3613 {
         assertEquals(
                 -0.0D,
                 TypeUtils.parseDouble(utf8, 0, utf8.length));
+    }
+
+    @Test
+    public void testDecimal() {
+        BigDecimal decimal = new BigDecimal(str);
+        assertEquals(
+                decimal,
+                JSON.parseObject(str, BigDecimal.class));
+        assertEquals(
+                decimal,
+                JSON.parseObject(chars, BigDecimal.class));
+        assertEquals(
+                decimal,
+                JSON.parseObject(utf8, BigDecimal.class));
+
+        assertEquals(
+                decimal,
+                JSON.parseObject(str, BigDecimal.class));
+        assertEquals(
+                decimal,
+                JSON.parseObject(chars, BigDecimal.class));
+        assertEquals(
+                decimal,
+                JSON.parseObject(utf8, BigDecimal.class));
     }
 }
