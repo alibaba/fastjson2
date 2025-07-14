@@ -1398,8 +1398,9 @@ public class JSONObjectTest {
         jsonObject.put("bytes", new byte[0]);
         assertEquals(0, jsonObject.getBytes("bytes").length);
 
-        jsonObject.put("bytes", Base64.getEncoder().encodeToString("abc中华人民共和国".getBytes()));
-        assertEquals("abc中华人民共和国", new String(jsonObject.getBytes("bytes"), StandardCharsets.UTF_8));
+        String str = "abc中华人民共和国";
+        jsonObject.put("bytes", Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8)));
+        assertEquals(str, new String(jsonObject.getBytes("bytes"), StandardCharsets.UTF_8));
     }
 
     @Test
