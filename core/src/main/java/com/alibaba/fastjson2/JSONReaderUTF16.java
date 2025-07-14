@@ -2646,7 +2646,11 @@ final class JSONReaderUTF16
                         result = 1; // invalid
                     }
                 } else {
-                    if (fc != '-' && doubleValue != 0) {
+                    if (fc != '-') {
+                        if (doubleValue != 0) {
+                            doubleValue = -doubleValue;
+                        }
+                    } else if (result == 0) {
                         doubleValue = -doubleValue;
                     }
                 }
@@ -2818,7 +2822,11 @@ final class JSONReaderUTF16
                         result = 1; // invalid
                     }
                 } else {
-                    if (fc != '-' && floatValue != 0) {
+                    if (fc != '-') {
+                        if (floatValue != 0) {
+                            floatValue = -floatValue;
+                        }
+                    } else if (result == 0) {
                         floatValue = -floatValue;
                     }
                 }
