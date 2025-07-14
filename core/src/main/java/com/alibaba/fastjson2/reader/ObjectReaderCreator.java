@@ -223,6 +223,15 @@ public class ObjectReaderCreator {
 
             ObjectReader initReader = getInitReader(provider, parameter.getParameterizedType(), parameter.getType(), fieldInfo);
             Type paramType = parameter.getParameterizedType();
+            Type genericType = null;
+            if (objectType instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) objectType;
+                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                if (actualTypeArguments.length > 0) {
+                    genericType = actualTypeArguments[0];
+                }
+            }
+            paramType = genericType != null ? genericType : paramType;
             fieldReaders.add(
                     createFieldReaderParam(
                     null,
