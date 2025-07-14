@@ -1774,7 +1774,7 @@ public abstract class JSONWriter
         boolean formatHasHour;
         long features;
         ZoneId zoneId;
-        int maxLevel = 2048;
+        int maxLevel = defaultMaxLevel;
         boolean hasFilter;
         PropertyPreFilter propertyPreFilter;
         PropertyFilter propertyFilter;
@@ -2149,6 +2149,14 @@ public abstract class JSONWriter
             if (labelFilter != null) {
                 hasFilter = true;
             }
+        }
+
+        public int getMaxLevel() {
+            return maxLevel;
+        }
+
+        public void setMaxLevel(int maxLevel) {
+            this.maxLevel = maxLevel;
         }
     }
 

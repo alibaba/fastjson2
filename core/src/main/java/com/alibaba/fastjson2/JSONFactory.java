@@ -91,6 +91,7 @@ public final class JSONFactory {
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
     static int defaultDecimalMaxScale = 2048;
+    static int defaultMaxLevel;
 
     interface JSONReaderUTF8Creator {
         JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
@@ -217,6 +218,7 @@ public final class JSONFactory {
         useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
         useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
+        defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
     }
 
     private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
@@ -245,7 +247,9 @@ public final class JSONFactory {
         return propertyValue;
     }
 
-    private static String getProperty(Properties properties, String name) {
+    private static int getPropertyInt(Properties properties, String name, int defaultValue) {
+        int propertyValue = defaultValue;
+
         String property = System.getProperty(name);
         if (property != null) {
             property = property.trim();
@@ -256,8 +260,13 @@ public final class JSONFactory {
                 }
             }
         }
+        try {
+            propertyValue = Integer.parseInt(property);
+        } catch (NumberFormatException ignored) {
+            // ignore
+        }
 
-        return property;
+        return propertyValue;
     }
 
     public static boolean isUseJacksonAnnotation() {
