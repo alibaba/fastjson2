@@ -223,6 +223,8 @@ public class ObjectReaderCreator {
 
             ObjectReader initReader = getInitReader(provider, parameter.getParameterizedType(), parameter.getType(), fieldInfo);
             Type paramType = parameter.getParameterizedType();
+            Type resolvedType = BeanUtils.resolve(objectType, objectClass, paramType);
+            paramType = resolvedType != null ? resolvedType : paramType;
             fieldReaders.add(
                     createFieldReaderParam(
                     null,
