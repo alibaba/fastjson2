@@ -1774,7 +1774,7 @@ public abstract class JSONWriter
         boolean formatHasHour;
         long features;
         ZoneId zoneId;
-        int maxLevel = 4096;
+        int maxLevel = 2048;
         boolean hasFilter;
         PropertyPreFilter propertyPreFilter;
         PropertyFilter propertyFilter;
