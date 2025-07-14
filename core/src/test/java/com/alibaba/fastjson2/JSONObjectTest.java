@@ -8,6 +8,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -1397,8 +1398,9 @@ public class JSONObjectTest {
         jsonObject.put("bytes", new byte[0]);
         assertEquals(0, jsonObject.getBytes("bytes").length);
 
-        jsonObject.put("bytes", Base64.getEncoder().encodeToString("abc中华人民共和国".getBytes()));
-        assertEquals("abc中华人民共和国", new String(jsonObject.getBytes("bytes")));
+        String str = "abc中华人民共和国";
+        jsonObject.put("bytes", Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8)));
+        assertEquals(str, new String(jsonObject.getBytes("bytes"), StandardCharsets.UTF_8));
     }
 
     @Test
