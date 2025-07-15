@@ -1742,7 +1742,10 @@ public class IOUtils {
     }
 
     public static long getLongUnaligned(char[] buf, int offset) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+        return ((long) buf[offset]) |
+                ((long) buf[offset + 1] << 16) |
+                ((long) buf[offset + 2] << 32) |
+                ((long) buf[offset + 3] << 48);
     }
 
     public static long getLongLE(byte[] buf, int offset) {

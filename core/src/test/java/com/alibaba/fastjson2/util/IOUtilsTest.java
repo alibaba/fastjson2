@@ -489,4 +489,79 @@ public class IOUtilsTest {
             }
         }
     }
+
+    @Test
+    public void testIsNULLMemoryAlignment() {
+       
+        char[] nullChars = {'n', 'u', 'l', 'l'};
+
+        assertTrue(IOUtils.isNULL(nullChars, 0), "应该正确识别 'null' 字符串");
+
+        char[] largeBuffer = new char[20];
+        for (int offset = 0; offset <= 16; offset++) {
+            java.util.Arrays.fill(largeBuffer, ' ');
+
+            if (offset + 4 <= largeBuffer.length) {
+                largeBuffer[offset] = 'n';
+                largeBuffer[offset + 1] = 'u';
+                largeBuffer[offset + 2] = 'l';
+                largeBuffer[offset + 3] = 'l';
+                boolean result = IOUtils.isNULL(largeBuffer, offset);
+                assertTrue(result, "偏移量 " + offset + " 处应该正确识别 'null'");
+            }
+        }
+
+
+        char[] notNull = {'t', 'r', 'u', 'e'};
+        assertFalse(IOUtils.isNULL(notNull, 0), "应该正确识别非 'null' 字符串");
+
+        char[] mixed = {'x', 'n', 'u', 'l', 'l', 'y'};
+        assertTrue(IOUtils.isNULL(mixed, 1), "应该在偏移位置正确识别 'null'");
+        assertFalse(IOUtils.isNULL(mixed, 0), "应该在偏移位置正确识别非 'null'");
+    }
+
+    @Test
+    public void testGetLongUnalignedSafety() {
+
+
+        char[] buffer = new char[8];
+        buffer[0] = 0x1234;
+        buffer[1] = 0x5678;
+        buffer[2] = 0x9ABC;
+        buffer[3] = 0xDEF0;
+
+       
+        long result = IOUtils.getLongUnaligned(buffer, 0);
+
+ 
+        long expected = 0x1234L | (0x5678L << 16) | (0x9ABCL << 32) | (0xDEF0L << 48);
+        assertEquals(expected, result, "getLongUnaligned 应该正确拼接字符");
+
+    
+        char[] smallBuffer = {'a', 'b', 'c', 'd'};
+        long smallResult = IOUtils.getLongUnaligned(smallBuffer, 0);
+        long expectedSmall = 'a' | ((long) 'b' << 16) | ((long) 'c' << 32) | ((long) 'd' << 48);
+        assertEquals(expectedSmall, smallResult, "应该正确处理较小的缓冲区");
+    }
+
+    @Test
+    public void testNullDetectionWithVariousInputs() {
+    
+
+        char[] standard = {'n', 'u', 'l', 'l'};
+        assertTrue(IOUtils.isNULL(standard, 0));
+
+    
+        char[] uppercase = {'N', 'U', 'L', 'L'};
+        assertFalse(IOUtils.isNULL(uppercase, 0));
+
+
+        char[] partial = {'n', 'u', 'l', 'x'};
+        assertFalse(IOUtils.isNULL(partial, 0));
+
+        char[] longer = {'x', 'x', 'n', 'u', 'l', 'l', 'x', 'x', 'x', 'x'};
+        assertTrue(IOUtils.isNULL(longer, 2));
+        assertFalse(IOUtils.isNULL(longer, 0));
+        assertFalse(IOUtils.isNULL(longer, 6));
+    }
 }
