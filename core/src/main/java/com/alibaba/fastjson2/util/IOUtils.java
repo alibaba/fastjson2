@@ -10,9 +10,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 
 public class IOUtils {
     static final int NULL_32 = BIG_ENDIAN ? 0x6e756c6c : 0x6c6c756e;
-    static final long NULL_64 = BIG_ENDIAN ? 0x6e0075006c006cL : 0x6c006c0075006eL;
     static final int ALSE = BIG_ENDIAN ? 0x616c7365 : 0x65736c61;
-    static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
     public static final int[] DIGITS_K = new int[1000];
     private static final byte[] MIN_INT_BYTES = "-2147483648".getBytes();
@@ -1200,15 +1198,7 @@ public class IOUtils {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == NULL_32;
     }
 
-    public static boolean isNULL(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) == NULL_64;
-    }
-
     public static boolean isALSE(byte[] buf, int pos) {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
-    }
-
-    public static boolean isALSE(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) == ALSE_64;
     }
 }
