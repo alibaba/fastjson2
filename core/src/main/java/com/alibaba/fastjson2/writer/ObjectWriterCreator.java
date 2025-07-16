@@ -135,7 +135,7 @@ public class ObjectWriterCreator {
         return new ObjectWriterAdapter(objectClass, null, null, features, Arrays.asList(fieldWriters));
     }
 
-    protected FieldWriter creteFieldWriter(
+    protected FieldWriter createFieldWriter(
             Class objectClass,
             long writerFeatures,
             ObjectWriterProvider provider,
@@ -351,7 +351,7 @@ public class ObjectWriterCreator {
             Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
                     if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
                         ((FieldWriterObject) fieldWriter).writeUsing = true;
@@ -377,7 +377,7 @@ public class ObjectWriterCreator {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();
                         fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
-                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                        FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
                             if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
                                 ((FieldWriterObject) fieldWriter).writeUsing = true;
