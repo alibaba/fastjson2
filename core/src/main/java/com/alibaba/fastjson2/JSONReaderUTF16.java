@@ -619,7 +619,10 @@ final class JSONReaderUTF16
             if (offset < end && chars[offset] == first) {
                 offset++;
             } else if (offset + 4 < end
-                    && IOUtils.isNULL(chars, offset)
+                    && chars[offset] == 'n'
+                    && chars[offset + 1] == 'u'
+                    && chars[offset + 2] == 'l'
+                    && chars[offset + 3] == 'l'
                     && chars[offset + 4] == first
             ) {
                 offset += 5;

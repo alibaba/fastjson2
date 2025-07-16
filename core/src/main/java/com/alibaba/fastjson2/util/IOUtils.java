@@ -1295,16 +1295,8 @@ public class IOUtils {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == NULL_32;
     }
 
-    public static boolean isNULL(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) == NULL_64;
-    }
-
     public static boolean isALSE(byte[] buf, int pos) {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
-    }
-
-    public static boolean isALSE(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) == ALSE_64;
     }
 
     public static int indexOfChar(byte[] value, int ch, int fromIndex, int max) {
