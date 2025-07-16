@@ -224,7 +224,7 @@ public class ObjectWriterCreatorASM
                         fieldInfo.init();
                         fieldInfo.ignore = ((field.getModifiers() & Modifier.PUBLIC) == 0 || (field.getModifiers() & Modifier.TRANSIENT) != 0);
 
-                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                        FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
                             if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
                                 ((FieldWriterObject) fieldWriter).writeUsing = true;
@@ -378,7 +378,7 @@ public class ObjectWriterCreatorASM
             final FieldInfo fieldInfo = new FieldInfo();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
                     if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
                         ((FieldWriterObject) fieldWriter).writeUsing = true;
