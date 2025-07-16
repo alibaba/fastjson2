@@ -80,7 +80,10 @@ final class JSONReaderASCII
             if (offset < end && bytes[offset] == first) {
                 offset++;
             } else if (offset + 4 < end
-                    && IOUtils.isNULL(bytes, offset)
+                    && bytes[offset] == 'n'
+                    && bytes[offset + 1] == 'u'
+                    && bytes[offset + 2] == 'l'
+                    && bytes[offset + 3] == 'l'
                     && bytes[offset + 4] == first
             ) {
                 offset += 5;

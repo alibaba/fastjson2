@@ -1194,10 +1194,6 @@ public class IOUtils {
         return (d & 0xF) * 10 + (d >> 16);
     }
 
-    public static boolean isNULL(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == NULL_32;
-    }
-
     public static boolean isALSE(byte[] buf, int pos) {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
     }

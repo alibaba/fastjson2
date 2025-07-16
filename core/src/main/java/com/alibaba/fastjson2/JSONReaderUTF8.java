@@ -3359,7 +3359,13 @@ class JSONReaderUTF8
                 boolValue = true;
                 valueType = JSON_TYPE_BOOL;
                 ch = offset == end ? EOI : bytes[offset++];
-            } else if (ch == 'f' && offset + 3 < end && IOUtils.isALSE(bytes, offset)) {
+            } else if (ch == 'f'
+                    && offset + 3 < end
+                    && bytes[offset] == 'a'
+                    && bytes[offset + 1] == 'l'
+                    && bytes[offset + 2] == 's'
+                    && bytes[offset + 3] == 'e'
+            ) {
                 valid = true;
                 offset += 4;
                 boolValue = false;
@@ -4469,7 +4475,10 @@ class JSONReaderUTF8
             if (offset < end && bytes[offset] == first) {
                 offset++;
             } else if (offset + 4 < end
-                    && IOUtils.isNULL(bytes, offset)
+                    && bytes[offset] == 'n'
+                    && bytes[offset + 1] == 'u'
+                    && bytes[offset + 2] == 'l'
+                    && bytes[offset + 3] == 'l'
                     && bytes[offset + 4] == first
             ) {
                 offset += 5;
