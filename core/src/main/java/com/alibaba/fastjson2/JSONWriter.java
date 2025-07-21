@@ -2322,7 +2322,9 @@ public abstract class JSONWriter
          * JSON formatting support using 4 spaces for indentation
          * @since 2.0.54
          */
-        PrettyFormatWith4Space(1L << 43);
+        PrettyFormatWith4Space(1L << 43),
+
+        WriterUtilDateAsMillis(1L << 44);
 
         public final long mask;
 
