@@ -1223,4 +1223,14 @@ public class JSONWriterUTF8Test {
             assertFalse(containsEscaped(v, vectorQuote));
         }
     }
+
+    @Test
+    public void writeDecimal1() {
+        BigDecimal dec = BigDecimal.valueOf(1234567890, -16);
+        try (JSONWriterUTF8 jsonWriter = (JSONWriterUTF8) JSONWriter.ofUTF8()) {
+            jsonWriter.bytes = new byte[0];
+            jsonWriter.writeDecimal(dec);
+            assertEquals(dec.toString(), jsonWriter.toString());
+        }
+    }
 }
