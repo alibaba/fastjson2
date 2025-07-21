@@ -1372,16 +1372,8 @@ public class IOUtils {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != NULL_32;
     }
 
-    public static boolean isTRUE(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == TRUE;
-    }
-
     public static boolean notTRUE(byte[] buf, int pos) {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != TRUE;
-    }
-
-    public static boolean isTRUE(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) == TRUE_64;
     }
 
     public static boolean notTRUE(char[] buf, int pos) {
