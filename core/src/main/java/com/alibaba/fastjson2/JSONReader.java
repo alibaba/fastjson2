@@ -1964,6 +1964,10 @@ public abstract class JSONReader
 
     public abstract void readNull();
 
+    protected double readNaN() {
+        throw new JSONException("not support");
+    }
+
     public abstract boolean readIfNull();
 
     public abstract String getString();
@@ -2759,6 +2763,9 @@ public abstract class JSONReader
                     val = null;
                     break;
                 }
+                case 'N':
+                    val = readNaN();
+                    break;
                 case '/':
                     skipComment();
                     --i;

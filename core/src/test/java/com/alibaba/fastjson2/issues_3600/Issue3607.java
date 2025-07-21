@@ -25,4 +25,18 @@ public class Issue3607 {
         assertEquals(Float.NaN,
                 JSON.parseObject(str.toCharArray(), float.class));
     }
+
+    @Test
+    public void test1() {
+        String json = "{\"scores\":[[0.88,0.18],[NaN,NaN]]}";
+        assertEquals(Double.NaN,
+                JSON.parseObject(json)
+                        .getJSONArray("scores").getJSONArray(1).get(0));
+        assertEquals(Double.NaN,
+                JSON.parseObject(json.toCharArray())
+                        .getJSONArray("scores").getJSONArray(1).get(0));
+        assertEquals(Double.NaN,
+                JSON.parseObject(json.getBytes(StandardCharsets.UTF_8))
+                        .getJSONArray("scores").getJSONArray(1).get(0));
+    }
 }

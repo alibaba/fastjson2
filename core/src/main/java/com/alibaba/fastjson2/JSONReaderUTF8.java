@@ -5787,6 +5787,33 @@ class JSONReaderUTF8
     }
 
     @Override
+    public final double readNaN() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch;
+        if (bytes[offset] == 'a'
+                && bytes[offset + 1] == 'N') {
+            offset += 2;
+            ch = offset == end ? EOI : bytes[offset++];
+        } else {
+            throw new JSONException("json syntax error, not NaN " + offset);
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset >= end ? EOI : bytes[offset++];
+        }
+        if (comma = (ch == ',')) {
+            ch = offset >= end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset >= end ? EOI : bytes[offset++];
+            }
+        }
+        this.ch = (char) ch;
+        this.offset = offset;
+        return Double.NaN;
+    }
+
+    @Override
     public final int getStringLength() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("string length only support string input " + ch);

@@ -4082,6 +4082,33 @@ final class JSONReaderUTF16
         this.offset = offset;
     }
 
+    @Override
+    public final double readNaN() {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        int ch;
+        if (chars[offset] == 'a'
+                && chars[offset + 1] == 'N') {
+            offset += 2;
+            ch = offset == end ? EOI : chars[offset++];
+        } else {
+            throw new JSONException("json syntax error, not NaN " + offset);
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset >= end ? EOI : chars[offset++];
+        }
+        if (comma = (ch == ',')) {
+            ch = offset >= end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset >= end ? EOI : chars[offset++];
+            }
+        }
+        this.ch = (char) ch;
+        this.offset = offset;
+        return Double.NaN;
+    }
+
     public final BigDecimal readBigDecimal() {
         boolean valid = false;
         final char[] chars = this.chars;
