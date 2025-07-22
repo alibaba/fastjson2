@@ -299,6 +299,7 @@ public class ObjectWriterBaseModule
             boolean isTransient = Modifier.isTransient(modifiers);
             if (isTransient) {
                 fieldInfo.ignore = true;
+                fieldInfo.isTransient = true;
             }
 
             JSONField jsonField = null;
@@ -971,7 +972,7 @@ public class ObjectWriterBaseModule
 
             for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {
                 fieldInfo.features |= feature.mask;
-                if (fieldInfo.ignore && !ignore && feature == JSONWriter.Feature.FieldBased) {
+                if (fieldInfo.ignore && !fieldInfo.isTransient && !ignore && feature == JSONWriter.Feature.FieldBased) {
                     fieldInfo.ignore = false;
                 }
             }
