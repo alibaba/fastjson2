@@ -369,7 +369,12 @@ public class ObjectWriterCreatorASM
                             sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
                         }
                         if (sameFieldName != null) {
-                            fieldWriterMap.remove(sameFieldName);
+                            FieldWriter sameNameFieldWriter = fieldWriterMap.get(sameFieldName);
+                            if (sameNameFieldWriter != null
+                                    && sameNameFieldWriter.method != null
+                                    && sameNameFieldWriter.method.equals(method)) {
+                                fieldWriterMap.remove(sameFieldName);
+                            }
                         }
                     }
                 });
