@@ -1,0 +1,268 @@
+package com.alibaba.fastjson2.issues_3600;
+
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+public class Issue3657 {
+   
+    public static class FlameTreeNode {
+        private String n;
+        private long s;
+        private long v;
+        private List<FlameTreeNode> c;
+
+        public FlameTreeNode(String name, long self, long total) {
+            this.n = name;
+            this.s = self;
+            this.v = total;
+            this.c = new ArrayList<>();
+        }
+
+        public FlameTreeNode() {
+        }
+
+        public void addChild(FlameTreeNode child) {
+            this.c.add(child);
+        }
+
+        public String getN() {
+            return this.n;
+        }
+
+        public void setN(String n) {
+            this.n = n;
+        }
+
+        public long getS() {
+            return this.s;
+        }
+
+        public void setS(long s) {
+            this.s = s;
+        }
+
+        public long getV() {
+            return this.v;
+        }
+
+        public void setV(long v) {
+            this.v = v;
+        }
+
+        public List<FlameTreeNode> getC() {
+            return this.c;
+        }
+
+        public void setC(List<FlameTreeNode> c) {
+            this.c = c;
+        }
+    }
+
+    
+    public static class SimpleNode {
+        public List<SimpleNode> children;
+
+        public SimpleNode() {
+            this.children = new ArrayList<>();
+        }
+
+        public void addChild(SimpleNode child) {
+            this.children.add(child);
+        }
+    }
+
+    
+    private FlameTreeNode createNestedStructure(int depth) {
+        FlameTreeNode root = new FlameTreeNode("root", 100, 100);
+        FlameTreeNode current = root;
+
+        for (int i = 1; i < depth; i++) {
+            FlameTreeNode child = new FlameTreeNode("node" + i, 10, 10);
+            current.addChild(child);
+            current = child;
+        }
+
+        return root;
+    }
+
+    
+    private SimpleNode createSimpleNestedStructure(int depth) {
+        SimpleNode root = new SimpleNode();
+        SimpleNode current = root;
+
+        for (int i = 1; i < depth; i++) {
+            SimpleNode child = new SimpleNode();
+            current.addChild(child);
+            current = child;
+        }
+
+        return root;
+    }
+
+   
+    @Test
+    public void testJSONFactoryAPI() {
+    
+        int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
+        assertEquals(2048, originalMaxLevel, "Default maxLevel should be 2048");
+
+        try {
+         
+            JSONFactory.setDefaultMaxLevel(5000);
+            assertEquals(5000, JSONFactory.getDefaultMaxLevel(), "Should return 5000 after setting maxLevel to 5000");
+
+           
+            JSONFactory.setDefaultMaxLevel(3000);
+            assertEquals(3000, JSONFactory.getDefaultMaxLevel(), "Should return 3000 after setting maxLevel to 3000");
+
+        
+            assertThrows(IllegalArgumentException.class, () -> {
+                JSONFactory.setDefaultMaxLevel(0);
+            }, "Setting maxLevel to 0 should throw IllegalArgumentException");
+
+            assertThrows(IllegalArgumentException.class, () -> {
+                JSONFactory.setDefaultMaxLevel(-1);
+            }, "Setting maxLevel to negative should throw IllegalArgumentException");
+        } finally {
+           
+            JSONFactory.setDefaultMaxLevel(originalMaxLevel);
+        }
+    }
+
+    
+    @Test
+    public void testDefaultMaxLevelLimit() {
+
+        int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
+        try {
+            JSONFactory.setDefaultMaxLevel(2048);
+
+     
+            FlameTreeNode root = createNestedStructure(2050);
+
+            JSONException exception = assertThrows(JSONException.class, () -> {
+                JSON.toJSONString(root);
+            }, "Exceeding 2048 depth should throw JSONException");
+
+            assertTrue(exception.getMessage().contains("level too large"),
+                      "Exception message should contain 'level too large'");
+        } finally {
+            JSONFactory.setDefaultMaxLevel(originalMaxLevel);
+        }
+    }
+
+   
+    @Test
+    public void testCustomMaxLevel() {
+        
+        int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
+
+        try {
+         
+            JSONFactory.setDefaultMaxLevel(3000);
+            assertEquals(3000, JSONFactory.getDefaultMaxLevel());
+
+           
+            FlameTreeNode root = createNestedStructure(2800);
+
+           
+            assertDoesNotThrow(() -> {
+                String json = JSON.toJSONString(root);
+                assertNotNull(json, "Serialization result should not be null");
+                assertTrue(json.length() > 0, "Serialization result should not be empty");
+            }, "Should be able to serialize normally within new maxLevel limit");
+        } finally {
+          
+            JSONFactory.setDefaultMaxLevel(originalMaxLevel);
+        }
+    }
+
+    
+    @Test
+    public void testBoundaryConditions() {
+        int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
+
+        try {
+            JSONFactory.setDefaultMaxLevel(2048);
+
+            SimpleNode rootAtLimit = createSimpleNestedStructure(2047);
+            assertDoesNotThrow(() -> {
+                String json = JSON.toJSONString(rootAtLimit);
+                assertNotNull(json);
+            }, "Should be able to serialize normally within limit boundary");
+
+        
+            SimpleNode rootOverLimit = createSimpleNestedStructure(2049);
+            JSONException exception = assertThrows(JSONException.class, () -> {
+                JSON.toJSONString(rootOverLimit);
+            }, "Exceeding limit should throw exception");
+
+            assertTrue(exception.getMessage().contains("level too large"));
+        } finally {
+            JSONFactory.setDefaultMaxLevel(originalMaxLevel);
+        }
+    }
+
+
+    @Test
+    public void testRealWorldUsage() {
+        int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
+
+        try {
+           
+            JSONFactory.setDefaultMaxLevel(5000); 
+
+            FlameTreeNode deepStructure = createNestedStructure(3000);
+            String json = JSON.toJSONString(deepStructure);
+            assertNotNull(json);
+            assertTrue(json.contains("\"n\":\"root\""));
+
+           
+            JSONFactory.setDefaultMaxLevel(2048);
+            assertEquals(2048, JSONFactory.getDefaultMaxLevel());
+
+          
+            FlameTreeNode overLimitStructure = createNestedStructure(2100);
+            assertThrows(JSONException.class, () -> {
+                JSON.toJSONString(overLimitStructure);
+            });
+        } finally {
+            JSONFactory.setDefaultMaxLevel(originalMaxLevel);
+        }
+    }
+
+    
+    @Test
+    public void testRegression() {
+        int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
+
+        try {
+    
+            FlameTreeNode simpleNode = new FlameTreeNode("test", 1, 1);
+            simpleNode.addChild(new FlameTreeNode("child", 2, 2));
+
+            String json = JSON.toJSONString(simpleNode);
+            assertNotNull(json);
+            assertTrue(json.contains("\"n\":\"test\""));
+
+    
+            FlameTreeNode parsed = JSON.parseObject(json, FlameTreeNode.class);
+            assertNotNull(parsed);
+            assertEquals("test", parsed.getN());
+            assertEquals(1, parsed.getS());
+            assertEquals(1, parsed.getV());
+            assertNotNull(parsed.getC());
+            assertEquals(1, parsed.getC().size());
+        } finally {
+            JSONFactory.setDefaultMaxLevel(originalMaxLevel);
+        }
+    }
+}
