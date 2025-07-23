@@ -284,6 +284,15 @@ public final class JSONFactory {
     public static void setUseGsonAnnotation(boolean useGsonAnnotation) {
         JSONFactory.useGsonAnnotation = useGsonAnnotation;
     }
+    private static volatile boolean jsonFieldDefaultValueCompatMode;
+
+    public static boolean isJSONFieldDefaultValueCompatMode() {
+        return jsonFieldDefaultValueCompatMode;
+    }
+    
+    public static void setJSONFieldDefaultValueCompatMode(boolean compatMode) {
+        jsonFieldDefaultValueCompatMode = compatMode;
+    }
 
     static final CacheItem[] CACHE_ITEMS;
 
