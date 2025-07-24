@@ -1774,7 +1774,7 @@ public abstract class JSONWriter
         boolean formatHasHour;
         long features;
         ZoneId zoneId;
-        int maxLevel = defaultMaxLevel;
+        int maxLevel;
         boolean hasFilter;
         PropertyPreFilter propertyPreFilter;
         PropertyFilter propertyFilter;
@@ -1794,6 +1794,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -1805,6 +1806,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -1820,6 +1822,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -1841,6 +1844,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
