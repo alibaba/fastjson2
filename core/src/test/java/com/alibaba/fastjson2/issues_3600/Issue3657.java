@@ -156,7 +156,9 @@ public class Issue3657 {
             JSONFactory.setDefaultMaxLevel(3000);
             assertEquals(3000, JSONFactory.getDefaultMaxLevel());
 
-            FlameTreeNode root = createNestedStructure(2800);
+            // Each FlameTreeNode creates 2 levels (object + children list)
+            // So for maxLevel=3000, we can have approximately 1400 nodes
+            FlameTreeNode root = createNestedStructure(1400);
 
             assertDoesNotThrow(() -> {
                 String json = JSON.toJSONString(root);
@@ -175,13 +177,13 @@ public class Issue3657 {
         try {
             JSONFactory.setDefaultMaxLevel(2048);
 
-            SimpleNode rootAtLimit = createSimpleNestedStructure(2047);
+            SimpleNode rootAtLimit = createSimpleNestedStructure(1023);
             assertDoesNotThrow(() -> {
                 String json = JSON.toJSONString(rootAtLimit);
                 assertNotNull(json);
             });
 
-            SimpleNode rootOverLimit = createSimpleNestedStructure(2049);
+            SimpleNode rootOverLimit = createSimpleNestedStructure(1025);
             JSONException exception = assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(rootOverLimit);
             });
@@ -197,17 +199,14 @@ public class Issue3657 {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
 
         try {
-            JSONFactory.setDefaultMaxLevel(5000);
+            JSONFactory.setDefaultMaxLevel(2048);
 
-            FlameTreeNode deepStructure = createNestedStructure(3000);
+            FlameTreeNode deepStructure = createNestedStructure(1000);
             String json = JSON.toJSONString(deepStructure);
             assertNotNull(json);
             assertTrue(json.contains("\"n\":\"root\""));
 
-            JSONFactory.setDefaultMaxLevel(2048);
-            assertEquals(2048, JSONFactory.getDefaultMaxLevel());
-
-            FlameTreeNode overLimitStructure = createNestedStructure(2100);
+            FlameTreeNode overLimitStructure = createNestedStructure(1100);
             assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(overLimitStructure);
             });
