@@ -2320,6 +2320,7 @@ public class ObjectReaderCreator {
             if (JSONFactory.isJSONFieldDefaultValueCompatMode()
                     && defaultValue instanceof String
                     && Date.class.isAssignableFrom(fieldClass)) {
+                        // For compatibility with JSONField defaultValue
             } else {
                 Function typeConvert = JSONFactory
                         .getDefaultObjectReaderProvider()
