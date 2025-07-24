@@ -2317,13 +2317,19 @@ public class ObjectReaderCreator {
         }
 
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
-            Function typeConvert = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getTypeConvert(defaultValue.getClass(), fieldType);
-            if (typeConvert != null) {
-                defaultValue = typeConvert.apply(defaultValue);
+            if (JSONFactory.isJSONFieldDefaultValueCompatMode()
+                    && defaultValue instanceof String
+                    && Date.class.isAssignableFrom(fieldClass)) {
+                        // For compatibility with JSONField defaultValue
             } else {
-                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+                Function typeConvert = JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getTypeConvert(defaultValue.getClass(), fieldType);
+                if (typeConvert != null) {
+                    defaultValue = typeConvert.apply(defaultValue);
+                } else {
+                    throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+                }
             }
         }
 
