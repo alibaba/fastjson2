@@ -297,7 +297,7 @@ public class ObjectWriterBaseModule
 
             int modifiers = field.getModifiers();
             boolean isTransient = Modifier.isTransient(modifiers);
-            if (isTransient) {
+            if (isTransient && fieldInfo.skipTransient) {
                 fieldInfo.ignore = true;
                 fieldInfo.isTransient = true;
             }
@@ -794,6 +794,7 @@ public class ObjectWriterBaseModule
 
             if (JDKUtils.CLASS_TRANSIENT != null && method.getAnnotation(JDKUtils.CLASS_TRANSIENT) != null) {
                 fieldInfo.ignore = true;
+                fieldInfo.isTransient = true;
             }
 
             if (objectClass != null) {
@@ -884,7 +885,9 @@ public class ObjectWriterBaseModule
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "java.beans.Transient":
-                        fieldInfo.ignore = true;
+                        if (fieldInfo.skipTransient) {
+                            fieldInfo.ignore = true;
+                        }
                         fieldInfo.isTransient = true;
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty": {
@@ -964,6 +967,13 @@ public class ObjectWriterBaseModule
             boolean ignore = !jsonField.serialize();
             if (!fieldInfo.ignore) {
                 fieldInfo.ignore = ignore;
+            }
+
+            if (!jsonField.skipTransient()) {
+                fieldInfo.skipTransient = false;
+                if (fieldInfo.isTransient) {
+                    fieldInfo.ignore = false;
+                }
             }
 
             if (jsonField.unwrapped()) {

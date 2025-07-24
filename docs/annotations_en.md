@@ -172,6 +172,26 @@ public void test1() {
 }
 ```
 
+### 1.7 Don't ignore transient fields when serializing
+
+Configure @JSONField(skipTransient = false) on transient fields or getter methods annotated with @java.beans.Transient. This can force serialization of transient fields.
+```java
+public class Bean1 {
+    @JSONField(skipTransient = false)
+    public transient int id;
+}
+
+public class Bean2 {
+    private int id;
+
+    @JSONField(skipTransient = false)
+    @java.beans.Transient
+    public int getId() {
+        return id;
+    }
+}
+```
+
 ## 2. @JSONType
 
 JSONType is an Annotation configured on Class/Interface, which can configure the NamingStrategy of all fields of the modified class, fields ignored by serialization and deserialization, Features of JSONReader/JSONWriter, etc.

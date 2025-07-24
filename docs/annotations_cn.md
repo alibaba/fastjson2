@@ -160,6 +160,25 @@ public void test1() {
 }
 ```
 
+### 1.7 配置序列化时不忽略transient属性
+将@JSONField(skipTransient = false)配置在transient字段或@java.beans.Transient修饰的getter方法上，可以强制序列化transient属性。
+```java
+public class Bean1 {
+    @JSONField(skipTransient = false)
+    public transient int id;
+}
+
+public class Bean2 {
+    private int id;
+
+    @JSONField(skipTransient = false)
+    @java.beans.Transient
+    public int getId() {
+        return id;
+    }
+}
+```
+
 ## 2. @JSONType
 JSONType是配置在类/接口上的注解，可以配置改类的所有字段的NamingStrategy、序列化和反序列化忽略的字段、JSONReader/JSONWriter的Features等。
 
