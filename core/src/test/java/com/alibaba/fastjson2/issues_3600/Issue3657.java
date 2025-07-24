@@ -8,11 +8,13 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue3657 {
-   
     public static class FlameTreeNode {
         private String n;
         private long s;
@@ -66,7 +68,6 @@ public class Issue3657 {
         }
     }
 
-    
     public static class SimpleNode {
         public List<SimpleNode> children;
 
@@ -79,7 +80,6 @@ public class Issue3657 {
         }
     }
 
-    
     private FlameTreeNode createNestedStructure(int depth) {
         FlameTreeNode root = new FlameTreeNode("root", 100, 100);
         FlameTreeNode current = root;
@@ -93,7 +93,6 @@ public class Issue3657 {
         return root;
     }
 
-    
     private SimpleNode createSimpleNestedStructure(int depth) {
         SimpleNode root = new SimpleNode();
         SimpleNode current = root;
@@ -107,85 +106,68 @@ public class Issue3657 {
         return root;
     }
 
-   
     @Test
     public void testJSONFactoryAPI() {
-    
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
-        assertEquals(2048, originalMaxLevel, "Default maxLevel should be 2048");
+        assertEquals(2048, originalMaxLevel);
 
         try {
-         
             JSONFactory.setDefaultMaxLevel(5000);
-            assertEquals(5000, JSONFactory.getDefaultMaxLevel(), "Should return 5000 after setting maxLevel to 5000");
+            assertEquals(5000, JSONFactory.getDefaultMaxLevel());
 
-           
             JSONFactory.setDefaultMaxLevel(3000);
-            assertEquals(3000, JSONFactory.getDefaultMaxLevel(), "Should return 3000 after setting maxLevel to 3000");
+            assertEquals(3000, JSONFactory.getDefaultMaxLevel());
 
-        
             assertThrows(IllegalArgumentException.class, () -> {
                 JSONFactory.setDefaultMaxLevel(0);
-            }, "Setting maxLevel to 0 should throw IllegalArgumentException");
+            });
 
             assertThrows(IllegalArgumentException.class, () -> {
                 JSONFactory.setDefaultMaxLevel(-1);
-            }, "Setting maxLevel to negative should throw IllegalArgumentException");
+            });
         } finally {
-           
             JSONFactory.setDefaultMaxLevel(originalMaxLevel);
         }
     }
 
-    
     @Test
     public void testDefaultMaxLevelLimit() {
-
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
         try {
             JSONFactory.setDefaultMaxLevel(2048);
 
-     
             FlameTreeNode root = createNestedStructure(2050);
 
             JSONException exception = assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(root);
-            }, "Exceeding 2048 depth should throw JSONException");
+            });
 
-            assertTrue(exception.getMessage().contains("level too large"),
-                      "Exception message should contain 'level too large'");
+            assertTrue(exception.getMessage().contains("level too large"));
         } finally {
             JSONFactory.setDefaultMaxLevel(originalMaxLevel);
         }
     }
 
-   
     @Test
     public void testCustomMaxLevel() {
-        
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
 
         try {
-         
             JSONFactory.setDefaultMaxLevel(3000);
             assertEquals(3000, JSONFactory.getDefaultMaxLevel());
 
-           
             FlameTreeNode root = createNestedStructure(2800);
 
-           
             assertDoesNotThrow(() -> {
                 String json = JSON.toJSONString(root);
-                assertNotNull(json, "Serialization result should not be null");
-                assertTrue(json.length() > 0, "Serialization result should not be empty");
-            }, "Should be able to serialize normally within new maxLevel limit");
+                assertNotNull(json);
+                assertTrue(json.length() > 0);
+            });
         } finally {
-          
             JSONFactory.setDefaultMaxLevel(originalMaxLevel);
         }
     }
 
-    
     @Test
     public void testBoundaryConditions() {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
@@ -197,13 +179,12 @@ public class Issue3657 {
             assertDoesNotThrow(() -> {
                 String json = JSON.toJSONString(rootAtLimit);
                 assertNotNull(json);
-            }, "Should be able to serialize normally within limit boundary");
+            });
 
-        
             SimpleNode rootOverLimit = createSimpleNestedStructure(2049);
             JSONException exception = assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(rootOverLimit);
-            }, "Exceeding limit should throw exception");
+            });
 
             assertTrue(exception.getMessage().contains("level too large"));
         } finally {
@@ -211,25 +192,21 @@ public class Issue3657 {
         }
     }
 
-
     @Test
     public void testRealWorldUsage() {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
 
         try {
-           
-            JSONFactory.setDefaultMaxLevel(5000); 
+            JSONFactory.setDefaultMaxLevel(5000);
 
             FlameTreeNode deepStructure = createNestedStructure(3000);
             String json = JSON.toJSONString(deepStructure);
             assertNotNull(json);
             assertTrue(json.contains("\"n\":\"root\""));
 
-           
             JSONFactory.setDefaultMaxLevel(2048);
             assertEquals(2048, JSONFactory.getDefaultMaxLevel());
 
-          
             FlameTreeNode overLimitStructure = createNestedStructure(2100);
             assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(overLimitStructure);
@@ -239,13 +216,11 @@ public class Issue3657 {
         }
     }
 
-    
     @Test
     public void testRegression() {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
 
         try {
-    
             FlameTreeNode simpleNode = new FlameTreeNode("test", 1, 1);
             simpleNode.addChild(new FlameTreeNode("child", 2, 2));
 
@@ -253,7 +228,6 @@ public class Issue3657 {
             assertNotNull(json);
             assertTrue(json.contains("\"n\":\"test\""));
 
-    
             FlameTreeNode parsed = JSON.parseObject(json, FlameTreeNode.class);
             assertNotNull(parsed);
             assertEquals("test", parsed.getN());
