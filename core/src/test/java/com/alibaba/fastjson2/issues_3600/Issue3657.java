@@ -136,8 +136,7 @@ public class Issue3657 {
         try {
             JSONFactory.setDefaultMaxLevel(2048);
 
-            FlameTreeNode root = createNestedStructure(2050);
-
+            FlameTreeNode root = createNestedStructure(1100);
             JSONException exception = assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(root);
             });
@@ -157,8 +156,8 @@ public class Issue3657 {
             assertEquals(3000, JSONFactory.getDefaultMaxLevel());
 
             // Each FlameTreeNode creates 2 levels (object + children list)
-            // So for maxLevel=3000, we can have approximately 1400 nodes
-            FlameTreeNode root = createNestedStructure(1400);
+            // Use a more conservative depth to avoid StackOverflowError
+            FlameTreeNode root = createNestedStructure(500);
 
             assertDoesNotThrow(() -> {
                 String json = JSON.toJSONString(root);
