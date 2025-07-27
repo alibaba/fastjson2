@@ -222,7 +222,7 @@ public class ObjectWriterCreatorASM
                 if (!record) {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();
-                        fieldInfo.ignore = ((field.getModifiers() & Modifier.PUBLIC) == 0 || (field.getModifiers() & Modifier.TRANSIENT) != 0);
+                        fieldInfo.ignore = fieldInfo.isPrivate = (field.getModifiers() & Modifier.PUBLIC) == 0;
 
                         FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {

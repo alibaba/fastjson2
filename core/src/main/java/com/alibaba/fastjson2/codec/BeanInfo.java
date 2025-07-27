@@ -47,6 +47,7 @@ public class BeanInfo {
     public String objectReaderFieldName;
     public Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler;
     public String rootName;
+    public boolean skipTransient = true;
 
     public BeanInfo() {
         if (JSONFactory.isDisableAutoType()) {
