@@ -371,8 +371,7 @@ public class ObjectWriterCreatorASM
                         if (sameFieldName != null) {
                             FieldWriter sameNameFieldWriter = fieldWriterMap.get(sameFieldName);
                             if (sameNameFieldWriter != null
-                                    && sameNameFieldWriter.method != null
-                                    && sameNameFieldWriter.method.equals(method)) {
+                                    && (sameNameFieldWriter.method == null || sameNameFieldWriter.method.equals(method))) {
                                 fieldWriterMap.remove(sameFieldName);
                             }
                         }

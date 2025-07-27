@@ -3106,7 +3106,11 @@ class JSONReaderUTF8
                 this.nameLength = i;
                 this.nameEnd = offset;
                 offset++;
-                ch = bytes[offset] & 0xff;
+                if (offset < end) {
+                    ch = bytes[offset] & 0xff;
+                } else {
+                    ch = EOI;
+                }
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     offset++;
