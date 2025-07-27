@@ -977,7 +977,7 @@ public class ObjectWriterBaseModule
             if (!fieldInfo.ignore) {
                 fieldInfo.ignore = ignore;
             }
-            
+
             if (!jsonField.skipTransient()) {
                 fieldInfo.skipTransient = false;
                 if (fieldInfo.isTransient && !fieldInfo.isPrivate) {
