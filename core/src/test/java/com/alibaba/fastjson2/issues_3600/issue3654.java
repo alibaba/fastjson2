@@ -11,7 +11,9 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +24,31 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.*;
 
 class Issue3654 {
+    private static boolean originalClassDisableReferenceDetect;
+    private static boolean originalClassDisableArrayMapping;
+    private static boolean originalClassDisableJSONB;
+    private static boolean originalClassDisableAutoType;
+    private static boolean originalClassDisableSmartMatch;
+
+    @BeforeAll
+    static void setUpClass() {
+        ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
+        originalClassDisableReferenceDetect = readerProvider.isDisableReferenceDetect();
+        originalClassDisableArrayMapping = readerProvider.isDisableArrayMapping();
+        originalClassDisableJSONB = readerProvider.isDisableJSONB();
+        originalClassDisableAutoType = readerProvider.isDisableAutoType();
+        originalClassDisableSmartMatch = readerProvider.isDisableSmartMatch();
+    }
+
+    @AfterAll
+    static void tearDownClass() {
+        JSONFactory.setDisableReferenceDetect(originalClassDisableReferenceDetect);
+        JSONFactory.setDisableArrayMapping(originalClassDisableArrayMapping);
+        JSONFactory.setDisableJSONB(originalClassDisableJSONB);
+        JSONFactory.setDisableAutoType(originalClassDisableAutoType);
+        JSONFactory.setDisableSmartMatch(originalClassDisableSmartMatch);
+    }
+
     @BeforeEach
     void setUp() {
         JSONFactory.setContextReaderCreator(null);
@@ -36,6 +63,12 @@ class Issue3654 {
         JSONFactory.setContextObjectReaderProvider(null);
         JSONFactory.setContextWriterCreator(null);
         JSONFactory.setContextJSONPathCompiler(null);
+
+        JSONFactory.setDisableReferenceDetect(originalClassDisableReferenceDetect);
+        JSONFactory.setDisableArrayMapping(originalClassDisableArrayMapping);
+        JSONFactory.setDisableJSONB(originalClassDisableJSONB);
+        JSONFactory.setDisableAutoType(originalClassDisableAutoType);
+        JSONFactory.setDisableSmartMatch(originalClassDisableSmartMatch);
     }
 
     @Test
@@ -241,6 +274,8 @@ class Issue3654 {
     void testDefaultFormats() {
         String readerFormat = JSONFactory.getDefaultReaderFormat();
         String writerFormat = JSONFactory.getDefaultWriterFormat();
+        assertNull(readerFormat);
+        assertNull(writerFormat);
     }
 
     @Test
@@ -273,11 +308,45 @@ class Issue3654 {
 
     @Test
     void testSetDisableFlags() {
-        JSONFactory.setDisableReferenceDetect(true);
-        JSONFactory.setDisableArrayMapping(true);
-        JSONFactory.setDisableJSONB(true);
-        JSONFactory.setDisableAutoType(true);
-        JSONFactory.setDisableSmartMatch(true);
+        ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
+
+        boolean originalDisableReferenceDetect = readerProvider.isDisableReferenceDetect();
+        boolean originalDisableArrayMapping = readerProvider.isDisableArrayMapping();
+        boolean originalDisableJSONB = readerProvider.isDisableJSONB();
+        boolean originalDisableAutoType = readerProvider.isDisableAutoType();
+        boolean originalDisableSmartMatch = readerProvider.isDisableSmartMatch();
+
+        try {
+            JSONFactory.setDisableReferenceDetect(true);
+            JSONFactory.setDisableArrayMapping(true);
+            JSONFactory.setDisableJSONB(true);
+            JSONFactory.setDisableAutoType(true);
+            JSONFactory.setDisableSmartMatch(true);
+
+            assertTrue(writerProvider.isDisableReferenceDetect());
+            assertTrue(writerProvider.isDisableArrayMapping());
+            assertTrue(writerProvider.isDisableJSONB());
+            assertTrue(writerProvider.isDisableAutoType());
+
+            assertTrue(readerProvider.isDisableReferenceDetect());
+            assertTrue(readerProvider.isDisableArrayMapping());
+            assertTrue(readerProvider.isDisableJSONB());
+            assertTrue(readerProvider.isDisableAutoType());
+            assertTrue(readerProvider.isDisableSmartMatch());
+
+            assertNotNull(JSONFactory.isDisableReferenceDetect());
+            assertNotNull(JSONFactory.isDisableArrayMapping());
+            assertNotNull(JSONFactory.isDisableJSONB());
+            assertNotNull(JSONFactory.isDisableAutoType());
+            assertNotNull(JSONFactory.isDisableSmartMatch());
+        } finally {
+            JSONFactory.setDisableReferenceDetect(originalDisableReferenceDetect);
+            JSONFactory.setDisableArrayMapping(originalDisableArrayMapping);
+            JSONFactory.setDisableJSONB(originalDisableJSONB);
+            JSONFactory.setDisableAutoType(originalDisableAutoType);
+            JSONFactory.setDisableSmartMatch(originalDisableSmartMatch);
+        }
     }
 
     @Test
