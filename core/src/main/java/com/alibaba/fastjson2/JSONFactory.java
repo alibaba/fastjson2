@@ -285,13 +285,23 @@ public final class JSONFactory {
         JSONFactory.useGsonAnnotation = useGsonAnnotation;
     }
 
+    private static volatile boolean jsonFieldDefaultValueCompatMode;
+
+    public static boolean isJSONFieldDefaultValueCompatMode() {
+        return jsonFieldDefaultValueCompatMode;
+    }
+
+    public static void setJSONFieldDefaultValueCompatMode(boolean compatMode) {
+        jsonFieldDefaultValueCompatMode = compatMode;
+    }
+
     public static int getDefaultMaxLevel() {
         return defaultMaxLevel;
     }
 
     public static void setDefaultMaxLevel(int maxLevel) {
         if (maxLevel <= 0) {
-            throw new IllegalArgumentException("maxLevel must be positive");
+            throw new IllegalArgumentException("maxLevel must be positive, maxLevel " + maxLevel);
         }
         JSONFactory.defaultMaxLevel = maxLevel;
     }
