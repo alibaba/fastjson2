@@ -1059,7 +1059,11 @@ final class JSONReaderASCII
                 this.nameLength = i;
                 this.nameEnd = offset;
                 offset++;
-                c = bytes[offset];
+                if (offset < end) {
+                    c = bytes[offset];
+                } else {
+                    c = EOI;
+                }
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
                     offset++;
