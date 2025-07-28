@@ -257,7 +257,9 @@ public class ObjectWriterBaseModule
                     beanInfo.rootName = rootName;
                 }
 
-                beanInfo.skipTransient = jsonType.skipTransient();
+                if (beanInfo.skipTransient) {
+                    beanInfo.skipTransient = jsonType.skipTransient();
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));

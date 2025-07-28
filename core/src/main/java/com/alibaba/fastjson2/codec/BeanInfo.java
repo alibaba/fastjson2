@@ -107,6 +107,7 @@ public class BeanInfo {
             writerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
         }
         alphabetic = provider.isAlphabetic();
+        skipTransient = provider.isSkipTransient();
     }
 
     public void required(String fieldName) {
