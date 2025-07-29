@@ -78,6 +78,7 @@ public final class JSONFactory {
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
     static boolean defaultWriterAlphabetic;
+    static boolean defaultSkipTransient;
     static final boolean disableReferenceDetect;
     static final boolean disableArrayMapping;
     static final boolean disableJSONB;
@@ -218,6 +219,7 @@ public final class JSONFactory {
         useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
         useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
+        defaultSkipTransient = getPropertyBool(properties, "fastjson2.writer.skipTransient", true);
         defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
     }
 
@@ -647,5 +649,13 @@ public final class JSONFactory {
 
     public static void setDisableSmartMatch(boolean disableSmartMatch) {
         defaultObjectReaderProvider.setDisableSmartMatch(disableSmartMatch);
+    }
+
+    public static boolean isDefaultSkipTransient() {
+        return defaultSkipTransient;
+    }
+
+    public static void setDefaultSkipTransient(boolean skipTransient) {
+        defaultObjectWriterProvider.setSkipTransient(skipTransient);
     }
 }

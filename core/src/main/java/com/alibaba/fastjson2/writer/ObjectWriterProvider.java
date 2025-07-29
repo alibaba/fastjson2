@@ -43,6 +43,7 @@ public class ObjectWriterProvider
     boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
     boolean disableJSONB = JSONFactory.isDisableJSONB();
     boolean disableAutoType = JSONFactory.isDisableAutoType();
+    boolean skipTransient = JSONFactory.isDefaultSkipTransient();
 
     volatile long userDefineMask;
     boolean alphabetic = JSONFactory.isDefaultWriterAlphabetic();
@@ -669,6 +670,14 @@ public class ObjectWriterProvider
 
     public boolean isAlphabetic() {
         return alphabetic;
+    }
+
+    public boolean isSkipTransient() {
+        return skipTransient;
+    }
+
+    public void setSkipTransient(boolean skipTransient) {
+        this.skipTransient = skipTransient;
     }
 
     protected BeanInfo createBeanInfo() {

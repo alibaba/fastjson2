@@ -94,4 +94,9 @@ public @interface JSONType {
      * @since 2.0.52
      */
     String rootName() default "";
+
+    /**
+     * @since 2.0.58
+     */
+    boolean skipTransient() default true;
 }
