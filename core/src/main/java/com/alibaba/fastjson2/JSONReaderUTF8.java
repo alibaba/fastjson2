@@ -252,6 +252,8 @@ class JSONReaderUTF8
         }
 
         if (ch != ',') {
+            this.offset = offset;
+            this.ch = (char) ch;
             return false;
         }
 
