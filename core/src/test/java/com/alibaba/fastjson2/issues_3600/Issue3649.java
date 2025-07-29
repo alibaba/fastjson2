@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_3600;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +15,18 @@ public class Issue3649 {
         UserDTO user = new UserDTO();
         user.setUserName("张三");
         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(user));
+        assertEquals(2, jsonObject.size());
+        assertEquals(user.getUserName(), jsonObject.getString("UserName"));
+        assertEquals(user.getUserName(), jsonObject.getString("userName"));
+    }
+
+    @Test
+    public void test_reflect() {
+        UserDTO user = new UserDTO();
+        user.setUserName("张三");
+        JSONObject jsonObject = JSON.parseObject(
+                ObjectWriterCreator.INSTANCE.createObjectWriter(UserDTO.class)
+                        .toJSONString(user));
         assertEquals(2, jsonObject.size());
         assertEquals(user.getUserName(), jsonObject.getString("UserName"));
         assertEquals(user.getUserName(), jsonObject.getString("userName"));
@@ -38,6 +51,18 @@ public class Issue3649 {
         UserDTO1 user = new UserDTO1();
         user.setUserName("张三");
         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(user));
+        assertEquals(2, jsonObject.size());
+        assertEquals(user.getUserName(), jsonObject.getString("UserName"));
+        assertEquals(user.getUserName(), jsonObject.getString("userName"));
+    }
+
+    @Test
+    public void test1_reflect() {
+        UserDTO1 user = new UserDTO1();
+        user.setUserName("张三");
+        JSONObject jsonObject = JSON.parseObject(
+                ObjectWriterCreator.INSTANCE.createObjectWriter(UserDTO1.class)
+                        .toJSONString(user));
         assertEquals(2, jsonObject.size());
         assertEquals(user.getUserName(), jsonObject.getString("UserName"));
         assertEquals(user.getUserName(), jsonObject.getString("userName"));

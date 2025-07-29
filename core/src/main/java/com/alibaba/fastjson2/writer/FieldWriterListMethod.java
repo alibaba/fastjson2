@@ -54,7 +54,7 @@ final class FieldWriterListMethod<T>
         if (value == null) {
             if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
-                jsonWriter.writeArrayNull();
+                jsonWriter.writeArrayNull(features);
                 return true;
             } else {
                 return false;
