@@ -127,7 +127,7 @@ public void test2() {
 }
 ```
 
-### 1.6 Configure Enum to serialize and deserialize based on one of the fields through JSONField(value = true)
+### 1.7 Configure Enum to serialize and deserialize based on one of the fields through JSONField(value = true)
 
 Configure @JSONField(value = true) on the enum field, serialization and serialization will be based on this field
 
@@ -169,6 +169,26 @@ public void test1() {
     assertEquals("{\"type\":102}", str);
     Bean1 bean1 = JSON.parseObject(str, Bean1.class);
     assertEquals(bean.type, bean1.type);
+}
+```
+
+### 1.8 Don't ignore transient fields when serializing
+
+Starting from version 2.0.58, configure @JSONField(skipTransient = false) on transient fields or getter methods annotated with @java.beans.Transient. This can force serialization of transient fields.
+```java
+public class Bean1 {
+    @JSONField(skipTransient = false)
+    public transient int id;
+}
+
+public class Bean2 {
+    private int id;
+
+    @JSONField(skipTransient = false)
+    @java.beans.Transient
+    public int getId() {
+        return id;
+    }
 }
 ```
 
@@ -297,6 +317,27 @@ public class JSONTypeOrders {
         bean.filed4 = "4";
         log.info(JSON.toJSONString(bean));
         //{"filed4":"4","filed3":"3","filed2":"2","filed1":"1"}
+    }
+}
+```
+
+### 2.5 Don't ignore transient fields when serializing
+
+Starting from version 2.0.58, you can configure the mandatory serialization of transient properties through ` @ JSONType (skipTransient=false) `.
+
+```java
+@JSONType(skipTransient = false)
+public class Bean1 {
+    public transient int id;
+}
+
+@JSONType(skipTransient = false)
+public class Bean2 {
+    private int id;
+
+    @java.beans.Transient
+    public int getId() {
+        return id;
     }
 }
 ```
