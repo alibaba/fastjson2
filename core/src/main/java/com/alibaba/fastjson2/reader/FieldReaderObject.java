@@ -9,10 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -125,10 +122,21 @@ public class FieldReaderObject<T>
 
         try {
             Object value;
+            char first = jsonReader.current();
             if (jsonReader.nextIfNullOrEmptyString()) {
-                value = fieldClass == Optional.class
-                        ? Optional.empty()
-                        : defaultValue;
+                if (defaultValue != null) {
+                    value = defaultValue;
+                } else if (fieldClass == OptionalInt.class) {
+                    value = OptionalInt.empty();
+                } else if (fieldClass == OptionalLong.class) {
+                    value = OptionalLong.empty();
+                } else if (fieldClass == OptionalDouble.class) {
+                    value = OptionalDouble.empty();
+                } else if (fieldClass == Optional.class) {
+                    value = Optional.empty();
+                } else {
+                    value = first == 'n' ? null : "";
+                }
             } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
@@ -169,7 +177,9 @@ public class FieldReaderObject<T>
                 jsonReader.skipValue();
                 return;
             } else if ((contextFeatures & JSONReader.Feature.ErrorOnNoneSerializable.mask) != 0) {
-                throw new JSONException("not support none-Serializable");
+                if (fieldClass != Object.class || (jsonReader.isObject() || jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY)) {
+                    throw new JSONException("not support none-Serializable");
+                }
             }
         }
 

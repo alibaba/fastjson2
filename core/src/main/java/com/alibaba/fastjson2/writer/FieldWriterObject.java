@@ -23,6 +23,7 @@ public class FieldWriterObject<T>
     final boolean unwrapped;
     final boolean array;
     final boolean number;
+    protected boolean writeUsing;
 
     static final AtomicReferenceFieldUpdater<FieldWriterObject, Class> initValueClassUpdater = AtomicReferenceFieldUpdater.newUpdater(
             FieldWriterObject.class,
@@ -73,7 +74,7 @@ public class FieldWriterObject<T>
             return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
             boolean typeMatch = initValueClass == valueClass
-                    || (initValueClass.isAssignableFrom(valueClass) && !jsonWriter.isEnabled(WriteClassName) && fieldType instanceof Class)
+                    || (writeUsing && initValueClass.isAssignableFrom(valueClass))
                     || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass))
                     || (initValueClass == List.class && initValueClass.isAssignableFrom(valueClass));
             if (!typeMatch && initValueClass.isPrimitive()) {
@@ -195,7 +196,6 @@ public class FieldWriterObject<T>
         return objectWriter;
     }
 
-    @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         JSONWriter.Context context = jsonWriter.context;
         long oldFeatures = context.getFeatures();
@@ -228,7 +228,8 @@ public class FieldWriterObject<T>
 
         // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
         if (value == null) {
-            if ((features & WriteNulls.mask) != 0 && (features & NotWriteDefaultValue.mask) == 0) {
+            if (((features & WriteNulls.mask) != 0 || (features & NullAsDefaultValue.mask) != 0 && !number)
+                    && (features & NotWriteDefaultValue.mask) == 0) {
                 writeFieldName(jsonWriter);
                 if (array) {
                     jsonWriter.writeArrayNull();
@@ -239,7 +240,7 @@ public class FieldWriterObject<T>
                         || fieldClass == StringBuilder.class) {
                     jsonWriter.writeStringNull();
                 } else {
-                    jsonWriter.writeNull();
+                    jsonWriter.writeObjectNull(fieldClass);
                 }
                 return true;
             } else {

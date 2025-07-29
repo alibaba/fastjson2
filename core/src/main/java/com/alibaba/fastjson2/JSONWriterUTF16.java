@@ -1295,7 +1295,7 @@ final class JSONWriterUTF16
     @Override
     public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         if (value == null) {
-            writeNumberNull();
+            writeDecimalNull();
             return;
         }
 
@@ -1315,7 +1315,7 @@ final class JSONWriterUTF16
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0));
 
         int off = this.off;
-        int minCapacity = off + precision + value.scale() + 7;
+        int minCapacity = off + precision + Math.abs(value.scale()) + 7;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }

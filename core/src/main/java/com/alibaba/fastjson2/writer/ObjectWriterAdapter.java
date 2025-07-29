@@ -656,6 +656,11 @@ public class ObjectWriterAdapter<T>
             if (fieldValue == object) {
                 fieldValue = jsonObject;
             }
+            if (fieldValue instanceof Enum) {
+                if ((features & WriteEnumsUsingName.mask) != 0) {
+                    fieldValue = ((Enum) fieldValue).name();
+                }
+            }
             if (fieldWriter instanceof FieldWriterObject && !(fieldValue instanceof Map)) {
                 ObjectWriter valueWriter = fieldWriter.getInitWriter();
                 if (valueWriter == null) {
@@ -663,7 +668,11 @@ public class ObjectWriterAdapter<T>
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
-                    fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                    if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                    } else {
+                        fieldValue = JSON.toJSON(fieldValue);
+                    }
                 }
             }
             jsonObject.put(fieldWriter.fieldName, fieldValue);

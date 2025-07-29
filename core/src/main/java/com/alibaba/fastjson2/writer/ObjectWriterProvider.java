@@ -577,6 +577,7 @@ public class ObjectWriterProvider {
         boolean isTransient = Modifier.isTransient(modifiers);
         if (isTransient) {
             fieldInfo.ignore = true;
+            fieldInfo.isTransient = true;
         }
 
         JSONField jsonField = null;
@@ -1012,6 +1013,11 @@ public class ObjectWriterProvider {
 
         if (Map.class.isAssignableFrom(objectClass)) {
             return ObjectWriterImplMap.of(objectClass);
+        }
+
+        if (Map.Entry.class.isAssignableFrom(objectClass)
+                && objectClass.getName().startsWith("java.util")) {
+            return ObjectWriterImplMapEntry.INSTANCE;
         }
 
         if (objectType == Integer.class) {

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
@@ -445,6 +446,17 @@ public class ObjectReaderNoneDefaultConstructor<T>
             Object fieldValue = map.get(fieldReader.fieldName);
             if (fieldValue == null) {
                 continue;
+            }
+
+            if (fieldReader.field != null && Modifier.isFinal(fieldReader.field.getModifiers())) {
+                try {
+                    Object value = fieldReader.method.invoke(object);
+                    if (value instanceof Collection && !((Collection) value).isEmpty()) {
+                        continue;
+                    }
+                } catch (Exception e) {
+                    // just ignore
+                }
             }
 
             Class<?> valueClass = fieldValue.getClass();

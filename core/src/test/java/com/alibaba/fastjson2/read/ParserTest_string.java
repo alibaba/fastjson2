@@ -174,13 +174,12 @@ public class ParserTest_string {
         assertEquals(Fnv.hashCode64("v14"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v14"), lexer.getNameHashCodeLCase());
         assertEquals("v14", lexer.getFieldName());
-        assertEquals("[null]",
-                lexer.readString());
+        assertNull(lexer.readString());
 
         assertEquals(Fnv.hashCode64("v15"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v15"), lexer.getNameHashCodeLCase());
         assertEquals("v15", lexer.getFieldName());
-        assertEquals("[\"123\"]",
+        assertEquals("123",
                 lexer.readString());
 
         assertEquals('}', lexer.current());

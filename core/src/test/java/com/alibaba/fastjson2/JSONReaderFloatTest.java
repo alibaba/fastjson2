@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.IOUtilsTest;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -551,7 +552,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + 2, chars);
+            IOUtilsTest.getChars(i, len + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + 2);
 
             String str = new String(chars, 0, len + 2);
@@ -573,7 +574,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -595,7 +596,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -617,7 +618,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -639,7 +640,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -686,11 +687,11 @@ public class JSONReaderFloatTest {
         {
             String str = "[-122.422003528252475, 37.808480096967251,-122.42082593937107, 37.808631474146033,-122.420825939371]";
             JSONArray array = JSON.parseArray(str, JSONReader.Feature.UseBigDecimalForFloats);
-            assertEquals(-122.422003528252475F, array.getDouble(0));
-            assertEquals(37.808480096967251F, array.getDouble(1));
-            assertEquals(-122.42082593937107F, array.getDouble(2));
-            assertEquals(37.808631474146033F, array.getDouble(3));
-            assertEquals(-122.420825939371F, array.getDouble(4));
+            assertEquals(-122.422003528252475D, array.getDouble(0));
+            assertEquals(37.808480096967251D, array.getDouble(1));
+            assertEquals(-122.42082593937107D, array.getDouble(2));
+            assertEquals(37.808631474146033D, array.getDouble(3));
+            assertEquals(-122.420825939371D, array.getDouble(4));
         }
     }
 }

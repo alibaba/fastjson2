@@ -456,6 +456,10 @@ public abstract class JSONReader
 
     public abstract void next();
 
+    public void nextWithoutComment() {
+        next();
+    }
+
     public abstract long readValueHashCode();
 
     public long readTypeHashCode() {
@@ -1632,6 +1636,10 @@ public abstract class JSONReader
 
     public abstract void readNull();
 
+    protected double readNaN() {
+        throw new JSONException("not support");
+    }
+
     public abstract boolean readIfNull();
 
     public abstract String getString();
@@ -2084,6 +2092,7 @@ public abstract class JSONReader
             return null;
         }
 
+        wasNull = false;
         boolean boolValue = readBoolValue();
         if (!boolValue && wasNull) {
             return null;
@@ -2307,8 +2316,13 @@ public abstract class JSONReader
                     val = null;
                     break;
                 }
+                case 'N':
+                    val = readNaN();
+                    break;
                 case '/':
                     skipComment();
+                    --i;
+                    continue;
                 default:
                     throw new JSONException("TODO : " + ch);
             }
@@ -2583,73 +2597,8 @@ public abstract class JSONReader
                         long v2 = mag2 & 0XFFFFFFFFL;
 
                         if (v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
+                            long v23 = (v2 << 32) + v3;
                             long unscaledVal = negative ? -v23 : v23;
-
-                            if (exponent == 0) {
-                                if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                                    boolean isNegative;
-                                    long unsignedUnscaledVal;
-                                    if (unscaledVal < 0) {
-                                        isNegative = true;
-                                        unsignedUnscaledVal = -unscaledVal;
-                                    } else {
-                                        isNegative = false;
-                                        unsignedUnscaledVal = unscaledVal;
-                                    }
-
-                                    /*
-                                     * If both unscaledVal and the scale can be exactly
-                                     * represented as float values, perform a single float
-                                     * multiply or divide to compute the (properly
-                                     * rounded) result.
-                                     */
-
-                                    if (doubleChars == null) {
-                                        doubleChars = new char[20];
-                                    }
-                                    int len = IOUtils.writeInt64(doubleChars, 0, unsignedUnscaledVal);
-                                    return TypeUtils.floatValue(isNegative, len - scale, doubleChars, len);
-                                } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
-                                    boolean isNegative;
-                                    long unsignedUnscaledVal;
-                                    if (unscaledVal < 0) {
-                                        isNegative = true;
-                                        unsignedUnscaledVal = -unscaledVal;
-                                    } else {
-                                        isNegative = false;
-                                        unsignedUnscaledVal = unscaledVal;
-                                    }
-
-                                    /*
-                                     * If both unscaledVal and the scale can be exactly
-                                     * represented as double values, perform a single
-                                     * double multiply or divide to compute the (properly
-                                     * rounded) result.
-                                     */
-                                    if (unsignedUnscaledVal < 1L << 52) {
-                                        // Don't have too guard against
-                                        // Math.abs(MIN_VALUE) because of outer check
-                                        // against INFLATED.
-                                        if (scale > 0 && scale < DOUBLE_10_POW.length) {
-                                            return (double) unscaledVal / DOUBLE_10_POW[scale];
-                                        } else if (scale < 0 && scale > -DOUBLE_10_POW.length) {
-                                            return (double) unscaledVal * DOUBLE_10_POW[-scale];
-                                        }
-                                    }
-
-                                    int len = unsignedUnscaledVal < 10000000000000000L
-                                            ? 16
-                                            : unsignedUnscaledVal < 100000000000000000L
-                                            ? 17
-                                            : unsignedUnscaledVal < 1000000000000000000L ? 18 : 19;
-                                    if (doubleChars == null) {
-                                        doubleChars = new char[20];
-                                    }
-                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
-                                    return TypeUtils.doubleValue(isNegative, len - scale, doubleChars, len);
-                                }
-                            }
                             decimal = BigDecimal.valueOf(unscaledVal, scale);
                         }
                     }
@@ -4296,8 +4245,17 @@ public abstract class JSONReader
     protected final String readStringNotMatch() {
         switch (ch) {
             case '[':
-                return toString(
-                        readArray());
+                List array = readArray();
+                if (array.size() == 1) {
+                    Object item = array.get(0);
+                    if (item == null) {
+                        return null;
+                    }
+                    if (item instanceof String) {
+                        return item.toString();
+                    }
+                }
+                return toString(array);
             case '{':
                 return toString(
                         readObject());

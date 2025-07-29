@@ -7,6 +7,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNulls;
+
 final class FieldWriterCharMethod<T>
         extends FieldWriter<T> {
     protected FieldWriterCharMethod(
@@ -48,6 +51,16 @@ final class FieldWriterCharMethod<T>
         Character value = (Character) getFieldValue(object);
 
         if (value == null) {
+            long features2 = jsonWriter.context.getFeatures() | this.features;
+            if ((features2 & (WriteNulls.mask | NullAsDefaultValue.mask)) != 0) {
+                writeFieldName(jsonWriter);
+                if ((features2 & NullAsDefaultValue.mask) != 0) {
+                    jsonWriter.writeChar('\0');
+                } else {
+                    jsonWriter.writeNull();
+                }
+                return true;
+            }
             return false;
         }
 

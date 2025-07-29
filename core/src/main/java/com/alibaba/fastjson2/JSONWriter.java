@@ -191,6 +191,13 @@ public abstract class JSONWriter
             return null;
         }
 
+        return setPath0(index, object);
+    }
+
+    private String setPath0(int index, Object object) {
+        if (path == null) {
+            return null;
+        }
         this.path = index == 0
                 ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
                 : index == 1
@@ -745,6 +752,7 @@ public abstract class JSONWriter
 
     public final void writeNameValue(String name, Object value) {
         writeName(name);
+        writeColon();
         writeAny(value);
     }
 
@@ -997,6 +1005,28 @@ public abstract class JSONWriter
         writeRaw("null");
     }
 
+    public void writeObjectNull(Class<?> fieldClass) {
+        if ((this.context.features & NullAsDefaultValue.mask) != 0) {
+            if (fieldClass == Character.class) {
+                writeString("\u0000");
+            } else {
+                writeRaw('{', '}');
+            }
+        } else {
+            writeNull();
+        }
+    }
+
+    public final void writeDecimalNull() {
+        if ((this.context.features & NullAsDefaultValue.mask) != 0) {
+            writeDouble(0.0);
+        } else if ((this.context.features & WriteNullNumberAsZero.mask) != 0) {
+            writeInt32(0);
+        } else {
+            writeNull();
+        }
+    }
+
     public void writeStringNull() {
         String raw;
         if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) != 0) {
@@ -1010,6 +1040,16 @@ public abstract class JSONWriter
     public void writeArrayNull() {
         String raw;
         if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask)) != 0) {
+            raw = "[]";
+        } else {
+            raw = "null";
+        }
+        writeRaw(raw);
+    }
+
+    public void writeArrayNull(long features) {
+        String raw;
+        if ((features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask)) != 0) {
             raw = "[]";
         } else {
             raw = "null";
@@ -2111,7 +2151,9 @@ public abstract class JSONWriter
          * JSON formatting support using 4 spaces for indentation
          * @since 2.0.54
          */
-        PrettyFormatWith4Space(1L << 43);
+        PrettyFormatWith4Space(1L << 43),
+
+        WriterUtilDateAsMillis(1L << 44);
 
         public final long mask;
 

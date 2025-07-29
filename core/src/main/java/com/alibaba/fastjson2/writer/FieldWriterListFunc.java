@@ -53,7 +53,7 @@ final class FieldWriterListFunc<T>
                 return false;
             }
             writeFieldName(jsonWriter);
-            jsonWriter.writeArrayNull();
+            jsonWriter.writeArrayNull(features);
             return true;
         }
 

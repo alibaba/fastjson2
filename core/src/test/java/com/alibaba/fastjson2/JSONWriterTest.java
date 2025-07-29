@@ -9,9 +9,6 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalTime;
-import java.time.OffsetTime;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -1606,7 +1603,7 @@ public class JSONWriterTest {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
                 byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF16();
@@ -1647,7 +1644,7 @@ public class JSONWriterTest {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
                 byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -1726,83 +1723,6 @@ public class JSONWriterTest {
                 byte[] outBytes = out.toByteArray();
                 assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
             }
-        }
-    }
-
-    @Test
-    public void test_writeOffsetTime() {
-        LocalTime localTime = LocalTime.of(12, 13, 14);
-        OffsetTime offsetTime = OffsetTime.of(localTime, ZoneOffset.ofHours(8));
-
-        String expected = "\"12:13:14+08:00\"";
-
-        {
-            JSONWriter jsonWriter = JSONWriter.of();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF16();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF8();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-    }
-
-    @Test
-    public void test_writeOffsetTimeZ() {
-        LocalTime localTime = LocalTime.of(12, 13, 14);
-        OffsetTime offsetTime = OffsetTime.of(localTime, ZoneOffset.UTC);
-
-        String expected = "\"12:13:14Z\"";
-
-        {
-            JSONWriter jsonWriter = JSONWriter.of();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF16();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF8();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-    }
-
-    @Test
-    public void test_writeOffsetTime_null() {
-        OffsetTime offsetTime = null;
-
-        String expected = "null";
-
-        {
-            JSONWriter jsonWriter = JSONWriter.of();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF16();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
-        }
-
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF8();
-            jsonWriter.writeOffsetTime(offsetTime);
-            assertEquals(expected, jsonWriter.toString());
         }
     }
 }

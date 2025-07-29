@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 
 class FieldWriterDoubleField<T>
         extends FieldWriter<T> {
+    final boolean writeNonStringValueAsString;
     protected FieldWriterDoubleField(
             String name,
             int ordinal,
@@ -17,6 +18,7 @@ class FieldWriterDoubleField<T>
             Field field
     ) {
         super(name, ordinal, features, format, label, Double.class, Double.class, field, null);
+        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     @Override
@@ -44,11 +46,15 @@ class FieldWriterDoubleField<T>
 
         if (value == null) {
             long features = jsonWriter.getFeatures(this.features);
-            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) != 0
                     && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0
             ) {
                 writeFieldName(jsonWriter);
-                jsonWriter.writeNumberNull();
+                if ((features & JSONWriter.Feature.NullAsDefaultValue.mask) != 0) {
+                    jsonWriter.writeDouble(0);
+                } else {
+                    jsonWriter.writeNumberNull();
+                }
                 return true;
             }
             return false;
@@ -60,7 +66,11 @@ class FieldWriterDoubleField<T>
         if (decimalFormat != null) {
             jsonWriter.writeDouble(doubleValue, decimalFormat);
         } else {
-            jsonWriter.writeDouble(doubleValue);
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(doubleValue);
+            } else {
+                jsonWriter.writeDouble(doubleValue);
+            }
         }
 
         return true;

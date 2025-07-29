@@ -1255,6 +1255,19 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeArrayNull(long features) {
+        if (off == bytes.length) {
+            ensureCapacity(off + 1);
+        }
+
+        if ((features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask)) != 0) {
+            bytes[off++] = BC_ARRAY_FIX_MIN;
+        } else {
+            bytes[off++] = BC_NULL;
+        }
+    }
+
+    @Override
     public void writeRaw(String str) {
         throw new JSONException("unsupported operation");
     }

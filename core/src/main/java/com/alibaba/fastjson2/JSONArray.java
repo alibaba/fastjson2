@@ -209,10 +209,10 @@ public class JSONArray
         ObjectWriter objectWriter = JSONFactory.defaultObjectWriterProvider.getObjectWriter(valueClass);
         if (objectWriter instanceof ObjectWriterAdapter) {
             ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
-            return writerAdapter.toJSONObject(value);
+            return writerAdapter.toJSONObject(value, 0);
         }
 
-        return null;
+        return (JSONObject) JSON.toJSON(value);
     }
 
     /**
