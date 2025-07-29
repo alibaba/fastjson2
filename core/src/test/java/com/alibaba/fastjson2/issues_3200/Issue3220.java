@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_3200;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,12 @@ public class Issue3220 {
         param.setCode("001");
         param.setSort("1");
         param.setStatus("正常");
-        assertEquals("{\"code\":\"001\",\"sort\":\"1\",\"status\":\"正常\",\"userName\":\"张三\"}", JSON.toJSONString(param));
+        String expected = "{\"code\":\"001\",\"sort\":\"1\",\"status\":\"正常\",\"userName\":\"张三\"}";
+        assertEquals(expected,
+                ObjectWriterCreator.INSTANCE.createObjectWriter(Param.class)
+                        .toJSONString(param));
+        assertEquals(expected,
+                JSON.toJSONString(param));
     }
 
     @Data

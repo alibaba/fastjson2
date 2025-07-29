@@ -35,7 +35,7 @@ public class FieldWriterListField<T>
             long features = this.features | context.getFeatures();
             if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
-                jsonWriter.writeArrayNull();
+                jsonWriter.writeArrayNull(features);
                 return true;
             } else {
                 return false;
