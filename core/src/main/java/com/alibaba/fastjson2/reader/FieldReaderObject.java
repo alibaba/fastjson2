@@ -122,8 +122,13 @@ public class FieldReaderObject<T>
 
         try {
             Object value;
+            char first = jsonReader.current();
             if (jsonReader.nextIfNullOrEmptyString()) {
-                value = defaultValue;
+                if (defaultValue != null || first == 'n') {
+                    value = defaultValue;
+                } else {
+                    value = "";
+                }
             } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
@@ -164,7 +169,9 @@ public class FieldReaderObject<T>
                 jsonReader.skipValue();
                 return;
             } else if ((contextFeatures & JSONReader.Feature.ErrorOnNoneSerializable.mask) != 0) {
-                throw new JSONException("not support none-Serializable");
+                if (fieldClass != Object.class || (jsonReader.isObject() || jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY)) {
+                    throw new JSONException("not support none-Serializable");
+                }
             }
         }
 

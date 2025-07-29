@@ -432,7 +432,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0D : 0D;
             }
             return doubleValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException e) {
@@ -566,7 +566,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0D : 0D;
             }
             return doubleValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException e) {
@@ -700,7 +700,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0F : 0F;
             }
             return floatValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException e) {
@@ -834,7 +834,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0F : 0F;
             }
             return floatValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException e) {

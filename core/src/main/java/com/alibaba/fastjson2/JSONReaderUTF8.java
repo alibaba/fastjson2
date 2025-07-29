@@ -261,6 +261,8 @@ class JSONReaderUTF8
         }
 
         if (ch != ',') {
+            this.offset = offset;
+            this.ch = (char) ch;
             return false;
         }
 
@@ -479,6 +481,24 @@ class JSONReaderUTF8
         if (ch == '/') {
             skipComment();
         }
+    }
+
+    @Override
+    public final void nextWithoutComment() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = offset >= end ? EOI : bytes[offset++];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch < 0) {
+            char_utf8(ch, offset);
+            return;
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
     }
 
     @Override
@@ -1621,7 +1641,11 @@ class JSONReaderUTF8
                 this.nameLength = i;
                 this.nameEnd = offset;
                 offset++;
-                ch = bytes[offset] & 0xff;
+                if (offset < end) {
+                    ch = bytes[offset] & 0xff;
+                } else {
+                    ch = EOI;
+                }
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     offset++;
@@ -2191,7 +2215,11 @@ class JSONReaderUTF8
                         result = 1; // invalid
                     }
                 } else {
-                    if (fc != '-' && doubleValue != 0) {
+                    if (fc != '-') {
+                        if (doubleValue != 0) {
+                            doubleValue = -doubleValue;
+                        }
+                    } else if (result == 0) {
                         doubleValue = -doubleValue;
                     }
                 }
@@ -2363,7 +2391,11 @@ class JSONReaderUTF8
                         result = 1; // invalid
                     }
                 } else {
-                    if (fc != '-' && floatValue != 0) {
+                    if (fc != '-') {
+                        if (floatValue != 0) {
+                            floatValue = -floatValue;
+                        }
+                    } else if (result == 0) {
                         floatValue = -floatValue;
                     }
                 }
@@ -2938,7 +2970,7 @@ class JSONReaderUTF8
         } else if (ch == '/') {
             multi = false;
         } else {
-            return;
+            throw new JSONException(info("parse comment error"));
         }
 
         ch = bytes[offset++];
@@ -3622,6 +3654,33 @@ class JSONReaderUTF8
         }
         this.ch = (char) ch;
         this.offset = offset;
+    }
+
+    @Override
+    public final double readNaN() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch;
+        if (bytes[offset] == 'a'
+                && bytes[offset + 1] == 'N') {
+            offset += 2;
+            ch = offset == end ? EOI : bytes[offset++];
+        } else {
+            throw new JSONException("json syntax error, not NaN " + offset);
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset >= end ? EOI : bytes[offset++];
+        }
+        if (comma = (ch == ',')) {
+            ch = offset >= end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset >= end ? EOI : bytes[offset++];
+            }
+        }
+        this.ch = (char) ch;
+        this.offset = offset;
+        return Double.NaN;
     }
 
     @Override

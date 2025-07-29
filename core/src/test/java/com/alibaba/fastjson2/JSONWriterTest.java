@@ -1603,7 +1603,7 @@ public class JSONWriterTest {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
                 byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF16();
@@ -1644,7 +1644,7 @@ public class JSONWriterTest {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 jsonWriter.flushTo(out);
                 byte[] outBytes = out.toByteArray();
-                assertEquals(v, new String(outBytes));
+                assertEquals(v, new String(outBytes, StandardCharsets.UTF_8));
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();

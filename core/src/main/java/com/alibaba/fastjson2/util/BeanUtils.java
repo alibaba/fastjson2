@@ -1919,6 +1919,10 @@ public abstract class BeanUtils {
         return toResolve;
     }
 
+    public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
+        return resolve(context, contextRawType, toResolve, new HashMap<>());
+    }
+
     private static Type resolve(Type context, Class<?> contextRawType, Type toResolve,
                                 Map<TypeVariable<?>, Type> visitedTypeVariables) {
         // this implementation is made a little more complicated in an attempt to avoid object-creation

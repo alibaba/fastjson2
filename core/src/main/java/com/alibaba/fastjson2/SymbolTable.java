@@ -15,6 +15,24 @@ public final class SymbolTable {
     private final long[] hashCodes;
     private final long[] hashCodesOrigin;
 
+    /**
+     * Create a symbol table
+     *
+     * @param input input
+     * @since 2.0.58
+     */
+    public SymbolTable(Class<?>... input) {
+        this(classNames(input));
+    }
+
+    private static String[] classNames(Class... input) {
+        String[] names = new String[input.length];
+        for (int i = 0; i < input.length; i++) {
+            names[i] = input[i].getName();
+        }
+        return names;
+    }
+
     public SymbolTable(String... input) {
         Set<String> set = new TreeSet<>();
         for (String name : input) {

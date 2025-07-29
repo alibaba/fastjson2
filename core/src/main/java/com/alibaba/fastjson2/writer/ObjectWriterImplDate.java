@@ -75,7 +75,8 @@ final class ObjectWriterImplDate
             return;
         }
 
-        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
+        if (formatMillis || ((format == null) && ctx.isDateFormatMillis())
+                || (jsonWriter.getFeatures(features) & JSONWriter.Feature.WriterUtilDateAsMillis.mask) != 0) {
             jsonWriter.writeInt64(millis);
             return;
         }

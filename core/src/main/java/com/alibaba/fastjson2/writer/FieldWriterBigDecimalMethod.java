@@ -51,7 +51,7 @@ final class FieldWriterBigDecimalMethod<T>
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.WriteNulls.mask) == 0) {
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
                 return false;
             }
         }

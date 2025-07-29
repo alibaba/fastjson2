@@ -141,7 +141,9 @@ abstract class FieldWriterDate<T>
             return;
         }
 
-        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
+        if (formatMillis
+                || (format == null && ctx.isDateFormatMillis())
+                || (jsonWriter.getFeatures(features) & JSONWriter.Feature.WriterUtilDateAsMillis.mask) != 0) {
             writeFieldName(jsonWriter);
             jsonWriter.writeInt64(timeMillis);
             return;

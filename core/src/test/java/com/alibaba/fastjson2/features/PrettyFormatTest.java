@@ -243,7 +243,7 @@ public class PrettyFormatTest {
         jsonWriter.close();
 
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}", jsonWriter.toString());
     }
 
@@ -258,7 +258,7 @@ public class PrettyFormatTest {
         jsonWriter.close();
 
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}", jsonWriter.toString());
     }
 

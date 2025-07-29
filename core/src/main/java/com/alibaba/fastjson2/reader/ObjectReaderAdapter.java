@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -578,6 +579,17 @@ public class ObjectReaderAdapter<T>
                 Object fieldValue = map.get(fieldReader.fieldName);
                 if (fieldValue == null) {
                     continue;
+                }
+
+                if (fieldReader.field != null && Modifier.isFinal(fieldReader.field.getModifiers())) {
+                    try {
+                        Object value = fieldReader.method.invoke(object);
+                        if (value instanceof Collection && !((Collection) value).isEmpty()) {
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        // just ignore
+                    }
                 }
 
                 if (fieldValue.getClass() == fieldReader.fieldType) {
