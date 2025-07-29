@@ -535,6 +535,8 @@ final class JSONReaderUTF16
         }
 
         if (ch != ',') {
+            this.offset = offset;
+            this.ch = ch;
             return false;
         }
 
