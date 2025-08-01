@@ -125,8 +125,7 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter) {
-        boolean fieldBased = (JSONFactory.getDefaultWriterFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
-        return register(type, objectWriter, fieldBased);
+        return register(type, objectWriter, false);
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter, boolean fieldBased) {
@@ -687,9 +686,8 @@ public class ObjectWriterProvider
 
     /**
      * Configure the Enum classes as a JavaBean
-     *
-     * @param enumClasses enum classes
      * @since 2.0.55
+     * @param enumClasses enum classes
      */
     @SuppressWarnings("rawtypes")
     @SafeVarargs
