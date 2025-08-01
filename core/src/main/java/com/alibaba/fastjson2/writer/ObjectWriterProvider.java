@@ -336,16 +336,9 @@ public class ObjectWriterProvider
         ObjectWriter objectWriter = fieldBased
                 ? cacheFieldBased.get(objectType)
                 : cache.get(objectType);
-        if (objectWriter != null) {
-            return objectWriter;
-        }
-        if (fieldBased) {
-            objectWriter = cache.get(objectType);
-            if (objectWriter != null) {
-                return objectWriter;
-            }
-        }
-        return getObjectWriterInternal(objectType, objectClass, fieldBased);
+        return objectWriter != null
+                ? objectWriter
+                : getObjectWriterInternal(objectType, objectClass, fieldBased);
     }
 
     private ObjectWriter getObjectWriterInternal(Type objectType, Class objectClass, boolean fieldBased) {
@@ -693,9 +686,8 @@ public class ObjectWriterProvider
 
     /**
      * Configure the Enum classes as a JavaBean
-     *
-     * @param enumClasses enum classes
      * @since 2.0.55
+     * @param enumClasses enum classes
      */
     @SuppressWarnings("rawtypes")
     @SafeVarargs
