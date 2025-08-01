@@ -500,6 +500,7 @@ public abstract class JSONReader
             case '_':
             case ',':
             case '~':
+            case ' ':
                 return (char) c;
             default:
                 throw new JSONException(info("unclosed.str '\\" + (char) c));
@@ -1964,6 +1965,10 @@ public abstract class JSONReader
 
     public abstract void readNull();
 
+    protected double readNaN() {
+        throw new JSONException("not support");
+    }
+
     public abstract boolean readIfNull();
 
     public abstract String getString();
@@ -2521,6 +2526,7 @@ public abstract class JSONReader
             return null;
         }
 
+        wasNull = false;
         boolean boolValue = readBoolValue();
         if (!boolValue && wasNull) {
             return null;
@@ -2758,6 +2764,9 @@ public abstract class JSONReader
                     val = null;
                     break;
                 }
+                case 'N':
+                    val = readNaN();
+                    break;
                 case '/':
                     skipComment();
                     --i;

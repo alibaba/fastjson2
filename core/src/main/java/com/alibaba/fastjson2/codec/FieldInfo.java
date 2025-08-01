@@ -37,6 +37,8 @@ public class FieldInfo {
     public Class<?> readUsing;
     public boolean fieldClassMixIn;
     public boolean isTransient;
+    public boolean skipTransient;
+    public boolean isPrivate;
     public String defaultValue;
     public Locale locale;
     public String schema;
@@ -96,6 +98,8 @@ public class FieldInfo {
         readUsing = null;
         fieldClassMixIn = false;
         isTransient = false;
+        skipTransient = true;
+        isPrivate = true;
         defaultValue = null;
         locale = null;
         schema = null;

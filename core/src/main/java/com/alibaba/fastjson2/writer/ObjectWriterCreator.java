@@ -135,7 +135,7 @@ public class ObjectWriterCreator {
         return new ObjectWriterAdapter(objectClass, null, null, features, Arrays.asList(fieldWriters));
     }
 
-    protected FieldWriter creteFieldWriter(
+    protected FieldWriter createFieldWriter(
             Class objectClass,
             long writerFeatures,
             ObjectWriterProvider provider,
@@ -351,8 +351,11 @@ public class ObjectWriterCreator {
             Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });
@@ -374,8 +377,11 @@ public class ObjectWriterCreator {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();
                         fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
-                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                        FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
+                            if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                                ((FieldWriterObject) fieldWriter).writeUsing = true;
+                            }
                             FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
 
                             if (origin != null && origin.compareTo(fieldWriter) > 0) {
@@ -490,6 +496,9 @@ public class ObjectWriterCreator {
                         );
                     }
 
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
@@ -506,7 +515,11 @@ public class ObjectWriterCreator {
                             sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
                         }
                         if (sameFieldName != null) {
-                            fieldWriterMap.remove(sameFieldName);
+                            FieldWriter sameNameFieldWriter = fieldWriterMap.get(sameFieldName);
+                            if (sameNameFieldWriter != null
+                                    && (sameNameFieldWriter.method == null || sameNameFieldWriter.method.equals(method))) {
+                                fieldWriterMap.remove(sameFieldName);
+                            }
                         }
                     }
                 });

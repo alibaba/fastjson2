@@ -855,6 +855,7 @@ public abstract class JSONWriter
 
     public final void writeNameValue(String name, Object value) {
         writeName(name);
+        writeColon();
         writeAny(value);
     }
 
@@ -1773,7 +1774,7 @@ public abstract class JSONWriter
         boolean formatHasHour;
         long features;
         ZoneId zoneId;
-        int maxLevel = 2048;
+        int maxLevel;
         boolean hasFilter;
         PropertyPreFilter propertyPreFilter;
         PropertyFilter propertyFilter;
@@ -1793,6 +1794,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -1804,6 +1806,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -1819,6 +1822,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -1840,6 +1844,7 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
+            this.maxLevel = defaultMaxLevel;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -2149,6 +2154,14 @@ public abstract class JSONWriter
                 hasFilter = true;
             }
         }
+
+        public int getMaxLevel() {
+            return maxLevel;
+        }
+
+        public void setMaxLevel(int maxLevel) {
+            this.maxLevel = maxLevel;
+        }
     }
 
     protected static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
@@ -2313,7 +2326,9 @@ public abstract class JSONWriter
          * JSON formatting support using 4 spaces for indentation
          * @since 2.0.54
          */
-        PrettyFormatWith4Space(1L << 43);
+        PrettyFormatWith4Space(1L << 43),
+
+        WriterUtilDateAsMillis(1L << 44);
 
         public final long mask;
 
@@ -2727,7 +2742,8 @@ public abstract class JSONWriter
             if (minCapacity < maxArraySize) {
                 newCapacity = maxArraySize;
             } else {
-                throw new OutOfMemoryError("try enabling LargeObject feature instead");
+                throw new JSONLargeObjectException("Maximum array size exceeded. Try enabling LargeObject feature instead. "
+                        + "Requested size: " + minCapacity + ", max size: " + maxArraySize);
             }
         }
         return newCapacity;

@@ -242,14 +242,14 @@ public class PrettyFormatTest {
         jsonWriter.close();
 
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}", jsonWriter.toString());
 
         jsonWriter.incrementIndent();
         assertEquals(1, jsonWriter.level());
         jsonWriter.println();
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}\n\t", jsonWriter.toString());
         jsonWriter.decrementIdent();
         assertEquals(0, jsonWriter.level());
@@ -266,14 +266,14 @@ public class PrettyFormatTest {
         jsonWriter.close();
 
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}", jsonWriter.toString());
 
         jsonWriter.incrementIndent();
         assertEquals(1, jsonWriter.level());
         jsonWriter.println();
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}\n\t", jsonWriter.toString());
         jsonWriter.decrementIdent();
         assertEquals(0, jsonWriter.level());

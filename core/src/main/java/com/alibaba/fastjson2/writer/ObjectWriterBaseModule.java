@@ -256,6 +256,10 @@ public class ObjectWriterBaseModule
                 if (!rootName.isEmpty()) {
                     beanInfo.rootName = rootName;
                 }
+
+                if (beanInfo.skipTransient) {
+                    beanInfo.skipTransient = jsonType.skipTransient();
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
@@ -298,7 +302,10 @@ public class ObjectWriterBaseModule
             int modifiers = field.getModifiers();
             boolean isTransient = Modifier.isTransient(modifiers);
             if (isTransient) {
-                fieldInfo.ignore = true;
+                fieldInfo.isTransient = true;
+                if (fieldInfo.skipTransient && beanInfo.skipTransient) {
+                    fieldInfo.ignore = true;
+                }
             }
 
             JSONField jsonField = null;
@@ -793,6 +800,11 @@ public class ObjectWriterBaseModule
 
             if (JDKUtils.CLASS_TRANSIENT != null && method.getAnnotation(JDKUtils.CLASS_TRANSIENT) != null) {
                 fieldInfo.ignore = true;
+                fieldInfo.isTransient = true;
+                if (!beanInfo.skipTransient) {
+                    fieldInfo.skipTransient = false;
+                    fieldInfo.ignore = false;
+                }
             }
 
             if (objectClass != null) {
@@ -820,6 +832,7 @@ public class ObjectWriterBaseModule
                 }
             }
 
+            fieldInfo.isPrivate = false;
             Annotation[] annotations = getAnnotations(method);
             processAnnotations(fieldInfo, annotations);
 
@@ -883,7 +896,9 @@ public class ObjectWriterBaseModule
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "java.beans.Transient":
-                        fieldInfo.ignore = true;
+                        if (fieldInfo.skipTransient) {
+                            fieldInfo.ignore = true;
+                        }
                         fieldInfo.isTransient = true;
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty": {
@@ -965,13 +980,20 @@ public class ObjectWriterBaseModule
                 fieldInfo.ignore = ignore;
             }
 
+            if (!jsonField.skipTransient()) {
+                fieldInfo.skipTransient = false;
+                if (fieldInfo.isTransient && !fieldInfo.isPrivate) {
+                    fieldInfo.ignore = false;
+                }
+            }
+
             if (jsonField.unwrapped()) {
                 fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
             }
 
             for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {
                 fieldInfo.features |= feature.mask;
-                if (fieldInfo.ignore && !ignore && feature == JSONWriter.Feature.FieldBased) {
+                if (fieldInfo.ignore && !fieldInfo.isTransient && !ignore && feature == JSONWriter.Feature.FieldBased) {
                     fieldInfo.ignore = false;
                 }
             }

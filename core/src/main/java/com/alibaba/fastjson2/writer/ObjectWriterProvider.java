@@ -43,6 +43,7 @@ public class ObjectWriterProvider
     boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
     boolean disableJSONB = JSONFactory.isDisableJSONB();
     boolean disableAutoType = JSONFactory.isDisableAutoType();
+    boolean skipTransient = JSONFactory.isDefaultSkipTransient();
 
     volatile long userDefineMask;
     boolean alphabetic = JSONFactory.isDefaultWriterAlphabetic();
@@ -124,7 +125,8 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter) {
-        return register(type, objectWriter, false);
+        boolean fieldBased = (JSONFactory.getDefaultWriterFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
+        return register(type, objectWriter, fieldBased);
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter, boolean fieldBased) {
@@ -669,6 +671,14 @@ public class ObjectWriterProvider
 
     public boolean isAlphabetic() {
         return alphabetic;
+    }
+
+    public boolean isSkipTransient() {
+        return skipTransient;
+    }
+
+    public void setSkipTransient(boolean skipTransient) {
+        this.skipTransient = skipTransient;
     }
 
     protected BeanInfo createBeanInfo() {

@@ -606,7 +606,7 @@ public class TypeUtilsTest {
             String s1 = Character.toString(i);
             String json = JSON.toJSONString(s1);
             assertEquals(s1, JSON.parse(json.toCharArray()));
-            assertEquals(s1, JSON.parse(json.getBytes()));
+            assertEquals(s1, JSON.parse(json.getBytes(StandardCharsets.UTF_8)));
         }
 
         for (char i = 0; i < 512; i++) {
@@ -614,7 +614,7 @@ public class TypeUtilsTest {
                 String s2 = new String(new char[]{i, j});
                 String json = JSON.toJSONString(s2);
                 assertEquals(s2, JSON.parse(json.toCharArray()));
-                assertEquals(s2, JSON.parse(json.getBytes()));
+                assertEquals(s2, JSON.parse(json.getBytes(StandardCharsets.UTF_8)));
             }
         }
     }

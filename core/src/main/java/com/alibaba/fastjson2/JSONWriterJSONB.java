@@ -1175,6 +1175,10 @@ final class JSONWriterJSONB
         writeRaw((this.context.features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
     }
 
+    public void writeArrayNull(long features) {
+        writeRaw((features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL);
+    }
+
     @Override
     public void writeRaw(String str) {
         throw new JSONException("unsupported operation");

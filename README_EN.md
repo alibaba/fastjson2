@@ -47,7 +47,7 @@ Related Documents:
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.57</version>
+    <version>2.0.58</version>
 </dependency>
 ```
 
@@ -73,7 +73,7 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.57</version>
+    <version>2.0.58</version>
 </dependency>
 ```
 
@@ -95,7 +95,7 @@ If your project uses `kotlin`, you can use the `Fastjson-Kotlin` module, and use
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.57</version>
+    <version>2.0.58</version>
 </dependency>
 ```
 
@@ -140,8 +140,16 @@ If your project uses a framework such as `SpringFramework`, you can use the `fas
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.57</version>
+    <artifactId>fastjson2-extension-spring5</artifactId>
+    <version>2.0.58</version>
+</dependency>
+```
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension-spring6</artifactId>
+    <version>2.0.58</version>
 </dependency>
 ```
 
@@ -149,7 +157,14 @@ If your project uses a framework such as `SpringFramework`, you can use the `fas
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.57'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.58'
+}
+```
+
+
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.58'
 }
 ```
 

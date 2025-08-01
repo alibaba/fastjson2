@@ -78,6 +78,7 @@ public final class JSONFactory {
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
     static boolean defaultWriterAlphabetic;
+    static boolean defaultSkipTransient;
     static final boolean disableReferenceDetect;
     static final boolean disableArrayMapping;
     static final boolean disableJSONB;
@@ -91,6 +92,7 @@ public final class JSONFactory {
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
     static int defaultDecimalMaxScale = 2048;
+    static int defaultMaxLevel;
 
     interface JSONReaderUTF8Creator {
         JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
@@ -217,6 +219,8 @@ public final class JSONFactory {
         useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
         useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
+        defaultSkipTransient = getPropertyBool(properties, "fastjson2.writer.skipTransient", true);
+        defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
     }
 
     private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
@@ -245,7 +249,9 @@ public final class JSONFactory {
         return propertyValue;
     }
 
-    private static String getProperty(Properties properties, String name) {
+    private static int getPropertyInt(Properties properties, String name, int defaultValue) {
+        int propertyValue = defaultValue;
+
         String property = System.getProperty(name);
         if (property != null) {
             property = property.trim();
@@ -256,8 +262,13 @@ public final class JSONFactory {
                 }
             }
         }
+        try {
+            propertyValue = Integer.parseInt(property);
+        } catch (NumberFormatException ignored) {
+            // ignore
+        }
 
-        return property;
+        return propertyValue;
     }
 
     public static boolean isUseJacksonAnnotation() {
@@ -274,6 +285,27 @@ public final class JSONFactory {
 
     public static void setUseGsonAnnotation(boolean useGsonAnnotation) {
         JSONFactory.useGsonAnnotation = useGsonAnnotation;
+    }
+
+    private static volatile boolean jsonFieldDefaultValueCompatMode;
+
+    public static boolean isJSONFieldDefaultValueCompatMode() {
+        return jsonFieldDefaultValueCompatMode;
+    }
+
+    public static void setJSONFieldDefaultValueCompatMode(boolean compatMode) {
+        jsonFieldDefaultValueCompatMode = compatMode;
+    }
+
+    public static int getDefaultMaxLevel() {
+        return defaultMaxLevel;
+    }
+
+    public static void setDefaultMaxLevel(int maxLevel) {
+        if (maxLevel <= 0) {
+            throw new IllegalArgumentException("maxLevel must be positive, maxLevel " + maxLevel);
+        }
+        JSONFactory.defaultMaxLevel = maxLevel;
     }
 
     static final CacheItem[] CACHE_ITEMS;
@@ -617,5 +649,13 @@ public final class JSONFactory {
 
     public static void setDisableSmartMatch(boolean disableSmartMatch) {
         defaultObjectReaderProvider.setDisableSmartMatch(disableSmartMatch);
+    }
+
+    public static boolean isDefaultSkipTransient() {
+        return defaultSkipTransient;
+    }
+
+    public static void setDefaultSkipTransient(boolean skipTransient) {
+        defaultObjectWriterProvider.setSkipTransient(skipTransient);
     }
 }

@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -224,6 +223,8 @@ public class ObjectReaderCreator {
 
             ObjectReader initReader = getInitReader(provider, parameter.getParameterizedType(), parameter.getType(), fieldInfo);
             Type paramType = parameter.getParameterizedType();
+            Type resolvedType = BeanUtils.resolve(objectType, objectClass, paramType);
+            paramType = resolvedType != null ? resolvedType : paramType;
             fieldReaders.add(
                     createFieldReaderParam(
                     null,
@@ -2316,13 +2317,19 @@ public class ObjectReaderCreator {
         }
 
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
-            Function typeConvert = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getTypeConvert(defaultValue.getClass(), fieldType);
-            if (typeConvert != null) {
-                defaultValue = typeConvert.apply(defaultValue);
+            if (JSONFactory.isJSONFieldDefaultValueCompatMode()
+                    && defaultValue instanceof String
+                    && Date.class.isAssignableFrom(fieldClass)) {
+                        // For compatibility with JSONField defaultValue
             } else {
-                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+                Function typeConvert = JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getTypeConvert(defaultValue.getClass(), fieldType);
+                if (typeConvert != null) {
+                    defaultValue = typeConvert.apply(defaultValue);
+                } else {
+                    throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+                }
             }
         }
 
@@ -2568,9 +2575,7 @@ public class ObjectReaderCreator {
             }
         }
 
-        boolean list = fieldClass == List.class
-                || fieldClass == ArrayList.class
-                || fieldClass == LinkedList.class
+        boolean list = List.class.isAssignableFrom(fieldClass)
                 || "cn.hutool.json.JSONArray".equals(fieldClass.getName());
         if (list) {
             if (fieldTypeResolved instanceof ParameterizedType) {

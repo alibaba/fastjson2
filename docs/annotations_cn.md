@@ -119,7 +119,7 @@ public void test2() {
 }
 ```
 
-### 1.6 通过JSONField(value = true)配置Enum基于其中一个字段序列化和反序列化
+### 1.7 通过JSONField(value = true)配置Enum基于其中一个字段序列化和反序列化
 将@JSONField(value = true)配置在enum字段上，序列化和序列化都会基于这个字段来进行，比如：
 ```java
 public enum Type {
@@ -157,6 +157,25 @@ public void test1() {
     assertEquals("{\"type\":102}", str);
     Bean1 bean1 = JSON.parseObject(str, Bean1.class);
     assertEquals(bean.type, bean1.type);
+}
+```
+
+### 1.8 配置序列化时不忽略transient属性
+从2.0.58版本开始，将@JSONField(skipTransient = false)配置在transient字段或@java.beans.Transient修饰的getter方法上，可以强制序列化transient属性。
+```java
+public class Bean1 {
+    @JSONField(skipTransient = false)
+    public transient int id;
+}
+
+public class Bean2 {
+    private int id;
+
+    @JSONField(skipTransient = false)
+    @java.beans.Transient
+    public int getId() {
+        return id;
+    }
 }
 ```
 
@@ -285,6 +304,27 @@ public class JSONTypeOrders {
         bean.filed4 = "4";
         log.info(JSON.toJSONString(bean));
         //{"filed4":"4","filed3":"3","filed2":"2","filed1":"1"}
+    }
+}
+```
+
+### 2.5 配置序列化时不忽略transient属性
+
+从2.0.58版本开始，您可以通过`@JSONType(skipTransient = false)`配置强制序列化transient属性。
+
+```java
+@JSONType(skipTransient = false)
+public class Bean1 {
+    public transient int id;
+}
+
+@JSONType(skipTransient = false)
+public class Bean2 {
+    private int id;
+
+    @java.beans.Transient
+    public int getId() {
+        return id;
     }
 }
 ```

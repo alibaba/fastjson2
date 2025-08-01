@@ -222,10 +222,13 @@ public class ObjectWriterCreatorASM
                 if (!record) {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();
-                        fieldInfo.ignore = ((field.getModifiers() & Modifier.PUBLIC) == 0 || (field.getModifiers() & Modifier.TRANSIENT) != 0);
+                        fieldInfo.ignore = fieldInfo.isPrivate = (field.getModifiers() & Modifier.PUBLIC) == 0;
 
-                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                        FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
+                            if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                                ((FieldWriterObject) fieldWriter).writeUsing = true;
+                            }
                             FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                             if (origin != null) {
                                 int cmp = origin.compareTo(fieldWriter);
@@ -347,6 +350,9 @@ public class ObjectWriterCreatorASM
                         );
                     }
 
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     FieldWriter origin = fieldWriterMap.putIfAbsent(fieldName, fieldWriter);
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
@@ -363,7 +369,11 @@ public class ObjectWriterCreatorASM
                             sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
                         }
                         if (sameFieldName != null) {
-                            fieldWriterMap.remove(sameFieldName);
+                            FieldWriter sameNameFieldWriter = fieldWriterMap.get(sameFieldName);
+                            if (sameNameFieldWriter != null
+                                    && (sameNameFieldWriter.method == null || sameNameFieldWriter.method.equals(method))) {
+                                fieldWriterMap.remove(sameFieldName);
+                            }
                         }
                     }
                 });
@@ -372,8 +382,11 @@ public class ObjectWriterCreatorASM
             final FieldInfo fieldInfo = new FieldInfo();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });

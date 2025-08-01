@@ -282,11 +282,6 @@ public class ObjectReaderBaseModule
                             processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
-                    case "com.fasterxml.jackson.annotation.JsonInclude":
-                        if (useJacksonAnnotation) {
-                            processJacksonJsonInclude(beanInfo, annotation);
-                        }
-                        break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSubTypes(beanInfo, annotation);
@@ -857,11 +852,6 @@ public class ObjectReaderBaseModule
                     case "com.google.gson.annotations.SerializedName":
                         if (JSONFactory.isUseGsonAnnotation()) {
                             processGsonSerializedName(fieldInfo, annotation);
-                        }
-                        break;
-                    case "com.fasterxml.jackson.annotation.JsonInclude":
-                        if (useJacksonAnnotation) {
-                            processJacksonJsonInclude(fieldInfo, annotation);
                         }
                         break;
                     default:
@@ -2186,6 +2176,8 @@ public class ObjectReaderBaseModule
                     case "com.google.common.collect.ImmutableSet":
                     case "com.google.common.collect.SingletonImmutableSet":
                         return ObjectReaderImplList.of(type, null, 0);
+                    case "cn.hutool.core.lang.tree.Tree":
+                        return ObjectReaderImplMap.of(null, (Class<?>) rawType, 0L);
                 }
 
                 if (rawType == Optional.class) {

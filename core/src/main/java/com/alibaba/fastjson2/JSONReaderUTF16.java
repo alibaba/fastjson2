@@ -535,6 +535,8 @@ final class JSONReaderUTF16
         }
 
         if (ch != ',') {
+            this.offset = offset;
+            this.ch = ch;
             return false;
         }
 
@@ -2646,7 +2648,11 @@ final class JSONReaderUTF16
                         result = 1; // invalid
                     }
                 } else {
-                    if (fc != '-' && doubleValue != 0) {
+                    if (fc != '-') {
+                        if (doubleValue != 0) {
+                            doubleValue = -doubleValue;
+                        }
+                    } else if (result == 0) {
                         doubleValue = -doubleValue;
                     }
                 }
@@ -2818,7 +2824,11 @@ final class JSONReaderUTF16
                         result = 1; // invalid
                     }
                 } else {
-                    if (fc != '-' && floatValue != 0) {
+                    if (fc != '-') {
+                        if (floatValue != 0) {
+                            floatValue = -floatValue;
+                        }
+                    } else if (result == 0) {
                         floatValue = -floatValue;
                     }
                 }
@@ -4072,6 +4082,33 @@ final class JSONReaderUTF16
 
         this.ch = ch;
         this.offset = offset;
+    }
+
+    @Override
+    public final double readNaN() {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        int ch;
+        if (chars[offset] == 'a'
+                && chars[offset + 1] == 'N') {
+            offset += 2;
+            ch = offset == end ? EOI : chars[offset++];
+        } else {
+            throw new JSONException("json syntax error, not NaN " + offset);
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset >= end ? EOI : chars[offset++];
+        }
+        if (comma = (ch == ',')) {
+            ch = offset >= end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset >= end ? EOI : chars[offset++];
+            }
+        }
+        this.ch = (char) ch;
+        this.offset = offset;
+        return Double.NaN;
     }
 
     public final BigDecimal readBigDecimal() {

@@ -1295,4 +1295,14 @@ public class JSONWriterUTF16Test {
             }
         }
     }
+
+    @Test
+    public void writeDecimal1() {
+        BigDecimal dec = BigDecimal.valueOf(1234567890, -16);
+        try (JSONWriterUTF16 jsonWriter = (JSONWriterUTF16) JSONWriter.ofUTF16()) {
+            jsonWriter.chars = new char[0];
+            jsonWriter.writeDecimal(dec);
+            assertEquals(dec.toString(), jsonWriter.toString());
+        }
+    }
 }
