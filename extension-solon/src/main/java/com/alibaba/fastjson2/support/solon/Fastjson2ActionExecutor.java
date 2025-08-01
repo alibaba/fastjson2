@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.mvc.ActionExecuteHandlerDefault;
+import org.noear.solon.core.util.LazyReference;
 import org.noear.solon.core.wrap.MethodWrap;
 import org.noear.solon.core.wrap.ParamWrap;
 
@@ -72,22 +73,24 @@ public class Fastjson2ActionExecutor
      * @param p Parameter wrappers
      * @param pi Parameter index
      * @param pt Parameter type
-     * @param bodyObj Body object
+     * @param bodyRef BodyValue Reference
      */
     @Override
-    protected Object changeValue(Context ctx, ParamWrap p, int pi, Class<?> pt, Object bodyObj) throws Exception {
+    protected Object changeValue(Context ctx, ParamWrap p, int pi, Class<?> pt, LazyReference bodyRef) throws Throwable {
         if (p.spec().isRequiredPath() || p.spec().isRequiredCookie() || p.spec().isRequiredHeader()) {
             //If path、cookie, header?
-            return super.changeValue(ctx, p, pi, pt, bodyObj);
+            return super.changeValue(ctx, p, pi, pt, bodyRef);
         }
 
-        if (!p.spec().isRequiredBody() && ctx.paramMap().containsKey(p.spec().getName())) {
+        if (p.spec().isRequiredBody() == false && ctx.paramMap().containsKey(p.spec().getName())) {
             //If path、queryString?
-            return super.changeValue(ctx, p, pi, pt, bodyObj);
+            return super.changeValue(ctx, p, pi, pt, bodyRef);
         }
+
+        Object bodyObj = bodyRef.get();
 
         if (bodyObj == null) {
-            return super.changeValue(ctx, p, pi, pt, bodyObj);
+            return super.changeValue(ctx, p, pi, pt, bodyRef);
         }
 
         if (bodyObj instanceof JSONObject) {
@@ -109,7 +112,7 @@ public class Fastjson2ActionExecutor
 
             //Try the body conversion
             if (pt.isPrimitive() || pt.getTypeName().startsWith("java.lang.")) {
-                return super.changeValue(ctx, p, pi, pt, bodyObj);
+                return super.changeValue(ctx, p, pi, pt, bodyRef);
             } else {
                 if (List.class.isAssignableFrom(pt)) {
                     return null;
