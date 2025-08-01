@@ -10,7 +10,7 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.57</version>
+    <version2.0.58</version>
 </dependency>
 ```
 
