@@ -1430,7 +1430,9 @@ class JSONWriterUTF16
     @Override
     public final void writeName8Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 13 + pretty * level;
+        int minCapacity = off
+                + 13 // 8 + quote 2 + comma 1 + colon 1 + pretty 1
+                + pretty * level;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
