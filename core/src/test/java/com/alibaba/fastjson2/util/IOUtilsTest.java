@@ -535,6 +535,198 @@ public class IOUtilsTest {
     }
 
     @Test
+    public void testSPARCUnsafeDisabled() {
+        String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+        try {
+            System.setProperty("fastjson2.unsafe.sparc.enabled", "false");
+
+            char[] testChars = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+            byte[] testBytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8};
+
+            assertDoesNotThrow(() -> {
+                long result1 = IOUtils.getLongLE(testChars, 0);
+                long result2 = IOUtils.getLongLE(testBytes, 0);
+                assertNotEquals(0, result1);
+                assertNotEquals(0, result2);
+            }, "Should work with Unsafe disabled");
+        } finally {
+            if (originalProperty != null) {
+                System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+            } else {
+                System.clearProperty("fastjson2.unsafe.sparc.enabled");
+            }
+        }
+    }
+
+    @Test
+    public void testSPARCUnsafeEnabled() {
+        String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+        try {
+            System.setProperty("fastjson2.unsafe.sparc.enabled", "true");
+
+            char[] testChars = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+            byte[] testBytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8};
+
+            assertDoesNotThrow(() -> {
+                long result1 = IOUtils.getLongLE(testChars, 0);
+                long result2 = IOUtils.getLongLE(testBytes, 0);
+                assertNotEquals(0, result1);
+                assertNotEquals(0, result2);
+            }, "Should work with Unsafe enabled");
+        } finally {
+            if (originalProperty != null) {
+                System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+            } else {
+                System.clearProperty("fastjson2.unsafe.sparc.enabled");
+            }
+        }
+    }
+
+    @Test
+    public void testGetLongLESafeCharArray() {
+        char[] testChars = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+
+        for (int i = 0; i < testChars.length - 4; i++) {
+            final int offset = i;
+            assertDoesNotThrow(() -> {
+                String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+                try {
+                    System.setProperty("fastjson2.unsafe.sparc.enabled", "false");
+                    long result = IOUtils.getLongLE(testChars, offset);
+                    assertTrue(result != 0 || isAllZero(testChars, offset, 4));
+                } finally {
+                    if (originalProperty != null) {
+                        System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+                    } else {
+                        System.clearProperty("fastjson2.unsafe.sparc.enabled");
+                    }
+                }
+            }, "Safe char array method should work at offset " + offset);
+        }
+    }
+
+    @Test
+    public void testGetLongLESafeByteArray() {
+        byte[] testBytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+        for (int i = 0; i < testBytes.length - 8; i++) {
+            final int offset = i;
+            assertDoesNotThrow(() -> {
+                String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+                try {
+                    System.setProperty("fastjson2.unsafe.sparc.enabled", "false");
+                    long result = IOUtils.getLongLE(testBytes, offset);
+                    assertTrue(result != 0 || isAllZero(testBytes, offset, 8));
+                } finally {
+                    if (originalProperty != null) {
+                        System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+                    } else {
+                        System.clearProperty("fastjson2.unsafe.sparc.enabled");
+                    }
+                }
+            }, "Safe byte array method should work at offset " + offset);
+        }
+    }
+
+    @Test
+    public void testSafeFallbackBoundaryConditions() {
+        String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+        try {
+            System.setProperty("fastjson2.unsafe.sparc.enabled", "false");
+
+            char[] minChars = new char[4];
+            minChars[0] = 'A';
+            minChars[1] = 'B';
+            minChars[2] = 'C';
+            minChars[3] = 'D';
+
+            byte[] minBytes = new byte[8];
+            for (int i = 0; i < 8; i++) {
+                minBytes[i] = (byte) (i + 1);
+            }
+
+            assertDoesNotThrow(() -> {
+                long result1 = IOUtils.getLongLE(minChars, 0);
+                long result2 = IOUtils.getLongLE(minBytes, 0);
+                assertNotEquals(0, result1);
+                assertNotEquals(0, result2);
+            }, "Should handle minimum buffer sizes");
+
+            char[] pattern1 = new char[]{'1', '2', '3', '4'};
+            char[] pattern2 = new char[]{'5', '6', '7', '8'};
+
+            long result1 = IOUtils.getLongLE(pattern1, 0);
+            long result2 = IOUtils.getLongLE(pattern2, 0);
+            assertNotEquals(result1, result2, "Different patterns should produce different results");
+        } finally {
+            if (originalProperty != null) {
+                System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+            } else {
+                System.clearProperty("fastjson2.unsafe.sparc.enabled");
+            }
+        }
+    }
+
+    @Test
+    public void testSafeFallbackWithUnicodeChars() {
+        String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+        try {
+            System.setProperty("fastjson2.unsafe.sparc.enabled", "false");
+
+            char[] unicodeChars = new char[]{'\u4e2d', '\u6587', '\u6d4b', '\u8bd5'};
+
+            assertDoesNotThrow(() -> {
+                long result = IOUtils.getLongLE(unicodeChars, 0);
+                assertNotEquals(0, result); // Unicode chars should produce non-zero result
+            }, "Should handle Unicode characters in safe mode");
+        } finally {
+            if (originalProperty != null) {
+                System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+            } else {
+                System.clearProperty("fastjson2.unsafe.sparc.enabled");
+            }
+        }
+    }
+
+    @Test
+    public void testConsistencyBetweenSafeAndUnsafeMethods() {
+        char[] testChars = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+        byte[] testBytes = new byte[]{65, 66, 67, 68, 69, 70, 71, 72}; // ASCII A-H
+
+        String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+
+        long safeCharResult, safeByteResult;
+        try {
+            System.setProperty("fastjson2.unsafe.sparc.enabled", "false");
+            safeCharResult = IOUtils.getLongLE(testChars, 0);
+            safeByteResult = IOUtils.getLongLE(testBytes, 0);
+        } finally {
+            if (originalProperty != null) {
+                System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+            } else {
+                System.clearProperty("fastjson2.unsafe.sparc.enabled");
+            }
+        }
+
+        long unsafeCharResult, unsafeByteResult;
+        try {
+            System.setProperty("fastjson2.unsafe.sparc.enabled", "true");
+            unsafeCharResult = IOUtils.getLongLE(testChars, 0);
+            unsafeByteResult = IOUtils.getLongLE(testBytes, 0);
+        } finally {
+            if (originalProperty != null) {
+                System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+            } else {
+                System.clearProperty("fastjson2.unsafe.sparc.enabled");
+            }
+        }
+        assertNotEquals(0, safeCharResult, "Safe char method should produce non-zero result");
+        assertNotEquals(0, safeByteResult, "Safe byte method should produce non-zero result");
+        assertNotEquals(0, unsafeCharResult, "Unsafe char method should produce non-zero result");
+        assertNotEquals(0, unsafeByteResult, "Unsafe byte method should produce non-zero result");
+    }
+
+    @Test
     public void testLongLEConsistency() {
         char[] testData = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
 
