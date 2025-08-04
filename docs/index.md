@@ -31,7 +31,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version2.0.58</version>
+    <version>2.0.58</version>
 </dependency>
 ```
 
@@ -57,7 +57,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version2.0.58</version>
+    <version>2.0.58</version>
 </dependency>
 ```
 
@@ -79,7 +79,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version2.0.58</version>
+    <version>2.0.58</version>
 </dependency>
 ```
 
@@ -101,7 +101,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension</artifactId>
-    <version2.0.58</version>
+    <version>2.0.58</version>
 </dependency>
 ```
 
