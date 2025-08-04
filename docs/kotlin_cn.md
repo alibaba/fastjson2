@@ -35,7 +35,7 @@
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.57")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.58")
 }
 ```
 

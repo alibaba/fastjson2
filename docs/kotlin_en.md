@@ -35,7 +35,7 @@ If the data class is used or the parameters are passed in through constructor, t
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.57")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.58")
 }
 ```
 

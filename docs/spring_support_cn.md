@@ -26,13 +26,13 @@ or
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.57'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.58'
 }
 
 or
 
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.57'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.58'
 }
 ```
 > 2.0.23版本之后为了兼容Spring 5.x / 6.x，将不同版本独立开不同的依赖包。
