@@ -1820,6 +1820,7 @@ public class IOUtils {
         }
         return v;
     }
+
     private static long getLongLESafe(char[] buf, int offset) {
         if (offset + 3 >= buf.length) {
             throw new IndexOutOfBoundsException("Buffer overflow in getLongLESafe");

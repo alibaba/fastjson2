@@ -126,7 +126,7 @@ public class SPARCCompatibilityTest {
             assertDoesNotThrow(() -> {
                 TestObject obj = new TestObject();
                 obj.name = str;
-                obj.description = "Padding: " + "X".repeat(str.length() % 8); // Create potential alignment issues
+                obj.description = "Padding: " + repeatString("X", str.length() % 8); // Create potential alignment issues
 
                 String json = JSON.toJSONString(obj);
                 assertNotNull(json);
@@ -143,7 +143,7 @@ public class SPARCCompatibilityTest {
                 TestObject obj = new TestObject();
                 obj.name = "Stress test iteration " + i;
                 obj.value = i;
-                obj.description = "Testing SPARC compatibility under load with varying string lengths: " + "X".repeat(i % 50);
+                obj.description = "Testing SPARC compatibility under load with varying string lengths: " + repeatString("X", i % 50);
 
                 String json = JSON.toJSONString(obj);
                 assertNotNull(json);
@@ -167,5 +167,20 @@ public class SPARCCompatibilityTest {
         public String name;
         public String[] tags;
         public Map<String, String> metadata;
+    }
+
+    /**
+     * JDK 8 compatible string repeat method.
+     * Equivalent to String.repeat(int) introduced in JDK 11.
+     */
+    private static String repeatString(String str, int count) {
+        if (count <= 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(str.length() * count);
+        for (int i = 0; i < count; i++) {
+            sb.append(str);
+        }
+        return sb.toString();
     }
 }
