@@ -55,7 +55,7 @@ Related Documents:
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.57'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.58'
 }
 ```
 
@@ -81,7 +81,7 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.57'
+    implementation 'com.alibaba:fastjson:2.0.58'
 }
 ```
 
@@ -120,7 +120,7 @@ If the data class is used or the parameters are passed in through constructor, t
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.57")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.58")
 }
 ```
 
