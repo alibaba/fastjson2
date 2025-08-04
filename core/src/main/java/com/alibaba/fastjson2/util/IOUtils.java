@@ -62,7 +62,22 @@ public class IOUtils {
 
     private static final short ZERO_DOT_LATIN1;
 
+    // SPARC platform detection and safety fields
+    private static final boolean IS_SPARC_PLATFORM;
+    private static final boolean ENABLE_UNSAFE_ON_SPARC;
+    private static final java.util.concurrent.atomic.AtomicInteger UNSAFE_ERROR_COUNT = new java.util.concurrent.atomic.AtomicInteger(0);
+    private static final int MAX_UNSAFE_ERROR_LOG = 10;
+
     static {
+        // SPARC platform detection
+        String osArch = System.getProperty("os.arch", "").toLowerCase();
+        IS_SPARC_PLATFORM = osArch.contains("sparc");
+
+        // Allow disabling Unsafe operations on SPARC via system property
+        ENABLE_UNSAFE_ON_SPARC = Boolean.parseBoolean(
+            System.getProperty("fastjson2.unsafe.sparc.enabled", "true")
+        );
+
         short[] shorts = new short[]{
                 0x3030, 0x3130, 0x3230, 0x3330, 0x3430, 0x3530, 0x3630, 0x3730, 0x3830, 0x3930,
                 0x3031, 0x3131, 0x3231, 0x3331, 0x3431, 0x3531, 0x3631, 0x3731, 0x3831, 0x3931,
@@ -1751,16 +1766,89 @@ public class IOUtils {
     }
 
     public static long getLongLE(byte[] buf, int offset) {
+        if (IS_SPARC_PLATFORM) {
+            if (!ENABLE_UNSAFE_ON_SPARC) {
+                return getLongLESafe(buf, offset);
+            }
+
+            long byteOffset = ARRAY_BYTE_BASE_OFFSET + offset;
+            if ((byteOffset & 7) != 0) {
+                return getLongLESafe(buf, offset);
+            }
+
+            try {
+                return convEndian(false, UNSAFE.getLong(buf, byteOffset));
+            } catch (Exception e) {
+                if (UNSAFE_ERROR_COUNT.incrementAndGet() <= MAX_UNSAFE_ERROR_LOG) {
+                    System.err.println("WARN: Unsafe memory access failed on SPARC platform, falling back to safe implementation. Error: " + e.getMessage());
+                }
+                return getLongLESafe(buf, offset);
+            }
+        }
+
         return convEndian(false,
                 UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
     public static long getLongLE(char[] buf, int offset) {
+        if (IS_SPARC_PLATFORM) {
+            if (!ENABLE_UNSAFE_ON_SPARC) {
+                return getLongLESafe(buf, offset);
+            }
+
+            long byteOffset = ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1);
+            if ((byteOffset & 7) != 0) {
+                return getLongLESafe(buf, offset);
+            }
+
+            try {
+                long v = UNSAFE.getLong(buf, byteOffset);
+                if (BIG_ENDIAN) {
+                    v = Long.reverseBytes(v);
+                }
+                return v;
+            } catch (Exception e) {
+                if (UNSAFE_ERROR_COUNT.incrementAndGet() <= MAX_UNSAFE_ERROR_LOG) {
+                    System.err.println("WARN: Unsafe memory access failed on SPARC platform, falling back to safe implementation. Error: " + e.getMessage());
+                }
+                return getLongLESafe(buf, offset);
+            }
+        }
         long v = UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
         if (BIG_ENDIAN) {
             v = Long.reverseBytes(v);
         }
         return v;
+    }
+    private static long getLongLESafe(char[] buf, int offset) {
+        if (offset + 3 >= buf.length) {
+            throw new IndexOutOfBoundsException("Buffer overflow in getLongLESafe");
+        }
+
+        long c0 = buf[offset] & 0xFFFFL;
+        long c1 = buf[offset + 1] & 0xFFFFL;
+        long c2 = buf[offset + 2] & 0xFFFFL;
+        long c3 = buf[offset + 3] & 0xFFFFL;
+
+        return c0 | (c1 << 16) | (c2 << 32) | (c3 << 48);
+    }
+
+    private static long getLongLESafe(byte[] buf, int offset) {
+        if (offset + 7 >= buf.length) {
+            throw new IndexOutOfBoundsException("Buffer overflow in getLongLESafe");
+        }
+
+        long b0 = buf[offset] & 0xFFL;
+        long b1 = buf[offset + 1] & 0xFFL;
+        long b2 = buf[offset + 2] & 0xFFL;
+        long b3 = buf[offset + 3] & 0xFFL;
+        long b4 = buf[offset + 4] & 0xFFL;
+        long b5 = buf[offset + 5] & 0xFFL;
+        long b6 = buf[offset + 6] & 0xFFL;
+        long b7 = buf[offset + 7] & 0xFFL;
+
+        return b0 | (b1 << 8) | (b2 << 16) | (b3 << 24) |
+               (b4 << 32) | (b5 << 40) | (b6 << 48) | (b7 << 56);
     }
 
     public static short hex2(int i) {

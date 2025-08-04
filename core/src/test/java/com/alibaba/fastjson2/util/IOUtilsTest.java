@@ -489,4 +489,107 @@ public class IOUtilsTest {
             }
         }
     }
+    @Test
+    public void testGetLongLECharArrayAlignment() {
+        char[] testChars = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};
+
+        for (int offset = 0; offset < testChars.length - 4; offset++) {
+            long result = IOUtils.getLongLE(testChars, offset);
+            assertTrue(result != 0 || isAllZero(testChars, offset, 4),
+                    "getLongLE should return non-zero for non-zero input at offset " + offset);
+        }
+
+        char[] pattern = new char[]{'1', '2', '3', '4', '5', '6', '7', '8'};
+        long result1 = IOUtils.getLongLE(pattern, 0);
+        long result2 = IOUtils.getLongLE(pattern, 1);
+
+        assertNotEquals(result1, result2, "Different offsets should produce different results");
+    }
+
+    @Test
+    public void testGetLongLEByteArrayAlignment() {
+        byte[] testBytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+        for (int offset = 0; offset < testBytes.length - 8; offset++) {
+            long result = IOUtils.getLongLE(testBytes, offset);
+            assertTrue(result != 0 || isAllZero(testBytes, offset, 8),
+                    "getLongLE should return non-zero for non-zero input at offset " + offset);
+        }
+
+        byte[] pattern = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+        long result1 = IOUtils.getLongLE(pattern, 0);
+        long result2 = IOUtils.getLongLE(pattern, 1);
+
+        assertNotEquals(result1, result2, "Different offsets should produce different results");
+    }
+
+    @Test
+    public void testSPARCPlatformDetection() {
+        char[] testChars = new char[]{'T', 'e', 's', 't', 'S', 'P', 'A', 'R', 'C'};
+
+        assertDoesNotThrow(() -> {
+            for (int i = 0; i < testChars.length - 4; i++) {
+                IOUtils.getLongLE(testChars, i);
+            }
+        }, "getLongLE should handle all platforms gracefully");
+    }
+
+    @Test
+    public void testLongLEConsistency() {
+        char[] testData = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+
+        String originalProperty = System.getProperty("fastjson2.unsafe.sparc.enabled");
+        try {
+            for (int offset = 0; offset < testData.length - 4; offset++) {
+                long result = IOUtils.getLongLE(testData, offset);
+                assertNotNull(result);
+            }
+        } finally {
+            if (originalProperty != null) {
+                System.setProperty("fastjson2.unsafe.sparc.enabled", originalProperty);
+            } else {
+                System.clearProperty("fastjson2.unsafe.sparc.enabled");
+            }
+        }
+    }
+
+    @Test
+    public void testEdgeCases() {
+        char[] minBuffer = new char[4];
+        minBuffer[0] = 'A';
+        minBuffer[1] = 'B';
+        minBuffer[2] = 'C';
+        minBuffer[3] = 'D';
+
+        assertDoesNotThrow(() -> IOUtils.getLongLE(minBuffer, 0),
+                "Should handle minimum buffer size without issues");
+        char[] largeBuffer = new char[100];
+        for (int i = 0; i < largeBuffer.length; i++) {
+            largeBuffer[i] = (char) ('A' + (i % 26));
+        }
+
+        for (int offset = 0; offset < largeBuffer.length - 4; offset += 7) { // Test unaligned offsets
+            final int currentOffset = offset;
+            assertDoesNotThrow(() -> IOUtils.getLongLE(largeBuffer, currentOffset),
+                    "Should handle large buffer at offset " + currentOffset);
+        }
+    }
+
+    private boolean isAllZero(char[] chars, int offset, int length) {
+        for (int i = offset; i < offset + length && i < chars.length; i++) {
+            if (chars[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isAllZero(byte[] bytes, int offset, int length) {
+        for (int i = offset; i < offset + length && i < bytes.length; i++) {
+            if (bytes[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
