@@ -87,7 +87,7 @@ public final class ObjectArrayReader
                         break;
                     case 'S':
                         if (jsonReader.nextIfSet()) {
-                            value = jsonReader.read(java.util.Set.class);
+                            value = jsonReader.read(java.util.HashSet.class);
                         } else {
                             throw new JSONException("Expected Set format but parsing failed: " + jsonReader.info());
                         }
