@@ -7463,16 +7463,13 @@ class JSONReaderUTF8
 
         byte[] decoded;
         if (index != offset) {
-            boolean hasPrefix = true;
-            String prefix = "data:image/jpeg;base64,";
-            for (int i = 0; i < prefix.length(); i++) {
-                if (bytes[offset + i] != prefix.charAt(i)) {
-                    hasPrefix = false;
-                    break;
-                }
-            }
-            if (hasPrefix) {
-                offset += prefix.length();
+            String prefix = "data:image/";
+            int p0, p1;
+            String base64 = "base64";
+            if (regionMatches(bytes, offset, prefix)
+                    && (p0 = IOUtils.indexOfChar(bytes, ';', prefix.length() + 1, index)) != -1
+                    && (p1 = IOUtils.indexOfChar(bytes, ',', p0 + 1, index)) != -1 && IOUtils.regionMatches(bytes, p0 + 1, base64)) {
+                offset = p1 + 1;
             }
 
             byte[] src = Arrays.copyOfRange(bytes, offset, index);

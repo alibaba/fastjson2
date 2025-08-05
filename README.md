@@ -49,7 +49,7 @@
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.57'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.58'
 }
 ```
 
@@ -75,7 +75,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.57'
+    implementation 'com.alibaba:fastjson:2.0.58'
 }
 ```
 
@@ -114,7 +114,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.57")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.58")
 }
 ```
 
@@ -151,14 +151,14 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.57'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.58'
 }
 ```
 
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.57'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.58'
 }
 ```
 

@@ -1621,6 +1621,19 @@ public class IOUtils {
         return indexOfChar(buf, '\\', i, max);
     }
 
+    public static boolean regionMatches(byte[] bytes, int off, String prefix) {
+        int len = prefix.length();
+        if (off + len >= bytes.length) {
+            return false;
+        }
+        for (int i = 0; i < len; i++) {
+            if (bytes[off + i] != prefix.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static int indexOfChar(byte[] buf, int ch, int fromIndex, int max) {
         for (int i = fromIndex; i < max; i++) {
             if (buf[i] == ch) {
