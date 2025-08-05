@@ -4,7 +4,10 @@ import com.alibaba.fastjson2.*;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,6 +65,56 @@ public class ObjectArrayReaderTest {
     public void testError() {
         assertThrows(JSONException.class, () -> JSON.parseObject("{\"value\":[a}", Bean.class));
         assertThrows(JSONException.class, () -> JSON.parseObject("{\"value\":{}}", Bean.class));
+    }
+
+    @Test
+    public void testArrayWithHashSet() {
+        HashSet<String> hashSet = new HashSet<>();
+        hashSet.add("test1");
+        hashSet.add("test2");
+        hashSet.add("test3");
+
+        Object[] array = new Object[]{hashSet};
+
+        String json = JSON.toJSONString(array, JSONWriter.Feature.WriteClassName);
+
+        Object[] result = JSON.parseObject(json, Object[].class, JSONReader.Feature.SupportClassForName);
+
+        assertNotNull(result);
+        assertEquals(1, result.length);
+        assertTrue(result[0] instanceof Set);
+
+        @SuppressWarnings("unchecked")
+        Set<String> resultSet = (Set<String>) result[0];
+        assertEquals(3, resultSet.size());
+        assertTrue(resultSet.contains("test1"));
+        assertTrue(resultSet.contains("test2"));
+        assertTrue(resultSet.contains("test3"));
+    }
+
+    @Test
+    public void testArrayListWithHashSet() {
+        HashSet<String> hashSet = new HashSet<>();
+        hashSet.add("test1");
+        hashSet.add("test2");
+
+        ArrayList<Object> arrayList = new ArrayList<>();
+        arrayList.add(hashSet);
+
+        String json = JSON.toJSONString(arrayList, JSONWriter.Feature.WriteClassName);
+
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> result = JSON.parseObject(json, ArrayList.class, JSONReader.Feature.SupportClassForName);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertTrue(result.get(0) instanceof Set);
+
+        @SuppressWarnings("unchecked")
+        Set<String> resultSet = (Set<String>) result.get(0);
+        assertEquals(2, resultSet.size());
+        assertTrue(resultSet.contains("test1"));
+        assertTrue(resultSet.contains("test2"));
     }
 
     public static class Bean {

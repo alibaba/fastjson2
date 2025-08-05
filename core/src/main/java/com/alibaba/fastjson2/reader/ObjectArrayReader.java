@@ -85,6 +85,13 @@ public final class ObjectArrayReader
                     case '[':
                         value = jsonReader.readArray();
                         break;
+                    case 'S':
+                        if (jsonReader.nextIfSet()) {
+                            value = jsonReader.read(java.util.Set.class);
+                        } else {
+                            throw new JSONException(jsonReader.info());
+                        }
+                        break;
                     default:
                         throw new JSONException(jsonReader.info());
                 }
