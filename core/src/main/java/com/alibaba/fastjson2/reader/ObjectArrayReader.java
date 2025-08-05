@@ -89,7 +89,7 @@ public final class ObjectArrayReader
                         if (jsonReader.nextIfSet()) {
                             value = jsonReader.read(java.util.Set.class);
                         } else {
-                            throw new JSONException(jsonReader.info());
+                            throw new JSONException("Expected Set format but parsing failed: " + jsonReader.info());
                         }
                         break;
                     default:
