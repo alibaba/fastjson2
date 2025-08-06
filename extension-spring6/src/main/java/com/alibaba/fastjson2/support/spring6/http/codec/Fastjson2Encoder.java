@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
+import com.alibaba.fastjson2.support.spring6.codec.Fastjson2Decoder;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.ResolvableType;
@@ -27,7 +28,9 @@ import java.util.Map;
  *
  * @author Xi.Liu
  * @see AbstractJackson2Decoder
+ * @deprecated in favor of {@link com.alibaba.fastjson2.support.spring6.codec.Fastjson2Encoder} and {@link Fastjson2Decoder}
  */
+@Deprecated
 public class Fastjson2Encoder
         extends AbstractJackson2Encoder {
     private final FastJsonConfig config;
