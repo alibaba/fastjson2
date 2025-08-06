@@ -630,6 +630,8 @@ public abstract class JSONReader
 
     public abstract boolean nextIfSet();
 
+    public abstract boolean nextIfList();
+
     public abstract boolean nextIfInfinity();
 
     public abstract String readPattern();
@@ -2770,6 +2772,20 @@ public abstract class JSONReader
                 }
                 case 'N':
                     val = readNaN();
+                    break;
+                case 'S':
+                    if (nextIfSet()) {
+                        val = read(java.util.Set.class);
+                    } else {
+                        throw new JSONException(info());
+                    }
+                    break;
+                case 'L':
+                    if (nextIfList()) {
+                        val = read(java.util.List.class);
+                    } else {
+                        throw new JSONException(info());
+                    }
                     break;
                 case '/':
                     skipComment();

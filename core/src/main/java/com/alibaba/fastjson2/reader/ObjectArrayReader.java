@@ -92,6 +92,13 @@ public final class ObjectArrayReader
                             throw new JSONException("Expected Set format but parsing failed: " + jsonReader.info());
                         }
                         break;
+                    case 'L':
+                        if (jsonReader.nextIfList()) {
+                            value = jsonReader.read(java.util.List.class);
+                        } else {
+                            throw new JSONException("Expected List format but parsing failed: " + jsonReader.info());
+                        }
+                        break;
                     default:
                         throw new JSONException(jsonReader.info());
                 }

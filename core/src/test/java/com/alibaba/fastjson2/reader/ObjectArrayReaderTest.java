@@ -117,6 +117,31 @@ public class ObjectArrayReaderTest {
         assertTrue(resultSet.contains("test2"));
     }
 
+    @Test
+    public void testArrayWithList() {
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("item1");
+        arrayList.add("item2");
+        arrayList.add("item3");
+
+        Object[] array = new Object[]{arrayList};
+
+        String json = JSON.toJSONString(array, JSONWriter.Feature.WriteClassName);
+
+        Object[] result = JSON.parseObject(json, Object[].class, JSONReader.Feature.SupportClassForName);
+
+        assertNotNull(result);
+        assertEquals(1, result.length);
+        assertTrue(result[0] instanceof java.util.List);
+
+        @SuppressWarnings("unchecked")
+        java.util.List<String> resultList = (java.util.List<String>) result[0];
+        assertEquals(3, resultList.size());
+        assertTrue(resultList.contains("item1"));
+        assertTrue(resultList.contains("item2"));
+        assertTrue(resultList.contains("item3"));
+    }
+
     public static class Bean {
         public Object[] value;
     }
