@@ -65,8 +65,11 @@ public final class Fastjson2Encoder
             if (JSON.isValidObject(str)) {
                 bytes = str.getBytes(config.getCharset());
             }
-        } else if (value instanceof byte[] && JSON.isValid((byte[]) value)) {
-            bytes = (byte[]) value;
+        } else if (value instanceof byte[]) {
+            byte[] curBytes = (byte[]) value;
+            if (JSON.isValid(curBytes)) {
+                bytes = (byte[]) value;
+            }
         }
         // If bytes is not null, write it to a DataBuffer
         if (bytes != null) {
