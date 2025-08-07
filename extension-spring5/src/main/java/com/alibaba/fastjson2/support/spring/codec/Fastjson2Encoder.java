@@ -60,8 +60,11 @@ public final class Fastjson2Encoder
     public DataBuffer encodeValue(@Nullable Object value, @NonNull DataBufferFactory bufferFactory, @NonNull ResolvableType valueType, MimeType mimeType, Map<String, Object> hints) {
         byte[] bytes = null;
         // Check if the value is a valid JSON string or byte array
-        if (value instanceof String && JSON.isValidObject((String) value)) {
-            bytes = ((String) value).getBytes(config.getCharset());
+        if (value instanceof String) {
+            String str = (String) value;
+            if (JSON.isValidObject(str)) {
+                bytes = str.getBytes(config.getCharset());
+            }
         } else if (value instanceof byte[] && JSON.isValid((byte[]) value)) {
             bytes = (byte[]) value;
         }
