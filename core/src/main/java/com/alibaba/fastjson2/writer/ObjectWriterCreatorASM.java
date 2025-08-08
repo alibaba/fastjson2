@@ -3231,7 +3231,6 @@ public class ObjectWriterCreatorASM
             }
         }
 
-
         mw.goto_(endIfNull_);
 
         mw.visitLabel(notNull_);

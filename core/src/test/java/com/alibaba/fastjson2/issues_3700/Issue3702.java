@@ -29,16 +29,6 @@ public class Issue3702 {
         private Float f;
         @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
         private Long l;
-//        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
-//        private Byte b;
-//        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
-//        private Short s;
-//        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
-//        private BigInteger bi;
-//        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
-//        private BigDecimal bd;
-//        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
-//        private Number n;
     }
     @Data
     public class NumberDTO2
