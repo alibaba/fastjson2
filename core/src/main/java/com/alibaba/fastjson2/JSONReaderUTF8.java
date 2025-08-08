@@ -362,6 +362,28 @@ class JSONReaderUTF8
     }
 
     @Override
+    public final boolean nextIfList() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        if (ch == 'L'
+                && offset + 2 < end
+                && bytes[offset] == 'i'
+                && bytes[offset + 1] == 's'
+                && bytes[offset + 2] == 't') {
+            offset += 3;
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+            this.offset = offset;
+            this.ch = (char) ch;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public final boolean nextIfInfinity() {
         final byte[] bytes = this.bytes;
         int offset = this.offset;
