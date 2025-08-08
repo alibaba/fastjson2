@@ -138,7 +138,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.45.1</version>
+            <version>3.50.0</version>
             <scope>provided</scope>
         </dependency>
 
