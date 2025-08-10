@@ -3978,18 +3978,17 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(notDefaultValue_);
 
         if (fieldClass == long.class) {
-            boolean iso8601 = "iso8601".equals(format);
-            if (iso8601 || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
+            boolean writeDate = "iso8601".equals(format) || fieldWriter instanceof FieldWriterDate;
+            if (writeDate || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
                 mw.aload(THIS);
                 mw.getfield(classNameType, fieldWriter(i), DESC_FIELD_WRITER);
 
                 mw.aload(JSON_WRITER);
                 mw.lload(FIELD_VALUE);
 
-                mw.invokevirtual(TYPE_FIELD_WRITER, iso8601 ? "writeDate" : "writeInt64", METHOD_DESC_WRITE_J);
+                mw.invokevirtual(TYPE_FIELD_WRITER, writeDate ? "writeDate" : "writeInt64", METHOD_DESC_WRITE_J);
             } else {
                 gwFieldName(mwc, fieldWriter, i);
-
                 mw.aload(JSON_WRITER);
                 mw.lload(FIELD_VALUE);
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64", "(J)V");
@@ -4354,7 +4353,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == long.class) {
-            if (format == null || format.isEmpty()) {
+            if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
             }
             return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
