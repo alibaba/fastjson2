@@ -3220,7 +3220,6 @@ public class ObjectWriterCreatorASM
                 gwFieldName(mwc, fieldWriter, i);
 
                 mw.aload(JSON_WRITER);
-                mw.visitLdcInsn(0);
                 mw.lconst_0();
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64", "(J)V");
             } else {  // (features & WriteNulls.mask) != 0
