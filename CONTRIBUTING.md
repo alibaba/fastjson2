@@ -6,6 +6,12 @@ PR are always welcome, even if they only contain small fixes like typos, or a fe
 
 Please submit a PR broken down into small changes bit by bit. A PR consisting of a lot of features and code changes may be hard to review. It is recommended to submit PRs in an incremental fashion.
 
+Before submitting your PR, please ensure that your code adheres to the project's coding standards and that all tests pass. You can do this by running the following Maven commands:
+```bash
+mvn validate
+mvn test
+```
+
 This [Wiki](https://github.com/alibaba/fastjson2/wiki) contains information about scenarios structure, design and api documents, how to use, how to run it, and more.
 
 Note: If you split your pull request to small changes, please make sure any of the changes goes to master will not break anything. Otherwise, it can not be merged until this feature complete.
