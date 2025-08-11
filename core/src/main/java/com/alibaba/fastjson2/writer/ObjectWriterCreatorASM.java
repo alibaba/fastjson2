@@ -3140,17 +3140,13 @@ public class ObjectWriterCreatorASM
             mw.aload(JSON_WRITER);
             mw.invokevirtual(TYPE_JSON_WRITER, "writeNumberNull", "()V");
         } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
             long features = fieldWriter.features;
             if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0) {
-                gwFieldName(mwc, fieldWriter, i);
-
-                mw.aload(JSON_WRITER);
                 mw.visitLdcInsn(0);
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
             } else {  // (features & WriteNulls.mask) != 0
-                gwFieldName(mwc, fieldWriter, i);
-
-                mw.aload(JSON_WRITER);
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
             }
         }
@@ -3201,20 +3197,30 @@ public class ObjectWriterCreatorASM
         mw.astore(FIELD_VALUE);
         mw.ifnonnull(notNull_);
 
-        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
             mwc.genIsEnabled(
                     WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
                     writeNullValue_,
                     endIfNull_
             );
+
+            mw.visitLabel(writeNullValue_);
+
+            gwFieldName(mwc, fieldWriter, i);
+
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64Null", "()V");
+        } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
+            long features = fieldWriter.features;
+            if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0) {
+                mw.lconst_0();
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64", "(J)V");
+            } else {  // (features & WriteNulls.mask) != 0
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
+            }
         }
-
-        mw.visitLabel(writeNullValue_);
-
-        gwFieldName(mwc, fieldWriter, i);
-
-        mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64Null", "()V");
 
         mw.goto_(endIfNull_);
 
@@ -3262,20 +3268,35 @@ public class ObjectWriterCreatorASM
         mw.dup();
         mw.astore(FIELD_VALUE);
         mw.ifnonnull(notNull_);
-        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
             mwc.genIsEnabled(
                     WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
                     writeNullValue_,
                     endIfNull_
             );
+
+            mw.visitLabel(writeNullValue_);
+
+            gwFieldName(mwc, fieldWriter, i);
+
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
+        } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
+            long features = fieldWriter.features;
+            if ((features & WriteNullNumberAsZero.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
+            } else if ((features & NullAsDefaultValue.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.i2d();
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeDouble", "(D)V");
+            } else {  // (features & WriteNulls.mask) != 0
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
+            }
         }
-
-        mw.visitLabel(writeNullValue_);
-
-        gwFieldName(mwc, fieldWriter, i);
-
-        mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
 
         mw.goto_(endIfNull_);
 
@@ -3325,18 +3346,34 @@ public class ObjectWriterCreatorASM
 
         mw.ifnonnull(notNull_);
 
-        mwc.genIsEnabled(
-                WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
-                writeNullValue_,
-                endIfNull_
-        );
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
+            mwc.genIsEnabled(
+                    WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                    writeNullValue_,
+                    endIfNull_
+            );
 
-        mw.visitLabel(writeNullValue_);
+            mw.visitLabel(writeNullValue_);
 
-        gwFieldName(mwc, fieldWriter, i);
+            gwFieldName(mwc, fieldWriter, i);
 
-        mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
+        } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
+            long features = fieldWriter.features;
+            if ((features & WriteNullNumberAsZero.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
+            } else if ((features & NullAsDefaultValue.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.i2f();
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(F)V");
+            } else {  // (features & WriteNulls.mask) != 0
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
+            }
+        }
 
         mw.goto_(endIfNull_);
 
