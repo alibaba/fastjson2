@@ -1181,7 +1181,10 @@ public interface JSONB {
     }
 
     static byte[] toBytes(Object object, SymbolTable symbolTable, JSONWriter.Feature... features) {
-        JSONWriter.Context context = new JSONWriter.Context(defaultObjectWriterProvider, features);
+        return toBytes(object, new Context(), symbolTable, features);
+    }
+
+    static byte[] toBytes(Object object, JSONWriter.Context context, SymbolTable symbolTable, JSONWriter.Feature... features) {
         try (JSONWriterJSONB writer = new JSONWriterJSONB(context, symbolTable)) {
             if (object == null) {
                 writer.writeNull();

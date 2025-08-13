@@ -93,7 +93,7 @@ public class DateUtils {
             return null;
         }
 
-        if (format == null || format.isEmpty()) {
+        if (format == null || format.isEmpty() || "string".equals(format)) {
             long millis = parseMillis(str, zoneId);
             if (millis == 0) {
                 return null;

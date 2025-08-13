@@ -11,6 +11,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 abstract class FieldWriterInt64<T>
         extends FieldWriter<T> {
     final boolean browserCompatible;
+    boolean writeAsMillis;
 
     FieldWriterInt64(
             String name,
