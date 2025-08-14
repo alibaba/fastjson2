@@ -2843,7 +2843,7 @@ public class ObjectWriterCreatorASM
             } else {
                 nullFeatures |= NullAsDefaultValue.mask;
             }
-            mwc.genIsEnabled(nullFeatures, notNull_);
+            mwc.genIsEnabled(fieldWriter.features, nullFeatures, notNull_);
 //            mw.iload(mwc.var(WRITE_NULLS));
 //            mw.ifeq(notNull_);
         }
@@ -2864,8 +2864,16 @@ public class ObjectWriterCreatorASM
                 || fieldClass == Double.class
                 || fieldClass == BigDecimal.class) {
             WRITE_NULL_METHOD = "writeDecimalNull";
+            WRITE_NULL_DESC = "(J)V";
+            mw.lload(mwc.var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(fieldWriter.features);
+            mw.lor();
         } else if (Number.class.isAssignableFrom(fieldClass)) {
             WRITE_NULL_METHOD = "writeNumberNull";
+            WRITE_NULL_DESC = "(J)V";
+            mw.lload(mwc.var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(fieldWriter.features);
+            mw.lor();
         } else if (fieldClass == Boolean.class) {
             WRITE_NULL_METHOD = "writeBooleanNull";
         } else if (fieldClass == String.class
