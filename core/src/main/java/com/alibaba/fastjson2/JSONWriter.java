@@ -989,6 +989,7 @@ public abstract class JSONWriter
     }
 
     public abstract void writeInt8(byte value);
+
     public abstract void writeInt8(byte[] value);
 
     public abstract void writeInt16(short value);
@@ -1186,7 +1187,11 @@ public abstract class JSONWriter
     }
 
     public final void writeNumberNull() {
-        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+        writeNumberNull(this.context.features);
+    }
+
+    public final void writeNumberNull(long features) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeInt32(0);
         } else {
             writeNull();
@@ -1194,9 +1199,13 @@ public abstract class JSONWriter
     }
 
     public final void writeDecimalNull() {
-        if ((this.context.features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
+        writeDecimalNull(this.context.features);
+    }
+
+    public final void writeDecimalNull(long features) {
+        if ((features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
             writeDouble(0.0);
-        } else if ((this.context.features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
+        } else if ((features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
             writeInt32(0);
         } else {
             writeNull();
@@ -1301,6 +1310,7 @@ public abstract class JSONWriter
 
     /**
      * write short value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1308,6 +1318,7 @@ public abstract class JSONWriter
 
     /**
      * write short value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1315,6 +1326,7 @@ public abstract class JSONWriter
 
     /**
      * write short value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1322,6 +1334,7 @@ public abstract class JSONWriter
 
     /**
      * write boolean array value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1342,6 +1355,7 @@ public abstract class JSONWriter
 
     /**
      * write byte array value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1362,6 +1376,7 @@ public abstract class JSONWriter
 
     /**
      * write short array value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1382,6 +1397,7 @@ public abstract class JSONWriter
 
     /**
      * write int array value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1402,6 +1418,7 @@ public abstract class JSONWriter
 
     /**
      * write long array value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1422,6 +1439,7 @@ public abstract class JSONWriter
 
     /**
      * write float array value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1442,6 +1460,7 @@ public abstract class JSONWriter
 
     /**
      * write double array value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1462,6 +1481,7 @@ public abstract class JSONWriter
 
     /**
      * write int value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1469,6 +1489,7 @@ public abstract class JSONWriter
 
     /**
      * write float value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1478,6 +1499,7 @@ public abstract class JSONWriter
 
     /**
      * write double value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -1487,6 +1509,7 @@ public abstract class JSONWriter
 
     /**
      * write long value as String
+     *
      * @param value value
      * @since 2.0.49
      */
@@ -2216,6 +2239,7 @@ public abstract class JSONWriter
          * and is used in some scenarios where serialized content needs to be signed.
          * SortedMap and derived classes do not need to do this.
          * This Feature does not work for LinkedHashMap.
+         *
          * @deprecated Use {@link Feature#SortMapEntriesByKeys} instead.
          */
         MapSortField(1 << 21),
@@ -2312,18 +2336,21 @@ public abstract class JSONWriter
          * The serialized Map will first be sorted according to Key,
          * and is used in some scenarios where serialized content needs to be signed.
          * SortedMap and derived classes do not need to do this.
+         *
          * @since 2.0.48
          */
         SortMapEntriesByKeys(1L << 41),
 
         /**
          * JSON formatting support using 4 spaces for indentation
+         *
          * @since 2.0.54
          */
         PrettyFormatWith2Space(1L << 42),
 
         /**
          * JSON formatting support using 4 spaces for indentation
+         *
          * @since 2.0.54
          */
         PrettyFormatWith4Space(1L << 43),
@@ -2719,8 +2746,8 @@ public abstract class JSONWriter
     }
 
     /**
-     * @deprecated
      * @param object
+     * @deprecated
      */
     public final void writeReference(Object object) {
         if (refs == null) {
