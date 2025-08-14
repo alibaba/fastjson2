@@ -1186,7 +1186,11 @@ public abstract class JSONWriter
     }
 
     public final void writeNumberNull() {
-        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+        writeNumberNull(this.context.features);
+    }
+
+    public final void writeNumberNull(long features) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeInt32(0);
         } else {
             writeNull();
@@ -1194,9 +1198,13 @@ public abstract class JSONWriter
     }
 
     public final void writeDecimalNull() {
-        if ((this.context.features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
+        writeDecimalNull(this.context.features);
+    }
+
+    public final void writeDecimalNull(long features) {
+        if ((features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
             writeDouble(0.0);
-        } else if ((this.context.features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
+        } else if ((features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
             writeInt32(0);
         } else {
             writeNull();

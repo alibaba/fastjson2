@@ -7,6 +7,8 @@ import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -16,6 +18,14 @@ public class Issue3702 {
         assertEquals(JSON.toJSONString(new NumberDTO()), "{\"d\":0,\"f\":0,\"i\":0,\"l\":0}");
         assertEquals(JSON.toJSONString(new NumberDTO2()), "{\"d\":0.0,\"f\":0.0,\"i\":0,\"l\":0}");
         assertEquals(JSON.toJSONString(new NumberDTO3()), "{}");
+        assertEquals(JSON.toJSONString(new NumberDTO4()),
+                "{\"bigDecimal\":0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0,\"floatValue\":0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
+        assertEquals(JSON.toJSONString(new NumberDTO5()),
+                "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
+        assertEquals(JSON.toJSONString(new NumberDTO3(), JSONWriter.Feature.WriteNullNumberAsZero),
+                "{\"bigDecimal\":0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0,\"floatValue\":0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
+        assertEquals(JSON.toJSONString(new NumberDTO3(), JSONWriter.Feature.NullAsDefaultValue),
+                "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
     }
 
     @Data
@@ -30,6 +40,7 @@ public class Issue3702 {
         @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
         private Long l;
     }
+
     @Data
     public class NumberDTO2
             implements Serializable {
@@ -42,12 +53,64 @@ public class Issue3702 {
         @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
         private Long l;
     }
+
     @Data
     public class NumberDTO3
             implements Serializable {
-        private Integer integer;
-        private Double wrapperDouble;
-        private Float wrapperFloat;
-        private Long wrapperLong;
+        private Byte byteValue;
+        private Short shortValue;
+        private Integer intValue;
+        private Long longValue;
+        private Float floatValue;
+        private Double doubleValue;
+        private BigDecimal bigDecimal;
+        private BigInteger bigInteger;
+        private Number number;
+    }
+
+    @Data
+    public class NumberDTO4
+            implements Serializable {
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private BigDecimal bigDecimal;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private BigInteger bigInteger;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private Byte byteValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private Short shortValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private Integer intValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private Long longValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private Float floatValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private Double doubleValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.WriteNullNumberAsZero)
+        private Number number;
+    }
+
+    @Data
+    public class NumberDTO5
+            implements Serializable {
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private BigDecimal bigDecimal;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private BigInteger bigInteger;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private Byte byteValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private Short shortValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private Integer intValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private Long longValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private Float floatValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private Double doubleValue;
+        @JSONField(serializeFeatures = JSONWriter.Feature.NullAsDefaultValue)
+        private Number number;
     }
 }
