@@ -190,7 +190,67 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
 
 > Reference: Spring Framework official documentation Spring Web MVC section, [For more configuration](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-config).
 
-# 3. Integrate Fastjson2 in Spring Web Socket
+# 3. Integrate Fastjson2 in Spring Webflux
+
+Fastjson2 provides support for reactive codec in Spring, to replace Spring's default Decoder and Encoder with Fastjson2Decoder and Fastjson2Encoder.
+
+**Packages**:
+
+- `com.alibaba.fastjson2.support.spring.codec.Fastjson2Decoder`
+- `com.alibaba.fastjson2.support.spring.codec.Fastjson2Encoder`
+
+**Spring6 Packages**:
+
+- `com.alibaba.fastjson2.support.spring6.codec.Fastjson2Decoder`
+- `com.alibaba.fastjson2.support.spring6.codec.Fastjson2Encoder`
+
+**Example1**:
+
+```java
+@Configuration
+public class CustomWebfluxConfigure implements WebFluxConfigurer {
+
+    @Override
+    public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+        //configurer.registerDefaults(false);
+        CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
+        //自定义配置
+        FastJsonConfig config = new FastJsonConfig();
+        config.setCharset(StandardCharsets.UTF_8);
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        //设置支持的媒体类型
+        MimeType[] supportedMimeTypes = new MimeType[]{MediaType.APPLICATION_JSON};
+        //注册解码器
+        customCodecs.register(new Fastjson2Decoder(config,supportedMimeTypes));
+        //注册编码器
+        customCodecs.register(new Fastjson2Encoder(config,supportedMimeTypes));
+    }
+}
+```
+
+**Example2**:
+
+```java
+@Bean
+public CodecCustomizer codecCustomizer() {
+    return configurer -> {
+        //configurer.registerDefaults(false);
+        CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
+        //自定义配置
+        FastJsonConfig config = new FastJsonConfig();
+        config.setCharset(StandardCharsets.UTF_8);
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        //设置支持的媒体类型
+        MimeType[] supportedMimeTypes = new MimeType[]{MediaType.APPLICATION_JSON};
+        //注册解码器
+        customCodecs.register(new Fastjson2Decoder(config, supportedMimeTypes));
+        //注册编码器
+        customCodecs.register(new Fastjson2Encoder(config, supportedMimeTypes));
+    };
+}
+```
+
+# 4. Integrate Fastjson2 in Spring Web Socket
 
 In Fastjson2, Spring WebSocket is also supported, which can be configured using `FastjsonSockJsMessageCodec`.
 
@@ -221,12 +281,12 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
 
 > Reference: Spring Framework official documentation Spring Web Socket section, [For more configuration](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#websocket).
 
-# 4. Integrate Fastjson2 in Spring Data Redis
+# 5. Integrate Fastjson2 in Spring Data Redis
 
 In Fastjson2, you can also use `GenericFastJsonRedisSerializer` or `FastJsonRedisSerializer` to provide a better
 performance experience for Spring Data Redis.
 
-## 4.1 Generic Redis Serializer
+## 5.1 Generic Redis Serializer
 
 Use `GenericFastJsonRedisSerializer` as the `RedisSerializer` of `RedisTemplate` to improve JSON serialization and
 deserialization speed.
@@ -255,7 +315,7 @@ public class RedisConfiguration {
 }
 ```
 
-## 4.2 Customized Redis Serializer
+## 5.2 Customized Redis Serializer
 
 Usually, `GenericFastJsonRedisSerializer` can be used for most scenarios. If you want to define a specific type
 of `RedisTemplate`, you can use `FastJsonRedisSerializer` instead of `GenericFastJsonRedisSerializer` , the
@@ -282,7 +342,7 @@ public class RedisConfiguration {
 
 ```
 
-## 4.3 JSONB Redis Serializer
+## 5.3 JSONB Redis Serializer
 
 If you plan to use JSONB as an object serialization/deserialization method and have higher serialization speed
 requirements, you can configure the `jsonb` parameter, which is a new support in fastjson 2.0.6, and the configuration
@@ -317,12 +377,12 @@ public class RedisConfiguration {
 
 > Reference: Spring Data Redis official documentation, [For more configuration](https://docs.spring.io/spring-data/redis/docs/current/reference/html/).
 
-# 5. Integrate Fastjson2 in Spring Messaging
+# 6. Integrate Fastjson2 in Spring Messaging
 
 In Fastjson2, you can use `MappingFastJsonMessageConverter` to provide a better performance experience for Spring
 Messaging.
 
-## 5.1 JSON Message Converter
+## 6.1 JSON Message Converter
 
 Use `MappingFastJsonMessageConverter` as Spring Cloud Stream or Spring Messaging to speed up message serialization and
 deserialization.
@@ -345,7 +405,7 @@ public class StreamConfiguration {
 
 ```
 
-## 5.2 JSONB Message Converter
+## 6.2 JSONB Message Converter
 
 If you plan to use JSONB as the object serialization/deserialization method and have high requirements on serialization
 speed, you can configure the `jsonb` parameter of `FastJsonConfig`, which is a new support in fastjson 2.0.6 version ,
