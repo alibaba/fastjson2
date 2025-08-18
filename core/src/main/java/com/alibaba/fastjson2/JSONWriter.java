@@ -2489,10 +2489,10 @@ public abstract class JSONWriter
                                         ascii = false;
                                         final int uc;
                                         if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
-                                            if (name.length() - i < 2) {
+                                            if (name.length() - j < 2) {
                                                 uc = -1;
                                             } else {
-                                                char d = name.charAt(i + 1);
+                                                char d = name.charAt(j + 1);
                                                 // d >= '\uDC00' && d < ('\uDFFF' + 1)
                                                 if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
                                                     uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
@@ -2603,10 +2603,10 @@ public abstract class JSONWriter
                                         ascii = false;
                                         final int uc;
                                         if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
-                                            if (name.length() - i < 2) {
+                                            if (name.length() - j < 2) {
                                                 uc = -1;
                                             } else {
-                                                char d = name.charAt(i + 1);
+                                                char d = name.charAt(j + 1);
                                                 // d >= '\uDC00' && d < ('\uDFFF' + 1)
                                                 if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
                                                     uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
