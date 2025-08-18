@@ -884,7 +884,16 @@ public class ObjectReaderBaseModule
             }
 
             BeanUtils.declaredFields(objectClass, field -> {
-                if (field.getName().equals(fieldName)) {
+                if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+                    if (field.getName().startsWith("is")) {
+                        name = field.getName().substring(2);
+                        if (!name.isEmpty()) {
+                            name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+                        }
+                    }
+                }
+
+                if (field.getName().equals(fieldName) || name.equals(fieldName)) {
                     int modifiers = field.getModifiers();
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
