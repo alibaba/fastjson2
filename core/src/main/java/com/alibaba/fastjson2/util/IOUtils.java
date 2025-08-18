@@ -287,6 +287,17 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Writes a decimal number to a byte array buffer
+     *
+     * @param buf byte array buffer
+     * @param off buffer starting offset
+     * @param unscaledVal unscaled value (precision part of BigDecimal)
+     * @param scale number of digits after the decimal point, caller must ensure scale >= 0
+     * @return offset after writing
+     *
+     * Note: This method trusts that the caller has ensured scale >= 0
+     */
     public static int writeDecimal(byte[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
             putByte(buf, off++, (byte) '-');
@@ -331,6 +342,17 @@ public class IOUtils {
         return IOUtils.writeInt64(buf, off, unscaledVal);
     }
 
+    /**
+     * Writes a decimal number to a character array buffer
+     *
+     * @param buf character array buffer
+     * @param off buffer starting offset
+     * @param unscaledVal unscaled value (precision part of BigDecimal)
+     * @param scale number of digits after the decimal point, caller must ensure scale >= 0
+     * @return offset after writing
+     *
+     * Note: This method trusts that the caller has ensured scale >= 0
+     */
     public static int writeDecimal(char[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
             putChar(buf, off++, '-');
