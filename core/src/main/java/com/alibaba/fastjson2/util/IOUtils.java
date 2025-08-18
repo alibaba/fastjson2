@@ -293,10 +293,10 @@ public class IOUtils {
      * @param buf byte array buffer
      * @param off buffer starting offset
      * @param unscaledVal unscaled value (precision part of BigDecimal)
-     * @param scale number of digits after the decimal point, caller must ensure scale >= 0
+     * @param scale number of digits after the decimal point, caller must ensure scale &gt;= 0
      * @return offset after writing
      *
-     * Note: This method trusts that the caller has ensured scale >= 0
+     * Note: This method trusts that the caller has ensured scale &gt;= 0
      */
     public static int writeDecimal(byte[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
@@ -348,10 +348,10 @@ public class IOUtils {
      * @param buf character array buffer
      * @param off buffer starting offset
      * @param unscaledVal unscaled value (precision part of BigDecimal)
-     * @param scale number of digits after the decimal point, caller must ensure scale >= 0
+     * @param scale number of digits after the decimal point, caller must ensure scale &gt;= 0
      * @return offset after writing
      *
-     * Note: This method trusts that the caller has ensured scale >= 0
+     * Note: This method trusts that the caller has ensured scale &gt;= 0
      */
     public static int writeDecimal(char[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
