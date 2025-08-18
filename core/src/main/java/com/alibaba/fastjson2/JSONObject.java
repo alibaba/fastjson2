@@ -184,9 +184,11 @@ public class JSONObject
     }
 
     /**
+     * Iterates over the JSONArray elements associated with the given key.
+     *
+     * @param key the key whose associated JSONArray is to be iterated
+     * @param action the action to be performed for each JSONObject element
      * @since 2.0.52
-     * @param key
-     * @param action
      * @deprecated Typo in the method name. Use {@link #forEachArrayObject(String, Consumer) forEachArrayObject} instead
      */
     @Deprecated
@@ -195,8 +197,10 @@ public class JSONObject
     }
 
     /**
-     * @param key
-     * @param action
+     * Iterates over the JSONArray elements associated with the given key.
+     *
+     * @param key the key whose associated JSONArray is to be iterated
+     * @param action the action to be performed for each JSONObject element
      */
     public void forEachArrayObject(String key, Consumer<JSONObject> action) {
         JSONArray array = getJSONArray(key);
@@ -274,6 +278,15 @@ public class JSONObject
         return null;
     }
 
+    /**
+     * Returns a list of objects of the specified type from the associated JSONArray in this {@link JSONObject}.
+     *
+     * @param <T> the type of elements in the list
+     * @param key the key whose associated value is to be returned
+     * @param itemClass the class of the items in the list
+     * @param features features to be enabled in parsing
+     * @return a list of objects or null
+     */
     public <T> List<T> getList(String key, Class<T> itemClass, JSONReader.Feature... features) {
         JSONArray jsonArray = getJSONArray(key);
         if (jsonArray == null) {
@@ -1532,14 +1545,18 @@ public class JSONObject
     }
 
     /**
+     * Handles method invocations on a proxy instance.
+     *
      * @param proxy proxy object, currently useless
      * @param method methods that need reflection
      * @param args parameters of invoke
+     * @return the result of the method invocation
+     * @throws Throwable if an error occurs during method invocation
      * @throws UnsupportedOperationException If reflection for this method is not supported
      * @throws ArrayIndexOutOfBoundsException If the length of args does not match the length of the method parameter
      */
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
         int parameterCount = method.getParameterCount();
@@ -1685,6 +1702,10 @@ public class JSONObject
     }
 
     /**
+     * Gets the JSON field name from the method's annotations.
+     *
+     * @param method the method to get the JSON field name from
+     * @return the JSON field name, or null if not found
      * @since 2.0.4
      */
     private String getJSONFieldName(Method method) {
@@ -1709,12 +1730,24 @@ public class JSONObject
         return name;
     }
 
+    /**
+     * Creates and puts a new JSONArray with the specified name.
+     *
+     * @param name the name for the new JSONArray
+     * @return the created JSONArray
+     */
     public JSONArray putArray(String name) {
         JSONArray array = new JSONArray();
         put(name, array);
         return array;
     }
 
+    /**
+     * Creates and puts a new JSONObject with the specified name.
+     *
+     * @param name the name for the new JSONObject
+     * @return the created JSONObject
+     */
     public JSONObject putObject(String name) {
         JSONObject object = new JSONObject();
         put(name, object);
@@ -1722,6 +1755,8 @@ public class JSONObject
     }
 
     /**
+     * Consumer for processing method names.
+     *
      * @since 2.0.3
      */
     static class NameConsumer
@@ -1765,6 +1800,10 @@ public class JSONObject
     }
 
     /**
+     * Checks if this JSONObject is valid according to the specified JSON schema.
+     *
+     * @param schema the JSON schema to validate against
+     * @return true if this JSONObject is valid according to the schema, false otherwise
      * @since 2.0.4
      */
     public boolean isValid(JSONSchema schema) {
@@ -1772,6 +1811,10 @@ public class JSONObject
     }
 
     /**
+     * Applies a name filter to an iterable collection.
+     *
+     * @param iterable the iterable collection to apply the filter to
+     * @param nameFilter the name filter to apply
      * @since 2.0.3
      */
     static void nameFilter(Iterable<?> iterable, NameFilter nameFilter) {
@@ -1785,9 +1828,13 @@ public class JSONObject
     }
 
     /**
+     * Applies a name filter to a map.
+     *
+     * @param map the map to apply the filter to
+     * @param nameFilter the name filter to apply
      * @since 2.0.3
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     static void nameFilter(Map map, NameFilter nameFilter) {
         JSONObject changed = null;
         for (Iterator<?> it = map.entrySet().iterator(); it.hasNext(); ) {
@@ -1819,6 +1866,10 @@ public class JSONObject
     }
 
     /**
+     * Applies a value filter to an iterable collection.
+     *
+     * @param iterable the iterable collection to apply the filter to
+     * @param valueFilter the value filter to apply
      * @since 2.0.3
      */
     @SuppressWarnings("rawtypes")
@@ -1833,9 +1884,13 @@ public class JSONObject
     }
 
     /**
+     * Applies a value filter to a map.
+     *
+     * @param map the map to apply the filter to
+     * @param valueFilter the value filter to apply
      * @since 2.0.3
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     static void valueFilter(Map map, ValueFilter valueFilter) {
         for (Object o : map.entrySet()) {
             Map.Entry entry = (Map.Entry) o;
@@ -1859,6 +1914,9 @@ public class JSONObject
     }
 
     /**
+     * Applies a value filter to this JSONObject.
+     *
+     * @param valueFilter the value filter to apply
      * @since 2.0.3
      */
     public void valueFilter(ValueFilter valueFilter) {
@@ -1866,6 +1924,9 @@ public class JSONObject
     }
 
     /**
+     * Applies a name filter to this JSONObject.
+     *
+     * @param nameFilter the name filter to apply
      * @since 2.0.3
      */
     public void nameFilter(NameFilter nameFilter) {
@@ -1881,6 +1942,10 @@ public class JSONObject
     }
 
     /**
+     * Evaluates a JSONPath expression against this JSONObject.
+     *
+     * @param path the JSONPath expression to evaluate
+     * @return the result of evaluating the JSONPath expression
      * @see JSONPath#paths(Object)
      */
     public Object eval(JSONPath path) {
@@ -1888,9 +1953,11 @@ public class JSONObject
     }
 
     /**
-     * if value instance of Map or Collection, return size, other return 0
+     * Returns the size of the value associated with the given key if it is a Map or Collection.
+     * For other types, returns 0.
      *
-     * @param key
+     * @param key the key whose associated value's size is to be returned
+     * @return the size of the value if it is a Map or Collection, otherwise 0
      * @since 2.0.24
      */
     public int getSize(String key) {

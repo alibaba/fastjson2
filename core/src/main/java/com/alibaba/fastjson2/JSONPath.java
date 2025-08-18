@@ -13,14 +13,83 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/**
+ * Represents a JSONPath expression for querying and manipulating JSON data.
+ *
+ * <p>JSONPath is a query language for JSON, similar to XPath for XML.
+ * It allows you to select and extract data from a JSON document.
+ *
+ * <p>Example usage:
+ * <pre>{@code
+ * // Parse JSON string and extract value using JSONPath
+ * String json = "{\"name\":\"John\", \"age\":30, \"city\":\"New York\"}";
+ * Object result = JSONPath.extract(json, "$.name");
+ * // result = "John"
+ *
+ * // Evaluate JSONPath on an object
+ * Map<String, Object> map = new HashMap<>();
+ * map.put("name", "John");
+ * map.put("age", 30);
+ * Object result = JSONPath.eval(map, "$.name");
+ * // result = "John"
+ *
+ * // Set value using JSONPath
+ * JSONPath.set(map, "$.name", "Jane");
+ * // map.get("name") = "Jane"
+ *
+ * // Remove value using JSONPath
+ * JSONPath.remove(map, "$.age");
+ * // map.size() = 1 (age field removed)
+ *
+ * // Check if path exists
+ * boolean exists = JSONPath.contains(map, "$.name");
+ * // exists = true
+ * }</pre>
+ *
+ * <p>Supported JSONPath expressions:
+ * <ul>
+ *   <li><code>$</code> - Root object/element</li>
+ *   <li><code>@</code> - Current object/element</li>
+ *   <li><code>. or []</code> - Child operator</li>
+ *   <li><code>..</code> - Recursive descent</li>
+ *   <li><code>*</code> - Wildcard</li>
+ *   <li><code>[]</code> - Array index or filter</li>
+ *   <li><code>[start:end:step]</code> - Array slice</li>
+ *   <li><code>?()</code> - Filter expression</li>
+ * </ul>
+ *
+ * @see <a href="https://github.com/json-path/JsonPath">JSONPath specification</a>
+ * @since 2.0.0
+ */
 public abstract class JSONPath {
     static final JSONReader.Context PARSE_CONTEXT = JSONFactory.createReadContext();
 
+    /**
+     * Context for JSON reading operations
+     */
     JSONReader.Context readerContext;
+
+    /**
+     * Context for JSON writing operations
+     */
     JSONWriter.Context writerContext;
+
+    /**
+     * The JSONPath expression string
+     */
     final String path;
+
+    /**
+     * Feature flags for this JSONPath
+     */
     final long features;
 
+    /**
+     * Constructs a JSONPath with the specified path and features
+     *
+     * @param path the JSONPath expression
+     * @param features the features to apply
+     */
     protected JSONPath(String path, Feature... features) {
         this.path = path;
         long featuresValue = 0;
@@ -30,47 +99,110 @@ public abstract class JSONPath {
         this.features = featuresValue;
     }
 
+    /**
+     * Constructs a JSONPath with the specified path and feature flags
+     *
+     * @param path the JSONPath expression
+     * @param features the feature flags to apply
+     */
     protected JSONPath(String path, long features) {
         this.path = path;
         this.features = features;
     }
 
+    /**
+     * Gets the parent JSONPath of this path
+     *
+     * @return the parent JSONPath, or null if this is the root path
+     */
     public abstract JSONPath getParent();
 
+    /**
+     * Checks if this path ends with a filter
+     *
+     * @return true if this path ends with a filter, false otherwise
+     */
     public boolean endsWithFilter() {
         return false;
     }
 
+    /**
+     * Checks if this path represents a previous reference
+     *
+     * @return true if this path is a previous reference, false otherwise
+     */
     public boolean isPrevious() {
         return false;
     }
 
+    /**
+     * Returns the string representation of this JSONPath
+     *
+     * @return the JSONPath expression string
+     */
     @Override
     public final String toString() {
         return path;
     }
 
+    /**
+     * Extracts a value from JSON string using the specified path
+     *
+     * @param json the JSON string to extract from
+     * @param path the JSONPath expression
+     * @return the extracted value, or null if not found
+     */
     public static Object extract(String json, String path) {
         JSONReader jsonReader = JSONReader.of(json);
         JSONPath jsonPath = JSONPath.of(path);
         return jsonPath.extract(jsonReader);
     }
 
+    /**
+     * Extracts a value from JSON string using the specified path and features
+     *
+     * @param json the JSON string to extract from
+     * @param path the JSONPath expression
+     * @param features the features to apply during extraction
+     * @return the extracted value, or null if not found
+     */
     public static Object extract(String json, String path, Feature... features) {
         JSONReader jsonReader = JSONReader.of(json);
         JSONPath jsonPath = JSONPath.of(path, features);
         return jsonPath.extract(jsonReader);
     }
 
+    /**
+     * Evaluates the JSONPath expression on a JSON string
+     *
+     * @param str the JSON string to evaluate
+     * @param path the JSONPath expression
+     * @return the evaluated result, or null if not found
+     */
     public static Object eval(String str, String path) {
         return extract(str, path);
     }
 
+    /**
+     * Evaluates the JSONPath expression on an object
+     *
+     * @param rootObject the root object to evaluate
+     * @param path the JSONPath expression
+     * @return the evaluated result, or null if not found
+     */
     public static Object eval(Object rootObject, String path) {
         return JSONPath.of(path)
                 .eval(rootObject);
     }
 
+    /**
+     * Sets a value in a JSON string using the specified path and returns the modified JSON
+     *
+     * @param json the JSON string to modify
+     * @param path the JSONPath expression
+     * @param value the value to set
+     * @return the modified JSON string
+     */
     public static String set(String json, String path, Object value) {
         Object object = JSON.parse(json);
         JSONPath.of(path)
@@ -78,6 +210,13 @@ public abstract class JSONPath {
         return JSON.toJSONString(object);
     }
 
+    /**
+     * Checks if the specified path exists in the object
+     *
+     * @param rootObject the root object to check
+     * @param path the JSONPath expression
+     * @return true if the path exists, false otherwise
+     */
     public static boolean contains(Object rootObject, String path) {
         if (rootObject == null) {
             return false;
@@ -87,6 +226,14 @@ public abstract class JSONPath {
         return jsonPath.contains(rootObject);
     }
 
+    /**
+     * Sets a value in an object using the specified path
+     *
+     * @param rootObject the root object to modify
+     * @param path the JSONPath expression
+     * @param value the value to set
+     * @return the modified root object
+     */
     public static Object set(Object rootObject, String path, Object value) {
         JSONPath.of(path)
                 .set(rootObject, value);
@@ -94,6 +241,14 @@ public abstract class JSONPath {
         return rootObject;
     }
 
+    /**
+     * Sets a callback function for the specified path in an object
+     *
+     * @param rootObject the root object to modify
+     * @param path the JSONPath expression
+     * @param callback the callback function to set
+     * @return the modified root object
+     */
     public static Object setCallback(Object rootObject, String path, Function callback) {
         JSONPath.of(path)
                 .setCallback(rootObject, callback);
@@ -101,6 +256,14 @@ public abstract class JSONPath {
         return rootObject;
     }
 
+    /**
+     * Sets a callback function for the specified path in an object
+     *
+     * @param rootObject the root object to modify
+     * @param path the JSONPath expression
+     * @param callback the callback function to set
+     * @return the modified root object
+     */
     public static Object setCallback(Object rootObject, String path, BiFunction callback) {
         JSONPath.of(path)
                 .setCallback(rootObject, callback);
@@ -108,6 +271,13 @@ public abstract class JSONPath {
         return rootObject;
     }
 
+    /**
+     * Removes a value from a JSON string using the specified path and returns the modified JSON
+     *
+     * @param json the JSON string to modify
+     * @param path the JSONPath expression
+     * @return the modified JSON string
+     */
     public static String remove(String json, String path) {
         Object object = JSON.parse(json);
 
@@ -117,11 +287,23 @@ public abstract class JSONPath {
         return JSON.toJSONString(object);
     }
 
+    /**
+     * Removes a value from an object using the specified path
+     *
+     * @param rootObject the root object to modify
+     * @param path the JSONPath expression
+     */
     public static void remove(Object rootObject, String path) {
         JSONPath.of(path)
                 .remove(rootObject);
     }
 
+    /**
+     * Gets all paths in the object
+     *
+     * @param javaObject the object to get paths from
+     * @return a map of paths to values
+     */
     public static Map<String, Object> paths(Object javaObject) {
         Map<Object, String> values = new IdentityHashMap<>();
         Map<String, Object> paths = new LinkedHashMap<>();
@@ -130,6 +312,14 @@ public abstract class JSONPath {
         return paths;
     }
 
+    /**
+     * Recursively collects paths and values from the object
+     *
+     * @param values map to store object to path mappings
+     * @param paths map to store path to value mappings
+     * @param parent the parent path
+     * @param javaObject the object to process
+     */
     void paths(Map<Object, String> values, Map paths, String parent, Object javaObject) {
         if (javaObject == null) {
             return;
@@ -243,8 +433,19 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Checks if this path is a reference
+     *
+     * @return true if this path is a reference, false otherwise
+     */
     public abstract boolean isRef();
 
+    /**
+     * Adds values to an array at the specified root object
+     *
+     * @param root the root object
+     * @param values the values to add
+     */
     public void arrayAdd(Object root, Object... values) {
         Object result = eval(root);
         if (result == null) {
@@ -258,14 +459,37 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Checks if the path exists in the object
+     *
+     * @param object the object to check
+     * @return true if the path exists, false otherwise
+     */
     public abstract boolean contains(Object object);
 
+    /**
+     * Evaluates the path on the object
+     *
+     * @param object the object to evaluate
+     * @return the evaluation result
+     */
     public abstract Object eval(Object object);
 
+    /**
+     * Creates a new reading context
+     *
+     * @return a new JSONReader.Context
+     */
     protected JSONReader.Context createContext() {
         return JSONFactory.createReadContext();
     }
 
+    /**
+     * Extracts a value from a JSON string
+     *
+     * @param jsonStr the JSON string to extract from
+     * @return the extracted value, or null if input is null
+     */
     public Object extract(String jsonStr) {
         if (jsonStr == null) {
             return null;
@@ -276,6 +500,12 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Extracts a value from a JSON byte array
+     *
+     * @param jsonBytes the JSON bytes to extract from
+     * @return the extracted value, or null if input is null
+     */
     public Object extract(byte[] jsonBytes) {
         if (jsonBytes == null) {
             return null;
@@ -286,6 +516,15 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Extracts a value from a JSON byte array with specified offset, length and charset
+     *
+     * @param jsonBytes the JSON bytes to extract from
+     * @param off the offset in the byte array
+     * @param len the number of bytes to read
+     * @param charset the charset to use
+     * @return the extracted value, or null if input is null
+     */
     public Object extract(byte[] jsonBytes, int off, int len, Charset charset) {
         if (jsonBytes == null) {
             return null;
@@ -296,10 +535,27 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Extracts a value using the provided JSONReader
+     *
+     * @param jsonReader the JSONReader to use
+     * @return the extracted value
+     */
     public abstract Object extract(JSONReader jsonReader);
 
+    /**
+     * Extracts a scalar value using the provided JSONReader
+     *
+     * @param jsonReader the JSONReader to use
+     * @return the extracted scalar value
+     */
     public abstract String extractScalar(JSONReader jsonReader);
 
+    /**
+     * Gets the reading context, creating it if necessary
+     *
+     * @return the JSONReader.Context
+     */
     public JSONReader.Context getReaderContext() {
         if (readerContext == null) {
             readerContext = JSONFactory.createReadContext();
@@ -307,11 +563,22 @@ public abstract class JSONPath {
         return readerContext;
     }
 
+    /**
+     * Sets the reading context
+     *
+     * @param context the context to set
+     * @return this JSONPath instance
+     */
     public JSONPath setReaderContext(JSONReader.Context context) {
         this.readerContext = context;
         return this;
     }
 
+    /**
+     * Gets the writing context, creating it if necessary
+     *
+     * @return the JSONWriter.Context
+     */
     public JSONWriter.Context getWriterContext() {
         if (writerContext == null) {
             writerContext = JSONFactory.createWriteContext();
@@ -319,15 +586,40 @@ public abstract class JSONPath {
         return writerContext;
     }
 
+    /**
+     * Sets the writing context
+     *
+     * @param writerContext the context to set
+     * @return this JSONPath instance
+     */
     public JSONPath setWriterContext(JSONWriter.Context writerContext) {
         this.writerContext = writerContext;
         return this;
     }
 
+    /**
+     * Sets a value in the object
+     *
+     * @param object the object to modify
+     * @param value the value to set
+     */
     public abstract void set(Object object, Object value);
 
+    /**
+     * Sets a value in the object with specified reader features
+     *
+     * @param object the object to modify
+     * @param value the value to set
+     * @param readerFeatures the reader features to apply
+     */
     public abstract void set(Object object, Object value, JSONReader.Feature... readerFeatures);
 
+    /**
+     * Sets a callback function for the object
+     *
+     * @param object the object to modify
+     * @param callback the callback function to set
+     */
     public void setCallback(Object object, Function callback) {
         setCallback(
                 object,
@@ -335,14 +627,44 @@ public abstract class JSONPath {
         );
     }
 
+    /**
+     * Sets a callback function for the object
+     *
+     * @param object the object to modify
+     * @param callback the callback function to set
+     */
     public abstract void setCallback(Object object, BiFunction callback);
 
+    /**
+     * Sets an integer value in the object
+     *
+     * @param object the object to modify
+     * @param value the integer value to set
+     */
     public abstract void setInt(Object object, int value);
 
+    /**
+     * Sets a long value in the object
+     *
+     * @param object the object to modify
+     * @param value the long value to set
+     */
     public abstract void setLong(Object object, long value);
 
+    /**
+     * Removes a value from the object
+     *
+     * @param object the object to modify
+     * @return true if removal was successful, false otherwise
+     */
     public abstract boolean remove(Object object);
 
+    /**
+     * Extracts a value using the provided JSONReader and passes it to the consumer
+     *
+     * @param jsonReader the JSONReader to use
+     * @param consumer the consumer to accept the extracted value
+     */
     public void extract(JSONReader jsonReader, ValueConsumer consumer) {
         Object object = extract(jsonReader);
         if (object == null) {
@@ -378,6 +700,12 @@ public abstract class JSONPath {
         throw new JSONException("TODO : " + object.getClass());
     }
 
+    /**
+     * Extracts a scalar value using the provided JSONReader and passes it to the consumer
+     *
+     * @param jsonReader the JSONReader to use
+     * @param consumer the consumer to accept the extracted scalar value
+     */
     public void extractScalar(JSONReader jsonReader, ValueConsumer consumer) {
         Object object = extractScalar(jsonReader);
         if (object == null) {
@@ -389,6 +717,12 @@ public abstract class JSONPath {
         consumer.accept(str);
     }
 
+    /**
+     * Extracts a Long value using the provided JSONReader
+     *
+     * @param jsonReader the JSONReader to use
+     * @return the extracted Long value, or null if the value was null
+     */
     public Long extractInt64(JSONReader jsonReader) {
         long value = extractInt64Value(jsonReader);
         if (jsonReader.wasNull) {
@@ -397,6 +731,12 @@ public abstract class JSONPath {
         return value;
     }
 
+    /**
+     * Extracts a long value using the provided JSONReader
+     *
+     * @param jsonReader the JSONReader to use
+     * @return the extracted long value, or 0 if the value was null
+     */
     public long extractInt64Value(JSONReader jsonReader) {
         Object object = extract(jsonReader);
         if (object == null) {
@@ -416,6 +756,12 @@ public abstract class JSONPath {
         return (Long) converted;
     }
 
+    /**
+     * Extracts an Integer value using the provided JSONReader
+     *
+     * @param jsonReader the JSONReader to use
+     * @return the extracted Integer value, or null if the value was null
+     */
     public Integer extractInt32(JSONReader jsonReader) {
         int intValue = extractInt32Value(jsonReader);
         if (jsonReader.wasNull) {
@@ -424,6 +770,12 @@ public abstract class JSONPath {
         return intValue;
     }
 
+    /**
+     * Extracts an int value using the provided JSONReader
+     *
+     * @param jsonReader the JSONReader to use
+     * @return the extracted int value, or 0 if the value was null
+     */
     public int extractInt32Value(JSONReader jsonReader) {
         Object object = extract(jsonReader);
         if (object == null) {
@@ -440,17 +792,37 @@ public abstract class JSONPath {
         return (Integer) typeConvert.apply(object);
     }
 
+    /**
+     * Compiles a JSONPath expression (deprecated, use {@link #of(String)} instead)
+     *
+     * @param path the JSONPath expression to compile
+     * @return the compiled JSONPath
+     * @deprecated use {@link #of(String)} instead
+     */
     @Deprecated
     public static JSONPath compile(String path) {
         return of(path);
     }
 
+    /**
+     * Compiles a JSONPath expression for a specific object class
+     *
+     * @param strPath the JSONPath expression to compile
+     * @param objectClass the class of the object to use with this path
+     * @return the compiled JSONPath
+     */
     public static JSONPath compile(String strPath, Class objectClass) {
         JSONPath path = of(strPath);
         JSONFactory.JSONPathCompiler compiler = JSONFactory.getDefaultJSONPathCompiler();
         return compiler.compile(objectClass, path);
     }
 
+    /**
+     * Creates a single segment JSONPath from a segment
+     *
+     * @param segment the segment to create a path from
+     * @return the created JSONPath
+     */
     static JSONPathSingle of(JSONPathSegment segment) {
         String prefix;
         if (segment instanceof JSONPathSegment.MultiIndexSegment || segment instanceof JSONPathSegmentIndex) {
@@ -466,6 +838,12 @@ public abstract class JSONPath {
         return new JSONPathSingle(segment, path);
     }
 
+    /**
+     * Creates a JSONPath from a path string
+     *
+     * @param path the JSONPath expression
+     * @return the created JSONPath
+     */
     public static JSONPath of(String path) {
         if ("#-1".equals(path)) {
             return PreviousPath.INSTANCE;
@@ -475,21 +853,37 @@ public abstract class JSONPath {
                 .parse();
     }
 
+    /**
+     * Creates a typed JSONPath from a path string and type
+     *
+     * @param path the JSONPath expression
+     * @param type the type of the result
+     * @return the created JSONPath
+     */
     public static JSONPath of(String path, Type type) {
         JSONPath jsonPath = of(path);
         return JSONPathTyped.of(jsonPath, type);
     }
 
+    /**
+     * Creates a typed JSONPath from a path string, type and features
+     *
+     * @param path the JSONPath expression
+     * @param type the type of the result
+     * @param features the features to apply
+     * @return the created JSONPath
+     */
     public static JSONPath of(String path, Type type, Feature... features) {
         JSONPath jsonPath = of(path, features);
         return JSONPathTyped.of(jsonPath, type);
     }
 
     /**
-     * create multi-path jsonpath
+     * Creates a multi-path JSONPath
      *
-     * @param paths jsonpath array
-     * @param types item types
+     * @param paths the JSONPath expressions
+     * @param types the types of the results
+     * @return the created JSONPath
      * @since 2.0.20
      */
     public static JSONPath of(String[] paths, Type[] types) {
@@ -497,10 +891,12 @@ public abstract class JSONPath {
     }
 
     /**
-     * create multi-path jsonpath
+     * Creates a multi-path JSONPath
      *
-     * @param paths jsonpath array
-     * @param types item types
+     * @param paths the JSONPath expressions
+     * @param types the types of the results
+     * @param features the reader features to apply
+     * @return the created JSONPath
      * @since 2.0.20
      */
     public static JSONPath of(String[] paths, Type[] types, JSONReader.Feature... features) {
@@ -508,13 +904,15 @@ public abstract class JSONPath {
     }
 
     /**
-     * create multi-path jsonpath
+     * Creates a multi-path JSONPath
      *
-     * @param paths jsonpath array
-     * @param types item types
-     * @param formats item format
-     * @param zoneId zonedId
-     * @param features parse use JSONReader.Features
+     * @param paths the JSONPath expressions
+     * @param types the types of the results
+     * @param formats the formats to apply
+     * @param pathFeatures the path features
+     * @param zoneId the zone ID
+     * @param features the reader features to apply
+     * @return the created JSONPath
      * @since 2.0.20
      */
     public static JSONPath of(
@@ -851,6 +1249,13 @@ public abstract class JSONPath {
         return new JSONPathTypedMulti(jsonPaths, types, formats, pathFeatures, zoneId, featuresValue);
     }
 
+    /**
+     * Creates a JSONPath from a path string with specified features
+     *
+     * @param path the JSONPath expression
+     * @param features the features to apply
+     * @return the created JSONPath
+     */
     public static JSONPath of(String path, Feature... features) {
         if ("#-1".equals(path)) {
             return PreviousPath.INSTANCE;
@@ -860,6 +1265,12 @@ public abstract class JSONPath {
                 .parse(features);
     }
 
+    /**
+     * Parses an operator from the JSONReader
+     *
+     * @param jsonReader the JSONReader to parse from
+     * @return the parsed operator
+     */
     static JSONPathFilter.Operator parseOperator(JSONReader jsonReader) {
         JSONPathFilter.Operator operator;
         switch (jsonReader.ch) {
@@ -1021,6 +1432,9 @@ public abstract class JSONPath {
         return operator;
     }
 
+    /**
+     * Represents a previous path reference
+     */
     static final class PreviousPath
             extends JSONPath {
         static final PreviousPath INSTANCE = new PreviousPath("#-1");
@@ -1095,6 +1509,9 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Represents the root path ($)
+     */
     static final class RootPath
             extends JSONPath {
         static final RootPath INSTANCE = new RootPath();
@@ -1168,6 +1585,9 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Represents the execution context for JSONPath operations
+     */
     static final class Context {
         final JSONPath path;
         final Context parent;
@@ -1188,6 +1608,9 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Represents a sequence of values
+     */
     static class Sequence {
         final List values;
 
@@ -1196,9 +1619,23 @@ public abstract class JSONPath {
         }
     }
 
+    /**
+     * Features that can be applied to JSONPath operations
+     */
     public enum Feature {
+        /**
+         * Always return results as a list
+         */
         AlwaysReturnList(1),
+
+        /**
+         * Return null on error instead of throwing exceptions
+         */
         NullOnError(1 << 1),
+
+        /**
+         * Keep null values in results
+         */
         KeepNullValue(1 << 2);
 
         public final long mask;

@@ -8,6 +8,39 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * ObjectReader is responsible for deserializing JSON data into Java objects.
+ * It provides a set of methods for creating object instances, reading JSON data,
+ * and handling field mapping.
+ *
+ * <p>This interface supports various features including:
+ * <ul>
+ *   <li>Object creation with different parameter types</li>
+ *   <li>JSON object and array reading</li>
+ *   <li>Field mapping and value setting</li>
+ *   <li>Auto-type support for polymorphic deserialization</li>
+ *   <li>Custom feature configuration</li>
+ * </ul>
+ *
+ * <p>Example usage:
+ * <pre>
+ * // Get an ObjectReader for a specific type
+ * ObjectReader<User> reader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(User.class);
+ *
+ * // Read from JSON string
+ * String jsonString = "{\"id\":1,\"name\":\"John\"}";
+ * User user = reader.readObject(JSONReader.of(jsonString));
+ *
+ * // Create instance with map data
+ * Map<String, Object> data = new HashMap<>();
+ * data.put("id", 1);
+ * data.put("name", "John");
+ * User user2 = reader.createInstance(data);
+ * </pre>
+ *
+ * @param <T> the type of objects that this ObjectReader can deserialize
+ * @since 2.0.0
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ObjectReader<T> {
     long HASH_TYPE = Fnv.hashCode64("@type");
@@ -53,13 +86,39 @@ public interface ObjectReader<T> {
         throw new UnsupportedOperationException(this.getClass().getName());
     }
 
+    /**
+     * Accepts extra field data that is not mapped to any specific field in the object.
+     * This method is called when deserializing JSON objects that contain fields not
+     * present in the target class.
+     *
+     * @param object the object being deserialized
+     * @param fieldName the name of the extra field
+     * @param fieldValue the value of the extra field
+     */
     default void acceptExtra(Object object, String fieldName, Object fieldValue) {
         acceptExtra(object, fieldName, fieldValue, this.getFeatures());
     }
 
+    /**
+     * Accepts extra field data that is not mapped to any specific field in the object.
+     * This method is called when deserializing JSON objects that contain fields not
+     * present in the target class.
+     *
+     * @param object the object being deserialized
+     * @param fieldName the name of the extra field
+     * @param fieldValue the value of the extra field
+     * @param features the JSON reader features to use
+     */
     default void acceptExtra(Object object, String fieldName, Object fieldValue, long features) {
     }
 
+    /**
+     * Creates an instance of the object type from a map of field values using the specified features.
+     *
+     * @param map the map containing field names and values
+     * @param features the JSON reader features to use
+     * @return a new instance of the object populated with values from the map
+     */
     default T createInstance(Map map, JSONReader.Feature... features) {
         long featuresValue = 0;
         for (int i = 0; i < features.length; i++) {
@@ -99,6 +158,14 @@ public interface ObjectReader<T> {
         return accept(object, map, features);
     }
 
+    /**
+     * Accepts field values from a map and populates the specified object instance.
+     *
+     * @param object the object instance to populate
+     * @param map the map containing field names and values
+     * @param features the JSON reader features to use
+     * @return the populated object instance
+     */
     default T accept(T object, Map map, long features) {
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String entryKey = entry.getKey().toString();
@@ -120,39 +187,82 @@ public interface ObjectReader<T> {
     }
 
     /**
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Creates an instance of the object type using a non-default constructor with the specified values.
+     *
+     * @param values the map of field hash codes to values
+     * @return a new instance of the object created with a non-default constructor
+     * @throws UnsupportedOperationException if the method is not overloaded or otherwise
      */
     default T createInstanceNoneDefaultConstructor(Map<Long, Object> values) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Features enabled by ObjectReader
+     * Gets the features enabled by this ObjectReader.
+     *
+     * @return the enabled features as a bit mask
      */
     default long getFeatures() {
         return 0L;
     }
 
+    /**
+     * Gets the type key used for auto-type support. This key is used to identify
+     * the type information in JSON objects.
+     *
+     * @return the type key string
+     */
     default String getTypeKey() {
         return "@type";
     }
 
+    /**
+     * Gets the hash code of the type key used for auto-type support.
+     *
+     * @return the hash code of the type key
+     */
     default long getTypeKeyHash() {
         return HASH_TYPE;
     }
 
+    /**
+     * Gets the class of objects that this ObjectReader can deserialize.
+     *
+     * @return the object class, or null if not specified
+     */
     default Class<T> getObjectClass() {
         return null;
     }
 
+    /**
+     * Gets the FieldReader for the specified field hash code.
+     *
+     * @param hashCode the hash code of the field name
+     * @return the FieldReader for the field, or null if not found
+     */
     default FieldReader getFieldReader(long hashCode) {
         return null;
     }
 
+    /**
+     * Gets the FieldReader for the specified field hash code, using lowercase matching.
+     *
+     * @param hashCode the hash code of the field name (lowercase)
+     * @return the FieldReader for the field, or null if not found
+     */
     default FieldReader getFieldReaderLCase(long hashCode) {
         return null;
     }
 
+    /**
+     * Sets the value of a field in the specified object.
+     *
+     * @param object the object in which to set the field value
+     * @param fieldName the name of the field to set
+     * @param fieldNameHashCode the hash code of the field name
+     * @param value the integer value to set
+     * @return true if the field was successfully set, false otherwise
+     */
     default boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, int value) {
         FieldReader fieldReader = getFieldReader(fieldNameHashCode);
         if (fieldReader == null) {
@@ -162,6 +272,15 @@ public interface ObjectReader<T> {
         return true;
     }
 
+    /**
+     * Sets the value of a field in the specified object.
+     *
+     * @param object the object in which to set the field value
+     * @param fieldName the name of the field to set
+     * @param fieldNameHashCode the hash code of the field name
+     * @param value the long value to set
+     * @return true if the field was successfully set, false otherwise
+     */
     default boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, long value) {
         FieldReader fieldReader = getFieldReader(fieldNameHashCode);
         if (fieldReader == null) {
@@ -171,6 +290,12 @@ public interface ObjectReader<T> {
         return true;
     }
 
+    /**
+     * Gets the FieldReader for the specified field name.
+     *
+     * @param fieldName the name of the field
+     * @return the FieldReader for the field, or null if not found
+     */
     default FieldReader getFieldReader(String fieldName) {
         long fieldNameHash = Fnv.hashCode64(fieldName);
         FieldReader fieldReader = getFieldReader(fieldNameHash);
@@ -188,6 +313,14 @@ public interface ObjectReader<T> {
         return fieldReader;
     }
 
+    /**
+     * Sets the value of a field in the specified object.
+     *
+     * @param object the object in which to set the field value
+     * @param fieldName the name of the field to set
+     * @param value the object value to set
+     * @return true if the field was successfully set, false otherwise
+     */
     default boolean setFieldValue(Object object, String fieldName, Object value) {
         FieldReader fieldReader = getFieldReader(fieldName);
         if (fieldReader == null) {
@@ -197,21 +330,46 @@ public interface ObjectReader<T> {
         return true;
     }
 
+    /**
+     * Gets the build function used to construct the final object instance.
+     *
+     * @return the build function, or null if not specified
+     */
     default Function getBuildFunction() {
         return null;
     }
 
+    /**
+     * Resolves an ObjectReader for the specified type hash using the JSON reader context.
+     *
+     * @param context the JSON reader context
+     * @param typeHash the hash code of the type name
+     * @return the ObjectReader for the type, or null if not found
+     */
     default ObjectReader autoType(JSONReader.Context context, long typeHash) {
         return context.getObjectReaderAutoType(typeHash);
     }
 
+    /**
+     * Resolves an ObjectReader for the specified type hash using the ObjectReaderProvider.
+     *
+     * @param provider the ObjectReaderProvider
+     * @param typeHash the hash code of the type name
+     * @return the ObjectReader for the type, or null if not found
+     */
     default ObjectReader autoType(ObjectReaderProvider provider, long typeHash) {
         return provider.getObjectReader(typeHash);
     }
 
     /**
-     * @return {@link T}
-     * @throws JSONException If a suitable ObjectReader is not found
+     * Reads an object from JSONB format.
+     *
+     * @param jsonReader the JSONReader to use for parsing
+     * @param fieldType the type of the field being read
+     * @param fieldName the name of the field being read
+     * @param features the features to use
+     * @return the deserialized object
+     * @throws JSONException if a suitable ObjectReader is not found
      */
     default T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isArray() &&
@@ -280,23 +438,39 @@ public interface ObjectReader<T> {
     }
 
     /**
-     * @return {@link T}
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Reads an object from JSONB format with array mapping.
+     *
+     * @param jsonReader the JSONReader to use for parsing
+     * @param fieldType the type of the field being read
+     * @param fieldName the name of the field being read
+     * @param features the features to use
+     * @return the deserialized object
+     * @throws UnsupportedOperationException if the method is not overloaded or otherwise
      */
     default T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @return {@link T}
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Reads an object from JSON format with array mapping.
+     *
+     * @param jsonReader the JSONReader to use for parsing
+     * @param fieldType the type of the field being read
+     * @param fieldName the name of the field being read
+     * @param features the features to use
+     * @return the deserialized object
+     * @throws UnsupportedOperationException if the method is not overloaded or otherwise
      */
     default T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @return {@link T}
+     * Reads an object from the specified JSON string using the provided features.
+     *
+     * @param str the JSON string to parse
+     * @param features the JSON reader features to use
+     * @return the deserialized object
      */
     default T readObject(String str, JSONReader.Feature... features) {
         try (JSONReader jsonReader = JSONReader.of(str, JSONFactory.createReadContext(features))) {
@@ -305,19 +479,35 @@ public interface ObjectReader<T> {
     }
 
     /**
-     * @return {@link T}
+     * Reads an object from the specified JSONReader.
+     *
+     * @param jsonReader the JSONReader to use for parsing
+     * @return the deserialized object
      */
     default T readObject(JSONReader jsonReader) {
         return readObject(jsonReader, null, null, getFeatures());
     }
 
+    /**
+     * Reads an object from the specified JSONReader using the provided features.
+     *
+     * @param jsonReader the JSONReader to use for parsing
+     * @param features the features to use
+     * @return the deserialized object
+     */
     default T readObject(JSONReader jsonReader, long features) {
         return readObject(jsonReader, null, null, features);
     }
 
     /**
-     * @return {@link T}
-     * @throws JSONException If a suitable ObjectReader is not found
+     * Reads an object from the specified JSONReader with the given field type, field name, and features.
+     *
+     * @param jsonReader the JSONReader to use for parsing
+     * @param fieldType the type of the field being read
+     * @param fieldName the name of the field being read
+     * @param features the features to use
+     * @return the deserialized object
+     * @throws JSONException if a suitable ObjectReader is not found
      */
     T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
 }

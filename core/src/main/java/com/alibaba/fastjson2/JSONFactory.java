@@ -21,6 +21,13 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
 
+/**
+ * JSONFactory is the core factory class for creating JSON readers and writers,
+ * as well as managing global configuration for fastjson2.
+ *
+ * @author wenshao
+ * @since 2.0.59
+ */
 public final class JSONFactory {
     public static final class Conf {
         static final Properties DEFAULT_PROPERTIES;
@@ -397,7 +404,9 @@ public final class JSONFactory {
     }
 
     /**
-     * @param objectSupplier
+     * Sets the default object supplier used when creating JSON objects.
+     *
+     * @param objectSupplier the supplier for creating Map instances
      * @since 2.0.15
      */
     public static void setDefaultObjectSupplier(Supplier<Map> objectSupplier) {
@@ -405,45 +414,92 @@ public final class JSONFactory {
     }
 
     /**
-     * @param arraySupplier
+     * Sets the default array supplier used when creating JSON arrays.
+     *
+     * @param arraySupplier the supplier for creating List instances
      * @since 2.0.15
      */
     public static void setDefaultArraySupplier(Supplier<List> arraySupplier) {
         defaultArraySupplier = arraySupplier;
     }
 
+    /**
+     * Gets the default object supplier used when creating JSON objects.
+     *
+     * @return the supplier for creating Map instances
+     */
     public static Supplier<Map> getDefaultObjectSupplier() {
         return defaultObjectSupplier;
     }
 
+    /**
+     * Gets the default array supplier used when creating JSON arrays.
+     *
+     * @return the supplier for creating List instances
+     */
     public static Supplier<List> getDefaultArraySupplier() {
         return defaultArraySupplier;
     }
 
+    /**
+     * Creates a new JSON writer context with default settings.
+     *
+     * @return a new JSONWriter.Context instance
+     */
     public static JSONWriter.Context createWriteContext() {
         return new JSONWriter.Context(defaultObjectWriterProvider);
     }
 
+    /**
+     * Creates a new JSON writer context with the specified provider and features.
+     *
+     * @param provider the object writer provider
+     * @param features the features to enable
+     * @return a new JSONWriter.Context instance
+     */
     public static JSONWriter.Context createWriteContext(ObjectWriterProvider provider, JSONWriter.Feature... features) {
         JSONWriter.Context context = new JSONWriter.Context(provider);
         context.config(features);
         return context;
     }
 
+    /**
+     * Creates a new JSON writer context with the specified features.
+     *
+     * @param features the features to enable
+     * @return a new JSONWriter.Context instance
+     */
     public static JSONWriter.Context createWriteContext(JSONWriter.Feature... features) {
         return new JSONWriter.Context(defaultObjectWriterProvider, features);
     }
 
+    /**
+     * Creates a new JSON reader context with default settings.
+     *
+     * @return a new JSONReader.Context instance
+     */
     public static JSONReader.Context createReadContext() {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         return new JSONReader.Context(provider);
     }
 
+    /**
+     * Creates a new JSON reader context with the specified features.
+     *
+     * @param features the features to enable
+     * @return a new JSONReader.Context instance
+     */
     public static JSONReader.Context createReadContext(long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         return new JSONReader.Context(provider, features);
     }
 
+    /**
+     * Creates a new JSON reader context with the specified features.
+     *
+     * @param features the features to enable
+     * @return a new JSONReader.Context instance
+     */
     public static JSONReader.Context createReadContext(JSONReader.Feature... features) {
         JSONReader.Context context = new JSONReader.Context(
                 JSONFactory.getDefaultObjectReaderProvider()
@@ -525,10 +581,20 @@ public final class JSONFactory {
                 .getObjectWriter(type, TypeUtils.getClass(type), JSONWriter.Feature.FieldBased.isEnabled(features));
     }
 
+    /**
+     * Gets the default object writer provider.
+     *
+     * @return the default ObjectWriterProvider instance
+     */
     public static ObjectWriterProvider getDefaultObjectWriterProvider() {
         return defaultObjectWriterProvider;
     }
 
+    /**
+     * Gets the default object reader provider.
+     *
+     * @return the default ObjectReaderProvider instance
+     */
     public static ObjectReaderProvider getDefaultObjectReaderProvider() {
         ObjectReaderProvider providerLocal = readerProviderLocal.get();
         if (providerLocal != null) {
@@ -538,6 +604,11 @@ public final class JSONFactory {
         return defaultObjectReaderProvider;
     }
 
+    /**
+     * Gets the default JSONPath compiler.
+     *
+     * @return the default JSONPathCompiler instance
+     */
     public static JSONPathCompiler getDefaultJSONPathCompiler() {
         JSONPathCompiler compilerLocal = jsonPathCompilerLocal.get();
         if (compilerLocal != null) {
@@ -547,26 +618,56 @@ public final class JSONFactory {
         return defaultJSONPathCompiler;
     }
 
+    /**
+     * Sets the object reader creator for the current thread context.
+     *
+     * @param creator the ObjectReaderCreator to set
+     */
     public static void setContextReaderCreator(ObjectReaderCreator creator) {
         readerCreatorLocal.set(creator);
     }
 
+    /**
+     * Sets the object reader provider for the current thread context.
+     *
+     * @param creator the ObjectReaderProvider to set
+     */
     public static void setContextObjectReaderProvider(ObjectReaderProvider creator) {
         readerProviderLocal.set(creator);
     }
 
+    /**
+     * Gets the object reader creator for the current thread context.
+     *
+     * @return the ObjectReaderCreator for the current thread, or null if not set
+     */
     public static ObjectReaderCreator getContextReaderCreator() {
         return readerCreatorLocal.get();
     }
 
+    /**
+     * Sets the JSONPath compiler for the current thread context.
+     *
+     * @param compiler the JSONPathCompiler to set
+     */
     public static void setContextJSONPathCompiler(JSONPathCompiler compiler) {
         jsonPathCompilerLocal.set(compiler);
     }
 
+    /**
+     * Sets the object writer creator for the current thread context.
+     *
+     * @param creator the ObjectWriterCreator to set
+     */
     public static void setContextWriterCreator(ObjectWriterCreator creator) {
         writerCreatorLocal.set(creator);
     }
 
+    /**
+     * Gets the object writer creator for the current thread context.
+     *
+     * @return the ObjectWriterCreator for the current thread, or null if not set
+     */
     public static ObjectWriterCreator getContextWriterCreator() {
         return writerCreatorLocal.get();
     }
@@ -575,86 +676,186 @@ public final class JSONFactory {
         JSONPath compile(Class objectClass, JSONPath path);
     }
 
+    /**
+     * Gets the default reader features.
+     *
+     * @return the default reader features as a long value
+     */
     public static long getDefaultReaderFeatures() {
         return defaultReaderFeatures;
     }
 
+    /**
+     * Gets the default reader zone ID.
+     *
+     * @return the default ZoneId for readers
+     */
     public static ZoneId getDefaultReaderZoneId() {
         return defaultReaderZoneId;
     }
 
+    /**
+     * Gets the default reader format string.
+     *
+     * @return the default format string for readers
+     */
     public static String getDefaultReaderFormat() {
         return defaultReaderFormat;
     }
 
+    /**
+     * Gets the default writer features.
+     *
+     * @return the default writer features as a long value
+     */
     public static long getDefaultWriterFeatures() {
         return defaultWriterFeatures;
     }
 
+    /**
+     * Gets the default writer zone ID.
+     *
+     * @return the default ZoneId for writers
+     */
     public static ZoneId getDefaultWriterZoneId() {
         return defaultWriterZoneId;
     }
 
+    /**
+     * Gets the default writer format string.
+     *
+     * @return the default format string for writers
+     */
     public static String getDefaultWriterFormat() {
         return defaultWriterFormat;
     }
 
+    /**
+     * Checks if the default writer uses alphabetic ordering.
+     *
+     * @return true if alphabetic ordering is enabled, false otherwise
+     */
     public static boolean isDefaultWriterAlphabetic() {
         return defaultWriterAlphabetic;
     }
 
+    /**
+     * Sets whether the default writer should use alphabetic ordering.
+     *
+     * @param defaultWriterAlphabetic true to enable alphabetic ordering, false to disable
+     */
     public static void setDefaultWriterAlphabetic(boolean defaultWriterAlphabetic) {
         JSONFactory.defaultWriterAlphabetic = defaultWriterAlphabetic;
     }
 
+    /**
+     * Checks if reference detection is disabled.
+     *
+     * @return true if reference detection is disabled, false otherwise
+     */
     public static boolean isDisableReferenceDetect() {
         return disableReferenceDetect;
     }
 
+    /**
+     * Checks if auto type support is disabled.
+     *
+     * @return true if auto type is disabled, false otherwise
+     */
     public static boolean isDisableAutoType() {
         return disableAutoType;
     }
 
+    /**
+     * Checks if JSONB format is disabled.
+     *
+     * @return true if JSONB is disabled, false otherwise
+     */
     public static boolean isDisableJSONB() {
         return disableJSONB;
     }
 
+    /**
+     * Checks if array mapping is disabled.
+     *
+     * @return true if array mapping is disabled, false otherwise
+     */
     public static boolean isDisableArrayMapping() {
         return disableArrayMapping;
     }
 
+    /**
+     * Sets whether reference detection should be disabled.
+     *
+     * @param disableReferenceDetect true to disable reference detection, false to enable
+     */
     public static void setDisableReferenceDetect(boolean disableReferenceDetect) {
         defaultObjectWriterProvider.setDisableReferenceDetect(disableReferenceDetect);
         defaultObjectReaderProvider.setDisableReferenceDetect(disableReferenceDetect);
     }
 
+    /**
+     * Sets whether array mapping should be disabled.
+     *
+     * @param disableArrayMapping true to disable array mapping, false to enable
+     */
     public static void setDisableArrayMapping(boolean disableArrayMapping) {
         defaultObjectWriterProvider.setDisableArrayMapping(disableArrayMapping);
         defaultObjectReaderProvider.setDisableArrayMapping(disableArrayMapping);
     }
 
+    /**
+     * Sets whether JSONB format should be disabled.
+     *
+     * @param disableJSONB true to disable JSONB, false to enable
+     */
     public static void setDisableJSONB(boolean disableJSONB) {
         defaultObjectWriterProvider.setDisableJSONB(disableJSONB);
         defaultObjectReaderProvider.setDisableJSONB(disableJSONB);
     }
 
+    /**
+     * Sets whether auto type support should be disabled.
+     *
+     * @param disableAutoType true to disable auto type, false to enable
+     */
     public static void setDisableAutoType(boolean disableAutoType) {
         defaultObjectWriterProvider.setDisableAutoType(disableAutoType);
         defaultObjectReaderProvider.setDisableAutoType(disableAutoType);
     }
 
+    /**
+     * Checks if smart matching is disabled.
+     *
+     * @return true if smart matching is disabled, false otherwise
+     */
     public static boolean isDisableSmartMatch() {
         return disableSmartMatch;
     }
 
+    /**
+     * Sets whether smart matching should be disabled.
+     *
+     * @param disableSmartMatch true to disable smart matching, false to enable
+     */
     public static void setDisableSmartMatch(boolean disableSmartMatch) {
         defaultObjectReaderProvider.setDisableSmartMatch(disableSmartMatch);
     }
 
+    /**
+     * Checks if transient fields are skipped by default.
+     *
+     * @return true if transient fields are skipped, false otherwise
+     */
     public static boolean isDefaultSkipTransient() {
         return defaultSkipTransient;
     }
 
+    /**
+     * Sets whether transient fields should be skipped by default.
+     *
+     * @param skipTransient true to skip transient fields, false to include them
+     */
     public static void setDefaultSkipTransient(boolean skipTransient) {
         defaultObjectWriterProvider.setSkipTransient(skipTransient);
     }
