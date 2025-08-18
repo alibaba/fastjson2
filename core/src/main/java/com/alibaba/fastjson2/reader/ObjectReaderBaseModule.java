@@ -884,6 +884,7 @@ public class ObjectReaderBaseModule
             }
 
             BeanUtils.declaredFields(objectClass, field -> {
+                String name = "";
                 if (field.getType() == boolean.class || field.getType() == Boolean.class) {
                     if (field.getName().startsWith("is")) {
                         name = field.getName().substring(2);
