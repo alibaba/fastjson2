@@ -1149,7 +1149,11 @@ public abstract class JSONWriter
     public abstract void writeNull();
 
     public void writeObjectNull(Class<?> fieldClass) {
-        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE)) != 0) {
+        writeObjectNull(this.context.features, fieldClass);
+    }
+
+    public void writeObjectNull(long features, Class<?> fieldClass) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE)) != 0) {
             if (fieldClass == Character.class) {
                 writeString("\u0000");
             } else {
@@ -1220,7 +1224,11 @@ public abstract class JSONWriter
     }
 
     public final void writeBooleanNull() {
-        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | WriteNullBooleanAsFalse.mask)) != 0) {
+        writeBooleanNull(this.context.features);
+    }
+
+    public final void writeBooleanNull(long features) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | WriteNullBooleanAsFalse.mask)) != 0) {
             writeBool(false);
         } else {
             writeNull();
