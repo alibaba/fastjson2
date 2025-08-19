@@ -287,6 +287,17 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Writes a decimal number to a byte array buffer
+     *
+     * @param buf byte array buffer
+     * @param off buffer starting offset
+     * @param unscaledVal unscaled value (precision part of BigDecimal)
+     * @param scale number of digits after the decimal point, caller must ensure scale &gt;= 0
+     * @return offset after writing
+     *
+     * Note: This method trusts that the caller has ensured scale &gt;= 0
+     */
     public static int writeDecimal(byte[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
             putByte(buf, off++, (byte) '-');
@@ -331,6 +342,17 @@ public class IOUtils {
         return IOUtils.writeInt64(buf, off, unscaledVal);
     }
 
+    /**
+     * Writes a decimal number to a character array buffer
+     *
+     * @param buf character array buffer
+     * @param off buffer starting offset
+     * @param unscaledVal unscaled value (precision part of BigDecimal)
+     * @param scale number of digits after the decimal point, caller must ensure scale &gt;= 0
+     * @return offset after writing
+     *
+     * Note: This method trusts that the caller has ensured scale &gt;= 0
+     */
     public static int writeDecimal(char[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
             putChar(buf, off++, '-');
@@ -470,10 +492,14 @@ public class IOUtils {
     }
 
     public static boolean isNumber(String str) {
-        for (int i = 0; i < str.length(); ++i) {
+        int len = str.length();
+        if (len == 0) {
+            return false;
+        }
+        for (int i = 0; i < len; ++i) {
             char ch = str.charAt(i);
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != 0 || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
@@ -484,10 +510,13 @@ public class IOUtils {
     }
 
     public static boolean isNumber(char[] buf, int off, int len) {
+        if (len <= 0) {
+            return false;
+        }
         for (int i = off, end = off + len; i < end; ++i) {
             char ch = buf[i];
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != off || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
@@ -498,10 +527,13 @@ public class IOUtils {
     }
 
     public static boolean isNumber(byte[] buf, int off, int len) {
+        if (len <= 0) {
+            return false;
+        }
         for (int i = off, end = off + len; i < end; ++i) {
             char ch = (char) buf[i];
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != off || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {

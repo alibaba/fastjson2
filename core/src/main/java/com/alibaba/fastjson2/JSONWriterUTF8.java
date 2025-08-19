@@ -844,7 +844,7 @@ final class JSONWriterUTF8
             return;
         }
 
-        for (; i < len; ++i) { // ascii none special fast write
+        for (; i < end; ++i) { // ascii none special fast write
             char ch = chars[i];
             if (ch <= 0x007F) {
                 switch (ch) {

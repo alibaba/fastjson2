@@ -810,7 +810,7 @@ class JSONWriterUTF16
             chars[off++] = quote;
         }
 
-        for (int i = offset; i < len; ++i) {
+        for (int i = offset, end = Math.min(offset + len, str.length); i < end; ++i) {
             char ch = str[i];
             switch (ch) {
                 case '"':

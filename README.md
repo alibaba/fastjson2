@@ -371,7 +371,7 @@ byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
 ```java
 byte[] bytes = ...
 User user = JSONB.parseObject(bytes, User.class);
-User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportBeanArrayMapping);
+User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArrayToBean);
 ```
 
 ### 3.2 使用`JSONPath`
