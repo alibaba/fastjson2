@@ -261,7 +261,7 @@ public class JSONTypeAlphabetic {
 
 You can configure `Features` of `JSONWriter`/`JSONReader` during serialize and deserialize through `@JSONType(serializeFeatures= ...)` or `@JSONType(deserializeFeatures = ...)` annotations.
 
-More `Features` Configuration please refer to [features_cn.md](features_cn.md) 。
+More `Features` Configuration please refer to [Features Documentation](features_en.md) 。
 
 ```java
 @Slf4j
