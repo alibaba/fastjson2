@@ -47,7 +47,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
  *     Integer age = (Integer) obj.get("age");
  * }
  * </pre>
- * </p>
+ *
  *
  * @since 2.0.0
  */
@@ -6073,11 +6073,11 @@ public abstract class JSONReader
      *
      * <p>Features can be enabled in several ways:
      * <ul>
-     *   <li>Using {@link JSONReader#of(String, Feature...)} or similar factory methods</li>
+     *   <li>Using factory methods like {@link JSONReader#of(String, Context)} with {@link JSONFactory#createReadContext(JSONReader.Feature...)}</li>
      *   <li>Using {@link Context#config(Feature...)} method</li>
-     *   <li>Using {@link JSONFactory#setReaderFeatures(Feature...)} for global configuration</li>
+     *   <li>Using {@link JSONFactory#getDefaultReaderFeatures()} for global configuration</li>
      * </ul>
-     * </p>
+     *
      *
      * <p>Example usage:
      * <pre>
@@ -6100,7 +6100,7 @@ public abstract class JSONReader
      *     MyObject obj = reader.read(MyObject.class);
      * }
      * </pre>
-     * </p>
+     *
      *
      * <p>Features are implemented as bitmask flags for efficient storage and checking.
      * Each feature has a unique mask value that is used internally to determine

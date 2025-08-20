@@ -19,7 +19,7 @@ package com.alibaba.fastjson2;
  * byte[] jsonBytes = "[1, 2, 3]".getBytes(StandardCharsets.UTF_8);
  * boolean isValidArray = JSONValidator.fromUtf8(jsonBytes).validate(); // returns true
  * </pre>
- * </p>
+ *
  *
  * @author wenshao[szujobs@hotmail.com]
  * @since 2.0.59
@@ -34,7 +34,7 @@ public class JSONValidator {
      *   <li>{@link #Array} - A JSON array, enclosed in square brackets []</li>
      *   <li>{@link #Value} - A JSON value, which can be a string, number, boolean, or null</li>
      * </ul>
-     * </p>
+     *
      */
     public enum Type {
         /** Represents a JSON object structure (enclosed in curly braces {}) */

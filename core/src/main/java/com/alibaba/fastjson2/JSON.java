@@ -56,7 +56,7 @@ import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
  * JSONArray jsonArray = JSON.parseArray(jsonArrayString);
  *
  * // 5. Parse JSON string to List
- * List<User> userList = JSON.parseArray(jsonArrayString, User.class);
+ * List&lt;User&gt; userList = JSON.parseArray(jsonArrayString, User.class);
  *
  * // 6. Parse JSON with features
  * User user = JSON.parseObject(jsonString, User.class, JSONReader.Feature.FieldBased);
@@ -79,8 +79,8 @@ import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
  * <pre>
  * // 1. Working with generic types
  * String jsonString = "{\"users\":[{\"id\":1,\"name\":\"John\"}]}";
- * TypeReference<Map<String, List<User>>> typeReference = new TypeReference<Map<String, List<User>>>() {};
- * Map<String, List<User>> map = JSON.parseObject(jsonString, typeReference);
+ * TypeReference&lt;Map&lt;String, List&lt;User&gt;&gt;&gt; typeReference = new TypeReference&lt;Map&lt;String, List&lt;User&gt;&gt;&gt;() {};
+ * Map&lt;String, List&lt;User&gt;&gt; map = JSON.parseObject(jsonString, typeReference);
  *
  * // 2. Working with filters
  * SimplePropertyPreFilter filter = new SimplePropertyPreFilter();

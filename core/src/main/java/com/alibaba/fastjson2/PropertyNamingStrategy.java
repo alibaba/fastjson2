@@ -17,7 +17,7 @@ import com.alibaba.fastjson2.util.BeanUtils;
  * // Using PascalCase naming strategy
  * PropertyNamingStrategy.PascalCase.fieldName("userName"); // returns "UserName"
  * </pre>
- * </p>
+ *
  *
  * @author wenshao[szujobs@hotmail.com]
  * @since 1.2.15
@@ -163,7 +163,6 @@ public enum PropertyNamingStrategy {
      *   <li>"first_name" becomes "firstName"</li>
      *   <li>"url" remains "url" (no underscores)</li>
      * </ul>
-     * </p>
      *
      * @param name the snake_case string to convert
      * @return the camelCase string, or the original string if it doesn't contain underscores
@@ -208,7 +207,6 @@ public enum PropertyNamingStrategy {
      *   <li>"Camel" or "camel" will return {@link #CamelCase}</li>
      * </ul>
      * Other strategy names are matched case-sensitively against the enum constant names.
-     * </p>
      *
      * @param strategy the name of the strategy to find, or null/empty to return null
      * @return the PropertyNamingStrategy with the specified name, or null if not found

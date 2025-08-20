@@ -25,14 +25,14 @@ import java.util.function.Function;
  * <p>Example usage:
  * <pre>
  * // Get an ObjectReader for a specific type
- * ObjectReader<User> reader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(User.class);
+ * ObjectReader&lt;User&gt; reader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(User.class);
  *
  * // Read from JSON string
  * String jsonString = "{\"id\":1,\"name\":\"John\"}";
  * User user = reader.readObject(JSONReader.of(jsonString));
  *
  * // Create instance with map data
- * Map<String, Object> data = new HashMap<>();
+ * Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
  * data.put("id", 1);
  * data.put("name", "John");
  * User user2 = reader.createInstance(data);

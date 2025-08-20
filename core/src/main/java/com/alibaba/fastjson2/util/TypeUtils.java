@@ -1949,8 +1949,8 @@ public class TypeUtils {
     /**
      * decimal is integer, check has non-zero small
      *
-     * @param decimal
-     * @return
+     * @param decimal the BigDecimal value to check
+     * @return true if the decimal is an integer, false otherwise
      */
     public static boolean isInteger(BigDecimal decimal) {
         int scale = decimal.scale();

@@ -28,7 +28,7 @@ public @interface JSONType {
     /**
      * Property that defines what to do regarding ordering of properties not explicitly included in annotation instance.
      * If set to true, they will be alphabetically ordered (default setting); if false, order is undefined
-     * @return
+     * @return true if properties should be alphabetically ordered, false otherwise
      */
     boolean alphabetic() default true;
 

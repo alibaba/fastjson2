@@ -114,7 +114,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
  * JSONArray jsonArray = JSONB.parseArray(jsonbBytes);
  *
  * // 8. Parse JSONB bytes to List
- * List<User> userList = JSONB.parseArray(jsonbBytes, User.class);
+ * List&lt;User&gt; userList = JSONB.parseArray(jsonbBytes, User.class);
  * </pre>
  *
  * @since 2.0.0

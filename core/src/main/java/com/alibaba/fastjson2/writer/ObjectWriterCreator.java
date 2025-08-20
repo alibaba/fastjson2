@@ -212,7 +212,6 @@ public class ObjectWriterCreator {
     /**
      * Creates a FieldWriter for the specified field.
      *
-     * @param <T> the type of objects that the FieldWriter can serialize
      * @param objectClass the class containing the field
      * @param writerFeatures the writer features to use
      * @param provider the ObjectWriterProvider to use

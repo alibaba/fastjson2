@@ -55,7 +55,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
  *     String prettyJson = writer.toString();
  * }
  * </pre>
- * </p>
+ *
  *
  * <p>JSONWriter instances are not thread-safe and should not be shared between multiple threads.
  * Each thread should create its own JSONWriter instance or use the factory methods to create
@@ -918,7 +918,7 @@ public abstract class JSONWriter
      *     String json = writer.toString();
      * }
      * </pre>
-     * </p>
+     *
      *
      * @return a new JSONWriter instance
      */
@@ -3869,11 +3869,11 @@ public abstract class JSONWriter
      *
      * <p>Features can be enabled in several ways:
      * <ul>
-     *   <li>Using {@link JSONWriter#of(Feature...)} or similar factory methods</li>
+     *   <li>Using factory methods like {@link #of(Feature...)}</li>
      *   <li>Using {@link Context#config(Feature...)} method</li>
-     *   <li>Using {@link JSONFactory#setWriterFeatures(Feature...)} for global configuration</li>
+     *   <li>Using {@link JSONFactory#getDefaultWriterFeatures()} for global configuration</li>
      * </ul>
-     * </p>
+     *
      *
      * <p>Example usage:
      * <pre>
@@ -3899,7 +3899,7 @@ public abstract class JSONWriter
      *     String json = writer.toString();
      * }
      * </pre>
-     * </p>
+     *
      *
      * <p>Features are implemented as bitmask flags for efficient storage and checking.
      * Each feature has a unique mask value that is used internally to determine
@@ -4423,11 +4423,11 @@ public abstract class JSONWriter
      * <p>Example paths:
      * <ul>
      *   <li>ROOT path: "$"</li>
-     *   <li>Property path: "$.name"</li>
-     *   <li>Array element path: "$.items[0]"</li>
-     *   <li>Nested path: "$.person.address.street"</li>
+     *   <li>Property path: \"$.name\"</li>
+     *   <li>Array element path: \"$.items[0]\"</li>
+     *   <li>Nested path: \"$.person.address.street\"</li>
      * </ul>
-     * </p>
+     *
      *
      * @since 2.0.0
      */
