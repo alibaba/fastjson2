@@ -266,6 +266,10 @@ public class ObjectReaderProvider
         }
     }
 
+    @Deprecated
+    public void addAutoTypeDeny(String name) {
+    }
+
     /**
      * Gets the auto-type handler that is invoked when a type is auto-resolved.
      *
