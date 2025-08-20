@@ -63,6 +63,7 @@ The project uses Maven profiles for different build scenarios (e.g., generating 
 ## Development Conventions
 
 - **Code Style:** The project uses Checkstyle for code formatting and style checks (configuration in `src/checkstyle/fastjson2-checks.xml`). The Maven `validate` phase enforces these rules.
+- **Code Validation:** Any modified code must comply with the rules defined in `src/checkstyle/fastjson2-checks.xml`. Use `mvn validate` to verify that your changes pass the code style checks.
 - **Testing:** JUnit 5 and Kotest are used for testing. Tests are located alongside the code in `src/test` directories within each module.
 - **Modular Structure:**
   - `core`: The main fastjson2 library.
