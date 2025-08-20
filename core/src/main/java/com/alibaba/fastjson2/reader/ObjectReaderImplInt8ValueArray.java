@@ -82,7 +82,14 @@ class ObjectReaderImplInt8ValueArray
                 if (str.isEmpty()) {
                     bytes = null;
                 } else {
-                    throw new JSONException(jsonReader.info("illegal input : " + str));
+                    // Check if the string has a data URI base64 prefix
+                    int indexOfBase64 = str.indexOf(";base64,");
+                    if (indexOfBase64 != -1) {
+                        str = str.substring(indexOfBase64 + 8);
+                        bytes = Base64.getDecoder().decode(str);
+                    } else {
+                        throw new JSONException(jsonReader.info("illegal input : " + str));
+                    }
                 }
             }
 
@@ -110,19 +117,9 @@ class ObjectReaderImplInt8ValueArray
         } else if (jsonReader.isString()) {
             String str = jsonReader.readString();
             if (str != null) {
-                String prefix = "data:image/jpeg;base64,";
-                if (str.startsWith(prefix)) {
-                    str = str.substring(prefix.length());
-                } else {
-                    prefix = "data:image/png;base64,";
-                    if (str.startsWith(prefix)) {
-                        str = str.substring(prefix.length());
-                    } else {
-                        int indexOfBase64 = str.indexOf(";base64,");
-                        if (indexOfBase64 != -1) {
-                            str = str.substring(indexOfBase64 + 8);
-                        }
-                    }
+                int indexOfBase64 = str.indexOf(";base64,");
+                if (indexOfBase64 != -1) {
+                    str = str.substring(indexOfBase64 + 8);
                 }
             }
             bytes = Base64.getDecoder().decode(str);
