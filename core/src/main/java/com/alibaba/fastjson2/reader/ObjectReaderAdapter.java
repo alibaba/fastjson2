@@ -754,6 +754,12 @@ public class ObjectReaderAdapter<T>
                         && fieldValue.getClass() == fieldReader.fieldType
                 ) {
                     fieldReader.accept(object, fieldValue);
+                } else if (fieldValue != null
+                        && "com.alibaba.fastjson.JSONObject".equals(fieldValue.getClass().getName())) {
+                    Object fieldValueJavaBean = provider
+                            .getObjectReader(fieldReader.fieldType)
+                            .createInstance((Map) fieldValue, features);
+                    fieldReader.accept(object, fieldValueJavaBean);
                 } else {
                     fieldReader.acceptAny(object, fieldValue, features);
                 }
