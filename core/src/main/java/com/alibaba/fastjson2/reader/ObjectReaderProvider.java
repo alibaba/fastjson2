@@ -1176,6 +1176,10 @@ public class ObjectReaderProvider
         this.autoTypeBeforeHandler = autoTypeBeforeHandler;
     }
 
+    public Map<String, Date> getAutoTypeList() {
+        return autoTypeList;
+    }
+
     private static final class LRUAutoTypeCache
             extends LinkedHashMap<String, Date> {
         private final int maxSize;
