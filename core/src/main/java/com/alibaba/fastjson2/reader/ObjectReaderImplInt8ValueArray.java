@@ -113,6 +113,16 @@ class ObjectReaderImplInt8ValueArray
                 String prefix = "data:image/jpeg;base64,";
                 if (str.startsWith(prefix)) {
                     str = str.substring(prefix.length());
+                } else {
+                    prefix = "data:image/png;base64,";
+                    if (str.startsWith(prefix)) {
+                        str = str.substring(prefix.length());
+                    } else {
+                        int indexOfBase64 = str.indexOf(";base64,");
+                        if (indexOfBase64 != -1) {
+                            str = str.substring(indexOfBase64 + 8);
+                        }
+                    }
                 }
             }
             bytes = Base64.getDecoder().decode(str);
