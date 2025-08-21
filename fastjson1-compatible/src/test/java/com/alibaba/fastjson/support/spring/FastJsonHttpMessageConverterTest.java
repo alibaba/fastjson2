@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -22,7 +23,7 @@ public class FastJsonHttpMessageConverterTest {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
 
         // 验证defaultCharset是否正确设置为UTF-8
-        Assertions.assertEquals(Charset.forName("UTF-8"), converter.getDefaultCharset());
+        Assertions.assertEquals(StandardCharsets.UTF_8, converter.getDefaultCharset());
 
         converter.setSupportedMediaTypes(Arrays
                 .asList(new MediaType[]{MediaType.APPLICATION_JSON_UTF8}));
