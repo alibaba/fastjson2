@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Fastjson for Spring MVC Converter.
@@ -44,6 +45,7 @@ public class FastJsonHttpMessageConverter
      */
     public FastJsonHttpMessageConverter() {
         super(MediaType.ALL);
+        setDefaultCharset(StandardCharsets.UTF_8);
     }
 
     /**
