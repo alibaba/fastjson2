@@ -80,61 +80,24 @@ symbolTable | JSONB.SymbolTable | JSONB序列化和反序列化的符号表，�
 
 在Fastjson2中，同样可以使用`FastJsonHttpMessageConverter` 和 `FastJsonJsonView` 为 Spring MVC 构建的 Web 应用提供更好的性能体验。
 
-## 2.1  Spring Web MVC Converter
-
-使用 `FastJsonHttpMessageConverter` 来替换 Spring MVC 默认的 `HttpMessageConverter`
-以提高 `@RestController` `@ResponseBody` `@RequestBody` 注解的 JSON序列化和反序列化速度。
-
-**Package**: `com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter`
-
-**Before Spring 5 Example**:
+## 2. 配置FastJsonHttpMessageConverter
 
 ```java
-
 @Configuration
-@EnableWebMvc
-public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
+public class WebMvcConfigurer extends WebMvcConfigurationSupport {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        //自定义配置...
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
-        config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
+        config.setCharset(StandardCharsets.UTF_8);
+        
         converter.setFastJsonConfig(config);
-        converter.setDefaultCharset(StandardCharsets.UTF_8);
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        // 从2.0.59版本开始，FastJsonHttpMessageConverter默认charset已经是UTF-8，无需手动设置
+        // converter.setDefaultCharset(StandardCharsets.UTF_8);
         converters.add(0, converter);
     }
-}
-```
-
-从Spring5.0版本开始，`WebMvcConfigurerAdapter` 已被弃用，您可以直接实现`WebMvcConfigurer`接口，而无需使用此适配器。
-
-**After Spring 5 Example**:
-
-```java
-
-@Configuration
-@EnableWebMvc
-public class CustomWebMvcConfigurer implements WebMvcConfigurer {
-
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        //自定义配置...
-        FastJsonConfig config = new FastJsonConfig();
-        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
-        config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
-        converter.setFastJsonConfig(config);
-        converter.setDefaultCharset(StandardCharsets.UTF_8);
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
-        converters.add(0, converter);
-    }
-
 }
 ```
 

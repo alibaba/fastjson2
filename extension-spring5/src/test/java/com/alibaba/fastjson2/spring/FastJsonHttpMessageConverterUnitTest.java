@@ -29,6 +29,9 @@ public class FastJsonHttpMessageConverterUnitTest {
         assertTrue(messageConverter.canRead(VO.class, VO.class, MediaType.APPLICATION_JSON));
         assertTrue(messageConverter.canWrite(VO.class, VO.class, MediaType.APPLICATION_JSON));
 
+        // 验证defaultCharset是否正确设置为UTF-8
+        assertEquals(Charset.forName("UTF-8"), messageConverter.getDefaultCharset());
+
         messageConverter.setSupportedMediaTypes(Arrays
                 .asList(new MediaType[]{MediaType.APPLICATION_JSON}));
         assertEquals(1, messageConverter.getSupportedMediaTypes().size());

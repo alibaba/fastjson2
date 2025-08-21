@@ -21,6 +21,9 @@ public class FastJsonHttpMessageConverterTest {
     public void test_read() throws Exception {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
 
+        // 验证defaultCharset是否正确设置为UTF-8
+        Assertions.assertEquals(Charset.forName("UTF-8"), converter.getDefaultCharset());
+
         converter.setSupportedMediaTypes(Arrays
                 .asList(new MediaType[]{MediaType.APPLICATION_JSON_UTF8}));
         Assertions.assertEquals(1, converter.getSupportedMediaTypes().size());
