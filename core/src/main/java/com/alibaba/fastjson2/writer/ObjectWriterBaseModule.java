@@ -428,7 +428,6 @@ public class ObjectWriterBaseModule
             if ((fieldInfo.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0
                     && !String.class.equals(field.getType())
                     && fieldInfo.writeUsing == null
-                    && !JSONFactory.isUseJacksonAnnotation()
             ) {
                 fieldInfo.writeUsing = ObjectWriterImplToString.class;
             }
