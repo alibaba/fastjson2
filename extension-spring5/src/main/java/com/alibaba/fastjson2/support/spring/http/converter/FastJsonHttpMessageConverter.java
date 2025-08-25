@@ -150,10 +150,10 @@ public class FastJsonHttpMessageConverter
     }
 
     // see jdk.internal.util.ArraysSupport.SOFT_MAX_ARRAY_LENGTH
-    public static final int SOFT_MAX_ARRAY_LENGTH = Integer.MAX_VALUE - 8;
+    private static final int SOFT_MAX_ARRAY_LENGTH = Integer.MAX_VALUE - 8;
 
     // see jdk.internal.util.ArraysSupport.newLength( )
-    public static int newLength(int oldLength, int minGrowth, int prefGrowth) {
+    private static int newLength(int oldLength, int minGrowth, int prefGrowth) {
         // preconditions not checked because of inlining
         // assert oldLength >= 0
         // assert minGrowth > 0
