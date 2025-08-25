@@ -1699,7 +1699,6 @@ public interface JSON {
      * @return {@link T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
-    @SuppressWarnings("unchecked")
     static <T> T parseObject(
             byte[] bytes,
             Type type,
@@ -1718,6 +1717,26 @@ public interface JSON {
                 features
         );
         context.setDateFormat(format);
+
+        return parseObject(bytes, type, context);
+    }
+
+    /**
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, Type type, JSONReader.Context context) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
 
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);

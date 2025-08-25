@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.config;
 
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.SymbolTable;
@@ -64,6 +65,11 @@ public class FastJsonConfig {
      */
     private SymbolTable symbolTable;
 
+    /** internal cache for JSONReader.Context, avoid repeatedly constructing new objects */
+    private transient JSONReader.Context readerContext;
+    /** internal cache for JSONWriter.Context, avoid repeatedly constructing new objects */
+    private transient JSONWriter.Context writerContext;
+
     /**
      * init param.
      */
@@ -96,6 +102,7 @@ public class FastJsonConfig {
      */
     public void setCharset(Charset charset) {
         this.charset = charset;
+        this.clearContext();
     }
 
     /**
@@ -114,6 +121,7 @@ public class FastJsonConfig {
      */
     public void setDateFormat(String dateFormat) {
         this.dateFormat = dateFormat;
+        this.clearContext();
     }
 
     /**
@@ -132,6 +140,7 @@ public class FastJsonConfig {
      */
     public void setReaderFeatures(JSONReader.Feature... readerFeatures) {
         this.readerFeatures = readerFeatures;
+        this.readerContext = null;
     }
 
     /**
@@ -150,6 +159,7 @@ public class FastJsonConfig {
      */
     public void setWriterFeatures(JSONWriter.Feature... writerFeatures) {
         this.writerFeatures = writerFeatures;
+        this.writerContext = null;
     }
 
     /**
@@ -168,6 +178,7 @@ public class FastJsonConfig {
      */
     public void setReaderFilters(Filter... readerFilters) {
         this.readerFilters = readerFilters;
+        this.readerContext = null;
     }
 
     /**
@@ -186,6 +197,7 @@ public class FastJsonConfig {
      */
     public void setWriterFilters(Filter... writerFilters) {
         this.writerFilters = writerFilters;
+        this.writerContext = null;
     }
 
     /**
@@ -224,6 +236,7 @@ public class FastJsonConfig {
      */
     public void setJSONB(boolean jsonb) {
         this.jsonb = jsonb;
+        this.clearContext();
     }
 
     /**
@@ -244,5 +257,41 @@ public class FastJsonConfig {
      */
     public void setSymbolTable(String... names) {
         this.symbolTable = JSONB.symbolTable(names);
+        this.clearContext();
     }
+
+    /**
+     * Clear internal caches of JSONReader.Context and JSONWriter.Context
+     */
+    public void clearContext() {
+        readerContext = null;
+        writerContext = null;
+    }
+
+    public JSONReader.Context readerContext() {
+        JSONReader.Context context = readerContext;
+        if (context == null) { // Concurrency may occur, but it will not cause any problems
+            context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider(), jsonb ? symbolTable : null, readerFilters, readerFeatures);
+            context.setDateFormat(dateFormat);
+            this.readerContext = context;
+        }
+        return context;
+    }
+
+    public JSONWriter.Context writerContext() {
+        JSONWriter.Context context = writerContext;
+        if (context == null) {
+            context = new JSONWriter.Context(dateFormat, writerFeatures);
+            if (dateFormat != null && !dateFormat.isEmpty()) {
+                context.setDateFormat(dateFormat);
+            }
+            // symbolTable is only in JSONWriter class
+            if (writerFilters != null && writerFilters.length > 0) {
+                context.configFilter(writerFilters);
+            }
+            this.writerContext = context;
+        }
+        return context;
+    }
+
 }
