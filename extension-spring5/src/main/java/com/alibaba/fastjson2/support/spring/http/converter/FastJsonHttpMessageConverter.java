@@ -95,13 +95,13 @@ public class FastJsonHttpMessageConverter
     }
 
     /** Default initialization capacity when content-length is not specified */
-    public static int REQUEST_BODY_DEFAULT_INITIAL_CAPACITY = 1024;
+    private static int REQUEST_BODY_INITIAL_CAPACITY = 1024;
 
-    public static void setRequestBodyDefaultInitialCapacity(int initialCapacity) {
+    public static void setRequestBodyInitialCapacity(int initialCapacity) {
         if (initialCapacity < 128 || initialCapacity > 1024 * 1024) {
             throw new IllegalArgumentException("invalid initialCapacity: " + initialCapacity);
         }
-        REQUEST_BODY_DEFAULT_INITIAL_CAPACITY = initialCapacity;
+        REQUEST_BODY_INITIAL_CAPACITY = initialCapacity;
     }
 
     /**
@@ -109,7 +109,7 @@ public class FastJsonHttpMessageConverter
      */
     protected static int calcInitialCapacity(long contentLength) {
         return contentLength == -1 || contentLength > Integer.MAX_VALUE
-                ? REQUEST_BODY_DEFAULT_INITIAL_CAPACITY
+                ? REQUEST_BODY_INITIAL_CAPACITY
                 // The maximum limit is 1MB to prevent fake request headers
                 : (int) Math.min(contentLength, 1024 * 1024);
     }
