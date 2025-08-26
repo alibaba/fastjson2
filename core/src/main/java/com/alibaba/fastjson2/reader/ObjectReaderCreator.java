@@ -77,6 +77,35 @@ import java.util.stream.Collectors;
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
+/**
+ * ObjectReaderCreator is responsible for creating ObjectReader instances for
+ * deserializing JSON data into Java objects. It provides factory methods for
+ * creating ObjectReaders for various types of objects and fields.
+ *
+ * <p>This class supports various features including:
+ * <ul>
+ *   <li>Creation of ObjectReaders for different object types</li>
+ *   <li>Creation of FieldReaders for different field types</li>
+ *   <li>Lambda expression support for setter methods</li>
+ *   <li>Custom field reader creation with various configurations</li>
+ *   <li>JIT compilation support for improved performance</li>
+ * </ul>
+ *
+ * <p>Example usage:
+ * <pre>
+ * // Get default creator
+ * ObjectReaderCreator creator = JSONFactory.getDefaultObjectReaderCreator();
+ *
+ * // Create ObjectReader for a class
+ * ObjectReader&lt;User&gt; reader = creator.createObjectReader(User.class);
+ *
+ * // Create FieldReader for a field
+ * Field field = User.class.getDeclaredField("name");
+ * FieldReader&lt;User&gt; fieldReader = creator.createFieldReader("name", String.class, field);
+ * </pre>
+ *
+ * @since 2.0.0
+ */
 public class ObjectReaderCreator {
     public static final boolean JIT = !JDKUtils.ANDROID && !JDKUtils.GRAAL;
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
@@ -271,11 +300,27 @@ public class ObjectReaderCreator {
         return fieldReaders.toArray(new FieldReader[0]);
     }
 
+    /**
+     * Creates a Function that can instantiate objects using the specified factory method and parameter names.
+     *
+     * @param <T> the type of objects that the Function can create
+     * @param factoryMethod the factory method to use for creating instances
+     * @param paramNames the parameter names to use for the factory method
+     * @return a Function that can create new instances of the specified type using the factory method
+     */
     public <T> Function<Map<Long, Object>, T> createFactoryFunction(Method factoryMethod, String... paramNames) {
         factoryMethod.setAccessible(true);
         return new FactoryFunction(factoryMethod, paramNames);
     }
 
+    /**
+     * Creates a Function that can instantiate objects using the specified constructor and parameter names.
+     *
+     * @param <T> the type of objects that the Function can create
+     * @param constructor the constructor to use for creating instances
+     * @param paramNames the parameter names to use for the constructor
+     * @return a Function that can create new instances of the specified type
+     */
     public <T> Function<Map<Long, Object>, T> createFunction(Constructor constructor, String... paramNames) {
         constructor.setAccessible(true);
         return new ConstructorFunction(
@@ -288,6 +333,15 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates a Function that can instantiate objects using the specified constructor, marker constructor, and parameter names.
+     *
+     * @param <T> the type of objects that the Function can create
+     * @param constructor the constructor to use for creating instances
+     * @param markerConstructor the marker constructor to use
+     * @param paramNames the parameter names to use for the constructor
+     * @return a Function that can create new instances of the specified type
+     */
     public <T> Function<Map<Long, Object>, T> createFunction(
             Constructor constructor,
             Constructor markerConstructor,
@@ -308,6 +362,14 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with the given field readers.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectClass the class of objects to deserialize
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             FieldReader... fieldReaders
@@ -323,6 +385,15 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with a default creator and field readers.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectClass the class of objects to deserialize
+     * @param defaultCreator the supplier function to create new instances of the object
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             Supplier<T> defaultCreator,
@@ -331,6 +402,15 @@ public class ObjectReaderCreator {
         return createObjectReader(objectClass, null, 0, null, defaultCreator, null, fieldReaders);
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with see-also support.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectType the class of objects to deserialize
+     * @param seeAlso the see-also classes
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
             Class<T> objectType,
             Class[] seeAlso,
@@ -348,6 +428,17 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with see-also support and custom type key.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectClass the class of objects to deserialize
+     * @param typeKey the type key to use
+     * @param seeAlso the see-also classes
+     * @param seeAlsoNames the see-also class names
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
             Class<T> objectClass,
             String typeKey,
@@ -368,6 +459,16 @@ public class ObjectReaderCreator {
     }
 
     /**
+     * Creates an ObjectReader for the specified object type with see-also support, custom type key, and default class.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectClass the class of objects to deserialize
+     * @param typeKey the type key to use
+     * @param seeAlso the see-also classes
+     * @param seeAlsoNames the see-also class names
+     * @param seeAlsoDefault the default see-also class
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
      * @since 2.0.24
      */
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
@@ -390,6 +491,18 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with see-also support, custom creator, and type key.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectType the class of objects to deserialize
+     * @param defaultCreator the supplier function to create new instances of the object
+     * @param typeKey the type key to use
+     * @param seeAlso the see-also classes
+     * @param seeAlsoNames the see-also class names
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
             Class<T> objectType,
             Supplier<T> defaultCreator,
@@ -783,6 +896,17 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with comprehensive configuration.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectClass the class of objects to deserialize
+     * @param features the features to use for deserialization
+     * @param defaultCreator the supplier function to create new instances of the object
+     * @param buildFunction the build function to use
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             long features,
@@ -793,6 +917,19 @@ public class ObjectReaderCreator {
         return createObjectReader(objectClass, null, features, null, defaultCreator, buildFunction, fieldReaders);
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with type key, features, schema, and comprehensive configuration.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectClass the class of objects to deserialize
+     * @param typeKey the type key to use
+     * @param features the features to use for deserialization
+     * @param schema the JSON schema to use
+     * @param defaultCreator the supplier function to create new instances of the object
+     * @param buildFunction the build function to use
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             String typeKey,
@@ -813,6 +950,20 @@ public class ObjectReaderCreator {
                 fieldReaders);
     }
 
+    /**
+     * Creates an ObjectReader for the specified object type with comprehensive configuration including root name.
+     *
+     * @param <T> the type of objects that the ObjectReader can deserialize
+     * @param objectClass the class of objects to deserialize
+     * @param typeKey the type key to use
+     * @param rootName the root name to use
+     * @param features the features to use for deserialization
+     * @param schema the JSON schema to use
+     * @param defaultCreator the supplier function to create new instances of the object
+     * @param buildFunction the build function to use
+     * @param fieldReaders the field readers to use for deserialization
+     * @return an ObjectReader instance for the specified type
+     */
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             String typeKey,
@@ -1785,6 +1936,13 @@ public class ObjectReaderCreator {
         return toFieldReaderArray(fieldReaders);
     }
 
+    /**
+     * Creates a Supplier function for the specified object class that can create new instances.
+     *
+     * @param <T> the type of objects that the Supplier can create
+     * @param objectClass the class of objects to create
+     * @return a Supplier function that can create new instances of the specified class, or null if creation is not possible
+     */
     public <T> Supplier<T> createSupplier(Class<T> objectClass) {
         if (objectClass.isInterface()) {
             return null;
@@ -1805,9 +1963,28 @@ public class ObjectReaderCreator {
             throw new JSONException("get constructor error, class " + objectClass.getName(), e);
         }
 
+        return createSupplier(constructor);
+    }
+
+    /**
+     * Creates a Supplier function for the specified constructor that can create new instances.
+     *
+     * @param <T> the type of objects that the Supplier can create
+     * @param constructor the constructor to use for creating instances
+     * @return a Supplier function that can create new instances using the specified constructor
+     */
+    public <T> Supplier<T> createSupplier(Constructor<T> constructor) {
         return createSupplier(constructor, true);
     }
 
+    /**
+     * Creates a Supplier function for the specified constructor with JIT compilation option.
+     *
+     * @param <T> the type of objects that the Supplier can create
+     * @param constructor the constructor to use for creating instances
+     * @param jit whether to use JIT compilation for improved performance
+     * @return a Supplier function that can create new instances using the specified constructor
+     */
     public <T> Supplier<T> createSupplier(Constructor constructor, boolean jit) {
         jit &= JIT;
 
@@ -1975,6 +2152,14 @@ public class ObjectReaderCreator {
         return null;
     }
 
+    /**
+     * Creates a Function that can build objects using the specified builder method.
+     *
+     * @param <T> the type of objects that the Function can build
+     * @param <R> the return type of the builder method
+     * @param builderMethod the builder method to use for building objects
+     * @return a Function that can build objects using the specified builder method
+     */
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
         try {
             return createBuildFunctionLambda(builderMethod);
@@ -1994,6 +2179,15 @@ public class ObjectReaderCreator {
         };
     }
 
+    /**
+     * Creates a Function that can build objects using the specified builder method with lambda optimization.
+     *
+     * @param <T> the type of objects that the Function can build
+     * @param <R> the return type of the builder method
+     * @param builderMethod the builder method to use for building objects
+     * @return a Function that can build objects using the specified builder method
+     * @throws Throwable if an error occurs during lambda creation
+     */
     <T, R> Function<T, R> createBuildFunctionLambda(Method builderMethod) {
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(builderMethod.getDeclaringClass());
         try {
@@ -2021,6 +2215,17 @@ public class ObjectReaderCreator {
         }
     }
 
+    /**
+     * Creates a FieldReader for the specified field with default configuration.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectType the class containing the field
+     * @param fieldName the name of the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param method the method to use for reading the field
+     * @return a FieldReader instance for the specified field
+     */
     public <T> FieldReader createFieldReader(
             Class<T> objectType,
             String fieldName,
@@ -2045,6 +2250,18 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates a FieldReader for the specified field with format configuration.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectType the class containing the field
+     * @param fieldName the name of the field
+     * @param format the date format to use for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param method the method to use for reading the field
+     * @return a FieldReader instance for the specified field
+     */
     public <T> FieldReader createFieldReader(
             Class<T> objectType,
             String fieldName,
@@ -2056,8 +2273,20 @@ public class ObjectReaderCreator {
         return createFieldReaderMethod(objectType, fieldName, format, fieldType, fieldClass, method);
     }
 
+    /**
+     * Creates a FieldReader for the specified method with default configuration.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectType the class containing the field
+     * @param fieldName the name of the field
+     * @param format the date format to use for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param method the method to use for reading the field
+     * @return a FieldReader instance for the specified field
+     */
     public <T> FieldReader createFieldReaderMethod(
-            Class<T> objectClass,
+            Class<T> objectType,
             String fieldName,
             String format,
             Type fieldType,
@@ -2065,8 +2294,8 @@ public class ObjectReaderCreator {
             Method method
     ) {
         return createFieldReaderMethod(
-                objectClass,
-                objectClass,
+                objectType,
+                objectType,
                 fieldName,
                 0,
                 0L,
@@ -2081,6 +2310,24 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates a FieldReader for the specified parameter with default configuration.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for the field
+     * @param format the date format to use for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param paramName the name of the parameter
+     * @param declaringClass the declaring class of the parameter
+     * @param parameter the parameter to create a reader for
+     * @param schema the JSON schema to use
+     * @return a FieldReader instance for the specified parameter
+     */
     public <T> FieldReader createFieldReaderParam(
             Class<T> objectClass,
             Type objectType,
@@ -2112,6 +2359,25 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates a FieldReader for the specified parameter with initialization reader.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for the field
+     * @param format the date format to use for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param paramName the name of the parameter
+     * @param declaringClass the declaring class of the parameter
+     * @param parameter the parameter to create a reader for
+     * @param schema the JSON schema to use
+     * @param initReader the initialization reader to use
+     * @return a FieldReader instance for the specified parameter
+     */
     public <T> FieldReader createFieldReaderParam(
             Class<T> objectClass,
             Type objectType,
@@ -2146,6 +2412,69 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates a FieldReader for the specified parameter with comprehensive configuration.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for the field
+     * @param format the date format to use for the field
+     * @param locale the locale to use for the field
+     * @param defaultValue the default value for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param paramName the name of the parameter
+     * @param declaringClass the declaring class of the parameter
+     * @param parameter the parameter to create a reader for
+     * @param schema the JSON schema to use
+     * @param initReader the initialization reader to use
+     * @return a FieldReader instance for the specified parameter
+     */
+    /**
+     * Creates a FieldReader for the specified parameter with comprehensive configuration including locale, default value, and initialization reader.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for the field
+     * @param format the date format to use for the field
+     * @param locale the locale to use for the field
+     * @param defaultValue the default value for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param paramName the name of the parameter
+     * @param declaringClass the declaring class of the parameter
+     * @param parameter the parameter to create a reader for
+     * @param schema the JSON schema to use for the field
+     * @param initReader the initialization reader to use
+     * @return a FieldReader instance for the specified parameter
+     */
+    /**
+     * Creates a FieldReader for the specified parameter with comprehensive configuration.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for the field
+     * @param format the date format to use for the field
+     * @param locale the locale to use for the field
+     * @param defaultValue the default value for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param paramName the name of the parameter
+     * @param declaringClass the declaring class of the parameter
+     * @param parameter the parameter to create a reader for
+     * @param schema the JSON schema to use for the field
+     * @param initReader the initialization reader to use
+     * @return a FieldReader instance for the specified parameter
+     */
     public <T> FieldReader createFieldReaderParam(
             Class<T> objectClass,
             Type objectType,
@@ -2257,6 +2586,25 @@ public class ObjectReaderCreator {
                 schema);
     }
 
+    /**
+     * Creates a FieldReader for the specified method with comprehensive configuration.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for the field
+     * @param format the date format to use for the field
+     * @param locale the locale to use for the field
+     * @param defaultValue the default value for the field
+     * @param schema the schema to use for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param method the method to use for reading the field
+     * @param initReader the initialization reader to use
+     * @return a FieldReader instance for the specified method
+     */
     public <T> FieldReader createFieldReaderMethod(
             Class<T> objectClass,
             Type objectType,
@@ -2291,6 +2639,27 @@ public class ObjectReaderCreator {
         );
     }
 
+    /**
+     * Creates a FieldReader for the specified method with comprehensive configuration including array-to-map options.
+     *
+     * @param <T> the type of objects that contain the field
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for the field
+     * @param format the date format to use for the field
+     * @param locale the locale to use for the field
+     * @param defaultValue the default value for the field
+     * @param schema the schema to use for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param method the method to use for reading the field
+     * @param initReader the initialization reader to use
+     * @param keyName the key name for array-to-map conversion
+     * @param arrayToMapDuplicateHandler the duplicate handler for array-to-map conversion
+     * @return a FieldReader instance for the specified method
+     */
     public <T> FieldReader createFieldReaderMethod(
             Class<T> objectClass,
             Type objectType,
@@ -2680,6 +3049,15 @@ public class ObjectReaderCreator {
         return createFieldReader(fieldName, null, field.getGenericType(), field);
     }
 
+    /**
+     * Creates a FieldReader for the specified method with minimal configuration.
+     *
+     * @param fieldName the name of the field
+     * @param method the method to create a reader for
+     * @param <T> the type of objects that the FieldReader can deserialize
+     * @return a FieldReader instance for the specified method
+     * @throws JSONException if the method has an illegal number of parameters
+     */
     public <T> FieldReader createFieldReader(
             String fieldName,
             Method method
@@ -3428,6 +3806,25 @@ public class ObjectReaderCreator {
         return initReader;
     }
 
+    /**
+     * Creates a FieldReader using lambda expressions for improved performance.
+     *
+     * @param <T> the type of objects that the FieldReader can deserialize
+     * @param objectClass the class containing the field
+     * @param objectType the type of the object
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use for deserialization
+     * @param format the date format to use for the field
+     * @param locale the locale to use for the field
+     * @param defaultValue the default value for the field
+     * @param schema the JSON schema to use for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param method the method to use for reading the field
+     * @param initReader the initialization reader to use
+     * @return a FieldReader instance for the specified field
+     */
     protected <T> FieldReader createFieldReaderLambda(
             Class<T> objectClass,
             Type objectType,

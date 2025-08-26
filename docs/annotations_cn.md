@@ -248,7 +248,7 @@ public class JSONTypeAlphabetic {
 
 您可以通过`@JSONType(serializeFeatures= ...)`或`@JSONType(deserializeFeatures = ...)`注解配置序列化和反序列时`JSONWriter`/`JSONReader`的`Features`。
 
-更多`Features`配置请参考 [features_cn.md](features_cn.md) 。
+更多`Features`配置请参考 [Features文档](features_cn.md) 。
 
 ```java
 @Slf4j

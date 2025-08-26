@@ -30,6 +30,37 @@ import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
+/**
+ * ObjectReaderProvider is responsible for providing and managing ObjectReader instances
+ * for deserializing JSON data into Java objects. It handles object creation, caching,
+ * type conversion, and auto-type support.
+ *
+ * <p>This provider supports various features including:
+ * <ul>
+ *   <li>Object reader caching for performance optimization</li>
+ *   <li>Auto-type support with security controls</li>
+ *   <li>Type conversion between different Java types</li>
+ *   <li>Mixin support for modifying serialization behavior</li>
+ *   <li>Module-based extensibility</li>
+ * </ul>
+ *
+ * <p>Example usage:
+ * <pre>
+ * // Get default provider
+ * ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+ *
+ * // Get object reader for a specific type
+ * ObjectReader&lt;User&gt; reader = provider.getObjectReader(User.class);
+ *
+ * // Parse JSON string using the reader
+ * User user = reader.readObject(JSONReader.of(jsonString));
+ *
+ * // Register custom type converter
+ * provider.registerTypeConvert(String.class, Integer.class, Integer::valueOf);
+ * </pre>
+ *
+ * @since 2.0.0
+ */
 public class ObjectReaderProvider
         implements ObjectCodecProvider {
     static final ClassLoader FASTJSON2_CLASS_LOADER = JSON.class.getClassLoader();
@@ -193,6 +224,13 @@ public class ObjectReaderProvider
         hashCache.put(Fnv.hashCode64(TypeUtils.getTypeName(HashMap.class)), ObjectReaderImplMap.INSTANCE);
     }
 
+    /**
+     * Registers an ObjectReader for the specified hash code if it is not already registered.
+     * This method handles both thread-local and global caching.
+     *
+     * @param hashCode the hash code for which to register the ObjectReader
+     * @param objectReader the ObjectReader to register
+     */
     public void registerIfAbsent(long hashCode, ObjectReader objectReader) {
         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         if (tcl != null && tcl != JSON.class.getClassLoader()) {
@@ -209,6 +247,12 @@ public class ObjectReaderProvider
         hashCache.putIfAbsent(hashCode, objectReader);
     }
 
+    /**
+     * Adds a type name to the auto-type accept list. Types in this list are allowed
+     * for auto-type deserialization.
+     *
+     * @param name the type name to add to the accept list
+     */
     public void addAutoTypeAccept(String name) {
         if (name != null && name.length() != 0) {
             long hash = Fnv.hashCode64(name);
@@ -226,22 +270,49 @@ public class ObjectReaderProvider
     public void addAutoTypeDeny(String name) {
     }
 
+    /**
+     * Gets the auto-type handler that is invoked when a type is auto-resolved.
+     *
+     * @return the auto-type handler, or null if none is set
+     */
     public Consumer<Class> getAutoTypeHandler() {
         return autoTypeHandler;
     }
 
+    /**
+     * Sets the auto-type handler that will be invoked when a type is auto-resolved.
+     *
+     * @param autoTypeHandler the auto-type handler to set
+     */
     public void setAutoTypeHandler(Consumer<Class> autoTypeHandler) {
         this.autoTypeHandler = autoTypeHandler;
     }
 
+    /**
+     * Gets the mixin source class for the specified target class.
+     *
+     * @param target the target class
+     * @return the mixin source class, or null if no mixin is registered for the target
+     */
     public Class getMixIn(Class target) {
         return mixInCache.get(target);
     }
 
+    /**
+     * Clears all mixin mappings.
+     */
     public void cleanupMixIn() {
         mixInCache.clear();
     }
 
+    /**
+     * Registers a mixin mapping between a target class and a mixin source class.
+     * Mixin allows modifying the serialization/deserialization behavior of a class
+     * by applying annotations from another class.
+     *
+     * @param target the target class to which the mixin will be applied
+     * @param mixinSource the source class from which annotations will be copied, or null to remove the mixin
+     */
     public void mixIn(Class target, Class mixinSource) {
         if (mixinSource == null) {
             mixInCache.remove(target);
@@ -252,10 +323,23 @@ public class ObjectReaderProvider
         cacheFieldBased.remove(target);
     }
 
+    /**
+     * Registers a subtype class for see-also support. This allows the provider to
+     * recognize and handle subtypes of the specified superclass.
+     *
+     * @param subTypeClass the subtype class to register
+     */
     public void registerSeeAlsoSubType(Class subTypeClass) {
         registerSeeAlsoSubType(subTypeClass, null);
     }
 
+    /**
+     * Registers a subtype class with a specific name for see-also support.
+     *
+     * @param subTypeClass the subtype class to register
+     * @param subTypeClassName the name of the subtype class, or null to use the class's simple name
+     * @throws JSONException if the superclass is null
+     */
     public void registerSeeAlsoSubType(Class subTypeClass, String subTypeClassName) {
         Class superClass = subTypeClass.getSuperclass();
         if (superClass == null) {
@@ -276,6 +360,15 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Registers an ObjectReader for the specified type. If an ObjectReader is already
+     * registered for the type, it will be replaced.
+     *
+     * @param type the type for which to register the ObjectReader
+     * @param objectReader the ObjectReader to register, or null to unregister
+     * @param fieldBased whether the ObjectReader is field-based
+     * @return the previous ObjectReader for the type, or null if there was no previous ObjectReader
+     */
     public ObjectReader register(Type type, ObjectReader objectReader, boolean fieldBased) {
         ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         if (objectReader == null) {
@@ -285,37 +378,98 @@ public class ObjectReaderProvider
         return cache.put(type, objectReader);
     }
 
+    /**
+     * Registers an ObjectReader for the specified type using method-based reading.
+     * If an ObjectReader is already registered for the type, it will be replaced.
+     *
+     * @param type the type for which to register the ObjectReader
+     * @param objectReader the ObjectReader to register, or null to unregister
+     * @return the previous ObjectReader for the type, or null if there was no previous ObjectReader
+     */
     public ObjectReader register(Type type, ObjectReader objectReader) {
         return register(type, objectReader, false);
     }
 
+    /**
+     * Registers an ObjectReader for the specified type using method-based reading
+     * if it is not already registered.
+     *
+     * @param type the type for which to register the ObjectReader
+     * @param objectReader the ObjectReader to register
+     * @return the previous ObjectReader for the type, or null if there was no previous ObjectReader
+     */
     public ObjectReader registerIfAbsent(Type type, ObjectReader objectReader) {
         return registerIfAbsent(type, objectReader, false);
     }
 
+    /**
+     * Registers an ObjectReader for the specified type if it is not already registered.
+     *
+     * @param type the type for which to register the ObjectReader
+     * @param objectReader the ObjectReader to register
+     * @param fieldBased whether the ObjectReader is field-based
+     * @return the previous ObjectReader for the type, or null if there was no previous ObjectReader
+     */
     public ObjectReader registerIfAbsent(Type type, ObjectReader objectReader, boolean fieldBased) {
         ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.putIfAbsent(type, objectReader);
     }
 
+    /**
+     * Unregisters the ObjectReader for the specified type using method-based reading.
+     *
+     * @param type the type for which to unregister the ObjectReader
+     * @return the unregistered ObjectReader, or null if there was no ObjectReader for the type
+     */
     public ObjectReader unregisterObjectReader(Type type) {
         return unregisterObjectReader(type, false);
     }
 
+    /**
+     * Unregisters the ObjectReader for the specified type.
+     *
+     * @param type the type for which to unregister the ObjectReader
+     * @param fieldBased whether the ObjectReader is field-based
+     * @return the unregistered ObjectReader, or null if there was no ObjectReader for the type
+     */
     public ObjectReader unregisterObjectReader(Type type, boolean fieldBased) {
         ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.remove(type);
     }
 
+    /**
+     * Unregisters the specified ObjectReader for the given type using method-based reading,
+     * but only if the currently registered reader matches the specified reader.
+     *
+     * @param type the type for which to unregister the ObjectReader
+     * @param reader the ObjectReader to unregister
+     * @return true if the ObjectReader was unregistered, false otherwise
+     */
     public boolean unregisterObjectReader(Type type, ObjectReader reader) {
         return unregisterObjectReader(type, reader, false);
     }
 
+    /**
+     * Unregisters the specified ObjectReader for the given type, but only if the currently
+     * registered reader matches the specified reader.
+     *
+     * @param type the type for which to unregister the ObjectReader
+     * @param reader the ObjectReader to unregister
+     * @param fieldBased whether the ObjectReader is field-based
+     * @return true if the ObjectReader was unregistered, false otherwise
+     */
     public boolean unregisterObjectReader(Type type, ObjectReader reader, boolean fieldBased) {
         ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.remove(type, reader);
     }
 
+    /**
+     * Registers an ObjectReaderModule. If the module is already registered, this method
+     * does nothing and returns false.
+     *
+     * @param module the module to register
+     * @return true if the module was registered, false if it was already registered
+     */
     public boolean register(ObjectReaderModule module) {
         for (int i = modules.size() - 1; i >= 0; i--) {
             if (modules.get(i) == module) {
@@ -329,10 +483,21 @@ public class ObjectReaderProvider
         return true;
     }
 
+    /**
+     * Unregisters an ObjectReaderModule.
+     *
+     * @param module the module to unregister
+     * @return true if the module was unregistered, false if it was not registered
+     */
     public boolean unregister(ObjectReaderModule module) {
         return modules.remove(module);
     }
 
+    /**
+     * Cleans up cached ObjectReaders and mixin mappings associated with the specified class.
+     *
+     * @param objectClass the class for which to clean up cached ObjectReaders
+     */
     public void cleanup(Class objectClass) {
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
@@ -350,6 +515,8 @@ public class ObjectReaderProvider
     }
 
     /**
+     * Clears all cached ObjectReaders and mixin mappings.
+     *
      * @since 2.0.53
      */
     public void clear() {
@@ -410,6 +577,13 @@ public class ObjectReaderProvider
         return false;
     }
 
+    /**
+     * Cleans up cached ObjectReaders associated with the specified ClassLoader.
+     * This method removes all cached readers that are related to classes loaded
+     * by the given ClassLoader.
+     *
+     * @param classLoader the ClassLoader for which to clean up cached ObjectReaders
+     */
     public void cleanup(ClassLoader classLoader) {
         mixInCache.entrySet().removeIf(
                 entry -> entry.getKey().getClassLoader() == classLoader
@@ -429,6 +603,13 @@ public class ObjectReaderProvider
         BeanUtils.cleanupCache(classLoader);
     }
 
+    /**
+     * Gets the ObjectReaderCreator used by this provider. If a context-specific creator
+     * is available, it will be returned; otherwise, the default creator for this provider
+     * will be returned.
+     *
+     * @return the ObjectReaderCreator
+     */
     public ObjectReaderCreator getCreator() {
         ObjectReaderCreator contextCreator = JSONFactory.getContextReaderCreator();
         if (contextCreator != null) {
@@ -437,6 +618,14 @@ public class ObjectReaderProvider
         return this.creator;
     }
 
+    /**
+     * Constructs an ObjectReaderProvider with the default ObjectReaderCreator based on
+     * system configuration. The creator selection follows this priority:
+     * 1. ASM creator (default, if not Android or GraalVM)
+     * 2. Reflection/Lambda creator (fallback)
+     *
+     * <p>The provider is initialized with the base module and all registered modules.
+     */
     public ObjectReaderProvider() {
         ObjectReaderCreator creator = null;
         switch (JSONFactory.CREATOR) {
@@ -464,6 +653,11 @@ public class ObjectReaderProvider
         init();
     }
 
+    /**
+     * Constructs an ObjectReaderProvider with the specified ObjectReaderCreator.
+     *
+     * @param creator the ObjectReaderCreator to use for creating ObjectReader instances
+     */
     public ObjectReaderProvider(ObjectReaderCreator creator) {
         this.creator = creator;
         modules.add(new ObjectReaderBaseModule(this));
@@ -476,6 +670,13 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Gets the type converter function that can convert values from one type to another.
+     *
+     * @param from the source type
+     * @param to the target type
+     * @return the converter function for the type pair, or null if no converter is registered
+     */
     public Function getTypeConvert(Type from, Type to) {
         Map<Type, Function> map = typeConverts.get(from);
         if (map == null) {
@@ -484,6 +685,14 @@ public class ObjectReaderProvider
         return map.get(to);
     }
 
+    /**
+     * Registers a type converter function that can convert values from one type to another.
+     *
+     * @param from the source type
+     * @param to the target type
+     * @param typeConvert the function to convert from source type to target type
+     * @return the previous converter function for the type pair, or null if there was no previous converter
+     */
     public Function registerTypeConvert(Type from, Type to, Function typeConvert) {
         Map<Type, Function> map = typeConverts.get(from);
         if (map == null) {
@@ -493,6 +702,13 @@ public class ObjectReaderProvider
         return map.put(to, typeConvert);
     }
 
+    /**
+     * Gets an ObjectReader by its hash code. This method first checks thread-local cache,
+     * then global cache for performance optimization.
+     *
+     * @param hashCode the hash code of the ObjectReader to retrieve
+     * @return the ObjectReader associated with the hash code, or null if not found
+     */
     public ObjectReader getObjectReader(long hashCode) {
         ObjectReaderCachePair pair = readerCache;
         if (pair != null) {
@@ -527,6 +743,15 @@ public class ObjectReaderProvider
         return objectReader;
     }
 
+    /**
+     * Gets an ObjectReader for the specified type name, expected class, and features.
+     * This method handles auto-type resolution and ObjectReader caching.
+     *
+     * @param typeName the name of the type
+     * @param expectClass the expected class type
+     * @param features the JSON reader features
+     * @return the ObjectReader for the specified type, or null if the type cannot be resolved
+     */
     public ObjectReader getObjectReader(String typeName, Class<?> expectClass, long features) {
         Class<?> autoTypeClass = checkAutoType(typeName, expectClass, features);
         if (autoTypeClass == null) {
@@ -551,6 +776,16 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Checks and resolves the class for auto-type support. This method handles security
+     * validation and class loading for auto-type deserialization.
+     *
+     * @param typeName the name of the type to check
+     * @param expectClass the expected class type
+     * @param features the JSON reader features
+     * @return the resolved Class, or null if the type cannot be resolved or is not allowed
+     * @throws JSONException if the type is not supported or security checks fail
+     */
     public Class<?> checkAutoType(String typeName, Class<?> expectClass, long features) {
         if (typeName == null || typeName.isEmpty()) {
             return null;
@@ -677,10 +912,21 @@ public class ObjectReaderProvider
         return clazz;
     }
 
+    /**
+     * Gets the list of registered ObjectReader modules.
+     *
+     * @return the list of modules
+     */
     public List<ObjectReaderModule> getModules() {
         return modules;
     }
 
+    /**
+     * Gets bean information for the specified class by delegating to registered modules.
+     *
+     * @param beanInfo the BeanInfo object to populate with bean information
+     * @param objectClass the class for which to get bean information
+     */
     public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
         for (int i = 0; i < modules.size(); i++) {
             ObjectReaderModule module = modules.get(i);
@@ -688,6 +934,13 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Gets field information for the specified field of a class.
+     *
+     * @param fieldInfo the FieldInfo object to populate with field information
+     * @param objectClass the class containing the field
+     * @param field the field for which to get information
+     */
     public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
         for (int i = 0; i < modules.size(); i++) {
             ObjectReaderModule module = modules.get(i);
@@ -695,6 +948,15 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Gets field information for the specified constructor parameter.
+     *
+     * @param fieldInfo the FieldInfo object to populate with field information
+     * @param objectClass the class containing the constructor
+     * @param constructor the constructor containing the parameter
+     * @param paramIndex the index of the parameter in the constructor
+     * @param parameter the parameter for which to get information
+     */
     public void getFieldInfo(
             FieldInfo fieldInfo,
             Class objectClass,
@@ -710,6 +972,15 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Gets field information for the specified method parameter.
+     *
+     * @param fieldInfo the FieldInfo object to populate with field information
+     * @param objectClass the class containing the method
+     * @param method the method containing the parameter
+     * @param paramIndex the index of the parameter in the method
+     * @param parameter the parameter for which to get information
+     */
     public void getFieldInfo(
             FieldInfo fieldInfo,
             Class objectClass,
@@ -724,10 +995,25 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Gets an ObjectReader for the specified type. If an ObjectReader for the type
+     * is already cached, it will be returned directly. Otherwise, a new ObjectReader
+     * will be created and cached.
+     *
+     * @param objectType the type for which to get an ObjectReader
+     * @return the ObjectReader for the specified type
+     */
     public ObjectReader getObjectReader(Type objectType) {
         return getObjectReader(objectType, false);
     }
 
+    /**
+     * Creates a value consumer creator for byte array values.
+     *
+     * @param objectClass the class for which to create the value consumer creator
+     * @param fieldReaderArray the field readers to use
+     * @return a function that creates ByteArrayValueConsumer instances
+     */
     public Function<Consumer, ByteArrayValueConsumer> createValueConsumerCreator(
             Class objectClass,
             FieldReader[] fieldReaderArray
@@ -735,6 +1021,13 @@ public class ObjectReaderProvider
         return creator.createByteArrayValueConsumerCreator(objectClass, fieldReaderArray);
     }
 
+    /**
+     * Creates a value consumer creator for char array values.
+     *
+     * @param objectClass the class for which to create the value consumer creator
+     * @param fieldReaderArray the field readers to use
+     * @return a function that creates CharArrayValueConsumer instances
+     */
     public Function<Consumer, CharArrayValueConsumer> createCharArrayValueConsumerCreator(
             Class objectClass,
             FieldReader[] fieldReaderArray
@@ -742,6 +1035,15 @@ public class ObjectReaderProvider
         return creator.createCharArrayValueConsumerCreator(objectClass, fieldReaderArray);
     }
 
+    /**
+     * Gets an ObjectReader for the specified type with field-based option.
+     * If an ObjectReader for the type is already cached, it will be returned directly.
+     * Otherwise, a new ObjectReader will be created and cached.
+     *
+     * @param objectType the type for which to get an ObjectReader
+     * @param fieldBased whether to use field-based reading (true) or method-based reading (false)
+     * @return the ObjectReader for the specified type
+     */
     public ObjectReader getObjectReader(Type objectType, boolean fieldBased) {
         if (objectType == null) {
             objectType = Object.class;
@@ -860,16 +1162,26 @@ public class ObjectReaderProvider
                 : cache.putIfAbsent(objectType, boundObjectReader);
     }
 
+    /**
+     * Gets the auto-type before handler that is invoked before type resolution.
+     *
+     * @return the auto-type before handler, or null if none is set
+     */
     public AutoTypeBeforeHandler getAutoTypeBeforeHandler() {
         return autoTypeBeforeHandler;
     }
 
-    public Map<String, Date> getAutoTypeList() {
-        return autoTypeList;
-    }
-
+    /**
+     * Sets the auto-type before handler that will be invoked before type resolution.
+     *
+     * @param autoTypeBeforeHandler the auto-type before handler to set
+     */
     public void setAutoTypeBeforeHandler(AutoTypeBeforeHandler autoTypeBeforeHandler) {
         this.autoTypeBeforeHandler = autoTypeBeforeHandler;
+    }
+
+    public Map<String, Date> getAutoTypeList() {
+        return autoTypeList;
     }
 
     private static final class LRUAutoTypeCache
@@ -887,6 +1199,14 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Gets field information for the specified method of a class. This method also
+     * handles setter methods by attempting to find corresponding fields.
+     *
+     * @param fieldInfo the FieldInfo object to populate with field information
+     * @param objectClass the class containing the method
+     * @param method the method for which to get information
+     */
     public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
         for (int i = 0; i < modules.size(); i++) {
             ObjectReaderAnnotationProcessor annotationProcessor = modules.get(i).getAnnotationProcessor();
@@ -908,6 +1228,15 @@ public class ObjectReaderProvider
         }
     }
 
+    /**
+     * Creates an object creator (supplier) for the specified class and reader features.
+     *
+     * @param objectClass the class for which to create an object creator
+     * @param readerFeatures the reader features to use
+     * @param <T> the type of the object
+     * @return a supplier function that creates new instances of the object
+     * @throws JSONException if no default constructor is found for the class
+     */
     public <T> Supplier<T> createObjectCreator(Class<T> objectClass, long readerFeatures) {
         boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = fieldBased
@@ -925,6 +1254,14 @@ public class ObjectReaderProvider
         return LambdaMiscCodec.createSupplier(constructor);
     }
 
+    /**
+     * Creates a FieldReader for the specified class, field name, and reader features.
+     *
+     * @param objectClass the class containing the field
+     * @param fieldName the name of the field
+     * @param readerFeatures the reader features to use
+     * @return a FieldReader for the specified field, or null if the field is not found
+     */
     public FieldReader createFieldReader(Class objectClass, String fieldName, long readerFeatures) {
         boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
 
@@ -967,6 +1304,16 @@ public class ObjectReaderProvider
         return null;
     }
 
+    /**
+     * Creates an ObjectReader for a custom object with specified field names, types, and consumer.
+     *
+     * @param names the field names
+     * @param types the field types
+     * @param supplier the supplier function to create new instances of the object
+     * @param c the field consumer to set field values
+     * @param <T> the type of the object
+     * @return the created ObjectReader
+     */
     public <T> ObjectReader<T> createObjectReader(
             String[] names,
             Type[] types,
@@ -976,6 +1323,17 @@ public class ObjectReaderProvider
         return createObjectReader(names, types, null, supplier, c);
     }
 
+    /**
+     * Creates an ObjectReader for a custom object with specified field names, types, features, and consumer.
+     *
+     * @param names the field names
+     * @param types the field types
+     * @param features the field features (can be null)
+     * @param supplier the supplier function to create new instances of the object
+     * @param c the field consumer to set field values
+     * @param <T> the type of the object
+     * @return the created ObjectReader
+     */
     public <T> ObjectReader<T> createObjectReader(
             String[] names,
             Type[] types,
@@ -1004,47 +1362,100 @@ public class ObjectReaderProvider
         );
     }
 
+    /**
+     * Checks if reference detection is disabled.
+     *
+     * @return true if reference detection is disabled, false otherwise
+     */
     public boolean isDisableReferenceDetect() {
         return disableReferenceDetect;
     }
 
+    /**
+     * Checks if auto-type support is disabled.
+     *
+     * @return true if auto-type support is disabled, false otherwise
+     */
     public boolean isDisableAutoType() {
         return disableAutoType;
     }
 
+    /**
+     * Checks if JSONB support is disabled.
+     *
+     * @return true if JSONB support is disabled, false otherwise
+     */
     public boolean isDisableJSONB() {
         return disableJSONB;
     }
 
+    /**
+     * Checks if array mapping is disabled.
+     *
+     * @return true if array mapping is disabled, false otherwise
+     */
     public boolean isDisableArrayMapping() {
         return disableArrayMapping;
     }
 
+    /**
+     * Sets whether reference detection is disabled.
+     *
+     * @param disableReferenceDetect true to disable reference detection, false to enable it
+     */
     public void setDisableReferenceDetect(boolean disableReferenceDetect) {
         this.disableReferenceDetect = disableReferenceDetect;
     }
 
+    /**
+     * Sets whether array mapping is disabled.
+     *
+     * @param disableArrayMapping true to disable array mapping, false to enable it
+     */
     public void setDisableArrayMapping(boolean disableArrayMapping) {
         this.disableArrayMapping = disableArrayMapping;
     }
 
+    /**
+     * Sets whether JSONB support is disabled.
+     *
+     * @param disableJSONB true to disable JSONB support, false to enable it
+     */
     public void setDisableJSONB(boolean disableJSONB) {
         this.disableJSONB = disableJSONB;
     }
 
+    /**
+     * Sets whether auto-type support is disabled.
+     *
+     * @param disableAutoType true to disable auto-type support, false to enable it
+     */
     public void setDisableAutoType(boolean disableAutoType) {
         this.disableAutoType = disableAutoType;
     }
 
+    /**
+     * Checks if smart match is disabled.
+     *
+     * @return true if smart match is disabled, false otherwise
+     */
     public boolean isDisableSmartMatch() {
         return disableSmartMatch;
     }
 
+    /**
+     * Sets whether smart match is disabled.
+     *
+     * @param disableSmartMatch true to disable smart match, false to enable it
+     */
     public void setDisableSmartMatch(boolean disableSmartMatch) {
         this.disableSmartMatch = disableSmartMatch;
     }
 
     /**
+     * Gets the property naming strategy used by this provider.
+     *
+     * @return the property naming strategy, or null if none is set
      * @since 2.0.52
      */
     public PropertyNamingStrategy getNamingStrategy() {
@@ -1052,6 +1463,9 @@ public class ObjectReaderProvider
     }
 
     /**
+     * Sets the property naming strategy used by this provider.
+     *
+     * @param namingStrategy the property naming strategy to set
      * @since 2.0.52
      */
     public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {

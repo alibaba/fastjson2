@@ -81,61 +81,24 @@ symbolTable | JSONB.SymbolTable | JSONB serialization and deserialization symbol
 In Fastjson2, `FastJsonHttpMessageConverter` and `FastJsonJsonView` can also be used to provide a better performance
 experience for Web applications built with Spring MVC.
 
-## 2.1  Spring Web MVC Converter
-
-Use `FastJsonHttpMessageConverter` to replace Spring MVC's default `HttpMessageConverter` to improve JSON serialization
-and deserialization speed of `@RestController` `@ResponseBody` `@RequestBody` annotations.
-
-**Package**: `com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter`
-
-**Before Spring 5 Example**:
+## 2. Configure FastJsonHttpMessageConverter
 
 ```java
-
 @Configuration
-@EnableWebMvc
-public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
+public class WebMvcConfigurer extends WebMvcConfigurationSupport {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        //custom configuration...
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
-        config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
+        config.setCharset(StandardCharsets.UTF_8);
+        
         converter.setFastJsonConfig(config);
-        converter.setDefaultCharset(StandardCharsets.UTF_8);
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        // From version 2.0.59, FastJsonHttpMessageConverter default charset is already UTF-8, no need to set manually
+        // converter.setDefaultCharset(StandardCharsets.UTF_8);
         converters.add(0, converter);
     }
-}
-```
-
-Starting from Spring 5.0, `WebMvcConfigurerAdapter` has been deprecated, you can directly implement the `WebMvcConfigurer` interface without using this adapter.
-
-**After Spring 5 Example**:
-
-```java
-
-@Configuration
-@EnableWebMvc
-public class CustomWebMvcConfigurer implements WebMvcConfigurer {
-
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        //custom configuration...
-        FastJsonConfig config = new FastJsonConfig();
-        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
-        config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
-        converter.setFastJsonConfig(config);
-        converter.setDefaultCharset(StandardCharsets.UTF_8);
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
-        converters.add(0, converter);
-    }
-
 }
 ```
 
