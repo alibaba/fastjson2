@@ -532,6 +532,16 @@ public class ObjectWriterCreator {
                         return;
                     }
 
+                    if (record && !beanInfo.alphabetic && (beanInfo.orders == null || beanInfo.orders.length == 0)) {
+                        String[] recordFieldNames = BeanUtils.getRecordFieldNames(objectClass);
+                        for (int i = 0; i < recordFieldNames.length; i++) {
+                            if (fieldName.equals(recordFieldNames[i])) {
+                                fieldInfo.ordinal = i;
+                                break;
+                            }
+                        }
+                    }
+
                     if (beanInfo.orders != null) {
                         boolean match = false;
                         for (int i = 0; i < beanInfo.orders.length; i++) {
@@ -644,7 +654,7 @@ public class ObjectWriterCreator {
 
         handleIgnores(beanInfo, fieldWriters);
 
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic || (record && !beanInfo.alphabetic)) {
             Collections.sort(fieldWriters);
         }
 

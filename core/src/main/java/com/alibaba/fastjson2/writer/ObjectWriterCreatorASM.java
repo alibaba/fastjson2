@@ -253,6 +253,16 @@ public class ObjectWriterCreatorASM
 
                     String fieldName = getFieldName(objectClass, provider, beanInfo, record, fieldInfo, method);
 
+                    if (record && !beanInfo.alphabetic && (beanInfo.orders == null || beanInfo.orders.length == 0)) {
+                        String[] recordFieldNames = BeanUtils.getRecordFieldNames(objectClass);
+                        for (int i = 0; i < recordFieldNames.length; i++) {
+                            if (fieldName.equals(recordFieldNames[i])) {
+                                fieldInfo.ordinal = i;
+                                break;
+                            }
+                        }
+                    }
+
                     if (beanInfo.orders != null) {
                         boolean match = false;
                         for (int i = 0; i < beanInfo.orders.length; i++) {
@@ -394,7 +404,7 @@ public class ObjectWriterCreatorASM
         fieldWriters = new ArrayList<>(fieldWriterMap.values());
 
         handleIgnores(beanInfo, fieldWriters);
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic || (record && !beanInfo.alphabetic)) {
             try {
                 Collections.sort(fieldWriters);
             } catch (Exception e) {
