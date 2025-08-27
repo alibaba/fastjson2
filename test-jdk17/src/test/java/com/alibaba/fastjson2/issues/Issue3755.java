@@ -30,7 +30,5 @@ public class Issue3755 {
         MyRecordWithOrders record3 = new MyRecordWithOrders("z的值", "a的值");
         String json3 = JSON.toJSONString(record3);
         assertEquals("{\"a\":\"a的值\",\"z\":\"z的值\"}", json3);
-
-
     }
 }
