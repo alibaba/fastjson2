@@ -1146,7 +1146,7 @@ public abstract class BeanUtils {
     }
 
     private static Method[] recordComponentsToMethods(Class<?> recordClass) {
-        if (JVM_VERSION < 14 || ANDROID_SDK_INT < 33) {
+        if (JVM_VERSION < 14 && ANDROID_SDK_INT < 33) {
             return new Method[0];
         }
 
