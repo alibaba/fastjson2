@@ -146,7 +146,7 @@ abstract class FieldWriterBoolean
                 return false;
             }
             writeFieldName(jsonWriter);
-            jsonWriter.writeBooleanNull();
+            jsonWriter.writeBooleanNull(features);
             return true;
         }
 
