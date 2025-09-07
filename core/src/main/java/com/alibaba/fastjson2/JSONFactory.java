@@ -746,6 +746,7 @@ public final class JSONFactory {
      */
     public static void setDefaultWriterAlphabetic(boolean defaultWriterAlphabetic) {
         JSONFactory.defaultWriterAlphabetic = defaultWriterAlphabetic;
+        defaultObjectWriterProvider.setAlphabetic(defaultWriterAlphabetic);
     }
 
     /**
@@ -857,6 +858,7 @@ public final class JSONFactory {
      * @param skipTransient true to skip transient fields, false to include them
      */
     public static void setDefaultSkipTransient(boolean skipTransient) {
+        JSONFactory.defaultSkipTransient = skipTransient;
         defaultObjectWriterProvider.setSkipTransient(skipTransient);
     }
 }

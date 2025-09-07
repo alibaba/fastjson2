@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class Issue2448 {
     @Test
     public void test() {
@@ -15,8 +17,7 @@ public class Issue2448 {
             bean.a1 = 1;
             bean.a2 = 2;
             bean.a3 = 3;
-            String json = JSON.toJSONString(bean);
-            System.out.println(json);
+            assertEquals("{\"a2\":2,\"a1\":1,\"a3\":3}", JSON.toJSONString(bean));
         } finally {
             JSONFactory.setDefaultWriterAlphabetic(defaultWriterAlphabetic);
         }
@@ -24,6 +25,27 @@ public class Issue2448 {
 
     @JSONType(alphabetic = false)
     public static class Bean {
+        public int a2;
+        public int a1;
+        public int a3;
+    }
+
+    @Test
+    public void test2() {
+        boolean defaultWriterAlphabetic = JSONFactory.isDefaultWriterAlphabetic();
+        try {
+            JSONFactory.setDefaultWriterAlphabetic(false);
+            Bean2 bean = new Bean2();
+            bean.a1 = 1;
+            bean.a2 = 2;
+            bean.a3 = 3;
+            assertEquals("{\"a2\":2,\"a1\":1,\"a3\":3}", JSON.toJSONString(bean));
+        } finally {
+            JSONFactory.setDefaultWriterAlphabetic(defaultWriterAlphabetic);
+        }
+    }
+
+    public static class Bean2 {
         public int a2;
         public int a1;
         public int a3;
