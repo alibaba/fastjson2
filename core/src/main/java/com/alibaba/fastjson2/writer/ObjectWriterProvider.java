@@ -985,6 +985,15 @@ public class ObjectWriterProvider
     }
 
     /**
+     * Sets whether alphabetic ordering is enabled.
+     *
+     * @param alphabetic true to enable alphabetic ordering, false to disable it
+     */
+    public void setAlphabetic(boolean alphabetic) {
+        this.alphabetic = alphabetic;
+    }
+
+    /**
      * Checks if transient fields should be skipped.
      *
      * @return true if transient fields should be skipped, false otherwise
