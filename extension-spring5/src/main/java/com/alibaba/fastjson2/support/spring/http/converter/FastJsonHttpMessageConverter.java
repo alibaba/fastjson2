@@ -95,7 +95,7 @@ public class FastJsonHttpMessageConverter
     }
 
     /** Default initialization capacity when content-length is not specified */
-    private static int REQUEST_BODY_INITIAL_CAPACITY = 1024;
+    private static int REQUEST_BODY_INITIAL_CAPACITY = 8192;
 
     public static void setRequestBodyInitialCapacity(int initialCapacity) {
         if (initialCapacity < 128 || initialCapacity > 1024 * 1024) {
