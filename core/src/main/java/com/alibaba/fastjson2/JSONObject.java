@@ -1049,6 +1049,10 @@ public class JSONObject
         if (value instanceof LocalDate) {
             return (LocalDate) value;
         }
+        if (value instanceof Date) {
+            Date date = (Date) value;
+            return date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDate();
+        }
         return TypeUtils.cast(value, LocalDate.class);
     }
 
@@ -1117,6 +1121,10 @@ public class JSONObject
         }
         if (value instanceof LocalDateTime) {
             return (LocalDateTime) value;
+        }
+        if (value instanceof Date) {
+            Date date = (Date) value;
+            return date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
         }
         return TypeUtils.cast(value, LocalDateTime.class);
     }
