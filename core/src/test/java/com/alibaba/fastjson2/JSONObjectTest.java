@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -1416,5 +1417,85 @@ public class JSONObjectTest {
         bean.id = 1001;
         JSONObject object = JSONObject.from(bean, JSONWriter.Feature.NotWriteDefaultValue);
         assertEquals(bean.id, object.getIntValue("id"));
+    }
+
+    @Test
+    public void testGetLocalDateWithDateValue() {
+        JSONObject jsonObject = new JSONObject();
+
+        Date date = new Date(1640995200000L);
+        jsonObject.put("dateValue", date);
+
+        LocalDate localDate = jsonObject.getLocalDate("dateValue");
+        assertNotNull(localDate);
+
+        LocalDate expectedLocalDate = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        assertEquals(expectedLocalDate, localDate);
+    }
+
+    @Test
+    public void testGetLocalDateTimeWithDateValue() {
+        JSONObject jsonObject = new JSONObject();
+
+        Date date = new Date(1640995200000L);
+        jsonObject.put("dateValue", date);
+
+        LocalDateTime localDateTime = jsonObject.getLocalDateTime("dateValue");
+        assertNotNull(localDateTime);
+
+        LocalDateTime expectedLocalDateTime = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+        assertEquals(expectedLocalDateTime, localDateTime);
+    }
+
+    @Test
+    public void testGetLocalDateWithNativeLocalDate() {
+        JSONObject jsonObject = new JSONObject();
+
+        LocalDate originalDate = LocalDate.of(2022, 1, 1);
+        jsonObject.put("localDateValue", originalDate);
+
+        LocalDate result = jsonObject.getLocalDate("localDateValue");
+        assertEquals(originalDate, result);
+    }
+
+    @Test
+    public void testGetLocalDateTimeWithNativeLocalDateTime() {
+        JSONObject jsonObject = new JSONObject();
+
+        LocalDateTime originalDateTime = LocalDateTime.of(2022, 1, 1, 12, 0, 0);
+        jsonObject.put("localDateTimeValue", originalDateTime);
+
+        LocalDateTime result = jsonObject.getLocalDateTime("localDateTimeValue");
+        assertEquals(originalDateTime, result);
+    }
+
+    @Test
+    public void testGetLocalDateWithNullValue() {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("nullValue", null);
+        LocalDate result = jsonObject.getLocalDate("nullValue");
+        assertNull(result);
+
+        LocalDate defaultDate = LocalDate.of(2020, 1, 1);
+        LocalDate resultWithDefault = jsonObject.getLocalDate("nullValue", defaultDate);
+        assertEquals(defaultDate, resultWithDefault);
+    }
+
+    @Test
+    public void testGetLocalDateTimeWithNullValue() {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("nullValue", null);
+        LocalDateTime result = jsonObject.getLocalDateTime("nullValue");
+        assertNull(result);
+
+        LocalDateTime defaultDateTime = LocalDateTime.of(2020, 1, 1, 10, 0, 0);
+        LocalDateTime resultWithDefault = jsonObject.getLocalDateTime("nullValue", defaultDateTime);
+        assertEquals(defaultDateTime, resultWithDefault);
     }
 }

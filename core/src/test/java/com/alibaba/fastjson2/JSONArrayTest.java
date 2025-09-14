@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2_vo.Integer1;
 import com.alibaba.fastjson2_vo.Long1;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -1494,5 +1496,49 @@ public class JSONArrayTest {
         assertNotNull(jsonArray);
         assertEquals(1, jsonArray.size());
         assertEquals("v", jsonArray.getString(0));
+    }
+
+    @Test
+    public void testGetLocalDateWithDate() {
+        Date date = new Date();
+        JSONArray array = new JSONArray();
+        array.add(date);
+
+        LocalDate localDate = array.getLocalDate(0);
+        assertNotNull(localDate);
+        assertEquals(date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDate(), localDate);
+    }
+
+    @Test
+    public void testGetLocalDateTimeWithDate() {
+        Date date = new Date();
+        JSONArray array = new JSONArray();
+        array.add(date);
+
+        LocalDateTime localDateTime = array.getLocalDateTime(0);
+        assertNotNull(localDateTime);
+        assertEquals(date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime(), localDateTime);
+    }
+
+    @Test
+    public void testGetLocalDateWithDateString() {
+        JSONArray array = new JSONArray();
+        array.add("2023-12-25");
+
+        LocalDate localDate = array.getLocalDate(0);
+        assertNotNull(localDate);
+        assertEquals(LocalDate.of(2023, 12, 25), localDate);
+    }
+
+    @Test
+    public void testGetLocalDateTimeWithNull() {
+        JSONArray array = new JSONArray();
+        array.add(null);
+
+        LocalDate localDate = array.getLocalDate(0);
+        assertNull(localDate);
+
+        LocalDateTime localDateTime = array.getLocalDateTime(0);
+        assertNull(localDateTime);
     }
 }
