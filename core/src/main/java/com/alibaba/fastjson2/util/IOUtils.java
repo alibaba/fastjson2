@@ -2226,23 +2226,6 @@ public class IOUtils {
     }
 
     /**
-     * Checks if the 2 bytes at the specified offset in a byte array represent valid digits.
-     * This method performs optimized digit validation by processing 2 bytes at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the byte array to check
-     * @param off the offset in the array where to start checking
-     * @return true if both bytes represent valid digits (0-9), false otherwise
-     */
-    public static boolean isDigit2(byte[] buf, int off) {
-        short x = UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            x = Short.reverseBytes(x);
-        }
-        return (((x & 0xF0F0) - 0x3030) | (((x & 0x0F0F) + 0x0606) & 0xF0F0)) == 0;
-    }
-
-    /**
      * Checks if the 2 characters at the specified offset in a character array represent valid digits.
      * This method performs optimized digit validation by processing 2 characters at once
      * using vector operations for improved performance.
