@@ -1444,6 +1444,20 @@ public class TypeUtils {
             return (T) toInstant(obj);
         }
 
+        if (targetClass == LocalDate.class) {
+            if (obj instanceof Date) {
+                Date date = (Date) obj;
+                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDate();
+            }
+        }
+
+        if (targetClass == LocalDateTime.class) {
+            if (obj instanceof Date) {
+                Date date = (Date) obj;
+                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
+            }
+        }
+
         if (targetClass == String.class) {
             if (obj instanceof Character) {
                 return (T) obj.toString();
