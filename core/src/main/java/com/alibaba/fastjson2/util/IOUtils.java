@@ -9,8 +9,6 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 
 public class IOUtils {
-    static final int NULL_32 = BIG_ENDIAN ? 0x6e756c6c : 0x6c6c756e;
-    static final int ALSE = BIG_ENDIAN ? 0x616c7365 : 0x65736c61;
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
     public static final int[] DIGITS_K = new int[1000];
     private static final byte[] MIN_INT_BYTES = "-2147483648".getBytes();
@@ -1171,10 +1169,7 @@ public class IOUtils {
     }
 
     public static int digit2(byte[] bytes, int off) {
-        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            x = Short.reverseBytes(x);
-        }
+        int x = bytes[off] | (bytes[off + 1] << 8);
         int d;
         if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0) {
             return -1;
@@ -1183,18 +1178,11 @@ public class IOUtils {
     }
 
     public static int digit2(char[] chars, int off) {
-        int x = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
-        if (BIG_ENDIAN) {
-            x = Integer.reverseBytes(x);
-        }
+        int x = chars[off] | (chars[off + 1] << 16);
         int d;
         if ((((x & 0xFFF0FFF0) - 0x300030) | (((d = x & 0x0F000F) + 0x060006) & 0xF000F0)) != 0) {
             return -1;
         }
         return (d & 0xF) * 10 + (d >> 16);
-    }
-
-    public static boolean isALSE(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
     }
 }
