@@ -41,9 +41,12 @@ final class FieldWriterBigIntFunc<T>
         BigInteger value = function.apply(o);
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullNumberAsZero.mask)) == 0) {
                 return false;
             }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeNumberNull(features);
+            return true;
         }
         writeFieldName(jsonWriter);
         jsonWriter.writeBigInt(value, features);

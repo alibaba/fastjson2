@@ -2843,7 +2843,7 @@ public class ObjectWriterCreatorASM
             } else {
                 nullFeatures |= NullAsDefaultValue.mask;
             }
-            mwc.genIsEnabled(fieldWriter.features, nullFeatures, notNull_);
+            mwc.genIsEnabled(features, nullFeatures, notNull_);
 //            mw.iload(mwc.var(WRITE_NULLS));
 //            mw.ifeq(notNull_);
         }
@@ -2860,22 +2860,30 @@ public class ObjectWriterCreatorASM
                 || Collection.class.isAssignableFrom(fieldClass)
                 || fieldClass.isArray()) {
             WRITE_NULL_METHOD = "writeArrayNull";
+            WRITE_NULL_DESC = "(J)V";
+            mw.lload(mwc.var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(features);
+            mw.lor();
         } else if (fieldClass == Float.class
                 || fieldClass == Double.class
                 || fieldClass == BigDecimal.class) {
             WRITE_NULL_METHOD = "writeDecimalNull";
             WRITE_NULL_DESC = "(J)V";
             mw.lload(mwc.var2(CONTEXT_FEATURES));
-            mw.visitLdcInsn(fieldWriter.features);
+            mw.visitLdcInsn(features);
             mw.lor();
         } else if (Number.class.isAssignableFrom(fieldClass)) {
             WRITE_NULL_METHOD = "writeNumberNull";
             WRITE_NULL_DESC = "(J)V";
             mw.lload(mwc.var2(CONTEXT_FEATURES));
-            mw.visitLdcInsn(fieldWriter.features);
+            mw.visitLdcInsn(features);
             mw.lor();
         } else if (fieldClass == Boolean.class) {
             WRITE_NULL_METHOD = "writeBooleanNull";
+            WRITE_NULL_DESC = "(J)V";
+            mw.lload(mwc.var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(features);
+            mw.lor();
         } else if (fieldClass == String.class
                 || fieldClass == Appendable.class
                 || fieldClass == StringBuffer.class
@@ -2883,7 +2891,10 @@ public class ObjectWriterCreatorASM
             WRITE_NULL_METHOD = "writeStringNull";
         } else {
             WRITE_NULL_METHOD = "writeObjectNull";
-            WRITE_NULL_DESC = "(Ljava/lang/Class;)V";
+            WRITE_NULL_DESC = "(JLjava/lang/Class;)V";
+            mw.lload(mwc.var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(features);
+            mw.lor();
             mwc.loadFieldClass(i, fieldClass);
         }
         mw.invokevirtual(TYPE_JSON_WRITER, WRITE_NULL_METHOD, WRITE_NULL_DESC);

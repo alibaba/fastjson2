@@ -273,11 +273,13 @@ public class FieldWriterObject<T>
 
         // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
         if (value == null) {
-            if (((features & WriteNulls.mask) != 0 || (features & NullAsDefaultValue.mask) != 0 && !number)
+            if (((features & WriteNulls.mask) != 0
+                    || (features & WriteNullListAsEmpty.mask) != 0
+                    || (features & NullAsDefaultValue.mask) != 0 && !number)
                     && (features & NotWriteDefaultValue.mask) == 0) {
                 writeFieldName(jsonWriter);
                 if (array) {
-                    jsonWriter.writeArrayNull();
+                    jsonWriter.writeArrayNull(features);
                 } else if (number) {
                     jsonWriter.writeNumberNull();
                 } else if (fieldClass == Appendable.class
