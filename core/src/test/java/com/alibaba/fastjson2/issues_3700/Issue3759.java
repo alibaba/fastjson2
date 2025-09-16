@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.issues;
+package com.alibaba.fastjson2.issues_3700;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class Issue3759Test {
+public class Issue3759 {
     @Test
     public void testWriteNullBooleanAsFalse() {
         TestDTO dto = new TestDTO();
