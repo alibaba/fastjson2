@@ -2875,7 +2875,13 @@ public class ObjectWriterCreatorASM
             mw.visitLdcInsn(fieldWriter.features);
             mw.lor();
         } else if (fieldClass == Boolean.class) {
-            WRITE_NULL_METHOD = "writeBooleanNull";
+            if ((fieldWriter.features & WriteNullBooleanAsFalse.mask) != 0) {
+                WRITE_NULL_METHOD = "writeBool";
+                WRITE_NULL_DESC = "(Z)V";
+                mw.iconst_0();
+            } else {
+                WRITE_NULL_METHOD = "writeBooleanNull";
+            }
         } else if (fieldClass == String.class
                 || fieldClass == Appendable.class
                 || fieldClass == StringBuffer.class
