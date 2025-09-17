@@ -14,5 +14,10 @@ public class Issue3784 {
         try (CSVReader reader = CSVReader.of(inputStream, StandardCharsets.UTF_8, String.class)) {
             reader.readLineAll();
         }
+
+        InputStream inputStream2 = getClass().getClassLoader().getResourceAsStream("issue3784.csv");
+        try (CSVReader reader = CSVReader.of(inputStream2, StandardCharsets.UTF_16, String.class)) {
+            reader.readLineAll();
+        }
     }
 }
