@@ -149,10 +149,7 @@ final class CSVReaderUTF16<T>
                     lineEnd = i;
 
                     int n = i + 1;
-                    if (n >= end) {
-                        break;
-                    }
-                    if (buf[n] == '\n') {
+                    if (n < end && buf[n] == '\n') {
                         i++;
                     }
 
