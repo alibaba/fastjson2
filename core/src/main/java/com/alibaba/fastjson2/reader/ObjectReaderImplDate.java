@@ -132,7 +132,14 @@ public class ObjectReaderImplDate
                                     return new Date(millis);
                                 }
 
-                                localDate = LocalDate.parse(str, formatter);
+                                // For yyyy-MM-dd format, if the string contains time part, we should ignore it to be compatible with fastjson1
+                                if (yyyyMMdd10 && str.length() > 10) {
+                                    // Extract only the date part (first 10 characters)
+                                    String datePart = str.substring(0, 10);
+                                    localDate = LocalDate.parse(datePart, formatter);
+                                } else {
+                                    localDate = LocalDate.parse(str, formatter);
+                                }
                                 ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                             }
                         }
