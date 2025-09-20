@@ -21,19 +21,8 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF8
         extends JSONWriter {
-    static final long REF;
-    static final short QUOTE2_COLON, QUOTE_COLON;
-
     final CacheItem cacheItem;
     protected byte[] bytes;
-
-    static {
-        byte[] chars = {'{', '"', '$', 'r', 'e', 'f', '"', ':'};
-        REF = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
-        QUOTE2_COLON = UNSAFE.getShort(chars, ARRAY_CHAR_BASE_OFFSET + 6);
-        chars[6] = '\'';
-        QUOTE_COLON = UNSAFE.getShort(chars, ARRAY_CHAR_BASE_OFFSET + 6);
-    }
 
     JSONWriterUTF8(Context ctx) {
         super(ctx, null, false, StandardCharsets.UTF_8);
@@ -54,7 +43,14 @@ final class JSONWriterUTF8
         if (off + 8 > bytes.length) {
             bytes = grow(off + 8);
         }
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, REF);
+        bytes[off] = '{';
+        bytes[off + 1] = '"';
+        bytes[off + 2] = '$';
+        bytes[off + 3] = 'r';
+        bytes[off + 4] = 'e';
+        bytes[off + 5] = 'f';
+        bytes[off + 6] = '"';
+        bytes[off + 7] = ':';
         this.off = off + 8;
         writeString(path);
         off = this.off;
@@ -1792,7 +1788,8 @@ final class JSONWriterUTF8
 
         bytes[off] = (byte) quote;
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, name);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        bytes[off + 9] = (byte) quote;
+        bytes[off + 10] = ':';
         this.off = off + 11;
     }
 
@@ -1948,7 +1945,8 @@ final class JSONWriterUTF8
 
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        bytes[off + 16] = (byte) quote;
+        bytes[off + 17] = ':';
         this.off = off + 18;
     }
 
@@ -1972,7 +1970,8 @@ final class JSONWriterUTF8
         bytes[off++] = (byte) quote;
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
         UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        bytes[off + 17] = (byte) quote;
+        bytes[off + 18] = ':';
         this.off = off + 18;
     }
 
