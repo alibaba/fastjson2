@@ -2849,7 +2849,7 @@ public abstract class BeanUtils {
         }
 
         if ("STRING".equals(jsonFormatValues[1]) && fieldInfo.format == null) {
-            fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+            fieldInfo.format = "string";
         } else if ("NUMBER".equals(jsonFormatValues[1])) {
             fieldInfo.format = "millis";
         }
