@@ -480,7 +480,7 @@ public class ObjectWriterCreator {
             }
 
             if (!fieldWritersCreated) {
-                Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+                Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
 
                 if (!record) {
                     BeanUtils.declaredFields(objectClass, field -> {

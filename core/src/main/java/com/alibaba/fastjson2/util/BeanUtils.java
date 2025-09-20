@@ -1134,11 +1134,45 @@ public abstract class BeanUtils {
     private static Method[] getMethods(Class objectClass) {
         Method[] methods;
         try {
-            methods = objectClass.getMethods();
+            if (isRecord(objectClass)) {
+                methods = recordComponentsToMethods(objectClass);
+            } else {
+                methods = objectClass.getMethods();
+            }
         } catch (NoClassDefFoundError ignored) {
             methods = new Method[0];
         }
         return methods;
+    }
+
+    private static Method[] recordComponentsToMethods(Class<?> recordClass) {
+        if (JVM_VERSION < 14 && ANDROID_SDK_INT < 33) {
+            return new Method[0];
+        }
+
+        try {
+            if (RECORD_GET_RECORD_COMPONENTS == null) {
+                RECORD_GET_RECORD_COMPONENTS = Class.class.getMethod("getRecordComponents");
+            }
+
+            if (RECORD_COMPONENT_GET_NAME == null) {
+                Class<?> c = Class.forName("java.lang.reflect.RecordComponent");
+                RECORD_COMPONENT_GET_NAME = c.getMethod("getName");
+            }
+
+            final Object[] components = (Object[]) RECORD_GET_RECORD_COMPONENTS.invoke(recordClass);
+            final Method[] methods = new Method[components.length];
+            for (int i = 0; i < components.length; i++) {
+                String componentName = (String) RECORD_COMPONENT_GET_NAME.invoke(components[i]);
+                methods[i] = recordClass.getMethod(componentName);
+            }
+
+            return methods;
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Failed to access Methods needed to support `java.lang.Record`: (%s) %s",
+                    e.getClass().getName(), e.getMessage()), e);
+        }
     }
 
     private static boolean isJSONField(AnnotatedElement element) {
