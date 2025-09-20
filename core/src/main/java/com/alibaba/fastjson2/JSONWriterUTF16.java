@@ -21,21 +21,8 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF16
         extends JSONWriter {
-    static final long REF_0, REF_1;
-    static final int QUOTE2_COLON, QUOTE_COLON;
-
     protected char[] chars;
     final CacheItem cacheItem;
-
-    static {
-        // char[] chars = new char[] {'\"', ':'};
-        char[] chars = {'{', '"', '$', 'r', 'e', 'f', '"', ':'};
-        REF_0 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
-        REF_1 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + 8);
-        QUOTE2_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + 12);
-        chars[6] = '\'';
-        QUOTE_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + 12);
-    }
 
     JSONWriterUTF16(Context ctx) {
         super(ctx, null, false, StandardCharsets.UTF_16);
@@ -1168,9 +1155,14 @@ final class JSONWriterUTF16
         if (off + 9 > chars.length) {
             chars = grow(off + 9);
         }
-        long address = ARRAY_BYTE_BASE_OFFSET + ((long) off << 1);
-        UNSAFE.putLong(chars, address, REF_0);
-        UNSAFE.putLong(chars, address + 8, REF_1);
+        chars[off] = '{';
+        chars[off + 1] = '"';
+        chars[off + 2] = '$';
+        chars[off + 3] = 'r';
+        chars[off + 4] = 'e';
+        chars[off + 5] = 'f';
+        chars[off + 6] = '"';
+        chars[off + 7] = ':';
         this.off = off + 8;
         writeString(path);
         off = this.off;
@@ -1757,7 +1749,8 @@ final class JSONWriterUTF16
         }
 
         putLong(chars, off, name);
-        putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        chars[off + 8] = quote;
+        chars[off + 9] = ':';
         this.off = off + 10;
     }
 
@@ -1781,7 +1774,8 @@ final class JSONWriterUTF16
 
         chars[off++] = quote;
         putLong(chars, off, name);
-        putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        chars[off + 8] = quote;
+        chars[off + 9] = ':';
         this.off = off + 10;
     }
 
@@ -1937,7 +1931,8 @@ final class JSONWriterUTF16
         }
 
         putLong(chars, off, name0, name1);
-        putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        chars[off + 16] = quote;
+        chars[off + 17] = ':';
         this.off = off + 18;
     }
 
@@ -1961,7 +1956,8 @@ final class JSONWriterUTF16
 
         chars[off++] = quote;
         putLong(chars, off, name0, name1);
-        putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        chars[off + 16] = quote;
+        chars[off + 17] = ':';
         this.off = off + 18;
     }
 
