@@ -578,7 +578,9 @@ public class ObjectReaderAdapter<T>
                 FieldReader fieldReader = fieldReaders[i];
                 Object fieldValue = map.get(fieldReader.fieldName);
                 if (fieldValue == null) {
-                    continue;
+                    if ((features2 & JSONReader.Feature.IgnoreSetNullValue.mask) != 0 || !map.containsKey(fieldReader.fieldName)) {
+                        continue;
+                    }
                 }
 
                 if (fieldReader.field != null && Modifier.isFinal(fieldReader.field.getModifiers())) {
@@ -592,7 +594,7 @@ public class ObjectReaderAdapter<T>
                     }
                 }
 
-                if (fieldValue.getClass() == fieldReader.fieldType) {
+                if (fieldValue == null || fieldValue.getClass() == fieldReader.fieldType) {
                     fieldReader.accept(object, fieldValue);
                 } else {
                     if ((fieldReader instanceof FieldReaderList)
