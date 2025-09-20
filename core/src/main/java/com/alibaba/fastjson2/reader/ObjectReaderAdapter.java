@@ -695,7 +695,7 @@ public class ObjectReaderAdapter<T>
                 FieldReader fieldReader = fieldReaders[i];
                 Object fieldValue = map.get(fieldReader.fieldName);
                 if (fieldValue == null) {
-                    if ((features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0 || !map.containsKey(fieldReader.fieldName)) {
+                    if ((features2 & JSONReader.Feature.IgnoreSetNullValue.mask) != 0 || !map.containsKey(fieldReader.fieldName)) {
                         continue;
                     }
                 }

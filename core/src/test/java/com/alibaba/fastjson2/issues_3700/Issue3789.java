@@ -16,6 +16,7 @@ public class Issue3789 {
                 () -> JSONObject.of("name", null).to(Bean.class));
 
         assertNull(JSONObject.of("name", null).to(Bean.class, JSONReader.Feature.IgnoreSetNullValue).name);
+        assertNull(JSONObject.of().to(Bean.class).name);
 
         assertEquals(name,
                 JSONObject.of("name", name).to(Bean.class).name);
