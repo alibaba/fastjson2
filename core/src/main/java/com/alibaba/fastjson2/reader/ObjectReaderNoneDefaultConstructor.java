@@ -274,6 +274,21 @@ public class ObjectReaderNoneDefaultConstructor<T>
             if (fieldReader == null && (featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
                 long hashCodeLCase = jsonReader.getNameHashCodeLCase();
                 fieldReader = getFieldReaderLCase(hashCodeLCase);
+
+                if (fieldReader == null) {
+                    String name = jsonReader.getFieldName();
+                    if (name.startsWith("is")) {
+                        String fieldName1 = name.substring(2);
+                        long hashCode64LCase = Fnv.hashCode64LCase(fieldName1);
+                        FieldReader fieldReader1 = getFieldReaderLCase(hashCode64LCase);
+                        if (fieldReader1 != null) {
+                            Class fieldClass = fieldReader1.fieldClass;
+                            if (fieldClass == Boolean.class || fieldClass == boolean.class) {
+                                fieldReader = fieldReader1;
+                            }
+                        }
+                    }
+                }
             }
 
             if (fieldReader == null) {
