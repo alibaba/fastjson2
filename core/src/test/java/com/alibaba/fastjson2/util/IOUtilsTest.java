@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IOUtilsTest {
     static final byte[] DigitTens = {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1',
@@ -318,5 +320,75 @@ public class IOUtilsTest {
             getChars(n, size_n, chars_n);
             assertEquals(str_n, new String(chars_n));
         }
+    }
+
+    @Test
+    public void testIsNumber() {
+        // Test String version
+        assertTrue(IOUtils.isNumber("123"));
+        assertTrue(IOUtils.isNumber("-123"));
+        assertTrue(IOUtils.isNumber("+123"));
+        assertTrue(IOUtils.isNumber("0"));
+        assertTrue(IOUtils.isNumber("999999999"));
+
+        assertFalse(IOUtils.isNumber("12.3"));
+        assertFalse(IOUtils.isNumber("abc"));
+        assertFalse(IOUtils.isNumber(""));
+        assertFalse(IOUtils.isNumber("123a"));
+        assertFalse(IOUtils.isNumber("++123"));
+        assertFalse(IOUtils.isNumber("--123"));
+        assertFalse(IOUtils.isNumber("12+3"));
+        assertFalse(IOUtils.isNumber("12-3"));
+        assertFalse(IOUtils.isNumber("-"));
+        assertFalse(IOUtils.isNumber("+"));
+
+        // Test char[] version
+        char[] chars1 = "123".toCharArray();
+        assertTrue(IOUtils.isNumber(chars1, 0, chars1.length));
+
+        char[] chars2 = "-123".toCharArray();
+        assertTrue(IOUtils.isNumber(chars2, 0, chars2.length));
+        assertFalse(IOUtils.isNumber(chars2, 0, 1));
+
+        char[] chars3 = "+123".toCharArray();
+        assertTrue(IOUtils.isNumber(chars3, 0, chars3.length));
+        assertFalse(IOUtils.isNumber(chars3, 0, 1));
+
+        char[] chars4 = "12.3".toCharArray();
+        assertFalse(IOUtils.isNumber(chars4, 0, chars4.length));
+
+        char[] chars5 = "123a".toCharArray();
+        assertFalse(IOUtils.isNumber(chars5, 0, chars5.length));
+
+        char[] chars6 = "12+3".toCharArray();
+        assertFalse(IOUtils.isNumber(chars6, 0, chars6.length));
+
+        // Test with offset and length
+        char[] chars7 = "abc123def".toCharArray();
+        assertTrue(IOUtils.isNumber(chars7, 3, 3)); // "123" part
+        assertFalse(IOUtils.isNumber(chars7, 0, chars7.length)); // entire string
+
+        // Test byte[] version
+        byte[] bytes1 = "123".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes1, 0, bytes1.length));
+
+        byte[] bytes2 = "-123".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes2, 0, bytes2.length));
+        assertFalse(IOUtils.isNumber(bytes2, 0, 1));
+
+        byte[] bytes3 = "+123".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes3, 0, bytes3.length));
+        assertFalse(IOUtils.isNumber(bytes3, 0, 1));
+
+        byte[] bytes4 = "12.3".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.isNumber(bytes4, 0, bytes4.length));
+
+        byte[] bytes5 = "123a".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.isNumber(bytes5, 0, bytes5.length));
+
+        // Test with offset and length
+        byte[] bytes6 = "abc123def".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes6, 3, 3)); // "123" part
+        assertFalse(IOUtils.isNumber(bytes6, 0, bytes6.length)); // entire string
     }
 }

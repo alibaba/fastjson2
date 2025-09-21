@@ -341,10 +341,14 @@ public class IOUtils {
     }
 
     public static boolean isNumber(String str) {
-        for (int i = 0; i < str.length(); ++i) {
+        int len = str.length();
+        if (len == 0) {
+            return false;
+        }
+        for (int i = 0; i < len; ++i) {
             char ch = str.charAt(i);
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != 0 || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
@@ -354,11 +358,14 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isNumber(char[] chars, int off, int len) {
+    public static boolean isNumber(char[] buf, int off, int len) {
+        if (len <= 0) {
+            return false;
+        }
         for (int i = off, end = off + len; i < end; ++i) {
-            char ch = chars[i];
+            char ch = buf[i];
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != off || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
@@ -368,11 +375,14 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isNumber(byte[] chars, int off, int len) {
+    public static boolean isNumber(byte[] buf, int off, int len) {
+        if (len <= 0) {
+            return false;
+        }
         for (int i = off, end = off + len; i < end; ++i) {
-            char ch = (char) chars[i];
+            char ch = (char) buf[i];
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != off || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
