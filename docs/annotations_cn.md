@@ -161,7 +161,7 @@ public void test1() {
 ```
 
 ### 1.8 配置序列化时不忽略transient属性
-从2.0.58版本开始，将@JSONField(skipTransient = false)配置在transient字段或@java.beans.Transient修饰的getter方法上，可以强制序列化transient属性。
+从2.0.59版本开始，将@JSONField(skipTransient = false)配置在transient字段或@java.beans.Transient修饰的getter方法上，可以强制序列化transient属性。
 ```java
 public class Bean1 {
     @JSONField(skipTransient = false)
@@ -310,7 +310,7 @@ public class JSONTypeOrders {
 
 ### 2.5 配置序列化时不忽略transient属性
 
-从2.0.58版本开始，您可以通过`@JSONType(skipTransient = false)`配置强制序列化transient属性。
+从2.0.59版本开始，您可以通过`@JSONType(skipTransient = false)`配置强制序列化transient属性。
 
 ```java
 @JSONType(skipTransient = false)

@@ -174,7 +174,7 @@ public void test1() {
 
 ### 1.8 Don't ignore transient fields when serializing
 
-Starting from version 2.0.58, configure @JSONField(skipTransient = false) on transient fields or getter methods annotated with @java.beans.Transient. This can force serialization of transient fields.
+Starting from version 2.0.59, configure @JSONField(skipTransient = false) on transient fields or getter methods annotated with @java.beans.Transient. This can force serialization of transient fields.
 ```java
 public class Bean1 {
     @JSONField(skipTransient = false)
@@ -323,7 +323,7 @@ public class JSONTypeOrders {
 
 ### 2.5 Don't ignore transient fields when serializing
 
-Starting from version 2.0.58, you can configure the mandatory serialization of transient properties through ` @ JSONType (skipTransient=false) `.
+Starting from version 2.0.59, you can configure the mandatory serialization of transient properties through ` @ JSONType (skipTransient=false) `.
 
 ```java
 @JSONType(skipTransient = false)
