@@ -47,20 +47,19 @@ class FieldWriterDoubleMethod<T>
             throw error;
         }
 
-        writeFieldName(jsonWriter);
-
         if (value == null) {
-            jsonWriter.writeNumberNull();
+            return writeFloatNull(jsonWriter);
+        }
+
+        writeFieldName(jsonWriter);
+        double doubleValue = value;
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(doubleValue, decimalFormat);
         } else {
-            double doubleValue = value.doubleValue();
-            if (decimalFormat != null) {
-                jsonWriter.writeDouble(doubleValue, decimalFormat);
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(doubleValue);
             } else {
-                if (writeNonStringValueAsString) {
-                    jsonWriter.writeString(doubleValue);
-                } else {
-                    jsonWriter.writeDouble(doubleValue);
-                }
+                jsonWriter.writeDouble(doubleValue);
             }
         }
 
