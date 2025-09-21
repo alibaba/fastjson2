@@ -5581,11 +5581,6 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public boolean nextIfList() {
-        return false;
-    }
-
-    @Override
     public boolean nextIfInfinity() {
         return false;
     }

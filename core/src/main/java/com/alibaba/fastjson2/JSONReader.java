@@ -1548,15 +1548,6 @@ public abstract class JSONReader
     public abstract boolean nextIfSet();
 
     /**
-     * Checks if the current value represents a List and advances the reader if it is.
-     * This method is used to detect List-type collections during JSON parsing.
-     *
-     * @return true if the current value represents a List, false otherwise
-     * @since 2.0.51
-     */
-    public abstract boolean nextIfList();
-
-    /**
      * Checks if the current value represents infinity and advances the reader if it is.
      * This method is used to detect infinity values during JSON parsing.
      *
@@ -4121,13 +4112,6 @@ public abstract class JSONReader
                 case 'S':
                     if (nextIfSet()) {
                         val = read(java.util.Set.class);
-                    } else {
-                        throw new JSONException(info());
-                    }
-                    break;
-                case 'L':
-                    if (nextIfList()) {
-                        val = read(java.util.List.class);
                     } else {
                         throw new JSONException(info());
                     }
