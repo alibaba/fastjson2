@@ -1524,6 +1524,34 @@ public abstract class JSONReader
 
     protected abstract void readNumber0();
 
+    /**
+     * Reads a Base64 encoded string from JSON data and decodes it to bytes.
+     *
+     * @return The decoded byte array
+     */
+    /**
+     * Reads a Base64 encoded string from JSON data and decodes it to bytes.
+     *
+     * @return The decoded byte array
+     */
+    public byte[] readBase64() {
+        String str = readString();
+        if (str != null) {
+            String prefix = "data:image/";
+            int p0, p1;
+            String base64 = "base64";
+            if (str.startsWith(prefix)
+                    && (p0 = str.indexOf(';', prefix.length() + 1)) != -1
+                    && (p1 = str.indexOf(',', p0 + 1)) != -1 && str.regionMatches(p0 + 1, base64, 0, base64.length())) {
+                str = str.substring(p1 + 1);
+            }
+        }
+        if (str.isEmpty()) {
+            return new byte[0];
+        }
+        return Base64.getDecoder().decode(str);
+    }
+
     public abstract String readString();
 
     public Date readDate() {
