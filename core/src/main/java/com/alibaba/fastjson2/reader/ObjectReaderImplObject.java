@@ -158,6 +158,10 @@ public final class ObjectReaderImplObject
                     break;
                 }
 
+                if (jsonReader.current() == '/') {
+                    jsonReader.skipComment();
+                }
+
                 Object name;
                 if (i == 0 && typeName == null && hash != 0) {
                     name = jsonReader.getFieldName();
