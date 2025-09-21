@@ -2319,6 +2319,13 @@ public abstract class JSONReader
                 case 'N':
                     val = readNaN();
                     break;
+                case 'S':
+                    if (nextIfSet()) {
+                        val = read(java.util.Set.class);
+                    } else {
+                        throw new JSONException(info());
+                    }
+                    break;
                 case '/':
                     skipComment();
                     --i;
