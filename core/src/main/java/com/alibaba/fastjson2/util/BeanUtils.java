@@ -2852,32 +2852,22 @@ public abstract class BeanUtils {
 
     public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation) {
         Class<? extends Annotation> annotationClass = annotation.getClass();
+        final String[] jsonFormatValues = new String[3]; // 0:pattern; 1:shape; 2:locale
         BeanUtils.annotationMethods(annotationClass, m -> {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
                 switch (name) {
                     case "pattern": {
-                        String pattern = (String) result;
-                        if (pattern.length() != 0) {
-                            fieldInfo.format = pattern;
-                        }
+                        jsonFormatValues[0] = (String) result;
                         break;
                     }
                     case "shape": {
-                        String shape = ((Enum) result).name();
-                        if ("STRING".equals(shape)) {
-                            fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
-                        } else if ("NUMBER".equals(shape)) {
-                            fieldInfo.format = "millis";
-                        }
+                        jsonFormatValues[1] = ((Enum) result).name();
                         break;
                     }
                     case "locale": {
-                        String locale = (String) result;
-                        if (!locale.isEmpty() && !"##default".equals(locale)) {
-                            fieldInfo.locale = Locale.forLanguageTag(locale);
-                        }
+                        jsonFormatValues[2] = (String) result;
                         break;
                     }
                     default:
@@ -2887,6 +2877,20 @@ public abstract class BeanUtils {
                 // ignored
             }
         });
+
+        if (jsonFormatValues[0].length() != 0) {
+            fieldInfo.format = jsonFormatValues[0];
+        }
+
+        if ("STRING".equals(jsonFormatValues[1]) && fieldInfo.format == null) {
+            fieldInfo.format = "string";
+        } else if ("NUMBER".equals(jsonFormatValues[1])) {
+            fieldInfo.format = "millis";
+        }
+
+        if (!jsonFormatValues[2].isEmpty() && !"##default".equals(jsonFormatValues[2])) {
+            fieldInfo.locale = Locale.forLanguageTag(jsonFormatValues[2]);
+        }
     }
 
     public static void processJacksonJsonFormat(BeanInfo beanInfo, Annotation annotation) {
