@@ -22,10 +22,7 @@ final class FieldWriterBigDecimalField<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         BigDecimal value = (BigDecimal) getFieldValue(object);
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
-                return false;
-            }
+            return writeFloatNull(jsonWriter);
         }
 
         writeFieldName(jsonWriter);

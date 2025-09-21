@@ -43,16 +43,7 @@ class FieldWriterFloatField<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         Float value = (Float) getFieldValue(object);
         if (value == null) {
-            long features = jsonWriter.getFeatures(this.features);
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
-                return false;
-            }
-            if ((features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0) {
-                writeFieldName(jsonWriter);
-                jsonWriter.writeDecimalNull();
-                return true;
-            }
-            return false;
+            return writeFloatNull(jsonWriter);
         }
 
         writeFieldName(jsonWriter);

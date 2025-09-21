@@ -45,23 +45,21 @@ class FieldWriterDoubleMethod<T>
             throw error;
         }
 
-        writeFieldName(jsonWriter);
-
         if (value == null) {
-            jsonWriter.writeNumberNull();
-        } else {
-            double doubleValue = value;
-            if (decimalFormat != null) {
-                jsonWriter.writeDouble(doubleValue, decimalFormat);
-            } else {
-                if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
-                    jsonWriter.writeString(doubleValue);
-                } else {
-                    jsonWriter.writeDouble(doubleValue);
-                }
-            }
+            return writeFloatNull(jsonWriter);
         }
 
+        writeFieldName(jsonWriter);
+        double doubleValue = value;
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(doubleValue, decimalFormat);
+        } else {
+            if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(doubleValue);
+            } else {
+                jsonWriter.writeDouble(doubleValue);
+            }
+        }
         return true;
     }
 
