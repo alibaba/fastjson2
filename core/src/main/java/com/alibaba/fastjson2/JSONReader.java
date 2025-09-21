@@ -3664,6 +3664,7 @@ public abstract class JSONReader
                         break;
                     case "yyyyMMddHHmmssSSSZ":
                         useSimpleFormatter = true;
+                        break;
                     case "yyyy-MM-dd HH:mm:ss":
                     case "yyyy-MM-ddTHH:mm:ss":
                         formatyyyyMMddhhmmss19 = true;
