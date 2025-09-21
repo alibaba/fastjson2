@@ -1317,6 +1317,14 @@ public class ObjectReaderCreator {
                     if (fieldInfo.alternateNames == null) {
                         String findName = methodName.substring(3);
                         Field field = BeanUtils.getDeclaredField(objectClass, findName);
+                        if (field == null) {
+                            Class<?> fieldClass = method.getParameterTypes()[0];
+                            if (fieldClass == boolean.class && !findName.isEmpty()) {
+                                findName = "is" + Character.toUpperCase(findName.charAt(0)) + findName.substring(1);
+                                field = BeanUtils.getDeclaredField(objectClass, findName);
+                            }
+                        }
+
                         if (field != null) {
                             fieldInfo.alternateNames = new String[]{findName};
                         }
