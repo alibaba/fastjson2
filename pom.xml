@@ -1025,6 +1025,15 @@
             </modules>
         </profile>
         <profile>
+            <id>enable-incubators-for-jdk25+</id>
+            <activation>
+                <jdk>[25,)</jdk>
+            </activation>
+            <modules>
+                <module>test-jdk25</module>
+            </modules>
+        </profile>
+        <profile>
             <id>enable-for-jdk21+</id>
             <activation>
                 <jdk>[21,)</jdk>
