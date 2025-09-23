@@ -847,6 +847,7 @@
         <profile>
             <id>gen-javadoc</id>
             <activation>
+                <jdk>(,20]</jdk>
                 <property>
                     <name>performRelease</name>
                     <value>true</value>
@@ -881,6 +882,53 @@
                             <doclint>all,-missing</doclint>
                             <links>
                                 <link>https://docs.oracle.com/javase/8/docs/api</link>
+                            </links>
+                            <additionalJOptions>
+                                <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
+                            </additionalJOptions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>gen-javadoc</id>
+            <activation>
+                <jdk>[21,)</jdk>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <javadoc.default.exclude.packages>
+                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*:*.internal.*.*.*.*:com/alibaba/fastjson2/benchmark
+                </javadoc.default.exclude.packages>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadoc</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <show>protected</show>
+                            <charset>UTF-8</charset>
+                            <encoding>UTF-8</encoding>
+                            <docencoding>UTF-8</docencoding>
+                            <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/examples/exclude-package-names.html -->
+                            <excludePackageNames>
+                                ${javadoc.default.exclude.packages}:jdk.incubator.vector
+                            </excludePackageNames>
+                            <doclint>all,-missing</doclint>
+                            <links>
+                                <link>https://docs.oracle.com/javase/21/docs/api</link>
                             </links>
                             <additionalJOptions>
                                 <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
