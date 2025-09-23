@@ -892,7 +892,7 @@
             </build>
         </profile>
         <profile>
-            <id>gen-javadoc</id>
+            <id>gen-javadoc-21</id>
             <activation>
                 <jdk>[21,)</jdk>
                 <property>
