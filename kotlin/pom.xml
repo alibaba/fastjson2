@@ -94,7 +94,6 @@
         <profile>
             <id>gen-dokka</id>
             <activation>
-                <jdk>(,21]</jdk>
                 <property>
                     <name>performRelease</name>
                     <value>true</value>
