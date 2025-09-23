@@ -1010,18 +1010,6 @@
             </build>
         </profile>
         <profile>
-            <id>enable-incubators-for-jdk17+</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <modules>
-                <module>example-graalvm-native</module>
-                <module>extension-spring6</module>
-                <module>example-spring6-test</module>
-                <module>test-jdk17</module>
-            </modules>
-        </profile>
-        <profile>
             <id>enable-incubators-for-jdk25+</id>
             <activation>
                 <jdk>[25,)</jdk>
