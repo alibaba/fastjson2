@@ -879,9 +879,6 @@
                                 ${javadoc.default.exclude.packages}:jdk.incubator.vector
                             </excludePackageNames>
                             <doclint>all,-missing</doclint>
-                            <links>
-                                <link>https://docs.oracle.com/javase/8/docs/api</link>
-                            </links>
                             <additionalJOptions>
                                 <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
                             </additionalJOptions>
@@ -1013,18 +1010,6 @@
             </build>
         </profile>
         <profile>
-            <id>enable-incubators-for-jdk17+</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <modules>
-                <module>example-graalvm-native</module>
-                <module>extension-spring6</module>
-                <module>example-spring6-test</module>
-                <module>test-jdk17</module>
-            </modules>
-        </profile>
-        <profile>
             <id>enable-incubators-for-jdk25+</id>
             <activation>
                 <jdk>[25,)</jdk>
@@ -1032,6 +1017,23 @@
             <modules>
                 <module>test-jdk25</module>
             </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                    <version>1.18.42</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>enable-for-jdk21+</id>

@@ -14,8 +14,6 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -35,17 +33,13 @@ public final class JSONFactory {
         static {
             Properties properties = new Properties();
 
-            InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
-                final String resourceFile = "fastjson2.properties";
+            final String resourceFile = "fastjson2.properties";
 
-                if (cl != null) {
-                    return cl.getResourceAsStream(resourceFile);
-                } else {
-                    return ClassLoader.getSystemResourceAsStream(resourceFile);
-                }
-            });
+            InputStream inputStream = cl != null
+                    ? cl.getResourceAsStream(resourceFile)
+                    : ClassLoader.getSystemResourceAsStream(resourceFile);
             if (inputStream != null) {
                 try {
                     properties.load(inputStream);
