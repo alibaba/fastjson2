@@ -227,9 +227,9 @@ public class Fastjson2EncoderTest {
 
     @Test
     void testCanEncode() {
-        // 测试支持的媒体类型
-        assertTrue(encoderAll.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-        assertTrue(encoderAll.canEncode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));
+        // 测试不支持的媒体类型
+        assertFalse(encoderAll.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+        assertFalse(encoderAll.canEncode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));
         assertTrue(encoderAll.canEncode(ResolvableType.forClass(TestVO.class), MediaType.APPLICATION_JSON));
         assertTrue(encoderAll.canEncode(ResolvableType.forClass(Integer.class), MediaType.APPLICATION_JSON));
 

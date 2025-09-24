@@ -186,16 +186,57 @@ public class Fastjson2DecoderTest {
 
     @Test
     void testCanDecode() {
-        // 测试支持的媒体类型
-        assertTrue(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-        assertTrue(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));
+        // 测试默认解码器应该支持的JSON相关媒体类型
         assertTrue(decoderAll.canDecode(ResolvableType.forClass(TestVO.class), MediaType.APPLICATION_JSON));
+        assertTrue(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
         assertTrue(decoderAll.canDecode(ResolvableType.forClass(Integer.class), MediaType.APPLICATION_JSON));
 
-        // 测试不支持的媒体类型
+        // 测试支持JSON相关的其他类型
+        MediaType jsonVariant = new MediaType("application", "hal+json");
+        assertTrue(decoderAll.canDecode(ResolvableType.forClass(TestVO.class), jsonVariant));
+
+        //默认解码器不应该支持非JSON媒体类型
+        assertFalse(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+        assertFalse(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));
+        assertFalse(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.MULTIPART_FORM_DATA));
+        assertFalse(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_OCTET_STREAM));
+
+        // 测试指定JSON类型的解码器行为
+        assertTrue(decoderJson.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
         assertFalse(decoderJson.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
         assertFalse(decoderJson.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_HTML));
         assertFalse(decoderJson.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));
+    }
+
+    @Test
+    void FileUploadMediaTypeHandling() {
+        // 创建默认解码器
+        Fastjson2Decoder fixedDecoder = new Fastjson2Decoder();
+
+        //JSON解码器不应该声称能处理文件上传相关的媒体类型
+        assertFalse(fixedDecoder.canDecode(ResolvableType.forClass(Object.class), MediaType.MULTIPART_FORM_DATA),
+                "error");
+
+        assertFalse(fixedDecoder.canDecode(ResolvableType.forClass(Object.class), MediaType.APPLICATION_OCTET_STREAM),
+                "error");
+
+        assertFalse(fixedDecoder.canDecode(ResolvableType.forClass(Object.class), MediaType.MULTIPART_MIXED),
+                "error");
+
+        assertFalse(fixedDecoder.canDecode(ResolvableType.forClass(Object.class), MediaType.MULTIPART_RELATED),
+                "error");
+        assertTrue(fixedDecoder.canDecode(ResolvableType.forClass(Object.class), MediaType.APPLICATION_JSON),
+                "error");
+
+        assertTrue(fixedDecoder.canDecode(ResolvableType.forClass(Object.class), new MediaType("application", "hal+json")),
+                "error");
+
+        assertTrue(fixedDecoder.canDecode(ResolvableType.forClass(Object.class), new MediaType("application", "vnd.api+json")),
+                "error");
+
+        Fastjson2Decoder legacyDecoder = new Fastjson2Decoder(new FastJsonConfig(), MediaType.ALL);
+        assertTrue(legacyDecoder.canDecode(ResolvableType.forClass(Object.class), MediaType.MULTIPART_FORM_DATA),
+                "right");
     }
 
     @Test
