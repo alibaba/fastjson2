@@ -96,6 +96,23 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
             return;
         }
 
+        long features2 = jsonWriter.getFeatures(features | this.features);
+
+        if ((features2 & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0) {
+            jsonWriter.writeString(e.toString());
+            return;
+        }
+
+        if ((features2 & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0) {
+            jsonWriter.writeInt32(e.ordinal());
+            return;
+        }
+
+        if ((features2 & JSONWriter.Feature.WriteEnumsUsingName.mask) != 0) {
+            jsonWriter.writeString(e.name());
+            return;
+        }
+
         if (valueField != null) {
             Object fieldValue;
             try {
@@ -111,18 +128,6 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
             } catch (Exception error) {
                 throw new JSONException("getEnumValue error", error);
             }
-        }
-
-        long features2 = jsonWriter.getFeatures(features | this.features);
-
-        if ((features2 & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0) {
-            jsonWriter.writeString(e.toString());
-            return;
-        }
-
-        if ((features2 & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0) {
-            jsonWriter.writeInt32(e.ordinal());
-            return;
         }
 
         String enumName = null;
