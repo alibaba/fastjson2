@@ -188,12 +188,14 @@ public class Fastjson2DecoderTest {
     @Test
     void testCanDecode() {
         // 测试支持的媒体类型
-        assertTrue(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-        assertTrue(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));
+        assertTrue(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
+        assertTrue(decoderAll.canDecode(ResolvableType.forClass(String.class), new MediaType("application", "vnd.api+json")));
         assertTrue(decoderAll.canDecode(ResolvableType.forClass(TestVO.class), MediaType.APPLICATION_JSON));
         assertTrue(decoderAll.canDecode(ResolvableType.forClass(Integer.class), MediaType.APPLICATION_JSON));
 
         // 测试不支持的媒体类型
+        assertFalse(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+        assertFalse(decoderAll.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));
         assertFalse(decoderJson.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
         assertFalse(decoderJson.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_HTML));
         assertFalse(decoderJson.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_XML));

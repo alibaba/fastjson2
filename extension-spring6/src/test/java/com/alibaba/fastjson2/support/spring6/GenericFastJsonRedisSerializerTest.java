@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.SerializationException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -82,7 +83,7 @@ public class GenericFastJsonRedisSerializerTest {
                 "\"msg\": \"success\"\n" +
                 "}";
 
-        BaseResult<List<String>> baseResult3 = (BaseResult<List<String>>) genericFastJsonRedisSerializer.deserialize(json.getBytes());
+        BaseResult<List<String>> baseResult3 = (BaseResult<List<String>>) genericFastJsonRedisSerializer.deserialize(json.getBytes(StandardCharsets.UTF_8));
         assertEquals(baseResult3.getCode(), "1000");
         assertEquals(baseResult3.getData().size(), 6);
     }

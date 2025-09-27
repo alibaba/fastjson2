@@ -31,40 +31,48 @@ import java.util.Map;
  */
 public final class Fastjson2Decoder
         extends AbstractDecoder<Object> {
+    private static final int BUFFER_SIZE = 65536;
+
     private final FastJsonConfig config;
 
-    /**
-     * default constructor
-     */
     public Fastjson2Decoder() {
-        this(new FastJsonConfig(), MediaType.ALL);
+        this(new FastJsonConfig(),
+                MediaType.APPLICATION_JSON,
+             new MediaType("application", "*+json"));
     }
 
-    /**
-     * Constructor with custom configs
-     *
-     * @param config    FastJsonConfig
-     * @param mimeTypes the mime types to support
-     */
-    public Fastjson2Decoder(FastJsonConfig config, MimeType... mimeTypes) {
-        super(mimeTypes == null || mimeTypes.length == 0 ? new MimeType[]{MediaType.ALL} : mimeTypes);
+    public Fastjson2Decoder(final FastJsonConfig config,
+                            final MimeType... mimeTypes) {
+        super(mimeTypes == null || mimeTypes.length == 0
+                ? new MimeType[]{
+                    MediaType.APPLICATION_JSON,
+                    new MediaType("application", "*+json")}
+                : mimeTypes);
         this.config = config;
     }
 
     @Override
     @NonNull
-    public Flux<Object> decode(@NonNull Publisher<DataBuffer> inputStream, @NonNull ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+    public Flux<Object> decode(@NonNull final Publisher<DataBuffer> inputStream,
+                               @NonNull final ResolvableType elementType,
+                               @Nullable final MimeType mimeType,
+                               @Nullable final Map<String, Object> hints) {
         return Flux.from(inputStream)
-                .mapNotNull(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+                .mapNotNull(dataBuffer ->
+                    decode(dataBuffer, elementType, mimeType, hints));
     }
 
     @Override
     @Nullable
-    public Object decode(@NonNull DataBuffer buffer, @NonNull ResolvableType targetType, MimeType mimeType, Map<String, Object> hints) throws DecodingException {
+    public Object decode(@NonNull final DataBuffer buffer,
+                         @NonNull final ResolvableType targetType,
+                         final MimeType mimeType,
+                         final Map<String, Object> hints)
+            throws DecodingException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream();
                 InputStream in = buffer.asInputStream()) {
-            byte[] buf = new byte[1 << 16];
-            for (; ; ) {
+            byte[] buf = new byte[BUFFER_SIZE];
+            for (;;) {
                 int len = in.read(buf);
                 if (len == -1) {
                     break;
@@ -81,9 +89,11 @@ public final class Fastjson2Decoder
             logValue(value, hints);
             return value;
         } catch (JSONException ex) {
-            throw new DecodingException("JSON parse error: " + ex.getMessage(), ex);
+            throw new DecodingException("JSON parse error: " + ex.getMessage(),
+                    ex);
         } catch (IOException ex) {
-            throw new DecodingException("I/O error while reading input message", ex);
+            throw new DecodingException(
+                    "I/O error while reading input message", ex);
         } finally {
             DataBufferUtils.release(buffer);
         }
@@ -91,17 +101,24 @@ public final class Fastjson2Decoder
 
     @Override
     @NonNull
-    public Mono<Object> decodeToMono(@NonNull Publisher<DataBuffer> inputStream, @NonNull ResolvableType elementType,
-                                     @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+    public Mono<Object> decodeToMono(
+            @NonNull final Publisher<DataBuffer> inputStream,
+            @NonNull final ResolvableType elementType,
+            @Nullable final MimeType mimeType,
+            @Nullable final Map<String, Object> hints) {
         return DataBufferUtils.join(inputStream)
-                .flatMap(dataBuffer -> Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hints)));
+                .flatMap(dataBuffer -> Mono.justOrEmpty(
+                    decode(dataBuffer, elementType, mimeType, hints)));
     }
 
-    private void logValue(@Nullable Object value, @Nullable Map<String, Object> hints) {
+    private void logValue(@Nullable final Object value,
+                          @Nullable final Map<String, Object> hints) {
         if (!Hints.isLoggingSuppressed(hints)) {
             LogFormatUtils.traceDebug(logger, traceOn -> {
-                String formatted = LogFormatUtils.formatValue(value, !traceOn);
-                return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+                String formatted = LogFormatUtils.formatValue(value,
+                        !traceOn);
+                return Hints.getLogPrefix(hints) + "Decoded [" + formatted
+                        + "]";
             });
         }
     }

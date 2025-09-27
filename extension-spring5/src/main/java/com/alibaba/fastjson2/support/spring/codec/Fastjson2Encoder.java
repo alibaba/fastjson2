@@ -34,7 +34,7 @@ public final class Fastjson2Encoder
      * default constructor
      */
     public Fastjson2Encoder() {
-        this(new FastJsonConfig(), MediaType.ALL);
+        this(new FastJsonConfig(), MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
     }
 
     /**
@@ -44,7 +44,9 @@ public final class Fastjson2Encoder
      * @param mimeTypes the mime types to support
      */
     public Fastjson2Encoder(FastJsonConfig config, MimeType... mimeTypes) {
-        super(mimeTypes == null || mimeTypes.length == 0 ? new MimeType[]{MediaType.ALL} : mimeTypes);
+        super(mimeTypes == null || mimeTypes.length == 0
+                ? new MimeType[]{MediaType.APPLICATION_JSON, new MediaType("application", "*+json")}
+                : mimeTypes);
         this.config = config;
     }
 
