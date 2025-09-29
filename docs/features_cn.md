@@ -138,7 +138,77 @@ User user2 = JSON.parseObject(json, User.class,
     JSONReader.Feature.InitStringFieldAsEmpty);
 ```
 
-# 7. 最佳实践建议
+# 7. 1.x 特性变更指南
+
+## 7.1 默认开启的特性
+
+在 fastjson 1.x 中，默认开启的特性如下：
+
+**序列化**：
+* `SerializerFeature.QuoteFieldNames`
+* `SerializerFeature.SkipTransientField`
+* `SerializerFeature.WriteEnumUsingName`
+* `SerializerFeature.SortField`
+
+**反序列化**：
+* `Feature.AutoCloseSource`
+* `Feature.InternFieldNames`
+* `Feature.UseBigDecimal`
+* `Feature.AllowUnQuotedFieldNames`
+* `Feature.AllowSingleQuotes`
+* `Feature.AllowArbitraryCommas`
+* `Feature.SortFeidFastMatch`
+* `Feature.IgnoreNotMatch`
+
+在 fastjson 2.x 中，**所有特性默认关闭**。
+
+## 7.2 1.x特性变更
+
+**序列化**：
+* `QuoteFieldNames`：2.x默认支持，无需配置。且2.x支持`UnquoteFieldName`特性
+* `UseISO8601DateFormat`：2.x中替代方案如下：
+    - `JSON.configWriterDateFormat("iso8601")`（全局配置）
+    - `JSON.toJSONString(bean, "iso8601")`
+    - `@JSONField(format = "iso8601")`
+* `SkipTransientField`；2.x默认支持，若要关闭，方案如下：
+    - JVM参数配置 `-Dfastjson2.writer.skipTransient=false`（全局配置）
+    - `JSONFactory.setDefaultSkipTransient(false)`（全局配置）
+    - `@JSONType(skipTransient = false)`
+    - `@JSONField(skipTransient = false)`
+* `SortField`：2.x默认支持，无需配置
+* `WriteDateUseDateFormat`：2.x中替代方案如下：
+    - `JSON.toJSONString(bean, "millis")`
+    - 使用2.0.58中新增加的特性`JSONWriter.Feature.WriterUtilDateAsMillis`
+* `DisableCircularReferenceDetect`：1.x中默认有循环引用检测，2.x则默认关闭。2.x若要开启，使用特性`ReferenceDetection`
+* `WriteEnumUsingName`：2.x中默认关闭
+* `WriteSlashAsSpecial`：2.x未支持
+* `WriteTabAsSpecial`、`DisableCheckSpecialChar`在1.x中已弃用
+* 其余1.x序列化特性无变化
+
+**反序列化**：
+* `AllowArbitraryCommas`：2.x的语法更加严格，不支持多重逗号
+* `AllowComment`：2.x默认支持，无需配置
+* `AllowISO8601DateFormat`：2.x默认支持，也可通过以下方式显式指定：
+    - `JSON.configReaderDateFormat("iso8601")`（全局配置）
+    - `JSON.parseObject(str, Bean.class, "iso8601")`
+* `AllowSingleQuotes`：2.x默认支持，无需配置
+* `AutoCloseSource`（反序列化不完整JSON抛出异常）：2.x默认支持，无需配置
+* `CustomMapDeserializer`：2.x未支持
+* `DisableCircularReferenceDetect`：更名为`DisableReferenceDetect`
+* `DisableFieldSmartMatch`：替换为`SupportSmartMatch`（1.x中智能匹配默认开启，2.x中智能匹配默认关闭）
+* `DisableSpecialKeyDetect`：2.x默认支持，无需配置
+* `IgnoreAutoType`：2.x默认关闭AutoType功能，缺省配置下是安全的
+* `IgnoreNotMatch`：2.x默认支持，无需配置
+* `OrderedField`（反序列化为JSONObject、JSONArray时，保证声明顺序）：2.x默认支持，无需配置
+* `SupportNonPublicField`：可替换为`FieldBased`
+* `SafeMode`：2.x可通过JVM参数配置 `-Dfastjson2.parser.safeMode=true`
+* `TrimStringFieldValue`：可替换为`TrimString`
+* `UseBigDecimal`：替换为`UseBigDecimalForFloats`、`UseBigDecimalForDoubles`
+* `UseNativeJavaObject`：更名为`UseNativeObject`
+* `UseObjectArray`（JSON数组解析为Object[]而非ArrayList）：2.x未支持 
+* 其余1.x反序列化特性无变化
+
+# 8. 最佳实践建议
 
 1. **安全性考虑**：
    - 默认情况下不要开启`SupportAutoType`，除非确实需要处理带类型信息的JSON
