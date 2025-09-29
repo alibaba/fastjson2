@@ -140,7 +140,77 @@ User user2 = JSON.parseObject(json, User.class,
     JSONReader.Feature.InitStringFieldAsEmpty);
 ```
 
-# 7. Best Practices
+# 7. 1.x Feature Migration Guide
+
+## 7.1 Features Enabled by Default
+
+In fastjson 1.x, the default enabled features are as follows:
+
+**Serialization**
+* `SerializerFeature.QuoteFieldNames`
+* `SerializerFeature.SkipTransientField`
+* `SerializerFeature.WriteEnumUsingName`
+* `SerializerFeature.SortField`
+
+**Deserialization**
+* `Feature.AutoCloseSource`
+* `Feature.InternFieldNames`
+* `Feature.UseBigDecimal`
+* `Feature.AllowUnQuotedFieldNames`
+* `Feature.AllowSingleQuotes`
+* `Feature.AllowArbitraryCommas`
+* `Feature.SortFeidFastMatch`
+* `Feature.IgnoreNotMatch`
+
+In fastjson 2.x, **all features are OFF by default**.
+
+## 7.2 Changes from 1.x to 2.x
+
+**Serialization**:
+* `QuoteFieldNames`: Enabled by default in 2.x; no configuration required. And 2.x supports the `UnquoteFieldName` feature.
+* `UseISO8601DateFormat`: Replaced in 2.x by:
+    - `JSON.configWriterDateFormat("iso8601")` (global)
+    - `JSON.toJSONString(bean, "iso8601")` 
+    - `@JSONField(format = "iso8601")` 
+* `SkipTransientField`: Enabled by default in 2.x. To disable:
+    - JVM system property `-Dfastjson2.writer.skipTransient=false`
+    - `JSONFactory.setDefaultSkipTransient(false)`
+    - `@JSONType(skipTransient = false)`
+    - `@JSONField(skipTransient = false)`
+* `SortField`: Enabled by default in 2.x; no configuration required.
+* `WriteDateUseDateFormat`:  Alternatives in 2.x:
+    - `JSON.toJSONString(bean, "millis")`
+    - `JSONWriter.Feature.WriterUtilDateAsMillis` (since 2.0.58)
+* `DisableCircularReferenceDetect`: 1.x detects circular refs by default; 2.x does not. To turn detection on in 2.x use `ReferenceDetection`.
+* `WriteEnumUsingName`: Disabled by default in 2.x.
+* `WriteSlashAsSpecial`: Not supported in 2.x.
+* `WriteTabAsSpecial` & `DisableCheckSpecialChar`: Already deprecated in 1.x; removed in 2.x.
+* All other 1.x serialization features remain unchanged.
+
+**Deserialization**:
+* `AllowArbitraryCommas`: 2.x uses strict syntax; multiple commas are not allowed.
+* `AllowComment`: Enabled by default in 2.x; no configuration required.
+* `AllowISO8601DateFormat`: Enabled by default in 2.x. Explicit settings:
+    - `JSON.configReaderDateFormat("iso8601")`
+    - `JSON.parseObject(str, Bean.class, "iso8601")`
+* `AllowSingleQuotes`: Enabled by default in 2.x; no configuration required.
+* `AutoCloseSource` (throw on incomplete JSON): Enabled by default in 2.x; no configuration required.
+* `CustomMapDeserializer`: Not supported in 2.x.
+* `DisableCircularReferenceDetect`: Renamed to `DisableReferenceDetect`.
+* `DisableFieldSmartMatch`: Replaced by `SupportSmartMatch`. (Smart matching was ON in 1.x, OFF by default in 2.x.)
+* `DisableSpecialKeyDetect`: Enabled by default in 2.x; no configuration required.
+* `IgnoreAutoType`: 2.x disables AutoType by default; safe out-of-the-box.
+* `IgnoreNotMatch`: Enabled by default in 2.x; no configuration required.
+* `OrderedField` (keep declaration order for JSONObject / JSONArray): Enabled by default in 2.x; no configuration required.
+* `SupportNonPublicField`: Use `FieldBased` in 2.x.
+* `SafeMode`: 2.x: JVM system property `-Dfastjson2.parser.safeMode=true`.
+* `TrimStringFieldValue`: Use `JSONReader.Feature.TrimString` in 2.x.
+* `UseBigDecimal`: Split into `UseBigDecimalForFloats` and `UseBigDecimalForDoubles` in 2.x.
+* `UseNativeJavaObject`: Renamed to `UseNativeObject`.
+* `UseObjectArray` (parse JSON arrays as `Object[]` instead of `ArrayList`): Not supported in 2.x.
+* All other 1.x deserialization features remain unchanged.
+
+# 8. Best Practices
 
 1. **Security Considerations**:
    - Do not enable `SupportAutoType` by default unless you really need to process JSON with type information
