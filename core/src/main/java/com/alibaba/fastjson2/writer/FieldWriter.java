@@ -123,7 +123,7 @@ public abstract class FieldWriter<T>
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
         this.managedReference = (features & ReferenceDetection.mask) != 0;
-        this.backReference = (features & FieldInfo.BACKR_EFERENCE) != 0;
+        this.backReference = (features & FieldInfo.BACKR_REFERENCE) != 0;
         this.rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
 
         int nameLength = name.length();
