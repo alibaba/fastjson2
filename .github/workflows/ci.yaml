@@ -14,15 +14,19 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       matrix:
-        os: [ ubuntu-24.04, windows-latest, macos-latest ]
         java: [ 8, 11, 17, 21, 25 ]
+        os-arch:
+          - { os: ubuntu-24.04, arch: x64 }
+          - { os: windows-latest, arch: x64 }
+          - { os: macos-latest, arch: arm64 }
+          - { os: ubuntu-24.04-arm, arch: arm64 }
       fail-fast: false
       max-parallel: 16
-    name: Test on JDK ${{ matrix.java }} OS ${{ matrix.os }}
+    name: Test on JDK ${{ matrix.java }} OS ${{ matrix.os-arch.os }} (${{ matrix.os-arch.arch }})
+    runs-on: ${{ matrix.os-arch.os }}
 
     steps:
       - uses: actions/checkout@v3
