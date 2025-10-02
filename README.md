@@ -5,35 +5,40 @@
 [![Java support](https://img.shields.io/badge/Java-8+-green?logo=java&logoColor=white)](https://openjdk.java.net/)
 [![License](https://img.shields.io/github/license/alibaba/fastjson2?color=4D7A97&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-green?label=gitpod&logo=gitpod&logoColor=white)](https://gitpod.io/#https://github.com/alibaba/fastjson2)
-[![Last SNAPSHOT](https://img.shields.io/nexus/snapshots/https/central.sonatype.org/com.alibaba.fastjson2/fastjson2?label=latest%20snapshot)](https://central.sonatype.com/repository/maven-snapshots/com/alibaba/fastjson2/fastjson2/maven-metadata.xml)
+[![Last SNAPSHOT](https://img.shields.io/nexus/snapshots/https/oss.sonatype.org/com.alibaba.fastjson2/fastjson2?label=latest%20snapshot)](https://oss.sonatype.org/content/repositories/snapshots/com/alibaba/fastjson2/)
 [![GitHub Stars](https://img.shields.io/github/stars/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/fork)
 [![user repos](https://badgen.net/github/dependents-repo/alibaba/fastjson2?label=user%20repos)](https://github.com/alibaba/fastjson2/network/dependents)
 [![GitHub Contributors](https://img.shields.io/github/contributors/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/graphs/contributors)
 
-##### [📖 English Documentation](README_EN.md) | 📖 中文文档
-##### 本项目的Issues会被同步沉淀至[阿里云开发者社区](https://developer.aliyun.com/ask/)
+##### 📖 English Documentation | 📖 [中文文档](README_cn.md)
+#####  The issues of fastjson will be also posted on [Alibaba Cloud Developer Community](https://developer.aliyun.com/ask/)
 
 # FASTJSON v2
 
-`FASTJSON 2`是一个性能极致并且简单易用的Java JSON库。
+`FASTJSON v2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` library for the next ten years.
 
-- `FASTJSON 2`是`FASTJSON`项目的重要升级，和FASTJSON 1相比，性能有非常大的提升，解决了autoType功能因为兼容和白名单的安全性问题。
-- 性能极致，性能远超过其他流行JSON库，包括jackson/gson/org.json，性能数据: [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
-- 支持JDK新特性，包括`JDK 11`/`JDK 17`/`JDK 21`，针对`compact string`优化，支持Record，支持`GraalVM Native-Image`
-- 完善的[`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn)支持，支持[SQL:2016](https://en.wikipedia.org/wiki/SQL:2016)的JSONPath语法
-- 支持`Android 8+`，客户端和服务器一套API
-- 支持`Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
-- 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
-- 新增加支持二进制格式JSONB [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
+- Supports the JSON and JSONB Protocols.
+- Supports full parsing and partial parsing.
+- Supports Java servers and Android Clients, and has big data applications.
+- Supports Kotlin [https://alibaba.github.io/fastjson2/kotlin_en](https://alibaba.github.io/fastjson2/kotlin_en)
+- Supports Android 8+ 
+- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 
 ![fastjson logo](https://user-images.githubusercontent.com/1063891/233821110-0c912009-4de3-4664-a27e-25274f2fa9c1.jpg)
 
-# 1. 使用准备
+Related Documents:
 
-## 1.1 添加依赖
+- `JSONB` format documentation:  
+  [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
+- `FASTJSON v2`'s performance has been significantly improved. For the benchmark, see here:  
+  [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
 
-在`fastjson v2`中，`groupId`和`1.x`不一样，是`com.alibaba.fastjson2`：
+# 1. Prepare
+
+## 1.1 Download
+
+`FASTJSONv2`'s groupId is different from versions `1.x`, it is instead `com.alibaba.fastjson2`:
 
 `Maven`:
 
@@ -53,13 +58,13 @@ dependencies {
 }
 ```
 
-可以在 [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2) 查看最新可用的版本。
+Find the latest version of `FASTJSONv2` at [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2).
 
-## 1.2 其他模块
+## 1.2 Other modules
 
-### `Fastjson v1`兼容模块
+### Compatible dependence of fastjson-v1
 
-如果原来使用`fastjson 1.2.x`版本，可以使用兼容包，兼容包不能保证100%兼容，请仔细测试验证，发现问题请及时反馈。
+If you are using `fastjson 1.2.x`, you can use the compatibility package. The compatibility package cannot guarantee 100% compatibility. Please test  it yourself and report any problems.
 
 `Maven`:
 
@@ -79,11 +84,11 @@ dependencies {
 }
 ```
 
-### `Fastjson Kotlin`集成模块
+### `Kotlin` integration module `fastjson-kotlin`
 
-如果项目使用`Kotlin`，可以使用`fastjson-kotlin`模块，使用方式上采用`kotlin`的特性。
+If your project uses `kotlin`, you can use the `Fastjson-Kotlin` module, and use the characteristics of `kotlin`.
 
-* `Maven`:
+`Maven`:
 
 ```xml
 <dependency>
@@ -93,8 +98,8 @@ dependencies {
 </dependency>
 ```
 
-酌情添加标准库(kotlin-stdlib)、反射库(kotlin-reflect)，
-其中若使用数据类(data class)、通过构造函数传入参数则添加反射库。
+Add standard library(kotlin-stdlib) and reflection library(kotlin-reflect) as appropriate.
+If the data class is used or the parameters are passed in through constructor, then add reflection library.
 
 ```xml
 <dependency>
@@ -125,9 +130,9 @@ dependencies {
 }
 ```
 
-### `Fastjson Extension`扩展模块
+### `Extension` integration module `fastjson-extension`
 
-如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](docs/spring_support_cn.md)。
+If your project uses a framework such as `SpringFramework`, you can use the `fastjson-extension` module, please refer to the usage [SpringFramework Support](docs/spring_support_en.md).
 
 `Maven`:
 
@@ -162,11 +167,11 @@ dependencies {
 }
 ```
 
-# 2. 简单使用
+# 2. Usage
 
-在`fastjson v2`中，`package`和`1.x`不一样，是`com.alibaba.fastjson2`。如果你之前用的是`fastjson1`，大多数情况直接更包名就即可。
+The package name of `fastjson v2` is different from `fastjson v1`. It is `com.alibaba.fastjson2`. If you used `fastjson v1` before, simply change the package name.
 
-### 2.1 将`JSON`解析为`JSONObject`
+### 2.1 Parse `JSON` into `JSONObject`
 
 `Java`:
 
@@ -190,7 +195,7 @@ val bytes = ... // ByteArray
 val data = bytes.parseObject() // JSONObject
 ```
 
-### 2.2 将`JSON`解析为`JSONArray`
+### 2.2 Parse `JSON` into `JSONArray`
 
 `Java`:
 
@@ -208,7 +213,7 @@ val text = ... // String
 val data = text.parseArray() // JSONArray
 ```
 
-### 2.3 将`JSON`解析为`Java`对象
+### 2.3 Parse `JSON` into a Java Object
 
 `Java`:
 
@@ -227,7 +232,7 @@ val data = text.to<User>() // User
 val data = text.parseObject<User>() // User
 ```
 
-### 2.4 将`Java`对象序列化为`JSON`
+### 2.4 Serialization Java Object to `JSON`
 
 `Java`:
 
@@ -247,9 +252,9 @@ val text = data.toJSONString() // String
 val bytes = data.toJSONByteArray() // ByteArray
 ```
 
-### 2.5 使用`JSONObject`、`JSONArray`
+### 2.5 Use `JSONObject`, `JSONArray`
 
-#### 2.5.1 获取简单属性
+#### 2.5.1 Get simple property
 
 ```java
 String text = "{\"id\": 2,\"name\": \"fastjson2\"}";
@@ -267,7 +272,7 @@ int id = array.getIntValue(0);
 String name = array.getString(1);
 ```
 
-#### 2.5.2 读取`JavaBean`
+#### 2.5.2 Get JavaBean
 
 `Java`:
 
@@ -289,7 +294,7 @@ val user = array.to<User>(0)
 val user = obj.to<User>("key")
 ```
 
-#### 2.5.3 转为`JavaBean`
+#### 2.5.3 Convert to JavaBean
 
 `Java`:
 
@@ -311,7 +316,7 @@ val user = obj.to<User>() // User
 val users = array.toList<User>() // List<User>
 ```
 
-### 2.6 将`JavaBean`对象序列化为`JSON`
+### 2.6 Serialize `JavaBean` to `JSON`
 
 `Java`:
 
@@ -345,8 +350,7 @@ val text = user.toJSONString() // String
 val bytes = user.toJSONByteArray() // ByteArray
 ```
 
-序列化结果:
-
+Serialization result:
 ```json
 {
     "id"   : 2,
@@ -354,11 +358,11 @@ val bytes = user.toJSONByteArray() // ByteArray
 }
 ```
 
-# 3. 进阶使用
+# 3. Advanced usage
 
-### 3.1 使用`JSONB`
+### 3.1 Use `JSONB`
 
-#### 3.1.1 将`JavaBean`对象序列化`JSONB`
+#### 3.1.1 Serialize `JavaBean` to `JSONB`
 
 ```java
 User user = ...;
@@ -366,48 +370,43 @@ byte[] bytes = JSONB.toBytes(user);
 byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
 ```
 
-#### 3.1.2 将`JSONB`数据解析为`JavaBean`
+#### 3.1.2 Parse `JSONB` to `JavaBean`
 
 ```java
 byte[] bytes = ...
 User user = JSONB.parseObject(bytes, User.class);
-User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArrayToBean);
+User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportBeanArrayMapping);
 ```
 
-### 3.2 使用`JSONPath`
+### 3.2 Use `JSONPath`
 
-#### 3.2.1 使用`JSONPath`读取部分数据
+#### 3.2.1 Use `JSONPath` to read partial data
 
 ```java
 String text = ...;
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
+JSONPath path = JSONPath.of("$.id"); // Cached for reuse
 
 JSONReader parser = JSONReader.of(text);
 Object result = path.extract(parser);
 ```
 
-#### 3.2.2 使用`JSONPath`读取部分`byte[]`的数据
+#### 3.2.2 Read part of `byte[]` data using `JSONPath`
 
 ```java
 byte[] bytes = ...;
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
+JSONPath path = JSONPath.of("$.id"); // Cached for reuse
 
 JSONReader parser = JSONReader.of(bytes);
 Object result = path.extract(parser);
 ```
 
-#### 3.2.3 使用`JSONPath`读取部分`byte[]`的数据
+#### 3.2.3 Read part of `byte[]` data using `JSONPath`
 
 ```java
 byte[] bytes = ...;
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
+JSONPath path = JSONPath.of("$.id"); // Cached for reuse
 
-JSONReader parser = JSONReader.ofJSONB(bytes); // 注意这里使用ofJSONB方法
+JSONReader parser = JSONReader.ofJSONB(bytes); // Use ofJSONB method
 Object result = path.extract(parser);
 ```
-
-## Star History
-
-
-[![Star History Chart](https://api.star-history.com/svg?repos=alibaba/fastjson2&type=Date)](https://star-history.com/#alibaba/fastjson2)
 
