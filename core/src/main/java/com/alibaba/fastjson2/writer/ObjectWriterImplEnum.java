@@ -96,6 +96,8 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
             return;
         }
 
+        long features2 = jsonWriter.getFeatures(features | this.features);
+
         if (valueField != null) {
             Object fieldValue;
             try {
@@ -104,7 +106,7 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
                 } else {
                     fieldValue = ((Method) valueField).invoke(object);
                 }
-                if (fieldValue != object) {
+                if (fieldValue != object && (features2 & JSONWriter.Feature.WriteEnumsUsingName.mask) == 0) {
                     jsonWriter.writeAny(fieldValue);
                     return;
                 }
@@ -112,8 +114,6 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
                 throw new JSONException("getEnumValue error", error);
             }
         }
-
-        long features2 = jsonWriter.getFeatures(features | this.features);
 
         if ((features2 & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0) {
             jsonWriter.writeString(e.toString());
