@@ -398,7 +398,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -430,7 +430,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0D;
@@ -466,7 +466,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -498,7 +498,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0F;
@@ -534,7 +534,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -587,7 +587,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return defaultValue;
@@ -627,7 +627,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -680,7 +680,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return defaultValue;
@@ -720,7 +720,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -765,7 +765,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -895,7 +895,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -950,7 +950,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
             return toBigDecimal(str);
         }
 

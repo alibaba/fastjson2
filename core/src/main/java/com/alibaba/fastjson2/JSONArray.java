@@ -273,7 +273,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -306,7 +306,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0D;
@@ -343,7 +343,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -376,7 +376,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0F;
@@ -412,7 +412,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -449,7 +449,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
@@ -485,7 +485,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -522,7 +522,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
@@ -559,7 +559,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -592,7 +592,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
@@ -625,7 +625,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -658,7 +658,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
@@ -767,7 +767,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -823,7 +823,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            return toBigDecimal((String) value);
+            return toBigDecimal(((String) value).trim());
         }
 
         if (value instanceof Boolean) {
