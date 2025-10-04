@@ -945,9 +945,6 @@ public class JSONObject
 
         if (value instanceof Number) {
             long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
             return new Date(millis);
         }
 
