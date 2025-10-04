@@ -159,7 +159,6 @@ public class Fastjson2EntityConverter
             this.context = context;
         }
 
-
         /**
          * Set features
          */

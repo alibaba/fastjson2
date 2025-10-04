@@ -34,9 +34,6 @@ public class Fastjson2StringSerializer
     private static final String label = "/json";
     private static final Fastjson2StringSerializer _default = new Fastjson2StringSerializer();
 
-    /**
-     * 默认实例
-     */
     public static Fastjson2StringSerializer getDefault() {
         return _default;
     }
@@ -48,9 +45,7 @@ public class Fastjson2StringSerializer
         loadJsonProps(jsonProps);
     }
 
-    public Fastjson2StringSerializer() {
-
-    }
+    public Fastjson2StringSerializer() { }
 
     /**
      * 获取序列化配置
@@ -214,7 +209,6 @@ public class Fastjson2StringSerializer
         });
     }
 
-
     protected void loadJsonProps(JsonProps jsonProps) {
         if (jsonProps != null) {
             if (jsonProps.dateAsTicks) {
@@ -227,7 +221,7 @@ public class Fastjson2StringSerializer
                 getSerializeConfig().getContext().setDateFormat(jsonProps.dateAsFormat);
             }
 
-            //JsonPropsUtil.dateAsFormat(this, jsonProps);
+            //JsonPropsUtil2.dateAsFormat(this, jsonProps);
             JsonPropsUtil2.dateAsTicks(this, jsonProps);
             JsonPropsUtil2.boolAsInt(this, jsonProps);
 
@@ -285,25 +279,15 @@ public class Fastjson2StringSerializer
             }
         }
 
-        /**
-         * 获取配置
-         */
         public C getContext() {
             return context;
         }
 
-        /**
-         * 重置配置
-         */
         public void setContext(C context) {
             Assert.notNull(context, "context can not be null");
             this.context = context;
         }
 
-
-        /**
-         * 设置特性
-         */
         public void setFeatures(F... features) {
             if (forSerialize) {
                 ((JSONWriter.Context) context).setFeatures(JSONFactory.getDefaultWriterFeatures());
@@ -314,9 +298,6 @@ public class Fastjson2StringSerializer
             addFeatures(features);
         }
 
-        /**
-         * 添加特性
-         */
         public void addFeatures(F... features) {
             if (forSerialize) {
                 //序列化
@@ -332,9 +313,6 @@ public class Fastjson2StringSerializer
             }
         }
 
-        /**
-         * 移除特性
-         */
         public void removeFeatures(F... features) {
             if (forSerialize) {
                 //序列化

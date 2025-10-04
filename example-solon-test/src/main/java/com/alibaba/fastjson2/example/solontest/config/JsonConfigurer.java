@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.example.solontest.config;
 
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.solon.Fastjson2StringSerializer;
 import org.noear.solon.annotation.Bean;
 import org.noear.solon.annotation.Configuration;
