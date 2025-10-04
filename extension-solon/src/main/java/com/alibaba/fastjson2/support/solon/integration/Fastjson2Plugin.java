@@ -1,11 +1,10 @@
 package com.alibaba.fastjson2.support.solon.integration;
 
-import com.alibaba.fastjson2.support.solon.Fastjson2ActionExecutor;
-import com.alibaba.fastjson2.support.solon.Fastjson2RenderFactory;
-import com.alibaba.fastjson2.support.solon.Fastjson2RenderTypedFactory;
-import org.noear.solon.Solon;
+import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
+import com.alibaba.fastjson2.support.solon.Fastjson2StringSerializer;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
+import org.noear.solon.serialization.SerializerNames;
 import org.noear.solon.serialization.prop.JsonProps;
 
 /**
@@ -19,19 +18,14 @@ public class Fastjson2Plugin
     public void start(AppContext context) {
         JsonProps jsonProps = JsonProps.create(context);
 
-        //::renderFactory
-        Fastjson2RenderFactory renderFactory = new Fastjson2RenderFactory(jsonProps); //绑定属性
-        context.wrapAndPut(Fastjson2RenderFactory.class, renderFactory); //推入容器，用于扩展
-        Solon.app().renderManager().register(renderFactory);
+        //::serializer
+        Fastjson2StringSerializer serializer = new Fastjson2StringSerializer(jsonProps);
+        context.wrapAndPut(Fastjson2StringSerializer.class, serializer); //用于扩展
+        context.app().serializers().register(SerializerNames.AT_JSON, serializer);
 
-        //::renderTypedFactory
-        Fastjson2RenderTypedFactory renderTypedFactory = new Fastjson2RenderTypedFactory();
-        context.wrapAndPut(Fastjson2RenderTypedFactory.class, renderTypedFactory); //推入容器，用于扩展
-        Solon.app().renderManager().register(renderTypedFactory);
-
-        //::actionExecutor
-        Fastjson2ActionExecutor actionExecutor = new Fastjson2ActionExecutor(); //支持 json 内容类型执行
-        context.wrapAndPut(Fastjson2ActionExecutor.class, actionExecutor); //推入容器，用于扩展
-        Solon.app().chainManager().addExecuteHandler(actionExecutor);
+        //::entityConverter
+        Fastjson2EntityConverter entityConverter = new Fastjson2EntityConverter(serializer);
+        context.wrapAndPut(Fastjson2EntityConverter.class, entityConverter); //用于扩展
+        context.app().chains().addEntityConverter(entityConverter);
     }
 }
