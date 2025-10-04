@@ -389,7 +389,7 @@ public class JSONObject
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to double");
     }
 
     /**
@@ -401,27 +401,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to double value
      */
     public double getDoubleValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0D;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0D;
-            }
-
-            return Double.parseDouble(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to double value");
+        Double value = getDouble(key);
+        return value == null ? 0D : value;
     }
 
     /**
@@ -457,7 +438,7 @@ public class JSONObject
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to float");
     }
 
     /**
@@ -469,27 +450,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to float value
      */
     public float getFloatValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0F;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0F;
-            }
-
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to float value");
+        Float value = getFloat(key);
+        return value == null ? 0F : value;
     }
 
     /**
@@ -985,11 +947,11 @@ public class JSONObject
             return null;
         }
 
-        if (value instanceof BigInteger) {
-            return (BigInteger) value;
-        }
-
         if (value instanceof Number) {
+            if (value instanceof BigInteger) {
+                return (BigInteger) value;
+            }
+
             if (value instanceof BigDecimal) {
                 return ((BigDecimal) value).toBigInteger();
             }
@@ -1054,8 +1016,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
-            return toBigDecimal(str);
+            return toBigDecimal(((String) value).trim());
         }
 
         if (value instanceof Boolean) {
