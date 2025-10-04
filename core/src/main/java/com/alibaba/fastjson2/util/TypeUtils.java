@@ -1444,6 +1444,20 @@ public class TypeUtils {
             return (T) toInstant(obj);
         }
 
+        if (targetClass == LocalDate.class) {
+            if (obj instanceof Date) {
+                Date date = (Date) obj;
+                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDate();
+            }
+        }
+
+        if (targetClass == LocalDateTime.class) {
+            if (obj instanceof Date) {
+                Date date = (Date) obj;
+                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
+            }
+        }
+
         if (targetClass == String.class) {
             if (obj instanceof Character) {
                 return (T) obj.toString();
@@ -1949,8 +1963,8 @@ public class TypeUtils {
     /**
      * decimal is integer, check has non-zero small
      *
-     * @param decimal
-     * @return
+     * @param decimal the BigDecimal value to check
+     * @return true if the decimal is an integer, false otherwise
      */
     public static boolean isInteger(BigDecimal decimal) {
         int scale = decimal.scale();
@@ -3067,9 +3081,24 @@ public class TypeUtils {
     }
 
     public static boolean isProxy(Class<?> clazz) {
+        // Check if the class name contains Spring Cloud RefreshScope indicators
+        String className = clazz.getName();
+        int p = className.indexOf('$');
+        if (p != -1
+                && (className.contains("$EnhancerBySpringCGLIB$")
+                || className.contains("$EnhancerByCGLIB$")
+                || className.contains("$FastClassBySpringCGLIB$")
+                || className.contains("$FastClassByCGLIB$")
+                || className.contains("$EnhancerBySpringCGLIB$")
+                || className.contains("$EnhancerByCGLIB$"))) {
+            return true;
+        }
+
+        // Check interfaces for RefreshScope marker or other proxy indicators
         for (Class<?> item : clazz.getInterfaces()) {
             String interfaceName = item.getName();
             switch (interfaceName) {
+                case "org.springframework.cloud.context.config.annotation.RefreshScope":
                 case "org.springframework.cglib.proxy.Factory":
                 case "javassist.util.proxy.ProxyObject":
                 case "org.apache.ibatis.javassist.util.proxy.ProxyObject":
@@ -3079,9 +3108,22 @@ public class TypeUtils {
                 case "net.sf.cglib.proxy.Factory":
                     return true;
                 default:
+                    // Check if interface name contains Spring-related patterns
+                    if (interfaceName.startsWith("org.springframework.cloud.context.config.annotation.") &&
+                            interfaceName.endsWith("RefreshScope")) {
+                        return true;
+                    }
                     break;
             }
         }
+
+        // Check if class name follows Spring proxy patterns
+        if (className.contains("$SpringCGLIB$")
+                || className.contains("$SpringCGLIB$")
+                || className.contains("$EnhancerBySpringCGLIB$")) {
+            return true;
+        }
+
         return false;
     }
 

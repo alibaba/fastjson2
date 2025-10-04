@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.59-SNAPSHOT</version>
+    <version>2.0.60-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -32,7 +32,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
-        <jackson.version>2.18.3</jackson.version>
+        <jackson.version>2.20.0</jackson.version>
         <jetty.version>11.0.15</jetty.version>
         <jersey.version>2.44</jersey.version>
         <solon.version>3.6.0</solon.version>
@@ -53,7 +53,7 @@
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
         <kotlin.compiler.apiVersion>1.9</kotlin.compiler.apiVersion>
 
-        <junit5.version>5.12.2</junit5.version>
+        <junit5.version>5.13.4</junit5.version>
         <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.37</jmh.version>
 
@@ -146,7 +146,7 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>5.8.36</version>
+                <version>5.8.39</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
@@ -183,12 +183,12 @@
             <dependency>
                 <groupId>com.github.erosb</groupId>
                 <artifactId>everit-json-schema</artifactId>
-                <version>1.14.5</version>
+                <version>1.14.6</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.13.1</version>
+                <version>2.13.2</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -225,7 +225,7 @@
             <dependency>
                 <groupId>com.opencsv</groupId>
                 <artifactId>opencsv</artifactId>
-                <version>5.10</version>
+                <version>5.12.0</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle.ojdbc</groupId>
@@ -240,7 +240,7 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.19.0</version>
+                <version>2.20.0</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
@@ -338,7 +338,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
-                <version>4.4</version>
+                <version>4.5.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -408,7 +408,7 @@
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
-                <version>20250107</version>
+                <version>20250517</version>
             </dependency>
 
             <dependency>
@@ -429,7 +429,7 @@
             <dependency>
                 <groupId>org.msgpack</groupId>
                 <artifactId>msgpack-core</artifactId>
-                <version>0.9.9</version>
+                <version>0.9.10</version>
             </dependency>
 
             <dependency>
@@ -446,7 +446,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.38</version>
+                <version>1.18.42</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -672,7 +672,7 @@
             -->
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -791,7 +791,7 @@
                     <!-- https://github.com/moditect/moditect -->
                     <groupId>org.moditect</groupId>
                     <artifactId>moditect-maven-plugin</artifactId>
-                    <version>1.2.2.Final</version>
+                    <version>1.3.0.Final</version>
                     <executions>
                         <execution>
                             <id>add-module-infos</id>
@@ -879,9 +879,6 @@
                                 ${javadoc.default.exclude.packages}:jdk.incubator.vector
                             </excludePackageNames>
                             <doclint>all,-missing</doclint>
-                            <links>
-                                <link>https://docs.oracle.com/javase/8/docs/api</link>
-                            </links>
                             <additionalJOptions>
                                 <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
                             </additionalJOptions>
@@ -934,7 +931,7 @@
                         <groupId>io.github.git-commit-id</groupId>
                         <artifactId>git-commit-id-maven-plugin</artifactId>
                         <!-- DO NOT upgrade to v5+, since don't support java 8 -->
-                        <version>9.0.0</version>
+                        <version>9.0.2</version>
                         <executions>
                             <execution>
                                 <id>get-the-git-infos</id>
@@ -1013,16 +1010,30 @@
             </build>
         </profile>
         <profile>
-            <id>enable-incubators-for-jdk17+</id>
+            <id>enable-incubators-for-jdk25+</id>
             <activation>
-                <jdk>[17,)</jdk>
+                <jdk>[25,)</jdk>
             </activation>
             <modules>
-                <module>example-graalvm-native</module>
-                <module>extension-spring6</module>
-                <module>example-spring6-test</module>
-                <module>test-jdk17</module>
+                <module>test-jdk25</module>
             </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                    <version>1.18.42</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>enable-for-jdk21+</id>

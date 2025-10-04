@@ -27,7 +27,9 @@ import java.util.Map;
  *
  * @author Xi.Liu
  * @see AbstractJackson2Decoder
+ * @deprecated in favor of {@link com.alibaba.fastjson2.support.spring.codec.Fastjson2Encoder} and {@link com.alibaba.fastjson2.support.spring.codec.Fastjson2Decoder}
  */
+@Deprecated
 public class Fastjson2Encoder
         extends AbstractJackson2Encoder {
     private final FastJsonConfig config;

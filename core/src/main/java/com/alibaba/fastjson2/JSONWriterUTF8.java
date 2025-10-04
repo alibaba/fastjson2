@@ -844,7 +844,7 @@ final class JSONWriterUTF8
             return;
         }
 
-        for (; i < len; ++i) { // ascii none special fast write
+        for (; i < end; ++i) { // ascii none special fast write
             char ch = chars[i];
             if (ch <= 0x007F) {
                 switch (ch) {
@@ -1310,9 +1310,11 @@ final class JSONWriterUTF8
     }
 
     @Override
-    public final void writeName8Raw(long name) {
+    public void writeName8Raw(long name) {
         int off = this.off;
-        int minCapacity = off + 13 + pretty * level;
+        int minCapacity = off
+                + 13 // 8 + quote 2 + comma 1 + colon 1 + pretty 1
+                + pretty * level;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);

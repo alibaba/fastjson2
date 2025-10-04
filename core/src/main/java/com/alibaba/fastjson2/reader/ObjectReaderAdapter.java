@@ -695,7 +695,9 @@ public class ObjectReaderAdapter<T>
                 FieldReader fieldReader = fieldReaders[i];
                 Object fieldValue = map.get(fieldReader.fieldName);
                 if (fieldValue == null) {
-                    continue;
+                    if ((features2 & JSONReader.Feature.IgnoreSetNullValue.mask) != 0 || !map.containsKey(fieldReader.fieldName)) {
+                        continue;
+                    }
                 }
 
                 if (fieldReader.field != null && Modifier.isFinal(fieldReader.field.getModifiers())) {
@@ -710,7 +712,7 @@ public class ObjectReaderAdapter<T>
                 }
 
                 try {
-                    if (fieldValue.getClass() == fieldReader.fieldType) {
+                    if (fieldValue == null || fieldValue.getClass() == fieldReader.fieldType) {
                         fieldReader.accept(object, fieldValue);
                     } else {
                         if ((fieldReader instanceof FieldReaderList)
@@ -754,6 +756,12 @@ public class ObjectReaderAdapter<T>
                         && fieldValue.getClass() == fieldReader.fieldType
                 ) {
                     fieldReader.accept(object, fieldValue);
+                } else if (fieldValue != null
+                        && "com.alibaba.fastjson.JSONObject".equals(fieldValue.getClass().getName())) {
+                    Object fieldValueJavaBean = provider
+                            .getObjectReader(fieldReader.fieldType)
+                            .createInstance((Map) fieldValue, features);
+                    fieldReader.accept(object, fieldValueJavaBean);
                 } else {
                     fieldReader.acceptAny(object, fieldValue, features);
                 }

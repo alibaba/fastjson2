@@ -44,19 +44,7 @@ class FieldWriterDoubleField<T>
         Double value = (Double) getFieldValue(object);
 
         if (value == null) {
-            long features = jsonWriter.getFeatures(this.features);
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) != 0
-                    && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0
-            ) {
-                writeFieldName(jsonWriter);
-                if ((features & JSONWriter.Feature.NullAsDefaultValue.mask) != 0) {
-                    jsonWriter.writeDouble(0);
-                } else {
-                    jsonWriter.writeNumberNull();
-                }
-                return true;
-            }
-            return false;
+            return writeFloatNull(jsonWriter);
         }
 
         writeFieldName(jsonWriter);

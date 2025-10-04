@@ -33,11 +33,82 @@ import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
 import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
 
+/**
+ * This is the main entry point for using fastjson2 API.
+ * It provides a set of static methods for JSON processing,
+ * including parsing and serialization of various data types.
+ *
+ * <p>Example usage:
+ * <pre>
+ * // 1. Parse JSON string to Object
+ * String jsonString = "{\"id\":1,\"name\":\"John\",\"age\":30}";
+ * User user = JSON.parseObject(jsonString, User.class);
+ *
+ * // 2. Serialize Object to JSON string
+ * User user = new User(1L, "John", 30, new Date(), Arrays.asList("reading", "swimming"));
+ * String jsonString = JSON.toJSONString(user);
+ *
+ * // 3. Parse JSON string to JSONObject
+ * JSONObject jsonObject = JSON.parseObject(jsonString);
+ *
+ * // 4. Parse JSON string to JSONArray
+ * String jsonArrayString = "[{\"id\":1,\"name\":\"John\"},{\"id\":2,\"name\":\"Jane\"}]";
+ * JSONArray jsonArray = JSON.parseArray(jsonArrayString);
+ *
+ * // 5. Parse JSON string to List
+ * List&lt;User&gt; userList = JSON.parseArray(jsonArrayString, User.class);
+ *
+ * // 6. Parse JSON with features
+ * User user = JSON.parseObject(jsonString, User.class, JSONReader.Feature.FieldBased);
+ *
+ * // 7. Serialize with features
+ * String jsonString = JSON.toJSONString(user, JSONWriter.Feature.PrettyFormat);
+ *
+ * // 8. Parse from byte array
+ * byte[] bytes = jsonString.getBytes(StandardCharsets.UTF_8);
+ * User user = JSON.parseObject(bytes, User.class);
+ *
+ * // 9. Serialize to byte array
+ * byte[] bytes = JSON.toJSONBytes(user);
+ *
+ * // 10. Validate JSON string
+ * boolean valid = JSON.isValid(jsonString);
+ * </pre>
+ *
+ * <p>For more advanced usage:
+ * <pre>
+ * // 1. Working with generic types
+ * String jsonString = "{\"users\":[{\"id\":1,\"name\":\"John\"}]}";
+ * TypeReference&lt;Map&lt;String, List&lt;User&gt;&gt;&gt; typeReference = new TypeReference&lt;Map&lt;String, List&lt;User&gt;&gt;&gt;() {};
+ * Map&lt;String, List&lt;User&gt;&gt; map = JSON.parseObject(jsonString, typeReference);
+ *
+ * // 2. Working with filters
+ * SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+ * filter.getExcludes().add("id");
+ * String jsonString = JSON.toJSONString(user, filter);
+ *
+ * // 3. Working with date format
+ * String jsonString = JSON.toJSONString(user, "yyyy-MM-dd HH:mm:ss");
+ *
+ * // 4. Working with custom context
+ * JSONReader.Context readerContext = JSONFactory.createReadContext();
+ * readerContext.setDateFormat("yyyy-MM-dd");
+ * User user = JSON.parseObject(jsonString, User.class, readerContext);
+ *
+ * // 5. Streaming parsing
+ * try (InputStream inputStream = new FileInputStream("data.json")) {
+ *     JSON.parseObject(inputStream, User.class, System.out::println);
+ * }
+ * </pre>
+ *
+ * @since 2.0.0
+ */
+
 public interface JSON {
     /**
      * fastjson2 version name
      */
-    String VERSION = "2.0.59";
+    String VERSION = "2.0.60";
 
     /**
      * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
@@ -1628,7 +1699,6 @@ public interface JSON {
      * @return {@link T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
-    @SuppressWarnings("unchecked")
     static <T> T parseObject(
             byte[] bytes,
             Type type,
@@ -1647,6 +1717,26 @@ public interface JSON {
                 features
         );
         context.setDateFormat(format);
+
+        return parseObject(bytes, type, context);
+    }
+
+    /**
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, Type type, JSONReader.Context context) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
 
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
@@ -3586,6 +3676,7 @@ public interface JSON {
      * @param features the specified features is applied to serialization
      * @return the length of byte stream
      * @throws JSONException If an I/O error or serialization error occurs
+     * @since 2.0.2
      */
     static int writeTo(OutputStream out, Object object, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3616,6 +3707,7 @@ public interface JSON {
      * @param features the specified features is applied to serialization
      * @return the length of byte stream
      * @throws JSONException If an I/O error or serialization error occurs
+     * @since 2.0.2
      */
     static int writeTo(OutputStream out, Object object, Filter[] filters, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3651,6 +3743,7 @@ public interface JSON {
      * @param features the specified features is applied to serialization
      * @return the length of byte stream
      * @throws JSONException If an I/O error or serialization error occurs
+     * @since 2.0.2
      */
     static int writeTo(
             OutputStream out,
@@ -3690,6 +3783,7 @@ public interface JSON {
      *
      * @param text the specified string will be validated
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValid(String text) {
         if (text == null || text.isEmpty()) {
@@ -3710,6 +3804,7 @@ public interface JSON {
      * @param text the specified string will be validated
      * @param features the specified features is applied to parsing
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValid(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -3729,6 +3824,7 @@ public interface JSON {
      *
      * @param chars the specified array will be validated
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValid(char[] chars) {
         if (chars == null || chars.length == 0) {
@@ -3748,6 +3844,7 @@ public interface JSON {
      *
      * @param text the specified string will be validated
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValidObject(String text) {
         if (text == null || text.isEmpty()) {
@@ -3770,6 +3867,7 @@ public interface JSON {
      *
      * @param bytes the specified array will be validated
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValidObject(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -3792,6 +3890,7 @@ public interface JSON {
      *
      * @param text the {@link String} to validate
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValidArray(String text) {
         if (text == null || text.isEmpty()) {
@@ -3814,6 +3913,7 @@ public interface JSON {
      *
      * @param bytes the specified array will be validated
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValid(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -3834,6 +3934,7 @@ public interface JSON {
      * @param bytes the specified array will be validated
      * @param charset the specified charset of the bytes
      * @return {@code true} or {@code false}
+     * @since 2.0.2
      */
     static boolean isValid(byte[] bytes, Charset charset) {
         if (bytes == null || bytes.length == 0) {
@@ -3940,8 +4041,10 @@ public interface JSON {
     /**
      * Converts the specified object to an object of the specified goal type
      *
+     * @param <T> the target type
      * @param clazz the specified goal class
      * @param object the specified object to be converted
+     * @return the converted object of type T, or null if the input object is null
      * @since 2.0.4
      */
     static <T> T to(Class<T> clazz, Object object) {
@@ -3959,8 +4062,10 @@ public interface JSON {
     /**
      * Converts the specified object to an object of the specified goal type
      *
-     * @param clazz the specified goal class
+     * @param <T> the target type
      * @param object the specified object to be converted
+     * @param clazz the specified goal class
+     * @return the converted object of type T, or null if the input object is null
      * @deprecated since 2.0.4, please use {@link #to(Class, Object)}
      */
     static <T> T toJavaObject(Object object, Class<T> clazz) {
@@ -3968,6 +4073,10 @@ public interface JSON {
     }
 
     /**
+     * Mixes in the properties of the mixinSource class into the target class
+     *
+     * @param target the target class to mix into
+     * @param mixinSource the source class to mix from
      * @since 2.0.2
      */
     static void mixIn(Class<?> target, Class<?> mixinSource) {
@@ -3978,6 +4087,9 @@ public interface JSON {
     /**
      * Register an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
      *
+     * @param type the type to register an ObjectReader for
+     * @param objectReader the ObjectReader to register
+     * @return the previously registered ObjectReader, or null if there was none
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
      * @since 2.0.2
@@ -3989,6 +4101,10 @@ public interface JSON {
     /**
      * Register an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
      *
+     * @param type the type to register an ObjectReader for
+     * @param objectReader the ObjectReader to register
+     * @param fieldBased whether to use field-based reading
+     * @return the previously registered ObjectReader, or null if there was none
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
      * @since 2.0.38
@@ -4000,6 +4116,9 @@ public interface JSON {
     /**
      * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
      *
+     * @param type the type to register an ObjectReader for
+     * @param objectReader the ObjectReader to register
+     * @return the previously registered ObjectReader, or null if there was none
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#registerIfAbsent(Type, ObjectReader)
      * @since 2.0.6
@@ -4011,6 +4130,10 @@ public interface JSON {
     /**
      * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
      *
+     * @param type the type to register an ObjectReader for
+     * @param objectReader the ObjectReader to register
+     * @param fieldBased whether to use field-based reading
+     * @return the previously registered ObjectReader, or null if there was none
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#registerIfAbsent(Type, ObjectReader)
      * @since 2.0.38
@@ -4022,18 +4145,34 @@ public interface JSON {
     /**
      * Register an {@link ObjectReaderModule} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
      *
+     * @param objectReaderModule the ObjectReaderModule to register
+     * @return true if the module was registered successfully, false otherwise
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(ObjectReaderModule)
+     * @since 2.0.2
      */
     static boolean register(ObjectReaderModule objectReaderModule) {
         ObjectReaderProvider provider = getDefaultObjectReaderProvider();
         return provider.register(objectReaderModule);
     }
 
+    /**
+     * Register a see-also sub type
+     *
+     * @param subTypeClass the sub type class to register
+     * @since 2.0.2
+     */
     static void registerSeeAlsoSubType(Class subTypeClass) {
         registerSeeAlsoSubType(subTypeClass, null);
     }
 
+    /**
+     * Register a see-also sub type with a specific class name
+     *
+     * @param subTypeClass the sub type class to register
+     * @param subTypeClassName the class name for the sub type
+     * @since 2.0.2
+     */
     static void registerSeeAlsoSubType(Class subTypeClass, String subTypeClassName) {
         ObjectReaderProvider provider = getDefaultObjectReaderProvider();
         provider.registerSeeAlsoSubType(subTypeClass, subTypeClassName);
@@ -4042,8 +4181,11 @@ public interface JSON {
     /**
      * Register an {@link ObjectWriterModule} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
+     * @param objectWriterModule the ObjectWriterModule to register
+     * @return true if the module was registered successfully, false otherwise
      * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(ObjectWriterModule)
+     * @since 2.0.2
      */
     static boolean register(ObjectWriterModule objectWriterModule) {
         return JSONFactory.getDefaultObjectWriterProvider().register(objectWriterModule);
@@ -4052,6 +4194,9 @@ public interface JSON {
     /**
      * Register an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
+     * @param type the type to register an ObjectWriter for
+     * @param objectWriter the ObjectWriter to register
+     * @return the previously registered ObjectWriter, or null if there was none
      * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
      * @since 2.0.2
@@ -4063,6 +4208,10 @@ public interface JSON {
     /**
      * Register an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
+     * @param type the type to register an ObjectWriter for
+     * @param objectWriter the ObjectWriter to register
+     * @param fieldBased whether to use field-based writing
+     * @return the previously registered ObjectWriter, or null if there was none
      * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
      * @since 2.0.38
@@ -4074,6 +4223,9 @@ public interface JSON {
     /**
      * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
+     * @param type the type to register an ObjectWriter for
+     * @param objectWriter the ObjectWriter to register
+     * @return the previously registered ObjectWriter, or null if there was none
      * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#registerIfAbsent(Type, ObjectWriter)
      * @since 2.0.6
@@ -4085,6 +4237,10 @@ public interface JSON {
     /**
      * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
+     * @param type the type to register an ObjectWriter for
+     * @param objectWriter the ObjectWriter to register
+     * @param fieldBased whether to use field-based writing
+     * @return the previously registered ObjectWriter, or null if there was none
      * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#registerIfAbsent(Type, ObjectWriter)
      * @since 2.0.6
@@ -4096,8 +4252,8 @@ public interface JSON {
     /**
      * Register ObjectWriterFilter
      *
-     * @param type
-     * @param filter
+     * @param type the class type to register filter for
+     * @param filter the filter to apply to the specified type
      * @since 2.0.19
      */
     static void register(Class type, Filter filter) {
@@ -4167,9 +4323,9 @@ public interface JSON {
     }
 
     /**
-     * config default reader dateFormat
+     * Config default reader dateFormat
      *
-     * @param dateFormat
+     * @param dateFormat the date format to use for reading
      * @since 2.0.30
      */
     static void configReaderDateFormat(String dateFormat) {
@@ -4177,18 +4333,19 @@ public interface JSON {
     }
 
     /**
-     * config default reader dateFormat
+     * Config default writer dateFormat
      *
-     * @param dateFormat
+     * @param dateFormat the date format to use for writing
+     * @since 2.0.30
      */
     static void configWriterDateFormat(String dateFormat) {
         defaultWriterFormat = dateFormat;
     }
 
     /**
-     * config default reader zoneId
+     * Config default reader zoneId
      *
-     * @param zoneId
+     * @param zoneId the zone ID to use for reading
      * @since 2.0.36
      */
     static void configReaderZoneId(ZoneId zoneId) {
@@ -4196,9 +4353,9 @@ public interface JSON {
     }
 
     /**
-     * config default writer zoneId
+     * Config default writer zoneId
      *
-     * @param zoneId
+     * @param zoneId the zone ID to use for writing
      * @since 2.0.36
      */
     static void configWriterZoneId(ZoneId zoneId) {
@@ -4245,8 +4402,10 @@ public interface JSON {
     /**
      * Builds a new {@link T} using the properties of the specified object
      *
+     * @param <T> the type of the object to copy
      * @param object the specified object will be copied
      * @param features the specified features is applied to serialization
+     * @return a new instance of T with the same properties as the input object, or null if the input is null
      * @since 2.0.12
      */
     static <T> T copy(T object, JSONWriter.Feature... features) {
@@ -4324,9 +4483,11 @@ public interface JSON {
     /**
      * Builds a new instance of targetClass using the properties of the specified object
      *
+     * @param <T> the target type
      * @param object the specified object will be copied
      * @param targetClass the specified target class
      * @param features the specified features is applied to serialization
+     * @return a new instance of targetClass with properties copied from the input object, or null if the input is null
      * @since 2.0.16
      */
     static <T> T copyTo(Object object, Class<T> targetClass, JSONWriter.Feature... features) {
@@ -4416,8 +4577,9 @@ public interface JSON {
 
     /**
      * Configure the Enum classes as a JavaBean
+     *
+     * @param enumClasses the enum classes to configure as JavaBeans
      * @since 2.0.55
-     * @param enumClasses enum classes
      */
     @SuppressWarnings("rawtypes")
     @SafeVarargs

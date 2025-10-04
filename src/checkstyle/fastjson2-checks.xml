@@ -36,10 +36,6 @@
         <property name="format" value="->\s*\{\s+\}" />
         <property name="message" value="Whitespace inside empty lambda body" />
     </module>
-    <module name="RegexpSingleline">
-        <property name="format" value="(class|interface) ([a-zA-Z0-9_])+(&lt;.*&gt;)? (extends|implements)" />
-        <property name="message" value="No new line before extends/implements" />
-    </module>
 
     <module name="TreeWalker">
         <module name="SuppressWarningsHolder" />

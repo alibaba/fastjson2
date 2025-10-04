@@ -19,6 +19,33 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.time.ZoneOffset.UTC;
 
+/**
+ * DateUtils provides utility methods for parsing and formatting dates in various formats.
+ * It supports multiple date formats including ISO 8601, RFC formats, and custom patterns.
+ *
+ * <p>This class offers functionality for:
+ * <ul>
+ *   <li>Parsing date strings in various formats to Date objects</li>
+ *   <li>Formatting Date objects to date strings</li>
+ *   <li>Working with different time zones and locales</li>
+ *   <li>Handling special date formats like cookies and HTTP headers</li>
+ *   <li>Converting between different date representations</li>
+ * </ul>
+ *
+ * <p>Example usage:
+ * <pre>
+ * // Parse a date string
+ * Date date = DateUtils.parseDate("2023-12-25 10:30:45");
+ *
+ * // Format a Date object
+ * String formatted = DateUtils.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss");
+ *
+ * // Parse with specific format and time zone
+ * Date date2 = DateUtils.parseDate("2023/12/25 10:30:45", "yyyy/MM/dd HH:mm:ss", ZoneId.of("UTC"));
+ * </pre>
+ *
+ * @since 2.0.0
+ */
 public class DateUtils {
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     public static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
@@ -75,6 +102,13 @@ public class DateUtils {
         static final String[] CACHE = new String[1024];
     }
 
+    /**
+     * Parses a date string in the format "yyyy-MM-dd HH:mm:ss" to a Date object.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse, e.g., "2023-12-25 10:30:45"
+     * @return the parsed Date object, or null if the input string is null or empty
+     */
     public static Date parseDateYMDHMS19(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -84,16 +118,32 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string with the specified format to a Date object.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @param format the format pattern to use for parsing
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str, String format) {
         return parseDate(str, format, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Parses a date string with the specified format and time zone to a Date object.
+     *
+     * @param str the date string to parse
+     * @param format the format pattern to use for parsing
+     * @param zoneId the time zone to use for parsing
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str, String format, ZoneId zoneId) {
         if (str == null || str.isEmpty() || "null".equals(str)) {
             return null;
         }
 
-        if (format == null || format.isEmpty()) {
+        if (format == null || format.isEmpty() || "string".equals(format)) {
             long millis = parseMillis(str, zoneId);
             if (millis == 0) {
                 return null;
@@ -163,6 +213,13 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string to a Date object using default parsing rules.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str) {
         long millis = parseMillis(str, DEFAULT_ZONE_ID);
         if (millis == 0) {
@@ -171,6 +228,14 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string to a Date object using default parsing rules.
+     * Uses the specified time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @param zoneId the time zone to use for parsing
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str, ZoneId zoneId) {
         long millis = parseMillis(str, zoneId);
         if (millis == 0) {
@@ -179,10 +244,25 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string to milliseconds since epoch using default parsing rules.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @return the parsed milliseconds since epoch, or 0 if the input string is null
+     */
     public static long parseMillis(String str) {
         return parseMillis(str, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Parses a date string to milliseconds since epoch using default parsing rules.
+     * Uses the specified time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @param zoneId the time zone to use for parsing
+     * @return the parsed milliseconds since epoch, or 0 if the input string is null
+     */
     public static long parseMillis(String str, ZoneId zoneId) {
         if (str == null) {
             return 0;
@@ -197,6 +277,12 @@ public class DateUtils {
         return parseMillis(chars, 0, chars.length, zoneId);
     }
 
+    /**
+     * Parses a date string to a LocalDateTime object using default parsing rules.
+     *
+     * @param str the date string to parse
+     * @return the parsed LocalDateTime object, or null if the input string is null or empty
+     */
     public static LocalDateTime parseLocalDateTime(String str) {
         if (str == null) {
             return null;
@@ -204,6 +290,15 @@ public class DateUtils {
         return parseLocalDateTime(str, 0, str.length());
     }
 
+    /**
+     * Parses a date string to a LocalDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the date string to parse
+     * @param off the offset in the string to start parsing from
+     * @param len the length of the substring to parse
+     * @return the parsed LocalDateTime object, or null if the input string is null or empty
+     */
     public static LocalDateTime parseLocalDateTime(String str, int off, int len) {
         if (str == null || len == 0) {
             return null;
@@ -241,6 +336,24 @@ public class DateUtils {
         return ldt;
     }
 
+    /**
+     * Parses a character array to a LocalDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed LocalDateTime object, or null if the input array is null or empty
+     */
+    /**
+     * Parses a character array to a LocalDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed LocalDateTime object, or null if the input array is null or empty
+     */
     public static LocalDateTime parseLocalDateTime(char[] str, int off, int len) {
         if (str == null || len == 0) {
             return null;
@@ -304,6 +417,14 @@ public class DateUtils {
         }
     }
 
+    /**
+     * Parses a byte array to a LocalTime object with 5-character format (HH:mm).
+     * Supports formats like "10:30".
+     *
+     * @param str the byte array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime5(byte[] str, int off) {
         if (off + 5 > str.length) {
             return null;
@@ -325,6 +446,14 @@ public class DateUtils {
         return localTime(hour, minute, second);
     }
 
+    /**
+     * Parses a character array to a LocalTime object with 5-character format (HH:mm).
+     * Supports formats like "10:30".
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime5(char[] str, int off) {
         if (off + 5 > str.length) {
             return null;
@@ -345,6 +474,14 @@ public class DateUtils {
         return localTime(hour, minute, second);
     }
 
+    /**
+     * Parses a byte array to a LocalTime object with 6-character format (HHmmss).
+     * Supports formats like "103045".
+     *
+     * @param str the byte array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime6(byte[] str, int off) {
         if (off + 5 > str.length) {
             return null;
@@ -373,6 +510,14 @@ public class DateUtils {
         return localTime(hour, minute, second);
     }
 
+    /**
+     * Parses a character array to a LocalTime object with 6-character format (HHmmss).
+     * Supports formats like "103045".
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime6(char[] str, int off) {
         if (off + 5 > str.length) {
             return null;
@@ -795,6 +940,15 @@ public class DateUtils {
         }
     }
 
+    /**
+     * Parses a character array to a LocalDate object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed LocalDate object, or null if the input array is null or empty
+     */
     public static LocalDate parseLocalDate(char[] str, int off, int len) {
         if (str == null || len == 0) {
             return null;
@@ -3030,6 +3184,15 @@ public class DateUtils {
         return parseZonedDateTime(str, off, len, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Parses a character array to a ZonedDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed ZonedDateTime object, or null if the input array is null or empty
+     */
     public static ZonedDateTime parseZonedDateTime(char[] str, int off, int len) {
         return parseZonedDateTime(str, off, len, DEFAULT_ZONE_ID);
     }
@@ -7571,10 +7734,25 @@ public class DateUtils {
                 + second;
     }
 
+    /**
+     * Formats a Date object to a string in the format "yyyy-MM-dd HH:mm:ss".
+     * Uses the system default time zone for formatting.
+     *
+     * @param date the Date object to format
+     * @return the formatted date string, e.g., "2023-12-25 10:30:45"
+     */
     public static String formatYMDHMS19(Date date) {
         return formatYMDHMS19(date, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Formats a Date object to a string in the format "yyyy-MM-dd HH:mm:ss".
+     * Uses the specified time zone for formatting.
+     *
+     * @param date the Date object to format
+     * @param zoneId the time zone to use for formatting
+     * @return the formatted date string, e.g., "2023-12-25 10:30:45"
+     */
     public static String formatYMDHMS19(Date date, ZoneId zoneId) {
         if (date == null) {
             return null;
@@ -7682,6 +7860,13 @@ public class DateUtils {
         return new String(chars);
     }
 
+    /**
+     * Formats a Date object to a string in the format "yyyyMMdd".
+     * Uses the system default time zone for formatting.
+     *
+     * @param date the Date object to format
+     * @return the formatted date string, e.g., "20231225"
+     */
     public static String formatYMD8(Date date) {
         if (date == null) {
             return null;
@@ -7690,6 +7875,14 @@ public class DateUtils {
         return formatYMD8(date.getTime(), DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Formats a timestamp in milliseconds to a string in the format "yyyyMMdd".
+     * Uses the specified time zone for formatting.
+     *
+     * @param timeMillis the timestamp in milliseconds to format
+     * @param zoneId the time zone to use for formatting
+     * @return the formatted date string, e.g., "20231225"
+     */
     public static String formatYMD8(long timeMillis, ZoneId zoneId) {
         final long SECONDS_PER_DAY = 60 * 60 * 24;
 

@@ -884,7 +884,17 @@ public class ObjectReaderBaseModule
             }
 
             BeanUtils.declaredFields(objectClass, field -> {
-                if (field.getName().equals(fieldName)) {
+                String name = "";
+                if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+                    if (field.getName().startsWith("is")) {
+                        name = field.getName().substring(2);
+                        if (!name.isEmpty()) {
+                            name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+                        }
+                    }
+                }
+
+                if (field.getName().equals(fieldName) || name.equals(fieldName)) {
                     int modifiers = field.getModifiers();
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
@@ -1931,6 +1941,7 @@ public class ObjectReaderBaseModule
                 || type == AbstractCollection.class
                 || type == AbstractList.class
                 || type == ArrayList.class
+                || type == Stack.class
         ) {
             return ObjectReaderImplList.of(type, null, 0);
             // return new ObjectReaderImplList(type, (Class) type, ArrayList.class, Object.class, null);
@@ -2111,7 +2122,8 @@ public class ObjectReaderBaseModule
                         || rawType == List.class
                         || rawType == AbstractCollection.class
                         || rawType == AbstractList.class
-                        || rawType == ArrayList.class) {
+                        || rawType == ArrayList.class
+                        || rawType == Stack.class) {
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, ArrayList.class);
                     } else if (itemClass == Long.class) {

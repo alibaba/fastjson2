@@ -1134,11 +1134,45 @@ public abstract class BeanUtils {
     private static Method[] getMethods(Class objectClass) {
         Method[] methods;
         try {
-            methods = objectClass.getMethods();
+            if (isRecord(objectClass)) {
+                methods = recordComponentsToMethods(objectClass);
+            } else {
+                methods = objectClass.getMethods();
+            }
         } catch (NoClassDefFoundError ignored) {
             methods = new Method[0];
         }
         return methods;
+    }
+
+    private static Method[] recordComponentsToMethods(Class<?> recordClass) {
+        if (JVM_VERSION < 14 && ANDROID_SDK_INT < 33) {
+            return new Method[0];
+        }
+
+        try {
+            if (RECORD_GET_RECORD_COMPONENTS == null) {
+                RECORD_GET_RECORD_COMPONENTS = Class.class.getMethod("getRecordComponents");
+            }
+
+            if (RECORD_COMPONENT_GET_NAME == null) {
+                Class<?> c = Class.forName("java.lang.reflect.RecordComponent");
+                RECORD_COMPONENT_GET_NAME = c.getMethod("getName");
+            }
+
+            final Object[] components = (Object[]) RECORD_GET_RECORD_COMPONENTS.invoke(recordClass);
+            final Method[] methods = new Method[components.length];
+            for (int i = 0; i < components.length; i++) {
+                String componentName = (String) RECORD_COMPONENT_GET_NAME.invoke(components[i]);
+                methods[i] = recordClass.getMethod(componentName);
+            }
+
+            return methods;
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Failed to access Methods needed to support `java.lang.Record`: (%s) %s",
+                    e.getClass().getName(), e.getMessage()), e);
+        }
     }
 
     private static boolean isJSONField(AnnotatedElement element) {
@@ -2818,32 +2852,22 @@ public abstract class BeanUtils {
 
     public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation) {
         Class<? extends Annotation> annotationClass = annotation.getClass();
+        final String[] jsonFormatValues = new String[3]; // 0:pattern; 1:shape; 2:locale
         BeanUtils.annotationMethods(annotationClass, m -> {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
                 switch (name) {
                     case "pattern": {
-                        String pattern = (String) result;
-                        if (pattern.length() != 0) {
-                            fieldInfo.format = pattern;
-                        }
+                        jsonFormatValues[0] = (String) result;
                         break;
                     }
                     case "shape": {
-                        String shape = ((Enum) result).name();
-                        if ("STRING".equals(shape)) {
-                            fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
-                        } else if ("NUMBER".equals(shape)) {
-                            fieldInfo.format = "millis";
-                        }
+                        jsonFormatValues[1] = ((Enum) result).name();
                         break;
                     }
                     case "locale": {
-                        String locale = (String) result;
-                        if (!locale.isEmpty() && !"##default".equals(locale)) {
-                            fieldInfo.locale = Locale.forLanguageTag(locale);
-                        }
+                        jsonFormatValues[2] = (String) result;
                         break;
                     }
                     default:
@@ -2853,6 +2877,20 @@ public abstract class BeanUtils {
                 // ignored
             }
         });
+
+        if (jsonFormatValues[0].length() != 0) {
+            fieldInfo.format = jsonFormatValues[0];
+        }
+
+        if ("STRING".equals(jsonFormatValues[1]) && fieldInfo.format == null) {
+            fieldInfo.format = "string";
+        } else if ("NUMBER".equals(jsonFormatValues[1])) {
+            fieldInfo.format = "millis";
+        }
+
+        if (!jsonFormatValues[2].isEmpty() && !"##default".equals(jsonFormatValues[2])) {
+            fieldInfo.locale = Locale.forLanguageTag(jsonFormatValues[2]);
+        }
     }
 
     public static void processJacksonJsonFormat(BeanInfo beanInfo, Annotation annotation) {

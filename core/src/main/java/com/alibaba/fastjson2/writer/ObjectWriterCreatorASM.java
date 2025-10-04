@@ -2843,7 +2843,7 @@ public class ObjectWriterCreatorASM
             } else {
                 nullFeatures |= NullAsDefaultValue.mask;
             }
-            mwc.genIsEnabled(nullFeatures, notNull_);
+            mwc.genIsEnabled(fieldWriter.features, nullFeatures, notNull_);
 //            mw.iload(mwc.var(WRITE_NULLS));
 //            mw.ifeq(notNull_);
         }
@@ -2864,10 +2864,24 @@ public class ObjectWriterCreatorASM
                 || fieldClass == Double.class
                 || fieldClass == BigDecimal.class) {
             WRITE_NULL_METHOD = "writeDecimalNull";
+            WRITE_NULL_DESC = "(J)V";
+            mw.lload(mwc.var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(fieldWriter.features);
+            mw.lor();
         } else if (Number.class.isAssignableFrom(fieldClass)) {
             WRITE_NULL_METHOD = "writeNumberNull";
+            WRITE_NULL_DESC = "(J)V";
+            mw.lload(mwc.var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(fieldWriter.features);
+            mw.lor();
         } else if (fieldClass == Boolean.class) {
-            WRITE_NULL_METHOD = "writeBooleanNull";
+            if ((fieldWriter.features & WriteNullBooleanAsFalse.mask) != 0) {
+                WRITE_NULL_METHOD = "writeBool";
+                WRITE_NULL_DESC = "(Z)V";
+                mw.iconst_0();
+            } else {
+                WRITE_NULL_METHOD = "writeBooleanNull";
+            }
         } else if (fieldClass == String.class
                 || fieldClass == Appendable.class
                 || fieldClass == StringBuffer.class
@@ -3140,17 +3154,13 @@ public class ObjectWriterCreatorASM
             mw.aload(JSON_WRITER);
             mw.invokevirtual(TYPE_JSON_WRITER, "writeNumberNull", "()V");
         } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
             long features = fieldWriter.features;
             if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0) {
-                gwFieldName(mwc, fieldWriter, i);
-
-                mw.aload(JSON_WRITER);
                 mw.visitLdcInsn(0);
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
             } else {  // (features & WriteNulls.mask) != 0
-                gwFieldName(mwc, fieldWriter, i);
-
-                mw.aload(JSON_WRITER);
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
             }
         }
@@ -3201,20 +3211,30 @@ public class ObjectWriterCreatorASM
         mw.astore(FIELD_VALUE);
         mw.ifnonnull(notNull_);
 
-        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
             mwc.genIsEnabled(
                     WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
                     writeNullValue_,
                     endIfNull_
             );
+
+            mw.visitLabel(writeNullValue_);
+
+            gwFieldName(mwc, fieldWriter, i);
+
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64Null", "()V");
+        } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
+            long features = fieldWriter.features;
+            if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0) {
+                mw.lconst_0();
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64", "(J)V");
+            } else {  // (features & WriteNulls.mask) != 0
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
+            }
         }
-
-        mw.visitLabel(writeNullValue_);
-
-        gwFieldName(mwc, fieldWriter, i);
-
-        mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64Null", "()V");
 
         mw.goto_(endIfNull_);
 
@@ -3262,20 +3282,35 @@ public class ObjectWriterCreatorASM
         mw.dup();
         mw.astore(FIELD_VALUE);
         mw.ifnonnull(notNull_);
-        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
             mwc.genIsEnabled(
                     WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
                     writeNullValue_,
                     endIfNull_
             );
+
+            mw.visitLabel(writeNullValue_);
+
+            gwFieldName(mwc, fieldWriter, i);
+
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
+        } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
+            long features = fieldWriter.features;
+            if ((features & WriteNullNumberAsZero.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
+            } else if ((features & NullAsDefaultValue.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.i2d();
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeDouble", "(D)V");
+            } else {  // (features & WriteNulls.mask) != 0
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
+            }
         }
-
-        mw.visitLabel(writeNullValue_);
-
-        gwFieldName(mwc, fieldWriter, i);
-
-        mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
 
         mw.goto_(endIfNull_);
 
@@ -3325,18 +3360,34 @@ public class ObjectWriterCreatorASM
 
         mw.ifnonnull(notNull_);
 
-        mwc.genIsEnabled(
-                WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
-                writeNullValue_,
-                endIfNull_
-        );
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) == 0) {
+            mwc.genIsEnabled(
+                    WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask,
+                    writeNullValue_,
+                    endIfNull_
+            );
 
-        mw.visitLabel(writeNullValue_);
+            mw.visitLabel(writeNullValue_);
 
-        gwFieldName(mwc, fieldWriter, i);
+            gwFieldName(mwc, fieldWriter, i);
 
-        mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
+            mw.aload(JSON_WRITER);
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimalNull", "()V");
+        } else {
+            gwFieldName(mwc, fieldWriter, i);
+            mw.aload(JSON_WRITER);
+            long features = fieldWriter.features;
+            if ((features & WriteNullNumberAsZero.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
+            } else if ((features & NullAsDefaultValue.mask) != 0) {
+                mw.visitLdcInsn(0);
+                mw.i2f();
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(F)V");
+            } else {  // (features & WriteNulls.mask) != 0
+                mw.invokevirtual(TYPE_JSON_WRITER, "writeNull", "()V");
+            }
+        }
 
         mw.goto_(endIfNull_);
 
@@ -3978,18 +4029,17 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(notDefaultValue_);
 
         if (fieldClass == long.class) {
-            boolean iso8601 = "iso8601".equals(format);
-            if (iso8601 || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
+            boolean writeDate = "iso8601".equals(format) || fieldWriter instanceof FieldWriterDate;
+            if (writeDate || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
                 mw.aload(THIS);
                 mw.getfield(classNameType, fieldWriter(i), DESC_FIELD_WRITER);
 
                 mw.aload(JSON_WRITER);
                 mw.lload(FIELD_VALUE);
 
-                mw.invokevirtual(TYPE_FIELD_WRITER, iso8601 ? "writeDate" : "writeInt64", METHOD_DESC_WRITE_J);
+                mw.invokevirtual(TYPE_FIELD_WRITER, writeDate ? "writeDate" : "writeInt64", METHOD_DESC_WRITE_J);
             } else {
                 gwFieldName(mwc, fieldWriter, i);
-
                 mw.aload(JSON_WRITER);
                 mw.lload(FIELD_VALUE);
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64", "(J)V");
@@ -4354,7 +4404,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == long.class) {
-            if (format == null || format.isEmpty()) {
+            if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
             }
             return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);

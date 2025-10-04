@@ -48,15 +48,7 @@ class FieldWriterFloatMethod<T>
         }
 
         if (value == null) {
-            long features = jsonWriter.getFeatures(this.features);
-            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0
-                    && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0
-            ) {
-                writeFieldName(jsonWriter);
-                jsonWriter.writeNumberNull();
-                return true;
-            }
-            return false;
+            return writeFloatNull(jsonWriter);
         }
 
         writeFieldName(jsonWriter);

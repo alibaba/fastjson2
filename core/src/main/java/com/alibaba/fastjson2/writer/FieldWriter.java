@@ -1042,4 +1042,35 @@ public abstract class FieldWriter<T>
     public Function getFunction() {
         return null;
     }
+
+    protected final boolean writeFloatNull(JSONWriter jsonWriter) {
+        long features = jsonWriter.getFeatures(this.features);
+        if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullNumberAsZero.mask)) == 0) {
+            return false;
+        }
+        writeFieldName(jsonWriter);
+        if ((features & NullAsDefaultValue.mask) != 0) {
+            jsonWriter.writeFloat(0.0F);
+        } else if ((features & WriteNullNumberAsZero.mask) != 0) {
+            jsonWriter.writeInt32(0);
+        } else {
+            jsonWriter.writeNull();
+        }
+        return true;
+    }
+
+    protected final boolean writeIntNull(JSONWriter jsonWriter) {
+        long features = this.features | jsonWriter.getFeatures();
+        if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullNumberAsZero.mask)) == 0) {
+            return false;
+        }
+        writeFieldName(jsonWriter);
+
+        if ((features & (JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullNumberAsZero.mask)) != 0) {
+            jsonWriter.writeInt32(0);
+        } else {
+            jsonWriter.writeNull();
+        }
+        return true;
+    }
 }

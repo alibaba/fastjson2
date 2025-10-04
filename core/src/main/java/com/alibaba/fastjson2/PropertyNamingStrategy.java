@@ -4,6 +4,22 @@ import com.alibaba.fastjson2.util.BeanUtils;
 
 /**
  * An enumeration that defines a few standard naming conventions for JSON field names.
+ *
+ * <p>This enum provides various naming strategies that can be used to transform Java field names
+ * to different JSON field naming conventions. For example, camelCase can be transformed to snake_case,
+ * kebab-case, or other formats.</p>
+ *
+ * <p>Example usage:
+ * <pre>
+ * // Using snake_case naming strategy
+ * PropertyNamingStrategy.SnakeCase.fieldName("userName"); // returns "user_name"
+ *
+ * // Using PascalCase naming strategy
+ * PropertyNamingStrategy.PascalCase.fieldName("userName"); // returns "UserName"
+ * </pre>
+ *
+ *
+ * @author wenshao[szujobs@hotmail.com]
  * @since 1.2.15
  */
 public enum PropertyNamingStrategy {
@@ -128,10 +144,29 @@ public enum PropertyNamingStrategy {
     LowerCaseWithDots,
     NeverUseThisValueExceptDefaultValue;
 
+    /**
+     * Transforms the given field name according to this naming strategy.
+     *
+     * @param name the original field name in Java (typically camelCase)
+     * @return the transformed field name according to the naming strategy
+     */
     public String fieldName(String name) {
         return BeanUtils.fieldName(name, this.name());
     }
 
+    /**
+     * Converts a snake_case string to camelCase.
+     *
+     * <p>For example:
+     * <ul>
+     *   <li>"user_name" becomes "userName"</li>
+     *   <li>"first_name" becomes "firstName"</li>
+     *   <li>"url" remains "url" (no underscores)</li>
+     * </ul>
+     *
+     * @param name the snake_case string to convert
+     * @return the camelCase string, or the original string if it doesn't contain underscores
+     */
     public static String snakeToCamel(String name) {
         if (name == null || name.indexOf('_') == -1) {
             return name;
@@ -162,6 +197,20 @@ public enum PropertyNamingStrategy {
         return new String(chars);
     }
 
+    /**
+     * Returns the PropertyNamingStrategy enum constant with the specified name.
+     *
+     * <p>The string matching is case-insensitive for common aliases:
+     * <ul>
+     *   <li>"Upper" or "upper" will return {@link #UpperCase}</li>
+     *   <li>"Lower" or "lower" will return {@link #LowerCase}</li>
+     *   <li>"Camel" or "camel" will return {@link #CamelCase}</li>
+     * </ul>
+     * Other strategy names are matched case-sensitively against the enum constant names.
+     *
+     * @param strategy the name of the strategy to find, or null/empty to return null
+     * @return the PropertyNamingStrategy with the specified name, or null if not found
+     */
     public static PropertyNamingStrategy of(String strategy) {
         if (strategy == null || strategy.isEmpty()) {
             return null;
