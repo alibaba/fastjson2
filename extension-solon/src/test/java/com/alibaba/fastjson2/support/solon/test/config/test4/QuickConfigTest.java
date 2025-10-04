@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.support.solon.test.config.test4;
 
-import com.alibaba.fastjson2.support.solon.Fastjson2RenderFactory;
+import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
 import com.alibaba.fastjson2.support.solon.test._model.UserDo;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.annotation.Import;
@@ -19,7 +19,7 @@ import java.util.Map;
 @SolonTest
 public class QuickConfigTest {
     @Inject
-    Fastjson2RenderFactory renderFactory;
+    Fastjson2EntityConverter entityConverter;
 
     @Test
     public void hello2() throws Throwable {
@@ -34,7 +34,7 @@ public class QuickConfigTest {
         userDo.setMap1(data);
 
         ContextEmpty ctx = new ContextEmpty();
-        renderFactory.create().render(userDo, ctx);
+        entityConverter.write(userDo, ctx);
         String output = ctx.attr("output");
 
         System.out.println(output);
