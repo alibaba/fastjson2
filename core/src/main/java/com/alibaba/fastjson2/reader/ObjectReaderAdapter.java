@@ -548,7 +548,7 @@ public class ObjectReaderAdapter<T>
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         Object typeKey = map.get(this.typeKey);
 
-        long features2 = features | this.features;
+        long features2 = features | this.features | JSONFactory.getDefaultReaderFeatures();
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
             long typeHash = Fnv.hashCode64(typeName);
