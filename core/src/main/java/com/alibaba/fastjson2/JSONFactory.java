@@ -341,4 +341,8 @@ public final class JSONFactory {
             return new com.alibaba.fastjson.JSONObject((Map) o);
         }
     }
+
+    public static long getDefaultReaderFeatures() {
+        return defaultReaderFeatures;
+    }
 }
