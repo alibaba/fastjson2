@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_3100;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,6 +14,7 @@ public class Issue3163 {
         assertEquals(0, bean.id);
     }
 
+    @Data
     public static class Bean {
         @JSONField(deserialize = false)
         public int id;
