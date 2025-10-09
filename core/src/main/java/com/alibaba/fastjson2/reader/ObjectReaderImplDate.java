@@ -110,6 +110,11 @@ public class ObjectReaderImplDate
                         return null;
                     }
 
+                    if (format.indexOf('-') != -1 && str.indexOf('-') == -1 && TypeUtils.isInteger(str)) {
+                        millis = Long.parseLong(str);
+                        return new Date(millis);
+                    }
+
                     LocalDateTime ldt;
                     if (!formatHasHour) {
                         if (!formatHasDay) {
@@ -126,11 +131,6 @@ public class ObjectReaderImplDate
                             if (str.length() == 19 && jsonReader.isEnabled(JSONReader.Feature.SupportSmartMatch)) {
                                 ldt = DateUtils.parseLocalDateTime(str, 0, str.length());
                             } else {
-                                if (format.indexOf('-') != -1 && str.indexOf('-') == -1 && TypeUtils.isInteger(str)) {
-                                    millis = Long.parseLong(str);
-                                    return new Date(millis);
-                                }
-
                                 // For yyyy-MM-dd format, if the string contains time part, we should ignore it to be compatible with fastjson1
                                 if (yyyyMMdd10 && str.length() > 10) {
                                     // Extract only the date part (first 10 characters)
