@@ -150,7 +150,9 @@ public class JSONArray
         }
 
         if (value instanceof Object[]) {
-            return JSONArray.of((Object[]) value);
+            JSONArray array = JSONArray.of((Object[]) value);
+            set(index, array);
+            return array;
         }
 
         Class<?> valueClass = value.getClass();
@@ -161,6 +163,7 @@ public class JSONArray
                 Object item = Array.get(value, i);
                 jsonArray.add(item);
             }
+            set(index, jsonArray);
             return jsonArray;
         }
 
@@ -205,12 +208,13 @@ public class JSONArray
 
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
-        if (objectWriter instanceof ObjectWriterAdapter) {
-            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
-            return writerAdapter.toJSONObject(value);
-        }
 
-        return (JSONObject) JSON.toJSON(value);
+        JSONObject jsonObject = (objectWriter instanceof ObjectWriterAdapter)
+                ? ((ObjectWriterAdapter) objectWriter).toJSONObject(value)
+                : (JSONObject) JSON.toJSON(value);
+
+        set(index, jsonObject);
+        return jsonObject;
     }
 
     /**
