@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 class JSONPathSingle
@@ -110,5 +111,20 @@ class JSONPathSingle
     @Override
     public final JSONPath getParent() {
         return RootPath.INSTANCE;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        JSONPathSingle that = (JSONPathSingle) object;
+        return Objects.equals(segment, that.segment);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(segment);
     }
 }

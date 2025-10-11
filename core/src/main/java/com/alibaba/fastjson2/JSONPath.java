@@ -946,8 +946,11 @@ public abstract class JSONPath {
         boolean allThreeName = true;
         boolean sameMultiLength = true;
         JSONPathMulti firstMulti = null;
+        Map<JSONPath, List<Integer>> pathMap = new LinkedHashMap<>();
         for (int i = 0; i < jsonPaths.length; i++) {
             JSONPath path = jsonPaths[i];
+            pathMap.computeIfAbsent(path, k -> new ArrayList<>()).add(i);
+
             if (i == 0) {
                 if (path instanceof JSONPathMulti) {
                     firstMulti = (JSONPathMulti) path;
@@ -1015,10 +1018,11 @@ public abstract class JSONPath {
                 }
             }
         }
+        boolean duplicate = pathMap.size() != jsonPaths.length;
 
         long featuresValue = JSONReader.Feature.of(features);
 
-        if (allSingleName) {
+        if (allSingleName && !duplicate) {
             return new JSONPathTypedMultiNames(
                     jsonPaths,
                     null,
@@ -1035,7 +1039,7 @@ public abstract class JSONPath {
             return new JSONPathTypedMultiIndexes(jsonPaths, null, jsonPaths, types, formats, pathFeatures, zoneId, featuresValue);
         }
 
-        if (allTwoName || allTwoIndexPositive) {
+        if ((allTwoName && !duplicate) || allTwoIndexPositive) {
             boolean samePrefix = true;
             JSONPathSegment first0 = ((JSONPathTwoSegment) jsonPaths[0]).first;
             for (int i = 1; i < jsonPaths.length; i++) {
@@ -1119,7 +1123,7 @@ public abstract class JSONPath {
                     }
                 }
             }
-        } else if (allThreeName) {
+        } else if (allThreeName && !duplicate) {
             boolean samePrefix = true;
             JSONPathSegment first0 = ((JSONPathMulti) jsonPaths[0]).segments.get(0);
             JSONPathSegment first1 = ((JSONPathMulti) jsonPaths[0]).segments.get(1);

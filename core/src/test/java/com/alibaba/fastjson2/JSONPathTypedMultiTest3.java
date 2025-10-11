@@ -227,7 +227,7 @@ public class JSONPathTypedMultiTest3 {
                 );
 
                 Object[] array = (Object[]) jsonPath.extract("{\"p2\":{\"x\":\"异常\"}}");
-                assertArrayEquals(new Object[2], array);
+                assertArrayEquals(new Object[2], array, objectClass.getName());
             }
         }
     }
@@ -256,7 +256,7 @@ public class JSONPathTypedMultiTest3 {
                         null
                 );
 
-                assertThrows(JSONException.class, () -> jsonPath.extract("{\"p2\":{\"x\":\"异常\"}}"));
+                assertThrows(JSONException.class, () -> jsonPath.extract("{\"p2\":{\"x\":\"异常\"}}"), objectClass.toString());
             }
         }
     }
