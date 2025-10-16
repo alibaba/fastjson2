@@ -41,4 +41,45 @@ public class Issue3499 {
             implements Serializable {
         T msg;
     }
+
+    @Setter
+    @Getter
+    public static class ParentTestOrder
+            implements Serializable {
+        private static final long serialVersionUID = 721230004160956721L;
+        private boolean flag;
+    }
+
+    @Setter
+    @Getter
+    public static class TestOrder extends ParentTestOrder {
+        private String name;
+    }
+
+    @Test
+    public void test1() {
+        TestOrder order = new TestOrder();
+        order.setName("test");
+        order.setFlag(true);
+
+        byte[] bytes1 = JSONB.toBytes(
+                order,
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ErrorOnNoneSerializable,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                JSONWriter.Feature.WriteNameAsSymbol);
+
+        JSONB.parseObject(
+                bytes1,
+                TestOrder.class,
+                JSONReader.Feature.UseDefaultConstructorAsPossible,
+                JSONReader.Feature.ErrorOnNoneSerializable,
+                JSONReader.Feature.IgnoreAutoTypeNotMatch,
+                JSONReader.Feature.UseNativeObject,
+                JSONReader.Feature.FieldBased);
+    }
 }

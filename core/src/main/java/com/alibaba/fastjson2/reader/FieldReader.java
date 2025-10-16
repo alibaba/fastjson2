@@ -73,7 +73,7 @@ public abstract class FieldReader<T>
         this.fieldClassSerializable = fieldClass != null
                 && (Serializable.class.isAssignableFrom(fieldClass)
                 || Modifier.isInterface(fieldClass.getModifiers())
-                || BeanUtils.isRecord(fieldClass));
+                || BeanUtils.isRecord(fieldClass) || fieldClass.isPrimitive());
         this.features = features;
         this.fieldNameHash = Fnv.hashCode64(fieldName);
         this.fieldNameHashLCase = Fnv.hashCode64LCase(fieldName);
