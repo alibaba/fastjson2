@@ -9,7 +9,7 @@ public class ArrayBugTest {
     @Test
     public void test_for_array() {
         assertEquals("[\"e1\"]",
-                JSONPath.of("$.arr", String.class, JSONPath.Feature.UnwrapStringArray)
+                JSONPath.of("$.arr", String.class, JSONPath.Feature.DisableStringArrayUnwrapping)
                         .extract("{\"arr\":[\"e1\"]}"));
 
         assertEquals("e1",

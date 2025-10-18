@@ -1648,7 +1648,7 @@ public abstract class JSONPath {
          * unwrapped to just that string value rather than returning the array.
          * For example, ["value"] would be returned as "value".
          */
-        UnwrapStringArray(1 << 3);
+        DisableStringArrayUnwrapping(1 << 3);
 
         public final long mask;
 

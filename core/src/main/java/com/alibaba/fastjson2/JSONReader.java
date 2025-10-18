@@ -6475,7 +6475,7 @@ public abstract class JSONReader
          * unwrapped to just that string value rather than returning the array.
          * For example, ["value"] would be returned as "value".
          */
-        UnwrapStringArray(1L << 34L),;
+        DisableStringArrayUnwrapping(1L << 34L);
 
         public final long mask;
 
@@ -6762,7 +6762,7 @@ public abstract class JSONReader
         switch (ch) {
             case '[':
                 List array = readArray();
-                if (array.size() == 1 && ((context.features & Feature.UnwrapStringArray.mask) == 0)) {
+                if (array.size() == 1 && ((context.features & Feature.DisableStringArrayUnwrapping.mask) == 0)) {
                     Object item = array.get(0);
                     if (item == null) {
                         return null;
