@@ -41,6 +41,11 @@ final class JSONPathSingleNameString
                     continue;
                 }
 
+                if (jsonReader.isArray()
+                        && (features & Feature.UnwrapStringArray.mask) != 0
+                ) {
+                    return jsonReader.readArray().toString();
+                }
                 return jsonReader.readString();
             }
         }

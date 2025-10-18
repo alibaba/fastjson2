@@ -1640,7 +1640,15 @@ public abstract class JSONPath {
         /**
          * Keep null values in results
          */
-        KeepNullValue(1 << 2);
+        KeepNullValue(1 << 2),
+
+        /**
+         * Unwrap single-element string arrays to scalar values.
+         * When enabled, JSON arrays containing a single string element will be
+         * unwrapped to just that string value rather than returning the array.
+         * For example, ["value"] would be returned as "value".
+         */
+        UnwrapStringArray(1 << 3);
 
         public final long mask;
 
