@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2.issues_3800;
 
 import java.util.Date;
+
+import org.junit.jupiter.api.Test;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
-import org.junit.jupiter.api.Test;
-
 import lombok.Data;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,10 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * @version 20251018
  */
 public class Issue3830 {
-
     @Test
     public void testRecordFieldOrder() {
-
         User user = new User();
         user.setId("U00001");
         user.setRealName("Foo");
