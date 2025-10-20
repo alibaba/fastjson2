@@ -108,6 +108,11 @@ public class ObjectReaderImplDate
                         return null;
                     }
 
+                    if (format.indexOf('-') != -1 && str.indexOf('-') == -1 && TypeUtils.isInteger(str)) {
+                        millis = Long.parseLong(str);
+                        return new Date(millis);
+                    }
+
                     LocalDateTime ldt;
                     if (!formatHasHour) {
                         if (!formatHasDay) {
