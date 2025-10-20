@@ -6474,6 +6474,7 @@ public abstract class JSONReader
          * When enabled, JSON arrays containing a single string element will be
          * unwrapped to just that string value rather than returning the array.
          * For example, ["value"] would be returned as "value".
+         * @since 2.0.60
          */
         DisableStringArrayUnwrapping(1L << 34L);
 
@@ -6762,12 +6763,12 @@ public abstract class JSONReader
         switch (ch) {
             case '[':
                 List array = readArray();
-                if (array.size() == 1 && ((context.features & Feature.DisableStringArrayUnwrapping.mask) == 0)) {
+                if (array.size() == 1) {
                     Object item = array.get(0);
                     if (item == null) {
                         return null;
                     }
-                    if (item instanceof String) {
+                    if ((context.features & Feature.DisableStringArrayUnwrapping.mask) == 0 && item instanceof String) {
                         return item.toString();
                     }
                 }
