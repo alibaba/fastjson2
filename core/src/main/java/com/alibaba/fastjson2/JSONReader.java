@@ -3974,7 +3974,16 @@ public abstract class JSONReader
         /**
          * @since 2.0.56
          */
-        DisableReferenceDetect(MASK_DISABLE_REFERENCE_DETECT);
+        DisableReferenceDetect(MASK_DISABLE_REFERENCE_DETECT),
+
+        /**
+         * Feature that determines whether to unwrap single-element string arrays to scalar values.
+         * When enabled, JSON arrays containing a single string element will be
+         * unwrapped to just that string value rather than returning the array.
+         * For example, ["value"] would be returned as "value".
+         * @since 2.0.60
+         */
+        DisableStringArrayUnwrapping(1L << 34L);
 
         public final long mask;
 
@@ -4287,7 +4296,7 @@ public abstract class JSONReader
                     if (item == null) {
                         return null;
                     }
-                    if (item instanceof String) {
+                    if ((context.features & Feature.DisableStringArrayUnwrapping.mask) == 0 && item instanceof String) {
                         return item.toString();
                     }
                 }
