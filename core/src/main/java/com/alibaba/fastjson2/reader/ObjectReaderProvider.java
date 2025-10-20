@@ -2238,7 +2238,8 @@ public class ObjectReaderProvider {
                         || rawType == List.class
                         || rawType == AbstractCollection.class
                         || rawType == AbstractList.class
-                        || rawType == ArrayList.class) {
+                        || rawType == ArrayList.class
+                        || rawType == Stack.class) {
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, ArrayList.class);
                     } else if (itemClass == Long.class) {
