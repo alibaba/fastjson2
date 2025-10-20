@@ -19,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
 
-import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 
 /**
@@ -313,23 +312,15 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            boolean nonPublic = (modifiers & PUBLIC) == 0;
-
             String itemFieldName = field.getName();
             if (itemFieldName.equals(fieldName)) {
-                if (nonPublic) {
-                    processor.getFieldInfo(fieldInfo, objectClass, field);
-                }
+                processor.getFieldInfo(fieldInfo, objectClass, field);
                 fieldInfo.features |= FieldInfo.FIELD_MASK;
             } else if (itemFieldName.equals(fieldName1)) {
-                if (nonPublic) {
-                    processor.getFieldInfo(fieldInfo, objectClass, field);
-                }
+                processor.getFieldInfo(fieldInfo, objectClass, field);
                 fieldInfo.features |= FieldInfo.FIELD_MASK;
             } else if (itemFieldName.equals(fieldName2)) {
-                if (nonPublic) {
-                    processor.getFieldInfo(fieldInfo, objectClass, field);
-                }
+                processor.getFieldInfo(fieldInfo, objectClass, field);
                 fieldInfo.features |= FieldInfo.FIELD_MASK;
             }
         }
