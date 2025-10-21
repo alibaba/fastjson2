@@ -661,7 +661,7 @@ public class ObjectWriterAdapter<T>
                     fieldValue = ((Enum) fieldValue).name();
                 }
             }
-            if (fieldWriter instanceof FieldWriterObject && !(fieldValue instanceof Map)) {
+            if (fieldWriter instanceof FieldWriterObject && fieldValue != null && !(fieldValue instanceof Map)) {
                 ObjectWriter valueWriter = fieldWriter.getInitWriter();
                 if (valueWriter == null) {
                     valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
