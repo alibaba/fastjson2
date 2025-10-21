@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.issues_3800;
 
-import java.util.Date;
-
-import org.junit.jupiter.api.Test;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
+import org.junit.jupiter.api.Test;
+
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
