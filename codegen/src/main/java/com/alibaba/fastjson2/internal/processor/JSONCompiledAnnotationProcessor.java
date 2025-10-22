@@ -3015,14 +3015,15 @@ public class JSONCompiledAnnotationProcessor
             );
         }
 
-        JCTree.JCExpression mapEntryKeyExpr = method(jsonReaderIdent, "readFieldName");
+        JCTree.JCVariableDecl mapKeyVar = defVar(
+                attributeInfo.name + "_key",
+                ident("String"),
+                method(jsonReaderIdent, "readFieldName")
+        );
+        whileStmts.append(mapKeyVar);
+        JCTree.JCIdent mapKeyIdent = ident(mapKeyVar);
 
         if (referenceDetect) {
-            JCTree.JCVariableDecl mapKey = defVar(attributeInfo.name + "_key", ident("String"), mapEntryKeyExpr);
-            whileStmts.append(mapKey);
-            JCTree.JCVariableDecl mapValue = defVar(attributeInfo.name + "_value", ident("String"));
-            whileStmts.append(mapValue);
-
             ListBuffer<JCTree.JCStatement> isReferenceStmts = new ListBuffer<>();
             JCTree.JCMethodInvocation readReferenceMethod = method(jsonReaderIdent, "readReference");
             JCTree.JCVariableDecl refVar = defVar("ref", ident("String"), readReferenceMethod);
@@ -3031,7 +3032,7 @@ public class JSONCompiledAnnotationProcessor
                     jsonReaderIdent,
                     "addResolveTask",
                     ident(fieldValueVar),
-                    ident(mapKey),
+                    mapKeyIdent,
                     method(qualIdent("com.alibaba.fastjson2.JSONPath"), "of", ident(refVar))
             );
             isReferenceStmts.append(exec(addResolveTaskMethod));
@@ -3039,11 +3040,11 @@ public class JSONCompiledAnnotationProcessor
                     defIf(
                             method(jsonReaderIdent, "isReference"),
                             block(isReferenceStmts.toList()),
-                            exec(method(fieldValueVar, "put", mapEntryKeyExpr, mapEntryValueExpr))
+                            exec(method(fieldValueVar, "put", mapKeyIdent, mapEntryValueExpr))
                     )
             );
         } else {
-            whileStmts.append(exec(method(fieldValueVar, "put", mapEntryKeyExpr, mapEntryValueExpr)));
+            whileStmts.append(exec(method(fieldValueVar, "put", mapKeyIdent, mapEntryValueExpr)));
         }
 
         elseStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfObjectEndMethod), block(whileStmts.toList())));
