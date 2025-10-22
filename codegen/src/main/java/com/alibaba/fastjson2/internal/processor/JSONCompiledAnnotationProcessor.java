@@ -1848,7 +1848,6 @@ public class JSONCompiledAnnotationProcessor
 
         JCTree.JCIdent fieldValue = ident("string" + i);
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
-        stmts.append(genWriteFieldName(mwc, attributeInfo, i));
         stmts.append(
                 defVar(
                         fieldValue.name,
@@ -1859,13 +1858,19 @@ public class JSONCompiledAnnotationProcessor
         stmts.append(
                 defIf(
                         notNull(fieldValue),
-                        block(exec(mwc.jsonWriterMethod("writeString", fieldValue))),
+                        block(
+                                genWriteFieldName(mwc, attributeInfo, i),
+                                exec(mwc.jsonWriterMethod("writeString", fieldValue))
+                        ),
                         block(defIf(
                                 ne(bitAnd(mwc.contextFeatures, writeNullFeatures), 0L),
-                                defIf(
-                                        ne(bitAnd(mwc.contextFeatures, writeNullAsEmptyFeatures), 0L),
-                                        block(exec(mwc.jsonWriterMethod("writeString", ""))),
-                                        block(exec(mwc.jsonWriterMethod("writeStringNull")))
+                                block(
+                                        genWriteFieldName(mwc, attributeInfo, i),
+                                        defIf(
+                                                ne(bitAnd(mwc.contextFeatures, writeNullAsEmptyFeatures), 0L),
+                                                block(exec(mwc.jsonWriterMethod("writeString", ""))),
+                                                block(exec(mwc.jsonWriterMethod("writeStringNull")))
+                                        )
                                 )
                         ))
                 )
