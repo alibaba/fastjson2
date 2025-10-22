@@ -210,7 +210,7 @@ public class JSONArray
 
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
-        
+
         JSONObject jsonObject = (objectWriter instanceof ObjectWriterAdapter)
                 ? ((ObjectWriterAdapter) objectWriter).toJSONObject(value)
                 : (JSONObject) JSON.toJSON(value);
