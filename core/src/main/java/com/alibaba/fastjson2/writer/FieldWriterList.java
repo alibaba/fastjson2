@@ -183,7 +183,7 @@ public abstract class FieldWriterList<T>
     @Override
     public final void writeListValue(JSONWriter jsonWriter, List list) {
         if (jsonWriter.jsonb) {
-            writeListJSONB(jsonWriter, list);
+            writeListValueJSONB(jsonWriter, list);
             return;
         }
 

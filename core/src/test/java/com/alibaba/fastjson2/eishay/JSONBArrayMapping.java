@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,6 +63,9 @@ public class JSONBArrayMapping {
         assertEquals(5, refs.size());
 
         byte[] bytes = writer.getBytes();
+        System.out.println(JSONB.toJSONString(bytes));
+        assertEquals(270, bytes.length);
+        assertEquals(1425615208, Arrays.hashCode(bytes));
         Object object1 = JSONB.parseObject(bytes, Object.class, jsonbReaderFeaturesSupportBeanArray);
 
         assertEquals(
