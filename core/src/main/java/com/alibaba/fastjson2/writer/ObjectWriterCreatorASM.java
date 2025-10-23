@@ -1169,36 +1169,38 @@ public class ObjectWriterCreatorASM
         }
 
         if (writeFieldName) {
-            if (!fieldClass.isPrimitive()) {
-                Label L_NOT_NULL = new Label();
-                mw.iload(mwc.var(WRITE_NULLS));
-                mw.ifne(L_NOT_NULL);
+            if (fieldWriter.defaultValue == null) {
+                if (!fieldClass.isPrimitive()) {
+                    Label L_NOT_NULL = new Label();
+                    mw.iload(mwc.var(WRITE_NULLS));
+                    mw.ifne(L_NOT_NULL);
 
-                mw.aload(FIELD_VALUE);
-                mw.ifnull(endFieldValue_);
+                    mw.aload(FIELD_VALUE);
+                    mw.ifnull(endFieldValue_);
 
-                mw.visitLabel(L_NOT_NULL);
-            } else {
-                int WRITE_DEFAULT_VALUE = mwc.var(NOT_WRITE_DEFAULT_VALUE);
-                Label L_NOT_DEFAULT_VALUE = new Label();
-                if (fieldClass == byte.class || fieldClass == short.class || fieldClass == int.class || fieldClass == boolean.class) {
-                    mw.iload(FIELD_VALUE);
-                    mw.ifne(L_NOT_DEFAULT_VALUE);
+                    mw.visitLabel(L_NOT_NULL);
+                } else {
+                    int WRITE_DEFAULT_VALUE = mwc.var(NOT_WRITE_DEFAULT_VALUE);
+                    Label L_NOT_DEFAULT_VALUE = new Label();
+                    if (fieldClass == byte.class || fieldClass == short.class || fieldClass == int.class || fieldClass == boolean.class) {
+                        mw.iload(FIELD_VALUE);
+                        mw.ifne(L_NOT_DEFAULT_VALUE);
 
-                    mw.iload(WRITE_DEFAULT_VALUE);
-                    mw.ifne(endFieldValue_);
+                        mw.iload(WRITE_DEFAULT_VALUE);
+                        mw.ifne(endFieldValue_);
 
-                    mw.visitLabel(L_NOT_DEFAULT_VALUE);
-                } else if (fieldClass == long.class) {
-                    mw.lload(FIELD_VALUE);
-                    mw.lconst_0();
-                    mw.lcmp();
-                    mw.ifne(L_NOT_DEFAULT_VALUE);
+                        mw.visitLabel(L_NOT_DEFAULT_VALUE);
+                    } else if (fieldClass == long.class) {
+                        mw.lload(FIELD_VALUE);
+                        mw.lconst_0();
+                        mw.lcmp();
+                        mw.ifne(L_NOT_DEFAULT_VALUE);
 
-                    mw.iload(WRITE_DEFAULT_VALUE);
-                    mw.ifne(endFieldValue_);
+                        mw.iload(WRITE_DEFAULT_VALUE);
+                        mw.ifne(endFieldValue_);
 
-                    mw.visitLabel(L_NOT_DEFAULT_VALUE);
+                        mw.visitLabel(L_NOT_DEFAULT_VALUE);
+                    }
                 }
             }
 
