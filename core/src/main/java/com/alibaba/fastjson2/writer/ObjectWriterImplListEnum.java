@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static com.alibaba.fastjson2.util.TypeUtils.toList;
+
 final class ObjectWriterImplListEnum
         extends ObjectWriterPrimitiveImpl {
     final Class defineClass;
@@ -32,7 +34,7 @@ final class ObjectWriterImplListEnum
             jsonWriter.writeTypeName(TypeUtils.getTypeName(objectClass));
         }
 
-        List list = (List) object;
+        List list = toList(object);
 
         int size = list.size();
         jsonWriter.startArray(size);
@@ -69,7 +71,7 @@ final class ObjectWriterImplListEnum
             return;
         }
 
-        List list = (List) object;
+        List list = toList(object);
 
         jsonWriter.startArray();
         for (int i = 0; i < list.size(); i++) {

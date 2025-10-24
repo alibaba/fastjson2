@@ -13,22 +13,28 @@ public class Issue1563 {
     @Test
     public void test() {
         List<List<Object>> data = new ArrayList<>();
+        List<String> strData = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             List<Object> row = new ArrayList<>();
             for (int j = 0; j < 2; j++) {
-                row.add("i_" + i + "_j_" + j);
+                String str = "i_" + i + "_j_" + j;
+                row.add(str);
+                strData.add(str);
             }
             data.add(row);
         }
-        MyData myData = new MyData(data);
-        assertEquals("{\"data\":[[\"i_0_j_0\",\"i_0_j_1\"],[\"i_1_j_0\",\"i_1_j_1\"]]}", JSON.toJSONString(myData));
+        MyData myData = new MyData(data, strData);
+        assertEquals("{\"data\":[[\"i_0_j_0\",\"i_0_j_1\"],[\"i_1_j_0\",\"i_1_j_1\"]],\"strData\":[\"i_0_j_0\",\"i_0_j_1\",\"i_1_j_0\",\"i_1_j_1\"]}",
+                JSON.toJSONString(myData));
     }
 
     public static class MyData {
         private final List<List<Object>> list;
+        private final List<String> strList;
 
-        public MyData(List<List<Object>> list) {
+        public MyData(List<List<Object>> list, List<String> strList) {
             this.list = list;
+            this.strList = strList;
         }
 
         public Iterable<Object> getData() {
@@ -41,6 +47,21 @@ public class Issue1563 {
 
                 @Override
                 public Object next() {
+                    return it.next();
+                }
+            };
+        }
+
+        public Iterable<String> getStrData() {
+            Iterator<String> it = strList.iterator();
+            return () -> new Iterator<String>() {
+                @Override
+                public boolean hasNext() {
+                    return it.hasNext();
+                }
+
+                @Override
+                public String next() {
                     return it.next();
                 }
             };
