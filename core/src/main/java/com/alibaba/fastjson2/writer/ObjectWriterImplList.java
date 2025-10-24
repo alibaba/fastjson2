@@ -68,7 +68,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = getList(object);
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -132,7 +132,7 @@ final class ObjectWriterImplList
             }
         }
 
-        List list = getList(object);
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -239,7 +239,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = getList(object);
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         boolean previousRefDetect = true;
@@ -377,19 +377,5 @@ final class ObjectWriterImplList
             }
         }
         jsonWriter.endArray();
-    }
-
-    private List getList(Object object) {
-        List list;
-        if (object instanceof Iterable) {
-            list = new ArrayList();
-            Iterator iterator = ((Iterable) object).iterator();
-            while (iterator.hasNext()) {
-                list.add(iterator.next());
-            }
-        } else {
-            list = (List) object;
-        }
-        return list;
     }
 }
