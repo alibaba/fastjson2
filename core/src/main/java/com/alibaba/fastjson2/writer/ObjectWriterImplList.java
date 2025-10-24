@@ -10,8 +10,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_ARRAY_1x;
-import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 final class ObjectWriterImplList
         extends ObjectWriterPrimitiveImpl {
@@ -65,7 +64,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = getList(object);
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -129,7 +128,7 @@ final class ObjectWriterImplList
             }
         }
 
-        List list = getList(object);
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -236,7 +235,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = getList(object);
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         boolean previousRefDetect = true;
@@ -374,20 +373,5 @@ final class ObjectWriterImplList
             }
         }
         jsonWriter.endArray();
-    }
-
-    private List getList(Object object) {
-        if (object instanceof List) {
-            return (List) object;
-        } else if (object instanceof Iterable) {
-            final Iterable items = (Iterable) object;
-            List list = items instanceof Collection ? new ArrayList(((Collection<?>) items).size()) : new ArrayList();
-            for (Object item : items) {
-                list.add(item);
-            }
-            return list;
-        } else {
-            throw new JSONException("Can not cast '" + object.getClass() + "' to List");
-        }
     }
 }

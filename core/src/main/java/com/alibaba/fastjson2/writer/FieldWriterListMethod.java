@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
 final class FieldWriterListMethod<T>
         extends FieldWriterList<T> {
@@ -42,7 +43,7 @@ final class FieldWriterListMethod<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         List value;
         try {
-            value = (List) getFieldValue(object);
+            value = toList(getFieldValue(object));
         } catch (JSONException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -84,7 +85,7 @@ final class FieldWriterListMethod<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        List value = (List) getFieldValue(object);
+        List value = toList(getFieldValue(object));
 
         if (value == null) {
             jsonWriter.writeNull();

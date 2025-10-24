@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
 final class FieldWriterListFunc<T>
         extends FieldWriterList<T> {
@@ -41,7 +42,7 @@ final class FieldWriterListFunc<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         List value;
         try {
-            value = function.apply(object);
+            value = toList(function.apply(object));
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -82,7 +83,7 @@ final class FieldWriterListFunc<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        List list = function.apply(object);
+        List list = toList(function.apply(object));
         if (list == null) {
             jsonWriter.writeNull();
             return;
