@@ -8,12 +8,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
 import static com.alibaba.fastjson2.JSONFactory.getClassJSONArray1x;
-import static com.alibaba.fastjson2.util.TypeUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
 final class ObjectWriterImplList
         extends ObjectWriterPrimitiveImpl {
