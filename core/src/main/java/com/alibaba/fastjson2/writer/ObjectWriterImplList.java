@@ -12,7 +12,7 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
 import static com.alibaba.fastjson2.JSONFactory.getClassJSONArray1x;
-import static com.alibaba.fastjson2.util.TypeUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
 final class ObjectWriterImplList
         extends ObjectWriterPrimitiveImpl {
@@ -67,7 +67,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = (List) object;
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -131,7 +131,7 @@ final class ObjectWriterImplList
             }
         }
 
-        List list = (List) object;
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -238,8 +238,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = (List) object;
-
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         boolean previousRefDetect = true;
