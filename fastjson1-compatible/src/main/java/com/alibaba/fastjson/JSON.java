@@ -2325,8 +2325,9 @@ public abstract class JSON
         if (result instanceof com.alibaba.fastjson2.JSONObject) {
             JSONObject jsonObject = new JSONObject();
             com.alibaba.fastjson2.JSONObject object = (com.alibaba.fastjson2.JSONObject) result;
-            for (Map.Entry<String, Object> entry : object.entrySet()) {
-                jsonObject.put(entry.getKey(), adaptResult(entry.getValue(), level + 1));
+            for (Map.Entry<?, Object> entry : object.entrySet()) {
+                String key = (entry.getKey() == null) ? null : entry.getKey().toString();
+                jsonObject.put(key, adaptResult(entry.getValue(), level + 1));
             }
             return jsonObject;
         } else if (result instanceof com.alibaba.fastjson2.JSONArray) {
