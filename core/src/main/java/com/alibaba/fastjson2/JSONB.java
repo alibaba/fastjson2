@@ -3062,8 +3062,7 @@ public interface JSONB {
                 return off + 1;
             }
             bytes[off] = BC_LOCAL_DATE;
-            int year = value.getYear();
-            putIntBE(bytes, off + 1, (year << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
+            putIntBE(bytes, off + 1, ((value.getYear() & 0xFFFF) << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
             return off + 5;
         }
 
@@ -3099,9 +3098,11 @@ public interface JSONB {
                 bytes[off] = BC_NULL;
                 return off + 1;
             }
+
+            bytes[off] = BC_LOCAL_DATETIME;
             putIntBE(bytes,
-                    off,
-                    (BC_LOCAL_DATETIME << 24) | (value.getYear() << 8) | value.getMonthValue());
+                    off + 1,
+                    ((value.getYear() & 0xFFFF) << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
             putIntBE(bytes,
                     off + 4,
                     (value.getDayOfMonth() << 24)

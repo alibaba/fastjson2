@@ -2503,6 +2503,29 @@ public abstract class JSONReader
             wasNull = true;
             return null;
         }
+
+        if (str.charAt(0) == '-') {
+            try {
+                int spaceIndex = -1;
+                for (int i = str.length() - 9; i >= 0; --i) {
+                    if (str.charAt(i) == ' ') {
+                        spaceIndex = i;
+                        break;
+                    }
+                }
+
+                String normalizedStr = str;
+                if (spaceIndex != -1) {
+                    char[] charArray = str.toCharArray();
+                    charArray[spaceIndex] = 'T';
+                    normalizedStr = new String(charArray);
+                }
+
+                return LocalDateTime.parse(normalizedStr);
+            } catch (java.time.format.DateTimeParseException e) {
+                // ignored
+            }
+        }
         throw new JSONException(info("read LocalDateTime error " + str));
     }
 
