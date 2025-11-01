@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_1500;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -24,8 +25,9 @@ public class Issue1563 {
             data.add(row);
         }
         MyData myData = new MyData(data, strData);
-        assertEquals("{\"data\":[[\"i_0_j_0\",\"i_0_j_1\"],[\"i_1_j_0\",\"i_1_j_1\"]],\"strData\":[\"i_0_j_0\",\"i_0_j_1\",\"i_1_j_0\",\"i_1_j_1\"]}",
-                JSON.toJSONString(myData));
+        String expected = "{\"data\":[[\"i_0_j_0\",\"i_0_j_1\"],[\"i_1_j_0\",\"i_1_j_1\"]],\"strData\":[\"i_0_j_0\",\"i_0_j_1\",\"i_1_j_0\",\"i_1_j_1\"]}";
+        assertEquals(expected, JSON.toJSONString(myData));
+        assertEquals(expected, ObjectWriterCreator.INSTANCE.createObjectWriter(myData.getClass()).toJSONString(myData));
     }
 
     public static class MyData {
