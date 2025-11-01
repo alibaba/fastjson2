@@ -105,4 +105,8 @@ final class ObjectWriterImplOffsetDateTime
         String str = formatter.format(odt);
         jsonWriter.writeString(str);
     }
+
+    public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        write(jsonWriter, object, fieldName, fieldType, features);
+    }
 }
