@@ -896,19 +896,19 @@ public class ObjectReaderBaseModule
 
                 if (field.getName().equals(fieldName) || name.equals(fieldName)) {
                     int modifiers = field.getModifiers();
-                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                    if (!Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
                     fieldInfo.features |= FieldInfo.FIELD_MASK;
                 } else if (field.getName().equals(fieldName1)) {
                     int modifiers = field.getModifiers();
-                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                    if (!Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
                     fieldInfo.features |= FieldInfo.FIELD_MASK;
                 } else if (field.getName().equals(fieldName2)) {
                     int modifiers = field.getModifiers();
-                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                    if (!Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
                     fieldInfo.features |= FieldInfo.FIELD_MASK;

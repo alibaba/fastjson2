@@ -3830,4 +3830,20 @@ public class TypeUtils {
         }
         return Object.class;
     }
+
+    public static List toList(Object object) {
+        if (object == null) {
+            return null;
+        } else if (object instanceof List) {
+            return (List) object;
+        } else if (object instanceof Iterable) {
+            List list = new ArrayList();
+            for (Object item : (Iterable) object) {
+                list.add(item);
+            }
+            return list;
+        } else {
+            throw new JSONException("Can not cast '" + object.getClass() + "' to List");
+        }
+    }
 }

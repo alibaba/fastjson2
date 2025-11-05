@@ -72,7 +72,7 @@ abstract class FieldWriterInt64<T>
         Long value = (Long) getFieldValue(object);
 
         if (value == null) {
-            jsonWriter.writeNull();
+            jsonWriter.writeNumberNull();
             return;
         }
 

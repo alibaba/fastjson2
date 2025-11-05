@@ -1042,7 +1042,8 @@ abstract class JSONPathFilter
                 for (int i = 0; i < list.size(); i++) {
                     Object item = list.get(i);
                     if (item instanceof Map) {
-                        if (((Map) item).containsKey(name)) {
+                        Map map = (Map) item;
+                        if (map.containsKey(name) && map.get(name) != null) {
                             array.add(item);
                         }
                     }
@@ -1063,7 +1064,8 @@ abstract class JSONPathFilter
                 for (int i = 0; i < list.size(); i++) {
                     Object item = list.get(i);
                     if (item instanceof Map) {
-                        if (((Map) item).containsKey(name)) {
+                        Map map = (Map) item;
+                        if (map.containsKey(name) && map.get(name) != null) {
                             array.add(item);
                         }
                     }

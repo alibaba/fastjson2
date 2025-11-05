@@ -15,15 +15,15 @@ public class ReadResult {
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
 
         Map<String, String> files = new LinkedHashMap<>();
-//        files.put("aliyun_ecs.c8a.large", "/Users/wenshao/Downloads/result_" + version + "_g8a.out");
+        files.put("aliyun_ecs.c9a.large", "/Users/wenshao/Downloads/result_" + version + "_g9a.out");
         files.put("aliyun_ecs.c9i.large", "/Users/wenshao/Downloads/result_" + version + "_g9i.out");
 //        files.put("aliyun_ecs.g7.large", "/Users/wenshao/Downloads/result_2.0.33_g7.out");
-        files.put("aliyun_ecs.g8y.large", "/Users/wenshao/Downloads/result_" + version + "_g8y.out");
+//        files.put("aliyun_ecs.g8y.large", "/Users/wenshao/Downloads/result_" + version + "_g8y.out");
 //        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.41_aws_c6g.out");
 //        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_" + version + "_aws_c7g.out");
         files.put("orangepi5p", "/Users/wenshao/Downloads/result_" + version + "_orangepi5.out");
 //        files.put("orangepi_aipro", "/Users/wenshao/Downloads/result_" + version + "_orangepi_aipro.out");
-//        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + version + "_applem1pro.out");
+        files.put("MacBookM1Pro", "/Users/wenshao/Downloads/result_" + version + "_applem1pro.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {

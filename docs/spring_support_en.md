@@ -11,7 +11,7 @@ independent in the `extension` dependency.
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
-    <version>2.0.59</version>
+    <version>2.0.60</version>
 </dependency>
 
 or
@@ -19,7 +19,7 @@ or
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring6</artifactId>
-    <version>2.0.59</version>
+    <version>2.0.60</version>
 </dependency>
 ```
 
@@ -27,13 +27,13 @@ or
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.59'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.60'
 }
 
 or
 
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.59'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.60'
 }
 ```
 > After version 2.0.23, in order to be compatible with Spring 5.x / 6.x, different versions are independently opened with different dependency packages.
@@ -95,7 +95,7 @@ public class WebMvcConfigurer extends WebMvcConfigurationSupport {
         config.setCharset(StandardCharsets.UTF_8);
         
         converter.setFastJsonConfig(config);
-        // From version 2.0.59, FastJsonHttpMessageConverter default charset is already UTF-8, no need to set manually
+        // From version 2.0.60, FastJsonHttpMessageConverter default charset is already UTF-8, no need to set manually
         // converter.setDefaultCharset(StandardCharsets.UTF_8);
         converters.add(0, converter);
     }

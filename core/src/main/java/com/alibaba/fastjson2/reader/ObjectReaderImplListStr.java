@@ -146,6 +146,13 @@ public final class ObjectReaderImplListStr
                 case "kotlin.collections.EmptySet":
                     list = getKotlinEmptySet(instanceType);
                     break;
+                case "java.util.Collections$EmptySet":
+                    list = Collections.emptySet();
+                    break;
+                case "java.util.Collections$EmptyList": {
+                    list = Collections.emptyList();
+                    break;
+                }
                 default:
                     try {
                         list = (Collection) instanceType.newInstance();

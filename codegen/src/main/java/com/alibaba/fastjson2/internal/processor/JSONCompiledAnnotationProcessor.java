@@ -1848,7 +1848,6 @@ public class JSONCompiledAnnotationProcessor
 
         JCTree.JCIdent fieldValue = ident("string" + i);
         ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
-        stmts.append(genWriteFieldName(mwc, attributeInfo, i));
         stmts.append(
                 defVar(
                         fieldValue.name,
@@ -1859,13 +1858,19 @@ public class JSONCompiledAnnotationProcessor
         stmts.append(
                 defIf(
                         notNull(fieldValue),
-                        block(exec(mwc.jsonWriterMethod("writeString", fieldValue))),
+                        block(
+                                genWriteFieldName(mwc, attributeInfo, i),
+                                exec(mwc.jsonWriterMethod("writeString", fieldValue))
+                        ),
                         block(defIf(
                                 ne(bitAnd(mwc.contextFeatures, writeNullFeatures), 0L),
-                                defIf(
-                                        ne(bitAnd(mwc.contextFeatures, writeNullAsEmptyFeatures), 0L),
-                                        block(exec(mwc.jsonWriterMethod("writeString", ""))),
-                                        block(exec(mwc.jsonWriterMethod("writeStringNull")))
+                                block(
+                                        genWriteFieldName(mwc, attributeInfo, i),
+                                        defIf(
+                                                ne(bitAnd(mwc.contextFeatures, writeNullAsEmptyFeatures), 0L),
+                                                block(exec(mwc.jsonWriterMethod("writeString", ""))),
+                                                block(exec(mwc.jsonWriterMethod("writeStringNull")))
+                                        )
                                 )
                         ))
                 )
@@ -3015,14 +3020,15 @@ public class JSONCompiledAnnotationProcessor
             );
         }
 
-        JCTree.JCExpression mapEntryKeyExpr = method(jsonReaderIdent, "readFieldName");
+        JCTree.JCVariableDecl mapKeyVar = defVar(
+                attributeInfo.name + "_key",
+                ident("String"),
+                method(jsonReaderIdent, "readFieldName")
+        );
+        whileStmts.append(mapKeyVar);
+        JCTree.JCIdent mapKeyIdent = ident(mapKeyVar);
 
         if (referenceDetect) {
-            JCTree.JCVariableDecl mapKey = defVar(attributeInfo.name + "_key", ident("String"), mapEntryKeyExpr);
-            whileStmts.append(mapKey);
-            JCTree.JCVariableDecl mapValue = defVar(attributeInfo.name + "_value", ident("String"));
-            whileStmts.append(mapValue);
-
             ListBuffer<JCTree.JCStatement> isReferenceStmts = new ListBuffer<>();
             JCTree.JCMethodInvocation readReferenceMethod = method(jsonReaderIdent, "readReference");
             JCTree.JCVariableDecl refVar = defVar("ref", ident("String"), readReferenceMethod);
@@ -3031,7 +3037,7 @@ public class JSONCompiledAnnotationProcessor
                     jsonReaderIdent,
                     "addResolveTask",
                     ident(fieldValueVar),
-                    ident(mapKey),
+                    mapKeyIdent,
                     method(qualIdent("com.alibaba.fastjson2.JSONPath"), "of", ident(refVar))
             );
             isReferenceStmts.append(exec(addResolveTaskMethod));
@@ -3039,11 +3045,11 @@ public class JSONCompiledAnnotationProcessor
                     defIf(
                             method(jsonReaderIdent, "isReference"),
                             block(isReferenceStmts.toList()),
-                            exec(method(fieldValueVar, "put", mapEntryKeyExpr, mapEntryValueExpr))
+                            exec(method(fieldValueVar, "put", mapKeyIdent, mapEntryValueExpr))
                     )
             );
         } else {
-            whileStmts.append(exec(method(fieldValueVar, "put", mapEntryKeyExpr, mapEntryValueExpr)));
+            whileStmts.append(exec(method(fieldValueVar, "put", mapKeyIdent, mapEntryValueExpr)));
         }
 
         elseStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfObjectEndMethod), block(whileStmts.toList())));

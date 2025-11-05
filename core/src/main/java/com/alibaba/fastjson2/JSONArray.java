@@ -150,7 +150,9 @@ public class JSONArray
         }
 
         if (value instanceof Object[]) {
-            return JSONArray.of((Object[]) value);
+            JSONArray array = JSONArray.of((Object[]) value);
+            set(index, array);
+            return array;
         }
 
         Class<?> valueClass = value.getClass();
@@ -161,6 +163,7 @@ public class JSONArray
                 Object item = Array.get(value, i);
                 jsonArray.add(item);
             }
+            set(index, jsonArray);
             return jsonArray;
         }
 
@@ -205,12 +208,13 @@ public class JSONArray
 
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
-        if (objectWriter instanceof ObjectWriterAdapter) {
-            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
-            return writerAdapter.toJSONObject(value);
-        }
 
-        return (JSONObject) JSON.toJSON(value);
+        JSONObject jsonObject = (objectWriter instanceof ObjectWriterAdapter)
+                ? ((ObjectWriterAdapter) objectWriter).toJSONObject(value)
+                : (JSONObject) JSON.toJSON(value);
+
+        set(index, jsonObject);
+        return jsonObject;
     }
 
     /**
@@ -282,7 +286,7 @@ public class JSONArray
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to double");
     }
 
     /**
@@ -295,27 +299,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public double getDoubleValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0D;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-
-        if (value instanceof String) {
-            String str = ((String) value).trim();
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0D;
-            }
-
-            return Double.parseDouble(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to double value");
+        Double value = getDouble(index);
+        return value == null ? 0D : value;
     }
 
     /**
@@ -352,7 +337,7 @@ public class JSONArray
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to float");
     }
 
     /**
@@ -365,27 +350,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public float getFloatValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0F;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = ((String) value).trim();
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0F;
-            }
-
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to float value");
+        Float value = getFloat(index);
+        return value == null ? 0F : value;
     }
 
     /**
@@ -416,6 +382,10 @@ public class JSONArray
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
             }
 
             return Long.parseLong(str);
@@ -455,6 +425,10 @@ public class JSONArray
                 return 0;
             }
 
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
+            }
+
             return Long.parseLong(str);
         }
 
@@ -489,6 +463,10 @@ public class JSONArray
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
             }
 
             return Integer.parseInt(str);
@@ -526,6 +504,10 @@ public class JSONArray
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
             }
 
             return Integer.parseInt(str);
@@ -568,7 +550,7 @@ public class JSONArray
             return Short.parseShort(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Short");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to short");
     }
 
     /**
@@ -581,27 +563,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public short getShortValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).shortValue();
-        }
-
-        if (value instanceof String) {
-            String str = ((String) value).trim();
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            return Short.parseShort(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to short value");
+        Short value = getShort(index);
+        return value == null ? 0 : value;
     }
 
     /**
@@ -634,7 +597,7 @@ public class JSONArray
             return Byte.parseByte(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Byte");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to byte");
     }
 
     /**
@@ -647,27 +610,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public byte getByteValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).byteValue();
-        }
-
-        if (value instanceof String) {
-            String str = ((String) value).trim();
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            return Byte.parseByte(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
+        Byte value = getByte(index);
+        return value == null ? 0 : value;
     }
 
     /**
@@ -703,7 +647,7 @@ public class JSONArray
             return "true".equalsIgnoreCase(str) || "1".equals(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean");
     }
 
     /**
@@ -715,26 +659,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public boolean getBooleanValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return false;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue() == 1;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            return "true".equalsIgnoreCase(str) || "1".equals(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
+        Boolean value = getBoolean(index);
+        return value != null && value;
     }
 
     /**
@@ -849,6 +775,10 @@ public class JSONArray
 
         if (value instanceof Date) {
             return (Date) value;
+        }
+
+        if (value instanceof String) {
+            return DateUtils.parseDate((String) value);
         }
 
         if (value instanceof Number) {
