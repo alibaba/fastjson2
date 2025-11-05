@@ -7,8 +7,18 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 
 /**
- * Fastjson for Spring Data Redis Serializer.
+ * Fastjson2 serializer for Spring Data Redis (Spring 6 / Spring Boot 3).
+ * Provides type-safe JSON serialization and deserialization for Redis values.
  *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * RedisTemplate<String, User> template = new RedisTemplate<>();
+ * template.setValueSerializer(new FastJsonRedisSerializer<>(User.class));
+ * template.setConnectionFactory(connectionFactory);
+ * template.afterPropertiesSet();
+ * }</pre>
+ *
+ * @param <T> the type of objects to serialize/deserialize
  * @author lihengming
  * @author Victor.Zxy
  * @see RedisSerializer
@@ -19,18 +29,40 @@ public class FastJsonRedisSerializer<T>
     private FastJsonConfig config = new FastJsonConfig();
     private final Class<T> type;
 
+    /**
+     * Creates a new serializer for the specified type.
+     *
+     * @param type the class type to serialize/deserialize
+     */
     public FastJsonRedisSerializer(Class<T> type) {
         this.type = type;
     }
 
+    /**
+     * Gets the current FastJsonConfig.
+     *
+     * @return the FastJsonConfig instance
+     */
     public FastJsonConfig getFastJsonConfig() {
         return config;
     }
 
+    /**
+     * Sets the FastJsonConfig for this serializer.
+     *
+     * @param fastJsonConfig the configuration to use
+     */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
         this.config = fastJsonConfig;
     }
 
+    /**
+     * Serializes the given object to JSON bytes.
+     *
+     * @param t the object to serialize
+     * @return the JSON bytes, or empty array if object is null
+     * @throws SerializationException if serialization fails
+     */
     @Override
     public byte[] serialize(T t) throws SerializationException {
         if (t == null) {
@@ -47,6 +79,13 @@ public class FastJsonRedisSerializer<T>
         }
     }
 
+    /**
+     * Deserializes JSON bytes to an object.
+     *
+     * @param bytes the JSON bytes to deserialize
+     * @return the deserialized object, or null if bytes is null or empty
+     * @throws SerializationException if deserialization fails
+     */
     @Override
     public T deserialize(byte[] bytes) throws SerializationException {
         if (bytes == null || bytes.length == 0) {

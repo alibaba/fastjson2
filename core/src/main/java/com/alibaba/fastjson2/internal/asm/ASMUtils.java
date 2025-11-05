@@ -23,6 +23,14 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
+/**
+ * Utility class for ASM bytecode manipulation operations.
+ * Provides methods for type conversion, descriptor generation, and parameter name lookup.
+ * This class contains constants and helper methods used throughout the fastjson2 code generation process.
+ *
+ * @see Type
+ * @see ClassWriter
+ */
 public final class ASMUtils {
     public static final String TYPE_UNSAFE_UTILS = JDKUtils.class.getName().replace('.', '/');
 
@@ -219,6 +227,20 @@ public final class ASMUtils {
         descMapping.put(FieldReader[].class, DESC_FIELD_READER_ARRAY);
     }
 
+    /**
+     * Converts a Java class to its internal JVM type name representation.
+     * Handles arrays, primitives, and reference types.
+     *
+     * @param clazz the class to convert
+     * @return the internal type name (e.g., "java/lang/String" for String.class, "[I" for int[].class)
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String type1 = ASMUtils.type(String.class);    // returns "java/lang/String"
+     * String type2 = ASMUtils.type(int.class);       // returns "I"
+     * String type3 = ASMUtils.type(int[].class);     // returns "[I"
+     * }</pre>
+     */
     public static String type(Class<?> clazz) {
         String type = typeMapping.get(clazz);
         if (type != null) {
@@ -235,6 +257,20 @@ public final class ASMUtils {
 
     static final AtomicReference<char[]> descCacheRef = new AtomicReference<>();
 
+    /**
+     * Generates the JVM type descriptor for the given class.
+     * Type descriptors are used in field and method signatures.
+     *
+     * @param clazz the class to generate descriptor for
+     * @return the type descriptor (e.g., "Ljava/lang/String;" for String.class, "I" for int.class)
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String desc1 = ASMUtils.desc(String.class);     // returns "Ljava/lang/String;"
+     * String desc2 = ASMUtils.desc(int.class);        // returns "I"
+     * String desc3 = ASMUtils.desc(Object[].class);   // returns "[Ljava/lang/Object;"
+     * }</pre>
+     */
     public static String desc(Class<?> clazz) {
         String desc = descMapping.get(clazz);
         if (desc != null) {
@@ -265,6 +301,22 @@ public final class ASMUtils {
         return str;
     }
 
+    /**
+     * Looks up parameter names for the given method or constructor using bytecode inspection.
+     * Attempts to extract parameter names from debug information in the class file.
+     * If debug information is not available, returns default parameter names like "arg0", "arg1", etc.
+     *
+     * @param methodOrCtor the method or constructor to inspect
+     * @return array of parameter names, or default names if debug info is unavailable
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Method method = MyClass.class.getDeclaredMethod("myMethod", String.class, int.class);
+     * String[] paramNames = ASMUtils.lookupParameterNames(method);
+     * // Returns actual parameter names if compiled with debug info, e.g., ["name", "age"]
+     * // Otherwise returns default names like ["arg0", "arg1"]
+     * }</pre>
+     */
     public static String[] lookupParameterNames(AccessibleObject methodOrCtor) {
         if (methodOrCtor instanceof Constructor) {
             Constructor constructor = (Constructor) methodOrCtor;

@@ -24,7 +24,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Fastjson for Spring MVC Converter.
+ * Fastjson2 HTTP message converter for Spring MVC.
+ * Converts HTTP request/response bodies between JSON and Java objects using Fastjson2.
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * @Configuration
+ * public class WebConfig implements WebMvcConfigurer {
+ *     @Override
+ *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+ *         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+ *         converters.add(0, converter);
+ *     }
+ * }
+ * }</pre>
  *
  * @author Victor.Zxy
  * @see AbstractHttpMessageConverter
@@ -34,15 +47,19 @@ import java.util.Arrays;
 public class FastJsonHttpMessageConverter
         extends AbstractHttpMessageConverter<Object>
         implements GenericHttpMessageConverter<Object> {
+    /**
+     * Media type for JavaScript responses (JSONP support).
+     */
     public static final MediaType APPLICATION_JAVASCRIPT = new MediaType("application", "javascript");
 
     /**
-     * with fastJson config
+     * Configuration for Fastjson2 behavior.
      */
     private FastJsonConfig config = new FastJsonConfig();
 
     /**
-     * Can serialize/deserialize all types.
+     * Creates a converter that can handle all media types.
+     * Default charset is UTF-8.
      */
     public FastJsonHttpMessageConverter() {
         super(MediaType.ALL);
@@ -50,45 +67,101 @@ public class FastJsonHttpMessageConverter
     }
 
     /**
-     * @return the fastJsonConfig.
+     * Gets the current FastJsonConfig.
+     *
+     * @return the FastJsonConfig instance
      */
     public FastJsonConfig getFastJsonConfig() {
         return config;
     }
 
     /**
-     * @param fastJsonConfig the fastJsonConfig to set.
+     * Sets the FastJsonConfig for this converter.
+     *
+     * @param fastJsonConfig the configuration to use
      */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
         this.config = fastJsonConfig;
     }
 
+    /**
+     * Indicates whether this converter supports the given class.
+     * This implementation supports all classes.
+     *
+     * @param clazz the class to check
+     * @return always true
+     */
     @Override
     protected boolean supports(Class<?> clazz) {
         return true;
     }
 
+    /**
+     * Checks if this converter can read the specified type.
+     *
+     * @param type the type to check
+     * @param contextClass the context class
+     * @param mediaType the media type
+     * @return true if this converter can read the type
+     */
     @Override
     public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
         return super.canRead(contextClass, mediaType);
     }
 
+    /**
+     * Checks if this converter can write the specified type.
+     *
+     * @param type the type to check
+     * @param clazz the class to check
+     * @param mediaType the media type
+     * @return true if this converter can write the type
+     */
     @Override
     public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
         return super.canWrite(clazz, mediaType);
     }
 
+    /**
+     * Reads an object from the HTTP input message.
+     *
+     * @param type the type to read to
+     * @param contextClass the context class
+     * @param inputMessage the HTTP input message
+     * @return the deserialized object
+     * @throws IOException if an I/O error occurs
+     * @throws HttpMessageNotReadableException if the message cannot be read
+     */
     @Override
     public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
         return readType(getType(type, contextClass), inputMessage);
     }
 
+    /**
+     * Writes an object to the HTTP output message.
+     *
+     * @param o the object to write
+     * @param type the type to write
+     * @param contentType the content type
+     * @param outputMessage the HTTP output message
+     * @throws IOException if an I/O error occurs
+     * @throws HttpMessageNotWritableException if the message cannot be written
+     */
     @Override
     public void write(Object o, Type type, MediaType contentType, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         // support StreamingHttpOutputMessage in spring4.0+
         super.write(o, contentType, outputMessage);
     }
 
+    /**
+     * Reads an object from the HTTP input message (internal implementation).
+     *
+     * @param clazz the class to read to
+     * @param inputMessage the HTTP input message
+     * @return the deserialized object
+     * @throws IOException if an I/O error occurs
+     * @throws HttpMessageNotReadableException if the message cannot be read
+     */
     @Override
     protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
         return readType(getType(clazz, null), inputMessage);
@@ -97,6 +170,13 @@ public class FastJsonHttpMessageConverter
     /** Default initialization capacity when content-length is not specified */
     private static int REQUEST_BODY_INITIAL_CAPACITY = 8192;
 
+    /**
+     * Sets the initial capacity for request body buffers when content-length is unknown.
+     * Must be between 128 and 1048576 (1MB).
+     *
+     * @param initialCapacity the initial capacity in bytes
+     * @throws IllegalArgumentException if initialCapacity is out of valid range
+     */
     public static void setRequestBodyInitialCapacity(int initialCapacity) {
         if (initialCapacity < 128 || initialCapacity > 1024 * 1024) {
             throw new IllegalArgumentException("invalid initialCapacity: " + initialCapacity);
@@ -105,7 +185,11 @@ public class FastJsonHttpMessageConverter
     }
 
     /**
-     * @param contentLength The content length of the request message. If -1 is passed, it means unknown.
+     * Calculates the initial buffer capacity based on content length.
+     * Prevents over-allocation for large or unknown content lengths.
+     *
+     * @param contentLength the content length of the request message, -1 if unknown
+     * @return the calculated initial capacity, capped at 1MB
      */
     protected static int calcInitialCapacity(long contentLength) {
         return contentLength == -1 || contentLength > Integer.MAX_VALUE
@@ -115,8 +199,13 @@ public class FastJsonHttpMessageConverter
     }
 
     /**
-     * @param in the specified input stream
-     * @param contentLength -1 means unknown
+     * Efficiently reads all bytes from an input stream.
+     * Optimized to minimize array copying and handle unknown content lengths.
+     *
+     * @param in the input stream to read from
+     * @param contentLength the expected content length, -1 if unknown
+     * @return the bytes read from the stream
+     * @throws IOException if an I/O error occurs
      */
     protected static byte[] fastRead(final InputStream in, final long contentLength) throws IOException {
         final int expectSize = calcInitialCapacity(contentLength);
@@ -179,6 +268,14 @@ public class FastJsonHttpMessageConverter
         }
     }
 
+    /**
+     * Reads and deserializes the HTTP input message to the specified type.
+     *
+     * @param type the target type
+     * @param inputMessage the HTTP input message
+     * @return the deserialized object
+     * @throws HttpMessageNotReadableException if parsing or I/O error occurs
+     */
     protected Object readType(Type type, HttpInputMessage inputMessage) {
         final long contentLength = inputMessage.getHeaders().getContentLength(); // -1 表示未知
         try {
@@ -191,6 +288,15 @@ public class FastJsonHttpMessageConverter
         }
     }
 
+    /**
+     * Writes the given object to the HTTP output message (internal implementation).
+     * Handles string/byte array optimization and JSONP support.
+     *
+     * @param object the object to write
+     * @param outputMessage the HTTP output message
+     * @throws IOException if an I/O error occurs
+     * @throws HttpMessageNotWritableException if the message cannot be written
+     */
     @Override
     protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         HttpHeaders headers = outputMessage.getHeaders();
@@ -226,6 +332,14 @@ public class FastJsonHttpMessageConverter
         }
     }
 
+    /**
+     * Resolves the actual type considering generic context.
+     * Uses Spring's ResolvableType if available (Spring 4.0+).
+     *
+     * @param type the declared type
+     * @param contextClass the context class for type resolution
+     * @return the resolved type
+     */
     protected Type getType(Type type, Class<?> contextClass) {
         if (Spring4TypeResolvableHelper.isSupport()) {
             return Spring4TypeResolvableHelper.getType(type, contextClass);

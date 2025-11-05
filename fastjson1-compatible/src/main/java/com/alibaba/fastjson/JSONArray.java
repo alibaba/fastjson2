@@ -21,6 +21,29 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
+/**
+ * A JSON array that implements {@link List} and provides convenient methods for accessing elements.
+ * <p>This is a fastjson1-compatible class that provides the same behavior as the original fastjson 1.x API.
+ * JSONArray provides type-safe accessor methods for retrieving and converting array elements.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create a JSONArray
+ * JSONArray array = new JSONArray();
+ * array.add("Alice");
+ * array.add(30);
+ * array.add(true);
+ *
+ * // Parse from JSON string
+ * JSONArray array2 = JSON.parseArray("[1,2,3,4,5]");
+ * int first = array2.getIntValue(0); // 1
+ * int size = array2.size();          // 5
+ *
+ * // Parse typed list
+ * String json = "[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]";
+ * List<User> users = JSON.parseArray(json, User.class);
+ * }</pre>
+ */
 public class JSONArray
         extends JSON
         implements List<Object>, Serializable, Cloneable {
@@ -43,6 +66,16 @@ public class JSONArray
         this.list = new ArrayList<>(initialCapacity);
     }
 
+    /**
+     * Retrieves a {@link Byte} value at the specified index.
+     * <p>This is a fastjson1-compatible method. Supports conversion from numbers and strings.
+     *
+     * @param index the index of the element to return
+     * @return the Byte value, or {@code null} if the value is null or an empty string
+     * @throws JSONException if the value cannot be converted to a Byte
+     * @throws NumberFormatException if the string value is not a valid byte
+     * @throws IndexOutOfBoundsException if the index is out of range
+     */
     public Byte getByte(int index) {
         Object value = get(index);
 
@@ -350,6 +383,23 @@ public class JSONArray
         throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
     }
 
+    /**
+     * Retrieves a {@link JSONObject} value at the specified index.
+     * <p>This is a fastjson1-compatible method. If the value is a string, it will be parsed as JSON.
+     * If the value is a Map, it will be converted to a JSONObject.
+     *
+     * @param index the index of the element to return
+     * @return the JSONObject value, or {@code null} if the value is null
+     * @throws JSONException if the value cannot be converted to a JSONObject
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONArray array = JSON.parseArray("[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]");
+     * JSONObject first = array.getJSONObject(0);
+     * String name = first.getString("name"); // "Alice"
+     * }</pre>
+     */
     public JSONObject getJSONObject(int index) {
         Object value = get(index);
 
@@ -845,6 +895,23 @@ public class JSONArray
         return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
+    /**
+     * Converts this JSONArray to a typed {@link List} of objects.
+     * <p>This is a fastjson1-compatible method. Each element in the array is automatically converted
+     * to the specified type with proper field mapping and type conversion.
+     *
+     * @param <T> the type of elements in the list
+     * @param clazz the class type of elements to convert to
+     * @return a typed list containing the converted elements
+     * @throws JSONException if any element cannot be converted to the specified type
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONArray array = JSON.parseArray("[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]");
+     * List<User> users = array.toJavaList(User.class);
+     * System.out.println(users.get(0).getName()); // "Alice"
+     * }</pre>
+     */
     public <T> List<T> toJavaList(Class<T> clazz) {
         List<T> list = new ArrayList<>(this.size());
 
@@ -876,11 +943,36 @@ public class JSONArray
         return list;
     }
 
+    /**
+     * Adds an element to this JSONArray and returns the array for method chaining.
+     * <p>This is a fluent API method that allows method chaining. This is a fastjson1-compatible method.
+     *
+     * @param e the element to add
+     * @return this JSONArray instance for method chaining
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONArray array = new JSONArray()
+     *     .fluentAdd(1)
+     *     .fluentAdd(2)
+     *     .fluentAdd(3);
+     * }</pre>
+     */
     public JSONArray fluentAdd(Object e) {
         list.add(e);
         return this;
     }
 
+    /**
+     * Converts this JSONArray to a Java object of the specified class type.
+     * <p>This is a fastjson1-compatible method. Useful when deserializing arrays into custom objects
+     * that implement list-like behavior or accept array data in constructors.
+     *
+     * @param <T> the type of the object to return
+     * @param clazz the class to convert this JSONArray to
+     * @return a new instance of the specified class
+     * @throws JSONException if the conversion fails
+     */
     public <T> T toJavaObject(Class<T> clazz) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(clazz);

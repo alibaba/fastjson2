@@ -18,6 +18,19 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
+/**
+ * Support class for serializing and deserializing JSR 354 Money and Currency API types.
+ * Provides ObjectWriter and ObjectReader instances for javax.money types including
+ * MonetaryAmount, CurrencyUnit, and NumberValue.
+ *
+ * <p>This class requires the JSR 354 Money API and a reference implementation (such as Moneta)
+ * to be available on the classpath.
+ *
+ * @see javax.money.MonetaryAmount
+ * @see javax.money.CurrencyUnit
+ * @see javax.money.NumberValue
+ * @since 2.0.0
+ */
 public class MoneySupport {
     static Class CLASS_MONETARY;
     static Class CLASS_MONETARY_AMOUNT;
@@ -33,6 +46,13 @@ public class MoneySupport {
     static Function<String, Object> FUNC_GET_CURRENCY;
     static Function<Object, BigDecimal> FUNC_NUMBER_VALUE;
 
+    /**
+     * Creates an ObjectReader for javax.money.CurrencyUnit.
+     * The reader deserializes currency codes (e.g., "USD", "EUR") into CurrencyUnit instances.
+     *
+     * @return an ObjectReader for CurrencyUnit
+     * @throws JSONException if the Money API classes are not available
+     */
     public static ObjectReader createCurrencyUnitReader() {
         if (CLASS_MONETARY == null) {
             CLASS_MONETARY = TypeUtils.loadClass("javax.money.Monetary");
@@ -70,6 +90,19 @@ public class MoneySupport {
         return ObjectReaderImplValue.of(CLASS_CURRENCY_UNIT, String.class, FUNC_GET_CURRENCY);
     }
 
+    /**
+     * Creates an ObjectReader for javax.money.MonetaryAmount.
+     * The reader deserializes JSON objects with "currency" and "number" fields into MonetaryAmount instances.
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * // JSON: {"currency": "USD", "number": 100.50}
+     * ObjectReader reader = MoneySupport.createMonetaryAmountReader();
+     * }</pre>
+     *
+     * @return an ObjectReader for MonetaryAmount
+     * @throws JSONException if reader creation fails
+     */
     public static ObjectReader createMonetaryAmountReader() {
         if (CLASS_NUMBER_VALUE == null) {
             CLASS_NUMBER_VALUE = TypeUtils.loadClass("javax.money.NumberValue");
@@ -112,6 +145,13 @@ public class MoneySupport {
 
     static Method METHOD_NUMBER_VALUE_OF;
 
+    /**
+     * Creates an ObjectReader for javax.money.NumberValue (specifically DefaultNumberValue).
+     * The reader deserializes numeric values into NumberValue instances.
+     *
+     * @return an ObjectReader for NumberValue
+     * @throws JSONException if the Money API classes are not available
+     */
     public static ObjectReader createNumberValueReader() {
         if (CLASS_DEFAULT_NUMBER_VALUE == null) {
             CLASS_DEFAULT_NUMBER_VALUE = TypeUtils.loadClass("org.javamoney.moneta.spi.DefaultNumberValue");
@@ -132,6 +172,19 @@ public class MoneySupport {
         return ObjectReaderImplValue.of(CLASS_NUMBER_VALUE, BigDecimal.class, METHOD_NUMBER_VALUE_OF);
     }
 
+    /**
+     * Creates an ObjectWriter for javax.money.MonetaryAmount.
+     * The writer serializes MonetaryAmount instances into JSON objects with "currency" and "number" fields.
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * // MonetaryAmount -> {"currency": "USD", "number": 100.50}
+     * ObjectWriter writer = MoneySupport.createMonetaryAmountWriter();
+     * }</pre>
+     *
+     * @return an ObjectWriter for MonetaryAmount
+     * @throws JSONException if writer creation fails
+     */
     public static ObjectWriter createMonetaryAmountWriter() {
         if (CLASS_MONETARY == null) {
             CLASS_MONETARY = TypeUtils.loadClass("javax.money.Monetary");
@@ -183,6 +236,13 @@ public class MoneySupport {
         return new ObjectWriterAdapter(CLASS_MONETARY_AMOUNT, null, null, 0, Arrays.asList(fieldWriter0, fieldWriter1));
     }
 
+    /**
+     * Creates an ObjectWriter for javax.money.NumberValue.
+     * The writer serializes NumberValue instances as BigDecimal values.
+     *
+     * @return an ObjectWriter for NumberValue
+     * @throws JSONException if writer creation fails
+     */
     public static ObjectWriter createNumberValueWriter() {
         if (CLASS_NUMBER_VALUE == null) {
             CLASS_NUMBER_VALUE = TypeUtils.loadClass("javax.money.NumberValue");
@@ -201,6 +261,15 @@ public class MoneySupport {
         return ObjectWriters.ofToBigDecimal(FUNC_NUMBER_VALUE);
     }
 
+    /**
+     * Creates a MonetaryAmount instance from a currency and number.
+     * This method is used internally during deserialization.
+     *
+     * @param currency the CurrencyUnit or currency code
+     * @param number the numeric amount (NumberValue or Number)
+     * @return a MonetaryAmount instance
+     * @throws JSONException if creation fails
+     */
     public static Object createMonetaryAmount(Object currency, Object number) {
         if (CLASS_NUMBER_VALUE == null) {
             CLASS_NUMBER_VALUE = TypeUtils.loadClass("javax.money.NumberValue");

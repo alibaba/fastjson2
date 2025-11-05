@@ -14,6 +14,38 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * ObjectReaderAdapter is a flexible implementation of ObjectReader that adapts various
+ * deserialization strategies for reading JSON data into Java objects. It provides efficient
+ * field lookup using hash-based indexing and supports polymorphic deserialization through
+ * the "seeAlso" mechanism.
+ *
+ * <p>Key features include:
+ * <ul>
+ *   <li>Fast field lookup using sorted hash codes and binary search</li>
+ *   <li>Case-insensitive field matching support</li>
+ *   <li>Polymorphic deserialization with @JsonTypeInfo.use(Id.NAME)</li>
+ *   <li>Custom object creators and build functions</li>
+ *   <li>Schema validation support</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create with field readers and custom creator
+ * Supplier<User> creator = User::new;
+ * FieldReader[] fieldReaders = {
+ *     ObjectReaders.fieldReader("id", Long.class, User::setId),
+ *     ObjectReaders.fieldReader("name", String.class, User::setName)
+ * };
+ * ObjectReader<User> reader = new ObjectReaderAdapter<>(User.class, creator, fieldReaders);
+ *
+ * // Use for deserialization
+ * User user = reader.readObject(JSONReader.of(jsonString));
+ * }</pre>
+ *
+ * @param <T> the type of objects that this ObjectReader can deserialize
+ * @since 2.0.0
+ */
 public class ObjectReaderAdapter<T>
         extends ObjectReaderBean<T> {
     protected final String typeKey;

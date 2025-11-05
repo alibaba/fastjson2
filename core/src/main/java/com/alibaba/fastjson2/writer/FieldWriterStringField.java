@@ -4,6 +4,25 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 
+/**
+ * FieldWriterStringField handles serialization of String fields accessed directly via reflection.
+ * This is a specialized field writer optimized for String type fields.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>String field serialization with proper escaping</li>
+ *   <li>Null string handling with WriteNullStringAsEmpty feature</li>
+ *   <li>String trimming when format is set to "trim"</li>
+ *   <li>Empty string filtering with IgnoreEmpty feature</li>
+ *   <li>Symbol table optimization for JSONB format</li>
+ *   <li>Raw value writing when RAW_VALUE feature is enabled</li>
+ * </ul>
+ *
+ * <p>This implementation uses direct field access via reflection for optimal performance.
+ *
+ * @param <T> the type of the object containing the string field
+ * @since 2.0.0
+ */
 final class FieldWriterStringField<T>
         extends FieldWriter<T> {
     FieldWriterStringField(

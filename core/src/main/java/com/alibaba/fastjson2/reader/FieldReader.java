@@ -25,6 +25,33 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
+/**
+ * FieldReader is responsible for reading and setting field values during JSON deserialization.
+ * It provides an abstraction over various field access methods including direct field access,
+ * setter methods, and constructor parameters.
+ *
+ * <p>Key features include:
+ * <ul>
+ *   <li>Multiple field access strategies (direct field, method, constructor parameter)</li>
+ *   <li>Type conversion and validation</li>
+ *   <li>Default value support</li>
+ *   <li>Schema validation</li>
+ *   <li>Format and locale support for date/time and number fields</li>
+ *   <li>Optimized field access using UNSAFE when available</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Typically used internally by ObjectReader implementations
+ * FieldReader fieldReader = objectReader.getFieldReader("name");
+ * if (fieldReader != null) {
+ *     fieldReader.accept(object, "John Doe");
+ * }
+ * }</pre>
+ *
+ * @param <T> the type of the object containing the field
+ * @since 2.0.0
+ */
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
     public final int ordinal;
@@ -117,12 +144,25 @@ public abstract class FieldReader<T>
         this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
     }
 
+    /**
+     * Accepts and sets the default value for this field on the specified object,
+     * if a default value is configured.
+     *
+     * @param object the object on which to set the default value
+     */
     public void acceptDefaultValue(T object) {
         if (defaultValue != null) {
             accept(object, defaultValue);
         }
     }
 
+    /**
+     * Gets or creates an ObjectReader for this field's type using the specified JSONReader.
+     * The result is cached for subsequent calls.
+     *
+     * @param jsonReader the JSONReader to use for obtaining the ObjectReader
+     * @return the ObjectReader for this field's type
+     */
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (reader != null) {
             return reader;
@@ -130,6 +170,13 @@ public abstract class FieldReader<T>
         return reader = jsonReader.getObjectReader(fieldType);
     }
 
+    /**
+     * Gets or creates an ObjectReader for this field's type using the specified context.
+     * The result is cached for subsequent calls.
+     *
+     * @param context the JSONReader context to use for obtaining the ObjectReader
+     * @return the ObjectReader for this field's type
+     */
     public ObjectReader getObjectReader(JSONReader.Context context) {
         if (reader != null) {
             return reader;
@@ -137,6 +184,13 @@ public abstract class FieldReader<T>
         return reader = context.getObjectReader(fieldType);
     }
 
+    /**
+     * Gets or creates an ObjectReader for this field's type using the specified provider.
+     * The result is cached for subsequent calls. This method respects the FieldBased feature.
+     *
+     * @param provider the ObjectReaderProvider to use for obtaining the ObjectReader
+     * @return the ObjectReader for this field's type
+     */
     public ObjectReader getObjectReader(ObjectReaderProvider provider) {
         if (reader != null) {
             return reader;
@@ -146,10 +200,21 @@ public abstract class FieldReader<T>
         return reader = provider.getObjectReader(fieldType, fieldBased);
     }
 
+    /**
+     * Gets the type of items in this field if it represents a collection or array.
+     *
+     * @return the item type, or null if this field is not a collection or array
+     */
     public Type getItemType() {
         return itemType;
     }
 
+    /**
+     * Gets the class of items in this field if it represents a collection or array.
+     * The result is cached for subsequent calls.
+     *
+     * @return the item class, or null if this field is not a collection or array
+     */
     public Class getItemClass() {
         if (itemType == null) {
             return null;
@@ -162,6 +227,11 @@ public abstract class FieldReader<T>
         return itemClass;
     }
 
+    /**
+     * Gets the hash code of the item class name for this field.
+     *
+     * @return the hash code of the item class name, or 0 if no item class exists
+     */
     public long getItemClassHash() {
         Class itemClass = getItemClass();
         if (itemClass == null) {
@@ -179,6 +249,14 @@ public abstract class FieldReader<T>
         return fieldName;
     }
 
+    /**
+     * Adds a reference resolution task for this field. This is used when deserializing
+     * JSON with circular references or forward references.
+     *
+     * @param jsonReader the JSONReader managing the deserialization
+     * @param object the object containing this field
+     * @param reference the reference path string to be resolved
+     */
     public void addResolveTask(JSONReader jsonReader, Object object, String reference) {
         JSONPath path;
         if (referenceCache != null && referenceCache.toString().equals(reference)) {
@@ -367,56 +445,145 @@ public abstract class FieldReader<T>
         return cmp;
     }
 
+    /**
+     * Checks if this field has the unwrapped feature enabled. Unwrapped fields
+     * have their properties flattened into the parent object during serialization/deserialization.
+     *
+     * @return true if this field is unwrapped, false otherwise
+     */
     public boolean isUnwrapped() {
         return (features & FieldInfo.UNWRAPPED_MASK) != 0;
     }
 
+    /**
+     * Adds a reference resolution task for an element in a list field.
+     *
+     * @param jsonReader the JSONReader managing the deserialization
+     * @param object the list object containing the reference
+     * @param i the index of the element in the list
+     * @param reference the reference path string to be resolved
+     */
     public void addResolveTask(JSONReader jsonReader, List object, int i, String reference) {
         jsonReader.addResolveTask(object, i, JSONPath.of(reference));
     }
 
+    /**
+     * Reads and sets the field value from JSONB format. By default, delegates to {@link #readFieldValue(JSONReader, Object)}.
+     *
+     * @param jsonReader the JSONReader to read from
+     * @param object the object on which to set the field value
+     */
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         readFieldValue(jsonReader, object);
     }
 
+    /**
+     * Reads the field value from the JSONReader without setting it on an object.
+     * This method must be implemented by concrete subclasses.
+     *
+     * @param jsonReader the JSONReader to read from
+     * @return the field value read from the JSONReader
+     */
     public abstract Object readFieldValue(JSONReader jsonReader);
 
+    /**
+     * Accepts and sets a boolean value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the boolean value to set
+     */
     public void accept(T object, boolean value) {
         accept(object, Boolean.valueOf(value));
     }
 
+    /**
+     * Checks if this field can directly accept values of the specified class type
+     * without conversion.
+     *
+     * @param valueClass the class of the value to check
+     * @return true if the value class matches the field class, false otherwise
+     */
     public boolean supportAcceptType(Class valueClass) {
         return fieldClass == valueClass;
     }
 
+    /**
+     * Accepts and sets a byte value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the byte value to set
+     */
     public void accept(T object, byte value) {
         accept(object, Byte.valueOf(value));
     }
 
+    /**
+     * Accepts and sets a short value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the short value to set
+     */
     public void accept(T object, short value) {
         accept(object, Short.valueOf(value));
     }
 
+    /**
+     * Accepts and sets an int value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the int value to set
+     */
     public void accept(T object, int value) {
         accept(object, Integer.valueOf(value));
     }
 
+    /**
+     * Accepts and sets a long value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the long value to set
+     */
     public void accept(T object, long value) {
         accept(object, Long.valueOf(value));
     }
 
+    /**
+     * Accepts and sets a char value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the char value to set
+     */
     public void accept(T object, char value) {
         accept(object, Character.valueOf(value));
     }
 
+    /**
+     * Accepts and sets a float value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the float value to set
+     */
     public void accept(T object, float value) {
         accept(object, Float.valueOf(value));
     }
 
+    /**
+     * Accepts and sets a double value on the specified object for this field.
+     *
+     * @param object the object on which to set the field value
+     * @param value the double value to set
+     */
     public void accept(T object, double value) {
         accept(object, Double.valueOf(value));
     }
 
+    /**
+     * Accepts and sets an Object value on the specified object for this field.
+     * This method must be implemented by concrete subclasses to handle the actual field setting.
+     *
+     * @param object the object on which to set the field value
+     * @param value the value to set
+     */
     public abstract void accept(T object, Object value);
 
     protected void acceptAny(T object, Object fieldValue, long features) {
@@ -485,27 +652,75 @@ public abstract class FieldReader<T>
         accept(object, typedFieldValue);
     }
 
+    /**
+     * Reads and sets the field value from the JSONReader on the specified object.
+     * This method must be implemented by concrete subclasses.
+     *
+     * @param jsonReader the JSONReader to read from
+     * @param object the object on which to set the field value
+     */
     public abstract void readFieldValue(JSONReader jsonReader, T object);
 
+    /**
+     * Checks and returns an auto-type ObjectReader for this field if applicable.
+     * This is used for polymorphic deserialization.
+     *
+     * @param jsonReader the JSONReader to use for type detection
+     * @return the auto-type ObjectReader, or null if not applicable
+     */
     public ObjectReader checkObjectAutoType(JSONReader jsonReader) {
         return null;
     }
 
+    /**
+     * Checks if this field is read-only. Read-only fields can be read but not written,
+     * typically getter methods without corresponding setters or final fields.
+     *
+     * @return true if this field is read-only, false otherwise
+     */
     public boolean isReadOnly() {
         return readOnly;
     }
 
+    /**
+     * Gets the initialization ObjectReader for this field, if one is configured.
+     * This is used for fields that require special initialization logic.
+     *
+     * @return the initialization ObjectReader, or null if none is configured
+     */
     public ObjectReader getInitReader() {
         return null;
     }
 
+    /**
+     * Processes extra JSON data that doesn't match any known field.
+     * By default, this method skips the value.
+     *
+     * @param jsonReader the JSONReader containing the extra data
+     * @param object the object being deserialized
+     */
     public void processExtra(JSONReader jsonReader, Object object) {
         jsonReader.skipValue();
     }
 
+    /**
+     * Accepts extra field data that doesn't match any known field.
+     * By default, this method does nothing. Subclasses can override to handle extra fields.
+     *
+     * @param object the object being deserialized
+     * @param name the name of the extra field
+     * @param value the value of the extra field
+     */
     public void acceptExtra(Object object, String name, Object value) {
     }
 
+    /**
+     * Gets or creates an ObjectReader for the item type of this field (for collections/arrays).
+     * The result is cached for subsequent calls.
+     *
+     * @param ctx the JSONReader context to use for obtaining the ObjectReader
+     * @return the ObjectReader for the item type
+     */
     public ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         if (itemReader != null) {
             return itemReader;
@@ -513,6 +728,12 @@ public abstract class FieldReader<T>
         return itemReader = ctx.getObjectReader(itemType);
     }
 
+    /**
+     * Gets or creates an ObjectReader for the item type of this field (for collections/arrays).
+     *
+     * @param jsonReader the JSONReader to use for obtaining the ObjectReader
+     * @return the ObjectReader for the item type
+     */
     public ObjectReader getItemObjectReader(JSONReader jsonReader) {
         return getItemObjectReader(jsonReader.getContext());
     }
@@ -577,10 +798,23 @@ public abstract class FieldReader<T>
         return null;
     }
 
+    /**
+     * Gets the BiConsumer function for this field, if one is configured.
+     * This is used for alternative field setting strategies.
+     *
+     * @return the BiConsumer function, or null if none is configured
+     */
     public BiConsumer getFunction() {
         return null;
     }
 
+    /**
+     * Checks if this FieldReader represents the same field as another FieldReader.
+     * This compares the underlying field or method names.
+     *
+     * @param other the other FieldReader to compare with
+     * @return true if both represent the same field, false otherwise
+     */
     public boolean sameTo(FieldReader other) {
         if (this.field != null) {
             String thisName = this.field.getName();
@@ -614,6 +848,12 @@ public abstract class FieldReader<T>
         return false;
     }
 
+    /**
+     * Checks if this FieldReader belongs to the specified class.
+     *
+     * @param clazz the class to check
+     * @return true if this field belongs to the specified class, false otherwise
+     */
     public boolean belongTo(Class clazz) {
         return (this.field != null && this.field.getDeclaringClass() == clazz)
                 || (this.method != null && this.method.getDeclaringClass().isAssignableFrom(clazz));

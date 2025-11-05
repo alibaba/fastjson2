@@ -9,6 +9,34 @@ import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * FieldWriterDate is an abstract base class for writing Date and date-time fields to JSON format.
+ * It provides comprehensive support for various date serialization formats and time zone handling.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Multiple date format options (milliseconds, ISO 8601, Unix time, custom patterns)</li>
+ *   <li>Time zone aware date serialization</li>
+ *   <li>DateTimeFormatter integration for custom patterns</li>
+ *   <li>Optimized formats for common patterns (yyyyMMdd, yyyy-MM-dd HH:mm:ss)</li>
+ *   <li>JSONB format with optimized milliseconds encoding</li>
+ * </ul>
+ *
+ * <p>Supported date formats:
+ * <ul>
+ *   <li>"millis" - Serialize as milliseconds since epoch</li>
+ *   <li>"unixtime" - Serialize as seconds since epoch</li>
+ *   <li>"iso8601" - Serialize in ISO 8601 format</li>
+ *   <li>"yyyyMMdd" - Serialize as compact date (e.g., 20240115)</li>
+ *   <li>"yyyy-MM-dd HH:mm:ss" - Serialize as formatted string</li>
+ *   <li>Custom DateTimeFormatter patterns</li>
+ * </ul>
+ *
+ * <p>Concrete implementations of this class handle different Date types and access methods.
+ *
+ * @param <T> the type of the object containing the date field
+ * @since 2.0.0
+ */
 abstract class FieldWriterDate<T>
         extends FieldWriter<T> {
     protected DateTimeFormatter formatter;

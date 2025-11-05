@@ -18,6 +18,40 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
+/**
+ * ObjectWriterImplMap provides serialization support for Map and Map-like objects to JSON format.
+ * This writer handles various Map implementations including HashMap, LinkedHashMap, JSONObject,
+ * and fastjson 1.x JSONObject.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Standard Java Map serialization with key-value pairs</li>
+ *   <li>Generic type support for Map&lt;K, V&gt;</li>
+ *   <li>JSONObject and fastjson 1.x JSONObject compatibility</li>
+ *   <li>Custom format support for values (e.g., date formatting)</li>
+ *   <li>Filter support (PropertyFilter, NameFilter, ValueFilter)</li>
+ *   <li>Reference detection for map values</li>
+ *   <li>Optimized writers for homogeneous map values</li>
+ *   <li>Smart key and value writer caching</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Serialize a simple map
+ * Map<String, Object> map = new HashMap<>();
+ * map.put("name", "John");
+ * map.put("age", 25);
+ * String json = JSON.toJSONString(map); // {"name":"John","age":25}
+ *
+ * // Serialize a typed map
+ * Map<String, User> userMap = new LinkedHashMap<>();
+ * userMap.put("user1", new User(1, "Alice"));
+ * userMap.put("user2", new User(2, "Bob"));
+ * String json = JSON.toJSONString(userMap);
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 public final class ObjectWriterImplMap
         extends ObjectWriterPrimitiveImpl {
     static final byte[] TYPE_NAME_JSONObject1O = JSONB.toBytes("JO10");

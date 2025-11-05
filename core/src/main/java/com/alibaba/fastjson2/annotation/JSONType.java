@@ -10,17 +10,62 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Configures JSON serialization and deserialization behavior for a class.
+ * This annotation provides comprehensive control over type handling, naming conventions,
+ * feature settings, and custom serializers/deserializers.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * @JSONType(naming = PropertyNamingStrategy.SnakeCase,
+ *           ignores = {"internalField"},
+ *           orders = {"id", "name", "createdAt"})
+ * public class User {
+ *     private Long id;
+ *     private String name;
+ *     private String internalField;
+ *     private Date createdAt;
+ * }
+ * }</pre>
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface JSONType {
+    /**
+     * Specifies the builder class to use for constructing objects during deserialization.
+     *
+     * @return the builder class, or void.class if not using a builder
+     */
     Class<?> builder() default void.class;
 
+    /**
+     * Specifies the key name for type information in polymorphic serialization.
+     * Common values include "@type", "type", or custom keys.
+     *
+     * @return the type key name
+     */
     String typeKey() default "";
+
+    /**
+     * Specifies the type name to use for this class in polymorphic serialization.
+     *
+     * @return the type name
+     */
     String typeName() default "";
 
+    /**
+     * Specifies subclasses for polymorphic deserialization.
+     * Used in conjunction with typeKey and typeName for handling inheritance hierarchies.
+     *
+     * @return array of subclasses
+     */
     Class<?>[] seeAlso() default{};
 
     /**
+     * Specifies the default class to use when deserializing polymorphic types
+     * if no type information is found or the type is unrecognized.
+     *
+     * @return the default class for polymorphic deserialization
      * @since 2.0.24
      */
     Class<?> seeAlsoDefault() default Void.class;
@@ -42,33 +87,88 @@ public @interface JSONType {
      */
     JSONWriter.Feature[] serializeFeatures() default {};
 
+    /**
+     * Specifies the property naming strategy for this type.
+     * Common strategies include CamelCase, SnakeCase, PascalCase, etc.
+     *
+     * @return the naming strategy to apply
+     */
     PropertyNamingStrategy naming() default PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue;
 
+    /**
+     * When true, enum values are serialized as JavaBeans with their properties,
+     * rather than as simple string values.
+     *
+     * @return true to serialize enums as JavaBeans
+     */
     boolean writeEnumAsJavaBean() default false;
 
+    /**
+     * Specifies field names to ignore during serialization and deserialization.
+     *
+     * @return array of field names to ignore
+     */
     String[] ignores() default {};
 
+    /**
+     * Specifies field names to include during serialization and deserialization.
+     * When specified, only these fields will be processed.
+     *
+     * @return array of field names to include
+     */
     String[] includes() default {};
 
     /**
      * Order in which properties of annotated object are to be serialized in.
      */
+    /**
+     * Specifies the order in which properties should be serialized.
+     * Properties not listed will be serialized after the listed ones.
+     *
+     * @return array of property names in the desired order
+     */
     String[] orders() default {};
 
+    /**
+     * Specifies a custom ObjectWriter class for serialization.
+     *
+     * @return the custom serializer class, or Void.class for default serialization
+     */
     Class<?> serializer() default Void.class;
 
+    /**
+     * Specifies a custom ObjectReader class for deserialization.
+     *
+     * @return the custom deserializer class, or Void.class for default deserialization
+     */
     Class<?> deserializer() default Void.class;
 
+    /**
+     * Specifies filters to apply during serialization for customizing output.
+     *
+     * @return array of filter classes
+     */
     Class<? extends Filter>[] serializeFilters() default {};
 
+    /**
+     * JSON Schema definition for this type for validation purposes.
+     *
+     * @return the JSON schema definition
+     */
     String schema() default "";
 
     /**
+     * Date/time format pattern to use for all date/time fields in this type.
+     *
+     * @return the format pattern
      * @since 2.0.8
      */
     String format() default "";
 
     /**
+     * Locale to use for formatting all date/time fields in this type.
+     *
+     * @return the locale string
      * @since 2.0.8
      */
     String locale() default "";

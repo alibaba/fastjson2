@@ -9,6 +9,30 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Implementation of {@link ParameterizedType} that represents a parameterized type such as
+ * {@code List<String>}, {@code Map<String, Integer>}, etc.
+ *
+ * <p>This class is used by fastjson2 to handle generic type information during serialization
+ * and deserialization, allowing proper type handling for generic collections and classes.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create a type for List<String>
+ * ParameterizedType listType = new ParameterizedTypeImpl(List.class, String.class);
+ *
+ * // Create a type for Map<String, Integer>
+ * ParameterizedType mapType = new ParameterizedTypeImpl(Map.class, String.class, Integer.class);
+ *
+ * // Use in JSON parsing
+ * String json = "[\"a\", \"b\", \"c\"]";
+ * List<String> list = JSON.parseObject(json, listType);
+ * }</pre>
+ *
+ * @see ParameterizedType
+ * @see java.lang.reflect.Type
+ * @since 2.0.0
+ */
 @JSONType(deserializeFeatures = JSONReader.Feature.SupportAutoType, typeName = "java.lang.reflect.ParameterizedType")
 public class ParameterizedTypeImpl
         implements ParameterizedType {
@@ -16,6 +40,14 @@ public class ParameterizedTypeImpl
     private final Type ownerType;
     private final Type rawType;
 
+    /**
+     * Constructs a ParameterizedType with the specified arguments, owner type, and raw type.
+     * This constructor is primarily used for deserialization.
+     *
+     * @param actualTypeArguments the actual type arguments of this parameterized type
+     * @param ownerType the owner type, if this is an inner class, or null
+     * @param rawType the raw type (e.g., List.class for List<String>)
+     */
     @JSONCreator
     public ParameterizedTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType) {
         this.actualTypeArguments = actualTypeArguments;
@@ -23,6 +55,13 @@ public class ParameterizedTypeImpl
         this.rawType = rawType;
     }
 
+    /**
+     * Constructs a ParameterizedType with the specified raw type and type arguments.
+     * The owner type is set to null.
+     *
+     * @param rawType the raw type (e.g., List.class for List<String>)
+     * @param actualTypeArguments the actual type arguments (e.g., String.class for List<String>)
+     */
     public ParameterizedTypeImpl(Type rawType, Type... actualTypeArguments) {
         this.rawType = rawType;
         this.actualTypeArguments = actualTypeArguments;

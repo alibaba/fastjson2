@@ -1,7 +1,11 @@
 package com.alibaba.fastjson2.internal.asm;
 
 /**
- * Created by wenshao on 05/08/2017.
+ * Collects local variable information from method bytecode to extract parameter names.
+ * This class is used during class file parsing to gather debug information about method parameters.
+ *
+ * @see TypeCollector
+ * @see ClassReader
  */
 public class MethodCollector {
     private final int paramCount;
@@ -23,6 +27,13 @@ public class MethodCollector {
         this.debugInfoPresent = paramCount == 0;
     }
 
+    /**
+     * Visits a local variable entry in the method's LocalVariableTable.
+     * Collects parameter names from the debug information.
+     *
+     * @param name the name of the local variable from debug info
+     * @param index the local variable index in the method's local variable array
+     */
     protected void visitLocalVariable(String name, int index) {
         if (index >= ignoreCount && index < ignoreCount + paramCount) {
             if (!("arg" + currentParameter).equals(name)) {
@@ -34,6 +45,11 @@ public class MethodCollector {
         }
     }
 
+    /**
+     * Returns the collected parameter names as a comma-separated string.
+     *
+     * @return comma-separated parameter names, or empty string if no parameters
+     */
     protected String getResult() {
         return result.length() != 0 ? result.substring(1) : "";
     }

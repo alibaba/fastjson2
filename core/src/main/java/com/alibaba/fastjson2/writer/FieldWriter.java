@@ -22,6 +22,46 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
+/**
+ * FieldWriter is responsible for writing individual fields of Java objects to JSON format.
+ * It serves as the base class for all field-specific writers and handles field serialization,
+ * formatting, and various field-level features.
+ *
+ * <p>This abstract class provides support for:
+ * <ul>
+ *   <li>Field value extraction from objects</li>
+ *   <li>Field name writing in JSON and JSONB formats</li>
+ *   <li>Type-specific value serialization (primitives, strings, dates, etc.)</li>
+ *   <li>Format configuration (date formats, decimal formats, etc.)</li>
+ *   <li>Field-level feature configuration</li>
+ *   <li>Symbol table support for optimized JSONB serialization</li>
+ *   <li>Reference detection for circular reference handling</li>
+ * </ul>
+ *
+ * <p>FieldWriter instances are typically created by {@link ObjectWriterCreator} during the
+ * creation of {@link ObjectWriter} instances. Each FieldWriter corresponds to a specific
+ * field in a Java class and knows how to serialize that field's value.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // FieldWriters are typically used internally by ObjectWriters
+ * ObjectWriter<User> writer = JSONFactory.getDefaultObjectWriterProvider()
+ *     .getObjectWriter(User.class);
+ * List<FieldWriter> fieldWriters = writer.getFieldWriters();
+ *
+ * // Write all fields to JSONWriter
+ * try (JSONWriter jsonWriter = JSONWriter.of()) {
+ *     jsonWriter.startObject();
+ *     for (FieldWriter fieldWriter : fieldWriters) {
+ *         fieldWriter.write(jsonWriter, user);
+ *     }
+ *     jsonWriter.endObject();
+ * }
+ * }</pre>
+ *
+ * @param <T> the type of the object containing the field
+ * @since 2.0.0
+ */
 public abstract class FieldWriter<T>
         implements Comparable {
     public final String fieldName;
@@ -168,14 +208,30 @@ public abstract class FieldWriter<T>
         nameWithColonUTF16 = chars;
     }
 
+    /**
+     * Checks if the field class is serializable. A class is considered serializable if it implements
+     * {@link java.io.Serializable} or is not final (allowing subclasses to be serializable).
+     *
+     * @return true if the field class is serializable, false otherwise
+     */
     public boolean isFieldClassSerializable() {
         return fieldClassSerializable;
     }
 
+    /**
+     * Checks if the date format for this field is set to write dates as milliseconds.
+     *
+     * @return true if dates should be written as milliseconds, false otherwise
+     */
     public boolean isDateFormatMillis() {
         return false;
     }
 
+    /**
+     * Checks if the date format for this field is set to ISO 8601 format.
+     *
+     * @return true if dates should be written in ISO 8601 format, false otherwise
+     */
     public boolean isDateFormatISO8601() {
         return false;
     }
@@ -304,10 +360,22 @@ public abstract class FieldWriter<T>
         return new JSONWriter.Path(parent, fieldName);
     }
 
+    /**
+     * Gets the item type for collection or array fields. This is used to determine
+     * the type of elements in a collection or array.
+     *
+     * @return the item type, or null if this field is not a collection or array
+     */
     public Type getItemType() {
         return null;
     }
 
+    /**
+     * Gets the item class for collection or array fields. This is used to determine
+     * the class of elements in a collection or array.
+     *
+     * @return the item class, or null if this field is not a collection or array
+     */
     public Class getItemClass() {
         return null;
     }
@@ -362,6 +430,22 @@ public abstract class FieldWriter<T>
         defaultValue = fieldValue;
     }
 
+    /**
+     * Gets the value of this field from the specified object. This method uses optimized
+     * field access via UNSAFE when possible for better performance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("John", 25);
+     * FieldWriter fieldWriter = getFieldWriter("name");
+     * Object value = fieldWriter.getFieldValue(user); // Returns "John"
+     * }</pre>
+     *
+     * @param object the object from which to extract the field value
+     * @return the value of the field
+     * @throws JSONException if the object is null or field access fails
+     * @throws UnsupportedOperationException if the field cannot be accessed
+     */
     public Object getFieldValue(T object) {
         if (object == null) {
             throw new JSONException("field.get error, " + fieldName);
@@ -533,11 +617,31 @@ public abstract class FieldWriter<T>
         return nameCompare;
     }
 
+    /**
+     * Writes an enum field to the JSONWriter. This method writes both the field name
+     * and the enum value.
+     *
+     * @param jsonWriter the JSONWriter to write to
+     * @param e the enum value to write
+     */
     public void writeEnum(JSONWriter jsonWriter, Enum e) {
         writeFieldName(jsonWriter);
         jsonWriter.writeEnum(e);
     }
 
+    /**
+     * Writes a binary (byte array) field to the JSONWriter with support for various
+     * encoding formats including base64, hex, and gzip compression.
+     *
+     * <p>The encoding format is determined by:
+     * <ul>
+     *   <li>The field's format annotation (e.g., "base64", "hex", "gzip")</li>
+     *   <li>The JSONWriter features (e.g., WriteByteArrayAsBase64)</li>
+     * </ul>
+     *
+     * @param jsonWriter the JSONWriter to write to
+     * @param value the byte array value to write, or null
+     */
     public void writeBinary(JSONWriter jsonWriter, byte[] value) {
         if (value == null) {
             if (!jsonWriter.isWriteNulls()) {
@@ -594,11 +698,24 @@ public abstract class FieldWriter<T>
         }
     }
 
+    /**
+     * Writes an int32 (integer) field to the JSONWriter.
+     *
+     * @param jsonWriter the JSONWriter to write to
+     * @param value the integer value to write
+     */
     public void writeInt32(JSONWriter jsonWriter, int value) {
         writeFieldName(jsonWriter);
         jsonWriter.writeInt32(value);
     }
 
+    /**
+     * Writes an int64 (long) field to the JSONWriter. If the WriteNonStringValueAsString
+     * feature is enabled, the value will be written as a string.
+     *
+     * @param jsonWriter the JSONWriter to write to
+     * @param value the long value to write
+     */
     public void writeInt64(JSONWriter jsonWriter, long value) {
         writeFieldName(jsonWriter);
         if ((features & WriteNonStringValueAsString.mask) != 0) {
@@ -608,6 +725,21 @@ public abstract class FieldWriter<T>
         }
     }
 
+    /**
+     * Writes a string field to the JSONWriter with support for trimming, symbol writing,
+     * and raw value writing based on field configuration.
+     *
+     * <p>This method supports:
+     * <ul>
+     *   <li>Null handling with WriteNullStringAsEmpty feature</li>
+     *   <li>String trimming when format is set to "trim"</li>
+     *   <li>Symbol table optimization for JSONB format</li>
+     *   <li>Raw value writing when RAW_VALUE feature is enabled</li>
+     * </ul>
+     *
+     * @param jsonWriter the JSONWriter to write to
+     * @param value the string value to write, or null
+     */
     public void writeString(JSONWriter jsonWriter, String value) {
         writeFieldName(jsonWriter);
 
@@ -862,13 +994,46 @@ public abstract class FieldWriter<T>
         }
     }
 
+    /**
+     * Gets the ObjectWriter for items in a collection or array field.
+     *
+     * @param writer the JSONWriter context
+     * @param itemType the type of items in the collection or array
+     * @return the ObjectWriter for the item type
+     */
     public ObjectWriter getItemWriter(JSONWriter writer, Type itemType) {
         return writer
                 .getObjectWriter(itemType, null);
     }
 
+    /**
+     * Writes only the field value (without the field name) to the JSONWriter.
+     * This method is used in array mapping mode where only values are serialized.
+     *
+     * <p>Implementations should extract the field value from the object and write it
+     * to the JSONWriter without writing the field name.
+     *
+     * @param jsonWriter the JSONWriter to write to
+     * @param object the object from which to extract and write the field value
+     */
     public abstract void writeValue(JSONWriter jsonWriter, T object);
 
+    /**
+     * Writes the complete field (both name and value) to the JSONWriter.
+     * This is the primary method for field serialization.
+     *
+     * <p>Implementations should:
+     * <ul>
+     *   <li>Check if the field should be written based on null handling and features</li>
+     *   <li>Write the field name using {@link #writeFieldName(JSONWriter)}</li>
+     *   <li>Extract the field value from the object</li>
+     *   <li>Write the field value to the JSONWriter</li>
+     * </ul>
+     *
+     * @param jsonWriter the JSONWriter to write to
+     * @param o the object from which to extract and write the field
+     * @return true if the field was written, false if it was skipped
+     */
     public abstract boolean write(JSONWriter jsonWriter, T o);
 
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {

@@ -32,11 +32,17 @@ public @interface JSONField {
      */
     String format() default "";
 
+    /**
+     * Label for categorizing fields, used with LabelFilter for selective serialization.
+     * Fields with matching labels can be included or excluded during serialization.
+     *
+     * @return the label for this field
+     */
     String label() default "";
 
     /**
      * Whether the field is serialized
-     * during serialization, default {@code ture}
+     * during serialization, default {@code true}
      */
     boolean serialize() default true;
 
@@ -85,18 +91,43 @@ public @interface JSONField {
      */
     JSONWriter.Feature[] serializeFeatures() default {};
 
+    /**
+     * Indicates if this field represents the value in a single-property object.
+     * When true, the object is serialized/deserialized as just the field value.
+     *
+     * @return true if this field is the value field
+     */
     boolean value() default false;
 
     /**
+     * Specifies a default value to use when the field is null or missing during deserialization.
      *
+     * @return the default value as a string
      * @since 1.2.61
      */
     String defaultValue() default "";
 
+    /**
+     * Specifies the locale for date/time formatting specific to this field.
+     * Format: language tag (e.g., "en_US", "zh_CN").
+     *
+     * @return the locale string
+     */
     String locale() default "";
 
+    /**
+     * JSON Schema definition for this field for validation purposes.
+     *
+     * @return the JSON schema definition
+     */
     String schema() default "";
 
+    /**
+     * When true, the field value is treated as raw JSON and not escaped during serialization.
+     * Useful for fields that already contain JSON strings.
+     *
+     * @return true if the field should be serialized as raw JSON
+     */
     boolean jsonDirect() default false;
 
     /**

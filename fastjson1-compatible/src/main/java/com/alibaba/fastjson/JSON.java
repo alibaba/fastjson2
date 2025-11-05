@@ -171,6 +171,22 @@ public abstract class JSON
         return context;
     }
 
+    /**
+     * Parses a JSON string into a {@link JSONObject}.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param str the JSON string to parse
+     * @return the parsed {@link JSONObject}, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or cannot be parsed
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "{\"name\":\"Alice\",\"age\":30}";
+     * JSONObject obj = JSON.parseObject(json);
+     * String name = obj.getString("name"); // "Alice"
+     * int age = obj.getIntValue("age"); // 30
+     * }</pre>
+     */
     public static JSONObject parseObject(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -204,6 +220,22 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Parses a JSON string into a {@link JSONObject} with specified parser features.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param text the JSON string to parse
+     * @param features optional parser features to control parsing behavior (e.g., {@link Feature#OrderedField})
+     * @return the parsed {@link JSONObject}, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or cannot be parsed
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "{\"name\":\"Bob\",\"id\":123}";
+     * JSONObject obj = JSON.parseObject(json, Feature.OrderedField);
+     * // Fields will maintain insertion order
+     * }</pre>
+     */
     public static JSONObject parseObject(String text, Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -516,6 +548,23 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Parses a JSON string into a Java object using a {@link TypeReference} for generic type specification.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param <T> the type of the object to return
+     * @param str the JSON string to parse
+     * @param typeReference the {@link TypeReference} containing type information for generic types
+     * @param features optional parser features to control parsing behavior
+     * @return the parsed object of type {@code T}, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or cannot be parsed into the specified type
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]";
+     * List<User> users = JSON.parseObject(json, new TypeReference<List<User>>(){});
+     * }</pre>
+     */
     public static <T> T parseObject(String str, TypeReference<T> typeReference, Feature... features) {
         Type type = typeReference != null ? typeReference.getType() : Object.class;
         return parseObject(str, type, features);
@@ -525,6 +574,24 @@ public abstract class JSON
         return parseObject(input, clazz, ParserConfig.global, featureValues, features);
     }
 
+    /**
+     * Parses a JSON string into a Java object of the specified class type.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     * The method automatically handles type conversion and object instantiation.
+     *
+     * @param <T> the type of the object to return
+     * @param str the JSON string to parse
+     * @param objectClass the class of the object to parse into
+     * @return the parsed object of type {@code T}, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or cannot be parsed into the specified type
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "{\"name\":\"Alice\",\"age\":30}";
+     * User user = JSON.parseObject(json, User.class);
+     * System.out.println(user.getName()); // "Alice"
+     * }</pre>
+     */
     public static <T> T parseObject(String str, Class<T> objectClass) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -555,6 +622,23 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Parses a JSON string into a Java object of the specified class type with parser features.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param <T> the type of the object to return
+     * @param str the JSON string to parse
+     * @param objectType the class of the object to parse into
+     * @param features optional parser features to control parsing behavior
+     * @return the parsed object of type {@code T}, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or cannot be parsed into the specified type
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "{\"name\":\"Alice\",\"age\":30}";
+     * User user = JSON.parseObject(json, User.class, Feature.SupportNonPublicField);
+     * }</pre>
+     */
     public static <T> T parseObject(String str, Class<T> objectType, Feature... features) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -586,6 +670,25 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Parses a JSON string into a Java object of the specified type with parser features.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     * This method supports generic types through the {@link Type} parameter.
+     *
+     * @param <T> the type of the object to return
+     * @param str the JSON string to parse
+     * @param objectType the type of the object to parse into (supports generic types)
+     * @param features optional parser features to control parsing behavior
+     * @return the parsed object of type {@code T}, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or cannot be parsed into the specified type
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]";
+     * Type type = new TypeReference<List<User>>(){}.getType();
+     * List<User> users = JSON.parseObject(json, type);
+     * }</pre>
+     */
     public static <T> T parseObject(String str, Type objectType, Feature... features) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -919,6 +1022,29 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Parses a JSON string into a Java object. The return type depends on the JSON structure:
+     * <ul>
+     *     <li>JSON object → {@link JSONObject}</li>
+     *     <li>JSON array → {@link JSONArray}</li>
+     *     <li>JSON string → {@link String}</li>
+     *     <li>JSON number → {@link Number} (Integer, Long, BigDecimal, etc.)</li>
+     *     <li>JSON boolean → {@link Boolean}</li>
+     *     <li>JSON null → {@code null}</li>
+     * </ul>
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param str the JSON string to parse
+     * @return the parsed object, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or cannot be parsed
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object obj1 = JSON.parse("{\"name\":\"Alice\"}"); // Returns JSONObject
+     * Object obj2 = JSON.parse("[1,2,3]");              // Returns JSONArray
+     * Object obj3 = JSON.parse("\"hello\"");            // Returns String "hello"
+     * }</pre>
+     */
     public static Object parse(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -1631,6 +1757,26 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Converts a Java object to its JSON string representation.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     * The method automatically handles serialization of all standard Java types, collections, and custom objects.
+     *
+     * @param object the object to serialize
+     * @return the JSON string representation of the object, or {@code "null"} if the object is null
+     * @throws JSONException if the object cannot be serialized
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("Alice", 30);
+     * String json = JSON.toJSONString(user);
+     * // Result: {"name":"Alice","age":30}
+     *
+     * List<Integer> list = Arrays.asList(1, 2, 3);
+     * String jsonArray = JSON.toJSONString(list);
+     * // Result: [1,2,3]
+     * }</pre>
+     */
     public static String toJSONString(Object object) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE);
         try (JSONWriter writer = JSONWriter.of(context)) {
@@ -1682,6 +1828,29 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Converts a Java object to its JSON string representation with specified serializer features.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param object the object to serialize
+     * @param features optional serializer features to control output format (e.g., {@link SerializerFeature#PrettyFormat})
+     * @return the JSON string representation of the object, or {@code "null"} if the object is null
+     * @throws JSONException if the object cannot be serialized
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("Alice", 30);
+     * String json = JSON.toJSONString(user, SerializerFeature.PrettyFormat);
+     * // Result (formatted):
+     * // {
+     * //   "name":"Alice",
+     * //   "age":30
+     * // }
+     *
+     * String jsonWithNulls = JSON.toJSONString(user, SerializerFeature.WriteMapNullValue);
+     * // Includes fields with null values
+     * }</pre>
+     */
     public static String toJSONString(Object object, SerializerFeature... features) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
@@ -1704,6 +1873,23 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Converts a Java object to its JSON representation as a UTF-8 encoded byte array.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     * Using byte arrays can be more efficient than strings for large payloads or when writing to streams.
+     *
+     * @param object the object to serialize
+     * @return the UTF-8 encoded JSON bytes, or the bytes for {@code "null"} if the object is null
+     * @throws JSONException if the object cannot be serialized
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("Alice", 30);
+     * byte[] jsonBytes = JSON.toJSONBytes(user);
+     * // Can be written directly to output stream or network
+     * outputStream.write(jsonBytes);
+     * }</pre>
+     */
     public static byte[] toJSONBytes(Object object) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
@@ -2160,6 +2346,22 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Parses a JSON array string into a {@link JSONArray}.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param str the JSON array string to parse
+     * @return the parsed {@link JSONArray}, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or is not a valid JSON array
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "[1,2,3,4,5]";
+     * JSONArray array = JSON.parseArray(json);
+     * int first = array.getIntValue(0); // 1
+     * int size = array.size();          // 5
+     * }</pre>
+     */
     public static JSONArray parseArray(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -2192,6 +2394,25 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Parses a JSON array string into a typed {@link List} of objects.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     * Each element in the JSON array is automatically converted to the specified type.
+     *
+     * @param <T> the type of elements in the list
+     * @param text the JSON array string to parse
+     * @param type the class type of elements in the list
+     * @return a typed list containing the parsed elements, or {@code null} if the input string is null or empty
+     * @throws JSONException if the JSON string is malformed or elements cannot be converted to the specified type
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "[{\"name\":\"Alice\",\"age\":30},{\"name\":\"Bob\",\"age\":25}]";
+     * List<User> users = JSON.parseArray(json, User.class);
+     * System.out.println(users.get(0).getName()); // "Alice"
+     * System.out.println(users.size());           // 2
+     * }</pre>
+     */
     public static <T> List<T> parseArray(String text, Class<T> type) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -2272,14 +2493,55 @@ public abstract class JSON
         }
     }
 
+    /**
+     * Validates whether a string is valid JSON without fully parsing it.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     * This method is more efficient than parsing when you only need to validate.
+     *
+     * @param str the string to validate
+     * @return {@code true} if the string is valid JSON, {@code false} otherwise
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean valid1 = JSON.isValid("{\"name\":\"Alice\"}"); // true
+     * boolean valid2 = JSON.isValid("[1,2,3]");              // true
+     * boolean valid3 = JSON.isValid("not json");             // false
+     * }</pre>
+     */
     public static boolean isValid(String str) {
         return com.alibaba.fastjson2.JSON.isValid(str);
     }
 
+    /**
+     * Validates whether a string is a valid JSON array without fully parsing it.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param str the string to validate
+     * @return {@code true} if the string is a valid JSON array, {@code false} otherwise
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean valid1 = JSON.isValidArray("[1,2,3]");    // true
+     * boolean valid2 = JSON.isValidArray("{\"a\":1}");  // false (object, not array)
+     * }</pre>
+     */
     public static boolean isValidArray(String str) {
         return com.alibaba.fastjson2.JSON.isValidArray(str);
     }
 
+    /**
+     * Validates whether a string is a valid JSON object without fully parsing it.
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     *
+     * @param str the string to validate
+     * @return {@code true} if the string is a valid JSON object, {@code false} otherwise
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean valid1 = JSON.isValidObject("{\"name\":\"Alice\"}"); // true
+     * boolean valid2 = JSON.isValidObject("[1,2,3]");              // false (array, not object)
+     * }</pre>
+     */
     public static boolean isValidObject(String str) {
         return com.alibaba.fastjson2.JSON.isValidObject(str);
     }
@@ -2302,6 +2564,24 @@ public abstract class JSON
         return parseObject(str, clazz);
     }
 
+    /**
+     * Converts a Java object to a JSON structure ({@link JSONObject} or {@link JSONArray}).
+     * <p>This is a fastjson1-compatible method that provides the same behavior as the original fastjson 1.x API.
+     * Unlike {@link #toJSONString(Object)}, this method returns a JSON object structure instead of a string,
+     * allowing programmatic manipulation of the JSON data.
+     *
+     * @param javaObject the Java object to convert
+     * @return a {@link JSONObject}, {@link JSONArray}, or other JSON-compatible object
+     * @throws JSONException if the object cannot be converted
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("Alice", 30);
+     * JSONObject json = (JSONObject) JSON.toJSON(user);
+     * json.put("email", "alice@example.com"); // Can modify the JSON
+     * String name = json.getString("name");   // "Alice"
+     * }</pre>
+     */
     public static Object toJSON(Object javaObject) {
         if (javaObject instanceof JSON) {
             return javaObject;

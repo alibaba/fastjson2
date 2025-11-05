@@ -22,7 +22,20 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
- * Fastjson2 字符串序列化
+ * Fastjson2 serializer for Solon framework.
+ * Provides JSON serialization and deserialization for Solon web framework with support
+ * for JSON properties configuration.
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * @Configuration
+ * public class Config {
+ *     @Bean
+ *     public EntityStringSerializer serializer() {
+ *         return new Fastjson2StringSerializer();
+ *     }
+ * }
+ * }</pre>
  *
  * @author noear
  * @author 暮城留风
@@ -34,6 +47,11 @@ public class Fastjson2StringSerializer
     private static final String label = "/json";
     private static final Fastjson2StringSerializer _default = new Fastjson2StringSerializer();
 
+    /**
+     * Gets the default singleton instance.
+     *
+     * @return the default Fastjson2StringSerializer instance
+     */
     public static Fastjson2StringSerializer getDefault() {
         return _default;
     }
@@ -41,14 +59,25 @@ public class Fastjson2StringSerializer
     private Fastjson2Decl<JSONWriter.Context, JSONWriter.Feature> serializeConfig;
     private Fastjson2Decl<JSONReader.Context, JSONReader.Feature> deserializeConfig;
 
+    /**
+     * Creates a new serializer with the specified JSON properties.
+     *
+     * @param jsonProps the JSON properties configuration
+     */
     public Fastjson2StringSerializer(JsonProps jsonProps) {
         loadJsonProps(jsonProps);
     }
 
+    /**
+     * Creates a new serializer with default configuration.
+     */
     public Fastjson2StringSerializer() { }
 
     /**
-     * 获取序列化配置
+     * Gets the serialization configuration.
+     * Creates a default configuration if not already initialized.
+     *
+     * @return the serialization configuration
      */
     public Fastjson2Decl<JSONWriter.Context, JSONWriter.Feature> getSerializeConfig() {
         if (serializeConfig == null) {
@@ -59,7 +88,10 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 获取反序列化配置
+     * Gets the deserialization configuration.
+     * Creates a default configuration if not already initialized.
+     *
+     * @return the deserialization configuration
      */
     public Fastjson2Decl<JSONReader.Context, JSONReader.Feature> getDeserializeConfig() {
         if (deserializeConfig == null) {
@@ -69,7 +101,9 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 内容类型
+     * Gets the MIME type supported by this serializer.
+     *
+     * @return "application/json"
      */
     @Override
     public String mimeType() {
@@ -77,8 +111,9 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 数据类型
+     * Gets the data type handled by this serializer.
      *
+     * @return String.class
      */
     @Override
     public Class<String> dataType() {
@@ -86,10 +121,11 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 是否匹配
+     * Checks if this serializer matches the given MIME type.
      *
-     * @param ctx 请求上下文
-     * @param mime 内容类型
+     * @param ctx the request context
+     * @param mime the MIME type to check
+     * @return true if this serializer can handle the MIME type
      */
     @Override
     public boolean matched(Context ctx, String mime) {
@@ -101,7 +137,9 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 序列化器名字
+     * Gets the name of this serializer.
+     *
+     * @return "fastjson2-json"
      */
     @Override
     public String name() {
@@ -109,9 +147,11 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 序列化
+     * Serializes an object to JSON string.
      *
-     * @param obj 对象
+     * @param obj the object to serialize
+     * @return the JSON string representation
+     * @throws IOException if serialization fails
      */
     @Override
     public String serialize(Object obj) throws IOException {
@@ -119,10 +159,12 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 反序列化
+     * Deserializes JSON string to an object.
      *
-     * @param data 数据
-     * @param toType 目标类型
+     * @param data the JSON string data
+     * @param toType the target type
+     * @return the deserialized object
+     * @throws IOException if deserialization fails
      */
     @Override
     public Object deserialize(String data, Type toType) throws IOException {
@@ -134,10 +176,11 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 序列化主体
+     * Serializes data to the response body.
      *
-     * @param ctx 请求上下文
-     * @param data 数据
+     * @param ctx the request context
+     * @param data the data to serialize
+     * @throws IOException if serialization fails
      */
     @Override
     public void serializeToBody(Context ctx, Object data) throws IOException {
@@ -154,9 +197,12 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 反序列化主体
+     * Deserializes data from the request body.
      *
-     * @param ctx 请求上下文
+     * @param ctx the request context
+     * @param bodyType the expected body type (can be null)
+     * @return the deserialized object
+     * @throws IOException if deserialization fails
      */
     @Override
     public Object deserializeFromBody(Context ctx, @Nullable Type bodyType) throws IOException {
@@ -170,20 +216,24 @@ public class Fastjson2StringSerializer
     }
 
     /**
-     * 添加编码器
+     * Adds a custom encoder for the specified type.
      *
-     * @param clz 类型
-     * @param encoder 编码器
+     * @param <T> the type to encode
+     * @param clz the class type
+     * @param encoder the object writer encoder
      */
     public <T> void addEncoder(Class<T> clz, ObjectWriter encoder) {
         getSerializeConfig().getContext().getProvider().register(clz, encoder);
     }
 
     /**
-     * 添加转换器（编码器的简化版）
+     * Adds a converter as a simplified encoder for the specified type.
+     * The converter can transform objects to String, Number, or null.
      *
-     * @param clz 类型
-     * @param converter 转换器
+     * @param <T> the type to encode
+     * @param clz the class type
+     * @param converter the converter function
+     * @throws IllegalArgumentException if the converter produces an unsupported type
      */
     @Override
     public <T> void addEncoder(Class<T> clz, Converter<T, Object> converter) {
@@ -209,6 +259,12 @@ public class Fastjson2StringSerializer
         });
     }
 
+    /**
+     * Loads JSON properties configuration and applies them to the serializer.
+     * Configures date formatting, null handling, boolean/number formatting, etc.
+     *
+     * @param jsonProps the JSON properties to load
+     */
     protected void loadJsonProps(JsonProps jsonProps) {
         if (jsonProps != null) {
             if (jsonProps.dateAsTicks) {
@@ -265,10 +321,22 @@ public class Fastjson2StringSerializer
         }
     }
 
+    /**
+     * Configuration holder for Fastjson2 context and features.
+     * Supports both serialization (JSONWriter) and deserialization (JSONReader) contexts.
+     *
+     * @param <C> the context type (JSONWriter.Context or JSONReader.Context)
+     * @param <F> the feature type (JSONWriter.Feature or JSONReader.Feature)
+     */
     public static class Fastjson2Decl<C, F> {
         private final boolean forSerialize;
         private C context;
 
+        /**
+         * Creates a new configuration holder with the specified context.
+         *
+         * @param context the JSON context
+         */
         public Fastjson2Decl(C context) {
             this.context = context;
 
@@ -279,15 +347,31 @@ public class Fastjson2StringSerializer
             }
         }
 
+        /**
+         * Gets the JSON context.
+         *
+         * @return the context
+         */
         public C getContext() {
             return context;
         }
 
+        /**
+         * Sets the JSON context.
+         *
+         * @param context the new context (must not be null)
+         * @throws IllegalArgumentException if context is null
+         */
         public void setContext(C context) {
             Assert.notNull(context, "context can not be null");
             this.context = context;
         }
 
+        /**
+         * Sets features, replacing all existing features with the defaults plus the specified ones.
+         *
+         * @param features the features to set
+         */
         public void setFeatures(F... features) {
             if (forSerialize) {
                 ((JSONWriter.Context) context).setFeatures(JSONFactory.getDefaultWriterFeatures());
@@ -298,6 +382,11 @@ public class Fastjson2StringSerializer
             addFeatures(features);
         }
 
+        /**
+         * Adds features to the context without removing existing ones.
+         *
+         * @param features the features to add
+         */
         public void addFeatures(F... features) {
             if (forSerialize) {
                 //序列化
@@ -313,6 +402,11 @@ public class Fastjson2StringSerializer
             }
         }
 
+        /**
+         * Removes features from the context.
+         *
+         * @param features the features to remove
+         */
         public void removeFeatures(F... features) {
             if (forSerialize) {
                 //序列化

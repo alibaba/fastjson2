@@ -14,11 +14,32 @@ import org.redisson.client.protocol.Encoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+/**
+ * Fastjson2 JSONB codec for Redisson.
+ * Provides JSONB (binary JSON format) serialization and deserialization for Redisson Redis client.
+ * JSONB offers better performance and smaller payload size compared to text JSON.
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * Config config = new Config();
+ * config.useSingleServer()
+ *     .setAddress("redis://127.0.0.1:6379")
+ *     .setCodec(new JSONBCodec(MyObject.class));
+ * RedissonClient redisson = Redisson.create(config);
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 public class JSONBCodec
         extends BaseCodec {
     final JSONBEncoder encoder;
     final JSONBDecoder decoder;
 
+    /**
+     * Creates a JSONB codec for the specified type with FieldBased feature.
+     *
+     * @param valueType the type to encode/decode
+     */
     public JSONBCodec(Type valueType) {
         this(
                 JSONFactory.createWriteContext(JSONWriter.Feature.FieldBased),
@@ -27,8 +48,10 @@ public class JSONBCodec
     }
 
     /**
+     * Creates a JSONB codec with automatic type support for polymorphic deserialization.
+     * Enables WriteClassName and FieldBased features for secure polymorphic handling.
      *
-     * @param autoTypes Support for automatically typed class name prefixes
+     * @param autoTypes support for automatically typed class name prefixes
      * @since 2.0.50
      */
     public JSONBCodec(String... autoTypes) {
@@ -40,24 +63,53 @@ public class JSONBCodec
                 null);
     }
 
+    /**
+     * Creates a JSONB codec with custom writer and reader contexts.
+     *
+     * @param writerContext the context for JSONB writing
+     * @param readerContext the context for JSONB reading
+     */
     public JSONBCodec(JSONWriter.Context writerContext, JSONReader.Context readerContext) {
         this(writerContext, readerContext, null);
     }
 
+    /**
+     * Creates a JSONB codec with custom contexts and type.
+     *
+     * @param writerContext the context for JSONB writing
+     * @param readerContext the context for JSONB reading
+     * @param valueType the type to encode/decode
+     */
     public JSONBCodec(JSONWriter.Context writerContext, JSONReader.Context readerContext, Type valueType) {
         this(new JSONBEncoder(writerContext), new JSONBDecoder(readerContext, valueType));
     }
 
+    /**
+     * Creates a JSONB codec with custom encoder and decoder.
+     *
+     * @param encoder the JSONB encoder
+     * @param decoder the JSONB decoder
+     */
     protected JSONBCodec(JSONBEncoder encoder, JSONBDecoder decoder) {
         this.encoder = encoder;
         this.decoder = decoder;
     }
 
+    /**
+     * Gets the decoder for deserializing values.
+     *
+     * @return the value decoder
+     */
     @Override
     public Decoder<Object> getValueDecoder() {
         return decoder;
     }
 
+    /**
+     * Gets the encoder for serializing values.
+     *
+     * @return the value encoder
+     */
     @Override
     public Encoder getValueEncoder() {
         return encoder;

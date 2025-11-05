@@ -14,6 +14,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.*;
 
+/**
+ * ObjectReaders provides factory methods for creating ObjectReader and FieldReader instances.
+ * This utility class simplifies the creation of custom deserializers for JSON data.
+ *
+ * <p>This class supports various features including:
+ * <ul>
+ *   <li>Creating ObjectReaders with custom creators and field readers</li>
+ *   <li>Creating FieldReaders for different primitive and object types</li>
+ *   <li>Factory methods for specialized readers (String, Int, Long, arrays, etc.)</li>
+ *   <li>Lambda-based field readers for clean, functional API</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create ObjectReader with field readers
+ * ObjectReader<User> reader = ObjectReaders.of(
+ *     User::new,
+ *     ObjectReaders.fieldReader("id", Long.class, User::setId),
+ *     ObjectReaders.fieldReader("name", String.class, User::setName)
+ * );
+ *
+ * // Create specialized primitive field readers
+ * FieldReader<User> intFieldReader = ObjectReaders.fieldReaderInt("age", User::setAge);
+ * FieldReader<User> boolFieldReader = ObjectReaders.fieldReaderBool("active", User::setActive);
+ *
+ * // Create ObjectReader from String conversion
+ * ObjectReader<UUID> uuidReader = ObjectReaders.ofString(UUID::fromString);
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 public class ObjectReaders {
     public static <T> ObjectReader<T> of(
             Supplier<T> defaultCreator,

@@ -14,10 +14,32 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
+/**
+ * Codec support for miscellaneous third-party collection libraries using lambda-based
+ * function generation. This class provides ObjectWriter and ObjectReader instances for
+ * types from libraries such as GNU Trove, HPPC (High Performance Primitive Collections),
+ * and BSON.
+ *
+ * <p>The class uses Java's LambdaMetafactory to generate efficient lambda-based adapters
+ * for serialization and deserialization, with fallback to reflection when lambda generation fails.
+ *
+ * @see com.alibaba.fastjson2.writer.ObjectWriter
+ * @see com.alibaba.fastjson2.reader.ObjectReader
+ * @since 2.0.0
+ */
 public class LambdaMiscCodec {
     static volatile boolean hppcError;
     static volatile Throwable errorLast;
 
+    /**
+     * Returns an ObjectWriter for the specified object type if supported by this codec.
+     * Supports primitive collection types from GNU Trove, HPPC, and BSON Decimal128.
+     *
+     * @param objectType the type to create a writer for
+     * @param objectClass the class to create a writer for
+     * @return an ObjectWriter for the type, or null if not supported
+     * @throws JSONException if writer creation fails
+     */
     public static ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         if (hppcError) {
             return null;
@@ -160,6 +182,14 @@ public class LambdaMiscCodec {
         return null;
     }
 
+    /**
+     * Returns an ObjectReader for the specified object class if supported by this codec.
+     * Supports primitive collection types from GNU Trove, HPPC, and BSON Decimal128.
+     *
+     * @param objectClass the class to create a reader for
+     * @return an ObjectReader for the class, or null if not supported
+     * @throws JSONException if reader creation fails
+     */
     public static ObjectReader getObjectReader(Class objectClass) {
         if (hppcError) {
             return null;
@@ -347,6 +377,13 @@ public class LambdaMiscCodec {
         return null;
     }
 
+    /**
+     * Creates a LongFunction from a constructor that accepts a single long parameter.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param constructor the constructor to wrap
+     * @return a LongFunction that invokes the constructor
+     */
     public static LongFunction createLongFunction(Constructor constructor) {
         try {
             Class objectClass = constructor.getDeclaringClass();
@@ -372,6 +409,13 @@ public class LambdaMiscCodec {
         return new ReflectLongFunction(constructor);
     }
 
+    /**
+     * Creates a ToIntFunction from a method that returns an int value.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param method the method to wrap
+     * @return a ToIntFunction that invokes the method
+     */
     public static ToIntFunction createToIntFunction(Method method) {
         Class<?> objectClass = method.getDeclaringClass();
         try {
@@ -398,6 +442,13 @@ public class LambdaMiscCodec {
         return new ReflectToIntFunction(method);
     }
 
+    /**
+     * Creates a ToLongFunction from a method that returns a long value.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param method the method to wrap
+     * @return a ToLongFunction that invokes the method
+     */
     public static ToLongFunction createToLongFunction(Method method) {
         Class<?> objectClass = method.getDeclaringClass();
         try {
@@ -424,6 +475,13 @@ public class LambdaMiscCodec {
         return new ReflectToLongFunction(method);
     }
 
+    /**
+     * Creates a Function from a constructor that accepts a single parameter.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param constructor the constructor to wrap
+     * @return a Function that invokes the constructor
+     */
     public static Function createFunction(Constructor constructor) {
         try {
             Class<?> declaringClass = constructor.getDeclaringClass();
@@ -452,6 +510,13 @@ public class LambdaMiscCodec {
         return new ConstructorFunction(constructor);
     }
 
+    /**
+     * Creates a Supplier from a no-argument constructor.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param constructor the constructor to wrap
+     * @return a Supplier that invokes the constructor
+     */
     public static Supplier createSupplier(Constructor constructor) {
         try {
             Class<?> declaringClass = constructor.getDeclaringClass();
@@ -477,6 +542,13 @@ public class LambdaMiscCodec {
         return new ConstructorSupplier(constructor);
     }
 
+    /**
+     * Creates a Supplier from a static no-argument method.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param method the static method to wrap
+     * @return a Supplier that invokes the method
+     */
     public static Supplier createSupplier(Method method) {
         try {
             Class<?> declaringClass = method.getDeclaringClass();
@@ -504,6 +576,14 @@ public class LambdaMiscCodec {
         return new ReflectSupplier(method);
     }
 
+    /**
+     * Creates a BiFunction from a method that accepts one or two parameters.
+     * Supports both static methods with two parameters and instance methods with one parameter.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param method the method to wrap
+     * @return a BiFunction that invokes the method
+     */
     public static BiFunction createBiFunction(Method method) {
         try {
             Class<?> declaringClass = method.getDeclaringClass();
@@ -548,6 +628,13 @@ public class LambdaMiscCodec {
         return new ReflectBiFunction(method);
     }
 
+    /**
+     * Creates a BiFunction from a constructor that accepts two parameters.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param constructor the constructor to wrap
+     * @return a BiFunction that invokes the constructor
+     */
     public static BiFunction createBiFunction(Constructor constructor) {
         try {
             Class<?> declaringClass = constructor.getDeclaringClass();
@@ -577,6 +664,12 @@ public class LambdaMiscCodec {
         return new ConstructorBiFunction(constructor);
     }
 
+    /**
+     * Converts a primitive class to its boxed wrapper class.
+     *
+     * @param cls the class to box
+     * @return the boxed wrapper class, or the input class if already non-primitive
+     */
     static Class<?> box(Class cls) {
         if (cls == int.class) {
             return Integer.class;
@@ -751,6 +844,13 @@ public class LambdaMiscCodec {
         return new FactoryFunction(method);
     }
 
+    /**
+     * Creates an ObjIntConsumer from an instance method that accepts an int parameter.
+     * Uses LambdaMetafactory for efficient invocation, with reflection fallback.
+     *
+     * @param method the method to wrap
+     * @return an ObjIntConsumer that invokes the method
+     */
     public static ObjIntConsumer createObjIntConsumer(Method method) {
         Class<?> declaringClass = method.getDeclaringClass();
         try {

@@ -24,10 +24,38 @@ public abstract class DateTimeCodec {
 
     DateTimeFormatter dateFormatter;
 
+    /**
+     * Constructs a DateTimeCodec with the specified format pattern.
+     * Uses the default locale for date/time formatting.
+     *
+     * @param format the date/time format pattern (e.g., "yyyy-MM-dd HH:mm:ss", "unixtime", "millis")
+     */
     public DateTimeCodec(String format) {
         this(format, null);
     }
 
+    /**
+     * Constructs a DateTimeCodec with the specified format pattern and locale.
+     * Supports special formats including "unixtime", "millis", "iso8601", and standard date/time patterns.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Standard format
+     * DateTimeCodec codec1 = new DateTimeCodec("yyyy-MM-dd HH:mm:ss");
+     *
+     * // Unix timestamp
+     * DateTimeCodec codec2 = new DateTimeCodec("unixtime");
+     *
+     * // Milliseconds
+     * DateTimeCodec codec3 = new DateTimeCodec("millis");
+     *
+     * // With locale
+     * DateTimeCodec codec4 = new DateTimeCodec("yyyy-MM-dd", Locale.US);
+     * }</pre>
+     *
+     * @param format the date/time format pattern
+     * @param locale the locale to use for formatting, null for default locale
+     */
     public DateTimeCodec(String format, Locale locale) {
         if (format != null) {
             format = format.replace("aa", "a");
@@ -72,6 +100,19 @@ public abstract class DateTimeCodec {
         this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
     }
 
+    /**
+     * Returns a DateTimeFormatter instance for the configured format pattern.
+     * The formatter is lazily initialized and cached for reuse.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DateTimeCodec codec = new DateTimeCodec("yyyy-MM-dd HH:mm:ss");
+     * DateTimeFormatter formatter = codec.getDateFormatter();
+     * String formatted = formatter.format(LocalDateTime.now());
+     * }</pre>
+     *
+     * @return a DateTimeFormatter for the configured pattern, or null if format is null or uses special formats
+     */
     public DateTimeFormatter getDateFormatter() {
         if (dateFormatter == null && format != null && !formatMillis && !formatISO8601 && !formatUnixTime) {
             if (locale == null) {
@@ -83,6 +124,20 @@ public abstract class DateTimeCodec {
         return dateFormatter;
     }
 
+    /**
+     * Returns a DateTimeFormatter instance for the configured format pattern with the specified locale.
+     * Reuses the cached formatter if the locale matches, otherwise creates a new formatter.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DateTimeCodec codec = new DateTimeCodec("yyyy-MM-dd");
+     * DateTimeFormatter formatter = codec.getDateFormatter(Locale.FRANCE);
+     * String formatted = formatter.format(LocalDate.now());
+     * }</pre>
+     *
+     * @param locale the locale to use for formatting, null to use the codec's default locale
+     * @return a DateTimeFormatter for the configured pattern with the specified locale, or null if format is null or uses special formats
+     */
     public DateTimeFormatter getDateFormatter(Locale locale) {
         if (format == null || formatMillis || formatISO8601 || formatUnixTime) {
             return null;

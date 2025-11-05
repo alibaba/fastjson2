@@ -17,10 +17,34 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
+/**
+ * Utility class for Apache Arrow integration with Fastjson2.
+ * Provides methods to convert between Arrow vectors and CSV format,
+ * and to populate Arrow vectors from string values.
+ *
+ * <p>Supports various Arrow vector types including:</p>
+ * <ul>
+ * <li>IntVector, BigIntVector, SmallIntVector, TinyIntVector</li>
+ * <li>Float4Vector, Float8Vector</li>
+ * <li>DecimalVector, Decimal256Vector</li>
+ * <li>VarCharVector</li>
+ * <li>DateMilliVector, TimeStampMilliVector</li>
+ * <li>BitVector</li>
+ * </ul>
+ *
+ * @since 2.0.0
+ */
 public class ArrowUtils {
     static final boolean LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
     static final byte DECIMAL_TYPE_WIDTH = 16;
 
+    /**
+     * Writes Arrow VectorSchemaRoot data to CSV format.
+     *
+     * @param writer the CSVWriter to write to
+     * @param root the VectorSchemaRoot containing the data to write
+     * @throws IOException if an I/O error occurs during writing
+     */
     public static void write(CSVWriter writer, VectorSchemaRoot root) throws IOException {
         List<FieldVector> fieldVectors = root.getFieldVectors();
 
@@ -104,6 +128,15 @@ public class ArrowUtils {
         }
     }
 
+    /**
+     * Sets the value of an Arrow FieldVector at the specified row from a string value.
+     * Automatically handles type conversion based on the vector type.
+     *
+     * @param vector the FieldVector to set the value in
+     * @param row the row index
+     * @param value the string value to parse and set
+     * @throws JSONException if the vector type is not supported
+     */
     public static void setValue(FieldVector vector, int row, String value) {
         if (value == null || value.isEmpty()) {
             return;
@@ -188,6 +221,14 @@ public class ArrowUtils {
         throw new JSONException("TODO " + vector.getClass());
     }
 
+    /**
+     * Sets a decimal value in a DecimalVector from a string.
+     * Optimized for performance with direct memory access for small precision values.
+     *
+     * @param vector the DecimalVector to set the value in
+     * @param row the row index
+     * @param str the decimal string value
+     */
     public static void setDecimal(DecimalVector vector, int row, String str) {
         if (str == null || str.isEmpty()) {
             vector.setNull(row);
@@ -203,6 +244,14 @@ public class ArrowUtils {
         setDecimal(vector, row, chars, 0, chars.length);
     }
 
+    /**
+     * Sets a string value in a VarCharVector.
+     * Optimized to use internal string bytes when possible to avoid extra conversion.
+     *
+     * @param vector the VarCharVector to set the value in
+     * @param row the row index
+     * @param str the string value
+     */
     public static void setString(VarCharVector vector, int row, String str) {
         if (str == null || str.length() == 0) {
             vector.setNull(row);
@@ -219,6 +268,16 @@ public class ArrowUtils {
         vector.set(row, bytes);
     }
 
+    /**
+     * Sets a decimal value in a DecimalVector from a character array.
+     * Optimized for performance with direct buffer access and fast parsing.
+     *
+     * @param vector the DecimalVector to set the value in
+     * @param row the row index
+     * @param bytes the character array containing the decimal value
+     * @param off the offset in the array
+     * @param len the length of the value
+     */
     public static void setDecimal(DecimalVector vector, int row, char[] bytes, int off, int len) {
         boolean negative = false;
         int j = off;
@@ -309,6 +368,16 @@ public class ArrowUtils {
         vector.set(row, decimal);
     }
 
+    /**
+     * Sets a decimal value in a DecimalVector from a byte array.
+     * Optimized for performance with direct buffer access and fast parsing.
+     *
+     * @param vector the DecimalVector to set the value in
+     * @param row the row index
+     * @param bytes the byte array containing the decimal value
+     * @param off the offset in the array
+     * @param len the length of the value
+     */
     public static void setDecimal(DecimalVector vector, int row, byte[] bytes, int off, int len) {
         boolean negative = false;
         int j = off;
@@ -399,6 +468,15 @@ public class ArrowUtils {
         vector.set(row, decimal);
     }
 
+    /**
+     * Sets a decimal value in a DecimalVector from a BigDecimal.
+     * Automatically adjusts scale to match the vector's scale and uses
+     * optimized direct memory access when possible.
+     *
+     * @param vector the DecimalVector to set the value in
+     * @param row the row index
+     * @param decimal the BigDecimal value to set
+     */
     public static void setDecimal(DecimalVector vector, int row, BigDecimal decimal) {
         int scale = vector.getScale();
         if (decimal.scale() != scale) {

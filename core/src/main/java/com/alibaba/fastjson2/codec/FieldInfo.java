@@ -54,6 +54,19 @@ public class FieldInfo {
      */
     public Class<?> contentAs;
 
+    /**
+     * Initializes and returns an ObjectReader instance from the readUsing class.
+     * Creates a new instance of the ObjectReader by invoking its no-argument constructor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FieldInfo fieldInfo = new FieldInfo();
+     * fieldInfo.readUsing = MyCustomObjectReader.class;
+     * ObjectReader reader = fieldInfo.getInitReader();
+     * }</pre>
+     *
+     * @return a new ObjectReader instance if readUsing is set and implements ObjectReader, null otherwise
+     */
     public ObjectReader getInitReader() {
         Class<?> calzz = readUsing;
         if (calzz != null && ObjectReader.class.isAssignableFrom(calzz)) {
@@ -69,6 +82,20 @@ public class FieldInfo {
         return null;
     }
 
+    /**
+     * Initializes and returns a BiConsumer instance for handling duplicate keys when converting arrays to maps.
+     * Creates a new instance of the duplicate handler by invoking its no-argument constructor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FieldInfo fieldInfo = new FieldInfo();
+     * fieldInfo.arrayToMapDuplicateHandler = MyDuplicateHandler.class;
+     * BiConsumer handler = fieldInfo.getInitArrayToMapDuplicateHandler();
+     * }</pre>
+     *
+     * @return a new BiConsumer instance if arrayToMapDuplicateHandler is set and implements BiConsumer, null otherwise
+     * @since 2.0.52
+     */
     public BiConsumer getInitArrayToMapDuplicateHandler() {
         Class<?> clazz = arrayToMapDuplicateHandler;
         if (clazz != null && BiConsumer.class.isAssignableFrom(clazz)) {
@@ -84,6 +111,19 @@ public class FieldInfo {
         return null;
     }
 
+    /**
+     * Resets all field information properties to their default values.
+     * This method clears all configuration settings including field name, format, features,
+     * custom serializers/deserializers, and other field-specific metadata.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FieldInfo fieldInfo = new FieldInfo();
+     * fieldInfo.fieldName = "myField";
+     * fieldInfo.format = "yyyy-MM-dd";
+     * fieldInfo.init(); // All properties are reset to defaults
+     * }</pre>
+     */
     public void init() {
         fieldName = null;
         format = null;

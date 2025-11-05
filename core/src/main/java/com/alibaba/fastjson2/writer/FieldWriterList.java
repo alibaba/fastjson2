@@ -13,6 +13,31 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
+/**
+ * FieldWriterList is an abstract base class for serializing List and Collection fields to JSON format.
+ * It provides specialized handling for list-type fields including generic type support and
+ * optimized writers for common list element types.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Generic List and Collection serialization</li>
+ *   <li>Item type detection and specialized handling (String, Enum, Date, etc.)</li>
+ *   <li>Custom format support for list items (e.g., date formatting)</li>
+ *   <li>Optimized writers for homogeneous lists (all elements same type)</li>
+ *   <li>Empty collection handling</li>
+ *   <li>Reference detection for list items when applicable</li>
+ * </ul>
+ *
+ * <p>The writer automatically selects optimized implementations for common scenarios:
+ * <ul>
+ *   <li>{@link ObjectWriterImplListStr} for List&lt;String&gt;</li>
+ *   <li>{@link ObjectWriterImplListEnum} for List&lt;Enum&gt;</li>
+ *   <li>{@link ObjectWriterImplList} for generic lists</li>
+ * </ul>
+ *
+ * @param <T> the type of the object containing the list field
+ * @since 2.0.0
+ */
 public abstract class FieldWriterList<T>
         extends FieldWriter<T> {
     private static final Class<?> EMPTY_LIST_CLASS = Collections.emptyList().getClass();

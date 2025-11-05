@@ -36,10 +36,22 @@ public class Labels {
         }
     }
 
+    /**
+     * Creates a LabelFilter that includes only properties with the specified labels.
+     *
+     * @param views the labels to include
+     * @return a LabelFilter for inclusion filtering
+     */
     public static LabelFilter includes(String... views) {
         return new DefaultLabelFilter(views, null);
     }
 
+    /**
+     * Creates a LabelFilter that excludes properties with the specified labels.
+     *
+     * @param views the labels to exclude
+     * @return a LabelFilter for exclusion filtering
+     */
     public static LabelFilter excludes(String... views) {
         return new DefaultLabelFilter(null, views);
     }

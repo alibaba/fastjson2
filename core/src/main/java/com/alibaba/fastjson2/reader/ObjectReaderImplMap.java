@@ -16,6 +16,36 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
+/**
+ * ObjectReaderImplMap provides deserialization support for Map and its various implementations.
+ * It handles standard Java maps, concurrent maps, sorted maps, unmodifiable maps, and
+ * specialized map types like EnumMap and Properties.
+ *
+ * <p>Supported map types include:
+ * <ul>
+ *   <li>HashMap, LinkedHashMap, TreeMap, WeakHashMap, IdentityHashMap</li>
+ *   <li>ConcurrentHashMap, ConcurrentSkipListMap</li>
+ *   <li>Hashtable, Properties</li>
+ *   <li>EnumMap</li>
+ *   <li>Unmodifiable maps (Collections.unmodifiableMap, etc.)</li>
+ *   <li>Synchronized maps (Collections.synchronizedMap, etc.)</li>
+ *   <li>Singleton maps (Collections.singletonMap)</li>
+ *   <li>Guava maps (ImmutableMap, etc.)</li>
+ *   <li>JSONObject (fastjson2's own Map implementation)</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Deserialize to HashMap
+ * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+ * Map<String, String> map = JSON.parseObject(json, new TypeReference<Map<String, String>>() {});
+ *
+ * // Deserialize to TreeMap
+ * Map<String, Integer> treeMap = JSON.parseObject(json, new TypeReference<TreeMap<String, Integer>>() {});
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 public final class ObjectReaderImplMap
         implements ObjectReader {
     static final Function ENUM_MAP_BUILDER = e -> new EnumMap((Map) e);

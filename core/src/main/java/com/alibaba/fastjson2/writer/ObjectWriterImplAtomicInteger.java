@@ -6,6 +6,38 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * ObjectWriterImplAtomicInteger provides serialization support for {@link java.util.concurrent.atomic.AtomicInteger}
+ * values to JSON format. AtomicInteger values are serialized as their integer value.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>AtomicInteger serialization as integer value</li>
+ *   <li>Type information writing when required</li>
+ *   <li>Null AtomicInteger handling</li>
+ *   <li>Optimized JSONB encoding</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Serialize an AtomicInteger
+ * AtomicInteger counter = new AtomicInteger(42);
+ * String json = JSON.toJSONString(counter); // 42
+ *
+ * // With type information
+ * String json = JSON.toJSONString(counter, JSONWriter.Feature.WriteClassName);
+ * // {"@type":"AtomicInteger","value":42}
+ *
+ * // In an object
+ * class Counter {
+ *     AtomicInteger count = new AtomicInteger(10);
+ * }
+ * String json = JSON.toJSONString(new Counter());
+ * // {"count":10}
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 final class ObjectWriterImplAtomicInteger
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplAtomicInteger INSTANCE = new ObjectWriterImplAtomicInteger(null);

@@ -97,8 +97,21 @@ public class JSONObject
 
     /**
      * Returns the Object of the associated keys in this {@link JSONObject}.
+     * Handles special key types like {@link Number}, {@link Character}, {@link Boolean}, and {@link UUID}
+     * by converting them to string form for lookup.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONObject obj = JSON.parseObject("{\"name\":\"John\",\"age\":30,\"1\":\"numKey\"}");
+     *
+     * Object name = obj.get("name");    // "John"
+     * Object age = obj.get("age");      // 30
+     * Object missing = obj.get("missing"); // null
+     * Object numKey = obj.get(1);       // "numKey" (numeric key converted to string)
+     * }</pre>
      *
      * @param key the key whose associated value is to be returned
+     * @return the value associated with the key, or null if not found
      * @since 2.0.2
      */
     @Override
@@ -347,9 +360,20 @@ public class JSONObject
 
     /**
      * Returns the {@link String} of the associated keys in this {@link JSONObject}.
+     * Converts various types to strings automatically.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONObject obj = JSON.parseObject("{\"name\":\"John\",\"age\":30,\"active\":true}");
+     *
+     * String name = obj.getString("name");     // "John"
+     * String age = obj.getString("age");       // "30" (number converted to string)
+     * String active = obj.getString("active"); // "true" (boolean converted to string)
+     * String missing = obj.getString("missing"); // null
+     * }</pre>
      *
      * @param key the key whose associated value is to be returned
-     * @return {@link String} or null
+     * @return {@link String} representation of the value, or null if not found
      */
     public String getString(String key) {
         Object value = super.get(key);
@@ -572,9 +596,20 @@ public class JSONObject
 
     /**
      * Returns the {@link Integer} of the associated keys in this {@link JSONObject}.
+     * Automatically converts from various types including Number, String, and Boolean.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONObject obj = JSON.parseObject("{\"count\":42,\"score\":\"95\",\"active\":true}");
+     *
+     * Integer count = obj.getInteger("count");   // 42
+     * Integer score = obj.getInteger("score");   // 95 (parsed from string)
+     * Integer active = obj.getInteger("active"); // 1 (true converted to 1)
+     * Integer missing = obj.getInteger("missing"); // null
+     * }</pre>
      *
      * @param key the key whose associated value is to be returned
-     * @return {@link Integer} or null
+     * @return {@link Integer} value, or null if not found
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
      * @throws JSONException Unsupported type conversion to {@link Integer}
      */
@@ -1751,14 +1786,25 @@ public class JSONObject
     }
 
     /**
-     * Chained addition of elements
+     * Chained addition of elements. Allows fluent/builder-style construction of JSONObject.
      *
-     * <pre>
-     * JSONObject object = new JSONObject().fluentPut("a", 1).fluentPut("b", 2).fluentPut("c", 3);
-     * </pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Fluent construction of JSONObject
+     * JSONObject user = new JSONObject()
+     *     .fluentPut("id", 1)
+     *     .fluentPut("name", "John")
+     *     .fluentPut("age", 30)
+     *     .fluentPut("email", "john@example.com");
+     *
+     * // Convert to JSON string
+     * String json = user.toString();
+     * // Result: {"id":1,"name":"John","age":30,"email":"john@example.com"}
+     * }</pre>
      *
      * @param key key with which the specified value is to be associated
      * @param value value to be associated with the specified key
+     * @return this JSONObject, for method chaining
      */
     public JSONObject fluentPut(String key, Object value) {
         put(key, value);

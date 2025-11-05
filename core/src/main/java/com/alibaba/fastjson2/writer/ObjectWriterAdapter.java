@@ -17,6 +17,48 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
+/**
+ * ObjectWriterAdapter is the primary implementation of {@link ObjectWriter} for serializing
+ * Java objects to JSON format. It adapts a Java class by managing a collection of {@link FieldWriter}
+ * instances, each responsible for serializing individual fields of the object.
+ *
+ * <p>This class provides comprehensive support for:
+ * <ul>
+ *   <li>Field-based and method-based serialization</li>
+ *   <li>Type information writing for polymorphic serialization</li>
+ *   <li>Filter support (PropertyFilter, ValueFilter, NameFilter, PropertyPreFilter)</li>
+ *   <li>Optimized field lookup using hash codes and binary search</li>
+ *   <li>JSONB format serialization with symbol tables</li>
+ *   <li>Array mapping mode for compact serialization</li>
+ *   <li>Reference detection for circular references</li>
+ * </ul>
+ *
+ * <p>ObjectWriterAdapter instances are typically created by {@link ObjectWriterCreator} and
+ * cached by {@link ObjectWriterProvider} for performance optimization.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create an adapter for a User class
+ * List<FieldWriter> fieldWriters = new ArrayList<>();
+ * fieldWriters.add(new FieldWriterInt32("id", 0, User.class.getField("id")));
+ * fieldWriters.add(new FieldWriterString("name", 1, User.class.getField("name")));
+ * ObjectWriterAdapter<User> adapter = new ObjectWriterAdapter<>(User.class, fieldWriters);
+ *
+ * // Serialize to JSON
+ * User user = new User(1, "John");
+ * try (JSONWriter writer = JSONWriter.of()) {
+ *     adapter.write(writer, user, null, null, 0);
+ *     String json = writer.toString(); // {"id":1,"name":"John"}
+ * }
+ *
+ * // Apply filters
+ * adapter.setPropertyFilter((object, name, value) -> !"password".equals(name));
+ * adapter.setNameFilter((object, name, value) -> name.toUpperCase());
+ * }</pre>
+ *
+ * @param <T> the type of objects this adapter can serialize
+ * @since 2.0.0
+ */
 public class ObjectWriterAdapter<T>
         implements ObjectWriter<T> {
     boolean hasFilter;

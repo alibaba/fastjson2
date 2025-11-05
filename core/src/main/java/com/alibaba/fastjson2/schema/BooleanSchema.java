@@ -2,6 +2,17 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONObject;
 
+/**
+ * JSON Schema validator for boolean types.
+ * Validates that values are of boolean type (true or false).
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * JSONSchema schema = JSONSchema.of(JSONObject.of("type", "boolean"));
+ * schema.isValid(true);   // returns true
+ * schema.isValid("true"); // returns false (not a boolean)
+ * }</pre>
+ */
 public final class BooleanSchema
         extends JSONSchema {
     BooleanSchema(JSONObject input) {

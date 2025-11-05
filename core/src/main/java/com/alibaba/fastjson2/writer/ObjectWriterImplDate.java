@@ -11,6 +11,39 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * ObjectWriterImplDate provides serialization support for {@link java.util.Date} objects to JSON format.
+ * This writer supports multiple date serialization formats including milliseconds, Unix time,
+ * ISO 8601, and custom date patterns.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Date serialization as milliseconds (default in many cases)</li>
+ *   <li>Date serialization as Unix time (seconds since epoch)</li>
+ *   <li>Date serialization in ISO 8601 format</li>
+ *   <li>Custom date format patterns (e.g., "yyyy-MM-dd HH:mm:ss")</li>
+ *   <li>Time zone aware serialization</li>
+ *   <li>java.sql.Date support with type information</li>
+ *   <li>JSONB format with optimized milliseconds encoding</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Default serialization (ISO 8601)
+ * Date date = new Date();
+ * String json = JSON.toJSONString(date); // "2024-01-15T10:30:00"
+ *
+ * // Serialize as milliseconds
+ * String json = JSON.toJSONString(date, JSONWriter.Feature.WriterUtilDateAsMillis);
+ * // 1705315800000
+ *
+ * // Custom format
+ * ObjectWriter writer = new ObjectWriterImplDate("yyyy-MM-dd", null);
+ * String json = writer.toJSONString(date); // "2024-01-15"
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 final class ObjectWriterImplDate
         extends DateTimeCodec
         implements ObjectWriter {

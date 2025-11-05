@@ -2,7 +2,25 @@ package com.alibaba.fastjson2.internal;
 
 import com.alibaba.fastjson2.util.IOUtils;
 
+/**
+ * Utility class for generating code-related names and identifiers.
+ * Provides methods to generate standardized field reader names for bytecode generation.
+ */
 public class CodeGenUtils {
+    /**
+     * Generates a standardized field reader name for the given index.
+     * Returns cached names for indices 0-15, and dynamically generates names for higher indices.
+     *
+     * @param i the field reader index
+     * @return the field reader name in the format "fieldReaderN" where N is the index
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String name0 = CodeGenUtils.fieldReader(0);  // returns "fieldReader0"
+     * String name5 = CodeGenUtils.fieldReader(5);  // returns "fieldReader5"
+     * String name20 = CodeGenUtils.fieldReader(20); // returns "fieldReader20"
+     * }</pre>
+     */
     public static String fieldReader(int i) {
         switch (i) {
             case 0:

@@ -16,6 +16,27 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
+/**
+ * FieldReaderObject is a FieldReader implementation for reading and setting object-typed
+ * fields during JSON deserialization. It handles various object types including custom
+ * classes, Maps, Collections, and formatted types (dates, numbers, etc.).
+ *
+ * <p>This class provides:
+ * <ul>
+ *   <li>Object field reading and setting via reflection or direct field access</li>
+ *   <li>Support for custom ObjectReader instances</li>
+ *   <li>Format-aware deserialization (e.g., date/time with custom formats)</li>
+ *   <li>BiConsumer function support for custom field setting logic</li>
+ *   <li>Automatic type detection for Maps and Collections</li>
+ *   <li>Reference resolution for circular references</li>
+ * </ul>
+ *
+ * <p>This is typically used as a base class for more specialized field readers or
+ * directly for generic object-typed fields.
+ *
+ * @param <T> the type of the object containing the field
+ * @since 2.0.0
+ */
 public class FieldReaderObject<T>
         extends FieldReader<T> {
     protected ObjectReader initReader;

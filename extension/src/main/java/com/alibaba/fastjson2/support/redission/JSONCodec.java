@@ -16,27 +16,74 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Fastjson2 codec for Redisson.
+ * Provides JSON serialization and deserialization for Redisson Redis client.
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * Config config = new Config();
+ * config.useSingleServer()
+ *     .setAddress("redis://127.0.0.1:6379")
+ *     .setCodec(new JSONCodec(MyObject.class));
+ * RedissonClient redisson = Redisson.create(config);
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 public class JSONCodec
         extends BaseCodec {
     final JSONEncoder encoder;
     final JSONDecoder decoder;
 
+    /**
+     * Creates a JSON codec for the specified type with UTF-8 charset.
+     *
+     * @param type the type to encode/decode
+     */
     public JSONCodec(Type type) {
         this(JSONFactory.createWriteContext(), JSONFactory.createReadContext(), type, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Creates a JSON codec for the specified type and charset.
+     *
+     * @param type the type to encode/decode
+     * @param charset the charset to use for encoding/decoding
+     */
     public JSONCodec(Type type, Charset charset) {
         this(JSONFactory.createWriteContext(), JSONFactory.createReadContext(), type, charset);
     }
 
+    /**
+     * Creates a JSON codec with custom writer and reader contexts.
+     *
+     * @param writerContext the context for JSON writing
+     * @param readerContext the context for JSON reading
+     */
     public JSONCodec(JSONWriter.Context writerContext, JSONReader.Context readerContext) {
         this(writerContext, readerContext, null, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Creates a JSON codec with custom writer and reader contexts and charset.
+     *
+     * @param writerContext the context for JSON writing
+     * @param readerContext the context for JSON reading
+     * @param charset the charset to use for encoding/decoding
+     */
     public JSONCodec(JSONWriter.Context writerContext, JSONReader.Context readerContext, Charset charset) {
         this(writerContext, readerContext, null, charset);
     }
 
+    /**
+     * Creates a JSON codec with custom contexts, type, and charset.
+     *
+     * @param writerContext the context for JSON writing
+     * @param readerContext the context for JSON reading
+     * @param valueType the type to encode/decode
+     * @param charset the charset to use for encoding/decoding
+     */
     public JSONCodec(JSONWriter.Context writerContext, JSONReader.Context readerContext, Type valueType, Charset charset) {
         this(new JSONEncoder(writerContext, charset), new JSONDecoder(valueType, charset, readerContext));
     }
@@ -46,11 +93,21 @@ public class JSONCodec
         this.decoder = decoder;
     }
 
+    /**
+     * Gets the decoder for deserializing values.
+     *
+     * @return the value decoder
+     */
     @Override
     public Decoder<Object> getValueDecoder() {
         return decoder;
     }
 
+    /**
+     * Gets the encoder for serializing values.
+     *
+     * @return the value encoder
+     */
     @Override
     public Encoder getValueEncoder() {
         return encoder;

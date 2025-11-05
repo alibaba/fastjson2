@@ -24,7 +24,11 @@ import java.util.Arrays;
 import java.util.function.BiFunction;
 
 /**
- * An open addressed Map implementation for long keys and int values.
+ * An open-addressed hash map implementation for primitive long keys and int values.
+ * This specialized map avoids boxing overhead and provides efficient storage for long-to-int mappings.
+ * Uses double hashing for collision resolution and automatic capacity growth with prime number sizing.
+ *
+ * <p>This implementation is adapted from the Trove library for use in fastjson2's internal caching.
  *
  * @author Eric D. Friedman
  * @author Rob Eden
@@ -111,8 +115,8 @@ public final class TLongIntHashMap {
     private int maxSize;
 
     /**
-     * Creates a new <code>TLongIntHashMap</code> instance with the default
-     * capacity and load factor.
+     * Creates a new TLongIntHashMap instance with default capacity (37) and load factor (0.5).
+     * The map will automatically resize when it reaches the load threshold.
      */
     public TLongIntHashMap() {
         int capacity = 37;
@@ -123,6 +127,12 @@ public final class TLongIntHashMap {
         values = new int[capacity];
     }
 
+    /**
+     * Creates a new TLongIntHashMap with a single initial key-value mapping.
+     *
+     * @param key the initial key
+     * @param value the initial value
+     */
     public TLongIntHashMap(long key, int value) {
         // int capacity = 37;
         maxSize = 18;
@@ -138,6 +148,13 @@ public final class TLongIntHashMap {
         size = 1;
     }
 
+    /**
+     * Inserts a key-value pair into the map, or updates the value if the key already exists.
+     * The map will automatically resize if necessary to maintain performance.
+     *
+     * @param key the key to insert or update
+     * @param value the value to associate with the key
+     */
     public void put(long key, int value) {
 //        int index = insertKey( key );
         int index;
@@ -238,6 +255,14 @@ public final class TLongIntHashMap {
         }
     }
 
+    /**
+     * Inserts a key-value pair if the key is not already present in the map.
+     * If the key exists, returns the existing value without modifying the map.
+     *
+     * @param key the key to insert
+     * @param value the value to associate with the key
+     * @return the existing value if key was present, otherwise the newly inserted value
+     */
     public int putIfAbsent(long key, int value) {
 //        int index = insertKey( key );
         int index;
@@ -339,6 +364,12 @@ public final class TLongIntHashMap {
         }
     }
 
+    /**
+     * Retrieves the value associated with the given key.
+     *
+     * @param key the key to look up
+     * @return the value associated with the key, or -1 if the key is not present
+     */
     public int get(long key) {
         final int DEFAULT_ENTRY_VALUE = -1;
 
@@ -379,6 +410,13 @@ public final class TLongIntHashMap {
         return DEFAULT_ENTRY_VALUE;
     }
 
+    /**
+     * Executes the given procedure for each key-value pair in the map.
+     * The procedure can terminate iteration early by returning false.
+     *
+     * @param procedure the function to execute for each entry, returns true to continue or false to stop
+     * @return true if all entries were processed, false if the procedure returned false
+     */
     public boolean forEachEntry(BiFunction<Long, Integer, Boolean> procedure) {
         long[] keys = set;
         int[] values = this.values;
@@ -413,6 +451,11 @@ public final class TLongIntHashMap {
         return buf.toString();
     }
 
+    /**
+     * Returns the number of key-value pairs currently stored in the map.
+     *
+     * @return the size of the map
+     */
     public int size() {
         return size;
     }

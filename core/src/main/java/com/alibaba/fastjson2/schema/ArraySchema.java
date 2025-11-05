@@ -11,6 +11,34 @@ import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 
+/**
+ * JSON Schema validator for array types.
+ * Supports validation of array length, item schemas, prefix items, additional items,
+ * unique items, and contains constraints.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Array with item type and length constraints
+ * JSONSchema schema = JSONSchema.of(JSONObject.of(
+ *     "type", "array",
+ *     "items", JSONObject.of("type", "integer"),
+ *     "minItems", 1,
+ *     "maxItems", 10
+ * ));
+ *
+ * // Array with unique items
+ * JSONSchema uniqueSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "array",
+ *     "uniqueItems", true
+ * ));
+ *
+ * // Array with contains constraint
+ * JSONSchema containsSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "array",
+ *     "contains", JSONObject.of("const", "required-value")
+ * ));
+ * }</pre>
+ */
 public final class ArraySchema
         extends JSONSchema {
     final Map<String, JSONSchema> definitions;
@@ -341,6 +369,11 @@ public final class ArraySchema
         }
     }
 
+    /**
+     * Returns the schema that validates array items.
+     *
+     * @return the item schema, or null if no item schema is defined
+     */
     public JSONSchema getItemSchema() {
         return itemSchema;
     }

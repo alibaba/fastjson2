@@ -14,6 +14,38 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+/**
+ * FieldReaderList is a specialized FieldReader for reading and setting List and Collection
+ * typed fields during JSON deserialization. It handles various collection types and
+ * provides efficient deserialization of array JSON data into Java collections.
+ *
+ * <p>Supported features include:
+ * <ul>
+ *   <li>Automatic collection type instantiation (ArrayList, HashSet, etc.)</li>
+ *   <li>Item type handling with ObjectReader caching</li>
+ *   <li>Format-aware item deserialization (e.g., dates with custom formats)</li>
+ *   <li>Reference resolution for collection elements</li>
+ *   <li>JSONB array format support</li>
+ *   <li>Typed array deserialization with proper generic type handling</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Typically created by ObjectReaderCreator
+ * FieldReader listFieldReader = new FieldReaderList(
+ *     "items",
+ *     List.class,
+ *     ArrayList.class,
+ *     String.class,
+ *     String.class,
+ *     0, 0, null, null, null, null, null, null, User::setItems
+ * );
+ * }</pre>
+ *
+ * @param <T> the type of the object containing the field
+ * @param <V> the type of items in the collection
+ * @since 2.0.0
+ */
 public class FieldReaderList<T, V>
         extends FieldReaderObject<T> {
     final long fieldClassHash;

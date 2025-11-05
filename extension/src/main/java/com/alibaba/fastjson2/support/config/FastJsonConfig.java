@@ -261,13 +261,23 @@ public class FastJsonConfig {
     }
 
     /**
-     * Clear internal caches of JSONReader.Context and JSONWriter.Context
+     * Clear internal caches of JSONReader.Context and JSONWriter.Context.
+     * This method should be called when configuration changes require context recreation.
      */
     public void clearContext() {
         readerContext = null;
         writerContext = null;
     }
 
+    /**
+     * Gets or creates the JSONReader.Context configured with this config's settings.
+     * The context is cached internally to avoid repeated object construction.
+     *
+     * <p>This method is thread-safe. Concurrent access may create multiple contexts,
+     * but this will not cause any functional problems.</p>
+     *
+     * @return the configured JSONReader.Context instance
+     */
     public JSONReader.Context readerContext() {
         JSONReader.Context context = readerContext;
         if (context == null) { // Concurrency may occur, but it will not cause any problems
@@ -278,6 +288,15 @@ public class FastJsonConfig {
         return context;
     }
 
+    /**
+     * Gets or creates the JSONWriter.Context configured with this config's settings.
+     * The context is cached internally to avoid repeated object construction.
+     *
+     * <p>This method is thread-safe. Concurrent access may create multiple contexts,
+     * but this will not cause any functional problems.</p>
+     *
+     * @return the configured JSONWriter.Context instance
+     */
     public JSONWriter.Context writerContext() {
         JSONWriter.Context context = writerContext;
         if (context == null) {

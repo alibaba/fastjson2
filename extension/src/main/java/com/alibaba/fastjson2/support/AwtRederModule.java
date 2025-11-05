@@ -13,6 +13,20 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReader;
 
+/**
+ * ObjectReaderModule for AWT types (Color, Point, Font).
+ * Provides custom deserialization for common java.awt classes.
+ *
+ * <p><b>Note:</b> This module is not supported on Android.</p>
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * JSON.register(AwtRederModule.INSTANCE);
+ * Color color = JSON.parseObject("{\"r\":255,\"g\":0,\"b\":0}", Color.class);
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 public class AwtRederModule
         implements ObjectReaderModule {
     // Android not support
@@ -21,8 +35,20 @@ public class AwtRederModule
     static final long HASH_NAME = Fnv.hashCode64("name");
     static final long HASH_SIZE = Fnv.hashCode64("size");
     static final long HASH_STYLE = Fnv.hashCode64("style");
+
+    /**
+     * Singleton instance of AwtRederModule.
+     * <p><b>Note:</b> Not supported on Android platform.</p>
+     */
     public static AwtRederModule INSTANCE = new AwtRederModule();
 
+    /**
+     * Gets the custom ObjectReader for AWT types.
+     *
+     * @param provider the ObjectReaderProvider
+     * @param type the type to be deserialized
+     * @return the ObjectReader for the specified type, or null if not supported
+     */
     @Override
     public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
         if (type == Color.class) {
@@ -61,6 +87,10 @@ public class AwtRederModule
         return null;
     }
 
+    /**
+     * Function to create Color instances from deserialized field values.
+     * Supports both RGB value and separate R, G, B component formats.
+     */
     static class ColorCreator
             implements Function<Map<Long, Object>, Color> {
         static final long HASH_RGB = Fnv.hashCode64("rgb");
@@ -68,6 +98,12 @@ public class AwtRederModule
         static final long HASH_G = Fnv.hashCode64("g");
         static final long HASH_B = Fnv.hashCode64("b");
 
+        /**
+         * Creates a Color from the provided field values.
+         *
+         * @param values map of field hashes to their values
+         * @return the created Color instance
+         */
         @Override
         public Color apply(Map<Long, Object> values) {
             Integer rgb = (Integer) values.get(HASH_RGB);

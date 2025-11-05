@@ -8,6 +8,48 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.*;
 
+/**
+ * ObjectWriterImplEnum provides serialization support for Enum types to JSON format.
+ * This writer handles enum serialization with various strategies including name, ordinal,
+ * toString, and custom value fields.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Enum serialization using enum name (default)</li>
+ *   <li>Enum serialization using enum ordinal</li>
+ *   <li>Enum serialization using toString() method</li>
+ *   <li>Enum serialization using custom value fields (annotated with @JSONField)</li>
+ *   <li>Type information writing for polymorphic deserialization</li>
+ *   <li>Optimized JSONB encoding with cached names</li>
+ *   <li>Support for renamed enum values via annotations</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Define an enum
+ * enum Status {
+ *     ACTIVE, INACTIVE, PENDING
+ * }
+ *
+ * // Default serialization (by name)
+ * Status status = Status.ACTIVE;
+ * String json = JSON.toJSONString(status); // "ACTIVE"
+ *
+ * // Serialize using toString
+ * String json = JSON.toJSONString(status, JSONWriter.Feature.WriteEnumUsingToString);
+ *
+ * // Enum with custom value field
+ * enum Priority {
+ *     @JSONField(value = 1) HIGH,
+ *     @JSONField(value = 2) MEDIUM,
+ *     @JSONField(value = 3) LOW
+ * }
+ * String json = JSON.toJSONString(Priority.HIGH); // Serializes custom value
+ * }</pre>
+ *
+ * @param <E> the enum type
+ * @since 2.0.0
+ */
 final class ObjectWriterImplEnum<E extends Enum<E>>
         extends ObjectWriterPrimitiveImpl {
     final Member valueField;

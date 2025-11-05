@@ -44,6 +44,26 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 /**
+ * A JSON object that implements a {@link Map} with string keys and object values.
+ * <p>This is a fastjson1-compatible class that provides the same behavior as the original fastjson 1.x API.
+ * JSONObject provides convenient methods for accessing and converting values to various Java types.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create a JSONObject
+ * JSONObject obj = new JSONObject();
+ * obj.put("name", "Alice");
+ * obj.put("age", 30);
+ *
+ * // Parse from JSON string
+ * JSONObject obj2 = JSON.parseObject("{\"name\":\"Bob\",\"age\":25}");
+ * String name = obj2.getString("name");
+ * int age = obj2.getIntValue("age");
+ *
+ * // Convert to Java object
+ * User user = obj2.toJavaObject(User.class);
+ * }</pre>
+ *
  * @author wenshao[szujobs@hotmail.com]
  */
 public class JSONObject
@@ -130,6 +150,21 @@ public class JSONObject
         return adaptResult(val);
     }
 
+    /**
+     * Retrieves a {@link JSONObject} value associated with the specified key.
+     * <p>This is a fastjson1-compatible method. If the value is a string, it will be parsed as JSON.
+     * If the value is a Map, it will be converted to a JSONObject.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the {@link JSONObject} value, or {@code null} if the key doesn't exist or the value is null
+     * @throws JSONException if the value cannot be converted to a JSONObject
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONObject user = obj.getJSONObject("user");
+     * String name = user.getString("name");
+     * }</pre>
+     */
     public JSONObject getJSONObject(String key) {
         Object value = map.get(key);
 
@@ -169,6 +204,24 @@ public class JSONObject
         return null;
     }
 
+    /**
+     * Retrieves a {@link JSONArray} value associated with the specified key.
+     * <p>This is a fastjson1-compatible method. If the value is a string, it will be parsed as JSON.
+     * If the value is a List, it will be converted to a JSONArray.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the {@link JSONArray} value, or {@code null} if the key doesn't exist or the value is null
+     * @throws JSONException if the value cannot be converted to a JSONArray
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONArray items = obj.getJSONArray("items");
+     * for (int i = 0; i < items.size(); i++) {
+     *     JSONObject item = items.getJSONObject(i);
+     *     // Process item
+     * }
+     * }</pre>
+     */
     public JSONArray getJSONArray(String key) {
         Object value = map.get(key);
 
@@ -198,10 +251,37 @@ public class JSONObject
         return JSON.parseArray(jsonString);
     }
 
+    /**
+     * Retrieves a value and converts it to the specified class type.
+     * <p>This is a fastjson1-compatible method that handles automatic type conversion.
+     *
+     * @param <T> the type of the object to return
+     * @param key the key whose associated value is to be returned
+     * @param clazz the class to convert the value to
+     * @return the value converted to type {@code T}, or {@code null} if the key doesn't exist
+     * @throws JSONException if the value cannot be converted to the specified type
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = obj.getObject("user", User.class);
+     * List<String> tags = obj.getObject("tags", List.class);
+     * }</pre>
+     */
     public <T> T getObject(String key, Class<T> clazz) {
         return getObject(key, clazz, new Feature[0]);
     }
-    //
+
+    /**
+     * Retrieves a value and converts it to the specified class type with parser features.
+     * <p>This is a fastjson1-compatible method that handles automatic type conversion.
+     *
+     * @param <T> the type of the object to return
+     * @param key the key whose associated value is to be returned
+     * @param clazz the class to convert the value to
+     * @param features optional parser features to control conversion behavior
+     * @return the value converted to type {@code T}, or {@code null} if the key doesn't exist
+     * @throws JSONException if the value cannot be converted to the specified type
+     */
     public <T> T getObject(String key, Class<T> clazz, Feature... features) {
         Object obj = map.get(key);
         if (obj == null) {
@@ -292,6 +372,24 @@ public class JSONObject
         return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
+    /**
+     * Retrieves a {@link Boolean} value associated with the specified key.
+     * <p>This is a fastjson1-compatible method. Supports conversion from boolean, number, and string values.
+     * Numbers are treated as {@code true} if equal to 1. Strings are treated as {@code true} if they equal
+     * "true" (case-insensitive) or "1".
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the Boolean value, or {@code null} if the key doesn't exist or the value is null/empty string
+     * @throws JSONException if the value cannot be converted to a Boolean
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean active = obj.getBoolean("active");
+     * if (active != null && active) {
+     *     // Process active user
+     * }
+     * }</pre>
+     */
     public Boolean getBoolean(String key) {
         Object value = map.get(key);
 
@@ -496,6 +594,24 @@ public class JSONObject
         throw new JSONException("Can not cast '" + value.getClass() + "' to short value");
     }
 
+    /**
+     * Retrieves an {@link Integer} value associated with the specified key.
+     * <p>This is a fastjson1-compatible method. Supports conversion from numbers, strings, and booleans.
+     * Booleans are converted to 1 (true) or 0 (false). String values with decimals are truncated.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the Integer value, or {@code null} if the key doesn't exist or the value is null/empty string
+     * @throws JSONException if the value cannot be converted to an Integer
+     * @throws NumberFormatException if the string value is not a valid number
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer age = obj.getInteger("age");
+     * if (age != null && age >= 18) {
+     *     // Process adult user
+     * }
+     * }</pre>
+     */
     public Integer getInteger(String key) {
         Object value = map.get(key);
 
@@ -532,7 +648,21 @@ public class JSONObject
         throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
-    //
+    /**
+     * Retrieves an int value associated with the specified key.
+     * <p>This is a fastjson1-compatible method. Returns 0 if the value is null or cannot be found.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the int value, or 0 if the key doesn't exist or the value is null/empty string
+     * @throws JSONException if the value cannot be converted to an int
+     * @throws NumberFormatException if the string value is not a valid number
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int count = obj.getIntValue("count");
+     * System.out.println("Count: " + count);
+     * }</pre>
+     */
     public int getIntValue(String key) {
         Object value = map.get(key);
 
@@ -561,7 +691,22 @@ public class JSONObject
         throw new JSONException("Can not cast '" + value.getClass() + "' to int value");
     }
 
-    //
+    /**
+     * Retrieves a {@link Long} value associated with the specified key.
+     * <p>This is a fastjson1-compatible method. Supports conversion from numbers and strings.
+     * String values with decimals are truncated.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the Long value, or {@code null} if the key doesn't exist or the value is null/empty string
+     * @throws JSONException if the value cannot be converted to a Long
+     * @throws NumberFormatException if the string value is not a valid number
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long id = obj.getLong("id");
+     * Long timestamp = obj.getLong("timestamp");
+     * }</pre>
+     */
     public Long getLong(String key) {
         Object value = map.get(key);
 
@@ -804,6 +949,20 @@ public class JSONObject
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
+    /**
+     * Retrieves a {@link String} value associated with the specified key.
+     * <p>This is a fastjson1-compatible method. Any non-null value is converted to a string
+     * using its {@code toString()} method.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the String value, or {@code null} if the key doesn't exist or the value is null
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String name = obj.getString("name");
+     * String description = obj.getString("description");
+     * }</pre>
+     */
     public String getString(String key) {
         Object value = get(key);
 
@@ -842,6 +1001,22 @@ public class JSONObject
         return map.put(key, value);
     }
 
+    /**
+     * Associates the specified value with the specified key and returns this JSONObject.
+     * <p>This is a fluent API method that allows method chaining. This is a fastjson1-compatible method.
+     *
+     * @param key the key with which the specified value is to be associated
+     * @param value the value to be associated with the specified key
+     * @return this JSONObject instance for method chaining
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONObject obj = new JSONObject()
+     *     .fluentPut("name", "Alice")
+     *     .fluentPut("age", 30)
+     *     .fluentPut("active", true);
+     * }</pre>
+     */
     public JSONObject fluentPut(String key, Object value) {
         map.put(key, value);
         return this;
@@ -1005,6 +1180,23 @@ public class JSONObject
         return com.alibaba.fastjson2.JSON.parseObject(str, type);
     }
 
+    /**
+     * Converts this JSONObject to a Java object of the specified class type.
+     * <p>This is a fastjson1-compatible method that performs automatic field mapping
+     * and type conversion.
+     *
+     * @param <T> the type of the object to return
+     * @param clazz the class to convert this JSONObject to
+     * @return a new instance of the specified class with values populated from this JSONObject
+     * @throws JSONException if the conversion fails
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONObject json = JSON.parseObject("{\"name\":\"Alice\",\"age\":30}");
+     * User user = json.toJavaObject(User.class);
+     * System.out.println(user.getName()); // "Alice"
+     * }</pre>
+     */
     public <T> T toJavaObject(Class<T> clazz) {
         if (clazz == Map.class) {
             return (T) this;

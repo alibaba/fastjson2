@@ -9,6 +9,41 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+/**
+ * ObjectWriterImplCollection provides serialization support for Collection types to JSON format.
+ * This writer handles various Collection implementations including ArrayList, HashSet, LinkedHashSet,
+ * TreeSet, and other custom collection types.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Generic Collection serialization as JSON arrays</li>
+ *   <li>Type information writing for specific collection types</li>
+ *   <li>Support for homogeneous and heterogeneous collections</li>
+ *   <li>Optimized serialization for common collection types</li>
+ *   <li>Empty collection handling</li>
+ *   <li>Reference detection for collection elements</li>
+ *   <li>JSONB format with optimized encoding</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Serialize a List
+ * List<String> list = Arrays.asList("apple", "banana", "cherry");
+ * String json = JSON.toJSONString(list); // ["apple","banana","cherry"]
+ *
+ * // Serialize a Set
+ * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
+ * String json = JSON.toJSONString(set); // [1,2,3]
+ *
+ * // Serialize with type information
+ * LinkedHashSet<String> linkedSet = new LinkedHashSet<>();
+ * linkedSet.add("first");
+ * linkedSet.add("second");
+ * String json = JSON.toJSONString(linkedSet, JSONWriter.Feature.WriteClassName);
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 final class ObjectWriterImplCollection
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplCollection INSTANCE = new ObjectWriterImplCollection();

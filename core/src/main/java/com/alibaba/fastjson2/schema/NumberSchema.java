@@ -5,6 +5,33 @@ import com.alibaba.fastjson2.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+/**
+ * JSON Schema validator for numeric types including integers and floating-point numbers.
+ * Supports validation of minimum, maximum, exclusiveMinimum, exclusiveMaximum, and multipleOf constraints.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Number with range constraints
+ * JSONSchema schema = JSONSchema.of(JSONObject.of(
+ *     "type", "number",
+ *     "minimum", 0,
+ *     "maximum", 100
+ * ));
+ *
+ * // Number with exclusive bounds
+ * JSONSchema exclusiveSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "number",
+ *     "exclusiveMinimum", 0,    // value must be > 0
+ *     "exclusiveMaximum", 100   // value must be < 100
+ * ));
+ *
+ * // Multiple of constraint
+ * JSONSchema multipleSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "number",
+ *     "multipleOf", 0.5
+ * ));
+ * }</pre>
+ */
 public final class NumberSchema
         extends JSONSchema {
     final BigDecimal minimum;

@@ -13,6 +13,36 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
+/**
+ * ObjectReaderImplList provides deserialization support for List, Set, Queue, Deque,
+ * and other Collection implementations. It handles various collection types including
+ * standard Java collections, unmodifiable collections, singleton collections, and
+ * specialized collections like EnumSet.
+ *
+ * <p>Supported collection types include:
+ * <ul>
+ *   <li>ArrayList, LinkedList, Vector, Stack</li>
+ *   <li>HashSet, LinkedHashSet, TreeSet, EnumSet</li>
+ *   <li>ArrayDeque, PriorityQueue, ConcurrentLinkedQueue</li>
+ *   <li>Unmodifiable collections (Collections.unmodifiableList, etc.)</li>
+ *   <li>Singleton collections (Collections.singleton, Collections.singletonList)</li>
+ *   <li>Guava collections (ImmutableList, etc.)</li>
+ *   <li>Kotlin collections</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Deserialize to ArrayList
+ * String json = "[1, 2, 3]";
+ * List<Integer> list = JSON.parseObject(json, new TypeReference<List<Integer>>() {});
+ *
+ * // Deserialize to HashSet
+ * String json = "[1, 2, 3]";
+ * Set<Integer> set = JSON.parseObject(json, new TypeReference<Set<Integer>>() {});
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 public final class ObjectReaderImplList
         implements ObjectReader {
     static final Class CLASS_EMPTY_SET = Collections.emptySet().getClass();

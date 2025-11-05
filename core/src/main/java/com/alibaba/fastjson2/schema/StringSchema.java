@@ -15,6 +15,33 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * JSON Schema validator for string types.
+ * Supports validation of string length, patterns, formats (email, URI, date-time, UUID, etc.),
+ * enum values, and const values.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // String with length constraints
+ * JSONSchema schema = JSONSchema.of(JSONObject.of(
+ *     "type", "string",
+ *     "minLength", 3,
+ *     "maxLength", 10
+ * ));
+ *
+ * // Email format validation
+ * JSONSchema emailSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "string",
+ *     "format", "email"
+ * ));
+ *
+ * // Pattern validation
+ * JSONSchema patternSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "string",
+ *     "pattern", "^[A-Z][0-9]+$"
+ * ));
+ * }</pre>
+ */
 public final class StringSchema
         extends JSONSchema {
     static final Pattern EMAIL_PATTERN = Pattern.compile("^\\s*?(.+)@(.+?)\\s*$");

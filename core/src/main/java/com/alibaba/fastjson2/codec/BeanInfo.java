@@ -49,6 +49,17 @@ public class BeanInfo {
     public String rootName;
     public boolean skipTransient = true;
 
+    /**
+     * Constructs a new BeanInfo instance with default settings from JSONFactory.
+     * Initializes reader and writer features based on global JSON factory configuration,
+     * including auto-type, reference detection, JSONB, array mapping, and smart match settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BeanInfo beanInfo = new BeanInfo();
+     * // Features are automatically set based on JSONFactory configuration
+     * }</pre>
+     */
     public BeanInfo() {
         if (JSONFactory.isDisableAutoType()) {
             writerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
@@ -71,6 +82,19 @@ public class BeanInfo {
         }
     }
 
+    /**
+     * Constructs a new BeanInfo instance with settings from the specified ObjectReaderProvider.
+     * Initializes reader features and naming strategy based on the provider's configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjectReaderProvider provider = new ObjectReaderProvider();
+     * BeanInfo beanInfo = new BeanInfo(provider);
+     * // Reader features are set based on provider configuration
+     * }</pre>
+     *
+     * @param provider the ObjectReaderProvider to obtain configuration from
+     */
     public BeanInfo(ObjectReaderProvider provider) {
         if (provider.isDisableAutoType()) {
             readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
@@ -93,6 +117,19 @@ public class BeanInfo {
         }
     }
 
+    /**
+     * Constructs a new BeanInfo instance with settings from the specified ObjectWriterProvider.
+     * Initializes writer features, alphabetic ordering, and transient field handling based on the provider's configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjectWriterProvider provider = new ObjectWriterProvider();
+     * BeanInfo beanInfo = new BeanInfo(provider);
+     * // Writer features are set based on provider configuration
+     * }</pre>
+     *
+     * @param provider the ObjectWriterProvider to obtain configuration from
+     */
     public BeanInfo(ObjectWriterProvider provider) {
         if (provider.isDisableAutoType()) {
             writerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
@@ -110,6 +147,21 @@ public class BeanInfo {
         skipTransient = provider.isSkipTransient();
     }
 
+    /**
+     * Marks the specified field as required in the JSON schema.
+     * If no schema exists, creates a new schema with the required field.
+     * If a schema exists, adds the field to the existing required fields array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BeanInfo beanInfo = new BeanInfo();
+     * beanInfo.required("id");
+     * beanInfo.required("name");
+     * // Schema now contains: {"required":["id","name"]}
+     * }</pre>
+     *
+     * @param fieldName the name of the field to mark as required
+     */
     public void required(String fieldName) {
         if (schema == null) {
             schema = JSONObject.of("required", JSONArray.of(fieldName)).toString();

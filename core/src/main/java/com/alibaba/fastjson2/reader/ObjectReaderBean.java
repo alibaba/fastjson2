@@ -16,6 +16,27 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreAutoTypeNotMatch;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportAutoType;
 
+/**
+ * ObjectReaderBean is an abstract base class for ObjectReader implementations that handle
+ * JavaBean-style objects. It provides common functionality for bean deserialization including
+ * object creation, schema validation, and extra field handling.
+ *
+ * <p>Key features include:
+ * <ul>
+ *   <li>Bean object creation using suppliers or constructors</li>
+ *   <li>Build function support for post-deserialization object transformation</li>
+ *   <li>JSON schema validation</li>
+ *   <li>Extra field and extra processor support</li>
+ *   <li>Auto-type before handler support</li>
+ *   <li>Default value handling</li>
+ * </ul>
+ *
+ * <p>This class is typically extended by concrete implementations like {@link ObjectReaderAdapter}
+ * or generated ASM-based readers for optimal performance.
+ *
+ * @param <T> the type of objects that this ObjectReader can deserialize
+ * @since 2.0.0
+ */
 public abstract class ObjectReaderBean<T>
         implements ObjectReader<T> {
     protected final Class objectClass;

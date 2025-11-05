@@ -30,8 +30,36 @@ package com.alibaba.fastjson2.internal.asm;
 import com.alibaba.fastjson2.JSONException;
 
 /**
+ * A writer for generating method bytecode in Java class files.
+ * This class provides methods to emit JVM bytecode instructions that form the body of a method.
+ * It handles instruction writing, label resolution, stack frame computation, and other aspects
+ * of method code generation according to the JVM specification.
+ *
+ * <p>The typical usage pattern:
+ * <ol>
+ *   <li>Create a MethodWriter via ClassWriter.visitMethod()
+ *   <li>Call instruction methods (e.g., aload(), invokevirtual(), return_()) to generate bytecode
+ *   <li>Use Labels for control flow (jumps, branches)
+ *   <li>Call visitMaxs() to finalize the method
+ * </ol>
+ *
+ * <p>This class provides convenient methods for common bytecode patterns:
+ * <ul>
+ *   <li>Loading/storing local variables: aload(), iload(), astore(), istore(), etc.
+ *   <li>Field access: getfield(), putfield(), getstatic()
+ *   <li>Method invocation: invokevirtual(), invokestatic(), invokespecial(), invokeinterface()
+ *   <li>Object operations: new_(), checkcast(), instanceof()
+ *   <li>Control flow: goto_(), ifeq(), ifnull(), if_icmpeq(), etc.
+ *   <li>Stack manipulation: dup(), pop(), swap()
+ *   <li>Arithmetic: iadd(), imul(), ineg(), etc.
+ *   <li>Constants: iconst_n(), lconst_0(), aconst_null(), visitLdcInsn()
+ * </ul>
+ *
  * @author Eric Bruneton
  * @author Eugene Kuleshov
+ * @see ClassWriter
+ * @see Label
+ * @see Opcodes
  */
 public final class MethodWriter {
     MethodWriter mv;

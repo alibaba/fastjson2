@@ -6,6 +6,36 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * ObjectWriterImplOptional provides serialization support for {@link java.util.Optional} values to JSON format.
+ * This writer unwraps Optional values and serializes the contained value, or writes null if the Optional is empty.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Optional value unwrapping and serialization</li>
+ *   <li>Empty Optional serialization as null</li>
+ *   <li>Type-specific formatting for wrapped values</li>
+ *   <li>Dynamic ObjectWriter resolution for wrapped values</li>
+ *   <li>JSONB format support</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Serialize Optional with value
+ * Optional<String> optional = Optional.of("Hello");
+ * String json = JSON.toJSONString(optional); // "Hello"
+ *
+ * // Serialize empty Optional
+ * Optional<String> empty = Optional.empty();
+ * String json = JSON.toJSONString(empty); // null
+ *
+ * // Serialize Optional with complex object
+ * Optional<User> userOpt = Optional.of(new User(1, "John"));
+ * String json = JSON.toJSONString(userOpt); // {"id":1,"name":"John"}
+ * }</pre>
+ *
+ * @since 2.0.0
+ */
 final class ObjectWriterImplOptional
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplOptional INSTANCE = new ObjectWriterImplOptional(null, null);

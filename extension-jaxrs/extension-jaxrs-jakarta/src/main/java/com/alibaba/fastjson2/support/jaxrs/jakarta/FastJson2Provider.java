@@ -16,30 +16,43 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 /**
- * Fastjson for JAX-RS Provider.
- * 参考：com.alibaba.fastjson.support.jaxrs.FastJsonProvider
+ * Fastjson2 provider for JAX-RS (jakarta namespace).
+ * Provides JSON serialization and deserialization for JAX-RS REST services using Jakarta EE APIs.
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * @ApplicationPath("/api")
+ * public class RestApplication extends Application {
+ *     @Override
+ *     public Set<Class<?>> getClasses() {
+ *         Set<Class<?>> classes = new HashSet<>();
+ *         classes.add(FastJson2Provider.class);
+ *         return classes;
+ *     }
+ * }
+ * }</pre>
+ *
  * @author 张治保
  * @since 2024/10/16
  * @see MessageBodyReader
  * @see MessageBodyWriter
  */
-
 @Provider
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.WILDCARD)
 public class FastJson2Provider
         implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
     /**
-     * These are classes that we never use for reading
-     * (never try to deserialize instances of these types).
+     * Classes excluded from deserialization.
+     * These types are never deserialized by this provider.
      */
     public static final Class<?>[] DEFAULT_UNREADABLES = new Class<?>[]{
             InputStream.class, Reader.class
     };
 
     /**
-     * These are classes that we never use for writing
-     * (never try to serialize instances of these types).
+     * Classes excluded from serialization.
+     * These types are never serialized by this provider.
      */
     public static final Class<?>[] DEFAULT_UNWRITABLES = new Class<?>[]{
             InputStream.class,
@@ -48,45 +61,47 @@ public class FastJson2Provider
     };
 
     /**
-     * Injectable context object used to locate configured
-     * instance of {@link FastJsonConfig} to use for actual
-     * serialization.
+     * Injectable context for locating configured FastJsonConfig instances.
+     * Used for JAX-RS context resolution.
      */
     @Context
     protected Providers providers;
 
     /**
-     * with fastJson config
+     * Configuration for Fastjson2 behavior.
      */
     @Getter
     @Setter
     private FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
     /**
-     * allow serialize/deserialize types in clazzes
+     * Whitelist of classes allowed for serialization/deserialization.
+     * If null, all types are allowed.
      */
     private Class<?>[] clazzes;
 
     /**
-     * Can serialize/deserialize all types.
+     * Creates a provider that can handle all types.
      */
     public FastJson2Provider() {
         this((Class<?>[]) null);
     }
 
     /**
-     * Only serialize/deserialize all types in clazzes.
+     * Creates a provider restricted to specific types.
+     *
+     * @param clazzes whitelist of allowed classes, or null for all types
      */
     public FastJson2Provider(Class<?>[] clazzes) {
         this.clazzes = clazzes;
     }
 
     /**
-     * Check some are interface/abstract classes to exclude.
+     * Checks if a type is assignable from any class in the exclusion list.
      *
-     * @param type the type
-     * @param classes the classes
-     * @return the boolean
+     * @param type the type to check
+     * @param classes the exclusion classes
+     * @return true if the type should be excluded
      */
     protected boolean isNotAssignableFrom(Class<?> type, Class<?>[] classes) {
         if (type == null) {
@@ -102,11 +117,12 @@ public class FastJson2Provider
     }
 
     /**
-     * Check whether a class can be serialized or deserialized. It can check
-     * based on packages, annotations on entities or explicit classes.
+     * Validates whether a class can be serialized or deserialized.
+     * Checks against the configured class whitelist if present.
      *
-     * @param type class need to check
-     * @return true if valid
+     * @param type the class to check
+     * @param classAnnotations annotations on the class
+     * @return true if the type is valid for processing
      */
     protected boolean isValidType(Class<?> type, Annotation[] classAnnotations) {
         if (type == null) {
@@ -125,10 +141,11 @@ public class FastJson2Provider
     }
 
     /**
-     * Check media type like "application/json".
+     * Checks if the media type is not compatible with JSON.
+     * Accepts json, javascript, x-json, x-javascript, and form-urlencoded subtypes.
      *
-     * @param mediaType media type
-     * @return true if the media type is valid
+     * @param mediaType the media type to check
+     * @return true if the media type does not match JSON formats
      */
     protected boolean hasNotMatchingMediaType(MediaType mediaType) {
         if (mediaType == null) {
@@ -145,8 +162,14 @@ public class FastJson2Provider
     }
 
     /**
-     * Method that JAX-RS container calls to try to check whether given value
-     * (of specified type) can be serialized by this provider.
+     * Determines if this provider can serialize the given type.
+     * Called by JAX-RS container to check provider capability.
+     *
+     * @param type the class to serialize
+     * @param genericType the generic type
+     * @param annotations annotations on the element
+     * @param mediaType the media type
+     * @return true if this provider can write the type
      */
     @Override
     public boolean isWriteable(
@@ -164,7 +187,18 @@ public class FastJson2Provider
     }
 
     /**
-     * Method that JAX-RS container calls to serialize given value.
+     * Serializes the given object to JSON.
+     * Called by JAX-RS container to write response body.
+     *
+     * @param object the object to serialize
+     * @param type the class type
+     * @param genericType the generic type
+     * @param annotations annotations on the element
+     * @param mediaType the media type
+     * @param httpHeaders HTTP headers
+     * @param entityStream the output stream
+     * @throws IOException if an I/O error occurs
+     * @throws WebApplicationException if serialization fails
      */
     @Override
     public void writeTo(
@@ -198,8 +232,14 @@ public class FastJson2Provider
     }
 
     /**
-     * Method that JAX-RS container calls to try to check whether values of
-     * given type (and media type) can be deserialized by this provider.
+     * Determines if this provider can deserialize the given type.
+     * Called by JAX-RS container to check provider capability.
+     *
+     * @param type the class to deserialize
+     * @param genericType the generic type
+     * @param annotations annotations on the element
+     * @param mediaType the media type
+     * @return true if this provider can read the type
      */
     @Override
     public boolean isReadable(
@@ -217,7 +257,18 @@ public class FastJson2Provider
     }
 
     /**
-     * Method that JAX-RS container calls to deserialize given value.
+     * Deserializes JSON to an object.
+     * Called by JAX-RS container to read request body.
+     *
+     * @param type the class type
+     * @param genericType the generic type
+     * @param annotations annotations on the element
+     * @param mediaType the media type
+     * @param httpHeaders HTTP headers
+     * @param entityStream the input stream
+     * @return the deserialized object
+     * @throws IOException if an I/O error occurs
+     * @throws WebApplicationException if deserialization fails
      */
     @Override
     public Object readFrom(
@@ -248,7 +299,12 @@ public class FastJson2Provider
     }
 
     /**
-     * Helper method that is called if no config has been explicitly configured.
+     * Locates the FastJsonConfig to use for the given type and media type.
+     * Attempts to resolve from JAX-RS context providers, falls back to default config.
+     *
+     * @param type the class type
+     * @param mediaType the media type
+     * @return the FastJsonConfig to use
      */
     protected FastJsonConfig locateConfigProvider(Class<?> type, MediaType mediaType) {
         if (providers != null) {

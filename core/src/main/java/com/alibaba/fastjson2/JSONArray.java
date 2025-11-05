@@ -219,9 +219,20 @@ public class JSONArray
 
     /**
      * Returns the {@link String} at the specified location in this {@link JSONArray}.
+     * Automatically converts various types to string representation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONArray array = JSON.parseArray("[\"John\", 30, true, null]");
+     *
+     * String name = array.getString(0);    // "John"
+     * String age = array.getString(1);     // "30" (number converted to string)
+     * String active = array.getString(2);  // "true" (boolean converted to string)
+     * String missing = array.getString(3); // null
+     * }</pre>
      *
      * @param index index of the element to return
-     * @return {@link String} or null
+     * @return {@link String} representation of the element, or null if the element is null
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public String getString(int index) {
@@ -1476,14 +1487,30 @@ public class JSONArray
     }
 
     /**
-     * Chained addition of elements
+     * Chained addition of elements. Allows fluent/builder-style construction of JSONArray.
      *
-     * <pre>
-     * JSONArray array = new JSONArray().fluentAdd(1).fluentAdd(2).fluentAdd(3);
-     * </pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Fluent construction of JSONArray
+     * JSONArray users = new JSONArray()
+     *     .fluentAdd("John")
+     *     .fluentAdd("Jane")
+     *     .fluentAdd("Bob");
+     *
+     * // Mixed types
+     * JSONArray data = new JSONArray()
+     *     .fluentAdd(1)
+     *     .fluentAdd("text")
+     *     .fluentAdd(true)
+     *     .fluentAdd(new JSONObject().fluentPut("key", "value"));
+     *
+     * // Convert to JSON string
+     * String json = data.toString();
+     * // Result: [1,"text",true,{"key":"value"}]
+     * }</pre>
      *
      * @param element element to be appended to this list
-     * @return this {@link JSONArray} instance
+     * @return this {@link JSONArray} instance, for method chaining
      * @since 2.0.3
      */
     public JSONArray fluentAdd(Object element) {

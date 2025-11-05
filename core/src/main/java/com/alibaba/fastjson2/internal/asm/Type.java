@@ -28,11 +28,21 @@
 package com.alibaba.fastjson2.internal.asm;
 
 /**
- * A Java field or method type. This class can be used to make it easier to manipulate type and
- * method descriptors.
+ * A Java field or method type representation for bytecode manipulation.
+ * This class provides utilities to work with type and method descriptors as defined in the JVM specification.
+ * It can parse descriptors, compute argument sizes, and convert between different type representations.
+ *
+ * <p>Type descriptors follow the JVM specification format:
+ * <ul>
+ *   <li>Primitive types: V (void), Z (boolean), C (char), B (byte), S (short), I (int), F (float), J (long), D (double)
+ *   <li>Object types: Lpackage/ClassName; (e.g., Ljava/lang/String;)
+ *   <li>Array types: [ followed by element type (e.g., [I for int[], [[Ljava/lang/Object; for Object[][])
+ *   <li>Method descriptors: (param types)return type (e.g., (ILjava/lang/String;)V)
+ * </ul>
  *
  * @author Eric Bruneton
  * @author Chris Nokleberg
+ * @see ASMUtils
  */
 public final class Type {
     static final int VOID = 0;
@@ -101,12 +111,20 @@ public final class Type {
 //    }
 
     /**
-     * Returns the {@link Type} values corresponding to the argument types of the given method
-     * descriptor.
+     * Returns the Type array corresponding to the argument types of the given method descriptor.
+     * Parses the method descriptor string and creates Type objects for each parameter.
      *
-     * @param methodDescriptor a method descriptor.
-     * @return the {@link Type} values corresponding to the argument types of the given method
-     * descriptor.
+     * @param methodDescriptor a method descriptor (e.g., "(ILjava/lang/String;)V")
+     * @return array of Type objects representing the method's parameter types
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type[] args1 = Type.getArgumentTypes("(I)V");
+     * // Returns array with one Type: INT_TYPE
+     *
+     * Type[] args2 = Type.getArgumentTypes("(Ljava/lang/String;I)Ljava/lang/Object;");
+     * // Returns array with two Types: String type and INT_TYPE
+     * }</pre>
      */
     static Type[] getArgumentTypes(final String methodDescriptor) {
         switch (methodDescriptor) {
@@ -289,9 +307,19 @@ public final class Type {
 //    }
 
     /**
-     * Returns the descriptor corresponding to this type.
+     * Returns the JVM type descriptor for this type.
+     * The descriptor format follows the JVM specification for field and method signatures.
      *
-     * @return the descriptor corresponding to this type.
+     * @return the type descriptor string
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type intType = Type.INT_TYPE;
+     * String desc1 = intType.getDescriptor();  // returns "I"
+     *
+     * Type stringType = Type.TYPE_STRING;
+     * String desc2 = stringType.getDescriptor();  // returns "Ljava/lang/String;"
+     * }</pre>
      */
     public String getDescriptor() {
         if (sort == OBJECT) {
@@ -381,13 +409,22 @@ public final class Type {
 //    }
 
     /**
-     * Computes the size of the arguments and of the return value of a method.
+     * Computes the size of the arguments and return value of a method from its descriptor.
+     * This is used for stack frame computation during bytecode generation.
      *
-     * @param methodDescriptor a method descriptor.
-     * @return the size of the arguments of the method (plus one for the implicit this argument),
-     * argumentsSize, and the size of its return value, returnSize, packed into a single int i =
-     * {@code (argumentsSize &lt;&lt; 2) | returnSize} (argumentsSize is therefore equal to {@code
-     * i &gt;&gt; 2}, and returnSize to {@code i &amp; 0x03}).
+     * @param methodDescriptor a method descriptor string
+     * @return packed int where argumentsSize is in upper bits (i >> 2) and returnSize in lower 2 bits (i & 0x03).
+     *         The argument size includes space for the implicit 'this' parameter for non-static methods.
+     *         Long and double types count as 2 units, other types count as 1 unit.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int size1 = Type.getArgumentsAndReturnSizes("()V");
+     * // Returns 4 (1 arg for 'this' << 2 | 0 return size) = 4
+     *
+     * int size2 = Type.getArgumentsAndReturnSizes("(I)Ljava/lang/String;");
+     * // Returns 9 (2 args << 2 | 1 return size) = 9
+     * }</pre>
      */
     public static int getArgumentsAndReturnSizes(final String methodDescriptor) {
         switch (methodDescriptor) {

@@ -28,7 +28,11 @@
 package com.alibaba.fastjson2.internal.asm;
 
 /**
+ * A writer for generating field declarations in a class file.
+ * This class handles writing the field_info structure as defined in the JVM specification.
+ *
  * @author Eric Bruneton
+ * @see ClassWriter
  */
 public final class FieldWriter {
     FieldWriter fv;

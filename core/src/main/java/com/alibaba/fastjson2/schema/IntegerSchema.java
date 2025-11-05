@@ -10,6 +10,33 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
+/**
+ * JSON Schema validator for integer types.
+ * Supports validation of integer values including minimum, maximum, exclusiveMinimum,
+ * exclusiveMaximum, multipleOf, and const constraints.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Integer with range constraints
+ * JSONSchema schema = JSONSchema.of(JSONObject.of(
+ *     "type", "integer",
+ *     "minimum", 1,
+ *     "maximum", 100
+ * ));
+ *
+ * // Integer with const value
+ * JSONSchema constSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "integer",
+ *     "const", 42
+ * ));
+ *
+ * // Integer that must be a multiple of 5
+ * JSONSchema multipleSchema = JSONSchema.of(JSONObject.of(
+ *     "type", "integer",
+ *     "multipleOf", 5
+ * ));
+ * }</pre>
+ */
 public final class IntegerSchema
         extends JSONSchema {
     final boolean typed;

@@ -11,6 +11,34 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
+/**
+ * FieldWriterMap is an abstract base class for serializing Map fields to JSON format.
+ * It extends {@link FieldWriterObject} with specialized handling for Map types including
+ * generic key and value type support.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Generic Map&lt;K, V&gt; field serialization</li>
+ *   <li>Type-specific key and value writers</li>
+ *   <li>Content type conversion via contentAs parameter</li>
+ *   <li>Reference detection for map values</li>
+ *   <li>Optimized map writer caching</li>
+ *   <li>Custom format support for map values</li>
+ * </ul>
+ *
+ * <p>The writer automatically extracts generic type information from the field declaration
+ * and uses it to select appropriate ObjectWriters for keys and values. If generic type
+ * information is not available, Object.class is used as the default.
+ *
+ * <p>Concrete implementations of this class handle different map access methods:
+ * <ul>
+ *   <li>Direct field access via reflection</li>
+ *   <li>Method-based access (getters)</li>
+ *   <li>Function-based access</li>
+ * </ul>
+ *
+ * @since 2.0.0
+ */
 abstract class FieldWriterMap
         extends FieldWriterObject {
     protected final Class<?> contentAs;

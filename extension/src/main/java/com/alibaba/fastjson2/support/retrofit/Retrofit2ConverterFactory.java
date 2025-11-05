@@ -14,7 +14,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 /**
- * Fastjson for Retrofit Converter Json Factory.
+ * Fastjson2 converter factory for Retrofit2.
+ * Provides JSON serialization and deserialization using Fastjson2 for Retrofit HTTP client.
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * Retrofit retrofit = new Retrofit.Builder()
+ *     .baseUrl("https://api.example.com/")
+ *     .addConverterFactory(Retrofit2ConverterFactory.create())
+ *     .build();
+ * }</pre>
  *
  * @author ligboy, wenshao
  * @author Victor.Zxy
@@ -27,18 +36,38 @@ public class Retrofit2ConverterFactory
 
     private FastJsonConfig config;
 
+    /**
+     * Creates a new converter factory with default FastJsonConfig.
+     */
     public Retrofit2ConverterFactory() {
         this.config = new FastJsonConfig();
     }
 
+    /**
+     * Creates a new converter factory with the specified FastJsonConfig.
+     *
+     * @param fastJsonConfig the configuration to use for JSON processing
+     */
     public Retrofit2ConverterFactory(FastJsonConfig fastJsonConfig) {
         this.config = fastJsonConfig;
     }
 
+    /**
+     * Creates a converter factory with default configuration.
+     *
+     * @return a new Retrofit2ConverterFactory instance
+     */
     public static Retrofit2ConverterFactory create() {
         return create(new FastJsonConfig());
     }
 
+    /**
+     * Creates a converter factory with the specified configuration.
+     *
+     * @param fastJsonConfig the configuration to use for JSON processing
+     * @return a new Retrofit2ConverterFactory instance
+     * @throws NullPointerException if fastJsonConfig is null
+     */
     public static Retrofit2ConverterFactory create(FastJsonConfig fastJsonConfig) {
         if (fastJsonConfig == null) {
             throw new NullPointerException("fastJsonConfig == null");
@@ -46,6 +75,14 @@ public class Retrofit2ConverterFactory
         return new Retrofit2ConverterFactory(fastJsonConfig);
     }
 
+    /**
+     * Creates a converter for deserializing HTTP response bodies.
+     *
+     * @param type the type to deserialize to
+     * @param annotations annotations on the declaring element
+     * @param retrofit the Retrofit instance
+     * @return a converter for the specified type
+     */
     @Override
     public Converter<ResponseBody, Object> responseBodyConverter(
             Type type,
@@ -55,6 +92,15 @@ public class Retrofit2ConverterFactory
         return new ResponseBodyConverter<>(type);
     }
 
+    /**
+     * Creates a converter for serializing objects to HTTP request bodies.
+     *
+     * @param type the type to serialize from
+     * @param parameterAnnotations annotations on the parameter
+     * @param methodAnnotations annotations on the method
+     * @param retrofit the Retrofit instance
+     * @return a converter for the specified type
+     */
     @Override
     public Converter<Object, RequestBody> requestBodyConverter(
             Type type,
@@ -65,10 +111,21 @@ public class Retrofit2ConverterFactory
         return new RequestBodyConverter<>();
     }
 
+    /**
+     * Gets the current FastJsonConfig.
+     *
+     * @return the FastJsonConfig instance
+     */
     public FastJsonConfig getFastJsonConfig() {
         return config;
     }
 
+    /**
+     * Sets the FastJsonConfig for this converter factory.
+     *
+     * @param fastJsonConfig the configuration to use
+     * @return this converter factory for method chaining
+     */
     public Retrofit2ConverterFactory setFastJsonConfig(FastJsonConfig fastJsonConfig) {
         this.config = fastJsonConfig;
         return this;

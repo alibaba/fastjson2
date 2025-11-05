@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by wenshao on 05/08/2017.
+ * A parser to read Java class files and extract method parameter names from debug information.
+ * This class reads the bytecode structure and visits methods to collect parameter information.
+ *
+ * @see TypeCollector
  */
 public class ClassReader {
     public final byte[] b;
@@ -15,6 +18,13 @@ public class ClassReader {
     public final int header;
 //    private boolean readAnnotations;
 
+    /**
+     * Constructs a new ClassReader from an input stream containing a Java class file.
+     * Reads the entire class structure including the constant pool and prepares for method visiting.
+     *
+     * @param is the input stream to read the class from
+     * @throws IOException if an I/O error occurs while reading the stream
+     */
     public ClassReader(InputStream is) throws IOException {
 //        this.readAnnotations = readAnnotations;
 
@@ -81,6 +91,12 @@ public class ClassReader {
         header = index;
     }
 
+    /**
+     * Visits the class structure and invokes the appropriate methods on the visitor
+     * to collect type and method information, particularly parameter names.
+     *
+     * @param classVisitor the visitor to process the class methods and collect parameter names
+     */
     public void accept(final TypeCollector classVisitor) {
         char[] c = new char[maxStringLength]; // buffer used to read strings
         int i, j; // loop variables

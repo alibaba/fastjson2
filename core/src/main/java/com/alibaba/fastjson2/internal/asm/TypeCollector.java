@@ -4,6 +4,13 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A class visitor that collects method information and parameter names from bytecode.
+ * This collector is used to extract parameter names from compiled classes for reflection purposes.
+ *
+ * @see ClassReader
+ * @see MethodCollector
+ */
 public class TypeCollector {
 //    static final String JSON_TYPE = ASMUtils.desc(JSONType.class);
     static final Map<String, String> PRIMITIVES;
@@ -35,6 +42,15 @@ public class TypeCollector {
         this.collector = null;
     }
 
+    /**
+     * Visits a method in the class file and creates a collector if the method matches
+     * the target method name and parameter types.
+     *
+     * @param access the method's access flags
+     * @param name the method name
+     * @param desc the method descriptor
+     * @return a MethodCollector if this is the target method, null otherwise
+     */
     protected MethodCollector visitMethod(int access, String name, String desc) {
         if (collector != null) {
             return null;
@@ -93,6 +109,11 @@ public class TypeCollector {
         return typeName.equals(paramTypeName);
     }
 
+    /**
+     * Returns the collected parameter names for the target method.
+     *
+     * @return array of parameter names, or empty array if debug info is not present
+     */
     public String[] getParameterNamesForMethod() {
         if (collector == null || !collector.debugInfoPresent) {
             return new String[0];

@@ -19,6 +19,28 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
+/**
+ * FieldWriterObject handles serialization of object-type fields to JSON format.
+ * This is a generic field writer that can serialize any object type including
+ * custom classes, collections, arrays, and complex objects.
+ *
+ * <p>This class provides support for:
+ * <ul>
+ *   <li>Object value serialization with type-specific writers</li>
+ *   <li>Unwrapped field serialization (merging field values into parent object)</li>
+ *   <li>Array and collection detection and handling</li>
+ *   <li>Dynamic ObjectWriter resolution based on runtime type</li>
+ *   <li>Caching of ObjectWriter instances for performance</li>
+ *   <li>Reference detection for circular reference handling</li>
+ * </ul>
+ *
+ * <p>The writer automatically resolves the appropriate ObjectWriter for the field's
+ * value at runtime, enabling polymorphic serialization where the actual type may
+ * differ from the declared field type.
+ *
+ * @param <T> the type of the object containing the field
+ * @since 2.0.0
+ */
 public class FieldWriterObject<T>
         extends FieldWriter<T> {
     volatile Class initValueClass;

@@ -20,6 +20,41 @@ import java.util.stream.IntStream;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
+/**
+ * Reader for parsing CSV (Comma-Separated Values) data into Java objects.
+ * Supports reading from various sources (String, byte[], char[], File, InputStream, Reader)
+ * and can deserialize into typed objects or string arrays.
+ *
+ * <p>The reader supports:
+ * <ul>
+ *   <li>Quoted values with embedded commas and newlines</li>
+ *   <li>Headers for mapping to object fields</li>
+ *   <li>Multiple character encodings (UTF-8, UTF-16, ISO-8859-1, etc.)</li>
+ *   <li>Streaming and batch reading</li>
+ *   <li>Type conversion and validation</li>
+ *   <li>Error handling with configurable behavior</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Reading from a file into objects
+ * try (CSVReader<User> reader = CSVReader.of(new File("users.csv"), User.class)) {
+ *     List<String> headers = reader.readHeader();
+ *     List<User> users = reader.readLineObjectAll();
+ * }
+ *
+ * // Reading from a string
+ * String csv = "name,age\nJohn,30\nJane,25";
+ * CSVReader<User> reader = CSVReader.of(csv, User.class);
+ * reader.readHeader();
+ * User user = reader.readLineObject();
+ * }</pre>
+ *
+ * @param <T> the type of objects to deserialize
+ * @see CSVWriter
+ * @see StreamReader
+ * @since 2.0.0
+ */
 public abstract class CSVReader<T>
         extends StreamReader<T>
         implements Closeable {
@@ -39,12 +74,23 @@ public abstract class CSVReader<T>
         this.objectSupport = false;
     }
 
+    /**
+     * Configures the reader with the specified features.
+     *
+     * @param features the features to enable
+     */
     public void config(Feature... features) {
         for (Feature feature : features) {
             this.features |= feature.mask;
         }
     }
 
+    /**
+     * Configures a specific feature on or off.
+     *
+     * @param feature the feature to configure
+     * @param state true to enable, false to disable
+     */
     public void config(Feature feature, boolean state) {
         if (state) {
             this.features |= feature.mask;
@@ -53,6 +99,14 @@ public abstract class CSVReader<T>
         }
     }
 
+    /**
+     * Creates a CSVReader from a Reader that deserializes to the specified type.
+     *
+     * @param <T> the type of objects to deserialize
+     * @param reader the source Reader
+     * @param objectClass the class of objects to deserialize
+     * @return a new CSVReader instance
+     */
     public static <T> CSVReader<T> of(Reader reader, Class<T> objectClass) {
         return new CSVReaderUTF16(reader, objectClass);
     }
@@ -716,6 +770,10 @@ public abstract class CSVReader<T>
     }
 
     /**
+     * Reads all remaining lines from the CSV as string arrays.
+     * Each array contains the values from one line.
+     *
+     * @return a list of string arrays, one per line
      * @since 2.0.30
      */
     public List<String[]> readLineAll() {
@@ -731,6 +789,10 @@ public abstract class CSVReader<T>
     }
 
     /**
+     * Reads all remaining lines from the CSV as typed objects.
+     * Each object is created from one line using the configured type and field mappings.
+     *
+     * @return a list of typed objects, one per line
      * @since 2.0.30
      */
     public List<T> readLineObjectAll() {
