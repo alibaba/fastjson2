@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.support.solon.test.config.test1;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
 import com.alibaba.fastjson2.support.solon.test._model.UserDo;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.annotation.Import;
 import org.noear.solon.annotation.Inject;
@@ -40,9 +41,9 @@ public class QuickConfigTest2 {
 
         System.out.println(output);
 
-        assert JSONObject.parseObject(output).size() == 5;
+        Assertions.assertEquals(5, JSONObject.parseObject(output).size());
 
         //完美
-        assert "{\"b1\":true,\"d1\":1.0,\"map1\":{\"time\":1673861993477,\"long\":12,\"int\":12},\"n1\":1,\"s1\":\"noear\"}".equals(output);
+        Assertions.assertEquals("{\"b1\":true,\"d1\":1.0,\"map1\":{\"time\":1673861993477,\"long\":12,\"int\":12},\"n1\":1,\"s1\":\"noear\"}", output);
     }
 }

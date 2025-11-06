@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.support.solon.test.requirement.case1;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -20,7 +21,7 @@ public class AsNumberTest2 {
         String tmp = JSON.toJSONString(demo, writeContext);
         System.out.println(tmp);
 
-        assert "{\"a\":0,\"b\":0,\"c\":1}".equals(tmp);
+        Assertions.assertEquals("{\"a\":0,\"b\":0,\"c\":1}", tmp);
 
         writeContext = new JSONWriter.Context(writerProvider,
                 JSONWriter.Feature.WriteNullNumberAsZero,
@@ -30,7 +31,7 @@ public class AsNumberTest2 {
         tmp = JSON.toJSONString(demo, writeContext);
         System.out.println(tmp);
 
-        assert "{\"a\":\"0\",\"b\":\"0\",\"c\":\"1\"}".equals(tmp);
+        Assertions.assertEquals("{\"a\":\"0\",\"b\":\"0\",\"c\":\"1\"}", tmp);
     }
 
     public static class Demo {
