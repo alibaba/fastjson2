@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.example.solontest;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.test.HttpTester;
 import org.noear.solon.test.SolonTest;
@@ -16,7 +17,7 @@ public class DemoTest
 
         String json2 = path("/demo").bodyJson(json).post();
 
-        assert json.equals(json2);
+        Assertions.assertEquals(json, json2);
     }
 
     @Test
@@ -25,7 +26,7 @@ public class DemoTest
 
         String json2 = path("/demo?username=world&password=1234").get();
 
-        assert json.equals(json2);
+        Assertions.assertEquals(json, json2);
     }
 
     @Test
@@ -34,6 +35,6 @@ public class DemoTest
 
         String json2 = path("/error").get();
 
-        assert json.equals(json2);
+        Assertions.assertEquals(json, json2);
     }
 }

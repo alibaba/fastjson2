@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.support.solon.test.config.test1_2;
 
 import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
 import com.alibaba.fastjson2.support.solon.test._model.CustomDateDo;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.annotation.Import;
 import org.noear.solon.annotation.Inject;
@@ -32,7 +33,7 @@ public class QuickConfigTest {
 
         System.out.println(output);
 
-        //err: register 类型处理后，JSONField 失效了
-        assert "{\"date\":1673861993477,\"date2\":\"2023-01-16 17:39:53\"}".equals(output);
+        //完美
+        Assertions.assertEquals("{\"date\":1673861993477,\"date2\":\"2023-01-16 17:39:53\"}", output);
     }
 }

@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.support.solon.test.action;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.Solon;
 import org.noear.solon.annotation.Controller;
@@ -23,7 +24,7 @@ public class ExecutorTest {
         Solon.app().tryHandle(ctx);
         ctx.result = ctx.attr("output");
         System.out.println(ctx.result);
-        assert "Hello noear A".equals(ctx.result);
+        Assertions.assertEquals("Hello noear A", ctx.result);
 
         ctx = new ContextEmpty();
         ctx.headerMap().add("Content-Type", "text/json");
@@ -33,7 +34,7 @@ public class ExecutorTest {
         Solon.app().tryHandle(ctx);
         ctx.result = ctx.attr("output");
         System.out.println(ctx.result);
-        assert "\"A\"".equals(ctx.result);
+        Assertions.assertEquals("\"A\"", ctx.result);
     }
 
     @Controller
