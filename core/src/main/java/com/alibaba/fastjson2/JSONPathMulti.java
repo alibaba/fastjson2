@@ -189,6 +189,7 @@ final class JSONPathMulti
                     ((JSONPathFilter.NameFilter) segment).excludeArray();
                 }
             }
+            segment.convert(root);
             segment.eval(context);
         }
 
