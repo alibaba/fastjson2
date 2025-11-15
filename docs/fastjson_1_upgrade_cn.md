@@ -34,7 +34,7 @@ FASTJSON v2项目目前处于活跃状态，会不定期发布新版本，你可
 ### 2.3. 使用新API升级
 使用新API是建议的升级方式，使用新的API能获得更多的功能。
 
-* 包名编程
+* 包名变更
   `FASTJSON` v2和1.x版本使用不同的package，新的package名称是com.alibaba.fastjson2，新package和之前不同，可以实现1.x和2.x共存
 
 ```java

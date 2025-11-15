@@ -1,17 +1,17 @@
-# 使用Mixin注入Annotation定制序列化和反序列化
+# Using Mixin to Inject Annotations for Custom Serialization and Deserialization
 
-当你需要定制化序列化一些LIB里面的类，你无法修改这些类的代码，你可以使用FASTJSON2的Mixin功能注入Annotation。
+When you need to customize the serialization of classes from a library whose code you cannot modify, you can use FASTJSON2's Mixin feature to inject annotations.
 
-比如：
+For example:
 
-## 1. 要序列化的类
+## 1. The Class to be Serialized
 ```java
 public static class Product {
     public String name;
 }
 ```
 
-## 2. 注入配置类
+## 2. The Mixin Configuration Class
 ```java
 public abstract class ProductMixin {
     @JSONField(name =  "productName")
@@ -19,12 +19,12 @@ public abstract class ProductMixin {
 }
 ```
 
-## 3. 注入配置 & 使用
+## 3. Injecting the Configuration & Usage
 ```java
-// 配置注入
+// Configure injection
 JSON.mixIn(Product.class, ProductMixin.class);
 
-// 使用
+// Usage
 Product product = new Product();
 product.name = "DataWorks";
 assertEquals("{\"productName\":\"DataWorks\"}", JSON.toJSONString(product));
@@ -33,8 +33,8 @@ Product productParsed = JSON.parseObject("{\"productName\":\"DataWorks\"}", Prod
 assertEquals("DataWorks", productParsed.name);
 ```
 
-## 4. 结合JSONCreator & JSONField(value=true)的例子
-如下的Address类，没有缺省构造函数，只有一个字段，我希望序列化结果为address字段的字符串。
+## 4. Example with JSONCreator & JSONField(value=true)
+Consider the following `Address` class, which has no default constructor and only one field. We want the serialization result to be the string value of the `address` field.
 ```java
 public static class Address {
     private final String address;
@@ -49,15 +49,15 @@ public static class Address {
 }
 ```
 
-注入使用方式如下：
+The injection and usage are as follows:
 ```java
 static class AddressMixin {
-    // 通过JSONCreator指定构造函数
+    // Specify the constructor with @JSONCreator
     @JSONCreator
     public AddressMixin(@JSONField(value = true) String address) {
     }
 
-    // 配置输出使用此字段
+    // Configure the output to use this field
     @JSONField(value = true)
     public String getAddress() {
         return null;
@@ -66,15 +66,15 @@ static class AddressMixin {
 
 @Test
 public void test() {
-    JSON.mixIn(Address.class, AddressMixin.class); // 通过mixin注入Annotation
+    JSON.mixIn(Address.class, AddressMixin.class); // Inject annotations via mixin
 
     Address address = new Address("HangZhou");
 
-    // 序列化输出结果为address字段
+    // The serialization output is the value of the address field
     String str = JSON.toJSONString(address); 
     assertEquals("\"HangZhou\"", str); 
 
-    // 通过结果可以看出使用了JSONCreator指定的构造函数
+    // The result shows that the constructor specified by @JSONCreator was used
     Address address1 = JSON.parseObject(str, Address.class);
     assertEquals(address.getAddress(), address1.getAddress()); 
 }

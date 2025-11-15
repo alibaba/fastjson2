@@ -1,15 +1,15 @@
-# 反序列化CodeGen算法介绍
-fastjson2会使用codegen来优化反序列化的性能，用到的codegen技术包括：
-* ASM 基于内置asm 9.2裁剪版实现的动态字节码生成类
-* Annotation Process Tools(APT)
+# Introduction to the Deserialization CodeGen Algorithm
+fastjson2 uses codegen to optimize deserialization performance. The codegen techniques used include:
+*   ASM: Dynamic bytecode class generation based on a built-in, trimmed version of ASM 9.2.
+*   Annotation Processing Tools (APT)
 
-## 1. 实现算法介绍
+## 1. Introduction to the Implementation Algorithm
 
-![image](reader_codegen_01.png)
+![image](images/reader_codegen_01.png)
 
-上图中算法1是常规实现；算法2是fastjson2的实现（最初是dsljson引入，被fastjson借鉴）；算法3是新引入的实现
+In the diagram above, Algorithm 1 is a conventional implementation; Algorithm 2 is fastjson2's implementation (originally introduced by dsljson and adopted by fastjson); Algorithm 3 is a newly introduced implementation.
 
-我们要将json反序列化为如下的Image类
+We want to deserialize a JSON into the following `Image` class:
 ```java
 @Data
 public class Image {
@@ -21,7 +21,7 @@ public class Image {
 }
 ```
 
-生成如下的代码来快速将json中的name和字段关联起来：
+The following code is generated to quickly associate the names in the JSON with the fields:
 ```java
 public final class Image_FASTJSONReader
     extends com.alibaba.fastjson2.reader.ObjectReader5 {
@@ -76,7 +76,7 @@ public final class Image_FASTJSONReader
 }
 ```
 
-相关方法在JSONReader中的实现
+The implementation of the related methods in `JSONReader` is as follows:
 ```java
 class JSONReaderUTF8 implements JSONReader {
     public final int getRawInt() {
@@ -127,12 +127,9 @@ class JSONReaderUTF8 implements JSONReader {
 }
 ```
 
-这样的实现好处是，不需要将key读取出来，也不需要将使用JSONReader#readFieldNameHashCode，通过key的前缀3个字符读取一个int值，使用switch来路由到相应字段的处理。
+The advantage of this implementation is that it doesn't need to read the entire key, nor does it need to use `JSONReader#readFieldNameHashCode`. Instead, it reads an integer value from the first few bytes of the key and uses a `switch` statement to route to the corresponding field's processing logic.
 
-## 2. 算法实现代码
-生成代码的实现：
-* ASM实现 com.alibaba.fastjson2.reader.ObjectReaderCreatorASM#genRead243
-* APT实现 com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor.genRead243
-
-
-
+## 2. Algorithm Implementation Code
+Code Generation Implementation:
+*   ASM Implementation: `com.alibaba.fastjson2.reader.ObjectReaderCreatorASM#genRead243`
+*   APT Implementation: `com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor.genRead243`

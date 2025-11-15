@@ -1,29 +1,29 @@
-CSV (comma-separated values)是一种使用逗号作为分隔符的被广泛使用的数据交换文件格式。
+CSV (comma-separated values) is a widely used data exchange file format that uses commas as delimiters.
 
-fastjson提供了一个高性能CSV读写支持。
+fastjson provides high-performance support for reading and writing CSV.
 
-# 1. 识别行数
-分析CSV格式的文件有多少行，如果CSV文件有Header，具体数据行数要减1
+# 1. Count Rows
+Analyze how many rows a CSV file has. If the CSV file has a header, the number of data rows will be one less.
 ```java
 File file = ...;
 int rowCount = CSVReader.rowCount(file);
 ```
 
-# 2. 分析文件内容
+# 2. Analyze File Content
 ```java
 File file = ...;
 CSVReader parser = CSVReader.of(file);
 
-// 先读取Header第一行
+// First, read the header (the first line)
 parser.readHeader();
 
-// 对数据进行统计分析
+// Perform statistical analysis on the data
 parser.statAll();
 
-// 获取各个列的分析结果
+// Get the analysis results for each column
 List<StreamReader.ColumnStat> columns = parser.getColumnStats();
 
-// 根据列的统计信息生成建表语句
+// Generate a CREATE TABLE statement based on the column statistics
 StringBuilder sql = new StringBuilder();
 sql.append("CREATE TABLE ").append(tableName).append(" (\n");
 for (int i = 0; i < columns.size(); i++) {
@@ -41,12 +41,12 @@ for (int i = 0; i < columns.size(); i++) {
 sql.append(");");
 ```
 
-# 3. 缺省按照String类型来读取文件
+# 3. Read File with String Type by Default
 ```java
 File file = ...;
 CSVReader parser = CSVReader.of(file);
 
-// 根据需要，先读取Header第一行，如果没有Header可以忽略
+// If needed, read the header first. If there is no header, this can be skipped.
 parser.readHeader();
         
 while (true) {
@@ -58,7 +58,7 @@ while (true) {
 }
 ```
 
-# 4. 指定每列的数据类型来读取文件
+# 4. Read File by Specifying Data Types for Each Column
 ```java
 File file = ...;
 Type[] types = new Type[] {
@@ -67,10 +67,10 @@ Type[] types = new Type[] {
         String.class , 
         Date.class 
 };
-// 构造CSVReader传入各列的类型信息
+// Construct the CSVReader, passing in the type information for each column
 CSVReader parser = CSVReader.of(file, types);
 
-// 根据需要，先读取Header第一行，如果没有Header可以忽略
+// If needed, read the header first. If there is no header, this can be skipped.
 parser.readHeader();
         
 while (true) {
@@ -79,15 +79,15 @@ while (true) {
         break;
     }
     
-    // 处理数据，每列的值都会和构造CSVReader时传入的types对应
-    Integer v0 = line[0];
-    Long v1 = line[1];
-    String v2 = line[2];
-    Date v3 = line[3];
+    // Process the data. The value of each column will correspond to the types passed in when constructing the CSVReader.
+    Integer v0 = (Integer) line[0];
+    Long v1 = (Long) line[1];
+    String v2 = (String) line[2];
+    Date v3 = (Date) line[3];
 }
 ```
 
-# 5. 将每行数据读取成一个JavaBean
+# 5. Read Each Row into a JavaBean
 ```java
 @Data
 class Bean {
@@ -99,45 +99,45 @@ class Bean {
 
 File file = ...;
 
-// 构造CSVReader传入对象类型
+// Construct the CSVReader, passing in the object type
 CSVReader parser = CSVReader.of(file, Bean.class);
 
-// 根据需要，先读取Header第一行，如果没有Header可以忽略
+// If needed, read the header first. If there is no header, this can be skipped.
 parser.readHeader();
 
 while (true) {
-    Bean object = (Bean) parser.readLineObject();
+    Bean object = parser.readLineObject();
     if (object == null) {
         break;
     }
     
-    // 处理数据 ...
+    // Process data ...
 }
 ```
 
-## 5.1 使用Lambda Consumer来读取JavaBean
+## 5.1 Read JavaBeans Using a Lambda Consumer
 ```java
 File file = ...;
 
-// 构造CSVReader传入对象类型
+// Construct the CSVReader, passing in the object type
 CSVReader parser = CSVReader.of(file, Bean.class);
 
-// 根据需要，是否要读取Header第一行
+// Specify whether to read the header first
 boolean readHeader = true;
 parser.readLineObjectAll(
         readHeader,
         e -> {
-            处理数据 ...
+            // Process data ...
         }
 );
 ```
 
-# 6. 写入CSV格式文件
+# 6. Write to a CSV Format File
 ```java
 File file = ...;
 CSVWriter writer = CSVWriter.of(file, StandardCharsets.UTF_8);
 
-// 写入数据
+// Write data
 Object[] row = ...;
 writer.writeLine(row);
 

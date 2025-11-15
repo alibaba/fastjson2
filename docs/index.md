@@ -10,7 +10,7 @@
 - 支持`Android`
 - 支持`Graal Native-Image`
 
-![fastjson](logo.jpg "fastjson")
+![fastjson](images/logo.jpg "fastjson")
 
 相关文档：
 

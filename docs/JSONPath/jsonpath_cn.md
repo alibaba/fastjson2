@@ -168,7 +168,7 @@ List<Entity> result = (List<Entity>)JSONPath.eval(entities, "[0:2]"); // 返回�
 assertEquals(3, result.size());
 assertSame(entities.get(0), result.get(0));
 assertSame(entities.get(1), result.get(1));
-assertSame(entities.get(2), result.get(1));
+assertSame(entities.get(2), result.get(2));
 ```
 ### 3.5 例5
 通过条件过滤，返回集合的子集

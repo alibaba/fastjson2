@@ -12,11 +12,11 @@ JSONB存储格式设计
 
 # 2. JSON支持格式定义
 
-![jsonb_protocol.jpg](jsonb_protocol.jpg)
+![jsonb_protocol.jpg](../images/jsonb_protocol.jpg)
 
 ```
 x90          # char
-x91          # bianry len_int32 bytes
+x91          # binary len_int32 bytes
 x92          # type [str] symbol_int32 jsonb
 x93          # reference
 
@@ -145,7 +145,6 @@ FLOAT有两种表示法
 * 0xb7 + <bytes4> 需要5个字节
 ```
 
-
 ## 3.7 DOUBLE表示
 DOUBLE有三种表示
 ```java
@@ -192,7 +191,7 @@ NULL/TRUE/FALSE都使用1个字节表示
 对象类型以0xa6开始，0xa5结束，中间有若干个key_value对，如下：
 ```java
 0xa6
-    [<key_any> <value_anry>]...
+    [<key_any> <value_any>]...
 0xa5
 ```
 
