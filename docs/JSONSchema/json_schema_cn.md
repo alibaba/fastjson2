@@ -69,7 +69,7 @@ public static class Point {
 }
 ```
 
-## 2. 在JSONField上配置schema
+## 3. 在JSONField上配置schema
 2.0.4版本后，可以在Annotation JSONField上配置schema校验输入的json数据
 
 ```java
@@ -104,7 +104,7 @@ public void test1() {
 }
 ```
 
-## 3. 在JSONType上配置schema
+## 4. 在JSONType上配置schema
 2.0.4版本后，可以在Annotation JSONType上配置schema校验输入的json数据
 
 ```java
@@ -140,7 +140,7 @@ public void test2() {
 }
 ```
 
-# 4. 通过类型构造JSONSchema
+# 5. 通过类型构造JSONSchema
 在后端和前端交互时，需要将java类型转换成JSONSchema返回给客户端。
 ```java
 @Test
@@ -165,7 +165,7 @@ public static class Bean {
 }
 ```
 
-# 5. 通过值对象构造JSONSchema
+# 6. 通过值对象构造JSONSchema
 ```java
 @Test
 public void fromValueMap() {

@@ -1,8 +1,8 @@
-# 实现ObjectWriter和ObjectReader实现定制序列化和反序列化
+# Implementing ObjectWriter and ObjectReader for Custom Serialization and Deserialization
 
-## 1. 实现ObjectWriter接口定制化序列化
+## 1. Implementing the ObjectWriter Interface for Custom Serialization
 
-## 1.1 ObjectWriter的定义
+### 1.1 ObjectWriter Definition
 ```java
 package com.alibaba.fastjson2.writer;
 
@@ -11,10 +11,10 @@ public interface ObjectWriter<T> {
 }
 ```
 
-## 1.2 实现ObjectWriter举例
+### 1.2 ObjectWriter Implementation Example
 ```java
 class InetAddressWriter implements ObjectWriter {
-    InetAddressWriter INSTANCE = new InetAddressWriter();
+    static final InetAddressWriter INSTANCE = new InetAddressWriter();
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -24,21 +24,21 @@ class InetAddressWriter implements ObjectWriter {
         }
 
         InetAddress address = (InetAddress) object;
-        // 优先使用name
+        // Prioritize using the name
         jsonWriter.writeString(address.getHostName());
     }
 }
 ```
 
-## 1.3 注册Writer
+### 1.3 Registering the Writer
 ```java
 JSON.register(InetAddress.class, InetAddressWriter.INSTANCE);
 JSON.register(Inet4Address.class, InetAddressWriter.INSTANCE);
 JSON.register(Inet6Address.class, InetAddressWriter.INSTANCE);
 ```
 
-## 1.4 注册ObjectWriters的一些内置实现
-ObjectWriters提供了构造ofToString/ofToInt/ofToLong方法，让使用者能更方便序列化，比如：
+### 1.4 Registering Some Built-in Implementations of ObjectWriters
+`ObjectWriters` provides `ofToString`/`ofToInt`/`ofToLong` methods to make serialization more convenient for users, for example:
 
 ```java
  public static class Bean {
@@ -80,9 +80,9 @@ public void testToInt() {
 }
 ```
 
-# 2. 实现ObjectReader定制反序列化
+# 2. Implementing ObjectReader for Custom Deserialization
 
-## 2.1 ObjectReader的定义
+## 2.1 ObjectReader Definition
 ```java
 package com.alibaba.fastjson2.reader;
 
@@ -90,9 +90,9 @@ public interface ObjectReader<T> {
     T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
 }
 ```
-ObjectReader还有很多其他方法，但都提供了缺省实现，上面这个方法是必须实现的。
+`ObjectReader` has many other methods, but they all provide default implementations. The method above must be implemented.
 
-## 2.2 实现ObjectReader举例
+## 2.2 ObjectReader Implementation Example
 ```java
 import java.time.Instant;
 import com.alibaba.fastjson2.reader.ObjectReader;
@@ -111,13 +111,13 @@ class InstantReader implements ObjectReader {
 }
 ```
 
-## 2.3 注册Reader
+## 2.3 Registering the Reader
 ```java
 JSON.register(Instant.class, InstantReader.INSTANCE);
 ```
 
-## 2.4 注册内置的ObjectReaders提供的一些内置实现
-ObjectReaders提供了构造ofString/ofInt/ofLong方法，让使用者能更方便反序列化，比如：
+## 2.4 Registering Some Built-in Implementations Provided by ObjectReaders
+`ObjectReaders` provides `ofString`/`ofInt`/`ofLong` methods to make deserialization more convenient for users, for example:
 ```java
 public static class Bean {
     final int code;

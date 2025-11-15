@@ -127,7 +127,7 @@ dependencies {
 
 ### `Fastjson Extension`扩展模块
 
-如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](docs/spring_support_cn.md)。
+如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](docs/Spring/spring_support_cn.md)。
 
 `Maven`:
 

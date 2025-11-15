@@ -70,9 +70,9 @@ param | Type | Desc
 charset | Charset | The specified character set, default UTF-8
 dateFormat | String | The specified date format, default yyyy-MM-dd HH:mm:ss
 writerFilters | Filter[] | Configure serialization filters
-writerFeatures | JSONWriter.Feature[] | Configure the specified behavior of serialization. For more configuration, see [Features](features_en.md)
+writerFeatures | JSONWriter.Feature[] | Configure the specified behavior of serialization. For more configuration, see [Features](../features_en.md)
 readerFilters | Filter[] | Configure deserialization filters
-readerFeatures | JSONReader.Feature[] | Configure the specified behavior of deserialization. For more configuration, see [Features](features_en.md)
+readerFeatures | JSONReader.Feature[] | Configure the specified behavior of deserialization. For more configuration, see [Features](../features_en.md)
 jsonb | boolean | Use JSONB for serialization and deserialization, the default is false
 symbolTable | JSONB.SymbolTable | JSONB serialization and deserialization symbol table, only valid when using JSONB
 

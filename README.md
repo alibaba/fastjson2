@@ -132,7 +132,7 @@ dependencies {
 
 ### `Extension` integration module `fastjson-extension`
 
-If your project uses a framework such as `SpringFramework`, you can use the `fastjson-extension` module, please refer to the usage [SpringFramework Support](docs/spring_support_en.md).
+If your project uses a framework such as `SpringFramework`, you can use the `fastjson-extension` module, please refer to the usage [SpringFramework Support](docs/Spring/spring_support_en.md).
 
 `Maven`:
 

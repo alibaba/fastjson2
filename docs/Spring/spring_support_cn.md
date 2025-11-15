@@ -70,9 +70,9 @@ Fastjson2对于序列化和反序列化的行为进行了重新设计，所以`F
 charset | Charset | 指定的字符集，默认UTF-8
 dateFormat | String | 指定的日期格式，默认yyyy-MM-dd HH:mm:ss
 writerFilters | Filter[] | 配置序列化过滤器
-writerFeatures | JSONWriter.Feature[] | 配置序列化的指定行为，更多配置请见：[Features文档](features_cn.md)
+writerFeatures | JSONWriter.Feature[] | 配置序列化的指定行为，更多配置请见：[Features文档](../features_cn.md)
 readerFilters | Filter[] | 配置反序列化过滤器
-readerFeatures | JSONReader.Feature[] | 配置反序列化的指定行为，更多配置请见：[Features文档](features_cn.md)
+readerFeatures | JSONReader.Feature[] | 配置反序列化的指定行为，更多配置请见：[Features文档](../features_cn.md)
 jsonb | boolean | 是否采用JSONB进行序列化和反序列化，默认false
 symbolTable | JSONB.SymbolTable | JSONB序列化和反序列化的符号表，只有使用JSONB时生效
 
