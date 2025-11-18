@@ -31,7 +31,11 @@ class ObjectWriterImplBoolValueArray
         } else {
             array = (boolean[]) object;
         }
-        jsonWriter.writeBool(array);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeBool(array);
+        }
     }
 
     @Override
@@ -42,6 +46,10 @@ class ObjectWriterImplBoolValueArray
         } else {
             array = (boolean[]) object;
         }
-        jsonWriter.writeBool(array);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeBool(array);
+        }
     }
 }

@@ -9,6 +9,7 @@ import java.util.function.Function;
 final class FieldWriterDoubleFunc<T>
         extends FieldWriter<T> {
     final Function<T, Double> function;
+    final boolean writeNonStringValueAsString;
 
     FieldWriterDoubleFunc(
             String fieldName,
@@ -22,6 +23,7 @@ final class FieldWriterDoubleFunc<T>
     ) {
         super(fieldName, ordinal, features, format, null, label, Double.class, Double.class, field, method);
         this.function = function;
+        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     @Override
@@ -66,7 +68,11 @@ final class FieldWriterDoubleFunc<T>
         if (decimalFormat != null) {
             jsonWriter.writeDouble(doubleValue, decimalFormat);
         } else {
-            jsonWriter.writeDouble(doubleValue);
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(doubleValue);
+            } else {
+                jsonWriter.writeDouble(doubleValue);
+            }
         }
         return true;
     }

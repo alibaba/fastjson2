@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 final class FieldWriterFloatValueFunc
         extends FieldWriter {
     final ToFloatFunction function;
+    final boolean writeNonStringValueAsString;
 
     FieldWriterFloatValueFunc(
             String fieldName,
@@ -22,6 +23,7 @@ final class FieldWriterFloatValueFunc
     ) {
         super(fieldName, ordinal, features, format, null, label, float.class, float.class, field, method);
         this.function = function;
+        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     @Override
@@ -55,7 +57,11 @@ final class FieldWriterFloatValueFunc
         if (decimalFormat != null) {
             jsonWriter.writeFloat(value, decimalFormat);
         } else {
-            jsonWriter.writeFloat(value);
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(value);
+            } else {
+                jsonWriter.writeFloat(value);
+            }
         }
         return true;
     }
