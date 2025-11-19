@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.issues_3800;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,8 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue3870 {
     @Test
     public void test() {
-        JSON.register(BigInteger.class, new BigIntWriter());
-        assertEquals("{\"b\":\"456\"}", JSON.toJSONString(new TestData()));
+        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
+        try {
+            provider.register(BigInteger.class, new BigIntWriter());
+            assertEquals("{\"b\":\"456\"}", JSON.toJSONString(new TestData()));
+        } finally {
+            provider.unregister(BigInteger.class);
+        }
     }
 
     public static class BigIntWriter implements ObjectWriter {
