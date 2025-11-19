@@ -1930,6 +1930,13 @@ public class ObjectWriterCreator {
                     return objectWriter;
                 }
             }
+        } else if (fieldClass == BigInteger.class) {
+            if ((provider.userDefineMask & ObjectWriterProvider.TYPE_BIGINT_MASK) != 0) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterBigInteger.INSTANCE) {
+                    return objectWriter;
+                }
+            }
         } else if (Enum.class.isAssignableFrom(fieldClass)) {
             ObjectWriter objectWriter = provider.cache.get(fieldClass);
             if (!(objectWriter instanceof ObjectWriterImplEnum)) {

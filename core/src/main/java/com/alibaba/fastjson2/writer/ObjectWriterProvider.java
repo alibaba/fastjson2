@@ -59,10 +59,11 @@ public class ObjectWriterProvider
         implements ObjectCodecProvider {
     static final int TYPE_INT32_MASK = 1 << 1;
     static final int TYPE_INT64_MASK = 1 << 2;
-    static final int TYPE_DECIMAL_MASK = 1 << 3;
-    static final int TYPE_DATE_MASK = 1 << 4;
-    static final int TYPE_ENUM_MASK = 1 << 5;
-    static final int NAME_COMPATIBLE_WITH_FILED = 1 << 6; // compatibleWithFieldName 1.x
+    static final int TYPE_BIGINT_MASK = 1 << 3;
+    static final int TYPE_DECIMAL_MASK = 1 << 4;
+    static final int TYPE_DATE_MASK = 1 << 5;
+    static final int TYPE_ENUM_MASK = 1 << 6;
+    static final int NAME_COMPATIBLE_WITH_FILED = 1 << 7; // compatibleWithFieldName 1.x
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
@@ -232,6 +233,12 @@ public class ObjectWriterProvider
                 userDefineMask &= ~TYPE_INT64_MASK;
             } else {
                 userDefineMask |= TYPE_INT64_MASK;
+            }
+        } else if (type == BigInteger.class) {
+            if (objectWriter == null || objectWriter == ObjectWriterBigInteger.INSTANCE) {
+                userDefineMask &= ~TYPE_BIGINT_MASK;
+            } else {
+                userDefineMask |= TYPE_BIGINT_MASK;
             }
         } else if (type == BigDecimal.class) {
             if (objectWriter == null || objectWriter == ObjectWriterImplBigDecimal.INSTANCE) {
