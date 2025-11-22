@@ -586,6 +586,8 @@ public class ObjectWriterCreatorASM
 
         byte[] code = cw.toByteArray();
 
+        ASMUtils.debugDump(objectClass, classNameFull, code);
+
         Class<?> deserClass = classLoader.defineClassPublic(classNameFull, code, 0, code.length);
 
         try {

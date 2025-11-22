@@ -709,6 +709,9 @@ public class ObjectReaderCreatorASM
         }
 
         byte[] code = cw.toByteArray();
+
+        ASMUtils.debugDump(objectClass, context.classNameFull, code);
+
         try {
             Class<?> readerClass = classLoader.defineClassPublic(context.classNameFull, code, 0, code.length);
 

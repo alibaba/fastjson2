@@ -16,10 +16,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
@@ -231,6 +228,73 @@ public final class ASMUtils {
 
         // 直接基于字符串替换，不使用正则替换
         return clazz.getName().replace('.', '/');
+    }
+
+    private static final String ASM_DEBUG_FILTER = System.getProperty("fastjson2.asm.debug");
+    private static final boolean ASM_DEBUG_ENABLED;
+    private static final boolean IS_DUMP_ALL;
+    private static final String[] DUMP_KEYWORDS;
+
+    static {
+        boolean enabled = false;
+        boolean dumpAll = false;
+        List<String> keywords = null;
+
+        if (ASM_DEBUG_FILTER != null && !ASM_DEBUG_FILTER.isEmpty()) {
+            enabled = true;
+            if ("*".equals(ASM_DEBUG_FILTER) || "true".equalsIgnoreCase(ASM_DEBUG_FILTER)) {
+                dumpAll = true;
+            } else {
+                String[] parts = ASM_DEBUG_FILTER.split(",");
+                keywords = new ArrayList<>(parts.length);
+                for (String part : parts) {
+                    String k = part.trim();
+                    if (!k.isEmpty()) {
+                        keywords.add(k);
+                    }
+                }
+            }
+        }
+
+        ASM_DEBUG_ENABLED = enabled;
+        IS_DUMP_ALL = dumpAll;
+        DUMP_KEYWORDS = (keywords != null) ? keywords.toArray(new String[0]) : new String[0];
+    }
+
+    public static void debugDump(Class<?> targetClass, String generatedClassName, byte[] code) {
+        if (!ASM_DEBUG_ENABLED) {
+            return;
+        }
+
+        boolean shouldDump = false;
+        if (IS_DUMP_ALL) {
+            shouldDump = true;
+        } else {
+            String targetName = (targetClass != null) ? targetClass.getName() : null;
+            if (targetName != null) {
+                for (String keyword : DUMP_KEYWORDS) {
+                    if (targetName.contains(keyword)) {
+                        shouldDump = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!shouldDump) {
+            return;
+        }
+
+        try {
+            String relativePath = generatedClassName.replace('.', '/') + ".class";
+            java.nio.file.Path path = java.nio.file.Paths.get("fastjson2_asm_dump", relativePath);
+            java.nio.file.Files.createDirectories(path.getParent());
+            java.nio.file.Files.write(path, code);
+
+            System.out.println("[Fastjson2-ASM] Dumped " + generatedClassName + " to " + path.toAbsolutePath());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     static final AtomicReference<char[]> descCacheRef = new AtomicReference<>();
