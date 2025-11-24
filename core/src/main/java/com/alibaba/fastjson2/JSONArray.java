@@ -225,10 +225,22 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public String getString(int index) {
+        return getString(index, null);
+    }
+
+    /**
+     * Returns the {@link String} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue the default mapping of the index
+     * @return {@link String} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     */
+    public String getString(int index, String defaultValue) {
         Object value = get(index);
 
         if (value == null) {
-            return null;
+            return defaultValue;
         }
 
         if (value instanceof String) {
