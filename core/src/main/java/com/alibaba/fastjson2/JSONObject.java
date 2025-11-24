@@ -344,7 +344,6 @@ public class JSONObject
 
         return null;
     }
-
     /**
      * Returns the {@link String} of the associated keys in this {@link JSONObject}.
      *
@@ -352,10 +351,21 @@ public class JSONObject
      * @return {@link String} or null
      */
     public String getString(String key) {
+        return getString(key, null);
+    }
+
+    /**
+     * Returns the {@link String} of the associated keys in this {@link JSONObject}.
+     *
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     * @return {@link String} or null
+     */
+    public String getString(String key, String defaultValue) {
         Object value = super.get(key);
 
         if (value == null) {
-            return null;
+            return defaultValue;
         }
 
         if (value instanceof String) {
