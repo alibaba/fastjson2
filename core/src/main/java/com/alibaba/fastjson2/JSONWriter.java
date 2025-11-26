@@ -1737,11 +1737,19 @@ public abstract class JSONWriter
                 }
 
                 if (filter instanceof PropertyFilter) {
-                    this.propertyFilter = (PropertyFilter) filter;
+                    if (this.propertyFilter == null) {
+                        this.propertyFilter = (PropertyFilter) filter;
+                    } else {
+                        this.propertyFilter = PropertyFilter.compose(this.propertyFilter, (PropertyFilter) filter);
+                    }
                 }
 
                 if (filter instanceof PropertyPreFilter) {
-                    this.propertyPreFilter = (PropertyPreFilter) filter;
+                    if (this.propertyPreFilter == null) {
+                        this.propertyPreFilter = (PropertyPreFilter) filter;
+                    } else {
+                        this.propertyPreFilter = PropertyPreFilter.compose(this.propertyPreFilter, (PropertyPreFilter) filter);
+                    }
                 }
 
                 if (filter instanceof BeforeFilter) {
@@ -1753,7 +1761,11 @@ public abstract class JSONWriter
                 }
 
                 if (filter instanceof LabelFilter) {
-                    this.labelFilter = (LabelFilter) filter;
+                    if (this.labelFilter == null) {
+                        this.labelFilter = (LabelFilter) filter;
+                    } else {
+                        this.labelFilter = LabelFilter.compose(this.labelFilter, (LabelFilter) filter);
+                    }
                 }
 
                 if (filter instanceof ContextValueFilter) {
