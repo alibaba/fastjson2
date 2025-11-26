@@ -62,8 +62,9 @@ public class Model {
 | DuplicateKeyValueAsArray        | 重复Key的Value不是替换而是组合成数组                                                                              |
 | AllowUnQuotedFieldNames         | 支持不带双引号的字段名                                                                                         |
 | NonStringKeyAsString            | 非String类型的Key当做String处理                                                                             |
-| Base64StringAsByteArray         | 将Base64格式的字符串反序列化为byte[]                                                                           |
-| DisableSingleQuote              | 不允许在key和value中使用单引号                                                                                   |
+| Base64StringAsByteArray         | 将Base64格式的字符串反序列化为byte[]                                                                            |
+| DisableSingleQuote              | 不允许在key和value中使用单引号                                                                                 |
+| AllowArbitraryCommas            | 允许多重逗号："[,,1, 2,, 3,,]"                                                                                             |
 
 # 5. JSONWriter.Feature介绍
 
@@ -186,7 +187,7 @@ User user2 = JSON.parseObject(json, User.class,
 * 其余1.x序列化特性无变化
 
 **反序列化**：
-* `AllowArbitraryCommas`：2.x的语法更加严格，不支持多重逗号
+* `AllowArbitraryCommas`：2.x的语法更加严格，不支持多重逗号（2.0.61 已支持）
 * `AllowComment`：2.x默认支持，无需配置
 * `AllowISO8601DateFormat`：2.x默认支持，也可通过以下方式显式指定：
     - `JSON.configReaderDateFormat("iso8601")`（全局配置）

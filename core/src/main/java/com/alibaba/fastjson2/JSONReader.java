@@ -3253,6 +3253,13 @@ public abstract class JSONReader
         }
 
         for (; ; ) {
+            if ((context.features & Feature.AllowArbitraryCommas.mask) != 0) {
+                while (ch == ',') {
+                    next();
+                    comma = true;
+                }
+            }
+
             if (nextIfArrayEnd()) {
                 level--;
                 break;
@@ -3278,6 +3285,13 @@ public abstract class JSONReader
         }
 
         for (; ; ) {
+            if ((context.features & Feature.AllowArbitraryCommas.mask) != 0) {
+                while (ch == ',') {
+                    next();
+                    comma = true;
+                }
+            }
+
             if (nextIfArrayEnd()) {
                 level--;
                 break;
@@ -3423,6 +3437,13 @@ public abstract class JSONReader
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipComment();
+            }
+
+            if ((contextFeatures & Feature.AllowArbitraryCommas.mask) != 0) {
+                while (ch == ',') {
+                    next();
+                    comma = true;
+                }
             }
 
             if (nextIfObjectEnd()) {
@@ -3681,6 +3702,13 @@ public abstract class JSONReader
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipComment();
+            }
+
+            if ((context.features & Feature.AllowArbitraryCommas.mask) != 0) {
+                while (ch == ',') {
+                    next();
+                    comma = true;
+                }
             }
 
             if (ch == '}') {
@@ -4061,6 +4089,13 @@ public abstract class JSONReader
 
         _for:
         for (; ; ++i) {
+            if ((context.features & Feature.AllowArbitraryCommas.mask) != 0) {
+                while (ch == ',') {
+                    next();
+                    comma = true;
+                }
+            }
+
             Object val;
             switch (ch) {
                 case ']':
@@ -6476,7 +6511,16 @@ public abstract class JSONReader
          * For example, ["value"] would be returned as "value".
          * @since 2.0.60
          */
-        DisableStringArrayUnwrapping(1L << 34L);
+        DisableStringArrayUnwrapping(1L << 34L),
+
+        /**
+         * Feature that determines whether to allow arbitrary commas in JSON.
+         * When enabled, multiple consecutive commas will be skipped.
+         * e.g. [1,,2] or {"a":1,, "b":2}
+         *
+         * @since 2.0.61
+         */
+        AllowArbitraryCommas(1L << 35L);
 
         public final long mask;
 

@@ -66,6 +66,7 @@ public class Model {
 | NonStringKeyAsString            | Treat non-String keys as String.                                                                                                                                                                                                                                         |
 | Base64StringAsByteArray         | Deserialize Base64 formatted strings as byte[].                                                                                                                                                                                                                          |
 | DisableSingleQuote              | Do not allow single quote in key name and values.                                                                                                                                                                                                                        |
+| AllowArbitraryCommas            | Allow multiple commas: "[,,1, 2,, 3,,]"                                                                                                                                                                                                                                                                         |
 
 # 5. JSONWriter.Feature
 
@@ -188,7 +189,7 @@ In fastjson 2.x, **all features are OFF by default**.
 * All other 1.x serialization features remain unchanged.
 
 **Deserialization**:
-* `AllowArbitraryCommas`: 2.x uses strict syntax; multiple commas are not allowed.
+* `AllowArbitraryCommas`: 2.x uses strict syntax; multiple commas are not allowed.(2.0.61 is already supported)
 * `AllowComment`: Enabled by default in 2.x; no configuration required.
 * `AllowISO8601DateFormat`: Enabled by default in 2.x. Explicit settings:
     - `JSON.configReaderDateFormat("iso8601")`

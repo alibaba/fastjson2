@@ -219,7 +219,16 @@ class JSONReaderUTF8
             ch = offset == end ? EOI : bytes[offset++];
         }
 
+        if ((context.features & Feature.AllowArbitraryCommas.mask) != 0 && ch == ',') {
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch == ',' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+        }
+
         if (ch != e) {
+            this.offset = offset;
+            this.ch = (char) ch;
             return false;
         }
 
@@ -306,6 +315,12 @@ class JSONReaderUTF8
 
     @Override
     public final boolean nextIfArrayEnd() {
+        if ((context.features & Feature.AllowArbitraryCommas.mask) != 0) {
+            while (ch == ',') {
+                next();
+            }
+        }
+
         int ch = this.ch;
         byte[] bytes = this.bytes;
         int offset = this.offset;
@@ -418,6 +433,12 @@ class JSONReaderUTF8
 
     @Override
     public final boolean nextIfObjectEnd() {
+        if ((context.features & Feature.AllowArbitraryCommas.mask) != 0) {
+            while (ch == ',') {
+                next();
+            }
+        }
+
         int ch = this.ch;
         byte[] bytes = this.bytes;
         int offset = this.offset;
