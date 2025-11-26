@@ -40,7 +40,7 @@ public class SimplePropertyPreFilterTest {
         list.add(beanA);
 
         String str = JSON.toJSONString(list, filters, JSONWriter.Feature.WriteMapNullValue);
-        assertEquals("[{\"b\":{\"age\":\"20\",\"id\":\"1\",\"uname\":\"user1\"},\"c\":{\"season\":\"2024\"},\"number\":2}]", str);
+        assertEquals("[{\"b\":{\"age\":\"20\",\"uname\":\"user1\"},\"c\":{\"season\":\"2024\"},\"number\":2}]", str);
     }
 
     @Data
