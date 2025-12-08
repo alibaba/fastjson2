@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
@@ -25,6 +26,12 @@ final class FieldReaderInt8Param<T>
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         Integer integer = jsonReader.readInt32();
-        return integer == null ? null : integer.byteValue();
+        if (integer == null) {
+            if (fieldClass == byte.class && (jsonReader.features(features) & JSONReader.Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                throw new JSONException(paramName.concat(" is null"));
+            }
+            return null;
+        }
+        return integer.byteValue();
     }
 }
