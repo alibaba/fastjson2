@@ -1989,7 +1989,7 @@ public class ObjectWriterCreator {
         Field field = BeanUtils.getField(objectClass, method);
 
         if (fieldClass == int.class) {
-            return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, label, null, method, (ToIntFunction<T>) lambda);
+            return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, label, field, method, (ToIntFunction<T>) lambda);
         }
 
         if (fieldClass == long.class) {
