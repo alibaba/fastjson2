@@ -29,6 +29,9 @@ abstract class FieldWriterInt64<T>
 
     public final void writeInt64(JSONWriter jsonWriter, long value) {
         long features = jsonWriter.getFeatures() | this.features;
+        if (value == 0 && (features & NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+            return;
+        }
         boolean writeAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
         writeFieldName(jsonWriter);
         if (!writeAsString) {

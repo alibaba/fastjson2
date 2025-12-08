@@ -18,7 +18,7 @@ final class FieldWriterBoolValFunc
             Method method,
             Predicate function
     ) {
-        super(fieldName, ordinal, features, format, label, Boolean.class, Boolean.class, field, method);
+        super(fieldName, ordinal, features, format, label, boolean.class, boolean.class, field, method);
         this.function = function;
     }
 

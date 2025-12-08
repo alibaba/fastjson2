@@ -21,6 +21,10 @@ abstract class FieldWriterInt8<T>
     }
 
     protected final void writeInt8(JSONWriter jsonWriter, byte value) {
+        long features = jsonWriter.getFeatures(this.features);
+        if (value == 0 && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+            return;
+        }
         boolean writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
         if (writeNonStringValueAsString) {
             writeFieldName(jsonWriter);

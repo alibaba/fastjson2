@@ -21,13 +21,15 @@ abstract class FieldWriterInt16<T>
     }
 
     protected final void writeInt16(JSONWriter jsonWriter, short value) {
+        if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue) && defaultValue == null) {
+            return;
+        }
         boolean writeNonStringValueAsString = (jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
         if (writeNonStringValueAsString) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(Short.toString(value));
             return;
         }
-
         writeFieldName(jsonWriter);
         jsonWriter.writeInt16(value);
     }

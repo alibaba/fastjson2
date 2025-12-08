@@ -57,6 +57,10 @@ final class FieldWriterDoubleValueFunc
             throw error;
         }
 
+        if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue) && defaultValue == null) {
+            return false;
+        }
+
         writeFieldName(jsonWriter);
         if (decimalFormat != null) {
             jsonWriter.writeDouble(value, decimalFormat);

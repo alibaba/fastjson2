@@ -38,6 +38,10 @@ final class FieldWriterCharValFunc
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
         char value = function.applyAsChar(object);
+        long features = jsonWriter.getFeatures(this.features);
+        if (value == '\0' && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+            return false;
+        }
         writeFieldName(jsonWriter);
         jsonWriter.writeChar(value);
         return true;

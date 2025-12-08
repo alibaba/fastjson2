@@ -30,6 +30,10 @@ abstract class FieldWriterInt32<T>
 
     @Override
     public final void writeInt32(JSONWriter jsonWriter, int value) {
+        long features = jsonWriter.getFeatures() | this.features;
+        if (value == 0 && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+            return;
+        }
         if (toString) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(Integer.toString(value));
