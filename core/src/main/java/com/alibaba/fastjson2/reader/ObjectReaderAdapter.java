@@ -27,6 +27,7 @@ public class ObjectReaderAdapter<T>
     final short[] mappingLCase;
 
     final Constructor constructor;
+    final int parameterCount;
     volatile boolean instantiationError;
 
     // seeAlso
@@ -124,6 +125,9 @@ public class ObjectReaderAdapter<T>
 
         if (constructor != null) {
             constructor.setAccessible(true);
+            parameterCount = constructor.getParameterCount();
+        } else {
+            parameterCount = -1;
         }
 
         if (typeKey == null || typeKey.isEmpty()) {
@@ -355,7 +359,7 @@ public class ObjectReaderAdapter<T>
     protected Object createInstance0(long features) {
         if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
                 && constructor != null
-                && constructor.getParameterCount() == 0) {
+                && parameterCount == 0) {
             T object;
             try {
                 object = (T) constructor.newInstance();
@@ -432,7 +436,7 @@ public class ObjectReaderAdapter<T>
 
         if (constructor != null) {
             try {
-                T object = (T) constructor.newInstance();
+                T object = (T) constructor.newInstance(new Object[parameterCount]);
                 if (hasDefaultValue) {
                     initDefaultValue(object);
                 }
