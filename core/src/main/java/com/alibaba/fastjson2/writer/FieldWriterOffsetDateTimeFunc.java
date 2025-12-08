@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
+import java.util.Locale;
 import java.util.function.Function;
 
 final class FieldWriterOffsetDateTimeFunc<T>
@@ -17,6 +18,7 @@ final class FieldWriterOffsetDateTimeFunc<T>
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
@@ -24,7 +26,7 @@ final class FieldWriterOffsetDateTimeFunc<T>
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
         this.function = function;
     }
 

@@ -579,6 +579,7 @@ public class ObjectWriterCreator {
                                     fieldInfo.ordinal,
                                     fieldInfo.features,
                                     fieldInfo.format,
+                                    fieldInfo.locale,
                                     fieldInfo.label,
                                     method,
                                     writeUsingWriter,
@@ -1776,11 +1777,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == LocalDate.class) {
-            return new FieldWriterLocalDateFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterLocalDateFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == OffsetDateTime.class) {
-            return new FieldWriterOffsetDateTimeFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterOffsetDateTimeFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == UUID.class) {
@@ -1835,7 +1836,7 @@ public class ObjectWriterCreator {
         }
 
         if (Modifier.isFinal(fieldClass.getModifiers())) {
-            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         return new FieldWriterObjectFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
@@ -1951,6 +1952,22 @@ public class ObjectWriterCreator {
             ObjectWriter initObjectWriter,
             Class<?> contentAs
     ) {
+        return createFieldWriterLambda(provider, objectClass, fieldName, ordinal, features, format, null, label, method, initObjectWriter, contentAs);
+    }
+
+    <T> FieldWriter<T> createFieldWriterLambda(
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Method method,
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
+    ) {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
@@ -2020,6 +2037,6 @@ public class ObjectWriterCreator {
         }
 
         Function function = (Function) lambda;
-        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function, contentAs);
+        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
     }
 }
