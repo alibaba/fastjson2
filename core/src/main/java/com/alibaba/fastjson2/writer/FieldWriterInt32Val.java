@@ -47,7 +47,7 @@ final class FieldWriterInt32Val<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         int value = getFieldValueInt(object);
 
-        if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue)) {
+        if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue) && defaultValue == null) {
             return false;
         }
 
