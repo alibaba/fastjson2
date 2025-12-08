@@ -35,7 +35,42 @@ public class AutoTypeTest37_MapBean {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONB.dump(bytes);
+        String str = JSONB.toJSONString(bytes, true);
+        assertEquals("{\n" +
+                "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest37_MapBean$Bean#0\",\n" +
+                "\t\"@value\":{\n" +
+                "\t\t\"items\":{\n" +
+                "\t\t\t\"a\":{\n" +
+                "\t\t\t\t\"child\":null,\n" +
+                "\t\t\t\t\"id\":101\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"b\":{\n" +
+                "\t\t\t\t\"child\":null,\n" +
+                "\t\t\t\t\"id\":102\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"c\":{\n" +
+                "\t\t\t\t\"child\":null,\n" +
+                "\t\t\t\t\"id\":103\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"d\":{\n" +
+                "\t\t\t\t\"child\":null,\n" +
+                "\t\t\t\t\"id\":104\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"e\":{\n" +
+                "\t\t\t\t\"child\":null,\n" +
+                "\t\t\t\t\"id\":105\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"f\":{\n" +
+                "\t\t\t\t\"child\":null,\n" +
+                "\t\t\t\t\"id\":107\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"z\":{\n" +
+                "\t\t\t\t\"child\":{},\n" +
+                "\t\t\t\t\"id\":110\n" +
+                "\t\t\t}\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "}", str);
 
         assertEquals(186, bytes.length);
         // 142 200 202 216 141 151 144

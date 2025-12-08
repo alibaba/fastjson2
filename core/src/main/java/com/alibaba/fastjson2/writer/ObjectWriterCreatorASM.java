@@ -2688,7 +2688,7 @@ public class ObjectWriterCreatorASM
             mw.aload(JSON_WRITER);
             mw.aload(FIELD_VALUE);
             mw.invokevirtual(TYPE_JSON_WRITER, "popPath0", "(Ljava/lang/Object;)V");
-            mw.goto_(null_);
+            mw.goto_(notNull_);
 
             mw.visitLabel(endDetect_);
 
