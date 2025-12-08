@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -135,10 +136,16 @@ public class FieldReaderObject<T>
                     value = OptionalDouble.empty();
                 } else if (fieldClass == Optional.class) {
                     value = Optional.empty();
-                } else if (first != 'n' && Map.class.isAssignableFrom(fieldClass) && fieldClass.equals(fieldType)) {
-                    value = getObjectReader(jsonReader).createInstance();
+                } else if (first != 'n') {
+                    if (Map.class.isAssignableFrom(fieldClass) && fieldClass.equals(fieldType)) {
+                        value = getObjectReader(jsonReader).createInstance();
+                    } else if (Temporal.class.isAssignableFrom(fieldClass)) {
+                        value = null;
+                    } else {
+                        value = "";
+                    }
                 } else {
-                    value = first == 'n' ? null : "";
+                    value = null;
                 }
             } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
