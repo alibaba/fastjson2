@@ -135,6 +135,8 @@ public class FieldReaderObject<T>
                     value = OptionalDouble.empty();
                 } else if (fieldClass == Optional.class) {
                     value = Optional.empty();
+                } else if (first != 'n' && Map.class.isAssignableFrom(fieldClass) && fieldClass.equals(fieldType)) {
+                    value = getObjectReader(jsonReader).createInstance();
                 } else {
                     value = first == 'n' ? null : "";
                 }
