@@ -1279,7 +1279,7 @@ public class ObjectWriterCreator {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
-        if (initObjectWriter == null && provider != null) {
+        if (initObjectWriter == null && provider != null && (format == null || format.isEmpty() || fieldClass != Date.class)) {
             initObjectWriter = getInitWriter(provider, fieldClass);
         }
 
