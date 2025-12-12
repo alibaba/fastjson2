@@ -138,7 +138,7 @@ public final class StringSchema
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (value == null) {
             if (typed) {
                 return REQUIRED_NOT_MATCH;

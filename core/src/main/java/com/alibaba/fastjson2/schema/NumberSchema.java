@@ -81,7 +81,7 @@ public final class NumberSchema
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (value == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
@@ -135,7 +135,7 @@ public final class NumberSchema
     }
 
     @Override
-    public ValidateResult validate(Integer value) {
+    protected ValidateResult validateInternal(Integer value) {
         if (value == null) {
             return SUCCESS;
         }
@@ -144,7 +144,7 @@ public final class NumberSchema
     }
 
     @Override
-    public ValidateResult validate(Float value) {
+    protected ValidateResult validateInternal(Float value) {
         if (value == null) {
             return SUCCESS;
         }
@@ -153,7 +153,7 @@ public final class NumberSchema
     }
 
     @Override
-    public ValidateResult validate(Double value) {
+    protected ValidateResult validateInternal(Double value) {
         if (value == null) {
             return SUCCESS;
         }
@@ -162,7 +162,7 @@ public final class NumberSchema
     }
 
     @Override
-    public ValidateResult validate(Long value) {
+    protected ValidateResult validateInternal(Long value) {
         if (value == null) {
             return SUCCESS;
         }
@@ -171,7 +171,7 @@ public final class NumberSchema
     }
 
     @Override
-    public ValidateResult validate(long value) {
+    protected ValidateResult validateInternal(long value) {
         BigDecimal decimalValue = null;
 
         if (minimum != null) {
@@ -227,7 +227,7 @@ public final class NumberSchema
     }
 
     @Override
-    public ValidateResult validate(double value) {
+    protected ValidateResult validateInternal(double value) {
         if (minimum != null) {
             if (minimumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {

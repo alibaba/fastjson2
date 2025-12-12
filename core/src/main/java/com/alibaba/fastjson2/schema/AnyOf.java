@@ -37,7 +37,7 @@ final class AnyOf
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         for (JSONSchema item : items) {
             ValidateResult result = item.validate(value);
             if (result == SUCCESS) {
