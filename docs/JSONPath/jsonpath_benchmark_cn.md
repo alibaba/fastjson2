@@ -1,4 +1,4 @@
-fastjson2将 [JSONPath](https://alibaba.github.io/fastjson2/jsonpath_cn) 作为一等公民，针对jsonpath做了很多优化。
+fastjson2将 [JSONPath](https://alibaba.github.io/fastjson2/JSONPath/jsonpath_cn) 作为一等公民，针对jsonpath做了很多优化。
 
 # 结论
 在如下测试场景中，fastjson2的性能是jayway的4.5倍

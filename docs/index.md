@@ -2,11 +2,11 @@
 
 `FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，
 
-- 支持`JSON/JSONB`两种协议，[`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn) 是一等公民。
+- 支持`JSON/JSONB`两种协议，[`JSONPath`](https://alibaba.github.io/fastjson2/JSONPath/jsonpath_cn) 是一等公民。
 - 支持全量解析和部分解析。
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`Kotlin`
-- 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+- 支持`JSON Schema` [https://alibaba.github.io/fastjson2/JSONSchema/json_schema_cn](https://alibaba.github.io/fastjson2/JSONSchema/json_schema_cn)
 - 支持`Android`
 - 支持`Graal Native-Image`
 
@@ -15,7 +15,7 @@
 相关文档：
 
 - `JSONB`格式文档：  
-  [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
+  [https://alibaba.github.io/fastjson2/JSONB/jsonb_format_cn](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_cn)
 - `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
   [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
 
@@ -93,7 +93,7 @@ dependencies {
 
 ### `Fastjson Extension`扩展模块
 
-如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](https://alibaba.github.io/fastjson2/spring_support_cn)。
+如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](https://alibaba.github.io/fastjson2/Spring/spring_support_cn)。
 
 `Maven`:
 
