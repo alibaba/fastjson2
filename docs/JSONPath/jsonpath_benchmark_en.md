@@ -1,4 +1,4 @@
-fastjson2 treats [JSONPath](jsonpath_en.md) as a first-class citizen and has made many optimizations for it.
+fastjson2 treats [JSONPath](https://alibaba.github.io/fastjson2/JSONPath/jsonpath_en) as a first-class citizen and has made many optimizations for it.
 
 # Conclusion
 In the test scenario below, fastjson2's performance is 4.5 times that of jayway.

@@ -21,16 +21,16 @@
 - Supports the JSON and JSONB Protocols.
 - Supports full parsing and partial parsing.
 - Supports Java servers and Android Clients, and has big data applications.
-- Supports Kotlin [https://alibaba.github.io/fastjson2/kotlin_en](https://alibaba.github.io/fastjson2/kotlin_en)
+- Supports Kotlin [https://alibaba.github.io/fastjson2/Kotlin/kotlin_en](https://alibaba.github.io/fastjson2/Kotlin/kotlin_en)
 - Supports Android 8+ 
-- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/JSONSchema/json_schema_en](https://alibaba.github.io/fastjson2/JSONSchema/json_schema_en)
 
 ![fastjson logo](https://user-images.githubusercontent.com/1063891/233821110-0c912009-4de3-4664-a27e-25274f2fa9c1.jpg)
 
 Related Documents:
 
 - `JSONB` format documentation:  
-  [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
+  [https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en)
 - `FASTJSON v2`'s performance has been significantly improved. For the benchmark, see here:  
   [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
 
