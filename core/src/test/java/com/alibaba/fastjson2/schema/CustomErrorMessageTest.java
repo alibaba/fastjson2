@@ -18,7 +18,7 @@ public class CustomErrorMessageTest {
         JSONObject schemaJson = JSONObject.of(
                 "type", "integer",
                 "maximum", 10,
-                "errorMessage", "错误：数值不能超过10！"
+                "error", "错误：数值不能超过10！"
         );
         JSONSchema schema = JSONSchema.of(schemaJson);
         ValidateResult result = schema.validate(100);
@@ -32,7 +32,7 @@ public class CustomErrorMessageTest {
         JSONObject schemaJson = JSONObject.of(
                 "type", "string",
                 "pattern", "^\\d+$",
-                "errorMessage", "错误：只能包含数字字符"
+                "error", "错误：只能包含数字字符"
         );
         JSONSchema schema = JSONSchema.of(schemaJson);
         ValidateResult result = schema.validate("abc");
@@ -49,7 +49,7 @@ public class CustomErrorMessageTest {
                 "    \"age\": {\n" +
                 "      \"type\": \"integer\",\n" +
                 "      \"minimum\": 18,\n" +
-                "      \"errorMessage\": \"未成年人禁止入内\"\n" +
+                "      \"error\": \"未成年人禁止入内\"\n" +
                 "    }\n" +
                 "  }\n" +
                 "}";
@@ -74,7 +74,7 @@ public class CustomErrorMessageTest {
     }
 
     public static class User {
-        @JSONField(schema = "{'minimum': 18, 'errorMessage': 'Age too young'}")
+        @JSONField(schema = "{'minimum': 18, 'error': 'Age too young'}")
         public int age;
     }
 }

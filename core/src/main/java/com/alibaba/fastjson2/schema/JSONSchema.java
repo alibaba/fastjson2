@@ -38,12 +38,7 @@ public abstract class JSONSchema {
     JSONSchema(JSONObject input) {
         this.title = input.getString("title");
         this.description = input.getString("description");
-
-        String msg = input.getString("errorMessage");
-        if (msg == null) {
-            msg = input.getString("message");
-        }
-        this.customErrorMessage = msg;
+        this.customErrorMessage = input.getString("error");
     }
 
     JSONSchema(String title, String description) {
