@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.filter.*;
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
@@ -1944,6 +1944,11 @@ public class ObjectWriterCreator {
         } else if (Enum.class.isAssignableFrom(fieldClass)) {
             ObjectWriter objectWriter = provider.cache.get(fieldClass);
             if (!(objectWriter instanceof ObjectWriterImplEnum)) {
+                return objectWriter;
+            }
+        } else {
+            ObjectWriter objectWriter = provider.cache.get(fieldClass);
+            if (objectWriter != null && objectWriter instanceof ObjectWriterAsString) {
                 return objectWriter;
             }
         }
