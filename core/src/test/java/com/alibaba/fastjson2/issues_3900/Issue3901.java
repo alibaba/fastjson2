@@ -31,7 +31,7 @@ public class Issue3901 {
         private String name;
     }
 
-    public class UserReader implements ObjectReader {
+    public static class UserReader implements ObjectReader {
         @Override
         public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             jsonReader.readObject();
