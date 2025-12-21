@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Reader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -25,6 +26,29 @@ public class JdbcSupport {
 
     static Class CLASS_CLOB;
     static volatile boolean CLASS_CLOB_ERROR;
+    static Class CLASS_SQL_TIMESTAMP;
+    static Constructor CONSTRUCTOR_SQL_TIMESTAMP;
+
+    static Class CLASS_SQL_DATE;
+    static Constructor CONSTRUCTOR_SQL_DATE;
+
+    static Class CLASS_SQL_TIME;
+    static Constructor CONSTRUCTOR_SQL_TIME;
+
+    static {
+        try {
+            CLASS_SQL_TIMESTAMP = Class.forName("java.sql.Timestamp");
+            CONSTRUCTOR_SQL_TIMESTAMP = CLASS_SQL_TIMESTAMP.getConstructor(long.class);
+
+            CLASS_SQL_DATE = Class.forName("java.sql.Date");
+            CONSTRUCTOR_SQL_DATE = CLASS_SQL_DATE.getConstructor(long.class);
+
+            CLASS_SQL_TIME = Class.forName("java.sql.Time");
+            CONSTRUCTOR_SQL_TIME = CLASS_SQL_TIME.getConstructor(long.class);
+        } catch (Throwable e) {
+            //
+        }
+    }
 
     public static ObjectReader createTimeReader(Class objectClass, String format, Locale locale) {
         return new TimeReader(format, locale);
@@ -47,15 +71,36 @@ public class JdbcSupport {
     }
 
     public static Object createTimestamp(long millis) {
-        return new Timestamp(millis);
+        if (CONSTRUCTOR_SQL_TIMESTAMP == null) {
+            throw new JSONException("class java.sql.Timestamp not found");
+        }
+        try {
+            return CONSTRUCTOR_SQL_TIMESTAMP.newInstance(millis);
+        } catch (Exception e) {
+            throw new JSONException("create java.sql.Timestamp error", e);
+        }
     }
 
     public static Object createDate(long millis) {
-        return new java.sql.Date(millis);
+        if (CONSTRUCTOR_SQL_DATE == null) {
+            throw new JSONException("class java.sql.Date not found");
+        }
+        try {
+            return CONSTRUCTOR_SQL_DATE.newInstance(millis);
+        } catch (Exception e) {
+            throw new JSONException("create java.sql.Date error", e);
+        }
     }
 
     public static Object createTime(long millis) {
-        return new java.sql.Time(millis);
+        if (CONSTRUCTOR_SQL_TIME == null) {
+            throw new JSONException("class java.sql.Time not found");
+        }
+        try {
+            return CONSTRUCTOR_SQL_TIME.newInstance(millis);
+        } catch (Exception e) {
+            throw new JSONException("create java.sql.Time error", e);
+        }
     }
 
     public static ObjectWriter createClobWriter(Class objectClass) {

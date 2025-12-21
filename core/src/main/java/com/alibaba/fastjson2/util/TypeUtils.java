@@ -1462,15 +1462,15 @@ public class TypeUtils {
             long time = ((Date) obj).getTime();
             String className = targetClass.getName();
 
-            if ("java.sql.Timestamp".equals(className) ||
-                    "java.sql.Date".equals(className) ||
-                    "java.sql.Time".equals(className)) {
-                try {
-                    Constructor<?> constructor = targetClass.getConstructor(long.class);
-                    return (T) constructor.newInstance(time);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to create instance for " + className, e);
-                }
+            switch (className) {
+                case "java.sql.Timestamp":
+                    return (T) JdbcSupport.createTimestamp(time);
+                case "java.sql.Date":
+                    return (T) JdbcSupport.createDate(time);
+                case "java.sql.Time":
+                    return (T) JdbcSupport.createTime(time);
+                default:
+                    break;
             }
         }
 
