@@ -1458,6 +1458,22 @@ public class TypeUtils {
             }
         }
 
+        if (obj instanceof Date) {
+            long time = ((Date) obj).getTime();
+            String className = targetClass.getName();
+
+            switch (className) {
+                case "java.sql.Timestamp":
+                    return (T) JdbcSupport.createTimestamp(time);
+                case "java.sql.Date":
+                    return (T) JdbcSupport.createDate(time);
+                case "java.sql.Time":
+                    return (T) JdbcSupport.createTime(time);
+                default:
+                    break;
+            }
+        }
+
         if (targetClass == String.class) {
             if (obj instanceof Character) {
                 return (T) obj.toString();

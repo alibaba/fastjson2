@@ -546,11 +546,11 @@ public class TypeUtils {
         return com.alibaba.fastjson2.util.TypeUtils.toBigInteger(value);
     }
 
-    public static Timestamp castToTimestamp(final Object value) {
+    public static Object castToTimestamp(final Object value) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(value, Timestamp.class);
     }
 
-    public static java.sql.Date castToSqlDate(final Object value) {
+    public static Object castToSqlDate(final Object value) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.sql.Date.class);
     }
 
