@@ -1609,4 +1609,16 @@ public class JSONReaderTest2 {
         context.setFeatures(features);
         assertEquals(features, context.getFeatures());
     }
+
+    @Test
+    public void test1() {
+        String name = "1234567890123456\\789";
+
+        String json = JSON.toJSONString(JSONObject.of("name", name, "id", 1234567890123456789L));
+        char[] chars = json.toCharArray();
+        JSONReader jsonReader = new JSONReaderUTF16(JSONFactory.createReadContext(), null, chars, 0, chars.length);
+        JSONObject jsonObject = jsonReader.readJSONObject();
+        assertEquals(name,
+                jsonObject.getString("name"));
+    }
 }
