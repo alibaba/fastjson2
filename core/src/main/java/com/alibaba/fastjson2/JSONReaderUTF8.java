@@ -3008,7 +3008,13 @@ class JSONReaderUTF8
             return new String(bytes, offset, length, ISO_8859_1);
         }
 
-        char[] charBuf = allocateCharBuf(length);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        char[] charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+        if (charBuf == null || charBuf.length < length) {
+            charBuf = new char[length];
+        }
+
         for (int i = 0; i < length; i++) {
             charBuf[i] = (char) (bytes[offset + i] & 0xFF);
         }
@@ -4992,7 +4998,11 @@ class JSONReaderUTF8
         } else {
             byte[] inputCodes = quote == '"' ? INPUT_CODES : INPUT_CODES_SINGLE_QUOTE;
 
-            char[] strBuf = allocateCharBuf(512);
+            CacheItem cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
+            char[] strBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+            if (strBuf == null) {
+                strBuf = new char[512];
+            }
 
             for (int i = 0; i < stroff; ++i) {
                 strBuf[i] = (char) bytes[start + i];
@@ -5094,19 +5104,6 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
         return str;
-    }
-
-    private char[] allocateCharBuf(int initCapacity) {
-        CacheItem cacheItem = this.cacheItem;
-        if (cacheItem == null) {
-            int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-            this.cacheItem = cacheItem = CACHE_ITEMS[cacheIndex];
-        }
-        char[] strBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
-        if (strBuf == null || strBuf.length < initCapacity) {
-            strBuf = new char[initCapacity];
-        }
-        return strBuf;
     }
 
     @Override
