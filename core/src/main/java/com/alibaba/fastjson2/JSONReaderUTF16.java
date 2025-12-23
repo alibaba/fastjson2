@@ -3088,6 +3088,10 @@ final class JSONReaderUTF16
                     stroff += 4;
                 }
 
+                if (offset >= end) {
+                    throw error("invalid escape character EOI");
+                }
+
                 char c = chars[offset];
                 if (c == '\\') {
                     c = chars[++offset];
