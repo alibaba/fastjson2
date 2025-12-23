@@ -3095,7 +3095,7 @@ final class JSONReaderUTF16
                         c = (char) hexDigit4(chars, check3(offset + 1, end));
                         offset += 4;
                     } else if (c == 'x') {
-                        c = char2(chars, offset, end);
+                        c = char2(chars, offset + 1, end);
                         offset += 2;
                     } else {
                         c = char1(c);
