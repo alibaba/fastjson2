@@ -4958,6 +4958,10 @@ class JSONReaderUTF8
         return -1;
     }
 
+    private static char[] ensureCapacity(char[] strBuf, int minCapacity) {
+        return Arrays.copyOf(strBuf, newCapacity(minCapacity, strBuf.length));
+    }
+
     public String readString() {
         final char quote = ch;
         if (quote != '"' && quote != '\'') {
@@ -5017,7 +5021,7 @@ class JSONReaderUTF8
                         break;
                     }
                     if (stroff + 7 >= strBuf.length) {
-                        strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 8, strBuf.length));
+                        strBuf = ensureCapacity(strBuf, stroff + 8);
                     }
 
                     for (int i = 0; i < 8; ++i) {
@@ -5030,7 +5034,7 @@ class JSONReaderUTF8
                 }
 
                 if (stroff == strBuf.length) {
-                    strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 1, strBuf.length));
+                    strBuf = ensureCapacity(strBuf, stroff + 1);
                 }
 
                 int c = bytes[offset++];
@@ -5054,7 +5058,7 @@ class JSONReaderUTF8
                                 c = char1(c);
                             }
                             if (stroff + 2 >= strBuf.length) {
-                                strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 3, strBuf.length));
+                                strBuf = ensureCapacity(strBuf, stroff + 3);
                             }
                             strBuf[stroff] = (char) c;
                         }
@@ -5069,7 +5073,7 @@ class JSONReaderUTF8
                         break;
                     case INPUT_CODE_UTF8_4:
                         if (stroff + 1 >= strBuf.length) {
-                            strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 2, strBuf.length));
+                            strBuf = ensureCapacity(strBuf, stroff + 2);
                         }
                         char2_utf8(bytes, offset - 1, c, strBuf, stroff);
                         offset += 3;
