@@ -36,6 +36,7 @@ final class JSONReaderUTF16
 
     private Closeable input;
     private int cacheIndex = -1;
+    private char[] strBuf;
 
     JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx, false, false);
@@ -2989,146 +2990,163 @@ final class JSONReaderUTF16
         stringValue = str;
     }
 
-    @Override
+    static boolean containsSlashOrQuoteUTF16(long v, long quoteV) {
+    /*
+      for (int i = 0; i < 4; ++i) {
+        short c = (short) v;
+        if (c == quote || c == '\\') {
+            return true;
+        }
+        v >>>= 16;
+      }
+      return false;
+     */
+        long x22 = v ^ quoteV; // quote character -> 0x0022 or 0x0027
+        long x5c = v ^ 0x005C_005C_005C_005CL; // backslash -> 0x005C
+        x22 = (x22 - 0x0001_0001_0001_0001L) & ~x22;
+        x5c = (x5c - 0x0001_0001_0001_0001L) & ~x5c;
+        return ((x22 | x5c) & 0x8000_8000_8000_8000L) != 0;
+    }
+
+    static int indexOf(long v, long quoteV) {
+        // 异或检测相等的short
+        long xor = v ^ quoteV;
+
+        // 检测零short：如果short为0，则 (x | (x - 1)) 的最高位为0
+        // 反之，利用 (x - 1) 来检测
+        long temp = xor | (xor - 0x0001000100010001L);
+        long mask = ~temp & 0x8000800080008000L;
+
+        return mask == 0 ? -1 : Long.numberOfTrailingZeros(mask) >>> 4;
+    }
+
+    static int indexOf(long v, int quote) {
+        for (int i = 0; i < 4; ++i) {
+            if (((short) v) == quote) {
+                return i;
+            }
+            v >>>= 16;
+        }
+        return -1;
+    }
+
     public String readString() {
-        final char[] chars = this.chars;
         final char quote = ch;
-        if (quote == '"' || quote == '\'') {
-            final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+        if (quote != '"' && quote != '\'') {
+            if (quote == 'n') {
+                readNull();
+                return null;
+            }
 
-            int offset = this.offset;
-            final int start = offset, end = this.end;
-            int valueLength;
-            boolean valueEscape = false;
+            return readStringNotMatch();
+        }
 
-            int upperBound = offset + ((end - offset) & ~7);
-            {
-                int i = 0;
+        char[] chars = this.chars;
+        int offset = this.offset, start = offset, end = this.end;
+        long quoteV = quote == '\'' ? 0x0027_0027_0027_0027L : 0x0022_0022_0022_0022L;
+        int upperBound = offset + ((end - offset) & ~7);
+        int stroff = 0;
+        int quoteIndex = -1, slashIndex = -1;
+        while (offset < upperBound) {
+            long v = getLongLE(chars, offset);
+            if (containsSlashOrQuoteUTF16(v, quoteV)) {
+                slashIndex = indexOf(v, '\\');
+                quoteIndex = indexOf(v, quote);
+                break;
+            }
+
+            offset += 4;
+            stroff += 4;
+        }
+
+        String str;
+        if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1) {
+            offset += quoteIndex;
+            str = new String(chars, start, offset - start);
+        } else {
+            char[] strBuf = this.strBuf;
+            if (strBuf == null) {
+                strBuf = new char[stroff + 512];
+                this.strBuf = strBuf;
+            }
+            System.arraycopy(chars, start, strBuf, 0, stroff);
+
+            while (true) {
+                upperBound = offset + ((end - offset) & ~7);
                 while (offset < upperBound) {
-                    long v0 = getLongLE(chars, offset);
-                    long v1 = getLongLE(chars, offset + 4);
-                    if (((v0 | v1) & 0xFF00FF00FF00FF00L) != 0
-                            || JSONReaderUTF8.containsSlashOrQuote((v0 << 8) | v1, byteVectorQuote)
-                    ) {
+                    long v = getLongLE(chars, offset);
+                    if (containsSlashOrQuoteUTF16(v, quoteV)) {
                         break;
                     }
 
-                    offset += 8;
-                    i += 8;
-                }
-
-                for (; ; ++i) {
-                    if (offset >= end) {
-                        throw error("invalid escape character EOI");
-                    }
-                    char c = chars[offset];
-                    if (c == '\\') {
-                        valueEscape = true;
-                        c = chars[offset + 1];
-                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
-                        continue;
+                    if (stroff + 4 >= strBuf.length) {
+                        strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 4, strBuf.length));
                     }
 
-                    if (c == quote) {
-                        valueLength = i;
-                        break;
-                    }
-                    offset++;
+                    IOUtils.putLongLE(strBuf, stroff, v);
+                    offset += 4;
+                    stroff += 4;
                 }
+
+                if (offset >= end) {
+                    throw error("invalid escape character EOI");
+                }
+
+                char c = chars[offset];
+                if (c == '\\') {
+                    c = chars[++offset];
+                    if (c == 'u') {
+                        c = (char) hexDigit4(chars, check3(offset + 1, end));
+                        offset += 4;
+                    } else if (c == 'x') {
+                        c = char2(chars, offset + 1, end);
+                        offset += 2;
+                    } else {
+                        c = char1(c);
+                    }
+                } else if (c == quote) {
+                    break;
+                }
+                if (stroff == strBuf.length) {
+                    strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 1, strBuf.length));
+                }
+                strBuf[stroff++] = c;
+                offset++;
             }
+            str = new String(strBuf, 0, stroff);
+        }
 
-            String str;
-            if (valueEscape) {
-                char[] buf = new char[valueLength];
-                offset = start;
-                for (int i = 0; ; ++i) {
-                    char c = chars[offset];
-                    if (c == '\\') {
-                        c = chars[++offset];
-                        switch (c) {
-                            case 'u': {
-                                c = (char) hexDigit4(chars, check3(offset + 1, end));
-                                offset += 4;
-                                break;
-                            }
-                            case 'x': {
-                                c = char2(chars[offset + 1], chars[offset + 2]);
-                                offset += 2;
-                                break;
-                            }
-                            case '\\':
-                            case '"':
-                                break;
-                            case 'b':
-                                c = '\b';
-                                break;
-                            case 't':
-                                c = '\t';
-                                break;
-                            case 'n':
-                                c = '\n';
-                                break;
-                            case 'f':
-                                c = '\f';
-                                break;
-                            case 'r':
-                                c = '\r';
-                                break;
-                            default:
-                                c = char1(c);
-                                break;
-                        }
-                    } else if (c == quote) {
-                        break;
-                    }
-                    buf[i] = c;
-                    offset++;
-                }
+        long features = context.features;
+        if ((features & (MASK_TRIM_STRING | MASK_EMPTY_STRING_AS_NULL)) != 0) {
+            str = stringValue(str, features);
+        }
 
-                str = new String(buf);
-            } else {
-                char c0, c1;
-                int strlen = offset - start;
-                if (strlen == 1 && (c0 = chars[start]) < 128) {
-                    str = TypeUtils.toString(c0);
-                } else if (strlen == 2
-                        && (c0 = chars[start]) < 128
-                        && (c1 = chars[start + 1]) < 128
-                ) {
-                    str = TypeUtils.toString(c0, c1);
-                } else if (this.str != null && (JVM_VERSION > 8 || ANDROID)) {
-                    str = this.str.substring(start, offset);
-                } else {
-                    str = new String(chars, start, offset - start);
-                }
-            }
+        int ch = ++offset == end ? EOI : chars[offset++];
+        while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+            ch = offset == end ? EOI : chars[offset++];
+        }
 
-            long features = context.features;
-            if ((features & (MASK_TRIM_STRING | MASK_EMPTY_STRING_AS_NULL)) != 0) {
-                str = stringValue(str, features);
-            }
-
-            int ch = ++offset == end ? EOI : chars[offset++];
+        if (comma = ch == ',') {
+            ch = offset == end ? EOI : chars[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
-
-            if (comma = ch == ',') {
-                ch = offset == end ? EOI : chars[offset++];
-                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                    ch = offset == end ? EOI : chars[offset++];
-                }
-            }
-
-            this.ch = (char) ch;
-            this.offset = offset;
-            return str;
-        } else if (quote == 'n') {
-            readNull();
-            return null;
         }
 
-        return readStringNotMatch();
+        this.ch = (char) ch;
+        this.offset = offset;
+        return str;
+    }
+
+    private char char2(char[] chars, int offset, int end) {
+        if (offset + 1 >= end) {
+            throw error("invalid escape character EOI");
+        }
+        try {
+            return char2(chars[offset], chars[offset + 1]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw error("invalid escape character EOI");
+        }
     }
 
     @Override

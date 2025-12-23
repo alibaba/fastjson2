@@ -41,4 +41,18 @@ public class JSONReaderUTF8Test {
         String parsed = jsonReader.readString();
         assertEquals(str, parsed);
     }
+
+    @Test
+    public void test1() {
+        String name = "1234567890123456789张\"三12345678901234567891234567890123456789";
+        long value = 1234567890123456789L;
+        String json = JSON.toJSONString(JSONObject.of("name", name, "value", value));
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        JSONReader jsonReader = new JSONReaderUTF8(JSONFactory.createReadContext(), bytes, 0, bytes.length);
+        JSONObject jsonObject = jsonReader.readJSONObject();
+        assertEquals(name,
+                jsonObject.getString("name"));
+        assertEquals(value,
+                jsonObject.getLong("value"));
+    }
 }

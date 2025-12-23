@@ -83,6 +83,60 @@ public abstract class JSONReader
         }
     }
 
+    static final byte[] CHAR1_ESCAPED;
+    static {
+        byte[] char1_escaped = new byte[128];
+        Arrays.fill(char1_escaped, (byte) -1);
+        byte[] mapping = new byte[] {
+                '0', '\0',
+                '1', '\1',
+                '2', '\2',
+                '3', '\3',
+                '4', '\4',
+                '5', '\5',
+                '6', '\6',
+                '7', '\7',
+                'b', '\b',
+                't', '\t',
+                'n', '\n',
+                'v', '\u000b',
+                'f', '\f',
+                'F', '\f',
+                'r', '\r',
+                '"', '"',
+                '\'', '\'',
+                '/', '/',
+                '.', '.',
+                '\\', '\\',
+                '#', '#',
+                '&', '&',
+                '[', '[',
+                ']', ']',
+                '@', '@',
+                '(', '(',
+                ')', ')',
+                '_', '_',
+                ',', ',',
+                '~', '~',
+                ' ', ' ',
+        };
+        for (int i = 0; i < mapping.length; i += 2) {
+            char1_escaped[mapping[i]] = mapping[i + 1];
+        }
+        CHAR1_ESCAPED = char1_escaped;
+    }
+
+    protected static int newCapacity(int minCapacity, int oldCapacity) {
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        if (newCapacity < 0) {
+            throw new OutOfMemoryError();
+        }
+        return newCapacity;
+    }
+
     protected final Context context;
     public final boolean jsonb;
     public final boolean utf8;
@@ -1271,56 +1325,15 @@ public abstract class JSONReader
     }
 
     final char char1(int c) {
-        switch (c) {
-            case '0':
-                return '\0';
-            case '1':
-                return '\1';
-            case '2':
-                return '\2';
-            case '3':
-                return '\3';
-            case '4':
-                return '\4';
-            case '5':
-                return '\5';
-            case '6':
-                return '\6';
-            case '7':
-                return '\7';
-            case 'b': // 8
-                return '\b';
-            case 't': // 9
-                return '\t';
-            case 'n': // 10
-                return '\n';
-            case 'v': // 11
-                return '\u000B';
-            case 'f': // 12
-            case 'F':
-                return '\f';
-            case 'r': // 13
-                return '\r';
-            case '"': // 34
-            case '\'': // 39
-            case '/': // 47
-            case '.': // 47
-            case '\\': // 92
-            case '#':
-            case '&':
-            case '[':
-            case ']':
-            case '@':
-            case '(':
-            case ')':
-            case '_':
-            case ',':
-            case '~':
-            case ' ':
-                return (char) c;
-            default:
-                throw new JSONException(info("unclosed.str '\\" + (char) c));
+        byte b = CHAR1_ESCAPED[c & 0x7f];
+        if (b == -1) {
+            throw char1Error(c);
         }
+        return (char) b;
+    }
+
+    private JSONException char1Error(int c) {
+        return new JSONException(info("unclosed.str '\\" + (char) c));
     }
 
     static char char2(int c1, int c2) {
@@ -6579,6 +6592,10 @@ public abstract class JSONReader
 
     final JSONException error(String message) {
         return new JSONException(info(message));
+    }
+
+    final JSONException error(String message, int ch) {
+        return new JSONException(info(message).concat(Integer.toString(ch)));
     }
 
     final JSONException error(String message, Exception cause) {

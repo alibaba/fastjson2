@@ -2528,6 +2528,21 @@ public class IOUtils {
         return (((x - 0x0101010101010101L) & ~x) & 0x8080808080808080L) == 0;
     }
 
+    public static int hexDigit4(byte[] buf, int offset, int end) {
+        return hexDigit4(buf, check3(offset + 1, end));
+    }
+
+    public static int check3(int off, int end) {
+        if (off + 3 >= end) {
+            throw outOfBoundsCheckFromToIndex(off, end);
+        }
+        return off;
+    }
+
+    static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
+        return new JSONException("offset overflow, offset " + offset + ", end " + end);
+    }
+
     /**
      * Extracts a 4-digit hexadecimal number from a byte array at the specified offset.
      * This method performs optimized hexadecimal digit extraction by processing 4 bytes at once
