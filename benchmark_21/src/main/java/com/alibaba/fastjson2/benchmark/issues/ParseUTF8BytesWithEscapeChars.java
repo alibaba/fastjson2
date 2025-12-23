@@ -44,7 +44,6 @@ public class ParseUTF8BytesWithEscapeChars {
         private String rspBody;
     }
 
-
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(ParseUTF8BytesWithEscapeChars.class.getName())
