@@ -6594,6 +6594,10 @@ public abstract class JSONReader
         return new JSONException(info(message));
     }
 
+    final JSONException error(String message, int ch) {
+        return new JSONException(info(message).concat(Integer.toString(ch)));
+    }
+
     final JSONException error(String message, Exception cause) {
         return new JSONException(info(message), cause);
     }

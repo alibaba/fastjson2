@@ -5002,12 +5002,7 @@ class JSONReaderUTF8
         } else {
             byte[] inputCodes = quote == '"' ? INPUT_CODES : INPUT_CODES_SINGLE_QUOTE;
 
-            int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-            cacheItem = CACHE_ITEMS[cacheIndex];
-            char[] strBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
-            if (strBuf == null) {
-                strBuf = new char[512];
-            }
+            char[] strBuf = allocateCharBuf(512);
 
             for (int i = 0; i < stroff; ++i) {
                 strBuf[i] = (char) bytes[start + i];
@@ -5080,7 +5075,7 @@ class JSONReaderUTF8
                         stroff += 1;
                         break;
                     default:
-                        throw new JSONException(info("unsupported char ", c));
+                        throw error("unsupported char ", c);
                 }
                 stroff++;
             }
@@ -5109,6 +5104,16 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
         return str;
+    }
+
+    private char[] allocateCharBuf(int initCapacity) {
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cacheIndex];
+        char[] strBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+        if (strBuf == null) {
+            strBuf = new char[initCapacity];
+        }
+        return strBuf;
     }
 
     @Override
