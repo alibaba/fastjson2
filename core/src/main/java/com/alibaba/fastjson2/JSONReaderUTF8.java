@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 
@@ -23,6 +22,46 @@ class JSONReaderUTF8
         extends JSONReader {
     static final int REF = BIG_ENDIAN ? 0x24726566 : 0x66657224;
     static final int ESCAPE_INDEX_NOT_SET = -2;
+
+    static final byte
+            INPUT_CODE_ASCII_NORMAL = 0,
+            INPUT_CODE_ASCII_ESCAPE = 1,
+            INPUT_CODE_UTF8_2 = 2,
+            INPUT_CODE_UTF8_3 = 3,
+            INPUT_CODE_UTF8_4 = 4,
+            INPUT_CODE_ERROR = -1;
+
+    protected static final byte[] INPUT_CODES;
+    protected static final byte[] INPUT_CODES_SINGLE_QUOTE;
+    static {
+        final byte[] table = new byte[256];
+        Arrays.fill(table, 0, 128, INPUT_CODE_ASCII_NORMAL);
+        table['"'] = INPUT_CODE_ASCII_ESCAPE;
+        table['\\'] = INPUT_CODE_ASCII_ESCAPE;
+
+        for (int c = 128; c < 256; ++c) {
+            byte code;
+            // We'll add number of bytes needed for decoding
+            if ((c & 0xE0) == 0xC0) { // 2 bytes (0x0080 - 0x07FF)
+                code = INPUT_CODE_UTF8_2;
+            } else if ((c & 0xF0) == 0xE0) { // 3 bytes (0x0800 - 0xFFFF)
+                code = INPUT_CODE_UTF8_3;
+            } else if ((c & 0xF8) == 0xF0) {
+                // 4 bytes; double-char with surrogates and all...
+                code = INPUT_CODE_UTF8_4;
+            } else {
+                // And -1 seems like a good "universal" error marker...
+                code = INPUT_CODE_ERROR;
+            }
+            table[c] = code;
+        }
+        INPUT_CODES = table;
+
+        byte[] table2 = table.clone();
+        table2['\''] = INPUT_CODE_ASCII_ESCAPE;
+        INPUT_CODES_SINGLE_QUOTE = table2;
+    }
+
     protected int nextEscapeIndex = ESCAPE_INDEX_NOT_SET;
 
     protected final byte[] bytes;
@@ -4909,250 +4948,163 @@ class JSONReaderUTF8
         return ((x22 | x5c) & 0x8080808080808080L) != 0;
     }
 
-    @Override
-    public String readString() {
-        char quote = this.ch;
-        if (quote == '"' || quote == '\'') {
-            final byte[] bytes = this.bytes;
-            int valueLength;
-            int offset = this.offset;
-            final int start = offset, end = this.end;
-            final long byteVectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
-            boolean ascii = true;
-            valueEscape = false;
+    private static int indexOf(long v, int quote) {
+        for (int i = 0; i < 8; ++i) {
+            if (((byte) v) == quote) {
+                return i;
+            }
+            v >>>= 8;
+        }
+        return -1;
+    }
 
-            {
-                int i = 0;
-                int upperBound = offset + ((end - offset) & ~7);
+    public String readString() {
+        final char quote = ch;
+        if (quote != '"' && quote != '\'') {
+            if (quote == 'n') {
+                readNull();
+                return null;
+            }
+
+            return readStringNotMatch();
+        }
+
+        int offset = this.offset, start = offset, end = this.end;
+        byte[] bytes = this.bytes;
+
+        final long quoteV = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
+        int upperBound = offset + ((end - offset) & ~7);
+        int slashIndex = -1, quoteIndex = -1;
+        int stroff = 0;
+        boolean ascii = true;
+        while (offset < upperBound) {
+            long v = getLongLE(bytes, offset);
+            ascii = (v & 0x8080808080808080L) == 0;
+            if (!ascii || containsSlashOrQuote(v, quoteV)) {
+                slashIndex = indexOf(v, '\\');
+                quoteIndex = indexOf(v, quote);
+                break;
+            }
+
+            offset += 8;
+            stroff += 8;
+        }
+
+        String str;
+        if (slashIndex == -1 && quoteIndex != -1 && ascii) {
+            offset += quoteIndex;
+            str = new String(bytes, start, offset - start, ISO_8859_1);
+            offset++;
+        } else {
+            byte[] inputCodes = quote == '"' ? INPUT_CODES : INPUT_CODES_SINGLE_QUOTE;
+
+            int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+            cacheItem = CACHE_ITEMS[cacheIndex];
+            char[] strBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
+            if (strBuf == null) {
+                strBuf = new char[512];
+            }
+
+            for (int i = 0; i < stroff; ++i) {
+                strBuf[i] = (char) bytes[start + i];
+            }
+
+            LOOP:
+            while (offset < end) {
                 while (offset < upperBound) {
                     long v = getLongLE(bytes, offset);
-                    if ((v & 0x8080808080808080L) != 0 || JSONReaderUTF8.containsSlashOrQuote(v, byteVectorQuote)) {
+                    if ((v & 0x8080808080808080L) != 0 || containsSlashOrQuote(v, quoteV)) {
                         break;
+                    }
+                    if (stroff + 7 >= strBuf.length) {
+                        strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 8, strBuf.length));
+                    }
+
+                    for (int i = 0; i < 8; ++i) {
+                        strBuf[stroff + i] = (char) (byte) v;
+                        v >>>= 8;
                     }
 
                     offset += 8;
-                    i += 8;
+                    stroff += 8;
                 }
-                // ...
 
-                for (; ; ++i) {
-                    if (offset >= end) {
-                        throw new JSONException("invalid escape character EOI");
-                    }
+                if (stroff == strBuf.length) {
+                    strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 1, strBuf.length));
+                }
 
-                    int c = bytes[offset];
-                    if (c == '\\') {
-                        valueEscape = true;
-                        c = bytes[offset + 1];
-                        offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
-                        if (ascii && (c == 'u' || c == 'x')) {
-                            ascii = false;
-                        }
-                        continue;
-                    }
-
-                    if (c >= 0) {
+                int c = bytes[offset++];
+                int code = inputCodes[c & 0xFF];
+                switch (code) {
+                    case INPUT_CODE_ASCII_NORMAL:
+                        strBuf[stroff] = (char) c;
+                        break;
+                    case INPUT_CODE_ASCII_ESCAPE:
                         if (c == quote) {
-                            valueLength = i;
-                            break;
-                        }
-                        offset++;
-                    } else {
-                        ascii = false;
-                        switch ((c & 0xFF) >> 4) {
-                            case 12:
-                            case 13: {
-                                /* 110x xxxx   10xx xxxx*/
+                            break LOOP;
+                        } else {
+                            c = bytes[offset++];
+                            if (c == 'u') {
+                                c = (char) hexDigit4(bytes, check3(offset, end));
+                                offset += 4;
+                            } else if (c == 'x') {
+                                c = char2(bytes[offset], bytes[offset + 1]);
                                 offset += 2;
-                                break;
+                            } else {
+                                c = char1(c);
                             }
-                            case 14: {
-                                offset += 3;
-                                break;
+                            if (stroff + 2 >= strBuf.length) {
+                                strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 3, strBuf.length));
                             }
-                            default: {
-                                /* 10xx xxxx,  1111 xxxx */
-                                if ((c >> 3) == -2) {
-                                    offset += 4;
-                                    i++;
-                                    break;
-                                }
-
-                                throw new JSONException("malformed input around byte " + offset);
-                            }
+                            strBuf[stroff] = (char) c;
                         }
-                    }
-                }
-            }
-
-            String str;
-            if (valueEscape) {
-                if (ascii && STRING_CREATOR_JDK11 != null) {
-                    byte[] chars = new byte[valueLength];
-                    offset = start;
-                    for (int i = 0; ; ++i) {
-                        byte ch = bytes[offset];
-                        if (ch == '\\') {
-                            ch = bytes[++offset];
-                            switch (ch) {
-                                case '\\':
-                                case '"':
-                                    break;
-                                case 'b':
-                                    ch = '\b';
-                                    break;
-                                case 't':
-                                    ch = '\t';
-                                    break;
-                                case 'n':
-                                    ch = '\n';
-                                    break;
-                                case 'f':
-                                    ch = '\f';
-                                    break;
-                                case 'r':
-                                    ch = '\r';
-                                    break;
-                                default:
-                                    ch = (byte) char1(ch);
-                                    break;
-                            }
-                        }
-                        else if (ch == quote) {
-                            break;
-                        }
-                        chars[i] = ch;
+                        break;
+                    case INPUT_CODE_UTF8_2:
+                        strBuf[stroff] = (char) (((c & 0x1F) << 6) | (bytes[offset] & 0x3F));
                         offset++;
-                    }
-
-                    str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
-                } else {
-                    char[] chars = new char[valueLength];
-                    offset = start;
-                    for (int i = 0; ; ++i) {
-                        int ch = bytes[offset];
-                        if (ch == '\\') {
-                            ch = bytes[++offset];
-                            switch (ch) {
-                                case 'u': {
-                                    ch = hexDigit4(bytes, check3(offset + 1, end));
-                                    offset += 4;
-                                    break;
-                                }
-                                case 'x': {
-                                    ch = char2(bytes[offset + 1], bytes[offset + 2]);
-                                    offset += 2;
-                                    break;
-                                }
-                                case '\\':
-                                case '"':
-                                    break;
-                                case 'b':
-                                    ch = '\b';
-                                    break;
-                                case 't':
-                                    ch = '\t';
-                                    break;
-                                case 'n':
-                                    ch = '\n';
-                                    break;
-                                case 'f':
-                                    ch = '\f';
-                                    break;
-                                case 'r':
-                                    ch = '\r';
-                                    break;
-                                default:
-                                    ch = char1(ch);
-                                    break;
-                            }
-                            chars[i] = (char) ch;
-                            offset++;
+                        break;
+                    case INPUT_CODE_UTF8_3:
+                        strBuf[stroff] = (char) (((c & 0x0F) << 12) | ((bytes[offset] & 0x3F) << 6) | (bytes[offset + 1] & 0x3F));
+                        offset += 2;
+                        break;
+                    case INPUT_CODE_UTF8_4:
+                        if (stroff + 1 >= strBuf.length) {
+                            strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 2, strBuf.length));
                         }
-                        else if (ch == quote) {
-                            break;
-                        }
-                        else {
-                            if (ch >= 0) {
-                                chars[i] = (char) ch;
-                                offset++;
-                            }
-                            else {
-                                switch ((ch & 0xFF) >> 4) {
-                                    case 12:
-                                    case 13: {
-                                        /* 110x xxxx   10xx xxxx*/
-                                        chars[i] = (char) (((ch & 0x1F) << 6) | (bytes[offset + 1] & 0x3F));
-                                        offset += 2;
-                                        break;
-                                    }
-                                    case 14: {
-                                        chars[i] = (char)
-                                                (((ch & 0x0F) << 12) |
-                                                        ((bytes[offset + 1] & 0x3F) << 6) |
-                                                        ((bytes[offset + 2] & 0x3F) << 0));
-                                        offset += 3;
-                                        break;
-                                    }
-                                    default: {
-                                        /* 10xx xxxx,  1111 xxxx */
-                                        char2_utf8(bytes, offset, ch, chars, i);
-                                        offset += 4;
-                                        i++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    str = new String(chars);
+                        char2_utf8(bytes, offset - 1, c, strBuf, stroff);
+                        offset += 3;
+                        stroff += 1;
+                        break;
+                    default:
+                        throw new JSONException(info("unsupported char ", c));
                 }
-            } else if (ascii) {
-                int strlen = offset - start;
-                if (strlen == 1) {
-                    str = TypeUtils.toString((char) (bytes[start] & 0xff));
-                } else if (strlen == 2) {
-                    str = TypeUtils.toString(
-                            (char) (bytes[start] & 0xff),
-                            (char) (bytes[start + 1] & 0xff)
-                    );
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    str = STRING_CREATOR_JDK11.apply(
-                            Arrays.copyOfRange(this.bytes, this.offset, offset),
-                            LATIN1);
-                } else {
-                    str = new String(bytes, start, offset - start, StandardCharsets.US_ASCII);
-                }
-            } else {
-                str = new String(bytes, start, offset - start, StandardCharsets.UTF_8);
+                stroff++;
             }
 
-            long features = context.features;
-            if ((features & (MASK_TRIM_STRING | MASK_EMPTY_STRING_AS_NULL)) != 0) {
-                str = stringValue(str, features);
-            }
+            str = new String(strBuf, 0, stroff);
+            CHARS_UPDATER.lazySet(cacheItem, strBuf);
+        }
 
-            int ch = ++offset == end ? EOI : bytes[offset++];
+        long features = context.features;
+        if ((features & (MASK_TRIM_STRING | MASK_EMPTY_STRING_AS_NULL)) != 0) {
+            str = stringValue(str, features);
+        }
+
+        int ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (comma = ch == ',') {
+            ch = offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
                 ch = offset == end ? EOI : bytes[offset++];
             }
-
-            if (comma = ch == ',') {
-                ch = offset == end ? EOI : bytes[offset++];
-                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                    ch = offset == end ? EOI : bytes[offset++];
-                }
-            }
-
-            this.ch = (char) ch;
-            this.offset = offset;
-            return str;
-        } else if (quote == 'n') {
-            readNull();
-            return null;
         }
 
-        return readStringNotMatch();
+        this.ch = (char) ch;
+        this.offset = offset;
+        return str;
     }
 
     @Override
@@ -7491,6 +7443,10 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
         return decoded;
+    }
+
+    public final String info(String message, int c) {
+        return info(message).concat(Integer.toString(c));
     }
 
     @Override

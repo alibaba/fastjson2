@@ -13,7 +13,7 @@ public class ParseUTF8BytesWithEscapeCharsTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("ParseUTF8BytesWithEscapeChars-fastjson2 : " + millis);
-            // 4291 3479
+            // 4291 3479 3369 3202 2429
         }
     }
 
@@ -42,8 +42,8 @@ public class ParseUTF8BytesWithEscapeCharsTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        fastjson2_str();
+        fastjson2();
+//        fastjson2_str();
 //        jackson();
     }
 }
