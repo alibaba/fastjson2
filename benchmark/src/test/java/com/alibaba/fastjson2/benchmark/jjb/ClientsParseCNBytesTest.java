@@ -13,6 +13,7 @@ public class ClientsParseCNBytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
+            // zulu8.7.0.23 : 2806(base) 2475
             // zulu21.32.17 : 2100(base) 2149
         }
     }
