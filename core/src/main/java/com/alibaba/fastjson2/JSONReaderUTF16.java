@@ -3095,7 +3095,7 @@ final class JSONReaderUTF16
                         c = (char) hexDigit4(chars, check3(offset + 1, end));
                         offset += 4;
                     } else if (c == 'x') {
-                        c = char2(chars[offset + 1], chars[offset + 2]);
+                        c = char2(chars, offset, end);
                         offset += 2;
                     } else {
                         c = char1(c);
@@ -3132,6 +3132,17 @@ final class JSONReaderUTF16
         this.ch = (char) ch;
         this.offset = offset;
         return str;
+    }
+
+    private char char2(char[] chars, int offset, int end) {
+        if (offset + 1 >= end) {
+            throw error("invalid escape character EOI");
+        }
+        try {
+            return char2(chars[offset], chars[offset + 1]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw error("invalid escape character EOI");
+        }
     }
 
     @Override
