@@ -79,7 +79,6 @@ class JSONReaderUTF8
     protected final InputStream in;
 
     protected CacheItem cacheItem;
-    protected char[] charBuf;
 
     JSONReaderUTF8(Context ctx, InputStream is) {
         super(ctx, false, true);
@@ -3009,22 +3008,13 @@ class JSONReaderUTF8
             return new String(bytes, offset, length, ISO_8859_1);
         }
 
-        char[] charBuf = this.charBuf;
-        if (charBuf == null) {
-            if (cacheItem == null) {
-                int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-                cacheItem = CACHE_ITEMS[cacheIndex];
-            }
-
-            this.charBuf = charBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
-        }
-        if (charBuf == null || charBuf.length < length) {
-            this.charBuf = charBuf = new char[length];
-        }
+        char[] charBuf = allocateCharBuf(length);
         for (int i = 0; i < length; i++) {
             charBuf[i] = (char) (bytes[offset + i] & 0xFF);
         }
-        return new String(charBuf, 0, length);
+        String str = new String(charBuf, 0, length);
+        CHARS_UPDATER.lazySet(cacheItem, charBuf);
+        return str;
     }
 
     @Override
@@ -5107,10 +5097,13 @@ class JSONReaderUTF8
     }
 
     private char[] allocateCharBuf(int initCapacity) {
-        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-        cacheItem = CACHE_ITEMS[cacheIndex];
+        CacheItem cacheItem = this.cacheItem;
+        if (cacheItem == null) {
+            int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+            this.cacheItem = cacheItem = CACHE_ITEMS[cacheIndex];
+        }
         char[] strBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
-        if (strBuf == null) {
+        if (strBuf == null || strBuf.length < initCapacity) {
             strBuf = new char[initCapacity];
         }
         return strBuf;
@@ -7489,10 +7482,6 @@ class JSONReaderUTF8
         if (cacheItem != null) {
             if (bytes.length < CACHE_THRESHOLD) {
                 BYTES_UPDATER.lazySet(cacheItem, bytes);
-            }
-
-            if (charBuf != null && charBuf.length < CACHE_THRESHOLD) {
-                CHARS_UPDATER.lazySet(cacheItem, charBuf);
             }
         }
 
