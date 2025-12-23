@@ -4995,7 +4995,7 @@ class JSONReaderUTF8
         }
 
         String str;
-        if (slashIndex == -1 && quoteIndex != -1 && ascii) {
+        if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1 && ascii) {
             offset += quoteIndex;
             str = new String(bytes, start, offset - start, ISO_8859_1);
             offset++;

@@ -3060,7 +3060,7 @@ final class JSONReaderUTF16
         }
 
         String str;
-        if (slashIndex == -1 && quoteIndex != -1) {
+        if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1) {
             offset += quoteIndex;
             str = new String(chars, start, offset - start);
         } else {
