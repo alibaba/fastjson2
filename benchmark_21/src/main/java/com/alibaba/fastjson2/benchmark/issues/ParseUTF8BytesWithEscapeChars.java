@@ -39,13 +39,9 @@ public class ParseUTF8BytesWithEscapeChars {
 
     @Data
     public static class ApiLog {
-
         private Long timestamp;
-
         private String reqBody;
-
         private String rspBody;
-
     }
 
 
