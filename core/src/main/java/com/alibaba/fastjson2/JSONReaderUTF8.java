@@ -4993,7 +4993,12 @@ class JSONReaderUTF8
         String str;
         if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1 && ascii) {
             offset += quoteIndex;
-            str = new String(bytes, start, offset - start, ISO_8859_1);
+            if (STRING_CREATOR_JDK11 != null) {
+                byte[] strValue = Arrays.copyOfRange(bytes, start, offset);
+                str = STRING_CREATOR_JDK11.apply(strValue, LATIN1);
+            } else {
+                str = new String(bytes, start, offset - start, ISO_8859_1);
+            }
             offset++;
         } else {
             byte[] inputCodes = quote == '"' ? INPUT_CODES : INPUT_CODES_SINGLE_QUOTE;
