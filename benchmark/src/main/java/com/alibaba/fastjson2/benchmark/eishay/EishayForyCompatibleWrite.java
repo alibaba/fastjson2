@@ -3,8 +3,8 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import org.apache.commons.io.IOUtils;
-import org.apache.fury.Fury;
-import org.apache.fury.ThreadSafeFury;
+import org.apache.fory.Fory;
+import org.apache.fory.ThreadSafeFory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -16,7 +16,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class EishayFuryCompatibleWrite {
+public class EishayForyCompatibleWrite {
     static MediaContent mc;
 
     static JSONWriter.Feature[] features = {
@@ -32,16 +32,16 @@ public class EishayFuryCompatibleWrite {
             JSONFactory.getDefaultObjectWriterProvider(), features
     );
 
-    static ThreadSafeFury furyCompatible = Fury.builder()
-            .withLanguage(org.apache.fury.config.Language.JAVA)
+    static ThreadSafeFory foryCompatible = Fory.builder()
+            .withLanguage(org.apache.fory.config.Language.JAVA)
             .withRefTracking(true)
             .requireClassRegistration(false)
-            .withCompatibleMode(org.apache.fury.config.CompatibleMode.COMPATIBLE)
-            .buildThreadSafeFury();
+            .withCompatibleMode(org.apache.fory.config.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFory();
 
     static {
         try {
-            InputStream is = EishayFuryCompatibleWrite.class.getClassLoader().getResourceAsStream("data/eishay.json");
+            InputStream is = EishayForyCompatibleWrite.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
@@ -61,19 +61,19 @@ public class EishayFuryCompatibleWrite {
     }
 
     @Benchmark
-    public void fury(Blackhole bh) {
-        byte[] bytes = furyCompatible.serialize(mc);
+    public void fory(Blackhole bh) {
+        byte[] bytes = foryCompatible.serialize(mc);
         bh.consume(bytes);
     }
 
-    public int furySize() {
-        return furyCompatible.serialize(mc).length;
+    public int forySize() {
+        return foryCompatible.serialize(mc).length;
 //        return 0;
     }
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(EishayFuryCompatibleWrite.class.getName())
+                .include(EishayForyCompatibleWrite.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

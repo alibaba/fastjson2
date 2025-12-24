@@ -7,10 +7,10 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-public class EishayFury {
+public class EishayFory {
     public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
-                .include(EishayFury.class.getName())
+                .include(EishayFory.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

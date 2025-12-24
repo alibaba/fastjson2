@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipInputStream;
 
-public class EishayFuryParseNoneCache {
+public class EishayForyParseNoneCache {
     static final int COUNT = 10_000;
     static final Class[] classes = new Class[COUNT];
 
@@ -33,23 +33,23 @@ public class EishayFuryParseNoneCache {
     static DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
 
     static byte[][] fastjson2JSONBBytes = new byte[COUNT][];
-    static byte[][] furyBytes = new byte[COUNT][];
+    static byte[][] foryBytes = new byte[COUNT][];
     static int index;
 
-    static org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
-            .withLanguage(org.apache.fury.config.Language.JAVA)
+    static org.apache.fory.ThreadSafeFory fory = org.apache.fory.Fory.builder()
+            .withLanguage(org.apache.fory.config.Language.JAVA)
             .withRefTracking(true)
             .withClassLoader(classLoader)
-            .buildThreadSafeFury();
+            .buildThreadSafeFory();
 
     static {
-        String classZipDataFile = "data/EishayFuryParseNoneCache_classes.bin.zip";
-        String jsonbZipDataFile = "data/EishayFuryParseNoneCache_data_fastjson.bin.zip";
-        String furyZipDataFile = "data/EishayFuryParseNoneCache_data_fury.bin.zip";
+        String classZipDataFile = "data/EishayForyParseNoneCache_classes.bin.zip";
+        String jsonbZipDataFile = "data/EishayForyParseNoneCache_data_fastjson.bin.zip";
+        String foryZipDataFile = "data/EishayForyParseNoneCache_data_fory.bin.zip";
 
         try {
             {
-                InputStream fis = EishayFuryParseNoneCache.class.getClassLoader().getResourceAsStream(classZipDataFile);
+                InputStream fis = EishayForyParseNoneCache.class.getClassLoader().getResourceAsStream(classZipDataFile);
                 ZipInputStream zipIn = new ZipInputStream(fis);
                 zipIn.getNextEntry();
 
@@ -79,7 +79,7 @@ public class EishayFuryParseNoneCache {
             }
 
             {
-                InputStream fis = EishayFuryParseNoneCache.class.getClassLoader().getResourceAsStream(jsonbZipDataFile);
+                InputStream fis = EishayForyParseNoneCache.class.getClassLoader().getResourceAsStream(jsonbZipDataFile);
                 ZipInputStream zipIn = new ZipInputStream(fis);
                 zipIn.getNextEntry();
 
@@ -90,12 +90,12 @@ public class EishayFuryParseNoneCache {
                 IOUtils.close(fis);
             }
             {
-                InputStream fis = EishayFuryParseNoneCache.class.getClassLoader().getResourceAsStream(furyZipDataFile);
+                InputStream fis = EishayForyParseNoneCache.class.getClassLoader().getResourceAsStream(foryZipDataFile);
                 ZipInputStream zipIn = new ZipInputStream(fis);
                 zipIn.getNextEntry();
 
                 ObjectInputStream is = new ObjectInputStream(zipIn);
-                furyBytes = (byte[][]) is.readObject();
+                foryBytes = (byte[][]) is.readObject();
                 IOUtils.close(zipIn);
                 IOUtils.close(is);
                 IOUtils.close(fis);
@@ -115,15 +115,15 @@ public class EishayFuryParseNoneCache {
     }
 
     @Benchmark
-    public void fury(Blackhole bh) {
+    public void fory(Blackhole bh) {
         Thread.currentThread().setContextClassLoader(classLoader);
-        byte[] bytes = furyBytes[index++];
-        bh.consume(fury.deserialize(bytes));
+        byte[] bytes = foryBytes[index++];
+        bh.consume(fory.deserialize(bytes));
     }
 
     public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
-                .include(EishayFuryParseNoneCache.class.getName())
+                .include(EishayForyParseNoneCache.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(1)

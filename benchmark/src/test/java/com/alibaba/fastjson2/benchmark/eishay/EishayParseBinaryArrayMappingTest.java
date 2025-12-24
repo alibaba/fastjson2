@@ -56,8 +56,8 @@ public class EishayParseBinaryArrayMappingTest {
         }
     }
 
-    public static void fury() throws Exception {
-        System.out.println("fury size " + EishayParseBinaryArrayMapping.furyBytes.length); // 235
+    public static void fory() throws Exception {
+        System.out.println("fory size " + EishayParseBinaryArrayMapping.foryBytes.length); // 235
         System.out.println();
 
         for (int j = 0; j < 5; j++) {
@@ -75,7 +75,7 @@ public class EishayParseBinaryArrayMappingTest {
 
     public static void main(String[] args) throws Exception {
         jsonb();
-//        fury();
+//        fory();
 //        kryo();
 //        protobuf();
 //        fastjson2UTF8Bytes();

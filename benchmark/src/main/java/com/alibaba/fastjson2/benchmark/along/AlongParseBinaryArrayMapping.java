@@ -8,8 +8,8 @@ import com.alibaba.fastjson2.benchmark.along.vo.SkillCategory;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import org.apache.commons.io.IOUtils;
-import org.apache.fury.Fury;
-import org.apache.fury.config.Language;
+import org.apache.fory.Fory;
+import org.apache.fory.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -27,11 +27,11 @@ public class AlongParseBinaryArrayMapping {
     static final ObjectReaderProvider providerFeatures = new ObjectReaderProvider();
     static final JSONReader.Context contextFeatures;
 
-    static Fury fury;
+    static Fory fory;
 
     static SkillFire_S2C_Msg object;
     static byte[] fastjson2JSONBBytes;
-    static byte[] furyBytes;
+    static byte[] foryBytes;
 
     static {
         providerFeatures.setDisableAutoType(true);
@@ -43,18 +43,18 @@ public class AlongParseBinaryArrayMapping {
             String str = IOUtils.toString(is, "UTF-8");
             object = JSONReader.of(str, contextFeatures).read(SkillFire_S2C_Msg.class);
 
-            fury = Fury.builder().withLanguage(Language.JAVA)
+            fory = Fory.builder().withLanguage(Language.JAVA)
                     .withRefTracking(false)
                     .requireClassRegistration(false)
                     .withNumberCompressed(true)
                     .build();
 
-            fury.register(SkillCategory.class);
-            fury.register(SkillFire_S2C_Msg.class);
-            fury.register(HarmDTO.class);
+            fory.register(SkillCategory.class);
+            fory.register(SkillFire_S2C_Msg.class);
+            fory.register(HarmDTO.class);
 
             fastjson2JSONBBytes = JSONB.toBytes(object, JSONWriter.Feature.BeanToArray);
-            furyBytes = fury.serializeJavaObject(object);
+            foryBytes = fory.serializeJavaObject(object);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -71,8 +71,8 @@ public class AlongParseBinaryArrayMapping {
     }
 
     @Benchmark
-    public void fury(Blackhole bh) {
-        bh.consume(fury.deserializeJavaObject(furyBytes, SkillFire_S2C_Msg.class));
+    public void fory(Blackhole bh) {
+        bh.consume(fory.deserializeJavaObject(foryBytes, SkillFire_S2C_Msg.class));
     }
 
     public static void main(String[] args) throws Exception {

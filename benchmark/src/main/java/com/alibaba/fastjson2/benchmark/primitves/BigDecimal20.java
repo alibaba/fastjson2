@@ -35,13 +35,13 @@ public class BigDecimal20 {
 
     static byte[] hessianBytes;
 
-//    static org.apache.fury.ThreadSafeFury furyCompatible = org.apache.fury.Fury.builder()
-//            .withLanguage(org.apache.fury.Language.JAVA)
+//    static org.apache.fory.ThreadSafeFory foryCompatible = org.apache.fory.Fory.builder()
+//            .withLanguage(org.apache.fory.Language.JAVA)
 //            .withReferenceTracking(true)
 //            .disableSecureMode()
-//            .withCompatibleMode(org.apache.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
-//    static byte[] furyCompatibleBytes;
+//            .withCompatibleMode(org.apache.fory.serializers.CompatibleMode.COMPATIBLE)
+//            .buildThreadSafeFory();
+//    static byte[] foryCompatibleBytes;
 
     public BigDecimal20() {
         try {
@@ -66,7 +66,7 @@ public class BigDecimal20 {
                 hessianBytes = byteArrayOutputStream.toByteArray();
             }
 
-//            furyCompatibleBytes = furyCompatible.serialize(bean);
+//            foryCompatibleBytes = foryCompatible.serialize(bean);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -108,8 +108,8 @@ public class BigDecimal20 {
     }
 
 //    @Benchmark
-    public void fury(Blackhole bh) {
-//        Object object = furyCompatible.deserialize(furyCompatibleBytes);
+    public void fory(Blackhole bh) {
+//        Object object = foryCompatible.deserialize(foryCompatibleBytes);
 //        bh.consume(object);
     }
 

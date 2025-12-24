@@ -30,7 +30,7 @@ public class BigInteger20 {
             String str = IOUtils.toString(is, "UTF-8");
             bean = JSON.parseObject(str, BigInteger20Field.class);
 
-//            furyCompatibleBytes = furyCompatible.serialize(bean);
+//            foryCompatibleBytes = foryCompatible.serialize(bean);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

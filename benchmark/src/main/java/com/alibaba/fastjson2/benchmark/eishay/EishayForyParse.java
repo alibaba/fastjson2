@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import org.apache.commons.io.IOUtils;
@@ -12,42 +11,42 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.*;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class EishayFuryCompatibleParse {
+public class EishayForyParse {
     static MediaContent mc;
     static JSONReader.Feature[] features = {
             JSONReader.Feature.SupportAutoType,
             JSONReader.Feature.IgnoreNoneSerializable,
             JSONReader.Feature.UseDefaultConstructorAsPossible,
             JSONReader.Feature.UseNativeObject,
-            JSONReader.Feature.FieldBased
+            JSONReader.Feature.FieldBased,
+            JSONReader.Feature.SupportArrayToBean
     };
 
-    static JSONReader.Context context = new JSONReader.Context(
-            JSONFactory.getDefaultObjectReaderProvider(), features
-    );
-
     static byte[] jsonbBytes;
-    static byte[] furyCompatibleBytes;
+    static byte[] foryBytes;
 
-    static org.apache.fury.ThreadSafeFury furyCompatible = org.apache.fury.Fury.builder()
-            .withLanguage(org.apache.fury.config.Language.JAVA)
-            .withRefTracking(true)
+    static org.apache.fory.ThreadSafeFory fory = org.apache.fory.Fory.builder()
+            .withLanguage(org.apache.fory.config.Language.JAVA)
             .requireClassRegistration(false)
-            .withCompatibleMode(org.apache.fury.config.CompatibleMode.COMPATIBLE)
-            .buildThreadSafeFury();
+            .withRefTracking(true)
+            .buildThreadSafeFory();
 
     static {
         try {
-            InputStream is = EishayFuryCompatibleParse.class.getClassLoader().getResourceAsStream("data/eishay.json");
+            InputStream is = EishayForyParse.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            jsonbBytes = JSONB.toBytes(mc, EishayFuryCompatibleWrite.features);
-            furyCompatibleBytes = furyCompatible.serialize(mc);
+            jsonbBytes = JSONB.toBytes(
+                    mc,
+                    EishayForyWrite.features
+            );
+
+            foryBytes = fory.serializeJavaObject(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -55,19 +54,19 @@ public class EishayFuryCompatibleParse {
 
     @Benchmark
     public void jsonb(Blackhole bh) {
-        Object object = JSONB.parseObject(jsonbBytes, Object.class, context);
+        Object object = JSONB.parseObject(jsonbBytes, Object.class, features);
         bh.consume(object);
     }
 
     @Benchmark
-    public void fury(Blackhole bh) {
-        Object object = furyCompatible.deserialize(furyCompatibleBytes);
+    public void fory(Blackhole bh) {
+        Object object = fory.deserialize(foryBytes);
         bh.consume(object);
     }
 
     public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
-                .include(EishayFuryCompatibleParse.class.getName())
+                .include(EishayForyParse.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

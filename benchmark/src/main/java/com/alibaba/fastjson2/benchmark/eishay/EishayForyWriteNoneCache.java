@@ -18,15 +18,15 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class EishayFuryWriteNoneCache {
+public class EishayForyWriteNoneCache {
     static final Class[] classes = new Class[10_000];
     static final Object[] objects = new Object[classes.length];
     static int index;
 
-    static org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
-            .withLanguage(org.apache.fury.config.Language.JAVA)
+    static org.apache.fory.ThreadSafeFory fory = org.apache.fory.Fory.builder()
+            .withLanguage(org.apache.fory.config.Language.JAVA)
             .withRefTracking(true)
-            .buildThreadSafeFury();
+            .buildThreadSafeFory();
 
     static JSONWriter.Feature[] features = {
             JSONWriter.Feature.WriteClassName,
@@ -44,7 +44,7 @@ public class EishayFuryWriteNoneCache {
 
     static {
         try {
-            InputStream is = EishayFuryWriteNoneCache.class.getClassLoader().getResourceAsStream("data/eishay.json");
+            InputStream is = EishayForyWriteNoneCache.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
 
             DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
@@ -68,15 +68,15 @@ public class EishayFuryWriteNoneCache {
     }
 
     @Benchmark
-    public void fury(Blackhole bh) {
+    public void fory(Blackhole bh) {
         Object object = objects[(index++) % objects.length];
-        byte[] bytes = fury.serialize(object);
+        byte[] bytes = fory.serialize(object);
         bh.consume(bytes);
     }
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(EishayFuryWriteNoneCache.class.getName())
+                .include(EishayForyWriteNoneCache.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

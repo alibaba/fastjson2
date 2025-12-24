@@ -17,14 +17,14 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class EishayFuryWrite {
+public class EishayForyWrite {
     static MediaContent object;
 
-    static org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
-            .withLanguage(org.apache.fury.config.Language.JAVA)
+    static org.apache.fory.ThreadSafeFory fory = org.apache.fory.Fory.builder()
+            .withLanguage(org.apache.fory.config.Language.JAVA)
             .requireClassRegistration(false)
             .withRefTracking(true)
-            .buildThreadSafeFury();
+            .buildThreadSafeFory();
 
     static JSONWriter.Feature[] features = {
             JSONWriter.Feature.WriteClassName,
@@ -42,7 +42,7 @@ public class EishayFuryWrite {
 
     static {
         try {
-            InputStream is = EishayFuryWrite.class.getClassLoader().getResourceAsStream("data/eishay.json");
+            InputStream is = EishayForyWrite.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
             object = JSONReader.of(str)
                     .read(MediaContent.class);
@@ -58,14 +58,14 @@ public class EishayFuryWrite {
     }
 
     @Benchmark
-    public void fury(Blackhole bh) {
-        byte[] bytes = fury.serialize(object);
+    public void fory(Blackhole bh) {
+        byte[] bytes = fory.serialize(object);
         bh.consume(bytes);
     }
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(EishayFuryWrite.class.getName())
+                .include(EishayForyWrite.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

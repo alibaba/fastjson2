@@ -16,8 +16,8 @@ import java.util.LinkedHashMap;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class EishayFuryParseNoneCacheTest {
-    static final EishayFuryParseNoneCache benchmark = new EishayFuryParseNoneCache();
+public class EishayForyParseNoneCacheTest {
+    static final EishayForyParseNoneCache benchmark = new EishayForyParseNoneCache();
     static final int COUNT = 1000;
 
     static JSONWriter.Feature[] writerFeatures = {
@@ -44,17 +44,17 @@ public class EishayFuryParseNoneCacheTest {
         EishayClassGen gen = new EishayClassGen();
         byte[][] bytes = gen.genFastjsonJSONBBytes(50_000, writerFeatures);
         try (ObjectOutputStream out = new ObjectOutputStream(
-                new FileOutputStream("EishayFuryParseNoneCache_data_fastjson.bin"))
+                new FileOutputStream("EishayForyParseNoneCache_data_fastjson.bin"))
         ) {
             out.writeObject(bytes);
         }
     }
 
-    public static void genFuryDataFiles() throws Exception {
+    public static void genForyDataFiles() throws Exception {
         EishayClassGen gen = new EishayClassGen();
-        byte[][] bytes = gen.genFuryBytes(20_000);
+        byte[][] bytes = gen.genForyBytes(20_000);
         try (ObjectOutputStream out = new ObjectOutputStream(
-                new FileOutputStream("EishayFuryParseNoneCache_data_fury.bin"))
+                new FileOutputStream("EishayForyParseNoneCache_data_fory.bin"))
         ) {
             out.writeObject(bytes);
         }
@@ -64,7 +64,7 @@ public class EishayFuryParseNoneCacheTest {
         EishayClassGen gen = new EishayClassGen();
         LinkedHashMap<String, byte[]> codeMap = gen.genCodes(50_000);
         try (ObjectOutputStream out = new ObjectOutputStream(
-                new FileOutputStream("EishayFuryParseNoneCache_classes.bin"))
+                new FileOutputStream("EishayForyParseNoneCache_classes.bin"))
         ) {
             out.writeObject(codeMap);
         }
@@ -75,7 +75,7 @@ public class EishayFuryParseNoneCacheTest {
         // com.alibaba.fastjson2.benchmark.eishay.vo
         String packageName = "com/alibaba/fastjson2/benchmark/eishay0";
 
-        try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
+        try (InputStream is = EishayForyWriteNoneCache.class.getClassLoader()
                 .getResourceAsStream("data/eishay.json")
         ) {
             String str = IOUtils.toString(is, "UTF-8");
@@ -105,21 +105,21 @@ public class EishayFuryParseNoneCacheTest {
                 benchmark.fastjson2JSONB(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryParseNoneCache-fastjson2_jsonb millis : " + millis);
+            System.out.println("EishayForyParseNoneCache-fastjson2_jsonb millis : " + millis);
             // zulu8.62.0.19 : 1095
             // zulu11.52.13 : 916
             // zulu17.38.21 : 845
         }
     }
 
-    public static void fury() throws Exception {
+    public static void fory() throws Exception {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < COUNT; ++i) {
-                benchmark.fury(BH);
+                benchmark.fory(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryParseNoneCache-fastjson2_jsonb millis : " + millis);
+            System.out.println("EishayForyParseNoneCache-fastjson2_jsonb millis : " + millis);
             // zulu8.62.0.19 : 16705
             // zulu11.52.13 : 12418
             // zulu17.38.21 : 10889
@@ -128,9 +128,9 @@ public class EishayFuryParseNoneCacheTest {
 
     public static void main(String[] args) throws Exception {
         fastjson2JSONB();
-//        fury();
+//        fory();
 //        genJSONBDataFiles();
-//        genFuryDataFiles();
+//        genForyDataFiles();
 //        genCodes();
 //        testSingle();
     }

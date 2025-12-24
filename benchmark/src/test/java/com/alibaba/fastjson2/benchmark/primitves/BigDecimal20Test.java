@@ -73,14 +73,14 @@ public class BigDecimal20Test {
         }
     }
 
-    public static void fury() {
+    public static void fory() {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.fury(BH);
+                benchmark.fory(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("BigDecimal20-fury : " + millis);
+            System.out.println("BigDecimal20-fory : " + millis);
 
             // zulu8.62.0.19 : 480
             // zulu11.52.13 :
@@ -120,7 +120,7 @@ public class BigDecimal20Test {
 //        fastjson2();
         jsonb();
 //        hessian();
-//        fury();
+//        fory();
 //        jackson();
 //        wastjson();
 //        kryo();

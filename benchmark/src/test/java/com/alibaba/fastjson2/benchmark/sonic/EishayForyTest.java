@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 
 import java.util.List;
 
-public class EishayFuryTest {
+public class EishayForyTest {
     public static void main(String[] args) throws Exception {
         String str = "{\"images\": [{\n" +
                 "      \"height\":768,\n" +
@@ -39,33 +39,33 @@ public class EishayFuryTest {
 
         MediaContent mediaContent = JSON.parseObject(str, MediaContent.class);
 //
-//        org.apache.fury.ThreadSafeFury furyCompatible = org.apache.fury.Fury.builder()
-//                .withLanguage(org.apache.fury.Language.JAVA)
+//        org.apache.fory.ThreadSafeFory foryCompatible = org.apache.fory.Fory.builder()
+//                .withLanguage(org.apache.fory.Language.JAVA)
 //                .withReferenceTracking(true)
 //                .disableSecureMode()
-//                .withCompatibleMode(org.apache.fury.serializers.CompatibleMode.COMPATIBLE)
-//                .buildThreadSafeFury();
+//                .withCompatibleMode(org.apache.fory.serializers.CompatibleMode.COMPATIBLE)
+//                .buildThreadSafeFory();
 //
-//        byte[] furyBytes = furyCompatible.serialize(mediaContent);
-//        System.out.println("fury bytes size : " + furyBytes.length);
+//        byte[] foryBytes = foryCompatible.serialize(mediaContent);
+//        System.out.println("fory bytes size : " + foryBytes.length);
 //
 //        int LOOP_COUNT = 1000000;
 //        for (int j = 0; j < 5; ++j) {
 //            long start = System.currentTimeMillis();
 //            for (int i = 0; i < LOOP_COUNT; i++) {
-//                furyCompatible.serialize(mediaContent);
+//                foryCompatible.serialize(mediaContent);
 //            }
 //            long millis = System.currentTimeMillis() - start;
-//            System.out.println("fastjson2 eishay fury-serialize time : " + millis);
+//            System.out.println("fastjson2 eishay fory-serialize time : " + millis);
 //        }
 //
 //        for (int j = 0; j < 5; ++j) {
 //            long start = System.currentTimeMillis();
 //            for (int i = 0; i < LOOP_COUNT; i++) {
-//                furyCompatible.deserialize(furyBytes);
+//                foryCompatible.deserialize(foryBytes);
 //            }
 //            long millis = System.currentTimeMillis() - start;
-//            System.out.println("fastjson2 eishay fury-deserialize time : " + millis);
+//            System.out.println("fastjson2 eishay fory-deserialize time : " + millis);
 //        }
     }
 
