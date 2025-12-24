@@ -355,20 +355,14 @@ public class IOUtilsTest {
         char[] chars = "1234ABcd".toCharArray();
         assertEquals("1234", Integer.toHexString(IOUtils.hexDigit4(chars, 0)));
         assertEquals("34ab", Integer.toHexString(IOUtils.hexDigit4(chars, 2)));
-    }
 
-    static int hexDigit4(byte[] bytes, int offset) {
-        long v = Long.reverseBytes(UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
-        v = (v & 0x0F0F0F0F_0F0F0F0FL) + ((((v & 0x40404040_40404040L) >> 2) | ((v & 0x40404040_40404040L) << 1)) >>> 4);
-        v = ((v >>> 28) & 0xF0000000L)
-                + ((v >>> 24) & 0xF000000)
-                + ((v >>> 20) & 0xF00000)
-                + ((v >>> 16) & 0xF0000)
-                + ((v >>> 12) & 0xF000)
-                + ((v >>> 8) & 0xF00)
-                + ((v >>> 4) & 0xF0)
-                + (v & 0xF);
-        return (int) v;
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".getBytes(StandardCharsets.US_ASCII), 0, 3));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".getBytes(StandardCharsets.US_ASCII), 0, 4));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("1234".getBytes(StandardCharsets.US_ASCII), 0, 3));
+
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".toCharArray(), 0, 3));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".toCharArray(), 0, 4));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("1234".toCharArray(), 0, 3));
     }
 
     @Test

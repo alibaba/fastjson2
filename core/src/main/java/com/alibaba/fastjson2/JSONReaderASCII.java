@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONReaderJSONB.check3;
 import static com.alibaba.fastjson2.util.IOUtils.hexDigit4;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -276,7 +275,7 @@ final class JSONReaderASCII
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = hexDigit4(bytes, check3(offset + 1, end));
+                            ch = hexDigit4(bytes, offset + 1, end);
                             offset += 4;
                             break;
                         }
@@ -350,7 +349,7 @@ final class JSONReaderASCII
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = hexDigit4(bytes, check3(offset + 1, end));
+                            ch = hexDigit4(bytes, offset + 1, end);
                             offset += 4;
                             break;
                         }
@@ -457,7 +456,7 @@ final class JSONReaderASCII
                 ch = (char) bytes[offset++];
                 switch (ch) {
                     case 'u': {
-                        ch = hexDigit4(bytes, check3(offset, end));
+                        ch = hexDigit4(bytes, offset, end);
                         offset += 4;
                         break;
                     }
@@ -538,7 +537,7 @@ final class JSONReaderASCII
                     ch = bytes[offset++];
                     switch (ch) {
                         case 'u': {
-                            ch = hexDigit4(bytes, check3(offset, end));
+                            ch = hexDigit4(bytes, offset, end);
                             offset += 4;
                             break;
                         }
@@ -662,7 +661,7 @@ final class JSONReaderASCII
                 ch = bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = hexDigit4(bytes, check3(offset + 1, end));
+                        ch = hexDigit4(bytes, offset + 1, end);
                         offset += 4;
                         break;
                     }
@@ -729,7 +728,7 @@ final class JSONReaderASCII
                     ch = bytes[++offset];
                     switch (ch) {
                         case 'u': {
-                            ch = hexDigit4(bytes, check3(offset + 1, end));
+                            ch = hexDigit4(bytes, offset + 1, end);
                             offset += 4;
                             break;
                         }
@@ -797,7 +796,7 @@ final class JSONReaderASCII
                 c = bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        c = hexDigit4(bytes, check3(offset + 1, end));
+                        c = hexDigit4(bytes, offset + 1, end);
                         offset += 4;
                         break;
                     }
@@ -876,7 +875,7 @@ final class JSONReaderASCII
                 c = bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        c = hexDigit4(bytes, check3(offset + 1, end));
+                        c = hexDigit4(bytes, offset + 1, end);
                         offset += 4;
                         break;
                     }
@@ -938,7 +937,7 @@ final class JSONReaderASCII
                     b = bytes[++offset];
                     switch (b) {
                         case 'u': {
-                            int ch = hexDigit4(bytes, check3(offset + 1, end));
+                            int ch = hexDigit4(bytes, offset + 1, end);
                             offset += 4;
                             if (ch > 0xFF) {
                                 chars = null;
@@ -995,7 +994,7 @@ final class JSONReaderASCII
                 ch = (char) bytes[++offset];
                 switch (ch) {
                     case 'u': {
-                        ch = (char) hexDigit4(bytes, check3(offset + 1, end));
+                        ch = (char) hexDigit4(bytes, offset + 1, end);
                         offset += 4;
                         break;
                     }
@@ -1445,7 +1444,7 @@ final class JSONReaderASCII
                     c = (char) (bytes[++offset]);
                     switch (c) {
                         case 'u': {
-                            c = (char) hexDigit4(bytes, check3(offset + 1, end));
+                            c = (char) hexDigit4(bytes, offset + 1, end);
                             offset += 4;
                             break;
                         }
@@ -1547,7 +1546,7 @@ final class JSONReaderASCII
                 c = (char) bytes[++offset];
                 switch (c) {
                     case 'u': {
-                        c = (char) hexDigit4(bytes, check3(offset + 1, end));
+                        c = (char) hexDigit4(bytes, offset + 1, end);
                         offset += 4;
                         break;
                     }

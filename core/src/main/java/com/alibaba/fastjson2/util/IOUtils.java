@@ -2529,14 +2529,10 @@ public class IOUtils {
     }
 
     public static int hexDigit4(byte[] buf, int offset, int end) {
-        return hexDigit4(buf, check3(offset + 1, end));
-    }
-
-    public static int check3(int off, int end) {
-        if (off + 3 >= end) {
-            throw outOfBoundsCheckFromToIndex(off, end);
+        if (offset + 4 > Math.min(end, buf.length)) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
         }
-        return off;
+        return hexDigit4(buf, offset);
     }
 
     static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
@@ -2556,6 +2552,13 @@ public class IOUtils {
         int v = getIntLE(buf, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
         return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
+    }
+
+    public static int hexDigit4(char[] buf, int offset, int end) {
+        if (offset + 4 > Math.min(end, buf.length)) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
+        }
+        return hexDigit4(buf, offset);
     }
 
     /**
