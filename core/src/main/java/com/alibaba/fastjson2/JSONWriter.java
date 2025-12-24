@@ -1935,7 +1935,7 @@ public abstract class JSONWriter
             return;
         }
         if (Float.isNaN(value) || Float.isInfinite(value)) {
-            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
                 writeFloat(value);
             } else {
                 writeNull();
@@ -2014,7 +2014,7 @@ public abstract class JSONWriter
             return;
         }
         if (Double.isNaN(value) || Double.isInfinite(value)) {
-            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
                 writeDouble(value);
             } else {
                 writeNull();
@@ -4415,7 +4415,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.61
          */
-        WriteNonFiniteAsString(1L << 45);
+        WriteFloatSpecialAsString(1L << 45);
 
         public final long mask;
 

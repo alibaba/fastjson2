@@ -1885,7 +1885,7 @@ final class JSONWriterUTF8
     @Override
     public final void writeFloat(float value) {
         if (Float.isNaN(value) || Float.isInfinite(value)) {
-            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
                 byte[] bytes = this.bytes;
                 int off = this.off;
 
@@ -1924,7 +1924,7 @@ final class JSONWriterUTF8
     @Override
     public final void writeDouble(double value) {
         if (Double.isNaN(value) || Double.isInfinite(value)) {
-            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
                 byte[] bytes = this.bytes;
                 int off = this.off;
 
