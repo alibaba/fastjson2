@@ -1935,7 +1935,11 @@ public abstract class JSONWriter
             return;
         }
         if (Float.isNaN(value) || Float.isInfinite(value)) {
-            writeNull();
+            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+                writeFloat(value);
+            } else {
+                writeNull();
+            }
             return;
         }
 
@@ -2010,7 +2014,11 @@ public abstract class JSONWriter
             return;
         }
         if (Double.isNaN(value) || Double.isInfinite(value)) {
-            writeNull();
+            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+                writeDouble(value);
+            } else {
+                writeNull();
+            }
             return;
         }
 
@@ -4399,7 +4407,15 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        WriterUtilDateAsMillis(1L << 44);
+        WriterUtilDateAsMillis(1L << 44),
+
+        /**
+         * Feature that determines whether to write float/double NaN and Infinite values as Strings.
+         * When enabled, NaN/Infinity will be serialized as "NaN", "Infinity", "-Infinity".
+         *
+         * @since 2.0.61
+         */
+        WriteNonFiniteAsString(1L << 45);
 
         public final long mask;
 

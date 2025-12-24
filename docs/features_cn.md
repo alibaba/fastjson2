@@ -106,6 +106,7 @@ public class Model {
 | UnquoteFieldName                  | 不带引号输出Key                                                                                                        |
 | NotWriteSetClassName              | 当打开WriteClassName时又不想输出Set的类型信息，使用这个Feature                                                                      |
 | NotWriteNumberClassName           | 当打开WriteClassName时又不想输出Number的类型信息，比如L/S/B/F/D这种后缀，使用这个Feature                                                   |
+| WriteNonFiniteAsString            | 启用后，NaN/Infinity将被序列化为“NaN”、“Infinity”、“-Infinity”    |
 
 # 6. 使用示例
 

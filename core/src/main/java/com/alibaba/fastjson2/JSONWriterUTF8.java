@@ -1884,6 +1884,22 @@ final class JSONWriterUTF8
 
     @Override
     public final void writeFloat(float value) {
+        if (Float.isNaN(value) || Float.isInfinite(value)) {
+            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+                byte[] bytes = this.bytes;
+                int off = this.off;
+
+                int minCapacity = off + 11;
+                if (minCapacity > bytes.length) {
+                    bytes = grow(minCapacity);
+                }
+                this.off = NumberUtils.writeNonFinite(bytes, off, value, true);
+            } else {
+                writeNull();
+            }
+            return;
+        }
+
         boolean writeAsString = (context.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
 
         int off = this.off;
@@ -1907,6 +1923,22 @@ final class JSONWriterUTF8
 
     @Override
     public final void writeDouble(double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            if ((context.features & WriteNonFiniteAsString.mask) != 0) {
+                byte[] bytes = this.bytes;
+                int off = this.off;
+
+                int minCapacity = off + 11;
+                if (minCapacity > bytes.length) {
+                    bytes = grow(minCapacity);
+                }
+                this.off = NumberUtils.writeNonFinite(bytes, off, value, true);
+            } else {
+                writeNull();
+            }
+            return;
+        }
+
         boolean writeAsString = (context.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
 
         int off = this.off;

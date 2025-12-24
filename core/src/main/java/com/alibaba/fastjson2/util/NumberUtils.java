@@ -480,20 +480,7 @@ public final class NumberUtils {
             IOUtils.putIntUnaligned(buf, off, NULL_32);
             return off + 4;
         }
-
-        if (Float.isNaN(floatValue)) {
-            buf[off] = 'N';
-            buf[off + 1] = 'a';
-            buf[off + 2] = 'N';
-            return off + 3;
-        }
-
-        if (floatValue == Float.NEGATIVE_INFINITY) {
-            buf[off++] = '-';
-        }
-
-        IOUtils.putLongUnaligned(buf, off, INFINITY);
-        return off + 8;
+        return writeNonFinite(buf, off, floatValue, false);
     }
 
     private static int writeSpecial(char[] buf, int off, float floatValue, boolean json) {
@@ -501,21 +488,56 @@ public final class NumberUtils {
             IOUtils.putLongUnaligned(buf, off, NULL_64);
             return off + 4;
         }
+        return writeNonFinite(buf, off, floatValue, false);
+    }
 
-        if (Float.isNaN(floatValue)) {
+    public static int writeNonFinite(byte[] buf, int off, double value, boolean quote) {
+        if (quote) {
+            buf[off++] = '"';
+        }
+
+        if (Double.isNaN(value)) {
             buf[off] = 'N';
             buf[off + 1] = 'a';
             buf[off + 2] = 'N';
-            return off + 3;
+            off += 3;
+        } else {
+            if (value < 0) {
+                buf[off++] = '-';
+            }
+            IOUtils.putLongUnaligned(buf, off, INFINITY);
+            off += 8;
         }
 
-        if (floatValue == Float.NEGATIVE_INFINITY) {
-            buf[off++] = '-';
+        if (quote) {
+            buf[off++] = '"';
+        }
+        return off;
+    }
+
+    public static int writeNonFinite(char[] buf, int off, double value, boolean quote) {
+        if (quote) {
+            buf[off++] = '"';
         }
 
-        IOUtils.putLongUnaligned(buf, off, INFI);
-        IOUtils.putLongUnaligned(buf, off + 4, NITY);
-        return off + 8;
+        if (Double.isNaN(value)) {
+            buf[off] = 'N';
+            buf[off + 1] = 'a';
+            buf[off + 2] = 'N';
+            off += 3;
+        } else {
+            if (value < 0) {
+                buf[off++] = '-';
+            }
+            IOUtils.putLongUnaligned(buf, off, INFI);
+            IOUtils.putLongUnaligned(buf, off + 4, NITY);
+            off += 8;
+        }
+
+        if (quote) {
+            buf[off++] = '"';
+        }
+        return off;
     }
 
     static final int MOD_FLOAT_EXP = (1 << 8) - 1;

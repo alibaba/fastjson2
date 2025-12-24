@@ -108,6 +108,7 @@ public class Model {
 | UnquoteFieldName                  | Output Key without quotes.                                                                                                                                                                                              |
 | NotWriteSetClassName              | When WriteClassName is turned on and you don't want to output the type information of Set, use this Feature.                                                                                                            |
 | NotWriteNumberClassName           | When WriteClassName is turned on and you don't want to output the type information of Number, such as the suffixes L/S/B/F/D, use this Feature.                                                                         |
+| WriteNonFiniteAsString            | When enabled, NaN/Infinity will be serialized as "NaN", "Infinity", "-Infinity".    |
 
 # 6. Usage Examples
 
