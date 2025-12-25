@@ -4833,9 +4833,7 @@ class JSONReaderUTF8
                         break;
                     }
                     case 'x': {
-                        int c1 = bytes[offset + 1];
-                        int c2 = bytes[offset + 2];
-                        c = char2(c1, c2);
+                        c = char2(bytes[offset + 1], bytes[offset + 2]);
                         offset += 2;
                         break;
                     }

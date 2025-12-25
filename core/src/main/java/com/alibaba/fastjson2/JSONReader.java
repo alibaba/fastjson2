@@ -55,21 +55,21 @@ public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 2047;
 
-    static final byte JSON_TYPE_INT = 1;
-    static final byte JSON_TYPE_DEC = 2;
-    static final byte JSON_TYPE_STRING = 3;
-    static final byte JSON_TYPE_BOOL = 4;
-    static final byte JSON_TYPE_NULL = 5;
-    static final byte JSON_TYPE_OBJECT = 6;
-    static final byte JSON_TYPE_ARRAY = 7;
-    static final byte JSON_TYPE_BIG_DEC = 8;
-
-    static final byte JSON_TYPE_INT8 = 9;
-    static final byte JSON_TYPE_INT16 = 10;
-    static final byte JSON_TYPE_INT64 = 11;
-    static final byte JSON_TYPE_FLOAT = 12;
-    static final byte JSON_TYPE_DOUBLE = 13;
-    static final byte JSON_TYPE_NaN = 14;
+    static final byte
+            JSON_TYPE_INT = 1,
+            JSON_TYPE_DEC = 2,
+            JSON_TYPE_STRING = 3,
+            JSON_TYPE_BOOL = 4,
+            JSON_TYPE_NULL = 5,
+            JSON_TYPE_OBJECT = 6,
+            JSON_TYPE_ARRAY = 7,
+            JSON_TYPE_BIG_DEC = 8,
+            JSON_TYPE_INT8 = 9,
+            JSON_TYPE_INT16 = 10,
+            JSON_TYPE_INT64 = 11,
+            JSON_TYPE_FLOAT = 12,
+            JSON_TYPE_DOUBLE = 13,
+            JSON_TYPE_NaN = 14;
 
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
