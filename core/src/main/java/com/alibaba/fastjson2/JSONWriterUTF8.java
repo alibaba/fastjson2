@@ -1885,6 +1885,11 @@ final class JSONWriterUTF8
     @Override
     public final void writeFloat(float value) {
         boolean writeAsString = (context.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Float.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 17;
@@ -1897,7 +1902,7 @@ final class JSONWriterUTF8
             bytes[off++] = '"';
         }
 
-        off = NumberUtils.writeFloat(bytes, off, value, true);
+        off = NumberUtils.writeFloat(bytes, off, value, true, writeSpecialAsString);
 
         if (writeAsString) {
             bytes[off++] = '"';
@@ -1908,6 +1913,11 @@ final class JSONWriterUTF8
     @Override
     public final void writeDouble(double value) {
         boolean writeAsString = (context.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Double.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 26;
@@ -1919,7 +1929,7 @@ final class JSONWriterUTF8
             bytes[off++] = '"';
         }
 
-        off = NumberUtils.writeDouble(bytes, off, value, true);
+        off = NumberUtils.writeDouble(bytes, off, value, true, writeSpecialAsString);
 
         if (writeAsString) {
             bytes[off++] = '"';
@@ -1935,6 +1945,7 @@ final class JSONWriterUTF8
         }
 
         boolean writeAsString = (context.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
@@ -1949,14 +1960,16 @@ final class JSONWriterUTF8
                 bytes[off++] = ',';
             }
 
-            if (writeAsString) {
-                bytes[off++] = '"';
-            }
-
-            off = NumberUtils.writeFloat(bytes, off, values[i], true);
-
-            if (writeAsString) {
-                bytes[off++] = '"';
+            if (!Float.isFinite(values[i])) {
+                off = NumberUtils.writeFloat(bytes, off, values[i], true, writeSpecialAsString);
+            } else {
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
+                off = NumberUtils.writeFloat(bytes, off, values[i], true, false);
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
             }
         }
         bytes[off] = ']';
@@ -1971,6 +1984,7 @@ final class JSONWriterUTF8
         }
 
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * 27 + 1;
@@ -1984,14 +1998,16 @@ final class JSONWriterUTF8
                 bytes[off++] = ',';
             }
 
-            if (writeAsString) {
-                bytes[off++] = '"';
-            }
-
-            off = NumberUtils.writeDouble(bytes, off, values[i], true);
-
-            if (writeAsString) {
-                bytes[off++] = '"';
+            if (!Double.isFinite(values[i])) {
+                off = NumberUtils.writeDouble(bytes, off, values[i], true, writeSpecialAsString);
+            } else {
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
+                off = NumberUtils.writeDouble(bytes, off, values[i], true, false);
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
             }
         }
         bytes[off] = ']';

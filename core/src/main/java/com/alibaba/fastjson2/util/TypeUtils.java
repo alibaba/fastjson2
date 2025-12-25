@@ -1910,13 +1910,13 @@ public class TypeUtils {
 
     public static BigDecimal toBigDecimal(float f) {
         byte[] bytes = new byte[15];
-        int size = NumberUtils.writeFloat(bytes, 0, f, true);
+        int size = NumberUtils.writeFloat(bytes, 0, f, true, false);
         return parseBigDecimal(bytes, 0, size);
     }
 
     public static BigDecimal toBigDecimal(double d) {
         byte[] bytes = new byte[24];
-        int size = NumberUtils.writeDouble(bytes, 0, d, true);
+        int size = NumberUtils.writeDouble(bytes, 0, d, true, false);
         return parseBigDecimal(bytes, 0, size);
     }
 

@@ -39,7 +39,7 @@ public class RyuFloatTest {
 
     static String toString(float value) {
         byte[] bytes = new byte[24];
-        int len = NumberUtils.writeFloat(bytes, 0, value, false);
+        int len = NumberUtils.writeFloat(bytes, 0, value, false, false);
         return new String(bytes, 0, len);
     }
 }
