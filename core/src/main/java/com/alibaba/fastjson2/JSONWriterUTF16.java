@@ -2044,23 +2044,12 @@ class JSONWriterUTF16
 
     @Override
     public final void writeFloat(float value) {
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
-            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
-                char[] chars = this.chars;
-                int off = this.off;
-
-                int minCapacity = off + 11;
-                if (minCapacity > chars.length) {
-                    chars = grow(minCapacity);
-                }
-                this.off = NumberUtils.writeNonFinite(chars, off, value, true);
-            } else {
-                writeNull();
-            }
-            return;
-        }
-
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Float.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 15;
@@ -2077,7 +2066,7 @@ class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        off = NumberUtils.writeFloat(chars, off, value, true);
+        off = NumberUtils.writeFloat(chars, off, value, true, writeSpecialAsString);
 
         if (writeAsString) {
             chars[off++] = '"';
@@ -2093,6 +2082,7 @@ class JSONWriterUTF16
         }
 
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
@@ -2107,14 +2097,16 @@ class JSONWriterUTF16
                 chars[off++] = ',';
             }
 
-            if (writeAsString) {
-                chars[off++] = '"';
-            }
-
-            off = NumberUtils.writeFloat(chars, off, values[i], true);
-
-            if (writeAsString) {
-                chars[off++] = '"';
+            if (!Float.isFinite(values[i])) {
+                off = NumberUtils.writeFloat(chars, off, values[i], true, writeSpecialAsString);
+            } else {
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
+                off = NumberUtils.writeFloat(chars, off, values[i], true, false);
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
             }
         }
         chars[off] = ']';
@@ -2123,23 +2115,12 @@ class JSONWriterUTF16
 
     @Override
     public final void writeDouble(double value) {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
-                char[] chars = this.chars;
-                int off = this.off;
-
-                int minCapacity = off + 11;
-                if (minCapacity > chars.length) {
-                    chars = grow(minCapacity);
-                }
-                this.off = NumberUtils.writeNonFinite(chars, off, value, true);
-            } else {
-                writeNull();
-            }
-            return;
-        }
-
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Double.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 24;
@@ -2156,7 +2137,7 @@ class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        off = NumberUtils.writeDouble(chars, off, value, true);
+        off = NumberUtils.writeDouble(chars, off, value, true, writeSpecialAsString);
 
         if (writeAsString) {
             chars[off++] = '"';
@@ -2167,11 +2148,12 @@ class JSONWriterUTF16
     @Override
     public final void writeDoubleArray(double value0, double value1) {
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + 48 + 3;
         if (writeAsString) {
-            minCapacity += 2;
+            minCapacity += 4;
         }
 
         char[] chars = this.chars;
@@ -2181,22 +2163,30 @@ class JSONWriterUTF16
 
         chars[off++] = '[';
 
-        if (writeAsString) {
-            chars[off++] = '"';
-        }
-        off = NumberUtils.writeDouble(chars, off, value0, true);
-        if (writeAsString) {
-            chars[off++] = '"';
+        if (!Double.isFinite(value0)) {
+            off = NumberUtils.writeDouble(chars, off, value0, true, writeSpecialAsString);
+        } else {
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
+            off = NumberUtils.writeDouble(chars, off, value0, true, false);
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
         }
 
         chars[off++] = ',';
 
-        if (writeAsString) {
-            chars[off++] = '"';
-        }
-        off = NumberUtils.writeDouble(chars, off, value1, true);
-        if (writeAsString) {
-            chars[off++] = '"';
+        if (!Double.isFinite(value1)) {
+            off = NumberUtils.writeDouble(chars, off, value1, true, writeSpecialAsString);
+        } else {
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
+            off = NumberUtils.writeDouble(chars, off, value1, true, false);
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
         }
 
         chars[off] = ']';
@@ -2211,6 +2201,7 @@ class JSONWriterUTF16
         }
 
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * 27 + 1;
@@ -2225,14 +2216,16 @@ class JSONWriterUTF16
                 chars[off++] = ',';
             }
 
-            if (writeAsString) {
-                chars[off++] = '"';
-            }
-
-            off = NumberUtils.writeDouble(chars, off, values[i], true);
-
-            if (writeAsString) {
-                chars[off++] = '"';
+            if (!Double.isFinite(values[i])) {
+                off = NumberUtils.writeDouble(chars, off, values[i], true, writeSpecialAsString);
+            } else {
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
+                off = NumberUtils.writeDouble(chars, off, values[i], true, false);
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
             }
         }
         chars[off] = ']';

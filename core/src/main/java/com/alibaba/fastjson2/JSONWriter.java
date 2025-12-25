@@ -1934,7 +1934,7 @@ public abstract class JSONWriter
             writeFloat(value);
             return;
         }
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
+        if (!Float.isFinite(value)) {
             if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
                 writeFloat(value);
             } else {
@@ -1972,6 +1972,14 @@ public abstract class JSONWriter
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
                 writeComma();
+            }
+            if (!Float.isFinite(value[i])) {
+                if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                    writeFloat(value[i]);
+                } else {
+                    writeNull();
+                }
+                continue;
             }
             String str = format.format(value[i]);
             writeRaw(str);
@@ -2013,7 +2021,7 @@ public abstract class JSONWriter
             writeDouble(value);
             return;
         }
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
+        if (!Double.isFinite(value)) {
             if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
                 writeDouble(value);
             } else {
@@ -2064,7 +2072,14 @@ public abstract class JSONWriter
             if (i != 0) {
                 writeComma();
             }
-
+            if (!Double.isFinite(value[i])) {
+                if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                    writeDouble(value[i]);
+                } else {
+                    writeNull();
+                }
+                continue;
+            }
             String str = format.format(value[i]);
             writeRaw(str);
         }

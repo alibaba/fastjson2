@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import lombok.AllArgsConstructor;
@@ -58,5 +59,79 @@ public class WriteFloatSpecialAsString {
         public Double d2;
         public float f1;
         public Float f2;
+    }
+
+    @Test
+    public void test_array_utf16() {
+        BeanArray bean = new BeanArray(
+                new double[]{1.2d, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY},
+                new float[]{1.2f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY}
+        );
+
+        String json = JSON.toJSONString(bean);
+        assertEquals("{\"d\":[1.2,null,null,null],\"f\":[1.2,null,null,null]}", json);
+
+        String jsonFeature = JSON.toJSONString(bean, JSONWriter.Feature.WriteFloatSpecialAsString);
+        assertEquals("{\"d\":[1.2,\"NaN\",\"Infinity\",\"-Infinity\"],\"f\":[1.2,\"NaN\",\"Infinity\",\"-Infinity\"]}", jsonFeature);
+    }
+
+    @Test
+    public void test_array_utf8() {
+        BeanArray bean = new BeanArray(
+                new double[]{1.2d, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY},
+                new float[]{1.2f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY}
+        );
+
+        String json = new String(JSON.toJSONBytes(bean), StandardCharsets.UTF_8);
+        assertEquals("{\"d\":[1.2,null,null,null],\"f\":[1.2,null,null,null]}", json);
+
+        String jsonFeature = new String(JSON.toJSONBytes(bean, JSONWriter.Feature.WriteFloatSpecialAsString), StandardCharsets.UTF_8);
+        assertEquals("{\"d\":[1.2,\"NaN\",\"Infinity\",\"-Infinity\"],\"f\":[1.2,\"NaN\",\"Infinity\",\"-Infinity\"]}", jsonFeature);
+    }
+
+    @Test
+    public void test_array_mixed_features() {
+        BeanArray bean = new BeanArray(
+                new double[]{1.2d, Double.NaN},
+                new float[]{1.2f, Float.POSITIVE_INFINITY}
+        );
+
+        String json = JSON.toJSONString(bean,
+                JSONWriter.Feature.WriteFloatSpecialAsString,
+                JSONWriter.Feature.WriteNonStringValueAsString);
+
+        assertEquals("{\"d\":[\"1.2\",\"NaN\"],\"f\":[\"1.2\",\"Infinity\"]}", json);
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class BeanArray {
+        public double[] d;
+        public float[] f;
+    }
+
+    @Test
+    public void test_array_with_format() {
+        BeanArrayFormat bean = new BeanArrayFormat(
+                new double[]{1.23456d, Double.NaN, Double.NEGATIVE_INFINITY},
+                new float[]{1.23456f, Float.NaN, Float.POSITIVE_INFINITY}
+        );
+
+        ObjectWriter writer = ObjectWriterCreator.INSTANCE.createObjectWriter(BeanArrayFormat.class);
+
+        String json = writer.toJSONString(bean);
+        assertEquals("{\"d\":[1.23,null,null],\"f\":[1.23,null,null]}", json);
+
+        String jsonFeature = writer.toJSONString(bean, JSONWriter.Feature.WriteFloatSpecialAsString);
+        assertEquals("{\"d\":[1.23,\"NaN\",\"-Infinity\"],\"f\":[1.23,\"NaN\",\"Infinity\"]}", jsonFeature);
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class BeanArrayFormat {
+        @JSONField(format = "0.00")
+        public double[] d;
+        @JSONField(format = "0.00")
+        public float[] f;
     }
 }
