@@ -502,7 +502,7 @@ public class ObjectWriterCreator {
             }
 
             if ((len == 1 && c0 >= 'a' && c0 <= 'z')
-                    || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
+                    || (len > 1 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
             ) {
                 char[] chars = fieldName.toCharArray();
                 if (c0 >= 'a' && c0 <= 'z') {
@@ -513,8 +513,18 @@ public class ObjectWriterCreator {
                 String fieldName1 = new String(chars);
                 Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
 
-                if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
-                    fieldName = field.getName();
+                if (field != null) {
+                    boolean ucaseAll = true;
+                    for (int i = 2; i < chars.length; i++) {
+                        char c = chars[i];
+                        if (c >= 'a' && c <= 'z') {
+                            ucaseAll = false;
+                            break;
+                        }
+                    }
+                    if (ucaseAll || Modifier.isPublic(field.getModifiers())) {
+                        fieldName = fieldName1;
+                    }
                 }
             }
         } else {
