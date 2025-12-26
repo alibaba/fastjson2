@@ -3598,6 +3598,9 @@ final class JSONReaderUTF16
 
         if (ch == '.') {
             valueType = JSON_TYPE_DEC;
+            if (offset == end) {
+                throw new JSONException(info("illegal input"));
+            }
             ch = chars[offset++];
             while (ch >= '0' && ch <= '9') {
                 valid = true;
