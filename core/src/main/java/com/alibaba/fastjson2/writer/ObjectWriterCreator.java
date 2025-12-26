@@ -818,7 +818,7 @@ public class ObjectWriterCreator {
             // ignored
         }
 
-        if (initObjectWriter == null && provider != null) {
+        if (initObjectWriter == null && provider != null && (format == null || format.isEmpty() || fieldClass != Date.class)) {
             initObjectWriter = getInitWriter(provider, fieldClass);
         }
 
