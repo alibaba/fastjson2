@@ -740,7 +740,7 @@ public class ObjectWriterCreator {
             }
         }
 
-        if (fieldClass == List.class || fieldClass == ArrayList.class) {
+        if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
             Type itemType = null;
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
@@ -904,7 +904,7 @@ public class ObjectWriterCreator {
             return new FieldWriterStringMethod(fieldName, ordinal, format, label, features, field, method);
         }
 
-        if (fieldClass == List.class) {
+        if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
             Type itemType;
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
@@ -1086,7 +1086,7 @@ public class ObjectWriterCreator {
             Type rawType = parameterizedType.getRawType();
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-            if (rawType == List.class || rawType == ArrayList.class) {
+            if (rawType == List.class || rawType == ArrayList.class || rawType == Iterable.class) {
                 if (actualTypeArguments.length == 1) {
                     Type itemType = actualTypeArguments[0];
                     if (itemType == String.class) {
