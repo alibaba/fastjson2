@@ -157,6 +157,9 @@ public abstract class JSONReader
     protected short exponent;
     protected short scale;
 
+    protected int numberStart = -1;
+    protected int numberLength;
+
     protected int mag0;
     protected int mag1;
     protected int mag2;
@@ -3107,6 +3110,12 @@ public abstract class JSONReader
     protected abstract void readNumber0();
 
     /**
+     * Constructs a BigDecimal from a raw byte/character array for correct scientific notation parsing.
+     * @return BigDecimal object, or null if it cannot be constructed.
+     */
+    protected abstract BigDecimal getBigDecimalFromRaw();
+
+    /**
      * Reads a Base64 encoded string from JSON data and decodes it to bytes.
      *
      * @return The decoded byte array
@@ -4396,6 +4405,16 @@ public abstract class JSONReader
             case JSON_TYPE_DEC: {
                 BigDecimal decimal = null;
 
+                if (exponent != 0) {
+                    decimal = getBigDecimalFromRaw();
+                    if (decimal != null) {
+                        if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                            return decimal.doubleValue();
+                        }
+                        return decimal;
+                    }
+                }
+
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
@@ -4420,24 +4439,10 @@ public abstract class JSONReader
                             : new int[]{mag0, mag1, mag2, mag3};
                     int signum = negative ? -1 : 1;
                     BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-
-                    int adjustedScale = scale - exponent;
-                    decimal = new BigDecimal(bigInt, adjustedScale);
-                    if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
-                        return decimal.doubleValue();
-                    }
+                    decimal = new BigDecimal(bigInt, scale);
                 }
 
-                if (exponent != 0) {
-                    String decimalStr = decimal.toPlainString();
-                    if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
-                        return Double.parseDouble(
-                                decimalStr + "E" + exponent);
-                    }
-                    return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
-                }
-
-                if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
+                if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
                     return decimal.doubleValue();
                 }
 

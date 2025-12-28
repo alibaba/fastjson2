@@ -5386,6 +5386,8 @@ class JSONReaderUTF8
         this.negative = false;
         this.exponent = 0;
         this.scale = 0;
+        this.numberStart = -1;
+        this.numberLength = 0;
 
         final int end = this.end;
         final byte[] bytes = this.bytes;
@@ -5469,6 +5471,9 @@ class JSONReaderUTF8
             this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
+
+        this.numberStart = start;
+        this.numberLength = offset - start;
 
         int len = offset - start;
 
@@ -6752,6 +6757,18 @@ class JSONReaderUTF8
         this.ch = (char) ch;
         this.offset = offset;
         return decimal;
+    }
+
+    @Override
+    protected BigDecimal getBigDecimalFromRaw() {
+        if (numberStart < 0 || numberLength <= 0) {
+            return null;
+        }
+        try {
+            return TypeUtils.parseBigDecimal(bytes, numberStart, numberLength);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override

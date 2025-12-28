@@ -4281,6 +4281,11 @@ final class JSONReaderJSONB
         return decimal;
     }
 
+    @Override
+    protected BigDecimal getBigDecimalFromRaw() {
+        return null;
+    }
+
     private BigDecimal readDecimal0(byte type) {
         int end = this.end;
         switch (type) {
