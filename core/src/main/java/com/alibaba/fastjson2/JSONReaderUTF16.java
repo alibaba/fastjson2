@@ -11,11 +11,14 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.time.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.BIG_ENDIAN;
 
 final class JSONReaderUTF16
         extends JSONReader {
@@ -3817,11 +3820,18 @@ final class JSONReaderUTF16
             }
 
             this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
+            if (valueType != JSON_TYPE_BIG_DEC) {
+                valueType = JSON_TYPE_DEC;
+            }
         }
 
         this.numberStart = start;
         this.numberLength = offset - start;
+
+        if (valueType == JSON_TYPE_BIG_DEC && exponent != 0) {
+            int numStart = negative ? start - 1 : start - 1;
+            stringValue = new String(chars, numStart, offset - 1 - numStart);
+        }
 
         if (offset == start) {
             if (ch == 'n') {
@@ -4245,7 +4255,9 @@ final class JSONReaderUTF16
             }
 
             this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
+            if (valueType != JSON_TYPE_BIG_DEC) {
+                valueType = JSON_TYPE_DEC;
+            }
         }
 
         if (offset == start) {
@@ -4307,8 +4319,9 @@ final class JSONReaderUTF16
             }
         }
         if (!value) {
-            if (expValue == 0 && !overflow && longValue != 0) {
-                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, scale);
+            if (!overflow && longValue != 0) {
+                int finalScale = scale - expValue;
+                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, finalScale);
                 value = true;
             }
 
@@ -6564,7 +6577,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5) {
+    public boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5) {
         char[] chars = this.chars;
         int offset = this.offset + 44;
         if (offset >= end) {
@@ -6593,7 +6606,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5) {
+    public boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5) {
         char[] chars = this.chars;
         int offset = this.offset + 45;
         if (offset >= end) {
@@ -6623,7 +6636,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match2() {
+    public boolean nextIfValue4Match2() {
         char[] chars = this.chars;
         int offset = this.offset + 3;
         if (offset >= end) {
@@ -6653,7 +6666,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match3() {
+    public boolean nextIfValue4Match3() {
         char[] chars = this.chars;
         int offset = this.offset + 4;
         if (offset >= end) {
@@ -6687,7 +6700,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match4(byte c4) {
+    public boolean nextIfValue4Match4(byte c4) {
         char[] chars = this.chars;
         int offset = this.offset + 5;
         if (offset >= end) {
@@ -6721,7 +6734,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match5(byte c4, byte c5) {
+    public boolean nextIfValue4Match5(byte c4, byte c5) {
         char[] chars = this.chars;
         int offset = this.offset + 6;
         if (offset >= end) {
@@ -6758,7 +6771,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match6(int name1) {
+    public boolean nextIfValue4Match6(int name1) {
         char[] chars = this.chars;
         int offset = this.offset + 7;
         if (offset >= end) {
@@ -6792,7 +6805,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match7(int name1) {
+    public boolean nextIfValue4Match7(int name1) {
         char[] chars = this.chars;
         int offset = this.offset + 8;
         if (offset >= end) {
@@ -6828,7 +6841,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match8(int name1, byte c8) {
+    public boolean nextIfValue4Match8(int name1, byte c8) {
         char[] chars = this.chars;
         int offset = this.offset + 9;
         if (offset >= end) {
@@ -6865,7 +6878,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
+    public boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
         char[] chars = this.chars;
         int offset = this.offset + 10;
         if (offset >= end) {
@@ -6903,7 +6916,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match10(long name1) {
+    public boolean nextIfValue4Match10(long name1) {
         char[] chars = this.chars;
         int offset = this.offset + 11;
         if (offset >= end) {
@@ -6937,7 +6950,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfValue4Match11(long name1) {
+    public boolean nextIfValue4Match11(long name1) {
         char[] chars = this.chars;
         int offset = this.offset + 12;
         if (offset >= end) {

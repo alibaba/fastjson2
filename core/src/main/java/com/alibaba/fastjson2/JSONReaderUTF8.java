@@ -5119,6 +5119,8 @@ class JSONReaderUTF8
         this.negative = false;
         this.exponent = 0;
         this.scale = 0;
+        this.numberStart = -1;
+        this.numberLength = 0;
         int firstOffset = offset;
 
         final byte[] bytes = this.bytes;
@@ -5266,7 +5268,17 @@ class JSONReaderUTF8
             }
 
             this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
+            if (valueType != JSON_TYPE_BIG_DEC) {
+                valueType = JSON_TYPE_DEC;
+            }
+        }
+
+        this.numberStart = start;
+        this.numberLength = offset - start;
+
+        if (valueType == JSON_TYPE_BIG_DEC && exponent != 0) {
+            int numStart = start - 1;
+            stringValue = new String(bytes, numStart, offset - 1 - numStart);
         }
 
         if (offset == start) {
@@ -5469,11 +5481,18 @@ class JSONReaderUTF8
             }
 
             this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
+            if (valueType != JSON_TYPE_BIG_DEC) {
+                valueType = JSON_TYPE_DEC;
+            }
         }
 
         this.numberStart = start;
         this.numberLength = offset - start;
+
+        if (valueType == JSON_TYPE_BIG_DEC && exponent != 0) {
+            int numStart = start - 1;
+            stringValue = new String(bytes, numStart, offset - 1 - numStart);
+        }
 
         int len = offset - start;
 
@@ -6724,8 +6743,9 @@ class JSONReaderUTF8
             }
         }
         if (!value) {
-            if (expValue == 0 && !overflow && longValue != 0) {
-                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, scale);
+            if (!overflow && longValue != 0) {
+                int finalScale = scale - expValue;
+                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, finalScale);
                 value = true;
             }
 

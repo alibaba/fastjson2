@@ -4289,6 +4289,12 @@ public abstract class JSONReader
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
+                if (exponent != 0) {
+                    BigDecimal decimal = getBigDecimalFromRaw();
+                    if (decimal != null) {
+                        return decimal;
+                    }
+                }
                 return toBigDecimal(stringValue);
             }
             case JSON_TYPE_BOOL:
@@ -4415,10 +4421,12 @@ public abstract class JSONReader
                     }
                 }
 
+                int finalScale = scale - exponent;
+
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
-                        decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        decimal = BigDecimal.valueOf(unscaledVal, finalScale);
                     } else {
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
@@ -4426,7 +4434,7 @@ public abstract class JSONReader
                         if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + v3;
                             long unscaledVal = negative ? -v23 : v23;
-                            decimal = BigDecimal.valueOf(unscaledVal, scale);
+                            decimal = BigDecimal.valueOf(unscaledVal, finalScale);
                         }
                     }
                 }
@@ -4439,7 +4447,7 @@ public abstract class JSONReader
                             : new int[]{mag0, mag1, mag2, mag3};
                     int signum = negative ? -1 : 1;
                     BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                    decimal = new BigDecimal(bigInt, scale);
+                    decimal = new BigDecimal(bigInt, finalScale);
                 }
 
                 if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
@@ -4449,6 +4457,18 @@ public abstract class JSONReader
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
+                BigDecimal decimal = null;
+
+                if (exponent != 0) {
+                    decimal = getBigDecimalFromRaw();
+                    if (decimal != null) {
+                        if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                            return decimal.doubleValue();
+                        }
+                        return decimal;
+                    }
+                }
+
                 if (scale > 0) {
                     if (scale > defaultDecimalMaxScale) {
                         throw new JSONException("scale overflow : " + scale);
@@ -6608,7 +6628,7 @@ public abstract class JSONReader
     }
 
     final JSONException error() {
-        throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
+        throw new JSONValidException("error, offset " + offset + ", char " + ch);
     }
 
     final JSONException error(int offset, int ch) {
