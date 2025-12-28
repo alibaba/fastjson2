@@ -5277,8 +5277,7 @@ class JSONReaderUTF8
         this.numberLength = offset - start;
 
         if (valueType == JSON_TYPE_BIG_DEC && exponent != 0) {
-            int numStart = start - 1;
-            stringValue = new String(bytes, numStart, offset - 1 - numStart);
+            stringValue = new String(bytes, start - 1, offset - start);
         }
 
         if (offset == start) {
@@ -5490,8 +5489,7 @@ class JSONReaderUTF8
         this.numberLength = offset - start;
 
         if (valueType == JSON_TYPE_BIG_DEC && exponent != 0) {
-            int numStart = start - 1;
-            stringValue = new String(bytes, numStart, offset - 1 - numStart);
+            stringValue = new String(bytes, start - 1, offset - start);
         }
 
         int len = offset - start;

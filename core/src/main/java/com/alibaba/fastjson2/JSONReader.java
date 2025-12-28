@@ -4411,22 +4411,15 @@ public abstract class JSONReader
             case JSON_TYPE_DEC: {
                 BigDecimal decimal = null;
 
-                if (exponent != 0) {
-                    decimal = getBigDecimalFromRaw();
-                    if (decimal != null) {
-                        if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
-                            return decimal.doubleValue();
-                        }
-                        return decimal;
-                    }
-                }
-
                 int finalScale = scale - exponent;
 
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
                         decimal = BigDecimal.valueOf(unscaledVal, finalScale);
+                        if (unscaledVal == 0 && scale == 0 && exponent != 0) {
+                            decimal = BigDecimal.ZERO;
+                        }
                     } else {
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
