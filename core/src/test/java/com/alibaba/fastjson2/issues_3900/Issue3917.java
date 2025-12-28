@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 
 public class Issue3917 {
@@ -59,7 +59,7 @@ public class Issue3917 {
         JSONObject obj = JSONObject.parse(json);
         Object value = obj.get("a");
 
-        assertTrue(value instanceof Double, "不设置feature应返回Double");
+        assertInstanceOf(Double.class, value, "不设置feature应返回Double");
         assertEquals(1.23e-10, (Double) value, 1e-20);
     }
 
