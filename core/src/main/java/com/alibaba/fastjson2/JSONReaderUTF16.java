@@ -3357,7 +3357,50 @@ final class JSONReaderUTF16
             if (i != 0 && !jsonReader.comma) {
                 throw jsonReader.valueError();
             }
-            offset = skipName(jsonReader, bytes, offset, end);
+
+            char ch = jsonReader.ch;
+            if ((ch >= '0' && ch <= '9') || ch == '-' || ch == '+') {
+                // skip
+                if (ch == '-' || ch == '+') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+                // skip
+                while (ch >= '0' && ch <= '9') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+                // skip
+                if (ch == '.') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                    while (ch >= '0' && ch <= '9') {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    }
+                }
+                // skip
+                if (ch == 'e' || ch == 'E') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                    if (ch == '+' || ch == '-') {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    }
+                    while (ch >= '0' && ch <= '9') {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    }
+                }
+                // skip
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+                // skip
+                if (ch == ':') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    }
+                }
+                jsonReader.ch = ch;
+            } else {
+                offset = skipName(jsonReader, bytes, offset, end);
+            }
+
             offset = skipValue(jsonReader, bytes, offset, end);
         }
 
