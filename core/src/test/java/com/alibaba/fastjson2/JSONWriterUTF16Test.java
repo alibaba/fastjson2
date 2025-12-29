@@ -18,6 +18,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.JSONWriterUTF16.BYTE_VEC_64_DOUBLE_QUOTE;
 import static com.alibaba.fastjson2.JSONWriterUTF16.BYTE_VEC_64_SINGLE_QUOTE;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1238,7 +1239,7 @@ public class JSONWriterUTF16Test {
         }
         byte[] bytes = new byte[chars.length << 1];
         long x = IOUtils.getLongLE(chars, 0);
-        IOUtils.putLongLE(bytes, 0, x);
+        BYTES.putLongLE(bytes, 0, x);
         return bytes;
     }
 
@@ -1256,7 +1257,7 @@ public class JSONWriterUTF16Test {
         StringUtils.writeU4Hex2(chars, 0, 1);
         assertEquals("\\u0001", new String(chars));
 
-        IOUtils.putLongUnaligned(chars, 2, IOUtils.utf16Hex4U(1));
+        BYTES.putLongUnaligned(chars, 2, IOUtils.utf16Hex4U(1));
         assertEquals("\\u0001", new String(chars));
 
         chars = new char[] {'0', '1', '2', '3'};

@@ -62,6 +62,10 @@ public final class ByteArrayUnsafe extends ByteArray {
         return big == BIG_ENDIAN ? n : Integer.reverseBytes(n);
     }
 
+    static long convEndian(boolean big, long n) {
+        return big == BIG_ENDIAN ? n : Long.reverseBytes(n);
+    }
+
     public int getIntBE(byte[] buf, int offset) {
         return convEndian(true, UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
@@ -233,5 +237,89 @@ public final class ByteArrayUnsafe extends ByteArray {
      */
     public void putIntLE(char[] buf, int pos, int v) {
         UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
+    }
+
+    public long getLongUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
+    public long getLongBE(byte[] buf, int offset) {
+        return convEndian(true, UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public long getLongLE(byte[] buf, int offset) {
+        return convEndian(false, UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public void putLongUnaligned(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
+    }
+
+    /**
+     * Writes a long value to a byte array in big-endian byte order.
+     * This method puts a long value into the specified byte array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
+    public void putLongBE(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
+    }
+
+    /**
+     * Writes a long value to a byte array in little-endian byte order.
+     * This method puts a long value into the specified byte array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
+    public void putLongLE(byte[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
+    }
+
+    public long getLongUnaligned(char[] buf, int offset) {
+        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    }
+
+    public long getLongBE(char[] buf, int offset) {
+        return convEndian(true, UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+    }
+
+    public long getLongLE(char[] buf, int offset) {
+        return convEndian(false, UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+    }
+
+    public void putLongUnaligned(char[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
+    }
+
+    /**
+     * Writes a long value to a character array in big-endian byte order.
+     * This method puts a long value into the specified character array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
+    public void putLongBE(char[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(true, v));
+    }
+
+    /**
+     * Writes a long value to a character array in little-endian byte order.
+     * This method puts a long value into the specified character array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
+    public void putLongLE(char[] buf, int pos, long v) {
+        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
     }
 }

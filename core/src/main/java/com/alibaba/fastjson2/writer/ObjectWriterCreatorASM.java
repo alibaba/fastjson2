@@ -1072,16 +1072,17 @@ public class ObjectWriterCreatorASM
         mw.invokevirtual(TYPE_BYTE_ARRAY, "putIntUnaligned", "([BII)V");
     }
 
-    private static void gwWriteLong(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {
+    private static void gwWriteLong(MethodWriter mw, int bytesSlot, int OFFSET, byte[] name, int offset) {
         long nameInt = IOUtils.getLongUnaligned(name, offset);
-        mw.aload(BYTES);
+        mw.getstatic(TYPE_CONF, "BYTES", DESC_BYTE_ARRAY);
+        mw.aload(bytesSlot);
         mw.iload(OFFSET);
         if (offset != 0) {
             mw.iconst_n(offset);
             mw.iadd();
         }
         mw.visitLdcInsn(nameInt);
-        mw.invokestatic(TYPE_IO_UTILS, "putLongUnaligned", "([BIJ)V");
+        mw.invokevirtual(TYPE_BYTE_ARRAY, "putLongUnaligned", "([BIJ)V");
     }
 
     private void writeFieldValueDirectJSONB(

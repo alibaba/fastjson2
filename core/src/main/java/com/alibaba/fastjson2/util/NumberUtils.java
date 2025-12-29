@@ -465,7 +465,7 @@ public final class NumberUtils {
             if (floatValue < 0) {
                 buf[off++] = '-';
             }
-            IOUtils.putLongUnaligned(buf, off, INFINITY);
+            BYTES.putLongUnaligned(buf, off, INFINITY);
             off += 8;
         }
 
@@ -477,7 +477,7 @@ public final class NumberUtils {
 
     private static int writeSpecial(char[] buf, int off, float floatValue, boolean json, boolean writeSpecialAsString) {
         if (json && !writeSpecialAsString) {
-            IOUtils.putLongUnaligned(buf, off, NULL_64);
+            BYTES.putLongUnaligned(buf, off, NULL_64);
             return off + 4;
         }
 
@@ -494,8 +494,8 @@ public final class NumberUtils {
             if (floatValue < 0) {
                 buf[off++] = '-';
             }
-            IOUtils.putLongUnaligned(buf, off, INFI);
-            IOUtils.putLongUnaligned(buf, off + 4, NITY);
+            BYTES.putLongUnaligned(buf, off, INFI);
+            BYTES.putLongUnaligned(buf, off + 4, NITY);
             off += 8;
         }
 

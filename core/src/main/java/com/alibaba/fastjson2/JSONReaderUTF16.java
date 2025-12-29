@@ -3083,7 +3083,7 @@ final class JSONReaderUTF16
                         strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 4, strBuf.length));
                     }
 
-                    IOUtils.putLongLE(strBuf, stroff, v);
+                    BYTES.putLongLE(strBuf, stroff, v);
                     offset += 4;
                     stroff += 4;
                 }

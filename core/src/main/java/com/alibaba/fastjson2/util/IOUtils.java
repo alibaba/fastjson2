@@ -998,7 +998,7 @@ public class IOUtils {
             off = IOUtils.writeInt32(buf, off, y01);
         }
 
-        putLongLE(buf, off,
+        BYTES.putLongLE(buf, off,
                 0x2d00002d0000L
                         | digitPair(y23)
                         | ((long) digitPair(month) << 24)
@@ -1036,9 +1036,9 @@ public class IOUtils {
         }
 
         int p1 = PACKED_DIGITS_UTF16[month & 0x7f];
-        putLongLE(buf, off,
+        BYTES.putLongLE(buf, off,
                 ((long) (p1 & 0xFFFF) << 48) | ((long) '-' << 32) | PACKED_DIGITS_UTF16[y23 & 0x7f]);
-        putLongLE(buf, off + 4,
+        BYTES.putLongLE(buf, off + 4,
                 ((long) (p1 & 0xFFFF0000) >> 16) | ((long) '-' << 16) | ((long) PACKED_DIGITS_UTF16[dayOfMonth & 0x7f] << 32));
         return off + 8;
     }
@@ -1055,7 +1055,7 @@ public class IOUtils {
      * @param second the second component of the time (0-59)
      */
     public static void writeLocalTime(byte[] buf, int off, int hour, int minute, int second) {
-        putLongLE(
+        BYTES.putLongLE(
                 buf,
                 off,
                 0x3a00003a0000L
@@ -1137,7 +1137,7 @@ public class IOUtils {
         final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putLongLE(buf, off, DIGITS_K_64[div2 & 0x3ff] & 0xffffffffffff0000L | DOT_X0);
+        BYTES.putLongLE(buf, off, DIGITS_K_64[div2 & 0x3ff] & 0xffffffffffff0000L | DOT_X0);
         off += 4;
 
         long v;
@@ -1159,7 +1159,7 @@ public class IOUtils {
             return off + 1;
         }
 
-        putLongLE(buf, off, DIGITS_K_64[rem1 & 0x3ff] & 0xffffffffffff0000L | (v >> 48));
+        BYTES.putLongLE(buf, off, DIGITS_K_64[rem1 & 0x3ff] & 0xffffffffffff0000L | (v >> 48));
         return off + 4;
     }
 
@@ -1213,7 +1213,7 @@ public class IOUtils {
 
     private static int writeInt4(char[] buf, int off, int v) {
         int v1 = (int) (v * 1374389535L >> 37); // v / 100;
-        putLongUnaligned(buf, off, mergeInt64(v - v1 * 100, v1));
+        BYTES.putLongUnaligned(buf, off, mergeInt64(v - v1 * 100, v1));
         return off + 4;
     }
 
@@ -1541,7 +1541,7 @@ public class IOUtils {
         if ((byte) v2 == 1) {
             putChar(buf, pos++, (char) (v2 >> 32));
         }
-        putLongLE(buf, pos, DIGITS_K_64[(i - q1 * 1000) & 0x3ff] & 0xffffffffffff0000L | (v2 >> 48));
+        BYTES.putLongLE(buf, pos, DIGITS_K_64[(i - q1 * 1000) & 0x3ff] & 0xffffffffffff0000L | (v2 >> 48));
         return pos + 4;
     }
 
@@ -1682,71 +1682,6 @@ public class IOUtils {
 
     private static void putChar(char[] buf, int pos, char v) {
         UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
-    }
-
-    /**
-     * Writes a long value to a character array in little-endian byte order.
-     * This method puts a long value into the specified character array at the given position
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the character array buffer to write to
-     * @param pos the position in the buffer where to write the long value
-     * @param v the long value to write
-     */
-    public static void putLongLE(char[] buf, int pos, long v) {
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
-    }
-
-    /**
-     * Writes a long value to a character array without alignment considerations.
-     * This method puts a long value into the specified character array at the given position
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the character array buffer to write to
-     * @param pos the position in the buffer where to write the long value
-     * @param v the long value to write
-     */
-    public static void putLongUnaligned(char[] buf, int pos, long v) {
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
-    }
-
-    /**
-     * Writes a long value to a byte array without alignment considerations.
-     * This method puts a long value into the specified byte array at the given position
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the long value
-     * @param v the long value to write
-     */
-    public static void putLongUnaligned(byte[] buf, int pos, long v) {
-        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
-    }
-
-    /**
-     * Writes a long value to a byte array in big-endian byte order.
-     * This method puts a long value into the specified byte array at the given position
-     * using big-endian byte ordering (most significant byte first).
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the long value
-     * @param v the long value to write
-     */
-    public static void putLongBE(byte[] buf, int pos, long v) {
-        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
-    }
-
-    /**
-     * Writes a long value to a byte array in little-endian byte order.
-     * This method puts a long value into the specified byte array at the given position
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the long value
-     * @param v the long value to write
-     */
-    public static void putLongLE(byte[] buf, int pos, long v) {
-        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
 
     /**
@@ -2280,11 +2215,7 @@ public class IOUtils {
      * @return the long value at the specified offset in big-endian order
      */
     public static long getLongBE(byte[] buf, int offset) {
-        long v = UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (!BIG_ENDIAN) {
-            v = Long.reverseBytes(v);
-        }
-        return v;
+        return BYTES.getLongBE(buf, offset);
     }
 
     /**
@@ -2297,7 +2228,7 @@ public class IOUtils {
      * @return the long value at the specified offset
      */
     public static long getLongUnaligned(byte[] buf, int offset) {
-        return UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+        return BYTES.getLongUnaligned(buf, offset);
     }
 
     /**
@@ -2310,7 +2241,7 @@ public class IOUtils {
      * @return the long value at the specified offset
      */
     public static long getLongUnaligned(char[] buf, int offset) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+        return BYTES.getLongUnaligned(buf, offset);
     }
 
     /**
@@ -2323,8 +2254,7 @@ public class IOUtils {
      * @return the long value at the specified offset in little-endian order
      */
     public static long getLongLE(byte[] buf, int offset) {
-        return convEndian(false,
-                UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset));
+        return BYTES.getLongLE(buf, offset);
     }
 
     /**
@@ -2337,11 +2267,7 @@ public class IOUtils {
      * @return the long value at the specified offset in little-endian order
      */
     public static long getLongLE(char[] buf, int offset) {
-        long v = UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
-        if (BIG_ENDIAN) {
-            v = Long.reverseBytes(v);
-        }
-        return v;
+        return BYTES.getLongLE(buf, offset);
     }
 
     /**

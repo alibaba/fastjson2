@@ -281,8 +281,8 @@ class JSONWriterUTF16
         final int upperBound = (value.length - coff) & ~7;
         long vec64;
         for (; coff < upperBound && StringUtils.noneEscaped(vec64 = getLongLE(value, coff), vecQuote); coff += 8) {
-            IOUtils.putLongLE(chars, off, expand(vec64));
-            IOUtils.putLongLE(chars, off + 4, expand(vec64 >>> 32));
+            BYTES.putLongLE(chars, off, expand(vec64));
+            BYTES.putLongLE(chars, off + 4, expand(vec64 >>> 32));
             off += 8;
         }
         if (!escape) {
@@ -372,8 +372,8 @@ class JSONWriterUTF16
                 long v0 = getLongLE(value, i << 1);
                 long v1 = getLongLE(value, (i + 4) << 1);
                 if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && StringUtils.noneEscaped((v0 << 8) | v1, vecQuote)) {
-                    putLongLE(chars, off, v0);
-                    putLongLE(chars, off + 4, v1);
+                    BYTES.putLongLE(chars, off, v0);
+                    BYTES.putLongLE(chars, off + 4, v1);
                     i += 8;
                     off += 8;
                     continue;
@@ -2370,7 +2370,7 @@ class JSONWriterUTF16
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                IOUtils.putLongLE(chars, off, (DIGITS_K_64[millis & 0x3ff] & 0xffffffffffff0000L) | DOT_X0);
+                BYTES.putLongLE(chars, off, (DIGITS_K_64[millis & 0x3ff] & 0xffffffffffff0000L) | DOT_X0);
                 off += 4;
             } else {
                 chars[off++] = '.';
@@ -2956,8 +2956,8 @@ class JSONWriterUTF16
                 long v0 = getLongLE(value, i);
                 long v1 = getLongLE(value, i + 4);
                 if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && StringUtils.noneEscaped((v0 << 8) | v1, vecQuote)) {
-                    putLongLE(chars, off, v0);
-                    putLongLE(chars, off + 4, v1);
+                    BYTES.putLongLE(chars, off, v0);
+                    BYTES.putLongLE(chars, off + 4, v1);
                     i += 8;
                     off += 8;
                     continue;

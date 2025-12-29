@@ -2350,7 +2350,7 @@ public interface JSONB {
             }
 
             bytes[off] = BC_DOUBLE;
-            IOUtils.putLongBE(bytes, off + 1, Double.doubleToLongBits(value));
+            BYTES.putLongBE(bytes, off + 1, Double.doubleToLongBits(value));
             return off + 9;
         }
 
@@ -2654,7 +2654,7 @@ public interface JSONB {
                 off += 5;
             } else {
                 bytes[off] = BC_INT64;
-                putLongBE(bytes, off + 1, value);
+                BYTES.putLongBE(bytes, off + 1, value);
                 off += 9;
             }
             return off;
@@ -3026,8 +3026,8 @@ public interface JSONB {
                 return off + 1;
             }
             BYTES.putShortLE(bytes, off, (short) ((BC_BINARY & 0xFF) | ((BC_INT32_NUM_16 & 0xFF) << 8)));
-            putLongBE(bytes, off + 2, value.getMostSignificantBits());
-            putLongBE(bytes, off + 10, value.getLeastSignificantBits());
+            BYTES.putLongBE(bytes, off + 2, value.getMostSignificantBits());
+            BYTES.putLongBE(bytes, off + 10, value.getLeastSignificantBits());
             return off + 18;
         }
 

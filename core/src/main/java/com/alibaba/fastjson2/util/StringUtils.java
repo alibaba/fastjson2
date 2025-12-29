@@ -322,13 +322,13 @@ public class StringUtils {
     }
 
     public static void writeU4Hex2(char[] chars, int off, int c) {
-        putLongUnaligned(chars, off, UTF16.U4);
+        BYTES.putLongUnaligned(chars, off, UTF16.U4);
         BYTES.putIntLE(chars, off + 4, utf16Hex2(c));
     }
 
     public static void writeU4HexU(char[] chars, int off, int c) {
         BYTES.putIntUnaligned(chars, off, UTF16.U2);
-        putLongLE(chars, off + 2, utf16Hex4U(c));
+        BYTES.putLongLE(chars, off + 2, utf16Hex4U(c));
     }
 
     public static boolean escaped(byte[] value, byte quote, long vecQuote) {

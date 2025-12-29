@@ -869,7 +869,7 @@ final class JSONWriterJSONB
         }
 
         bytes[off] = BC_TIMESTAMP_MILLIS;
-        putLongBE(bytes, off + 1, millis);
+        BYTES.putLongBE(bytes, off + 1, millis);
         this.off = off + 9;
     }
 
