@@ -360,7 +360,7 @@ public final class DoubleToDecimal {
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        }else if (t != 0) {
+        } else if (t != 0) {
             if (json && writeSpecialAsString) {
                 bytes[1 + index] = '"';
                 bytes[2 + index] = 'N';
@@ -716,7 +716,7 @@ public final class DoubleToDecimal {
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        }else if (t != 0) {
+        } else if (t != 0) {
             if (json && writeSpecialAsString) {
                 bytes[1 + index] = '"';
                 bytes[2 + index] = 'N';
@@ -1000,7 +1000,7 @@ public final class DoubleToDecimal {
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        }else if (t != 0) {
+        } else if (t != 0) {
             if (json && writeSpecialAsString) {
                 bytes[1 + index] = '"';
                 bytes[2 + index] = 'N';
@@ -1284,7 +1284,7 @@ public final class DoubleToDecimal {
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        }else if (t != 0) {
+        } else if (t != 0) {
             if (json && writeSpecialAsString) {
                 bytes[1 + index] = '"';
                 bytes[2 + index] = 'N';

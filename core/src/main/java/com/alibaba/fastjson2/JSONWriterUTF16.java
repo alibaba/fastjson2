@@ -2318,7 +2318,6 @@ final class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = '[';
 
-
         if (!Double.isFinite(value0)) {
             int len0 = DoubleToDecimal.toString(value0, chars, off, true, writeSpecialAsString);
             off += len0;
@@ -2333,9 +2332,7 @@ final class JSONWriterUTF16
             }
         }
 
-
         chars[off++] = ',';
-
 
         if (!Double.isFinite(value1)) {
             int len1 = DoubleToDecimal.toString(value1, chars, off, true, writeSpecialAsString);
