@@ -224,11 +224,11 @@ public class IOUtils {
             charPos -= 2;
             writeDigitPair(buf, charPos, -i);
         } else {
-            putByte(buf, --charPos, (byte) ('0' - i));
+            BYTES.putByte(buf, --charPos, (byte) ('0' - i));
         }
 
         if (negative) {
-            putByte(buf, charPos - 1, (byte) '-');
+            BYTES.putByte(buf, charPos - 1, (byte) '-');
         }
     }
 
@@ -265,11 +265,11 @@ public class IOUtils {
             charPos -= 2;
             writeDigitPair(buf, charPos, -i);
         } else {
-            putChar(buf, --charPos, (char) ('0' - i));
+            BYTES.putChar(buf, --charPos, (char) ('0' - i));
         }
 
         if (negative) {
-            putChar(buf, charPos - 1, '-');
+            BYTES.putChar(buf, charPos - 1, '-');
         }
     }
 
@@ -316,11 +316,11 @@ public class IOUtils {
             charPos -= 2;
             writeDigitPair(buf, charPos, -i2);
         } else {
-            putByte(buf, --charPos, (byte) ('0' - i2));
+            BYTES.putByte(buf, --charPos, (byte) ('0' - i2));
         }
 
         if (negative) {
-            putByte(buf, charPos - 1, (byte) '-');
+            BYTES.putByte(buf, charPos - 1, (byte) '-');
         }
     }
 
@@ -366,11 +366,11 @@ public class IOUtils {
             charPos -= 2;
             writeDigitPair(buf, charPos, -i2);
         } else {
-            putChar(buf, --charPos, (char) ('0' - i2));
+            BYTES.putChar(buf, --charPos, (char) ('0' - i2));
         }
 
         if (negative) {
-            putChar(buf, charPos - 1, '-');
+            BYTES.putChar(buf, charPos - 1, '-');
         }
     }
 
@@ -387,7 +387,7 @@ public class IOUtils {
      */
     public static int writeDecimal(byte[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
-            putByte(buf, off++, (byte) '-');
+            BYTES.putByte(buf, off++, (byte) '-');
             unscaledVal = -unscaledVal;
         }
 
@@ -402,17 +402,17 @@ public class IOUtils {
                 off += 2;
 
                 for (int i = 0; i < -insertionPoint; i++) {
-                    putByte(buf, off++, (byte) '0');
+                    BYTES.putByte(buf, off++, (byte) '0');
                 }
             } else {
                 long power = POWER_TEN[scale - 1];
                 long div = unscaledVal / power;
                 long rem = unscaledVal - div * power;
                 off = IOUtils.writeInt64(buf, off, div);
-                putByte(buf, off, (byte) '.');
+                BYTES.putByte(buf, off, (byte) '.');
 
                 if (scale == 1) {
-                    putByte(buf, off + 1, (byte) (rem + '0'));
+                    BYTES.putByte(buf, off + 1, (byte) (rem + '0'));
                     return off + 2;
                 } else if (scale == 2) {
                     writeDigitPair(buf, off + 1, (int) rem);
@@ -420,7 +420,7 @@ public class IOUtils {
                 }
 
                 for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
-                    putByte(buf, ++off, (byte) '0');
+                    BYTES.putByte(buf, ++off, (byte) '0');
                 }
                 return IOUtils.writeInt64(buf, off + 1, rem);
             }
@@ -442,7 +442,7 @@ public class IOUtils {
      */
     public static int writeDecimal(char[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
-            putChar(buf, off++, '-');
+            BYTES.putChar(buf, off++, '-');
             unscaledVal = -unscaledVal;
         }
 
@@ -457,17 +457,17 @@ public class IOUtils {
                 buf[off++] = '.';
 
                 for (int i = 0; i < -insertionPoint; i++) {
-                    putChar(buf, off++, '0');
+                    BYTES.putChar(buf, off++, '0');
                 }
             } else {
                 long power = POWER_TEN[scale - 1];
                 long div = unscaledVal / power;
                 long rem = unscaledVal - div * power;
                 off = IOUtils.writeInt64(buf, off, div);
-                putChar(buf, off, '.');
+                BYTES.putChar(buf, off, '.');
 
                 if (scale == 1) {
-                    putChar(buf, off + 1, (char) (rem + '0'));
+                    BYTES.putChar(buf, off + 1, (char) (rem + '0'));
                     return off + 2;
                 } else if (scale == 2) {
                     writeDigitPair(buf, off + 1, (int) rem);
@@ -475,7 +475,7 @@ public class IOUtils {
                 }
 
                 for (int i = 0, end = unscaleValSize - stringSize(rem) - insertionPoint; i < end; ++i) {
-                    putChar(buf, ++off, '0');
+                    BYTES.putChar(buf, ++off, '0');
                 }
                 return IOUtils.writeInt64(buf, off + 1, rem);
             }
@@ -1114,7 +1114,7 @@ public class IOUtils {
         BYTES.putShortLE(buf, off, (short) (v >> 8));
         off += 2;
         if (rem1 == 0) {
-            putByte(buf, off, (byte) (v >> 24));
+            BYTES.putByte(buf, off, (byte) (v >> 24));
             return off + 1;
         }
 
@@ -1155,7 +1155,7 @@ public class IOUtils {
         BYTES.putIntLE(buf, off, (int) (v >> 16));
         off += 2;
         if (rem1 == 0) {
-            putChar(buf, off, (char) (v >> 48));
+            BYTES.putChar(buf, off, (char) (v >> 48));
             return off + 1;
         }
 
@@ -1176,9 +1176,9 @@ public class IOUtils {
      */
     public static void writeLocalTime(char[] buf, int off, int hour, int minute, int second) {
         writeDigitPair(buf, off, hour);
-        putChar(buf, off + 2, ':');
+        BYTES.putChar(buf, off + 2, ':');
         writeDigitPair(buf, off + 3, minute);
-        putChar(buf, off + 5, ':');
+        BYTES.putChar(buf, off + 5, ':');
         writeDigitPair(buf, off + 6, second);
     }
 
@@ -1285,7 +1285,7 @@ public class IOUtils {
                 return off + MIN_LONG_BYTES.length;
             }
             val = -val;
-            putByte(buf, off++, (byte) ('-'));
+            BYTES.putByte(buf, off++, (byte) ('-'));
         }
 
         if (val <= Integer.MAX_VALUE) {
@@ -1350,7 +1350,7 @@ public class IOUtils {
                 return off + MIN_LONG_CHARS.length;
             }
             val = -val;
-            putChar(buf, off++, '-');
+            BYTES.putChar(buf, off++, '-');
         }
 
         if (val <= Integer.MAX_VALUE) {
@@ -1412,7 +1412,7 @@ public class IOUtils {
         int i;
         if (value < 0) {
             i = -value;
-            putByte(buf, pos++, (byte) '-');
+            BYTES.putByte(buf, pos++, (byte) '-');
         } else {
             i = value;
         }
@@ -1423,9 +1423,9 @@ public class IOUtils {
             BYTES.putShortLE(buf, pos, (short) (v >> 8));
             pos += 2;
         } else if (start == 1) {
-            putByte(buf, pos++, (byte) (v >> 16));
+            BYTES.putByte(buf, pos++, (byte) (v >> 16));
         }
-        putByte(buf, pos, (byte) (v >> 24));
+        BYTES.putByte(buf, pos, (byte) (v >> 24));
         return pos + 1;
     }
 
@@ -1444,7 +1444,7 @@ public class IOUtils {
         int i;
         if (value < 0) {
             i = -value;
-            putChar(buf, pos++, '-');
+            BYTES.putChar(buf, pos++, '-');
         } else {
             i = value;
         }
@@ -1455,9 +1455,9 @@ public class IOUtils {
             BYTES.putIntLE(buf, pos, (int) (v >> 16));
             pos += 2;
         } else if (start == 1) {
-            putChar(buf, pos++, (char) (v >> 32));
+            BYTES.putChar(buf, pos++, (char) (v >> 32));
         }
-        putChar(buf, pos, (char) (v >> 48));
+        BYTES.putChar(buf, pos, (char) (v >> 48));
         return pos + 1;
     }
 
@@ -1476,7 +1476,7 @@ public class IOUtils {
         int i;
         if (value < 0) {
             i = -value;
-            putByte(buf, pos++, (byte) '-');
+            BYTES.putByte(buf, pos++, (byte) '-');
         } else {
             i = value;
         }
@@ -1488,16 +1488,16 @@ public class IOUtils {
                 BYTES.putShortLE(buf, pos, (short) (v >> 8));
                 pos += 2;
             } else if (start == 1) {
-                putByte(buf, pos++, (byte) (v >> 16));
+                BYTES.putByte(buf, pos++, (byte) (v >> 16));
             }
-            putByte(buf, pos, (byte) (v >> 24));
+            BYTES.putByte(buf, pos, (byte) (v >> 24));
             return pos + 1;
         }
 
         final int q1 = (int) (i * 274877907L >> 38); // i / 1000;
         final int v2 = DIGITS_K_32[q1 & 0x3ff];
         if ((byte) v2 == 1) {
-            putByte(buf, pos++, (byte) (v2 >> 16));
+            BYTES.putByte(buf, pos++, (byte) (v2 >> 16));
         }
         BYTES.putIntLE(buf, pos, (DIGITS_K_32[(i - q1 * 1000) & 0x3ff]) & 0xffffff00 | (v2 >> 24));
         return pos + 4;
@@ -1518,7 +1518,7 @@ public class IOUtils {
         int i;
         if (value < 0) {
             i = -value;
-            putChar(buf, pos++, '-');
+            BYTES.putChar(buf, pos++, '-');
         } else {
             i = value;
         }
@@ -1530,16 +1530,16 @@ public class IOUtils {
                 BYTES.putIntLE(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
-                putChar(buf, pos++, (char) (v >> 32));
+                BYTES.putChar(buf, pos++, (char) (v >> 32));
             }
-            putChar(buf, pos, (char) (v >> 48));
+            BYTES.putChar(buf, pos, (char) (v >> 48));
             return pos + 1;
         }
 
         final int q1 = (int) (i * 274877907L >> 38); // i / 1000;
         final long v2 = DIGITS_K_64[q1 & 0x3ff];
         if ((byte) v2 == 1) {
-            putChar(buf, pos++, (char) (v2 >> 32));
+            BYTES.putChar(buf, pos++, (char) (v2 >> 32));
         }
         BYTES.putLongLE(buf, pos, DIGITS_K_64[(i - q1 * 1000) & 0x3ff] & 0xffffffffffff0000L | (v2 >> 48));
         return pos + 4;
@@ -1559,7 +1559,7 @@ public class IOUtils {
     public static int writeInt32(final byte[] buf, int off, long val) {
         if (val < 0) {
             val = -val;
-            putByte(buf, off++, (byte) ('-'));
+            BYTES.putByte(buf, off++, (byte) ('-'));
         }
         int v, v1;
         if (val < 10000) {
@@ -1605,7 +1605,7 @@ public class IOUtils {
     public static int writeInt32(final char[] buf, int off, long val) {
         if (val < 0) {
             val = -val;
-            putChar(buf, off++, '-');
+            BYTES.putChar(buf, off++, '-');
         }
         int v, v1;
         if (val < 10000) {
@@ -1635,53 +1635,6 @@ public class IOUtils {
         val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         off = writeInt3(buf, off, (int) val);
         return writeInt8(buf, off, (int) (numValue - val * 10000), v1);
-    }
-
-    /**
-     * Gets a byte value from a byte array at the specified position.
-     * This method retrieves a byte value from the specified byte array at the given position
-     * using unsafe memory operations for improved performance.
-     *
-     * @param buf the byte array buffer to read from
-     * @param pos the position in the buffer where to read the byte value
-     * @return the byte value at the specified position
-     */
-    public static byte getByte(byte[] buf, int pos) {
-        return UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + pos);
-    }
-
-    /**
-     * Gets a character value from a character array at the specified position.
-     * This method retrieves a character value from the specified character array at the given position
-     * using unsafe memory operations for improved performance.
-     *
-     * @param buf the character array buffer to read from
-     * @param pos the position in the buffer where to read the character value
-     * @return the character value at the specified position
-     */
-    public static char getChar(char[] buf, int pos) {
-        return UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
-    }
-
-    /**
-     * Gets a character value from a byte array at the specified position.
-     * This method retrieves a character value from the specified byte array at the given position
-     * using unsafe memory operations for improved performance.
-     *
-     * @param buf the byte array buffer to read from
-     * @param pos the position in the buffer where to read the character value
-     * @return the character value at the specified position
-     */
-    public static char getChar(byte[] buf, int pos) {
-        return UNSAFE.getChar(buf, ARRAY_BYTE_BASE_OFFSET + ((long) pos << 1));
-    }
-
-    private static void putByte(byte[] buf, int pos, byte v) {
-        UNSAFE.putByte(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
-    }
-
-    private static void putChar(char[] buf, int pos, char v) {
-        UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
     /**

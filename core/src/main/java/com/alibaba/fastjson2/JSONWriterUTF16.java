@@ -379,7 +379,7 @@ class JSONWriterUTF16
                     continue;
                 }
             }
-            char c = getChar(value, i++);
+            char c = BYTES.getChar(value, i++);
             if (c == '\\' || c == quote || c < ' ') {
                 escape = true;
                 break;
@@ -410,7 +410,7 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = quote;
         for (int i = 0, char_len = value.length; i < char_len; i++) {
-            char c = getChar(value, i);
+            char c = BYTES.getChar(value, i);
             if (c == '\\'
                     || c == quote
                     || c < ' '
@@ -449,7 +449,7 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = quote;
         for (int i = 0, char_len = value.length >> 1; i < char_len; i++) {
-            char c = getChar(value, i);
+            char c = BYTES.getChar(value, i);
             if (c == '\\'
                     || c == quote
                     || c < ' '
@@ -2963,7 +2963,7 @@ class JSONWriterUTF16
                     continue;
                 }
             }
-            char c = getChar(value, i++);
+            char c = BYTES.getChar(value, i++);
             if (c == '\\' || c == quote || c < ' ') {
                 escape = true;
                 break;

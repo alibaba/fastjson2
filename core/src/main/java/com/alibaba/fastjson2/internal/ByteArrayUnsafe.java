@@ -7,6 +7,53 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public final class ByteArrayUnsafe extends ByteArray {
     /**
+     * Gets a byte value from a byte array at the specified position.
+     * This method retrieves a byte value from the specified byte array at the given position
+     * using unsafe memory operations for improved performance.
+     *
+     * @param buf the byte array buffer to read from
+     * @param pos the position in the buffer where to read the byte value
+     * @return the byte value at the specified position
+     */
+    public byte getByte(byte[] buf, int pos) {
+        return UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + pos);
+    }
+
+    /**
+     * Gets a character value from a character array at the specified position.
+     * This method retrieves a character value from the specified character array at the given position
+     * using unsafe memory operations for improved performance.
+     *
+     * @param buf the character array buffer to read from
+     * @param pos the position in the buffer where to read the character value
+     * @return the character value at the specified position
+     */
+    public char getChar(char[] buf, int pos) {
+        return UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
+    }
+
+    /**
+     * Gets a character value from a byte array at the specified position.
+     * This method retrieves a character value from the specified byte array at the given position
+     * using unsafe memory operations for improved performance.
+     *
+     * @param buf the byte array buffer to read from
+     * @param pos the position in the buffer where to read the character value
+     * @return the character value at the specified position
+     */
+    public char getChar(byte[] buf, int pos) {
+        return UNSAFE.getChar(buf, ARRAY_BYTE_BASE_OFFSET + ((long) pos << 1));
+    }
+
+    public void putByte(byte[] buf, int pos, byte v) {
+        UNSAFE.putByte(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
+    }
+
+    public void putChar(char[] buf, int pos, char v) {
+        UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
+    }
+
+    /**
      * Writes a short value to a byte array in big-endian byte order.
      * This method puts a short value into the specified byte array at the given position
      * using big-endian byte ordering (most significant byte first).

@@ -4574,8 +4574,8 @@ final class JSONReaderJSONB
         int type = bytes[offset++];
         if (type == BC_LOCAL_DATE && offset + 3 < this.end) {
             int year = BYTES.getShortBE(bytes, offset);
-            int month = getByte(bytes, offset + 2);
-            int dayOfMonth = getByte(bytes, offset + 3);
+            int month = BYTES.getByte(bytes, offset + 2);
+            int dayOfMonth = BYTES.getByte(bytes, offset + 3);
             this.offset = offset + 4;
             return LocalDate.of(year, month, dayOfMonth);
         }

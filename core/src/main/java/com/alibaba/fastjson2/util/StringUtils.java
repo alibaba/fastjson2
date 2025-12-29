@@ -185,7 +185,7 @@ public class StringUtils {
 
         int coff = 0, char_len = value.length >> 1;
         while (coff < char_len) {
-            char c = IOUtils.getChar(value, coff++);
+            char c = BYTES.getChar(value, coff++);
             if (c < 0x80) {
                 switch (c) {
                     case '\\':
@@ -263,7 +263,7 @@ public class StringUtils {
                         if (coff + 1 > char_len) {
                             uc = -1;
                         } else {
-                            char d = getChar(value, coff);
+                            char d = BYTES.getChar(value, coff);
                             // d >= '\uDC00' && d < ('\uDFFF' + 1)
                             if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
                                 coff++;
