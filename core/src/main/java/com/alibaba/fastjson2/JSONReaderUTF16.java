@@ -3755,10 +3755,10 @@ final class JSONReaderUTF16
             int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
             if (numDigits > 38) {
                 valueType = JSON_TYPE_BIG_DEC;
-                if (negative) {
-                    numStart--;
-                }
-                stringValue = new String(chars, numStart, offset - 1 - numStart);
+//                if (negative) {
+//                    numStart--;
+//                }
+//                stringValue = new String(chars, numStart, offset - 1 - numStart);
             } else {
                 bigInt(chars, numStart, offset - 1);
             }
@@ -3798,7 +3798,13 @@ final class JSONReaderUTF16
             }
 
             this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
+            if (valueType != JSON_TYPE_BIG_DEC) {
+                valueType = JSON_TYPE_DEC;
+            }
+        }
+
+        if (valueType == JSON_TYPE_BIG_DEC) {
+            stringValue = new String(chars, start - 1, offset - start);
         }
 
         if (offset == start) {
