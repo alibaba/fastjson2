@@ -872,8 +872,12 @@ public abstract class JSONWriter
             return;
         }
 
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
-            writeNull();
+        if (!Float.isFinite(value)) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                writeFloat(value);
+            } else {
+                writeNull();
+            }
             return;
         }
 
@@ -913,6 +917,14 @@ public abstract class JSONWriter
             if (i != 0) {
                 writeComma();
             }
+            if (!Float.isFinite(value[i])) {
+                if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                    writeFloat(value[i]);
+                } else {
+                    writeNull();
+                }
+                continue;
+            }
             String str = format.format(value[i]);
             writeRaw(str);
         }
@@ -935,8 +947,12 @@ public abstract class JSONWriter
             return;
         }
 
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            writeNull();
+        if (!Double.isFinite(value)) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                writeDouble(value);
+            } else {
+                writeNull();
+            }
             return;
         }
 
@@ -968,7 +984,14 @@ public abstract class JSONWriter
             if (i != 0) {
                 writeComma();
             }
-
+            if (!Double.isFinite(value[i])) {
+                if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                    writeDouble(value[i]);
+                } else {
+                    writeNull();
+                }
+                continue;
+            }
             String str = format.format(value[i]);
             writeRaw(str);
         }
@@ -2128,7 +2151,14 @@ public abstract class JSONWriter
          */
         PrettyFormatWith4Space(1L << 43),
 
-        WriterUtilDateAsMillis(1L << 44);
+        WriterUtilDateAsMillis(1L << 44),
+
+        /**
+         * Feature that determines whether to write float/double NaN and Infinite values as Strings.
+         * When enabled, NaN/Infinity will be serialized as "NaN", "Infinity", "-Infinity".
+         * @since 2.0.61
+         */
+        WriteFloatSpecialAsString(1L << 45);
 
         public final long mask;
 
