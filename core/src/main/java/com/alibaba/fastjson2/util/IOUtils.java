@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.time.LocalTime;
 
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.NumberUtils.MULTIPLY_HIGH;
 
@@ -2050,199 +2051,6 @@ public class IOUtils {
     }
 
     /**
-     * Extracts a 4-digit number from a character array at the specified offset.
-     * This method performs optimized digit extraction by processing 4 characters at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the character array to extract digits from
-     * @param off the offset in the array where to start extracting
-     * @return the extracted 4-digit number, or -1 if the characters are not valid digits
-     */
-    public static int digit4(char[] buf, int off) {
-        long x = getLongLE(buf, off);
-        long d;
-        if ((((x & 0xFFF0FFF0FFF0FFF0L) - 0x30003000300030L) | (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L)) != 0) {
-            return -1;
-        }
-        return (int) ((
-                ((d & 0xF) * 10 +
-                ((d >> 16) & 0xF)) * 10 +
-                ((d >> 32) & 0xF)) * 10 +
-                (d >> 48));
-    }
-
-    /**
-     * Extracts a 4-digit number from a byte array at the specified offset.
-     * This method performs optimized digit extraction by processing 4 bytes at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the byte array to extract digits from
-     * @param off the offset in the array where to start extracting
-     * @return the extracted 4-digit number, or -1 if the bytes are not valid digits
-     */
-    public static int digit4(byte[] buf, int off) {
-        return digit4(
-                getIntLE(buf, off)
-        );
-    }
-
-    /**
-     * Extracts a 4-digit number from an integer value.
-     * This method performs optimized digit extraction on a packed integer containing 4 digits
-     * using vector operations for improved performance.
-     *
-     * @param x the integer containing packed digit information
-     * @return the extracted 4-digit number, or -1 if the value does not contain valid digits
-     */
-    private static int digit4(int x) {
-        /*
-            Here we are doing a 4-Byte Vector operation on the Int type.
-
-            x & 0xF0 != 0xC0
-            ---------------
-            0 0b0011_0000 & 0b1111_0000 = 0b0011_0000
-            1 0b0011_0001 & 0b1111_0000 = 0b0011_0000
-            2 0b0011_0010 & 0b1111_0000 = 0b0011_0000
-            3 0b0011_0011 & 0b1111_0000 = 0b0011_0000
-            4 0b0011_0100 & 0b1111_0000 = 0b0011_0000
-            5 0b0011_0101 & 0b1111_0000 = 0b0011_0000
-            6 0b0011_0110 & 0b1111_0000 = 0b0011_0000
-            7 0b0011_0111 & 0b1111_0000 = 0b0011_0000
-            8 0b0011_1000 & 0b1111_0000 = 0b0011_0000
-            9 0b0011_1001 & 0b1111_0000 = 0b0011_0000
-
-            (((d = x & 0x0F) + 0x06) & 0xF0) != 0
-            ---------------
-            0 ((0b0011_0000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            1 ((0b0011_0001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            2 ((0b0011_0010) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            3 ((0b0011_0011) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            4 ((0b0011_0100) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            5 ((0b0011_0101) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            6 ((0b0011_0110) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            7 ((0b0011_0111) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            8 ((0b0011_1000) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-            9 ((0b0011_1001) & 0b0000_1111 + 0b0110_0000) & 0b1111_0000 = 0b0110_0000
-         */
-        int d;
-        if ((((x & 0xF0F0F0F0) - 0x30303030) | (((d = x & 0x0F0F0F0F) + 0x06060606) & 0xF0F0F0F0)) != 0) {
-            return -1;
-        }
-        return (((d & 0xF) * 10 +
-                ((d >> 8) & 0xF)) * 10 +
-                ((d >> 16) & 0xF)) * 10 +
-                (d >> 24);
-    }
-
-    /**
-     * Extracts a 3-digit number from a character array at the specified offset.
-     * This method performs optimized digit extraction by processing 3 characters at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the character array to extract digits from
-     * @param off the offset in the array where to start extracting
-     * @return the extracted 3-digit number, or -1 if the characters are not valid digits
-     */
-    public static int digit3(char[] buf, int off) {
-        long x = getIntLE(buf, off) + (((long) getChar(buf, off + 2)) << 32);
-        long d;
-        if ((((x & 0xFFF0FFF0FFF0L) - 0x3000300030L) | (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L)) != 0) {
-            return -1;
-        }
-        return (int) (((d & 0xF) * 10 + ((d >> 16) & 0xF)) * 10 + (d >> 32));
-    }
-
-    /**
-     * Extracts a 3-digit number from a byte array at the specified offset.
-     * This method performs optimized digit extraction by processing 3 bytes at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the byte array to extract digits from
-     * @param off the offset in the array where to start extracting
-     * @return the extracted 3-digit number, or -1 if the bytes are not valid digits
-     */
-    public static int digit3(byte[] buf, int off) {
-        return digit3(
-                getShortLE(buf, off) | (getByte(buf, off + 2) << 16)
-        );
-    }
-
-    /**
-     * Extracts a 3-digit number from an integer value.
-     * This method performs optimized digit extraction on a packed integer containing 3 digits
-     * using vector operations for improved performance.
-     *
-     * @param x the integer containing packed digit information
-     * @return the extracted 3-digit number, or -1 if the value does not contain valid digits
-     */
-    private static int digit3(int x) {
-        int d;
-        if ((((x & 0xF0F0F0) - 0x303030) | (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0)) != 0) {
-            return -1;
-        }
-        return ((d & 0xF) * 10 + ((d >> 8) & 0xF)) * 10 + (d >> 16);
-    }
-
-    /**
-     * Extracts a 2-digit number from a character array at the specified offset.
-     * This method performs optimized digit extraction by processing 2 characters at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the character array to extract digits from
-     * @param off the offset in the array where to start extracting
-     * @return the extracted 2-digit number, or -1 if the characters are not valid digits
-     */
-    public static int digit2(char[] buf, int off) {
-        int x = UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
-        if (BIG_ENDIAN) {
-            x = Integer.reverseBytes(x);
-        }
-        int d;
-        if ((((x & 0xFFF0FFF0) - 0x300030) | (((d = x & 0x0F000F) + 0x060006) & 0xF000F0)) != 0) {
-            return -1;
-        }
-        return (d & 0xF) * 10 + (d >> 16);
-    }
-
-    /**
-     * Extracts a 2-digit number from a byte array at the specified offset.
-     * This method performs optimized digit extraction by processing 2 bytes at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the byte array to extract digits from
-     * @param off the offset in the array where to start extracting
-     * @return the extracted 2-digit number, or -1 if the bytes are not valid digits
-     */
-    public static int digit2(byte[] buf, int off) {
-        short x = UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            x = Short.reverseBytes(x);
-        }
-        int d;
-        if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0) {
-            return -1;
-        }
-        return (d & 0xF) * 10 + (d >> 8);
-    }
-
-    /**
-     * Checks if the 2 characters at the specified offset in a character array represent valid digits.
-     * This method performs optimized digit validation by processing 2 characters at once
-     * using vector operations for improved performance.
-     *
-     * @param buf the character array to check
-     * @param off the offset in the array where to start checking
-     * @return true if both characters represent valid digits (0-9), false otherwise
-     */
-    public static boolean isDigit2(char[] buf, int off) {
-        int x = UNSAFE.getShort(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
-        if (BIG_ENDIAN) {
-            x = Integer.reverseBytes(x);
-        }
-        return ((((x & 0xFFF0FFF0) - 0x300030) | (((x & 0x0F000F) + 0x060006) & 0xF000F0)) == 0);
-    }
-
-    /**
      * Validates if the specified integer value represents a single digit (0-9).
      * This method checks if the input value is within the valid digit range.
      *
@@ -2250,32 +2058,6 @@ public class IOUtils {
      * @return the input value if it's a valid digit (0-9), -1 otherwise
      */
     public static int digit(int d) {
-        return d >= 0 && d <= 9 ? d : -1;
-    }
-
-    /**
-     * Extracts a single digit from a character array at the specified offset.
-     * This method performs optimized digit extraction for a single character.
-     *
-     * @param buf the character array to extract the digit from
-     * @param off the offset in the array where to extract the digit
-     * @return the extracted digit value (0-9), or -1 if the character is not a valid digit
-     */
-    public static int digit1(char[] buf, int off) {
-        int d = UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
-        return d >= 0 && d <= 9 ? d : -1;
-    }
-
-    /**
-     * Extracts a single digit from a byte array at the specified offset.
-     * This method performs optimized digit extraction for a single byte.
-     *
-     * @param buf the byte array to extract the digit from
-     * @param off the offset in the array where to extract the digit
-     * @return the extracted digit value (0-9), or -1 if the byte is not a valid digit
-     */
-    public static int digit1(byte[] buf, int off) {
-        int d = UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + off) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
 
@@ -3088,7 +2870,7 @@ public class IOUtils {
         off++;
         int d;
         while (off + 1 < end
-                && (d = IOUtils.digit2(buf, off)) != -1
+                && (d = BYTES.digit2(buf, off)) != -1
                 && Integer.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             off += 2;

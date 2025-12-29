@@ -11,6 +11,7 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -3479,7 +3480,7 @@ class JSONReaderUTF8
                 : 1;  // or any value > 0
         int d;
         while (offset + 1 < end
-                && (d = IOUtils.digit2(bytes, offset)) != -1
+                && (d = BYTES.digit2(bytes, offset)) != -1
                 && Integer.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             offset += 2;
@@ -3550,7 +3551,7 @@ class JSONReaderUTF8
                 : 1;  // or any value > 0
         int d;
         while (offset + 1 < end
-                && (d = IOUtils.digit2(bytes, offset)) != -1
+                && (d = BYTES.digit2(bytes, offset)) != -1
                 && Long.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             offset += 2;
@@ -3632,7 +3633,7 @@ class JSONReaderUTF8
             int d;
             while (result <= 0
                     && offset + 1 < end
-                    && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                    && (d = BYTES.digit2(bytes, offset)) != -1) {
                 if (Long.MIN_VALUE / 100 <= result) {
                     result = result * 100 - d;  // overflow from d => result > 0
                     offset += 2;
@@ -3657,7 +3658,7 @@ class JSONReaderUTF8
                 offset++;
                 while (result <= 0
                         && offset + 1 < end
-                        && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                        && (d = BYTES.digit2(bytes, offset)) != -1) {
                     if (Long.MIN_VALUE / 100 <= result) {
                         result = result * 100 - d;  // overflow from d => result > 0
                         offset += 2;
@@ -3808,7 +3809,7 @@ class JSONReaderUTF8
             int d;
             while (result <= 0
                     && offset + 1 < end
-                    && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                    && (d = BYTES.digit2(bytes, offset)) != -1) {
                 if (Long.MIN_VALUE / 100 <= result) {
                     result = result * 100 - d;  // overflow from d => result > 0
                     offset += 2;
@@ -3833,7 +3834,7 @@ class JSONReaderUTF8
                 offset++;
                 while (result <= 0
                         && offset + 1 < end
-                        && (d = IOUtils.digit2(bytes, offset)) != -1) {
+                        && (d = BYTES.digit2(bytes, offset)) != -1) {
                     if (Long.MIN_VALUE / 100 <= result) {
                         result = result * 100 - d;  // overflow from d => result > 0
                         offset += 2;
@@ -5865,8 +5866,8 @@ class JSONReaderUTF8
                 && bytes[nextQuoteOffset - 3] == '-'
         ) {
             int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
-            int month = IOUtils.digit2(bytes, nextQuoteOffset - 5);
-            int dayOfMonth = IOUtils.digit2(bytes, nextQuoteOffset - 2);
+            int month = BYTES.digit2(bytes, nextQuoteOffset - 5);
+            int dayOfMonth = BYTES.digit2(bytes, nextQuoteOffset - 2);
             LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
             this.offset = nextQuoteOffset + 1;
             next();

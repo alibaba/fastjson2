@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.invoke.MethodType.methodType;
 
@@ -2125,7 +2126,7 @@ public class TypeUtils {
                 : 1;  // or any value > 0
         int d;
         while (off + 1 < max
-                && (d = IOUtils.digit2(bytes, off)) != -1
+                && (d = BYTES.digit2(bytes, off)) != -1
                 && Integer.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             off += 2;
@@ -2154,7 +2155,7 @@ public class TypeUtils {
                 : 1;  // or any value > 0
         int d;
         while (off + 1 < max
-                && (d = IOUtils.digit2(chars, off)) != -1
+                && (d = BYTES.digit2(chars, off)) != -1
                 && Integer.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             off += 2;
@@ -2183,7 +2184,7 @@ public class TypeUtils {
                 : 1;  // or any value > 0
         int d;
         while (off + 1 < max
-                && (d = IOUtils.digit2(bytes, off)) != -1
+                && (d = BYTES.digit2(bytes, off)) != -1
                 && Long.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             off += 2;
@@ -2212,7 +2213,7 @@ public class TypeUtils {
                 : 1;  // or any value > 0
         int d;
         while (off + 1 < max
-                && (d = IOUtils.digit2(chars, off)) != -1
+                && (d = BYTES.digit2(chars, off)) != -1
                 && Long.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             off += 2;

@@ -27,7 +27,7 @@ public class IOUtilsBench {
     @Benchmark
     public void digit4(Blackhole bh) throws Throwable {
         for (int i = 0; i < 1000; i += 8) {
-            bh.consume(com.alibaba.fastjson2.util.IOUtils.digit4(bytes, 0));
+            bh.consume(com.alibaba.fastjson2.internal.Conf.BYTES.digit4(bytes, 0));
         }
     }
 

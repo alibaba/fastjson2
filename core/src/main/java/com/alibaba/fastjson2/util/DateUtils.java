@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.DateUtils.DateTimeFormatPattern.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -433,12 +434,12 @@ public class DateUtils {
         int hour, minute;
         int second = 0;
         if (str[off + 2] == ':') {
-            hour = digit2(str, off);
-            minute = digit2(str, off + 3);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit2(str, off + 3);
         } else if (str[off + 1] == ':' && str[off + 3] == ':') {
-            hour = digit1(str, off);
-            minute = digit1(str, off + 2);
-            second = digit1(str, off + 4);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit1(str, off + 2);
+            second = BYTES.digit1(str, off + 4);
         } else {
             return null;
         }
@@ -461,12 +462,12 @@ public class DateUtils {
 
         int hour, minute, second = 0;
         if (str[off + 2] == ':') {
-            hour = digit2(str, off);
-            minute = digit2(str, off + 3);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit2(str, off + 3);
         } else if (str[off + 1] == ':' && str[off + 3] == ':') {
-            hour = digit1(str, off);
-            minute = digit1(str, off + 2);
-            second = digit1(str, off + 4);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit1(str, off + 2);
+            second = BYTES.digit1(str, off + 4);
         } else {
             return null;
         }
@@ -492,17 +493,17 @@ public class DateUtils {
 
         int hour, minute, second;
         if (str[off + 2] == ':' && c4 == ':') {
-            hour = digit2(str, off);
-            minute = digit1(str, off + 3);
-            second = digit1(str, off + 5);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit1(str, off + 3);
+            second = BYTES.digit1(str, off + 5);
         } else if (c1 == ':' && c4 == ':') {
-            hour = digit1(str, off);
-            minute = digit2(str, off + 2);
-            second = digit1(str, off + 5);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit2(str, off + 2);
+            second = BYTES.digit1(str, off + 5);
         } else if (c1 == ':' && str[off + 3] == ':') {
-            hour = digit1(str, off);
-            minute = digit1(str, off + 2);
-            second = digit2(str, off + 4);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit1(str, off + 2);
+            second = BYTES.digit2(str, off + 4);
         } else {
             return null;
         }
@@ -528,17 +529,17 @@ public class DateUtils {
 
         int hour, minute, second;
         if (str[off + 2] == ':' && c4 == ':') {
-            hour = digit2(str, off);
-            minute = digit1(str, off + 3);
-            second = digit1(str, off + 5);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit1(str, off + 3);
+            second = BYTES.digit1(str, off + 5);
         } else if (c1 == ':' && c4 == ':') {
-            hour = digit1(str, off);
-            minute = digit2(str, off + 2);
-            second = digit1(str, off + 5);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit2(str, off + 2);
+            second = BYTES.digit1(str, off + 5);
         } else if (c1 == ':' && str[off + 3] == ':') {
-            hour = digit1(str, off);
-            minute = digit1(str, off + 2);
-            second = digit2(str, off + 4);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit1(str, off + 2);
+            second = BYTES.digit2(str, off + 4);
         } else {
             return null;
         }
@@ -556,17 +557,17 @@ public class DateUtils {
 
         int hour, minute, second;
         if (str[off + 1] == ':' && c4 == ':') {
-            hour = digit1(str, off);
-            minute = digit2(str, off + 2);
-            second = digit2(str, off + 5);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit2(str, off + 2);
+            second = BYTES.digit2(str, off + 5);
         } else if (c2 == ':' && c4 == ':') {
-            hour = digit2(str, off);
-            minute = digit1(str, off + 3);
-            second = digit2(str, off + 5);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit1(str, off + 3);
+            second = BYTES.digit2(str, off + 5);
         } else if (c2 == ':' && str[off + 5] == ':') {
-            hour = digit2(str, off);
-            minute = digit2(str, off + 3);
-            second = digit1(str, off + 6);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit2(str, off + 3);
+            second = BYTES.digit1(str, off + 6);
         } else {
             return null;
         }
@@ -584,17 +585,17 @@ public class DateUtils {
 
         int hour, minute, second;
         if (str[off + 1] == ':' && c4 == ':') {
-            hour = digit1(str, off);
-            minute = digit2(str, off + 2);
-            second = digit2(str, off + 5);
+            hour = BYTES.digit1(str, off);
+            minute = BYTES.digit2(str, off + 2);
+            second = BYTES.digit2(str, off + 5);
         } else if (c2 == ':' && c4 == ':') {
-            hour = digit2(str, off);
-            minute = digit1(str, off + 3);
-            second = digit2(str, off + 5);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit1(str, off + 3);
+            second = BYTES.digit2(str, off + 5);
         } else if (c2 == ':' && str[off + 5] == ':') {
-            hour = digit2(str, off);
-            minute = digit2(str, off + 3);
-            second = digit1(str, off + 6);
+            hour = BYTES.digit2(str, off);
+            minute = BYTES.digit2(str, off + 3);
+            second = BYTES.digit1(str, off + 6);
         } else {
             return null;
         }
@@ -612,7 +613,7 @@ public class DateUtils {
     public static LocalTime parseLocalTime8(char[] bytes, int off) {
         return off + 8 > bytes.length || bytes[off + 2] != ':' || bytes[off + 5] != ':'
                 ? null
-                : localTime(digit2(bytes, off), digit2(bytes, off + 3), digit2(bytes, off + 6));
+                : localTime(BYTES.digit2(bytes, off), BYTES.digit2(bytes, off + 3), BYTES.digit2(bytes, off + 6));
     }
 
     public static LocalTime parseLocalTime(
@@ -671,10 +672,10 @@ public class DateUtils {
         if (off + 10 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         } else {
-            int hour = digit2(str, off);
-            int minute = digit2(str, off + 3);
-            int second = digit2(str, off + 6);
-            int millis = digit1(str, off + 9);
+            int hour = BYTES.digit2(str, off);
+            int minute = BYTES.digit2(str, off + 3);
+            int second = BYTES.digit2(str, off + 6);
+            int millis = BYTES.digit1(str, off + 9);
             if (millis > 0) {
                 millis *= 100000000;
             }
@@ -688,10 +689,10 @@ public class DateUtils {
         if (off + 10 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         } else {
-            int hour = digit2(str, off);
-            int minute = digit2(str, off + 3);
-            int second = digit2(str, off + 6);
-            int millis = digit1(str, off + 9);
+            int hour = BYTES.digit2(str, off);
+            int minute = BYTES.digit2(str, off + 3);
+            int second = BYTES.digit2(str, off + 6);
+            int millis = BYTES.digit1(str, off + 9);
             if (millis > 0) {
                 millis *= 100000000;
             }
@@ -709,7 +710,7 @@ public class DateUtils {
             int hour = (int) hms & 0xFF;
             int minute = (int) (hms >> 24) & 0xFF;
             int second = (int) (hms >> 48) & 0xFF;
-            int millis = digit2(str, off + 9);
+            int millis = BYTES.digit2(str, off + 9);
             if (millis > 0) {
                 millis *= 10000000;
             }
@@ -721,10 +722,10 @@ public class DateUtils {
         if (off + 11 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         } else {
-            int hour = digit2(str, off);
-            int minute = digit2(str, off + 3);
-            int second = digit2(str, off + 6);
-            int millis = digit2(str, off + 9);
+            int hour = BYTES.digit2(str, off);
+            int minute = BYTES.digit2(str, off + 3);
+            int second = BYTES.digit2(str, off + 6);
+            int millis = BYTES.digit2(str, off + 9);
             if (millis > 0) {
                 millis *= 10000000;
             }
@@ -742,7 +743,7 @@ public class DateUtils {
             int hour = (int) hms & 0xFF;
             int minute = (int) (hms >> 24) & 0xFF;
             int second = (int) (hms >> 48) & 0xFF;
-            int millis = digit3(str, off + 9);
+            int millis = BYTES.digit3(str, off + 9);
             if (millis > 0) {
                 millis *= 1000000;
             }
@@ -754,10 +755,10 @@ public class DateUtils {
         if (off + 12 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         } else {
-            int hour = digit2(str, off);
-            int minute = digit2(str, off + 3);
-            int second = digit2(str, off + 6);
-            int millis = digit3(str, off + 9);
+            int hour = BYTES.digit2(str, off);
+            int minute = BYTES.digit2(str, off + 3);
+            int second = BYTES.digit2(str, off + 6);
+            int millis = BYTES.digit3(str, off + 9);
             if (millis > 0) {
                 millis *= 1000000;
             }
@@ -783,9 +784,9 @@ public class DateUtils {
         if (off + 15 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         }
-        int hour = digit2(str, off);
-        int minute = digit2(str, off + 3);
-        int second = digit2(str, off + 6);
+        int hour = BYTES.digit2(str, off);
+        int minute = BYTES.digit2(str, off + 3);
+        int second = BYTES.digit2(str, off + 6);
         int nanos = readNanos(str, 6, off + 9);
         return (hour | minute | second | nanos) < 0
                 ? null
@@ -808,9 +809,9 @@ public class DateUtils {
         if (off + 18 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
             return null;
         }
-        int hour = digit2(str, off);
-        int minute = digit2(str, off + 3);
-        int second = digit2(str, off + 6);
+        int hour = BYTES.digit2(str, off);
+        int minute = BYTES.digit2(str, off + 3);
+        int second = BYTES.digit2(str, off + 6);
         int nanos = readNanos(str, 9, off + 9);
         return (hour | minute | second | nanos) < 0
                 ? null
@@ -1189,25 +1190,25 @@ public class DateUtils {
 
         int year, month, dom;
         if (c4 == '-' && str[off + 6] == '-') {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit1(str, off + 7);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit1(str, off + 7);
         } else if (c1 == '/' && c3 == '/') {
-            month = digit1(str, off);
-            dom = digit1(str, off + 2);
-            year = digit4(str, off + 4);
+            month = BYTES.digit1(str, off);
+            dom = BYTES.digit1(str, off + 2);
+            year = BYTES.digit4(str, off + 4);
         } else if (c1 == '-' && str[off + 5] == '-') {
             // d-MMM-yy
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month((char) str[off + 2], c3, c4);
-            year = digit2(str, off + 6);
+            year = BYTES.digit2(str, off + 6);
             if (year != -1) {
                 year += 2000;
             }
         } else {
-            year = digit4(str, off);
-            month = digit2(str, off + 4);
-            dom = digit2(str, off + 6);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 4);
+            dom = BYTES.digit2(str, off + 6);
         }
 
         if ((year | month | dom) <= 0) {
@@ -1233,25 +1234,25 @@ public class DateUtils {
 
         int year, month, dom;
         if (c4 == '-' && str[off + 6] == '-') {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit1(str, off + 7);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit1(str, off + 7);
         } else if (c1 == '/' && c3 == '/') {
-            month = digit1(str, off);
-            dom = digit1(str, off + 2);
-            year = digit4(str, off + 4);
+            month = BYTES.digit1(str, off);
+            dom = BYTES.digit1(str, off + 2);
+            year = BYTES.digit4(str, off + 4);
         } else if (c1 == '-' && str[off + 5] == '-') {
             // d-MMM-yy
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(str[off + 2], c3, c4);
-            year = digit2(str, off + 6);
+            year = BYTES.digit2(str, off + 6);
             if (year != -1) {
                 year += 2000;
             }
         } else {
-            year = digit4(str, off);
-            month = digit2(str, off + 4);
-            dom = digit2(str, off + 6);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 4);
+            dom = BYTES.digit2(str, off + 6);
         }
 
         if ((year | month | dom) <= 0) {
@@ -1281,47 +1282,47 @@ public class DateUtils {
         if ((c4 == '-' && c7 == '-')
                 || (c4 == '/' && c7 == '/') // tw : yyyy/mm/d
         ) {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit1(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit1(str, off + 8);
         } else if ((c4 == '-' && c6 == '-')
                 || (c4 == '/' && c6 == '/') // tw : yyyy/m/dd
         ) {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit2(str, off + 7);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit2(str, off + 7);
         } else if (c1 == '.' && c4 == '.') {
-            dom = digit1(str, off);
-            month = digit2(str, off + 2);
-            year = digit4(str, off + 5);
+            dom = BYTES.digit1(str, off);
+            month = BYTES.digit2(str, off + 2);
+            year = BYTES.digit4(str, off + 5);
         } else if ((c2 == '.' && c4 == '.')
                 || (c2 == '-' && c4 == '-')
         ) {
-            dom = digit2(str, off);
-            month = digit1(str, off + 3);
-            year = digit4(str, off + 5);
+            dom = BYTES.digit2(str, off);
+            month = BYTES.digit1(str, off + 3);
+            year = BYTES.digit4(str, off + 5);
         } else if (c1 == '-' && c4 == '-') {
-            dom = digit1(str, off);
-            month = digit2(str, off + 2);
-            year = digit4(str, off + 5);
+            dom = BYTES.digit1(str, off);
+            month = BYTES.digit2(str, off + 2);
+            year = BYTES.digit4(str, off + 5);
         } else if (c2 == '-' && c6 == '-') {
             // dd-MMM-yy
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month((char) str[off + 3], c4, (char) str[off + 5]);
-            year = digit2(str, off + 7);
+            year = BYTES.digit2(str, off + 7);
             if (year != -1) {
                 year += 2000;
             }
         } else if (c1 == '/' && c4 == '/') {
             // M/dd/dddd
-            month = digit1(str, off);
-            dom = digit2(str, off + 2);
-            year = digit4(str, off + 5);
+            month = BYTES.digit1(str, off);
+            dom = BYTES.digit2(str, off + 2);
+            year = BYTES.digit4(str, off + 5);
         } else if (c2 == '/' && c4 == '/') {
             // MM/d/dddd
-            month = digit2(str, off);
-            dom = digit1(str, off + 3);
-            year = digit4(str, off + 5);
+            month = BYTES.digit2(str, off);
+            dom = BYTES.digit1(str, off + 3);
+            year = BYTES.digit4(str, off + 5);
         } else {
             return null;
         }
@@ -1354,53 +1355,53 @@ public class DateUtils {
         if ((c4 == '-' && c7 == '-')
                 || (c4 == '/' && c7 == '/') // tw : yyyy/mm/d
         ) {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit1(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit1(str, off + 8);
         } else if ((c4 == '-' && c6 == '-')
                 || (c4 == '/' && c6 == '/') // tw : yyyy/m/dd
         ) {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit2(str, off + 7);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit2(str, off + 7);
         } else if ((c4 == '年' && c6 == '月' && c8 == '日')
                 || (c4 == '년' && c6 == '월' && c8 == '일')
         ) {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit1(str, off + 7);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit1(str, off + 7);
         } else if (c1 == '.' && c4 == '.') {
-            dom = digit1(str, off);
-            month = digit2(str, off + 2);
-            year = digit4(str, off + 5);
+            dom = BYTES.digit1(str, off);
+            month = BYTES.digit2(str, off + 2);
+            year = BYTES.digit4(str, off + 5);
         } else if ((c2 == '.' && c4 == '.')
                 || (c2 == '-' && c4 == '-')
         ) {
-            dom = digit2(str, off);
-            month = digit1(str, off + 3);
-            year = digit4(str, off + 5);
+            dom = BYTES.digit2(str, off);
+            month = BYTES.digit1(str, off + 3);
+            year = BYTES.digit4(str, off + 5);
         } else if (c1 == '-' && c4 == '-') {
-            dom = digit1(str, off);
-            month = digit2(str, off + 2);
-            year = digit4(str, off + 5);
+            dom = BYTES.digit1(str, off);
+            month = BYTES.digit2(str, off + 2);
+            year = BYTES.digit4(str, off + 5);
         } else if (c2 == '-' && c6 == '-') {
             // dd-MMM-yy
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(str[off + 3], c4, str[off + 5]);
-            year = digit2(str, off + 7);
+            year = BYTES.digit2(str, off + 7);
             if (year != -1) {
                 year += 2000;
             }
         } else if (c1 == '/' && c4 == '/') {
             // M/dd/dddd
-            month = digit1(str, off);
-            dom = digit2(str, off + 2);
-            year = digit4(str, off + 5);
+            month = BYTES.digit1(str, off);
+            dom = BYTES.digit2(str, off + 2);
+            year = BYTES.digit4(str, off + 5);
         } else if (c2 == '/' && c4 == '/') {
             // MM/d/dddd
-            month = digit2(str, off);
-            dom = digit1(str, off + 3);
-            year = digit4(str, off + 5);
+            month = BYTES.digit2(str, off);
+            dom = BYTES.digit1(str, off + 3);
+            year = BYTES.digit4(str, off + 5);
         } else {
             return null;
         }
@@ -1434,23 +1435,23 @@ public class DateUtils {
         int year, month, dom;
         if ((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/')) {
             // yyyy-MM-dd
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
         } else if ((c2 == '.' && c5 == '.') || (c2 == '-' && c5 == '-')) {
             // dd.MM.yyyy
-            dom = digit2(str, off);
-            month = digit2(str, off + 3);
-            year = digit4(str, off + 6);
+            dom = BYTES.digit2(str, off);
+            month = BYTES.digit2(str, off + 3);
+            year = BYTES.digit4(str, off + 6);
         } else if (c2 == '/' && c5 == '/') {
             // MM/dd/yyyy
-            month = digit2(str, off);
-            dom = digit2(str, off + 3);
-            year = digit4(str, off + 6);
+            month = BYTES.digit2(str, off);
+            dom = BYTES.digit2(str, off + 3);
+            year = BYTES.digit4(str, off + 6);
         } else if (str[off + 1] == ' ' && c5 == ' ') {
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, (char) str[off + 3], c4);
-            year = digit4(str, off + 6);
+            year = BYTES.digit4(str, off + 6);
         } else {
             return null;
         }
@@ -1485,38 +1486,38 @@ public class DateUtils {
         int year, month, dom;
         if ((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/')) {
             // yyyy-MM-dd
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
         } else if ((c2 == '.' && c5 == '.') || (c2 == '-' && c5 == '-')) {
             // dd.MM.yyyy
-            dom = digit2(str, off);
-            month = digit2(str, off + 3);
-            year = digit4(str, off + 6);
+            dom = BYTES.digit2(str, off);
+            month = BYTES.digit2(str, off + 3);
+            year = BYTES.digit4(str, off + 6);
         } else if (c2 == '/' && c5 == '/') {
             // MM/dd/yyyy
-            month = digit2(str, off);
-            dom = digit2(str, off + 3);
-            year = digit4(str, off + 6);
+            month = BYTES.digit2(str, off);
+            dom = BYTES.digit2(str, off + 3);
+            year = BYTES.digit4(str, off + 6);
         } else if ((c4 == '年' && c6 == '月' && c9 == '日')
                 || (c4 == '년' && c6 == '월' && c9 == '일')
         ) {
             // yyyy年M月dd日
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit2(str, off + 7);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit2(str, off + 7);
         } else if ((c4 == '年' && c7 == '月' && c9 == '日')
                 || (c4 == '년' && c7 == '월' && c9 == '일')
         ) {
             // yyyy年M月dd日
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit1(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit1(str, off + 8);
         } else if (c1 == ' ' && c5 == ' ') {
             // d MMM yyyy
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, str[off + 3], c4);
-            year = digit4(str, off + 6);
+            year = BYTES.digit4(str, off + 6);
         } else {
             return null;
         }
@@ -1543,13 +1544,13 @@ public class DateUtils {
         if ((c4 == '年' && c7 == '月' && c10 == '日')
                 || (c4 == '-' && c7 == '-' && c10 == 'Z')
                 || (c4 == '년' && c7 == '월' && c10 == '일')) {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
         } else if (str[off + 2] == ' ' && str[off + 6] == ' ') {
-            year = digit4(str, off + 7);
+            year = BYTES.digit4(str, off + 7);
             month = DateUtils.month(str[off + 3], c4, str[off + 5]);
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
         } else {
             return null;
         }
@@ -1571,13 +1572,13 @@ public class DateUtils {
 
         int year, month, dom;
         if (str[off + 4] == '-' && str[off + 7] == '-' && str[off + 10] == 'Z') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
         } else if (str[off + 2] == ' ' && str[off + 6] == ' ') {
-            year = digit4(str, off + 7);
+            year = BYTES.digit4(str, off + 7);
             month = DateUtils.month((char) str[off + 3], (char) str[off + 4], (char) str[off + 5]);
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
         } else {
             return null;
         }
@@ -1595,11 +1596,11 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 4);
-        int dom = digit2(str, off + 6);
-        int hour = digit2(str, off + 8);
-        int minute = digit2(str, off + 10);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 4);
+        int dom = BYTES.digit2(str, off + 6);
+        int hour = BYTES.digit2(str, off + 8);
+        int minute = BYTES.digit2(str, off + 10);
 
         if ((year | month | dom | hour | minute) < 0) {
             String input = new String(str, off, off + 12);
@@ -1622,11 +1623,11 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 4);
-        int dom = digit2(str, off + 6);
-        int hour = digit2(str, off + 8);
-        int minute = digit2(str, off + 10);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 4);
+        int dom = BYTES.digit2(str, off + 6);
+        int hour = BYTES.digit2(str, off + 8);
+        int minute = BYTES.digit2(str, off + 10);
 
         if ((year | month | dom | hour | minute) < 0) {
             String input = new String(str, off, off + 12);
@@ -1648,12 +1649,12 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 4);
-        int dom = digit2(str, off + 6);
-        int hour = digit2(str, off + 8);
-        int minute = digit2(str, off + 10);
-        int second = digit2(str, off + 12);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 4);
+        int dom = BYTES.digit2(str, off + 6);
+        int hour = BYTES.digit2(str, off + 8);
+        int minute = BYTES.digit2(str, off + 10);
+        int second = BYTES.digit2(str, off + 12);
 
         return (year | month | dom | hour | minute | second) < 0
                 ? null
@@ -1668,12 +1669,12 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 4);
-        int dom = digit2(str, off + 6);
-        int hour = digit2(str, off + 8);
-        int minute = digit2(str, off + 10);
-        int second = digit2(str, off + 12);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 4);
+        int dom = BYTES.digit2(str, off + 6);
+        int hour = BYTES.digit2(str, off + 8);
+        int minute = BYTES.digit2(str, off + 10);
+        int second = BYTES.digit2(str, off + 12);
 
         return (year | month | dom | hour | minute | second) < 0
                 ? null
@@ -1705,40 +1706,40 @@ public class DateUtils {
 
         int year, month, dom, hour, minute, second = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
         } else if (str[off + 8] == 'T' && str[off + 15] == 'Z') {
-            year = digit4(str, off);
-            month = digit2(str, off + 4);
-            dom = digit2(str, off + 6);
-            hour = digit2(str, off + 9);
-            minute = digit2(str, off + 11);
-            second = digit2(str, off + 13);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 4);
+            dom = BYTES.digit2(str, off + 6);
+            hour = BYTES.digit2(str, off + 9);
+            minute = BYTES.digit2(str, off + 11);
+            second = BYTES.digit2(str, off + 13);
         } else if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c12 == ':' && c14 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit1(str, off + 11);
-            minute = digit1(str, off + 13);
-            second = digit1(str, off + 15);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit1(str, off + 13);
+            second = BYTES.digit1(str, off + 15);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 2:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit1(str, off + 13);
-            second = digit1(str, off + 15);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit1(str, off + 13);
+            second = BYTES.digit1(str, off + 15);
         } else {
             return null;
         }
@@ -1778,56 +1779,56 @@ public class DateUtils {
 
         int year, month, dom, hour, minute, second = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
         } else if (str[off + 8] == 'T' && str[off + 15] == 'Z') {
-            year = digit4(str, off);
-            month = digit2(str, off + 4);
-            dom = digit2(str, off + 6);
-            hour = digit2(str, off + 9);
-            minute = digit2(str, off + 11);
-            second = digit2(str, off + 13);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 4);
+            dom = BYTES.digit2(str, off + 6);
+            hour = BYTES.digit2(str, off + 9);
+            minute = BYTES.digit2(str, off + 11);
+            second = BYTES.digit2(str, off + 13);
         } else if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c12 == ':' && c14 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit1(str, off + 11);
-            minute = digit1(str, off + 13);
-            second = digit1(str, off + 15);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit1(str, off + 13);
+            second = BYTES.digit1(str, off + 15);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 2:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit1(str, off + 13);
-            second = digit1(str, off + 15);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit1(str, off + 13);
+            second = BYTES.digit1(str, off + 15);
         } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
                 && c8 == -26 && c9 == -100 && c10 == -120 // 月
                 && c13 == -26 && c14 == -105 && c15 == -91 // 日
         ) {
-            year = digit4(str, off);
-            month = digit1(str, off + 7);
-            dom = digit2(str, off + 11);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 7);
+            dom = BYTES.digit2(str, off + 11);
             hour = 0;
             minute = 0;
         } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
                 && c9 == -26 && c10 == -100 && c11 == -120 // 月
                 && c13 == -26 && c14 == -105 && c15 == -91 // 日
         ) {
-            year = digit4(str, off);
-            month = digit2(str, off + 7);
-            dom = digit1(str, off + 12);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 7);
+            dom = BYTES.digit1(str, off + 12);
             hour = 0;
             minute = 0;
         } else {
@@ -1869,69 +1870,69 @@ public class DateUtils {
 
         int year, month, dom, hour, minute, second, nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
             second = 0;
         } else if (c4 == '-' && c6 == '-' && (c8 == ' ' || c8 == 'T') && c11 == ':' && c14 == ':') {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit1(str, off + 7);
-            hour = digit2(str, off + 9);
-            minute = digit2(str, off + 12);
-            second = digit2(str, off + 15);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit1(str, off + 7);
+            hour = BYTES.digit2(str, off + 9);
+            minute = BYTES.digit2(str, off + 12);
+            second = BYTES.digit2(str, off + 15);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':') {
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit2(str, off + 12);
-            minute = digit2(str, off + 15);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit2(str, off + 12);
+            minute = BYTES.digit2(str, off + 15);
             second = 0;
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 1:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit1(str, off + 13);
-            second = digit2(str, off + 15);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit1(str, off + 13);
+            second = BYTES.digit2(str, off + 15);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
             // d MMM yyyy H:mm:s
             // 6 DEC 2020 1:13:4
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit2(str, off + 13);
-            second = digit1(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit1(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
             // d MMM yyyy HH:m:s
             // 6 DEC 2020 11:3:4
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit1(str, off + 14);
-            second = digit1(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit1(str, off + 16);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
             // dd MMM yyyy H:m:s
             // 16 DEC 2020 1:3:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit1(str, off + 12);
-            minute = digit1(str, off + 14);
-            second = digit1(str, off + 16);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit1(str, off + 12);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit1(str, off + 16);
         } else {
-            year = digit4(str, off);
-            month = digit2(str, off + 4);
-            dom = digit2(str, off + 6);
-            hour = digit2(str, off + 8);
-            minute = digit2(str, off + 10);
-            second = digit2(str, off + 12);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 4);
+            dom = BYTES.digit2(str, off + 6);
+            hour = BYTES.digit2(str, off + 8);
+            minute = BYTES.digit2(str, off + 10);
+            second = BYTES.digit2(str, off + 12);
             nanoOfSecond = readNanos(str, 3, off + 14);
         }
 
@@ -1971,78 +1972,78 @@ public class DateUtils {
 
         int year, month, dom, hour, minute, second = 0, nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
             second = 0;
         } else if (c4 == '-' && c6 == '-' && (c8 == ' ' || c8 == 'T') && c11 == ':' && c14 == ':') {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit1(str, off + 7);
-            hour = digit2(str, off + 9);
-            minute = digit2(str, off + 12);
-            second = digit2(str, off + 15);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit1(str, off + 7);
+            hour = BYTES.digit2(str, off + 9);
+            minute = BYTES.digit2(str, off + 12);
+            second = BYTES.digit2(str, off + 15);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':') {
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit2(str, off + 12);
-            minute = digit2(str, off + 15);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit2(str, off + 12);
+            minute = BYTES.digit2(str, off + 15);
             second = 0;
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 1:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit1(str, off + 13);
-            second = digit2(str, off + 15);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit1(str, off + 13);
+            second = BYTES.digit2(str, off + 15);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
             // d MMM yyyy H:mm:s
             // 6 DEC 2020 1:13:4
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit2(str, off + 13);
-            second = digit1(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit1(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
             // d MMM yyyy HH:m:s
             // 6 DEC 2020 11:3:4
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit1(str, off + 14);
-            second = digit1(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit1(str, off + 16);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
             // dd MMM yyyy H:m:s
             // 16 DEC 2020 1:3:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit1(str, off + 12);
-            minute = digit1(str, off + 14);
-            second = digit1(str, off + 16);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit1(str, off + 12);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit1(str, off + 16);
         } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
                 && c9 == -26 && c10 == -100 && c11 == -120 // 月
                 && c14 == -26 && c15 == -105 && c16 == -91 // 日
         ) {
-            year = digit4(str, off);
-            month = digit2(str, off + 7);
-            dom = digit2(str, off + 12);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 7);
+            dom = BYTES.digit2(str, off + 12);
             hour = 0;
             minute = 0;
         } else {
-            year = digit4(str, off);
-            month = digit2(str, off + 4);
-            dom = digit2(str, off + 6);
-            hour = digit2(str, off + 8);
-            minute = digit2(str, off + 10);
-            second = digit2(str, off + 12);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 4);
+            dom = BYTES.digit2(str, off + 6);
+            hour = BYTES.digit2(str, off + 8);
+            minute = BYTES.digit2(str, off + 10);
+            second = BYTES.digit2(str, off + 12);
             nanoOfSecond = readNanos(str, 3, off + 14);
         }
 
@@ -2087,94 +2088,94 @@ public class DateUtils {
 
         int year, month, dom, hour, minute, second;
         if (c4 == '-' && c6 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit2(str, off + 7);
-            hour = digit2(str, off + 10);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit2(str, off + 7);
+            hour = BYTES.digit2(str, off + 10);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit1(str, off + 8);
-            hour = digit2(str, off + 10);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit1(str, off + 8);
+            hour = BYTES.digit2(str, off + 10);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c12 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit1(str, off + 11);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit1(str, off + 14);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit1(str, off + 17);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
             // d MMM yyyy H:mm:ss
             // 6 DEC 2020 2:13:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit1(str, off + 14);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c16 == ':') {
             // dd MMM yyyy HH:m:s
             // 16 DEC 2020 12:3:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit2(str, off + 12);
-            minute = digit1(str, off + 15);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit2(str, off + 12);
+            minute = BYTES.digit1(str, off + 15);
+            second = BYTES.digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c16 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit1(str, off + 12);
-            minute = digit2(str, off + 14);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit1(str, off + 12);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit1(str, off + 12);
-            minute = digit1(str, off + 14);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit1(str, off + 12);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit2(str, off + 16);
         } else {
             String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
@@ -2221,94 +2222,94 @@ public class DateUtils {
 
         int year, month, dom, hour, minute, second;
         if (c4 == '-' && c6 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit1(str, off + 5);
-            dom = digit2(str, off + 7);
-            hour = digit2(str, off + 10);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit1(str, off + 5);
+            dom = BYTES.digit2(str, off + 7);
+            hour = BYTES.digit2(str, off + 10);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit1(str, off + 8);
-            hour = digit2(str, off + 10);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit1(str, off + 8);
+            hour = BYTES.digit2(str, off + 10);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c12 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit1(str, off + 11);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c15 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit1(str, off + 14);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit2(str, off + 16);
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit1(str, off + 17);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
             // d MMM yyyy H:mm:ss
             // 6 DEC 2020 2:13:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit1(str, off + 11);
-            minute = digit2(str, off + 13);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit1(str, off + 11);
+            minute = BYTES.digit2(str, off + 13);
+            second = BYTES.digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit1(str, off + 14);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit2(str, off + 16);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
             // d MMM yyyy HH:m:ss
             // 6 DEC 2020 12:3:14
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c16 == ':') {
             // dd MMM yyyy HH:m:s
             // 16 DEC 2020 12:3:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit2(str, off + 12);
-            minute = digit1(str, off + 15);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit2(str, off + 12);
+            minute = BYTES.digit1(str, off + 15);
+            second = BYTES.digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c16 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit1(str, off + 12);
-            minute = digit2(str, off + 14);
-            second = digit1(str, off + 17);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit1(str, off + 12);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit1(str, off + 17);
         } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
             // dd MMM yyyy H:mm:s
             // 16 DEC 2020 1:13:4
-            dom = digit2(str, off);
+            dom = BYTES.digit2(str, off);
             month = DateUtils.month(c3, c4, c5);
-            year = digit4(str, off + 7);
-            hour = digit1(str, off + 12);
-            minute = digit1(str, off + 14);
-            second = digit2(str, off + 16);
+            year = BYTES.digit4(str, off + 7);
+            hour = BYTES.digit1(str, off + 12);
+            minute = BYTES.digit1(str, off + 14);
+            second = BYTES.digit2(str, off + 16);
         } else {
             String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
@@ -2345,26 +2346,26 @@ public class DateUtils {
                 && (c10 == ' ' || c10 == 'T')
                 && c13 == ':' && c16 == ':'
         ) {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit2(str, off + 17);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit2(str, off + 17);
         } else if (c2 == '/' && c5 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            dom = digit2(str, off);
-            month = digit2(str, off + 3);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit2(str, off + 17);
+            dom = BYTES.digit2(str, off);
+            month = BYTES.digit2(str, off + 3);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit2(str, off + 17);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
-            hour = digit2(str, off + 11);
-            minute = digit2(str, off + 14);
-            second = digit2(str, off + 17);
+            year = BYTES.digit4(str, off + 6);
+            hour = BYTES.digit2(str, off + 11);
+            minute = BYTES.digit2(str, off + 14);
+            second = BYTES.digit2(str, off + 17);
         } else {
             return null;
         }
@@ -2416,17 +2417,17 @@ public class DateUtils {
         int year, month, dom;
         if (((c4 == '-' && c7 == '-') || (c4 == '/' && c7 == '/'))
                 && (c10 == ' ' || c10 == 'T')) {
-            year = digit4(str, off);
-            month = digit2(str, off + 5);
-            dom = digit2(str, off + 8);
+            year = BYTES.digit4(str, off);
+            month = BYTES.digit2(str, off + 5);
+            dom = BYTES.digit2(str, off + 8);
         } else if (c2 == '/' && c5 == '/' && (c10 == ' ' || c10 == 'T')) {
-            dom = digit2(str, off);
-            month = digit2(str, off + 3);
-            year = digit4(str, off + 6);
+            dom = BYTES.digit2(str, off);
+            month = BYTES.digit2(str, off + 3);
+            year = BYTES.digit4(str, off + 6);
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ') {
-            dom = digit1(str, off);
+            dom = BYTES.digit1(str, off);
             month = DateUtils.month(c2, c3, c4);
-            year = digit4(str, off + 6);
+            year = BYTES.digit4(str, off + 6);
         } else {
             return null;
         }
@@ -2454,12 +2455,12 @@ public class DateUtils {
             return null;
         }
 
-        int dom = digit2(str, off);
+        int dom = BYTES.digit2(str, off);
         int month = DateUtils.month(str[off + 3], str[off + 4], str[off + 5]);
-        int year = digit4(str, off + 7);
-        int hour = digit2(str, off + 12);
-        int minute = digit2(str, off + 15);
-        int second = digit2(str, off + 18);
+        int year = BYTES.digit4(str, off + 7);
+        int hour = BYTES.digit2(str, off + 12);
+        int minute = BYTES.digit2(str, off + 15);
+        int second = BYTES.digit2(str, off + 18);
 
         return (year | month | dom | hour | minute | second) <= 0 || hour > 24 || minute > 59 || second > 60
                 ? null
@@ -2477,9 +2478,9 @@ public class DateUtils {
             return null;
         }
 
-        int dom = digit2(str, off);
+        int dom = BYTES.digit2(str, off);
         int month = DateUtils.month(str[off + 3], str[off + 4], str[off + 5]);
-        int year = digit4(str, off + 7);
+        int year = BYTES.digit4(str, off + 7);
         int hour = (int) hms & 0xFF;
         int minute = (int) (hms >> 24) & 0xFF;
         int second = (int) (hms >> 48) & 0xFF;
@@ -2502,9 +2503,9 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
         int hour = (int) hms & 0xFF;
         int minute = (int) (hms >> 24) & 0xFF;
         int second = (int) (hms >> 48) & 0xFF;
@@ -2528,12 +2529,12 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
+        int hour = BYTES.digit2(str, off + 11);
+        int minute = BYTES.digit2(str, off + 14);
+        int second = BYTES.digit2(str, off + 17);
         int nano = readNanos(str, 6, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
@@ -2554,9 +2555,9 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
         int hour = (int) hms & 0xFF;
         int minute = (int) (hms >> 24) & 0xFF;
         int second = (int) (hms >> 48) & 0xFF;
@@ -2580,12 +2581,12 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
+        int hour = BYTES.digit2(str, off + 11);
+        int minute = BYTES.digit2(str, off + 14);
+        int second = BYTES.digit2(str, off + 17);
         int nano = readNanos(str, 7, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
@@ -2606,12 +2607,12 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
+        int hour = BYTES.digit2(str, off + 11);
+        int minute = BYTES.digit2(str, off + 14);
+        int second = BYTES.digit2(str, off + 17);
         int nano = readNanos(str, 8, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60
@@ -2632,9 +2633,9 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
         int hour = (int) hms & 0xFF;
         int minute = (int) (hms >> 24) & 0xFF;
         int second = (int) (hms >> 48) & 0xFF;
@@ -2658,9 +2659,9 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
         int hour = (int) hms & 0xFF;
         int minute = (int) (hms >> 24) & 0xFF;
         int second = (int) (hms >> 48) & 0xFF;
@@ -2684,12 +2685,12 @@ public class DateUtils {
             return null;
         }
 
-        int year = digit4(str, off);
-        int month = digit2(str, off + 5);
-        int dom = digit2(str, off + 8);
-        int hour = digit2(str, off + 11);
-        int minute = digit2(str, off + 14);
-        int second = digit2(str, off + 17);
+        int year = BYTES.digit4(str, off);
+        int month = BYTES.digit2(str, off + 5);
+        int dom = BYTES.digit2(str, off + 8);
+        int hour = BYTES.digit2(str, off + 11);
+        int minute = BYTES.digit2(str, off + 14);
+        int second = BYTES.digit2(str, off + 17);
         int nano = readNanos(str, 9, off + 20);
 
         return (year | month | dom | hour | minute | second | nano) <= 0 || hour > 24 || minute > 59 || second > 60

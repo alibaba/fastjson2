@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -157,7 +158,7 @@ public class IOUtilsTest {
                     bytes[2] = (byte) (x2 + '0');
                     for (int x3 = -1; x3 <= 10; x3++) {
                         bytes[3] = (byte) (x3 + '0');
-                        int d4 = IOUtils.digit4(bytes, 0);
+                        int d4 = BYTES.digit4(bytes, 0);
                         int expect;
                         if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9 || x3 < 0 || x3 > 9) {
                             expect = -1;
@@ -174,7 +175,7 @@ public class IOUtilsTest {
     @Test
     public void digit4_chars() {
         assertEquals(1972,
-                IOUtils.digit4(
+                BYTES.digit4(
                         "1972".toCharArray(), 0));
 
         char[] chars = new char[4];
@@ -186,7 +187,7 @@ public class IOUtilsTest {
                     chars[2] = (char) (x2 + '0');
                     for (int x3 = -1; x3 <= 10; x3++) {
                         chars[3] = (char) (x3 + '0');
-                        int d4 = IOUtils.digit4(chars, 0);
+                        int d4 = BYTES.digit4(chars, 0);
                         int expect;
                         if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9 || x3 < 0 || x3 > 9) {
                             expect = -1;
@@ -203,7 +204,7 @@ public class IOUtilsTest {
     @Test
     public void digit3_chars() {
         assertEquals(197,
-                IOUtils.digit3(
+                BYTES.digit3(
                         "1972".toCharArray(), 0));
 
         char[] chars = new char[4];
@@ -213,7 +214,7 @@ public class IOUtilsTest {
                 chars[1] = (char) (x1 + '0');
                 for (int x2 = -1; x2 <= 10; x2++) {
                     chars[2] = (char) (x2 + '0');
-                    int d3 = IOUtils.digit3(chars, 0);
+                    int d3 = BYTES.digit3(chars, 0);
                     int expect;
                     if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9) {
                         expect = -1;
@@ -229,7 +230,7 @@ public class IOUtilsTest {
     @Test
     public void digit3() {
         assertEquals(197,
-                IOUtils.digit3(
+                BYTES.digit3(
                         "1972".getBytes(StandardCharsets.UTF_8), 0));
 
         byte[] bytes = new byte[4];
@@ -243,7 +244,7 @@ public class IOUtilsTest {
                 for (int x2 = -1; x2 <= 10; x2++) {
                     bytes[2] = (byte) (x2 + '0');
                     chars[2] = (char) (x2 + '0');
-                    int d3 = IOUtils.digit3(bytes, 0);
+                    int d3 = BYTES.digit3(bytes, 0);
                     int expect;
                     if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9 || x2 < 0 || x2 > 9) {
                         expect = -1;
@@ -251,7 +252,7 @@ public class IOUtilsTest {
                         expect = x0 * 100 + x1 * 10 + x2;
                     }
                     assertEquals(expect, d3);
-                    d3 = IOUtils.digit3(chars, 0);
+                    d3 = BYTES.digit3(chars, 0);
                     assertEquals(expect, d3);
                 }
             }
@@ -265,7 +266,7 @@ public class IOUtilsTest {
             bytes[0] = (byte) (x0 + '0');
             for (int x1 = -1; x1 <= 10; x1++) {
                 bytes[1] = (byte) (x1 + '0');
-                int d2 = IOUtils.digit2(bytes, 0);
+                int d2 = BYTES.digit2(bytes, 0);
                 int expect;
                 if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9) {
                     expect = -1;
@@ -280,7 +281,7 @@ public class IOUtilsTest {
     @Test
     public void digit2_chars() {
         assertEquals(19,
-                IOUtils.digit2(
+                BYTES.digit2(
                         "19".toCharArray(), 0));
 
         char[] bytes = new char[2];
@@ -288,7 +289,7 @@ public class IOUtilsTest {
             bytes[0] = (char) (x0 + '0');
             for (int x1 = -1; x1 <= 10; x1++) {
                 bytes[1] = (char) (x1 + '0');
-                int d2 = IOUtils.digit2(bytes, 0);
+                int d2 = BYTES.digit2(bytes, 0);
                 int expect;
                 if (x0 < 0 || x0 > 9 || x1 < 0 || x1 > 9) {
                     expect = -1;
