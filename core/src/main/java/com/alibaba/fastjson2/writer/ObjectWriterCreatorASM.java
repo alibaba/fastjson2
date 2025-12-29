@@ -1059,16 +1059,17 @@ public class ObjectWriterCreatorASM
         mw.invokevirtual(TYPE_BYTE_ARRAY, "putShortUnaligned", "([BIS)V");
     }
 
-    private static void gwWriteInt(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {
-        int nameInt = IOUtils.getIntUnaligned(name, offset);
-        mw.aload(BYTES);
+    private static void gwWriteInt(MethodWriter mw, int bytesSlot, int OFFSET, byte[] name, int offset) {
+        int nameInt = BYTES.getIntUnaligned(name, offset);
+        mw.getstatic(TYPE_CONF, "BYTES", DESC_BYTE_ARRAY);
+        mw.aload(bytesSlot);
         mw.iload(OFFSET);
         if (offset != 0) {
             mw.iconst_n(offset);
             mw.iadd();
         }
         mw.visitLdcInsn(nameInt);
-        mw.invokestatic(TYPE_IO_UTILS, "putIntUnaligned", "([BII)V");
+        mw.invokevirtual(TYPE_BYTE_ARRAY, "putIntUnaligned", "([BII)V");
     }
 
     private static void gwWriteLong(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {

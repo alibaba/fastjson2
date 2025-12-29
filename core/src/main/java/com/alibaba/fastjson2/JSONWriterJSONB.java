@@ -851,7 +851,7 @@ final class JSONWriterJSONB
             if (seconds >= Integer.MIN_VALUE && seconds <= Integer.MAX_VALUE) {
                 int secondsInt = (int) seconds;
                 bytes[off] = BC_TIMESTAMP_SECONDS;
-                putIntBE(bytes, off + 1, secondsInt);
+                BYTES.putIntBE(bytes, off + 1, secondsInt);
                 this.off = off + 5;
                 return;
             }
@@ -861,7 +861,7 @@ final class JSONWriterJSONB
                 if (minutes >= Integer.MIN_VALUE && minutes <= Integer.MAX_VALUE) {
                     int minutesInt = (int) minutes;
                     bytes[off] = BC_TIMESTAMP_MINUTES;
-                    putIntBE(bytes, off + 1, minutesInt);
+                    BYTES.putIntBE(bytes, off + 1, minutesInt);
                     this.off = off + 5;
                     return;
                 }
@@ -1316,10 +1316,10 @@ final class JSONWriterJSONB
             bytes = grow(off + 13);
         }
 
-        putIntBE(bytes,
+        BYTES.putIntBE(bytes,
                 off,
                 (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (dateTime.getYear() << 8) | dateTime.getMonthValue());
-        putIntBE(bytes,
+        BYTES.putIntBE(bytes,
                 off + 4,
                 (dateTime.getDayOfMonth() << 24)
                         | (dateTime.getHour() << 16)
@@ -1525,8 +1525,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 9);
         }
 
-        putIntBE(bytes, off, (BC_LOCAL_DATETIME << 24) | ((year & 0xFFFF) << 8) | month);
-        putIntBE(bytes, off + 4, (dayOfMonth << 24) | (hour << 16) | (minute << 8) | second);
+        BYTES.putIntBE(bytes, off, (BC_LOCAL_DATETIME << 24) | ((year & 0xFFFF) << 8) | month);
+        BYTES.putIntBE(bytes, off + 4, (dayOfMonth << 24) | (hour << 16) | (minute << 8) | second);
         bytes[off + 8] = BC_INT32_NUM_0;
         this.off = off + 9;
     }
@@ -1567,7 +1567,7 @@ final class JSONWriterJSONB
         }
 
         bytes[off] = BC_LOCAL_DATE;
-        putIntBE(bytes, off + 1, (year << 16) | (month << 8) | dayOfMonth);
+        BYTES.putIntBE(bytes, off + 1, (year << 16) | (month << 8) | dayOfMonth);
         this.off = off + 5;
     }
 

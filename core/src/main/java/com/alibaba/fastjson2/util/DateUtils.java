@@ -1152,7 +1152,7 @@ public class DateUtils {
                     // && "0000-00-00".equals(str)
                     && getLongLE(chars, off) == 0x30003000300030L
                     && getLongLE(chars, off + 4) == 0x2d00300030002dL
-                    && getIntLE(chars, off + 8) == 0x300030L
+                    && BYTES.getIntLE(chars, off + 8) == 0x300030L
             ) {
                 ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             }

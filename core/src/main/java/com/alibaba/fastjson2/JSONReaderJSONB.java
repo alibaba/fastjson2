@@ -204,7 +204,7 @@ final class JSONReaderJSONB
             type = getInt3(bytes, offset, type);
             offset += 2;
         } else if (type == BC_INT32 && offset + 3 < end) {
-            type = getIntBE(bytes, offset);
+            type = BYTES.getIntBE(bytes, offset);
             offset += 4;
             if (type > 1024 * 1024 * 256) {
                 throw new JSONException("input length overflow");
@@ -457,7 +457,7 @@ final class JSONReaderJSONB
                     offset += 3;
                     value = int32Value;
                 } else if (valueType == BC_INT32 && offset + 3 < end) {
-                    int int32Value = getIntBE(bytes, offset + 1);
+                    int int32Value = BYTES.getIntBE(bytes, offset + 1);
                     offset += 5;
                     value = int32Value;
                 } else {
@@ -565,12 +565,12 @@ final class JSONReaderJSONB
                 return (short) ((bytes[offset++] << 8)
                         + (bytes[offset++] & 0xFF));
             case BC_INT32: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_INT64_INT: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return (long) int32Value;
             }
@@ -587,7 +587,7 @@ final class JSONReaderJSONB
                 return new BigInteger(buf);
             }
             case BC_FLOAT: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             }
@@ -700,12 +700,12 @@ final class JSONReaderJSONB
                 return binary;
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getIntBE(bytes, check3(offset, end));
+                long minutes = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return new Date(minutes * 60L * 1000L);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getIntBE(bytes, check3(offset, end));
+                long seconds = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return new Date(seconds * 1000);
             }
@@ -1147,7 +1147,7 @@ final class JSONReaderJSONB
                 offset += 3;
                 value = int3;
             } else if (valueType == BC_INT32) {
-                value = getIntBE(bytes, check3(offset + 1, end));
+                value = BYTES.getIntBE(bytes, check3(offset + 1, end));
                 offset += 5;
             } else if (valueType == BC_REFERENCE) {
                 String reference = readReference();
@@ -3206,7 +3206,7 @@ final class JSONReaderJSONB
                 return "1.0";
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Long.toString(int32Value);
             }
@@ -3214,7 +3214,7 @@ final class JSONReaderJSONB
                 return Float.toString(
                         readInt32Value());
             case BC_FLOAT: {
-                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.toString(
                         Float.intBitsToFloat(int32Value)
@@ -3228,14 +3228,14 @@ final class JSONReaderJSONB
                 );
             }
             case BC_TIMESTAMP_SECONDS: {
-                long millis = getIntBE(bytes, check3(offset, end)) * 1000L;
+                long millis = BYTES.getIntBE(bytes, check3(offset, end)) * 1000L;
                 offset += 4;
                 return DateUtils.toString(
                         new Date(millis)
                 );
             }
             case BC_TIMESTAMP_MINUTES: {
-                long millis = getIntBE(bytes, check3(offset, end)) * 60000L;
+                long millis = BYTES.getIntBE(bytes, check3(offset, end)) * 60000L;
                 offset += 4;
                 return DateUtils.toString(
                         new Date(millis)
@@ -3398,7 +3398,7 @@ final class JSONReaderJSONB
             int64Value = getLong3(bytes, offset, type);
             offset += 2;
         } else if (type == BC_INT64_INT && offset + 3 < end) {
-            int64Value = getIntBE(bytes, offset);
+            int64Value = BYTES.getIntBE(bytes, offset);
             offset += 4;
         } else if (type == BC_INT64 && offset + 7 < end) {
             int64Value = getLongBE(bytes, offset);
@@ -3452,12 +3452,12 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT32: {
-                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_FLOAT: {
-                int int32Value = IOUtils.getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return (long) floatValue;
@@ -3471,12 +3471,12 @@ final class JSONReaderJSONB
             case BC_DOUBLE_LONG:
                 return (long) ((double) readInt64Value());
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getIntBE(bytes, check3(offset, end));
+                long minutes = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return minutes * 60 * 1000;
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getIntBE(bytes, check3(offset, end));
+                long seconds = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return seconds * 1000;
             }
@@ -3555,7 +3555,7 @@ final class JSONReaderJSONB
             type = getInt3(bytes, offset, type);
             offset += 2;
         } else if (type == BC_INT32 && offset + 3 < end) {
-            type = getIntBE(bytes, offset);
+            type = BYTES.getIntBE(bytes, offset);
             offset += 4;
         } else {
             this.offset = offset;
@@ -3614,7 +3614,7 @@ final class JSONReaderJSONB
             case BC_FLOAT_INT:
                 return (int) (float) readInt32Value();
             case BC_FLOAT: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return (int) floatValue;
@@ -3626,7 +3626,7 @@ final class JSONReaderJSONB
             case BC_TIMESTAMP_MINUTES:
             case BC_TIMESTAMP_SECONDS:
             case BC_INT64_INT:
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             case BC_STR_ASCII: {
@@ -3729,7 +3729,7 @@ final class JSONReaderJSONB
             int32Value = getInt3(bytes, offset, type);
             offset += 2;
         } else if (type == BC_INT32 && offset + 3 < end) {
-            int32Value = getIntBE(bytes, offset);
+            int32Value = BYTES.getIntBE(bytes, offset);
             offset += 4;
         } else {
             this.offset = offset;
@@ -3759,7 +3759,7 @@ final class JSONReaderJSONB
             int64Value = getLong3(bytes, offset, type);
             offset += 2;
         } else if (type == BC_INT64_INT && offset + 3 < end) {
-            int64Value = getIntBE(bytes, offset);
+            int64Value = BYTES.getIntBE(bytes, offset);
             offset += 4;
         } else if (type == BC_INT64 && offset + 7 < end) {
             int64Value = getLongBE(bytes, offset);
@@ -3815,7 +3815,7 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset;
         if (bytes[offset] == BC_FLOAT) {
-            int int32Val = getIntBE(bytes, check3(offset + 1, end));
+            int int32Val = BYTES.getIntBE(bytes, check3(offset + 1, end));
             this.offset = offset + 5;
             return Float.intBitsToFloat(int32Val);
         }
@@ -3849,7 +3849,7 @@ final class JSONReaderJSONB
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
@@ -4003,12 +4003,12 @@ final class JSONReaderJSONB
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_FLOAT:
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             case BC_FLOAT_INT: {
@@ -4165,12 +4165,12 @@ final class JSONReaderJSONB
                 return (short) int16Value;
             }
             case BC_INT32: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return int32Value;
             }
             case BC_INT64_INT: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return (long) int32Value;
             }
@@ -4192,7 +4192,7 @@ final class JSONReaderJSONB
                 );
             }
             case BC_FLOAT: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             }
@@ -4259,7 +4259,7 @@ final class JSONReaderJSONB
                 long unscaledLongValue = readInt64Value();
                 decimal = BigDecimal.valueOf(unscaledLongValue, scale);
             } else if (bytes[offset] == BC_INT32) {
-                decimal = BigDecimal.valueOf(getIntBE(bytes, check3(offset + 1, end)), scale);
+                decimal = BigDecimal.valueOf(BYTES.getIntBE(bytes, check3(offset + 1, end)), scale);
                 offset += 5;
             } else if (bytes[offset] == BC_INT64) {
                 decimal = BigDecimal.valueOf(
@@ -4303,7 +4303,7 @@ final class JSONReaderJSONB
                 return BigDecimal.valueOf(int16Value);
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return BigDecimal.valueOf(int32Value);
             }
@@ -4312,7 +4312,7 @@ final class JSONReaderJSONB
                 return BigDecimal.valueOf((long) floatValue);
             }
             case BC_FLOAT: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return BigDecimal.valueOf((long) floatValue);
@@ -4442,7 +4442,7 @@ final class JSONReaderJSONB
                 return BigInteger.valueOf(int16Value);
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return BigInteger.valueOf(int32Value);
             }
@@ -4452,7 +4452,7 @@ final class JSONReaderJSONB
                         (long) floatValue);
             }
             case BC_FLOAT: {
-                int int32Value = getIntBE(bytes, check3(offset, end));
+                int int32Value = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return BigInteger.valueOf(
@@ -4885,12 +4885,12 @@ final class JSONReaderJSONB
                 );
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getIntBE(bytes, check3(offset, end));
+                long minutes = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Instant.ofEpochSecond(minutes * 60, 0);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getIntBE(bytes, check3(offset, end));
+                long seconds = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 return Instant.ofEpochSecond(seconds, 0);
             }
@@ -4965,13 +4965,13 @@ final class JSONReaderJSONB
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getIntBE(bytes, check3(offset, end));
+                long minutes = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(minutes * 60);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getIntBE(bytes, check3(offset, end));
+                long seconds = BYTES.getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(seconds);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
@@ -5292,12 +5292,12 @@ final class JSONReaderJSONB
                 return new Date(millis);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getIntBE(bytes, check3(offset + 1, end));
+                long minutes = BYTES.getIntBE(bytes, check3(offset + 1, end));
                 this.offset += 5;
                 return new Date(minutes * 60L * 1000L);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getIntBE(bytes, check3(offset + 1, end));
+                long seconds = BYTES.getIntBE(bytes, check3(offset + 1, end));
                 this.offset += 5;
                 return new Date(seconds * 1000);
             }

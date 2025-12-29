@@ -2352,7 +2352,7 @@ final class JSONWriterUTF8
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                putIntLE(bytes, off, DIGITS_K_32[millis & 0x3ff] & 0xffffff00 | '.');
+                BYTES.putIntLE(bytes, off, DIGITS_K_32[millis & 0x3ff] & 0xffffff00 | '.');
                 off += 4;
             } else {
                 bytes[off++] = '.';

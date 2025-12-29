@@ -368,7 +368,7 @@ public final class NumberUtils {
                 buf[off++] = '-';
             }
             buf[off] = '0';
-            IOUtils.putIntUnaligned(buf, off + 1, DOT_ZERO_32);
+            BYTES.putIntUnaligned(buf, off + 1, DOT_ZERO_32);
             return off + 3;
         }
         boolean sign = doubleValue < 0;
@@ -434,7 +434,7 @@ public final class NumberUtils {
                 buf[off++] = '-';
             }
             buf[off] = '0';
-            IOUtils.putIntUnaligned(buf, off + 1, DOT_ZERO_32); // .0
+            BYTES.putIntUnaligned(buf, off + 1, DOT_ZERO_32); // .0
             return off + 3;
         }
         boolean sign = floatValue < 0;
@@ -449,7 +449,7 @@ public final class NumberUtils {
 
     private static int writeSpecial(byte[] buf, int off, float floatValue, boolean json, boolean writeSpecialAsString) {
         if (json && !writeSpecialAsString) {
-            IOUtils.putIntUnaligned(buf, off, NULL_32);
+            BYTES.putIntUnaligned(buf, off, NULL_32);
             return off + 4;
         }
         if (writeSpecialAsString) {
@@ -778,7 +778,7 @@ public final class NumberUtils {
         if (useScientific) {
             if (digitCnt == 1) {
                 buf[off] = (char) (value + 48);
-                IOUtils.putIntUnaligned(buf, off + 1, DOT_ZERO_32);
+                BYTES.putIntUnaligned(buf, off + 1, DOT_ZERO_32);
                 off += 3;
             } else {
                 int pos = digitCnt - 2;
@@ -805,11 +805,11 @@ public final class NumberUtils {
                 int n = (int) (e10 * 1374389535L >> 37); //
                 buf[off] = (char) (n + 48);
                 e10 = e10 - n * 100;
-                IOUtils.putIntUnaligned(buf, off + 1, TWO_DIGITS_32_BITS[e10]);
+                BYTES.putIntUnaligned(buf, off + 1, TWO_DIGITS_32_BITS[e10]);
                 off += 3;
             } else {
                 if (e10 > 9) {
-                    IOUtils.putIntUnaligned(buf, off, TWO_DIGITS_32_BITS[e10]);
+                    BYTES.putIntUnaligned(buf, off, TWO_DIGITS_32_BITS[e10]);
                     off += 2;
                 } else {
                     buf[off++] = (char) (e10 + 48);
@@ -819,12 +819,12 @@ public final class NumberUtils {
             // for non-scientific notation such as 12345, write a decimal point when size = decimalExp.
             if (e10 < 0) {
                 // -1/-2/-3
-                IOUtils.putIntUnaligned(buf, off, ZERO_DOT_32); // 0.
+                BYTES.putIntUnaligned(buf, off, ZERO_DOT_32); // 0.
                 off += 2;
                 if (e10 == -2) {
                     buf[off++] = '0';
                 } else if (e10 == -3) {
-                    IOUtils.putIntUnaligned(buf, off, ZERO_ZERO_32); // 00
+                    BYTES.putIntUnaligned(buf, off, ZERO_ZERO_32); // 00
                     off += 2;
                 }
                 off = writeInt64(buf, off, value);
@@ -851,7 +851,7 @@ public final class NumberUtils {
                             buf[off++] = '0';
                         }
                     }
-                    IOUtils.putIntUnaligned(buf, off, DOT_ZERO_32); // .0
+                    BYTES.putIntUnaligned(buf, off, DOT_ZERO_32); // .0
                     off += 2;
                 }
             }

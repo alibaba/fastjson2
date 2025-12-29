@@ -14,6 +14,7 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.*;
@@ -1128,7 +1129,7 @@ public class JSONWriterUTF8Test {
         StringUtils.writeU4Hex2(bytes, 0, 1);
         assertEquals("\\u0001", new String(bytes));
 
-        IOUtils.putIntUnaligned(bytes, 2, IOUtils.hex4U(1));
+        BYTES.putIntUnaligned(bytes, 2, IOUtils.hex4U(1));
         assertEquals("\\u0001", new String(bytes));
     }
 

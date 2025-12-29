@@ -153,7 +153,7 @@ public class IOUtils {
      * @param value the value (0-99) to write as a digit pair
      */
     public static void writeDigitPair(char[] buf, int charPos, int value) {
-        putIntLE(
+        BYTES.putIntLE(
                 buf,
                 charPos,
                 PACKED_DIGITS_UTF16[value & 0x7f]);
@@ -1096,7 +1096,7 @@ public class IOUtils {
         final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putIntLE(buf, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
+        BYTES.putIntLE(buf, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
         off += 4;
 
         int v;
@@ -1118,7 +1118,7 @@ public class IOUtils {
             return off + 1;
         }
 
-        putIntLE(buf, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
+        BYTES.putIntLE(buf, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
         return off + 4;
     }
 
@@ -1152,7 +1152,7 @@ public class IOUtils {
             v = DIGITS_K_64[(div - div2 * 1000) & 0x3ff];
         }
 
-        putIntLE(buf, off, (int) (v >> 16));
+        BYTES.putIntLE(buf, off, (int) (v >> 16));
         off += 2;
         if (rem1 == 0) {
             putChar(buf, off, (char) (v >> 48));
@@ -1452,7 +1452,7 @@ public class IOUtils {
         long v = DIGITS_K_64[i & 0x3ff];
         final int start = (byte) v;
         if (start == 0) {
-            putIntLE(buf, pos, (int) (v >> 16));
+            BYTES.putIntLE(buf, pos, (int) (v >> 16));
             pos += 2;
         } else if (start == 1) {
             putChar(buf, pos++, (char) (v >> 32));
@@ -1499,7 +1499,7 @@ public class IOUtils {
         if ((byte) v2 == 1) {
             putByte(buf, pos++, (byte) (v2 >> 16));
         }
-        putIntLE(buf, pos, (DIGITS_K_32[(i - q1 * 1000) & 0x3ff]) & 0xffffff00 | (v2 >> 24));
+        BYTES.putIntLE(buf, pos, (DIGITS_K_32[(i - q1 * 1000) & 0x3ff]) & 0xffffff00 | (v2 >> 24));
         return pos + 4;
     }
 
@@ -1527,7 +1527,7 @@ public class IOUtils {
             long v = DIGITS_K_64[i & 0x3ff];
             final int start = (byte) v;
             if (start == 0) {
-                putIntLE(buf, pos, (int) (v >> 16));
+                BYTES.putIntLE(buf, pos, (int) (v >> 16));
                 pos += 2;
             } else if (start == 1) {
                 putChar(buf, pos++, (char) (v >> 32));
@@ -1682,80 +1682,6 @@ public class IOUtils {
 
     private static void putChar(char[] buf, int pos, char v) {
         UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
-    }
-
-    /**
-     * Writes an int value to a byte array in big-endian byte order.
-     * This method puts an int value into the specified byte array at the given position
-     * using big-endian byte ordering (most significant byte first).
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the int value
-     * @param v the int value to write
-     */
-    public static void putIntBE(byte[] buf, int pos, int v) {
-        if (!BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
-    }
-
-    /**
-     * Writes an int value to a byte array in little-endian byte order.
-     * This method puts an int value into the specified byte array at the given position
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the int value
-     * @param v the int value to write
-     */
-    public static void putIntLE(byte[] buf, int pos, int v) {
-        if (BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
-    }
-
-    /**
-     * Writes an int value to a character array in little-endian byte order.
-     * This method puts an int value into the specified character array at the given position
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the character array buffer to write to
-     * @param pos the position in the buffer where to write the int value
-     * @param v the int value to write
-     */
-    public static void putIntLE(char[] buf, int pos, int v) {
-        if (BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
-    }
-
-    /**
-     * Writes an int value to a character array without alignment considerations.
-     * This method puts an int value into the specified character array at the given position
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the character array buffer to write to
-     * @param pos the position in the buffer where to write the int value
-     * @param v the int value to write
-     */
-    public static void putIntUnaligned(char[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
-    }
-
-    /**
-     * Writes an int value to a byte array without alignment considerations.
-     * This method puts an int value into the specified byte array at the given position
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the int value
-     * @param v the int value to write
-     */
-    public static void putIntUnaligned(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
     /**
@@ -2292,7 +2218,7 @@ public class IOUtils {
      * @return the extracted 4-digit hexadecimal number
      */
     public static int hexDigit4(byte[] buf, int offset) {
-        int v = getIntLE(buf, offset);
+        int v = BYTES.getIntLE(buf, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
         return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
     }
@@ -2341,84 +2267,7 @@ public class IOUtils {
      */
     public static boolean isUTF8BOM(byte[] buf, int off) {
         // EF BB BF
-        return ((getIntLE(buf, off)) & 0xFFFFFF) == 0xBFBBEF;
-    }
-
-    /**
-     * Gets an int value from a byte array at the specified offset in big-endian byte order.
-     * This method retrieves an int value from the specified byte array at the given offset
-     * using big-endian byte ordering (most significant byte first).
-     *
-     * @param buf the byte array to read from
-     * @param offset the offset in the array where to read the int value
-     * @return the int value at the specified offset in big-endian order
-     */
-    public static int getIntBE(byte[] buf, int offset) {
-        int v = UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (!BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        return v;
-    }
-
-    /**
-     * Gets an int value from a byte array at the specified offset in little-endian byte order.
-     * This method retrieves an int value from the specified byte array at the given offset
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the byte array to read from
-     * @param offset the offset in the array where to read the int value
-     * @return the int value at the specified offset in little-endian order
-     */
-    public static int getIntLE(byte[] buf, int offset) {
-        int v = UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        return v;
-    }
-
-    /**
-     * Gets an int value from a character array at the specified offset in little-endian byte order.
-     * This method retrieves an int value from the specified character array at the given offset
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the character array to read from
-     * @param offset the offset in the array where to read the int value
-     * @return the int value at the specified offset in little-endian order
-     */
-    public static int getIntLE(char[] buf, int offset) {
-        int v = UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
-        if (BIG_ENDIAN) {
-            v = Integer.reverseBytes(v);
-        }
-        return v;
-    }
-
-    /**
-     * Gets an int value from a byte array at the specified offset without alignment considerations.
-     * This method retrieves an int value from the specified byte array at the given offset
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the byte array to read from
-     * @param offset the offset in the array where to read the int value
-     * @return the int value at the specified offset
-     */
-    public static int getIntUnaligned(byte[] buf, int offset) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
-    }
-
-    /**
-     * Gets an int value from a character array at the specified offset without alignment considerations.
-     * This method retrieves an int value from the specified character array at the given offset
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the character array to read from
-     * @param offset the offset in the array where to read the int value
-     * @return the int value at the specified offset
-     */
-    public static int getIntUnaligned(char[] buf, int offset) {
-        return UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+        return ((BYTES.getIntLE(buf, off)) & 0xFFFFFF) == 0xBFBBEF;
     }
 
     /**

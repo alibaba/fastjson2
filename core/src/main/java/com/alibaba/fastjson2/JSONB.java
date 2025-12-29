@@ -2303,7 +2303,7 @@ public interface JSONB {
             }
 
             bytes[off] = BC_FLOAT;
-            IOUtils.putIntBE(bytes, off + 1, Float.floatToIntBits(value));
+            BYTES.putIntBE(bytes, off + 1, Float.floatToIntBits(value));
             return off + 5;
         }
 
@@ -2583,7 +2583,7 @@ public interface JSONB {
                 off += 3;
             } else {
                 bytes[off] = BC_INT32;
-                putIntBE(bytes, off + 1, value);
+                BYTES.putIntBE(bytes, off + 1, value);
                 off += 5;
             }
             return off;
@@ -2650,7 +2650,7 @@ public interface JSONB {
                 off += 3;
             } else if ((((value + 0x80000000L) & ~0xffffffffL) == 0)) {
                 bytes[off] = BC_INT64_INT;
-                putIntBE(bytes, off + 1, (int) value);
+                BYTES.putIntBE(bytes, off + 1, (int) value);
                 off += 5;
             } else {
                 bytes[off] = BC_INT64;
@@ -2876,12 +2876,12 @@ public interface JSONB {
          */
         static int putStringSizeLarge(byte[] bytes, int off, int strlen) {
             if (strlen <= INT32_SHORT_MAX) {
-                putIntBE(bytes, off, (BC_STR_ASCII << 24) + (BC_INT32_SHORT_ZERO << 16) + strlen);
+                BYTES.putIntBE(bytes, off, (BC_STR_ASCII << 24) + (BC_INT32_SHORT_ZERO << 16) + strlen);
                 return off + 4;
             }
 
             BYTES.putShortBE(bytes, off, (short) ((BC_STR_ASCII << 8) | BC_INT32));
-            putIntBE(bytes, off + 2, strlen);
+            BYTES.putIntBE(bytes, off + 2, strlen);
             return off + 6;
         }
 
@@ -3064,7 +3064,7 @@ public interface JSONB {
             }
             bytes[off] = BC_LOCAL_DATE;
             int year = value.getYear();
-            putIntBE(bytes, off + 1, (year << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
+            BYTES.putIntBE(bytes, off + 1, (year << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
             return off + 5;
         }
 
@@ -3081,7 +3081,7 @@ public interface JSONB {
                 bytes[off] = BC_NULL;
                 return off + 1;
             }
-            putIntBE(bytes,
+            BYTES.putIntBE(bytes,
                     off,
                     (BC_LOCAL_TIME << 24) | (value.getHour() << 16) | (value.getMinute() << 8) | value.getSecond());
             return JSONB.IO.writeInt32(bytes, off + 4, value.getNano());
@@ -3100,10 +3100,10 @@ public interface JSONB {
                 bytes[off] = BC_NULL;
                 return off + 1;
             }
-            putIntBE(bytes,
+            BYTES.putIntBE(bytes,
                     off,
                     (BC_LOCAL_DATETIME << 24) | (value.getYear() << 8) | value.getMonthValue());
-            putIntBE(bytes,
+            BYTES.putIntBE(bytes,
                     off + 4,
                     (value.getDayOfMonth() << 24)
                             | (value.getHour() << 16)
@@ -3125,10 +3125,10 @@ public interface JSONB {
                 bytes[off] = BC_NULL;
                 return off + 1;
             }
-            putIntBE(bytes,
+            BYTES.putIntBE(bytes,
                     off,
                     (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (value.getYear() << 8) | value.getMonthValue());
-            putIntBE(bytes,
+            BYTES.putIntBE(bytes,
                     off + 4,
                     (value.getDayOfMonth() << 24)
                             | (value.getHour() << 16)
@@ -3159,10 +3159,10 @@ public interface JSONB {
             }
 
             int year = 1970, month = 1, dayOfMonth = 1;
-            putIntBE(bytes,
+            BYTES.putIntBE(bytes,
                     off,
                     (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (year << 8) | month);
-            putIntBE(bytes,
+            BYTES.putIntBE(bytes,
                     off + 4,
                     (dayOfMonth << 24)
                             | (value.getHour() << 16)

@@ -114,4 +114,121 @@ public class ByteArray {
         }
         return -1;
     }
+
+    public int getIntUnaligned(byte[] buf, int offset) {
+        return BIG_ENDIAN ? getIntBE(buf, offset) : getIntLE(buf, offset);
+    }
+
+    public int getIntBE(byte[] buf, int offset) {
+        int b1 = (buf[offset] & 0xFF);
+        int b2 = (buf[offset + 1] & 0xFF);
+        int b3 = (buf[offset + 2] & 0xFF);
+        int b4 = (buf[offset + 3] & 0xFF);
+        return (b1 << 24) | (b2 << 16) | (b3 << 8) | b4;
+    }
+
+    public int getIntLE(byte[] buf, int offset) {
+        int b1 = (buf[offset] & 0xFF);
+        int b2 = (buf[offset + 1] & 0xFF);
+        int b3 = (buf[offset + 2] & 0xFF);
+        int b4 = (buf[offset + 3] & 0xFF);
+        return b1 | (b2 << 8) | (b3 << 16) | (b4 << 24);
+    }
+
+    public void putIntUnaligned(byte[] buf, int pos, int v) {
+        if (BIG_ENDIAN) {
+            putIntBE(buf, pos, v);
+        } else {
+            putIntLE(buf, pos, v);
+        }
+    }
+
+    /**
+     * Writes an int value to a byte array in big-endian byte order.
+     * This method puts an int value into the specified byte array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntBE(byte[] buf, int pos, int v) {
+        buf[pos] = (byte) ((v >>> 24) & 0xFF);
+        buf[pos + 1] = (byte) ((v >>> 16) & 0xFF);
+        buf[pos + 2] = (byte) ((v >>> 8) & 0xFF);
+        buf[pos + 3] = (byte) (v & 0xFF);
+    }
+
+    /**
+     * Writes an int value to a byte array in little-endian byte order.
+     * This method puts an int value into the specified byte array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntLE(byte[] buf, int pos, int v) {
+        buf[pos] = (byte) (v & 0xFF);
+        buf[pos + 1] = (byte) ((v >>> 8) & 0xFF);
+        buf[pos + 2] = (byte) ((v >>> 16) & 0xFF);
+        buf[pos + 3] = (byte) ((v >>> 24) & 0xFF);
+    }
+
+    public int getIntUnaligned(char[] buf, int offset) {
+        return BIG_ENDIAN ? getIntBE(buf, offset) : getIntLE(buf, offset);
+    }
+
+    public int getIntBE(char[] buf, int offset) {
+        return (((buf[offset] & 0xFFFF)) << 16) | (buf[offset + 1] & 0xFFFF);
+    }
+
+    /**
+     * Gets an int value from a character array at the specified offset in little-endian byte order.
+     * This method retrieves an int value from the specified character array at the given offset
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array to read from
+     * @param offset the offset in the array where to read the int value
+     * @return the int value at the specified offset in little-endian order
+     */
+    public int getIntLE(char[] buf, int offset) {
+        return ((buf[offset + 1] & 0xFFFF) << 16) | (buf[offset] & 0xFFFF);
+    }
+
+    public void putIntUnaligned(char[] buf, int pos, int v) {
+        if (BIG_ENDIAN) {
+            putIntBE(buf, pos, v);
+        } else {
+            putIntLE(buf, pos, v);
+        }
+    }
+
+    /**
+     * Writes an int value to a character array in big-endian byte order.
+     * This method puts an int value into the specified character array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntBE(char[] buf, int pos, int v) {
+        buf[pos] = (char) ((v >>> 16) & 0xFFFF);
+        buf[pos + 1] = (char) (v & 0xFFFF);
+    }
+
+    /**
+     * Writes an int value to a character array in little-endian byte order.
+     * This method puts an int value into the specified character array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntLE(char[] buf, int pos, int v) {
+        buf[pos] = (char) (v & 0xFFFF);
+        buf[pos + 1] = (char) ((v >>> 16) & 0xFFFF);
+    }
 }

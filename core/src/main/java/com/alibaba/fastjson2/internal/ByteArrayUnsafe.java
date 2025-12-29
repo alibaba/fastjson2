@@ -53,6 +53,53 @@ public final class ByteArrayUnsafe extends ByteArray {
         return convEndian(false,
                 UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
+
+    public int getIntUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
+    static int convEndian(boolean big, int n) {
+        return big == BIG_ENDIAN ? n : Integer.reverseBytes(n);
+    }
+
+    public int getIntBE(byte[] buf, int offset) {
+        return convEndian(true, UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public int getIntLE(byte[] buf, int offset) {
+        return convEndian(false, UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public void putIntUnaligned(byte[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
+    }
+
+    /**
+     * Writes an int value to a byte array in big-endian byte order.
+     * This method puts an int value into the specified byte array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntBE(byte[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
+    }
+
+    /**
+     * Writes an int value to a byte array in little-endian byte order.
+     * This method puts an int value into the specified byte array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntLE(byte[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
+    }
+
     public int digit1(byte[] buf, int off) {
         int d = UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + off) - '0';
         return d >= 0 && d <= 9 ? d : -1;
@@ -144,5 +191,47 @@ public final class ByteArrayUnsafe extends ByteArray {
                 ((d >> 16) & 0xF)) * 10 +
                 ((d >> 32) & 0xF)) * 10 +
                 (d >> 48));
+    }
+
+    public int getIntUnaligned(char[] buf, int offset) {
+        return UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    }
+
+    public int getIntBE(char[] buf, int offset) {
+        return convEndian(true, UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+    }
+
+    public int getIntLE(char[] buf, int offset) {
+        return convEndian(false, UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+    }
+
+    public void putIntUnaligned(char[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
+    }
+
+    /**
+     * Writes an int value to a character array in big-endian byte order.
+     * This method puts an int value into the specified character array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntBE(char[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(true, v));
+    }
+
+    /**
+     * Writes an int value to a character array in little-endian byte order.
+     * This method puts an int value into the specified character array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
+    public void putIntLE(char[] buf, int pos, int v) {
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
     }
 }

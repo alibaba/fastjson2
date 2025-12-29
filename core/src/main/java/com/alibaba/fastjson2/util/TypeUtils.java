@@ -2103,7 +2103,7 @@ public class TypeUtils {
         }
         byte b0;
         return (len == 1 && ((b0 = bytes[off]) == '1' || b0 == 'Y'))
-                || (len == 4 && (IOUtils.getIntUnaligned(bytes, off) | 0x20202020) == IOUtils.TRUE);
+                || (len == 4 && (BYTES.getIntUnaligned(bytes, off) | 0x20202020) == IOUtils.TRUE);
     }
 
     public static Boolean parseBoolean(char[] chars, int off, int len) {

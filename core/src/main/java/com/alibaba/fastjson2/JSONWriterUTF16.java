@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -1423,7 +1424,7 @@ class JSONWriterUTF16
         }
 
         putLong(chars, off, name);
-        putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        BYTES.putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 10;
     }
 
@@ -1449,7 +1450,7 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
         putLong(chars, off, name);
-        putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        BYTES.putIntUnaligned(chars, off + 8, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 10;
     }
 
@@ -1605,7 +1606,7 @@ class JSONWriterUTF16
         }
 
         putLong(chars, off, name0, name1);
-        putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        BYTES.putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 18;
     }
 
@@ -1629,7 +1630,7 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
         putLong(chars, off, name0, name1);
-        putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
+        BYTES.putIntUnaligned(chars, off + 16, useSingleQuote ? QUOTE_COLON : QUOTE2_COLON);
         this.off = off + 18;
     }
 

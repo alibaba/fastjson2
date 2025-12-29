@@ -308,27 +308,27 @@ public class StringUtils {
     }
 
     public static void writeU4Hex2(byte[] bytes, int off, int c) {
-        putIntUnaligned(bytes, off, LATIN1.U4);
+        BYTES.putIntUnaligned(bytes, off, LATIN1.U4);
         BYTES.putShortLE(bytes, off + 4, hex2(c));
     }
 
     public static void writeU4HexU(byte[] bytes, int off, int c) {
         BYTES.putShortUnaligned(bytes, off, LATIN1.U2);
-        putIntLE(bytes, off + 2, hex4U(c));
+        BYTES.putIntLE(bytes, off + 2, hex4U(c));
     }
 
     public static void writeEscapedChar(char[] chars, int off, int c0) {
-        IOUtils.putIntUnaligned(chars, off, UTF16.ESCAPED_CHARS[c0 & 0x7f]);
+        BYTES.putIntUnaligned(chars, off, UTF16.ESCAPED_CHARS[c0 & 0x7f]);
     }
 
     public static void writeU4Hex2(char[] chars, int off, int c) {
-        IOUtils.putLongUnaligned(chars, off, UTF16.U4);
-        IOUtils.putIntLE(chars, off + 4, utf16Hex2(c));
+        putLongUnaligned(chars, off, UTF16.U4);
+        BYTES.putIntLE(chars, off + 4, utf16Hex2(c));
     }
 
     public static void writeU4HexU(char[] chars, int off, int c) {
-        IOUtils.putIntUnaligned(chars, off, UTF16.U2);
-        IOUtils.putLongLE(chars, off + 2, utf16Hex4U(c));
+        BYTES.putIntUnaligned(chars, off, UTF16.U2);
+        putLongLE(chars, off + 2, utf16Hex4U(c));
     }
 
     public static boolean escaped(byte[] value, byte quote, long vecQuote) {
@@ -413,7 +413,7 @@ public class StringUtils {
                 int[] shorts = new int[128];
                 for (int i = 0; i < mapping.length; i += 2) {
                     buf[1] = mapping[i + 1];
-                    shorts[mapping[i]] = IOUtils.getIntUnaligned(buf, 0);
+                    shorts[mapping[i]] = BYTES.getIntUnaligned(buf, 0);
                 }
                 ESCAPED_CHARS = shorts;
             }
