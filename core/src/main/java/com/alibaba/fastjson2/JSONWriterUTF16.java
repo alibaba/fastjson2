@@ -2200,6 +2200,11 @@ final class JSONWriterUTF16
     @Override
     public void writeFloat(float value) {
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Float.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 15;
@@ -2214,7 +2219,7 @@ final class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        int len = DoubleToDecimal.toString(value, chars, off, true);
+        int len = DoubleToDecimal.toString(value, chars, off, true, writeSpecialAsString);
         off += len;
 
         if (writeAsString) {
@@ -2231,6 +2236,7 @@ final class JSONWriterUTF16
         }
 
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
@@ -2245,16 +2251,18 @@ final class JSONWriterUTF16
                 chars[off++] = ',';
             }
 
-            if (writeAsString) {
-                chars[off++] = '"';
-            }
-
-            float value = values[i];
-            int len = DoubleToDecimal.toString(value, chars, off, true);
-            off += len;
-
-            if (writeAsString) {
-                chars[off++] = '"';
+            if (!Float.isFinite(values[i])) {
+                int len = DoubleToDecimal.toString(values[i], chars, off, true, writeSpecialAsString);
+                off += len;
+            } else {
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
+                int len = DoubleToDecimal.toString(values[i], chars, off, true, false);
+                off += len;
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
             }
         }
         chars[off] = ']';
@@ -2264,6 +2272,11 @@ final class JSONWriterUTF16
     @Override
     public void writeDouble(double value) {
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Double.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 24;
@@ -2280,7 +2293,7 @@ final class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        int len = DoubleToDecimal.toString(value, chars, off, true);
+        int len = DoubleToDecimal.toString(value, chars, off, true, writeSpecialAsString);
         off += len;
 
         if (writeAsString) {
@@ -2292,11 +2305,12 @@ final class JSONWriterUTF16
     @Override
     public void writeDoubleArray(double value0, double value1) {
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + 48 + 3;
         if (writeAsString) {
-            minCapacity += 2;
+            minCapacity += 4;
         }
 
         ensureCapacity(minCapacity);
@@ -2304,24 +2318,37 @@ final class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = '[';
 
-        if (writeAsString) {
-            chars[off++] = '"';
+
+        if (!Double.isFinite(value0)) {
+            int len0 = DoubleToDecimal.toString(value0, chars, off, true, writeSpecialAsString);
+            off += len0;
+        } else {
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
+            int len0 = DoubleToDecimal.toString(value0, chars, off, true, false);
+            off += len0;
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
         }
-        int len0 = DoubleToDecimal.toString(value0, chars, off, true);
-        off += len0;
-        if (writeAsString) {
-            chars[off++] = '"';
-        }
+
 
         chars[off++] = ',';
 
-        if (writeAsString) {
-            chars[off++] = '"';
-        }
-        int len1 = DoubleToDecimal.toString(value1, chars, off, true);
-        off += len1;
-        if (writeAsString) {
-            chars[off++] = '"';
+
+        if (!Double.isFinite(value1)) {
+            int len1 = DoubleToDecimal.toString(value1, chars, off, true, writeSpecialAsString);
+            off += len1;
+        } else {
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
+            int len1 = DoubleToDecimal.toString(value1, chars, off, true, false);
+            off += len1;
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
         }
 
         chars[off] = ']';
@@ -2336,6 +2363,7 @@ final class JSONWriterUTF16
         }
 
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * 27 + 1;
@@ -2350,16 +2378,18 @@ final class JSONWriterUTF16
                 chars[off++] = ',';
             }
 
-            if (writeAsString) {
-                chars[off++] = '"';
-            }
-
-            double value = values[i];
-            int len = DoubleToDecimal.toString(value, chars, off, true);
-            off += len;
-
-            if (writeAsString) {
-                chars[off++] = '"';
+            if (!Double.isFinite(values[i])) {
+                int len = DoubleToDecimal.toString(values[i], chars, off, true, writeSpecialAsString);
+                off += len;
+            } else {
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
+                int len = DoubleToDecimal.toString(values[i], chars, off, true, false);
+                off += len;
+                if (writeAsString) {
+                    chars[off++] = '"';
+                }
             }
         }
         chars[off] = ']';

@@ -46,7 +46,7 @@ public final class DoubleToDecimal {
      * that do not provide specific machine instructions or where they are slow.
      * This is discussed in section 10 of [1].
      */
-    public static int toString(double v, byte[] bytes, int off, boolean json) {
+    public static int toString(double v, byte[] bytes, int off, boolean json, boolean writeSpecialAsString) {
         final long C_TINY = 3;
         final long C_MIN = 4503599627370496L;
         final int BQ_MASK = 2047;
@@ -354,18 +354,31 @@ public final class DoubleToDecimal {
         }
 
         int index = off - 1;
-        if (json) {
+        if (json && !writeSpecialAsString) {
             bytes[1 + index] = 'n';
             bytes[2 + index] = 'u';
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
-            index += 3;
+        }else if (t != 0) {
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                bytes[2 + index] = 'N';
+                bytes[3 + index] = 'a';
+                bytes[4 + index] = 'N';
+                bytes[5 + index] = '"';
+                index += 5;
+            } else {
+                bytes[1 + index] = 'N';
+                bytes[2 + index] = 'a';
+                bytes[3 + index] = 'N';
+                index += 3;
+            }
         } else {
+            if (json && writeSpecialAsString) {
+                bytes[++index] = '"';
+            }
+
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
@@ -378,11 +391,16 @@ public final class DoubleToDecimal {
             bytes[7 + index] = 't';
             bytes[8 + index] = 'y';
             index += 8;
+
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                index += 1;
+            }
         }
         return index + 1 - off;
     }
 
-    public static int toString(double v, char[] bytes, int off, boolean json) {
+    public static int toString(double v, char[] bytes, int off, boolean json, boolean writeSpecialAsString) {
         final int P = 53;
         final int Q_MIN = -1074;
         final long C_TINY = 3;
@@ -692,18 +710,31 @@ public final class DoubleToDecimal {
         }
 
         int index = off - 1;
-        if (json) {
+        if (json && !writeSpecialAsString) {
             bytes[1 + index] = 'n';
             bytes[2 + index] = 'u';
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
-            index += 3;
+        }else if (t != 0) {
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                bytes[2 + index] = 'N';
+                bytes[3 + index] = 'a';
+                bytes[4 + index] = 'N';
+                bytes[5 + index] = '"';
+                index += 5;
+            } else {
+                bytes[1 + index] = 'N';
+                bytes[2 + index] = 'a';
+                bytes[3 + index] = 'N';
+                index += 3;
+            }
         } else {
+            if (json && writeSpecialAsString) {
+                bytes[++index] = '"';
+            }
+
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
@@ -716,11 +747,16 @@ public final class DoubleToDecimal {
             bytes[7 + index] = 't';
             bytes[8 + index] = 'y';
             index += 8;
+
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                index += 1;
+            }
         }
         return index + 1 - off;
     }
 
-    public static int toString(float v, byte[] bytes, int off, boolean json) {
+    public static int toString(float v, byte[] bytes, int off, boolean json, boolean writeSpecialAsString) {
         final int Q_MIN = -149;
         final int C_TINY = 8;
         final int C_MIN = 8388608;
@@ -958,18 +994,31 @@ public final class DoubleToDecimal {
         }
 
         int index = off - 1;
-        if (json) {
+        if (json && !writeSpecialAsString) {
             bytes[1 + index] = 'n';
             bytes[2 + index] = 'u';
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
-            index += 3;
+        }else if (t != 0) {
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                bytes[2 + index] = 'N';
+                bytes[3 + index] = 'a';
+                bytes[4 + index] = 'N';
+                bytes[5 + index] = '"';
+                index += 5;
+            } else {
+                bytes[1 + index] = 'N';
+                bytes[2 + index] = 'a';
+                bytes[3 + index] = 'N';
+                index += 3;
+            }
         } else {
+            if (json && writeSpecialAsString) {
+                bytes[++index] = '"';
+            }
+
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
@@ -982,11 +1031,16 @@ public final class DoubleToDecimal {
             bytes[7 + index] = 't';
             bytes[8 + index] = 'y';
             index += 8;
+
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                index += 1;
+            }
         }
         return index + 1 - off;
     }
 
-    public static int toString(float v, char[] bytes, int off, boolean json) {
+    public static int toString(float v, char[] bytes, int off, boolean json, boolean writeSpecialAsString) {
         final int Q_MIN = -149;
         final int C_TINY = 8;
         final int C_MIN = 8388608;
@@ -1224,18 +1278,31 @@ public final class DoubleToDecimal {
         }
 
         int index = off - 1;
-        if (json) {
+        if (json && !writeSpecialAsString) {
             bytes[1 + index] = 'n';
             bytes[2 + index] = 'u';
             bytes[3 + index] = 'l';
             bytes[4 + index] = 'l';
             index += 4;
-        } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
-            index += 3;
+        }else if (t != 0) {
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                bytes[2 + index] = 'N';
+                bytes[3 + index] = 'a';
+                bytes[4 + index] = 'N';
+                bytes[5 + index] = '"';
+                index += 5;
+            } else {
+                bytes[1 + index] = 'N';
+                bytes[2 + index] = 'a';
+                bytes[3 + index] = 'N';
+                index += 3;
+            }
         } else {
+            if (json && writeSpecialAsString) {
+                bytes[++index] = '"';
+            }
+
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
@@ -1248,6 +1315,11 @@ public final class DoubleToDecimal {
             bytes[7 + index] = 't';
             bytes[8 + index] = 'y';
             index += 8;
+
+            if (json && writeSpecialAsString) {
+                bytes[1 + index] = '"';
+                index += 1;
+            }
         }
         return index + 1 - off;
     }
