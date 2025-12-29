@@ -2262,7 +2262,7 @@ public class IOUtils {
      * @return the extracted digit value (0-9), or -1 if the character is not a valid digit
      */
     public static int digit1(char[] buf, int off) {
-        int d = UNSAFE.getByte(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
+        int d = UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
 
