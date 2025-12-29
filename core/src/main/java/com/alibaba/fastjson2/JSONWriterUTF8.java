@@ -2202,6 +2202,11 @@ final class JSONWriterUTF8
     @Override
     public void writeFloat(float value) {
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Float.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 17;
@@ -2213,7 +2218,7 @@ final class JSONWriterUTF8
             bytes[off++] = '"';
         }
 
-        int len = DoubleToDecimal.toString(value, bytes, off, true);
+        int len = DoubleToDecimal.toString(value, bytes, off, true, writeSpecialAsString);
         off += len;
 
         if (writeAsString) {
@@ -2225,6 +2230,11 @@ final class JSONWriterUTF8
     @Override
     public void writeDouble(double value) {
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Double.isFinite(value)) {
+            writeAsString = false;
+        }
 
         int off = this.off;
         int minCapacity = off + 26;
@@ -2238,7 +2248,7 @@ final class JSONWriterUTF8
             bytes[off++] = '"';
         }
 
-        int len = DoubleToDecimal.toString(value, bytes, off, true);
+        int len = DoubleToDecimal.toString(value, bytes, off, true, writeSpecialAsString);
         off += len;
 
         if (writeAsString) {
@@ -2255,6 +2265,7 @@ final class JSONWriterUTF8
         }
 
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
@@ -2269,16 +2280,18 @@ final class JSONWriterUTF8
                 bytes[off++] = ',';
             }
 
-            if (writeAsString) {
-                bytes[off++] = '"';
-            }
-
-            float value = values[i];
-            int len = DoubleToDecimal.toString(value, bytes, off, true);
-            off += len;
-
-            if (writeAsString) {
-                bytes[off++] = '"';
+            if (!Float.isFinite(values[i])) {
+                int len = DoubleToDecimal.toString(values[i], bytes, off, true, writeSpecialAsString);
+                off += len;
+            } else {
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
+                int len = DoubleToDecimal.toString(values[i], bytes, off, true, false);
+                off += len;
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
             }
         }
         bytes[off] = ']';
@@ -2293,6 +2306,7 @@ final class JSONWriterUTF8
         }
 
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * 27 + 1;
@@ -2306,16 +2320,18 @@ final class JSONWriterUTF8
                 bytes[off++] = ',';
             }
 
-            if (writeAsString) {
-                bytes[off++] = '"';
-            }
-
-            double value = values[i];
-            int len = DoubleToDecimal.toString(value, bytes, off, true);
-            off += len;
-
-            if (writeAsString) {
-                bytes[off++] = '"';
+            if (!Double.isFinite(values[i])) {
+                int len = DoubleToDecimal.toString(values[i], bytes, off, true, writeSpecialAsString);
+                off += len;
+            } else {
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
+                int len = DoubleToDecimal.toString(values[i], bytes, off, true, false);
+                off += len;
+                if (writeAsString) {
+                    bytes[off++] = '"';
+                }
             }
         }
         bytes[off] = ']';
