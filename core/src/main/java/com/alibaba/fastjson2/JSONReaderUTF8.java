@@ -5270,10 +5270,6 @@ class JSONReaderUTF8
             int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
             if (numDigits > 38) {
                 valueType = JSON_TYPE_BIG_DEC;
-//                if (negative) {
-//                    numStart--;
-//                }
-//                stringValue = new String(bytes, numStart, offset - 1 - numStart);
             } else {
                 bigInt(bytes, numStart, offset - 1);
             }
