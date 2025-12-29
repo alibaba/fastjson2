@@ -17,6 +17,7 @@ import static com.alibaba.fastjson2.JSONB.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReaderUTF8.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -220,7 +221,7 @@ final class JSONReaderJSONB
     }
 
     private static int getInt3(byte[] bytes, int offset, int type) {
-        return ((type - BC_INT32_SHORT_ZERO) << 16) + (getShortBE(bytes, offset) & 0xFFFF);
+        return ((type - BC_INT32_SHORT_ZERO) << 16) + (BYTES.getShortBE(bytes, offset) & 0xFFFF);
     }
 
     private static int getLongByte(byte[] bytes, int offset, int type) {
@@ -228,7 +229,7 @@ final class JSONReaderJSONB
     }
 
     private static int getLong3(byte[] bytes, int offset, int type) {
-        return (((type - BC_INT64_SHORT_ZERO) << 16) + (getShortBE(bytes, offset) & 0xFFFF));
+        return (((type - BC_INT64_SHORT_ZERO) << 16) + (BYTES.getShortBE(bytes, offset) & 0xFFFF));
     }
 
     @Override
@@ -4572,7 +4573,7 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int type = bytes[offset++];
         if (type == BC_LOCAL_DATE && offset + 3 < this.end) {
-            int year = getShortBE(bytes, offset);
+            int year = BYTES.getShortBE(bytes, offset);
             int month = getByte(bytes, offset + 2);
             int dayOfMonth = getByte(bytes, offset + 3);
             this.offset = offset + 4;

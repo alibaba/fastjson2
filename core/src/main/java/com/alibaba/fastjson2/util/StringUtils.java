@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.hex4U;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
@@ -303,16 +304,16 @@ public class StringUtils {
     }
 
     public static void writeEscapedChar(byte[] bytes, int off, int c0) {
-        putShortLE(bytes, off, LATIN1.ESCAPED_CHARS[c0 & 0x7f]);
+        BYTES.putShortLE(bytes, off, LATIN1.ESCAPED_CHARS[c0 & 0x7f]);
     }
 
     public static void writeU4Hex2(byte[] bytes, int off, int c) {
         putIntUnaligned(bytes, off, LATIN1.U4);
-        putShortLE(bytes, off + 4, hex2(c));
+        BYTES.putShortLE(bytes, off + 4, hex2(c));
     }
 
     public static void writeU4HexU(byte[] bytes, int off, int c) {
-        putShortUnaligned(bytes, off, LATIN1.U2);
+        BYTES.putShortUnaligned(bytes, off, LATIN1.U2);
         putIntLE(bytes, off + 2, hex4U(c));
     }
 

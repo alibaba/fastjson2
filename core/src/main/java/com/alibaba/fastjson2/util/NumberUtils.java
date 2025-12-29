@@ -4,6 +4,7 @@ import java.lang.invoke.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
 
@@ -322,7 +323,7 @@ public final class NumberUtils {
                 buf[off++] = '-';
             }
             buf[off] = '0';
-            IOUtils.putShortUnaligned(buf, off + 1, DOT_ZERO_16);
+            BYTES.putShortUnaligned(buf, off + 1, DOT_ZERO_16);
             return off + 3;
         }
         boolean sign = doubleValue < 0;
@@ -409,7 +410,7 @@ public final class NumberUtils {
                 buf[off++] = '-';
             }
             buf[off] = '0';
-            IOUtils.putShortUnaligned(buf, off + 1, DOT_ZERO_16);
+            BYTES.putShortUnaligned(buf, off + 1, DOT_ZERO_16);
             return off + 3;
         }
         boolean sign = floatValue < 0;
@@ -674,7 +675,7 @@ public final class NumberUtils {
         if (useScientific) {
             if (digitCnt == 1) {
                 buf[off] = (byte) (value + 48);
-                IOUtils.putShortUnaligned(buf, off + 1, DOT_ZERO_16);
+                BYTES.putShortUnaligned(buf, off + 1, DOT_ZERO_16);
                 off += 3; // .0
             } else {
                 int pos = digitCnt - 2;
@@ -701,11 +702,11 @@ public final class NumberUtils {
                 int n = (int) (e10 * 1374389535L >> 37); //e10 / 100;
                 buf[off] = (byte) (n + 48);
                 e10 = e10 - n * 100;
-                IOUtils.putShortUnaligned(buf, off + 1, TWO_DIGITS_16_BITS[e10]);
+                BYTES.putShortUnaligned(buf, off + 1, TWO_DIGITS_16_BITS[e10]);
                 off += 3;
             } else {
                 if (e10 > 9) {
-                    IOUtils.putShortUnaligned(buf, off, TWO_DIGITS_16_BITS[e10]);
+                    BYTES.putShortUnaligned(buf, off, TWO_DIGITS_16_BITS[e10]);
                     off += 2;
                 } else {
                     buf[off++] = (byte) (e10 + 48);
@@ -715,12 +716,12 @@ public final class NumberUtils {
             // for non-scientific notation such as 12345, write a decimal point when size = decimalExp.
             if (e10 < 0) {
                 // -1/-2/-3
-                IOUtils.putShortUnaligned(buf, off, ZERO_DOT_16); // 0.
+                BYTES.putShortUnaligned(buf, off, ZERO_DOT_16); // 0.
                 off += 2;
                 if (e10 == -2) {
                     buf[off++] = '0';
                 } else if (e10 == -3) {
-                    IOUtils.putShortUnaligned(buf, off, ZERO_ZERO_16); // 00
+                    BYTES.putShortUnaligned(buf, off, ZERO_ZERO_16); // 00
                     off += 2;
                 }
                 off = writeInt64(buf, off, value);
@@ -747,7 +748,7 @@ public final class NumberUtils {
                             buf[off++] = '0';
                         }
                     }
-                    IOUtils.putShortUnaligned(buf, off, DOT_ZERO_16); // .0
+                    BYTES.putShortUnaligned(buf, off, DOT_ZERO_16); // .0
                     off += 2;
                 }
             }

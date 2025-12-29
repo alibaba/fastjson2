@@ -21,6 +21,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -2387,7 +2388,7 @@ public interface JSONB {
                 bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0;
                 return off + 1;
             }
-            putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
+            BYTES.putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
             return off + 2;
         }
 
@@ -2400,7 +2401,7 @@ public interface JSONB {
          * @return the new offset
          */
         static int writeInt8(byte[] bytes, int off, byte val) {
-            putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
+            BYTES.putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
             return off + 2;
         }
 
@@ -2419,7 +2420,7 @@ public interface JSONB {
                 return off + 1;
             }
             bytes[off] = BC_INT16;
-            putShortBE(bytes, off + 1, val);
+            BYTES.putShortBE(bytes, off + 1, val);
             return off + 3;
         }
 
@@ -2433,7 +2434,7 @@ public interface JSONB {
          */
         static int writeInt16(byte[] bytes, int off, short val) {
             bytes[off] = BC_INT16;
-            putShortBE(bytes, off + 1, val);
+            BYTES.putShortBE(bytes, off + 1, val);
             return off + 3;
         }
 
@@ -2490,7 +2491,7 @@ public interface JSONB {
             if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
                 bytes[off++] = (byte) symbol;
             } else if (symbol >= INT32_BYTE_MIN && symbol <= INT32_BYTE_MAX) {
-                putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
+                BYTES.putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
                 off += 2;
             } else {
                 off = JSONB.IO.writeInt32(bytes, off, symbol);
@@ -2574,11 +2575,11 @@ public interface JSONB {
             if (((value + 0x10) & ~0x3f) == 0) {
                 bytes[off++] = (byte) value;
             } else if (((value + 0x800) & ~0xfff) == 0) {
-                putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + value));
+                BYTES.putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + value));
                 off += 2;
             } else if (((value + 0x40000) & ~0x7ffff) == 0) {
                 bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (value >> 16));
-                putShortBE(bytes, off + 1, (short) value);
+                BYTES.putShortBE(bytes, off + 1, (short) value);
                 off += 3;
             } else {
                 bytes[off] = BC_INT32;
@@ -2641,11 +2642,11 @@ public interface JSONB {
             if (value >= INT64_NUM_LOW_VALUE && value <= INT64_NUM_HIGH_VALUE) {
                 bytes[off++] = (byte) (BC_INT64_NUM_MIN + (value - INT64_NUM_LOW_VALUE));
             } else if (((value + 0x800) & ~0xfffL) == 0) {
-                putShortBE(bytes, off, (short) ((BC_INT64_BYTE_ZERO << 8) + value));
+                BYTES.putShortBE(bytes, off, (short) ((BC_INT64_BYTE_ZERO << 8) + value));
                 off += 2;
             } else if (((value + 0x40000) & ~0x7ffffL) == 0) {
                 bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (value >> 16));
-                putShortBE(bytes, off + 1, (short) value);
+                BYTES.putShortBE(bytes, off + 1, (short) value);
                 off += 3;
             } else if ((((value + 0x80000000L) & ~0xffffffffL) == 0)) {
                 bytes[off] = BC_INT64_INT;
@@ -2861,7 +2862,7 @@ public interface JSONB {
          */
         static int putStringSizeSmall(byte[] bytes, int off, int val) {
             bytes[off] = BC_STR_ASCII;
-            putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + val));
+            BYTES.putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + val));
             return off + 3;
         }
 
@@ -2879,7 +2880,7 @@ public interface JSONB {
                 return off + 4;
             }
 
-            putShortBE(bytes, off, (short) ((BC_STR_ASCII << 8) | BC_INT32));
+            BYTES.putShortBE(bytes, off, (short) ((BC_STR_ASCII << 8) | BC_INT32));
             putIntBE(bytes, off + 2, strlen);
             return off + 6;
         }
@@ -2953,7 +2954,7 @@ public interface JSONB {
             } else {
                 bytes[off] = BC_STR_ASCII;
                 if (strlen <= INT32_BYTE_MAX) {
-                    putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
+                    BYTES.putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
                     off += 3;
                 } else {
                     off = JSONB.IO.writeInt32(bytes, off + 1, strlen);
@@ -3024,7 +3025,7 @@ public interface JSONB {
                 bytes[off] = BC_NULL;
                 return off + 1;
             }
-            putShortLE(bytes, off, (short) ((BC_BINARY & 0xFF) | ((BC_INT32_NUM_16 & 0xFF) << 8)));
+            BYTES.putShortLE(bytes, off, (short) ((BC_BINARY & 0xFF) | ((BC_INT32_NUM_16 & 0xFF) << 8)));
             putLongBE(bytes, off + 2, value.getMostSignificantBits());
             putLongBE(bytes, off + 10, value.getLeastSignificantBits());
             return off + 18;

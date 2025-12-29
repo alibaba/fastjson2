@@ -138,7 +138,7 @@ public class IOUtils {
      * @param value the value (0-99) to write as a digit pair
      */
     public static void writeDigitPair(byte[] buf, int charPos, int value) {
-        putShortLE(
+        BYTES.putShortLE(
                 buf,
                 charPos,
                 PACKED_DIGITS[value & 0x7f]);
@@ -395,10 +395,10 @@ public class IOUtils {
             int unscaleValSize = IOUtils.stringSize(unscaledVal);
             int insertionPoint = unscaleValSize - scale;
             if (insertionPoint == 0) {
-                putShortUnaligned(buf, off, ZERO_DOT_LATIN1);
+                BYTES.putShortUnaligned(buf, off, ZERO_DOT_LATIN1);
                 off += 2;
             } else if (insertionPoint < 0) {
-                putShortUnaligned(buf, off, ZERO_DOT_LATIN1);
+                BYTES.putShortUnaligned(buf, off, ZERO_DOT_LATIN1);
                 off += 2;
 
                 for (int i = 0; i < -insertionPoint; i++) {
@@ -1111,7 +1111,7 @@ public class IOUtils {
             v = DIGITS_K_32[(div - div2 * 1000) & 0x3ff];
         }
 
-        putShortLE(buf, off, (short) (v >> 8));
+        BYTES.putShortLE(buf, off, (short) (v >> 8));
         off += 2;
         if (rem1 == 0) {
             putByte(buf, off, (byte) (v >> 24));
@@ -1420,7 +1420,7 @@ public class IOUtils {
         int v = DIGITS_K_32[i & 0x3ff];
         final int start = (byte) v;
         if (start == 0) {
-            putShortLE(buf, pos, (short) (v >> 8));
+            BYTES.putShortLE(buf, pos, (short) (v >> 8));
             pos += 2;
         } else if (start == 1) {
             putByte(buf, pos++, (byte) (v >> 16));
@@ -1485,7 +1485,7 @@ public class IOUtils {
             int v = DIGITS_K_32[i & 0x3ff];
             final int start = (byte) v;
             if (start == 0) {
-                putShortLE(buf, pos, (short) (v >> 8));
+                BYTES.putShortLE(buf, pos, (short) (v >> 8));
                 pos += 2;
             } else if (start == 1) {
                 putByte(buf, pos++, (byte) (v >> 16));
@@ -1685,32 +1685,6 @@ public class IOUtils {
     }
 
     /**
-     * Writes a short value to a byte array in big-endian byte order.
-     * This method puts a short value into the specified byte array at the given position
-     * using big-endian byte ordering (most significant byte first).
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the short value
-     * @param v the short value to write
-     */
-    public static void putShortBE(byte[] buf, int pos, short v) {
-        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
-    }
-
-    /**
-     * Writes a short value to a byte array in little-endian byte order.
-     * This method puts a short value into the specified byte array at the given position
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the short value
-     * @param v the short value to write
-     */
-    public static void putShortLE(byte[] buf, int pos, short v) {
-        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
-    }
-
-    /**
      * Writes an int value to a byte array in big-endian byte order.
      * This method puts an int value into the specified byte array at the given position
      * using big-endian byte ordering (most significant byte first).
@@ -1756,19 +1730,6 @@ public class IOUtils {
             v = Integer.reverseBytes(v);
         }
         UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
-    }
-
-    /**
-     * Writes a short value to a byte array without alignment considerations.
-     * This method puts a short value into the specified byte array at the given position
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the byte array buffer to write to
-     * @param pos the position in the buffer where to write the short value
-     * @param v the short value to write
-     */
-    public static void putShortUnaligned(byte[] buf, int pos, short v) {
-        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
     /**
@@ -2367,47 +2328,6 @@ public class IOUtils {
      */
     public static boolean isDigit(int ch) {
         return ch >= '0' && ch <= '9';
-    }
-
-    /**
-     * Gets a short value from a byte array at the specified offset without alignment considerations.
-     * This method retrieves a short value from the specified byte array at the given offset
-     * without performing any byte order conversion or alignment adjustments.
-     *
-     * @param buf the byte array to read from
-     * @param offset the offset in the array where to read the short value
-     * @return the short value at the specified offset
-     */
-    public static short getShortUnaligned(byte[] buf, int offset) {
-        return UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset);
-    }
-
-    /**
-     * Gets a short value from a byte array at the specified offset in big-endian byte order.
-     * This method retrieves a short value from the specified byte array at the given offset
-     * using big-endian byte ordering (most significant byte first).
-     *
-     * @param buf the byte array to read from
-     * @param offset the offset in the array where to read the short value
-     * @return the short value at the specified offset in big-endian order
-     */
-    public static short getShortBE(byte[] buf, int offset) {
-        return convEndian(true,
-                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
-    }
-
-    /**
-     * Gets a short value from a byte array at the specified offset in little-endian byte order.
-     * This method retrieves a short value from the specified byte array at the given offset
-     * using little-endian byte ordering (least significant byte first).
-     *
-     * @param buf the byte array to read from
-     * @param offset the offset in the array where to read the short value
-     * @return the short value at the specified offset in little-endian order
-     */
-    public static short getShortLE(byte[] buf, int offset) {
-        return convEndian(false,
-                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
     /**

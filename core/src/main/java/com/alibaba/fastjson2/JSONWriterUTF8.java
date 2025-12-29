@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
@@ -136,11 +137,11 @@ final class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        putShortLE(bytes, off, (short) ('x' | ('\'' << 8)));
+        BYTES.putShortLE(bytes, off, (short) ('x' | ('\'' << 8)));
         off += 2;
 
         for (int i = 0; i < values.length; i++) {
-            putShortLE(bytes, off, hex2U(values[i]));
+            BYTES.putShortLE(bytes, off, hex2U(values[i]));
             off += 2;
         }
 

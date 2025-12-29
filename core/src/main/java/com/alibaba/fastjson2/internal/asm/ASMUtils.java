@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.internal.asm;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.internal.ByteArray;
+import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.*;
@@ -69,6 +71,8 @@ public final class ASMUtils {
     public static final String TYPE_JSONB_IO = JSONB.IO.class.getName().replace('.', '/');
     public static final String TYPE_FIELD_WRITER = FieldWriter.class.getName().replace('.', '/');
     public static final String TYPE_IO_UTILS = IOUtils.class.getName().replace('.', '/');
+    public static final String TYPE_CONF = Conf.class.getName().replace('.', '/');
+    public static final String TYPE_BYTE_ARRAY = ByteArray.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT = "java/lang/Object";
 
     public static final String DESC_FIELD_WRITER = 'L' + FieldWriter.class.getName().replace('.', '/') + ';';
@@ -79,6 +83,7 @@ public final class ASMUtils {
     public static final String DESC_JSON_WRITER = 'L' + TYPE_JSON_WRITER + ';';
     public static final String DESC_OBJECT_READER = 'L' + TYPE_OBJECT_READER + ';';
     public static final String DESC_OBJECT_WRITER = 'L' + TYPE_OBJECT_WRITER + ';';
+    public static final String DESC_BYTE_ARRAY = 'L' + TYPE_BYTE_ARRAY + ';';
     public static final String DESC_SUPPLIER = "Ljava/util/function/Supplier;";
     public static final String DESC_JSONSCHEMA = 'L' + JSONSchema.class.getName().replace('.', '/') + ';';
 

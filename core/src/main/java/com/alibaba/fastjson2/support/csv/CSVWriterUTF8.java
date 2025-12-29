@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
+
 final class CSVWriterUTF8
         extends CSVWriter {
     private static final short DOUBLE_QUOTE_2_LATIN1 = 0x22 | (0x22 << 8);
@@ -170,7 +172,7 @@ final class CSVWriterUTF8
         bytes[off++] = '"';
         for (byte ch : utf8) {
             if (ch == '"') {
-                IOUtils.putShortUnaligned(bytes, off, DOUBLE_QUOTE_2_LATIN1);
+                BYTES.putShortUnaligned(bytes, off, DOUBLE_QUOTE_2_LATIN1);
                 off += 2;
             } else {
                 bytes[off++] = ch;

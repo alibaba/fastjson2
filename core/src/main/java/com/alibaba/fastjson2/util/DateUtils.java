@@ -1058,7 +1058,7 @@ public class DateUtils {
             if (ldt == null
                     // && "0000-00-00".equals(str)
                     && getLongLE(chars, off) == 0x2d30302d30303030L
-                    && getShortLE(chars, off + 8) == 0x3030
+                    && BYTES.getShortLE(chars, off + 8) == 0x3030
             ) {
                 ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             }

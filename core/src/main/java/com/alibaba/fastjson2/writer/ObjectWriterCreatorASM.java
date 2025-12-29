@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
@@ -1045,16 +1046,17 @@ public class ObjectWriterCreatorASM
         mw.bastore();
     }
 
-    private static void gwWriteShort(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {
-        short nameInt = IOUtils.getShortUnaligned(name, offset);
-        mw.aload(BYTES);
+    private static void gwWriteShort(MethodWriter mw, int bytesSlot, int OFFSET, byte[] name, int offset) {
+        short nameInt = BYTES.getShortUnaligned(name, offset);
+        mw.getstatic(TYPE_CONF, "BYTES", DESC_BYTE_ARRAY);
+        mw.aload(bytesSlot);
         mw.iload(OFFSET);
         if (offset != 0) {
             mw.iconst_n(offset);
             mw.iadd();
         }
         mw.visitLdcInsn(nameInt);
-        mw.invokestatic(TYPE_IO_UTILS, "putShortUnaligned", "([BIS)V");
+        mw.invokevirtual(TYPE_BYTE_ARRAY, "putShortUnaligned", "([BIS)V");
     }
 
     private static void gwWriteInt(MethodWriter mw, int BYTES, int OFFSET, byte[] name, int offset) {

@@ -19,6 +19,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.DateUtils.OFFSET_8_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.IOUtils.*;
@@ -465,7 +466,7 @@ final class JSONWriterJSONB
         } else {
             bytes[off] = BC_STR_ASCII;
             if (strlen <= INT32_BYTE_MAX) {
-                putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
+                BYTES.putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
                 off += 3;
             } else {
                 off = JSONB.IO.writeInt32(bytes, off + 1, strlen);
@@ -1208,7 +1209,7 @@ final class JSONWriterJSONB
         if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
             bytes[off++] = (byte) symbol;
         } else if (symbol >= INT32_BYTE_MIN && symbol <= INT32_BYTE_MAX) {
-            putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
+            BYTES.putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
             off += 2;
         } else {
             off = JSONB.IO.writeInt32(bytes, off, symbol);

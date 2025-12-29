@@ -6,6 +6,53 @@ import static com.alibaba.fastjson2.util.JDKUtils.BIG_ENDIAN;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public final class ByteArrayUnsafe extends ByteArray {
+    /**
+     * Writes a short value to a byte array in big-endian byte order.
+     * This method puts a short value into the specified byte array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the short value
+     * @param v the short value to write
+     */
+    public void putShortBE(byte[] buf, int pos, short v) {
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
+    }
+
+    /**
+     * Writes a short value to a byte array in little-endian byte order.
+     * This method puts a short value into the specified byte array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the short value
+     * @param v the short value to write
+     */
+    public void putShortLE(byte[] buf, int pos, short v) {
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
+    }
+
+    static short convEndian(boolean big, short n) {
+        return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
+    }
+
+    public short getShortUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
+    public void putShortUnaligned(byte[] buf, int pos, short v) {
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
+    }
+
+    public short getShortBE(byte[] buf, int offset) {
+        return convEndian(true,
+                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
+
+    public short getShortLE(byte[] buf, int offset) {
+        return convEndian(false,
+                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
+    }
     public int digit1(byte[] buf, int off) {
         int d = UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + off) - '0';
         return d >= 0 && d <= 9 ? d : -1;
