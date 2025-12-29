@@ -122,7 +122,7 @@ public class IOUtils {
             long v = (c1 << 16) + (((long) c2) << 32) + (((long) c3) << 48);
             DIGITS_K_64[i] = c0 + v;
         }
-        ZERO_DOT_LATIN1 = UNSAFE.getShort(new byte[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
+        ZERO_DOT_LATIN1 = BYTES.getShortUnaligned(new byte[] {'0', '.'}, 0);
     }
 
     private static short digitPair(int value) {
@@ -1207,7 +1207,7 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             v2 = Integer.reverseBytes(v2);
         }
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + off, v2);
+        BYTES.putIntUnaligned(buf, off, v2);
         return off + 4;
     }
 
@@ -1227,13 +1227,13 @@ public class IOUtils {
 
     private static int writeInt3(byte[] buf, int off, int val) {
         int v = DIGITS_K_32[val & 0x3ff];
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + off, v >> ((((byte) v) + 1) << 3));
+        BYTES.putIntUnaligned(buf, off, v >> ((((byte) v) + 1) << 3));
         return off + 3 - (byte) v;
     }
 
     private static int writeInt3(char[] buf, int off, int val) {
         long v = DIGITS_K_64[val & 0x3ff];
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), v >> ((((short) v) + 1) << 4));
+        BYTES.putLongUnaligned(buf, off, v >> ((((short) v) + 1) << 4));
         return off + 3 - (byte) v;
     }
 
@@ -1247,7 +1247,7 @@ public class IOUtils {
         if (BIG_ENDIAN) {
             v = Long.reverseBytes(v);
         }
-        UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + off, v);
+        BYTES.putLongUnaligned(buf, off, v);
         return off + 8;
     }
 
@@ -1262,8 +1262,8 @@ public class IOUtils {
             x1 = Long.reverseBytes(x1);
             x2 = Long.reverseBytes(x2);
         }
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), x1);
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1) + 8, x2);
+        BYTES.putLongUnaligned(buf, off, x1);
+        BYTES.putLongUnaligned(buf, off + 4, x2);
         return off + 8;
     }
 
@@ -1695,13 +1695,12 @@ public class IOUtils {
      * @return the updated offset after writing the boolean value
      */
     public static int putBoolean(byte[] buf, int off, boolean v) {
-        long address = ARRAY_BYTE_BASE_OFFSET + off;
         if (v) {
-            UNSAFE.putInt(buf, address, TRUE);
+            BYTES.putIntUnaligned(buf, off, TRUE);
             return off + 4;
         } else {
-            UNSAFE.putByte(buf, address, (byte) 'f');
-            UNSAFE.putInt(buf, address + 1, ALSE);
+            BYTES.putByte(buf, off, (byte) 'f');
+            BYTES.putIntUnaligned(buf, off + 1, ALSE);
             return off + 5;
         }
     }
@@ -1717,13 +1716,12 @@ public class IOUtils {
      * @return the updated offset after writing the boolean value
      */
     public static int putBoolean(char[] buf, int off, boolean v) {
-        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         if (v) {
-            UNSAFE.putLong(buf, address, TRUE_64);
+            BYTES.putLongUnaligned(buf, off, TRUE_64);
             return off + 4;
         } else {
-            UNSAFE.putChar(buf, address, 'f');
-            UNSAFE.putLong(buf, address + 2, ALSE_64);
+            BYTES.putChar(buf, off, 'f');
+            BYTES.putLongUnaligned(buf, off + 1, ALSE_64);
             return off + 5;
         }
     }
@@ -1737,7 +1735,7 @@ public class IOUtils {
      * @return true if the position contains "alse", false otherwise
      */
     public static boolean isALSE(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
+        return BYTES.getIntUnaligned(buf, pos) == ALSE;
     }
 
     /**
@@ -1749,7 +1747,7 @@ public class IOUtils {
      * @return true if the position does not contain "alse", false otherwise
      */
     public static boolean notALSE(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != ALSE;
+        return BYTES.getIntUnaligned(buf, pos) != ALSE;
     }
 
     /**
@@ -1785,7 +1783,7 @@ public class IOUtils {
      * @return true if the position contains "null", false otherwise
      */
     public static boolean isNULL(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == NULL_32;
+        return BYTES.getIntUnaligned(buf, pos) == NULL_32;
     }
 
     /**
@@ -1797,7 +1795,7 @@ public class IOUtils {
      * @return true if the position does not contain "null", false otherwise
      */
     public static boolean notNULL(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != NULL_32;
+        return BYTES.getIntUnaligned(buf, pos) != NULL_32;
     }
 
     /**
@@ -1809,7 +1807,7 @@ public class IOUtils {
      * @return true if the position does not contain "true", false otherwise
      */
     public static boolean notTRUE(byte[] buf, int pos) {
-        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != TRUE;
+        return BYTES.getIntUnaligned(buf, pos) != TRUE;
     }
 
     /**
@@ -1821,7 +1819,7 @@ public class IOUtils {
      * @return true if the position does not contain "true", false otherwise
      */
     public static boolean notTRUE(char[] buf, int pos) {
-        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) != TRUE_64;
+        return BYTES.getLongUnaligned(buf, pos) != TRUE_64;
     }
 
     /**
@@ -1833,7 +1831,7 @@ public class IOUtils {
      * @return true if the position contains "null", false otherwise
      */
     public static boolean isNULL(char[] buf, int pos) {
-        return getLongUnaligned(buf, pos) == NULL_64;
+        return BYTES.getLongUnaligned(buf, pos) == NULL_64;
     }
 
     /**
@@ -1845,7 +1843,7 @@ public class IOUtils {
      * @return true if the position does not contain "null", false otherwise
      */
     public static boolean notNULL(char[] buf, int pos) {
-        return getLongUnaligned(buf, pos) != NULL_64;
+        return BYTES.getLongUnaligned(buf, pos) != NULL_64;
     }
 
     /**
@@ -1857,7 +1855,7 @@ public class IOUtils {
      * @param pos the position in the buffer where to write "null"
      */
     public static void putNULL(byte[] buf, int pos) {
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, NULL_32);
+        BYTES.putIntUnaligned(buf, pos, NULL_32);
     }
 
     /**
@@ -1869,7 +1867,7 @@ public class IOUtils {
      * @param pos the position in the buffer where to write "null"
      */
     public static void putNULL(char[] buf, int pos) {
-        UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), NULL_64);
+        BYTES.putLongUnaligned(buf, pos, NULL_64);
     }
 
     /**
