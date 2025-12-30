@@ -758,7 +758,7 @@ final class JSONWriterJSONB
         if (!utf16) {
             int maxSize = value.length + (value.length >> 2);
             int lenByteCnt = sizeOfInt(maxSize);
-            int result = IOUtils.encodeUTF8(value, 0, value.length, bytes, off + lenByteCnt + 1);
+            int result = IOUtils.encodeUTF8(value, 0, value.length >> 1, bytes, off + lenByteCnt + 1);
             int utf8len = result - off - lenByteCnt - 1;
             if (utf8len > value.length) {
                 utf16 = true;

@@ -484,23 +484,10 @@ public class IOUtils {
         return IOUtils.writeInt64(buf, off, unscaledVal);
     }
 
-    /**
-     * Encodes a UTF-16 byte array to UTF-8 byte array.
-     * This method converts characters from a source byte array (containing UTF-16 encoded data)
-     * to a destination byte array in UTF-8 encoding format.
-     *
-     * @param src the source byte array containing UTF-16 encoded data
-     * @param offset the starting offset in the source array
-     * @param len the number of bytes to encode from the source array
-     * @param dst the destination byte array to write UTF-8 encoded data to
-     * @param dp the starting position in the destination array
-     * @return the updated position in the destination array after encoding
-     */
-    public static int encodeUTF8(byte[] src, int offset, int len, byte[] dst, int dp) {
-        int sl = offset + len;
+    public static int encodeUTF8(byte[] str, int offset, int strlen, byte[] dst, int dp) {
+        int sl = offset + strlen;
         while (offset < sl) {
-            char c = UNSAFE.getChar(src, ARRAY_BYTE_BASE_OFFSET + offset);
-            offset += 2;
+            char c = BYTES.getChar(str, offset++);
 
             if (c < 0x80) {
                 dst[dp++] = (byte) c;
@@ -511,8 +498,7 @@ public class IOUtils {
                     dst[dp + 1] = (byte) (0x80 | (c & 0x3f));
                     dp += 2;
                 } else if (c >= '\uD800' && c <= '\uDFFF') {
-                    utf8_char2(src, offset, sl, c, dst, dp);
-                    offset += 2;
+                    utf8_char2(str, offset++, sl, c, dst, dp);
                     dp += 4;
                 } else {
                     // 3 bytes, 16 bits
@@ -576,7 +562,7 @@ public class IOUtils {
         char d;
         if (c > '\uDBFF'
                 || sl - offset < 1
-                || (d = UNSAFE.getChar(src, ARRAY_BYTE_BASE_OFFSET + offset)) < '\uDC00'
+                || (d = BYTES.getChar(src, offset)) < '\uDC00'
                 || d > '\uDFFF'
         ) {
             throw new JSONException("malformed input off : " + offset);

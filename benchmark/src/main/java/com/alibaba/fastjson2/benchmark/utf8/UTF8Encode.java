@@ -116,7 +116,7 @@ public class UTF8Encode {
             bytes = new byte[bufferSize];
         }
 
-        int cnt = IOUtils.encodeUTF8(value, 0, value.length, bytes, 0);
+        int cnt = IOUtils.encodeUTF8(value, 0, value.length >> 1, bytes, 0);
         byte[] utf8 = Arrays.copyOf(bytes, cnt);
         BYTES_UPDATER.lazySet(cacheItem, bytes);
         return utf8;

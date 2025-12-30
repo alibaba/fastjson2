@@ -38,7 +38,7 @@ public class IOUtilsTest {
         byte[] bytes = str.getBytes(StandardCharsets.UTF_16LE);
 
         byte[] dst = new byte[100];
-        int result = IOUtils.encodeUTF8(bytes, 0, bytes.length, dst, 0);
+        int result = IOUtils.encodeUTF8(bytes, 0, bytes.length >> 1, dst, 0);
         String str2 = new String(dst, 0, result, StandardCharsets.UTF_8);
         assertEquals(str, str2);
     }
@@ -49,7 +49,7 @@ public class IOUtilsTest {
         byte[] dst = new byte[100];
         assertThrows(
                 JSONException.class,
-                () -> IOUtils.encodeUTF8(bytes, 0, bytes.length, dst, 0));
+                () -> IOUtils.encodeUTF8(bytes, 0, bytes.length >> 1, dst, 0));
     }
 
     @Test

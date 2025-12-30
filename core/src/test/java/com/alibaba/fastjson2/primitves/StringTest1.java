@@ -14,7 +14,7 @@ public class StringTest1 {
         byte[] bytes = new byte[]{-41, 0, 45, 78};
 
         byte[] dst = new byte[10];
-        int result = IOUtils.encodeUTF8(bytes, 0, bytes.length, dst, 0);
+        int result = IOUtils.encodeUTF8(bytes, 0, bytes.length >> 1, dst, 0);
         String str2 = new String(dst, 0, result, StandardCharsets.UTF_8);
         assertEquals(str, str2);
     }
