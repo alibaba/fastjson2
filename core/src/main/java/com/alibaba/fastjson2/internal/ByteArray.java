@@ -41,7 +41,7 @@ public class ByteArray {
      * @return the character value at the specified position
      */
     public char getChar(byte[] buf, int pos) {
-        return (char) ((buf[pos] & 0xFF) | (buf[pos + 1] & 0xFF) << 8);
+        return (char) ((buf[pos << 1] & 0xFF) | (buf[(pos << 1) + 1] & 0xFF) << 8);
     }
 
     public void putByte(byte[] buf, int pos, byte v) {

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.issues_3600.issue3601;
 
 import com.alibaba.fastjson2.JSON;
-import lombok.var;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
