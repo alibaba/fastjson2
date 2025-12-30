@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.internal.CodeGenUtils.fieldReader;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
 import static com.alibaba.fastjson2.reader.ObjectReaderCreatorASM.MethodWriterContext.*;
@@ -2232,7 +2233,7 @@ public class ObjectReaderCreatorASM
                 }
             }
 
-            int name0 = UNSAFE.getInt(name0Bytes, ARRAY_BYTE_BASE_OFFSET);
+            int name0 = BYTES.getIntUnaligned(name0Bytes, 0);
 
             List<FieldReader> fieldReaders = name0Map.get(name0);
             if (fieldReaders == null) {
@@ -2293,7 +2294,7 @@ public class ObjectReaderCreatorASM
                         bytes4[1] = fieldName[4];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name1 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name1 &= 0xFFFF;
                         }
@@ -2308,7 +2309,7 @@ public class ObjectReaderCreatorASM
                         bytes4[1] = fieldName[4];
                         bytes4[2] = fieldName[5];
                         bytes4[3] = '"';
-                        int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name1 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name1 &= 0xFFFFFF;
                         }
@@ -2318,14 +2319,14 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 7: {
-                        int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        int name1 = BYTES.getIntUnaligned(fieldName, 3);
                         mw.aload(JSON_READER);
                         mw.iconst_n(name1);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match7", "(I)Z");
                         break;
                     }
                     case 8: {
-                        int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        int name1 = BYTES.getIntUnaligned(fieldName, 3);
                         mw.aload(JSON_READER);
                         mw.iconst_n(name1);
                         mw.iconst_n(fieldName[7]);
@@ -2337,7 +2338,7 @@ public class ObjectReaderCreatorASM
                         System.arraycopy(fieldName, 3, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name1 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name1 &= 0xFFFFFFFFFFFFL;
                         }
@@ -2350,7 +2351,7 @@ public class ObjectReaderCreatorASM
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 3, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name1 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name1 &= 0xFFFFFFFFFFFFFFL;
                         }
@@ -2360,14 +2361,14 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 11: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.invokevirtual(TYPE_JSON_READER, "nextIfName4Match11", "(J)Z");
                         break;
                     }
                     case 12: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.iconst_n(fieldName[11]);
@@ -2375,13 +2376,13 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 13: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[11];
                         bytes4[1] = fieldName[12];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name2 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name2 &= 0xFFFF;
                         }
@@ -2392,13 +2393,13 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 14: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[11];
                         bytes4[1] = fieldName[12];
                         bytes4[2] = fieldName[13];
                         bytes4[3] = '"';
-                        int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name2 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name2 &= 0xFFFFFF;
                         }
@@ -2409,8 +2410,8 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 15: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        int name2 = BYTES.getIntUnaligned(fieldName, 11);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.iconst_n(name2);
@@ -2418,8 +2419,8 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 16: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        int name2 = BYTES.getIntUnaligned(fieldName, 11);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.iconst_n(name2);
@@ -2428,13 +2429,13 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 17: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
 
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 11, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name2 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name2 &= 0xFFFFFFFFFFFFL;
                         }
@@ -2445,12 +2446,12 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 18: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
 
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 11, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name2 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name2 &= 0xFFFFFFFFFFFFFFL;
                         }
@@ -2461,8 +2462,8 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 19: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2470,8 +2471,8 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 20: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2480,14 +2481,14 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 21: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[19];
                         bytes4[1] = fieldName[20];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name3 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name3 &= 0xFFFF;
                         }
@@ -2499,14 +2500,14 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 22: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[19];
                         bytes4[1] = fieldName[20];
                         bytes4[2] = fieldName[21];
                         bytes4[3] = '"';
-                        int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name3 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name3 &= 0xFFFFFF;
                         }
@@ -2518,9 +2519,9 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 23: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        int name3 = BYTES.getIntUnaligned(fieldName, 19);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2529,9 +2530,9 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 24: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        int name3 = BYTES.getIntUnaligned(fieldName, 19);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2541,14 +2542,14 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 25: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
 
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 19, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name3 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name3 &= 0xFFFFFFFFFFFFL;
                         }
@@ -2560,13 +2561,13 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 26: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
 
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 19, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name3 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name3 &= 0xFFFFFFFFFFFFFFL;
                         }
@@ -2578,9 +2579,9 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 27: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2589,9 +2590,9 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 28: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2601,15 +2602,15 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 29: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[27];
                         bytes4[1] = fieldName[28];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name4 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name4 &= 0xFFFF;
                         }
@@ -2622,15 +2623,15 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 30: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[27];
                         bytes4[1] = fieldName[28];
                         bytes4[2] = fieldName[29];
                         bytes4[3] = '"';
-                        int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name4 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name4 &= 0xFFFFFF;
                         }
@@ -2643,10 +2644,10 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 31: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        int name4 = BYTES.getIntUnaligned(fieldName, 27);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2656,10 +2657,10 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 32: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        int name4 = BYTES.getIntUnaligned(fieldName, 27);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2670,14 +2671,14 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 33: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 27, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name4 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name4 &= 0xFFFFFFFFFFFFL;
                         }
@@ -2690,13 +2691,13 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 34: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 27, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name4 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name4 &= 0xFFFFFFFFFFFFFFL;
                         }
@@ -2709,10 +2710,10 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 35: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
 
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
@@ -2723,10 +2724,10 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 36: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
 
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
@@ -2738,16 +2739,16 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 37: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[35];
                         bytes4[1] = fieldName[36];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name5 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name5 &= 0xFFFF;
                         }
@@ -2761,16 +2762,16 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 38: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[35];
                         bytes4[1] = fieldName[36];
                         bytes4[2] = fieldName[37];
                         bytes4[3] = '"';
-                        int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name5 = BYTES.getIntUnaligned(bytes4, 0);
                         if (jsonb) {
                             name5 &= 0xFFFFFF;
                         }
@@ -2784,11 +2785,11 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 39: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
+                        int name5 = BYTES.getIntUnaligned(fieldName, 35);
 
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
@@ -2800,11 +2801,11 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 40: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
+                        int name5 = BYTES.getIntUnaligned(fieldName, 35);
 
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
@@ -2817,16 +2818,16 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 41: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
 
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 35, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name5 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name5 &= 0xFFFFFFFFFFFFL;
                         }
@@ -2840,15 +2841,15 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 42: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
 
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 35, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name5 = BYTES.getLongUnaligned(bytes8, 0);
                         if (jsonb) {
                             name5 &= 0xFFFFFFFFFFFFFFL;
                         }
@@ -2862,11 +2863,11 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 43: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        long name5 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
+                        long name5 = BYTES.getLongUnaligned(fieldName, 35);
                         mw.aload(JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitLdcInsn(name2);
@@ -2959,7 +2960,7 @@ public class ObjectReaderCreatorASM
                 default:
                     throw new IllegalStateException("length " + fieldNameLength);
             }
-            long rawLong = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+            long rawLong = BYTES.getLongUnaligned(bytes8, 0);
             mw.lload(RAW_LONG);
             mw.visitLdcInsn(rawLong);
             mw.lcmp();
@@ -3647,7 +3648,7 @@ public class ObjectReaderCreatorASM
                 } else if (enumName.length >= 3) {
                     System.arraycopy(enumName, 0, name0Bytes, 1, 3);
                 }
-                int name0 = UNSAFE.getInt(name0Bytes, ARRAY_BYTE_BASE_OFFSET);
+                int name0 = BYTES.getIntUnaligned(name0Bytes, 0);
 
                 List<Enum> enumList = name0Map.get(name0);
                 if (enumList == null) {
@@ -3736,21 +3737,21 @@ public class ObjectReaderCreatorASM
                             bytes4[1] = enumName[4];
                             bytes4[2] = enumName[5];
                             bytes4[3] = '"';
-                            int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                            int name1 = BYTES.getIntUnaligned(bytes4, 0);
                             mw.aload(JSON_READER);
                             mw.visitLdcInsn(name1);
                             mw.invokevirtual(TYPE_JSON_READER, "nextIfValue4Match6", "(I)Z");
                             break;
                         }
                         case 7: {
-                            int name1 = UNSAFE.getInt(enumName, ARRAY_BYTE_BASE_OFFSET + 3);
+                            int name1 = BYTES.getIntUnaligned(enumName, 3);
                             mw.aload(JSON_READER);
                             mw.visitLdcInsn(name1);
                             mw.invokevirtual(TYPE_JSON_READER, "nextIfValue4Match7", "(I)Z");
                             break;
                         }
                         case 8: {
-                            int name1 = UNSAFE.getInt(enumName, ARRAY_BYTE_BASE_OFFSET + 3);
+                            int name1 = BYTES.getIntUnaligned(enumName, 3);
                             mw.aload(JSON_READER);
                             mw.visitLdcInsn(name1);
                             mw.visitLdcInsn(enumName[7]);
@@ -3758,7 +3759,7 @@ public class ObjectReaderCreatorASM
                             break;
                         }
                         case 9: {
-                            int name1 = UNSAFE.getInt(enumName, ARRAY_BYTE_BASE_OFFSET + 3);
+                            int name1 = BYTES.getIntUnaligned(enumName, 3);
                             mw.aload(JSON_READER);
                             mw.visitLdcInsn(name1);
                             mw.visitLdcInsn(enumName[7]);
@@ -3770,7 +3771,7 @@ public class ObjectReaderCreatorASM
                             byte[] bytes8 = new byte[8];
                             System.arraycopy(enumName, 3, bytes8, 0, 7);
                             bytes8[7] = '"';
-                            long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                            long name1 = BYTES.getLongUnaligned(bytes8, 0);
                             mw.aload(JSON_READER);
                             mw.visitLdcInsn(name1);
                             mw.invokevirtual(TYPE_JSON_READER, "nextIfValue4Match10", "(J)Z");
@@ -3779,7 +3780,7 @@ public class ObjectReaderCreatorASM
                         case 11: {
                             byte[] bytes8 = new byte[8];
                             System.arraycopy(enumName, 3, bytes8, 0, 8);
-                            long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                            long name1 = BYTES.getLongUnaligned(bytes8, 0);
                             mw.aload(JSON_READER);
                             mw.visitLdcInsn(name1);
                             mw.invokevirtual(TYPE_JSON_READER, "nextIfValue4Match11", "(J)Z");
