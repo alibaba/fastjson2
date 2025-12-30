@@ -39,5 +39,5 @@ public final class Conf {
         return DEFAULT_PROPERTIES.getProperty(key);
     }
 
-    public static ByteArray BYTES = USE_UNSAFE ? new ByteArrayUnsafe() : new ByteArray();
+    public static final ByteArray BYTES = USE_UNSAFE ? new ByteArrayUnsafe() : new ByteArray();
 }
