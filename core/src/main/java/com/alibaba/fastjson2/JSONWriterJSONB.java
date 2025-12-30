@@ -1609,7 +1609,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 8);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        BYTES.putLongUnaligned(bytes, off, name);
         this.off = off + 2;
     }
 
@@ -1621,7 +1621,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 8);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        BYTES.putLongUnaligned(bytes, off, name);
         this.off = off + 3;
     }
 
@@ -1633,7 +1633,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 8);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        BYTES.putLongUnaligned(bytes, off, name);
         this.off = off + 4;
     }
 
@@ -1645,7 +1645,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 8);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        BYTES.putLongUnaligned(bytes, off, name);
         this.off = off + 5;
     }
 
@@ -1657,7 +1657,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 8);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        BYTES.putLongUnaligned(bytes, off, name);
         this.off = off + 6;
     }
 
@@ -1669,7 +1669,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 8);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        BYTES.putLongUnaligned(bytes, off, name);
         this.off = off + 7;
     }
 
@@ -1681,7 +1681,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 8);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        BYTES.putLongUnaligned(bytes, off, name);
         this.off = off + 8;
     }
 
@@ -1693,8 +1693,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 12);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putIntUnaligned(bytes, off + 8, name1);
         this.off = off + 9;
     }
 
@@ -1706,8 +1706,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 16);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putLongUnaligned(bytes, off + 8, name1);
         this.off = off + 10;
     }
 
@@ -1719,8 +1719,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 16);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putLongUnaligned(bytes, off + 8, name1);
         this.off = off + 11;
     }
 
@@ -1732,8 +1732,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 16);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putLongUnaligned(bytes, off + 8, name1);
         this.off = off + 12;
     }
 
@@ -1745,8 +1745,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 16);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putLongUnaligned(bytes, off + 8, name1);
         this.off = off + 13;
     }
 
@@ -1758,8 +1758,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 16);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putLongUnaligned(bytes, off + 8, name1);
         this.off = off + 14;
     }
 
@@ -1771,8 +1771,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 16);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putLongUnaligned(bytes, off + 8, name1);
         this.off = off + 15;
     }
 
@@ -1784,8 +1784,8 @@ final class JSONWriterJSONB
             bytes = grow(off + 16);
         }
 
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
-        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        BYTES.putLongUnaligned(bytes, off, name0);
+        BYTES.putLongUnaligned(bytes, off + 8, name1);
         this.off = off + 16;
     }
 
