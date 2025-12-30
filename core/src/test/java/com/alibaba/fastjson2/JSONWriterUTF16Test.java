@@ -554,11 +554,7 @@ public class JSONWriterUTF16Test {
         int b0 = 0xab, b1 = 0xcd;
         int[] hex256 = JSONWriterUTF16.HEX256;
         long v = hex256[b0 & 0xff] | (((long) hex256[b1 & 0xff]) << 32);
-        UNSAFE.putLong(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET,
-                v
-        );
+        BYTES.putLongUnaligned(buf, 0, v);
         assertEquals("abcd", new String(buf));
     }
 
@@ -576,11 +572,7 @@ public class JSONWriterUTF16Test {
         }
         long v = hex256[b0 & 0xff]
                 | (((long) hex256[b1 & 0xff]) << 32);
-        UNSAFE.putLong(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET,
-                Long.reverseBytes(v << 8)
-        );
+        BYTES.putLongBE(buf, 0, v << 8);
         assertEquals("abcd", new String(buf));
     }
 
@@ -589,7 +581,7 @@ public class JSONWriterUTF16Test {
         JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
 
         char[] name = "a123".toCharArray();
-        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(name, 0);
 
         {
             jsonWriter.chars = new char[0];
@@ -654,7 +646,7 @@ public class JSONWriterUTF16Test {
         jsonWriter.level += 2;
 
         char[] name = "a123".toCharArray();
-        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(name, 0);
 
         {
             jsonWriter.chars = new char[0];
@@ -718,7 +710,7 @@ public class JSONWriterUTF16Test {
         JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
 
         char[] name = "a123".toCharArray();
-        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(name, 0);
         byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_SPACE = 3;
 
         final int initOffset = 8183;

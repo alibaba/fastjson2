@@ -428,7 +428,7 @@ public class IOUtilsTest {
     @Test
     public void test_isASCII() {
         char[] chars = new char[] {'0', '1', '2', '3', '4', '5', '6', 0x80};
-        long v = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
+        long v = BYTES.getLongUnaligned(chars, 0);
         assertTrue(IOUtils.isLatin1(chars, 0, 4));
         assertTrue(IOUtils.isLatin1(chars, 4, 4));
     }

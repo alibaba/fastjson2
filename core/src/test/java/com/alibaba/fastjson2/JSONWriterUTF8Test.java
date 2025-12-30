@@ -15,8 +15,6 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.Conf.BYTES;
-import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterUTF8Test {
@@ -690,7 +688,7 @@ public class JSONWriterUTF8Test {
         JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
 
         char[] name = "a123".toCharArray();
-        long nameValue = UNSAFE.getLong(name, ARRAY_CHAR_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(name, 0);
 
         {
             jsonWriter.bytes = new byte[0];

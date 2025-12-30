@@ -7,8 +7,6 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
 import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.hex4U;
-import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public class StringUtils {
     protected static final long MASK_ESCAPE_NONE_ASCII = EscapeNoneAscii.mask;
@@ -372,8 +370,8 @@ public class StringUtils {
         static {
             {
                 byte[] bytes = "\\u00".getBytes(StandardCharsets.UTF_8);
-                U2 = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET);
-                U4 = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET);
+                U2 = BYTES.getShortUnaligned(bytes, 0);
+                U4 = BYTES.getIntUnaligned(bytes, 0);
             }
             {
                 char slash = '\\';
@@ -397,8 +395,8 @@ public class StringUtils {
         static {
             {
                 char[] bytes = "\\u00".toCharArray();
-                U2 = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET);
-                U4 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+                U2 = BYTES.getIntUnaligned(bytes, 0);
+                U4 = BYTES.getLongUnaligned(bytes, 0);
             }
             {
                 char[] mapping = new char[]{
