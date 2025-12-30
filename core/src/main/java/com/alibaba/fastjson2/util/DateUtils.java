@@ -9269,10 +9269,7 @@ public class DateUtils {
     };
 
     public static long hms(byte[] bytes, int off) {
-        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            v = Long.reverseBytes(v);
-        }
+        long v = BYTES.getLongLE(bytes, off);
         long d;
         if ((((v & 0xF0F0F0F0_F0F0F0F0L) - 0x30303030_30303030L) | (((d = v & 0x0F0F0F0F_0F0F0F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0
                 || (d & 0x00000F00_000F0000L) != 0x00000a00_000a0000L) { // 00:00:00
@@ -9282,10 +9279,7 @@ public class DateUtils {
     }
 
     public static long ymd(byte[] bytes, int off) {
-        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            v = Long.reverseBytes(v);
-        }
+        long v = BYTES.getLongLE(bytes, off);
         long d;
         if (((v & 0x0000FF00_00FF0000L) != 0x00002d00_002d0000L) // yy-mm-dd
                 || (((v & 0xF0F000F0_F000F0F0L) - 0x30300030_30003030L) | (((d = v & 0x0F0F000F_0F000F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0) {
@@ -9295,10 +9289,7 @@ public class DateUtils {
     }
 
     public static int yy(byte[] bytes, int off) {
-        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            x = Short.reverseBytes(x);
-        }
+        short x = BYTES.getShortLE(bytes, off);
         int d;
         if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0
         ) {

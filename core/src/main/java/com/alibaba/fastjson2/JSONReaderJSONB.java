@@ -26,8 +26,6 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 final class JSONReaderJSONB
         extends JSONReader {
-    static final long BASE = UNSAFE.arrayBaseOffset(byte[].class);
-
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
     static Charset GB18030;
 
@@ -1538,37 +1536,37 @@ final class JSONReaderJSONB
         } else {
             long nameValue = 0;
             if (strlen <= 8 && offset + strlen <= bytes.length) {
-                long offsetBase = this.offset + BASE;
+                int offsetBase = this.offset;
                 switch (strlen) {
                     case 1:
                         nameValue = bytes[offset];
                         break;
                     case 2:
-                        nameValue = UNSAFE.getShort(bytes, offsetBase) & 0xFFFFL;
+                        nameValue = BYTES.getShortUnaligned(bytes, offsetBase) & 0xFFFFL;
                         break;
                     case 3:
                         nameValue = (bytes[offset + 2] << 16)
-                                + (UNSAFE.getShort(bytes, offsetBase) & 0xFFFFL);
+                                + (BYTES.getShortUnaligned(bytes, offsetBase) & 0xFFFFL);
                         break;
                     case 4:
-                        nameValue = UNSAFE.getInt(bytes, offsetBase);
+                        nameValue = BYTES.getIntUnaligned(bytes, offsetBase);
                         break;
                     case 5:
                         nameValue = (((long) bytes[offset + 4]) << 32)
-                                + (UNSAFE.getInt(bytes, offsetBase) & 0xFFFFFFFFL);
+                                + (BYTES.getIntUnaligned(bytes, offsetBase) & 0xFFFFFFFFL);
                         break;
                     case 6:
-                        nameValue = ((long) UNSAFE.getShort(bytes, offsetBase + 4) << 32)
-                                + (UNSAFE.getInt(bytes, offsetBase) & 0xFFFFFFFFL);
+                        nameValue = ((long) BYTES.getShortUnaligned(bytes, offsetBase + 4) << 32)
+                                + (BYTES.getIntUnaligned(bytes, offsetBase) & 0xFFFFFFFFL);
                         break;
                     case 7:
                         nameValue = (((long) bytes[offset + 6]) << 48)
                                 + (((long) bytes[offset + 5] & 0xFFL) << 40)
                                 + (((long) bytes[offset + 4] & 0xFFL) << 32)
-                                + (UNSAFE.getInt(bytes, offsetBase) & 0xFFFFFFFFL);
+                                + (BYTES.getIntUnaligned(bytes, offsetBase) & 0xFFFFFFFFL);
                         break;
                     default:
-                        nameValue = UNSAFE.getLong(bytes, offsetBase);
+                        nameValue = BYTES.getLongUnaligned(bytes, offsetBase);
                         break;
                 }
             }
@@ -2704,72 +2702,72 @@ final class JSONReaderJSONB
                                 + (bytes[offset] & 0xFFL);
                         break;
                     case 4:
-                        nameValue0 = UNSAFE.getInt(bytes, BASE + offset);
+                        nameValue0 = BYTES.getIntUnaligned(bytes, offset);
                         break;
                     case 5:
                         nameValue0
                                 = (((long) bytes[offset + 4]) << 32)
-                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                                + (BYTES.getIntUnaligned(bytes, offset) & 0xFFFFFFFFL);
                         break;
                     case 6:
                         nameValue0
                                 = (((long) bytes[offset + 5]) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                                + (BYTES.getIntUnaligned(bytes, offset) & 0xFFFFFFFFL);
                         break;
                     case 7:
                         nameValue0
                                 = (((long) bytes[offset + 6]) << 48)
                                 + ((bytes[offset + 5] & 0xFFL) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                                + (BYTES.getIntUnaligned(bytes, offset) & 0xFFFFFFFFL);
                         break;
                     case 8:
-                        nameValue0 = UNSAFE.getLong(bytes, BASE + offset);
+                        nameValue0 = BYTES.getLongUnaligned(bytes, offset);
                         break;
                     case 9:
                         nameValue0 = bytes[offset];
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 1);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 1);
                         break;
                     case 10:
-                        nameValue0 = UNSAFE.getShort(bytes, BASE + offset);
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 2);
+                        nameValue0 = BYTES.getShortUnaligned(bytes, offset);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 2);
                         break;
                     case 11:
                         nameValue0
                                 = (bytes[offset] << 16)
                                 + ((bytes[offset + 1] & 0xFFL) << 8)
                                 + (bytes[offset + 2] & 0xFFL);
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 3);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 3);
                         break;
                     case 12:
-                        nameValue0 = UNSAFE.getInt(bytes, BASE + offset);
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 4);
+                        nameValue0 = BYTES.getIntUnaligned(bytes, offset);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 4);
                         break;
                     case 13:
                         nameValue0
                                 = (((long) bytes[offset + 4]) << 32)
-                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 5);
+                                + (BYTES.getIntUnaligned(bytes, offset) & 0xFFFFFFFFL);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 5);
                         break;
                     case 14:
                         nameValue0
                                 = (((long) bytes[offset + 5]) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 6);
+                                + (BYTES.getIntUnaligned(bytes, offset) & 0xFFFFFFFFL);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 6);
                         break;
                     case 15:
                         nameValue0
                                 = (((long) bytes[offset + 6]) << 48)
                                 + ((bytes[offset + 5] & 0xFFL) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 7);
+                                + (BYTES.getIntUnaligned(bytes, offset) & 0xFFFFFFFFL);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 7);
                         break;
                     case 16:
-                        nameValue0 = UNSAFE.getLong(bytes, BASE + offset);
-                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 8);
+                        nameValue0 = BYTES.getLongUnaligned(bytes, offset);
+                        nameValue1 = BYTES.getLongUnaligned(bytes, offset + 8);
                         break;
                     default:
                         break;
@@ -5632,14 +5630,14 @@ final class JSONReaderJSONB
     @Override
     public int getRawInt() {
         return offset + 3 < end
-                ? UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset)
+                ? BYTES.getIntUnaligned(bytes, offset)
                 : 0;
     }
 
     @Override
     public long getRawLong() {
         return offset + 7 < end
-                ? UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset)
+                ? BYTES.getLongUnaligned(bytes, offset)
                 : 0;
     }
 
@@ -5673,7 +5671,7 @@ final class JSONReaderJSONB
     public boolean nextIfName4Match5(int name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 6;
-        if (offset > end || UNSAFE.getShort(bytes, BASE + offset - 2) != name1) {
+        if (offset > end || BYTES.getShortUnaligned(bytes, offset - 2) != name1) {
             return false;
         }
 
@@ -5686,7 +5684,7 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 7;
         if (offset > end
-                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name1) {
+                || (BYTES.getIntUnaligned(bytes, offset - 3) & 0xFFFFFF) != name1) {
             return false;
         }
 
@@ -5698,7 +5696,7 @@ final class JSONReaderJSONB
     public boolean nextIfName4Match7(int name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 8;
-        if (offset > end || UNSAFE.getInt(bytes, BASE + offset - 4) != name1) {
+        if (offset > end || BYTES.getIntUnaligned(bytes, offset - 4) != name1) {
             return false;
         }
 
@@ -5710,7 +5708,7 @@ final class JSONReaderJSONB
     public boolean nextIfName4Match8(int name1, byte name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 9;
-        if (offset >= end || UNSAFE.getInt(bytes, BASE + offset - 5) != name1 || bytes[offset - 1] != name2) {
+        if (offset >= end || BYTES.getIntUnaligned(bytes, offset - 5) != name1 || bytes[offset - 1] != name2) {
             return false;
         }
 
@@ -5722,7 +5720,7 @@ final class JSONReaderJSONB
     public boolean nextIfName4Match9(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 10;
-        if (offset + 1 >= end || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFFFFFFFFFFL) != name1) {
+        if (offset + 1 >= end || (BYTES.getLongUnaligned(bytes, offset - 6) & 0xFFFFFFFFFFFFL) != name1) {
             return false;
         }
 
@@ -5733,7 +5731,7 @@ final class JSONReaderJSONB
     public boolean nextIfName4Match10(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 11;
-        if (offset >= end || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFFFFFFFFFFFFL) != name1) {
+        if (offset >= end || (BYTES.getLongUnaligned(bytes, offset - 7) & 0xFFFFFFFFFFFFFFL) != name1) {
             return false;
         }
 
@@ -5744,7 +5742,7 @@ final class JSONReaderJSONB
     public boolean nextIfName4Match11(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 12;
-        if (offset >= end || UNSAFE.getLong(bytes, BASE + offset - 8) != name1) {
+        if (offset >= end || BYTES.getLongUnaligned(bytes, offset - 8) != name1) {
             return false;
         }
 
@@ -5756,7 +5754,7 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 13;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 9) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name1
                 || bytes[offset - 1] != name2) {
             return false;
         }
@@ -5770,8 +5768,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 14;
         if (offset + 1 >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 10) != name1
-                || UNSAFE.getShort(bytes, BASE + offset - 2) != name2) {
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name1
+                || BYTES.getShortUnaligned(bytes, offset - 2) != name2) {
             return false;
         }
 
@@ -5784,8 +5782,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 15;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 11) != name1
-                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name2) {
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name1
+                || (BYTES.getIntUnaligned(bytes, offset - 3) & 0xFFFFFF) != name2) {
             return false;
         }
 
@@ -5798,8 +5796,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 16;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 12) != name1
-                || UNSAFE.getInt(bytes, BASE + offset - 4) != name2) {
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name2) {
             return false;
         }
 
@@ -5812,8 +5810,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 17;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 13) != name1
-                || UNSAFE.getInt(bytes, BASE + offset - 5) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name2
                 || bytes[offset - 1] != name3) {
             return false;
         }
@@ -5827,8 +5825,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 18;
         if (offset + 1 >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 14) != name1
-                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFFFFFFFFFFL) != name2) {
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name1
+                || (BYTES.getLongUnaligned(bytes, offset - 6) & 0xFFFFFFFFFFFFL) != name2) {
             return false;
         }
 
@@ -5841,8 +5839,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 19;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 15) != name1
-                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name2) {
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name1
+                || (BYTES.getLongUnaligned(bytes, offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name2) {
             return false;
         }
 
@@ -5855,8 +5853,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 20;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 16) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 8) != name2) {
+                || BYTES.getLongUnaligned(bytes, offset - 16) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name2) {
             return false;
         }
 
@@ -5869,8 +5867,8 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 21;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 17) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 9) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 17) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name2
                 || bytes[offset - 1] != name3
         ) {
             return false;
@@ -5885,9 +5883,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 22;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 18) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 10) != name2
-                || UNSAFE.getShort(bytes, BASE + offset - 2) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 18) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name2
+                || BYTES.getShortUnaligned(bytes, offset - 2) != name3
         ) {
             return false;
         }
@@ -5901,9 +5899,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 23;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 19) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 11) != name2
-                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 19) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name2
+                || (BYTES.getIntUnaligned(bytes, offset - 3) & 0xFFFFFF) != name3
         ) {
             return false;
         }
@@ -5917,9 +5915,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 24;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 20) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 12) != name2
-                || UNSAFE.getInt(bytes, BASE + offset - 4) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 20) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name2
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name3
         ) {
             return false;
         }
@@ -5932,9 +5930,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 25;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 21) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 13) != name2
-                || UNSAFE.getInt(bytes, BASE + offset - 5) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 21) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name2
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name3
                 || bytes[offset - 1] != name4
         ) {
             return false;
@@ -5949,9 +5947,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 26;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 22) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 14) != name2
-                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFF_FFFF_FFFFL) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 22) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name2
+                || (BYTES.getLongUnaligned(bytes, offset - 6) & 0xFFFF_FFFF_FFFFL) != name3
         ) {
             return false;
         }
@@ -5965,9 +5963,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 27;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 23) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 15) != name2
-                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 23) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name2
+                || (BYTES.getLongUnaligned(bytes, offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name3
         ) {
             return false;
         }
@@ -5981,9 +5979,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 28;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 24) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 16) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 8) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 24) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 16) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name3
         ) {
             return false;
         }
@@ -5997,9 +5995,9 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 29;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 25) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 17) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 9) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 25) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 17) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name3
                 || bytes[offset - 1] != name4
         ) {
             return false;
@@ -6014,10 +6012,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 30;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 26) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 18) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 10) != name3
-                || UNSAFE.getShort(bytes, BASE + offset - 2) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 26) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 18) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name3
+                || BYTES.getShortUnaligned(bytes, offset - 2) != name4
         ) {
             return false;
         }
@@ -6031,10 +6029,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 31;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 27) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 19) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 11) != name3
-                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 27) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 19) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name3
+                || (BYTES.getIntUnaligned(bytes, offset - 3) & 0xFFFFFF) != name4
         ) {
             return false;
         }
@@ -6048,10 +6046,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 32;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 28) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 20) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 12) != name3
-                || UNSAFE.getInt(bytes, BASE + offset - 4) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 28) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 20) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name3
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name4
         ) {
             return false;
         }
@@ -6065,10 +6063,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 33;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 29) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 21) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 13) != name3
-                || UNSAFE.getInt(bytes, BASE + offset - 5) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 29) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 21) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name3
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name4
                 || bytes[offset - 1] != name5
         ) {
             return false;
@@ -6083,10 +6081,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 34;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 30) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 22) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 14) != name3
-                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFF_FFFF_FFFFL) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 30) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 22) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name3
+                || (BYTES.getLongUnaligned(bytes, offset - 6) & 0xFFFF_FFFF_FFFFL) != name4
         ) {
             return false;
         }
@@ -6100,10 +6098,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 35;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 31) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 23) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 15) != name3
-                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 31) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 23) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name3
+                || (BYTES.getLongUnaligned(bytes, offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name4
         ) {
             return false;
         }
@@ -6117,10 +6115,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 36;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 32) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 24) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 16) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 8) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 32) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 24) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 16) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name4
         ) {
             return false;
         }
@@ -6134,10 +6132,10 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 37;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 33) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 25) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 17) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 9) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 33) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 25) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 17) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name4
                 || bytes[offset - 1] != name5
         ) {
             return false;
@@ -6152,11 +6150,11 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 38;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 34) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 26) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 18) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 10) != name4
-                || UNSAFE.getShort(bytes, BASE + offset - 2) != name5
+                || BYTES.getLongUnaligned(bytes, offset - 34) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 26) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 18) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name4
+                || BYTES.getShortUnaligned(bytes, offset - 2) != name5
         ) {
             return false;
         }
@@ -6170,11 +6168,11 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 39;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 35) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 27) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 19) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 11) != name4
-                || (UNSAFE.getInt(bytes, BASE + offset - 3) & 0xFFFFFF) != name5
+                || BYTES.getLongUnaligned(bytes, offset - 35) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 27) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 19) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name4
+                || (BYTES.getIntUnaligned(bytes, offset - 3) & 0xFFFFFF) != name5
         ) {
             return false;
         }
@@ -6188,11 +6186,11 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 40;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 36) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 28) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 20) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 12) != name4
-                || UNSAFE.getInt(bytes, BASE + offset - 4) != name5
+                || BYTES.getLongUnaligned(bytes, offset - 36) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 28) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 20) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name4
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name5
         ) {
             return false;
         }
@@ -6206,11 +6204,11 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 41;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 37) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 29) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 21) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 13) != name4
-                || UNSAFE.getInt(bytes, BASE + offset - 5) != name5
+                || BYTES.getLongUnaligned(bytes, offset - 37) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 29) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 21) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name4
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name5
                 || bytes[offset - 1] != name6
         ) {
             return false;
@@ -6225,11 +6223,11 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 42;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 38) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 30) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 22) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 14) != name4
-                || (UNSAFE.getLong(bytes, BASE + offset - 6) & 0xFFFF_FFFF_FFFFL) != name5
+                || BYTES.getLongUnaligned(bytes, offset - 38) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 30) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 22) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name4
+                || (BYTES.getLongUnaligned(bytes, offset - 6) & 0xFFFF_FFFF_FFFFL) != name5
         ) {
             return false;
         }
@@ -6243,11 +6241,11 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 43;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 39) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 31) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 23) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 15) != name4
-                || (UNSAFE.getLong(bytes, BASE + offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name5
+                || BYTES.getLongUnaligned(bytes, offset - 39) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 31) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 23) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name4
+                || (BYTES.getLongUnaligned(bytes, offset - 7) & 0xFFFF_FFFF_FFFF_FFL) != name5
         ) {
             return false;
         }
@@ -6261,11 +6259,11 @@ final class JSONReaderJSONB
         byte[] bytes = this.bytes;
         int offset = this.offset + 44;
         if (offset >= end
-                || UNSAFE.getLong(bytes, BASE + offset - 40) != name1
-                || UNSAFE.getLong(bytes, BASE + offset - 32) != name2
-                || UNSAFE.getLong(bytes, BASE + offset - 24) != name3
-                || UNSAFE.getLong(bytes, BASE + offset - 16) != name4
-                || UNSAFE.getLong(bytes, BASE + offset - 8) != name5
+                || BYTES.getLongUnaligned(bytes, offset - 40) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 32) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 24) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 16) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name5
         ) {
             return false;
         }
