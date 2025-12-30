@@ -1045,6 +1045,15 @@
             </modules>
         </profile>
         <profile>
+            <id>enable-for-jdk11+</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <modules>
+                <module>core-jdk11</module>
+            </modules>
+        </profile>
+        <profile>
             <id>enable-codegen</id>
             <activation>
                 <jdk>(,22]</jdk>
