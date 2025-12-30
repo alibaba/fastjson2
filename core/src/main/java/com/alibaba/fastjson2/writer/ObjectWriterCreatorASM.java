@@ -3698,10 +3698,10 @@ public class ObjectWriterCreatorASM
                         name1Bytes[1] = fieldNameUTF8[8];
                         name1Bytes[2] = '"';
                         name1Bytes[3] = ':';
-                        name1 = UNSAFE.getInt(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getIntUnaligned(name1Bytes, 0);
 
                         name1Bytes[2] = '\'';
-                        name1SQ = UNSAFE.getInt(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getIntUnaligned(name1Bytes, 0);
 
                         methodName = "writeName9Raw";
                         break;
@@ -3716,10 +3716,10 @@ public class ObjectWriterCreatorASM
                         name1Bytes[2] = fieldNameUTF8[9];
                         name1Bytes[3] = '"';
                         name1Bytes[4] = ':';
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[3] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName10Raw";
                         break;
@@ -3736,10 +3736,10 @@ public class ObjectWriterCreatorASM
                         name1Bytes[4] = '"';
                         name1Bytes[5] = ':';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[4] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName11Raw";
                         break;
@@ -3757,10 +3757,10 @@ public class ObjectWriterCreatorASM
                         name1Bytes[5] = '"';
                         name1Bytes[6] = ':';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[5] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName12Raw";
                         break;
@@ -3779,10 +3779,10 @@ public class ObjectWriterCreatorASM
                         name1Bytes[6] = '"';
                         name1Bytes[7] = ':';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[6] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName13Raw";
                         break;
@@ -3801,10 +3801,10 @@ public class ObjectWriterCreatorASM
                         name1Bytes[6] = fieldNameUTF8[13];
                         name1Bytes[7] = '"';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[7] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName14Raw";
                         break;
@@ -3813,7 +3813,7 @@ public class ObjectWriterCreatorASM
                         bytes[0] = '"';
                         System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
                         methodDesc = "(JJ)V";
-                        name1 = UNSAFE.getLong(fieldNameUTF8, ARRAY_BYTE_BASE_OFFSET + 7);
+                        name1 = BYTES.getLongUnaligned(fieldNameUTF8, 7);
                         name1SQ = name1;
                         methodName = "writeName15Raw";
                         break;
@@ -3821,7 +3821,7 @@ public class ObjectWriterCreatorASM
                     case 16: {
                         System.arraycopy(fieldNameUTF8, 0, bytes, 0, 8);
                         methodDesc = "(JJ)V";
-                        name1 = UNSAFE.getLong(fieldNameUTF8, ARRAY_BYTE_BASE_OFFSET + 8);
+                        name1 = BYTES.getLongUnaligned(fieldNameUTF8, 8);
                         name1SQ = name1;
                         methodName = "writeName16Raw";
                         break;
@@ -3830,13 +3830,13 @@ public class ObjectWriterCreatorASM
                         throw new IllegalStateException("length : " + length);
                 }
 
-                long nameIn64 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+                long nameIn64 = BYTES.getLongUnaligned(bytes, 0);
                 for (int j = 0; j < bytes.length; j++) {
                     if (bytes[j] == '"') {
                         bytes[j] = '\'';
                     }
                 }
-                long nameIn64SQ = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+                long nameIn64SQ = BYTES.getLongUnaligned(bytes, 0);
 
                 mw.aload(JSON_WRITER);
 
@@ -3921,14 +3921,14 @@ public class ObjectWriterCreatorASM
                 mw.iload(mwc.var(NAME_DIRECT));
                 mw.ifeq(labelElse);
 
-                long nameIn64 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+                long nameIn64 = BYTES.getLongUnaligned(bytes, 0);
                 mw.aload(JSON_WRITER);
                 mw.visitLdcInsn(nameIn64);
                 if ("(JI)V".equals(methodDesc)) {
-                    int name1 = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + 8);
+                    int name1 = BYTES.getIntUnaligned(bytes, 8);
                     mw.visitLdcInsn(name1);
                 } else if ("(JJ)V".equals(methodDesc)) {
-                    long name1 = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + 8);
+                    long name1 = BYTES.getLongUnaligned(bytes, 8);
                     mw.visitLdcInsn(name1);
                 }
                 mw.invokevirtual(
