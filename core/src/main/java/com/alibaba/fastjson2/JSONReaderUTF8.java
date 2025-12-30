@@ -831,7 +831,7 @@ class JSONReaderUTF8
     @Override
     public final int getRawInt() {
         if (offset + 3 < bytes.length) {
-            return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 1);
+            return BYTES.getIntUnaligned(bytes, offset - 1);
         }
         return 0;
     }
@@ -839,7 +839,7 @@ class JSONReaderUTF8
     @Override
     public final long getRawLong() {
         if (offset + 8 < bytes.length) {
-            return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 1);
+            return BYTES.getLongUnaligned(bytes, offset - 1);
         }
         return 0;
     }
@@ -968,7 +968,7 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match5(int name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 7;
-        if (offset >= end || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name1) {
+        if (offset >= end || BYTES.getIntUnaligned(bytes, offset - 4) != name1) {
             return false;
         }
 
@@ -988,7 +988,7 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 8;
         if (offset >= end
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name1
                 || bytes[offset - 1] != ':') {
             return false;
         }
@@ -1009,7 +1009,7 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 9;
         if (offset >= end
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 6) != name1
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1032,7 +1032,7 @@ class JSONReaderUTF8
         int offset = this.offset + 10;
         byte[] bytes = this.bytes;
         if (offset >= end
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 7) != name1
                 || bytes[offset - 3] != c8
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':') {
@@ -1054,7 +1054,7 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match9(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 11;
-        if (offset >= end || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name1) {
+        if (offset >= end || BYTES.getLongUnaligned(bytes, offset - 8) != name1) {
             return false;
         }
 
@@ -1074,7 +1074,7 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 12;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name1
                 || bytes[offset - 1] != ':'
         ) {
             return false;
@@ -1096,7 +1096,7 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 13;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name1
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':') {
             return false;
@@ -1118,7 +1118,7 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 14;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name1
                 || bytes[offset - 3] != name2
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1142,8 +1142,8 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 15;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name1
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name2
         ) {
             return false;
         }
@@ -1164,8 +1164,8 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 16;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name1
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name2
                 || bytes[offset - 1] != ':'
         ) {
             return false;
@@ -1187,8 +1187,8 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 17;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name1
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 6) != name2
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1211,8 +1211,8 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 18;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name1
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name1
+                || BYTES.getIntUnaligned(bytes, offset - 7) != name2
                 || bytes[offset - 3] != name3
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1239,8 +1239,8 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name2
+        if (BYTES.getLongUnaligned(bytes, offset - 16) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name2
         ) {
             return false;
         }
@@ -1264,8 +1264,8 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name2
+        if (BYTES.getLongUnaligned(bytes, offset - 17) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name2
                 || bytes[offset - 1] != ':'
         ) {
             return false;
@@ -1290,8 +1290,8 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name2
+        if (BYTES.getLongUnaligned(bytes, offset - 18) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name2
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1317,8 +1317,8 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name2
+        if (BYTES.getLongUnaligned(bytes, offset - 19) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name2
                 || bytes[offset - 3] != name3
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1345,9 +1345,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name2
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name3
+        if (BYTES.getLongUnaligned(bytes, offset - 20) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name2
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name3
         ) {
             return false;
         }
@@ -1371,9 +1371,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name2
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name3
+        if (BYTES.getLongUnaligned(bytes, offset - 21) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name2
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name3
                 || bytes[offset - 1] != ':'
         ) {
             return false;
@@ -1398,9 +1398,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name2
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name3
+        if (BYTES.getLongUnaligned(bytes, offset - 22) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name2
+                || BYTES.getIntUnaligned(bytes, offset - 6) != name3
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1426,9 +1426,9 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 23) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name2
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name3
+        if (BYTES.getLongUnaligned(bytes, offset - 23) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name2
+                || BYTES.getIntUnaligned(bytes, offset - 7) != name3
                 || bytes[offset - 3] != name4
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1452,9 +1452,9 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 27;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name3) {
+                || BYTES.getLongUnaligned(bytes, offset - 24) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 16) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name3) {
             return false;
         }
 
@@ -1474,9 +1474,9 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 28;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 25) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 17) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name3
                 || bytes[offset - 1] != ':') {
             return false;
         }
@@ -1497,9 +1497,9 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 29;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 26) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 18) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name3
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':') {
             return false;
@@ -1521,9 +1521,9 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 30;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 27) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 19) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name3
                 || bytes[offset - 3] != c29
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':') {
@@ -1546,10 +1546,10 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 31;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name3
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name4) {
+                || BYTES.getLongUnaligned(bytes, offset - 28) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 20) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name3
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name4) {
             return false;
         }
 
@@ -1569,10 +1569,10 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 32;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name3
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 29) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 21) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name3
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name4
                 || bytes[offset - 1] != ':') {
             return false;
         }
@@ -1595,10 +1595,10 @@ class JSONReaderUTF8
         if (offset >= end
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name3
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 30) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 22) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name3
+                || BYTES.getIntUnaligned(bytes, offset - 6) != name4
         ) {
             return false;
         }
@@ -1622,10 +1622,10 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 31) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 23) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name3
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name4
+        if (BYTES.getLongUnaligned(bytes, offset - 31) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 23) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name3
+                || BYTES.getIntUnaligned(bytes, offset - 7) != name4
                 || bytes[offset - 3] != c32
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1649,10 +1649,10 @@ class JSONReaderUTF8
         byte[] bytes = this.bytes;
         int offset = this.offset + 35;
         if (offset >= end
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name4) {
+                || BYTES.getLongUnaligned(bytes, offset - 32) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 24) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 16) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name4) {
             return false;
         }
 
@@ -1673,10 +1673,10 @@ class JSONReaderUTF8
         int offset = this.offset + 36;
         if (offset >= end
                 || bytes[offset - 1] != ':'
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 33) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 25) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 17) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name4
         ) {
             return false;
         }
@@ -1700,10 +1700,10 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 34) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name4
+        if (BYTES.getLongUnaligned(bytes, offset - 34) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 26) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 18) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name4
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1729,10 +1729,10 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 35) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name4
+        if (BYTES.getLongUnaligned(bytes, offset - 35) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 27) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 19) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 11) != name4
                 || bytes[offset - 3] != c36
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1759,11 +1759,11 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 36) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name4
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name5
+        if (BYTES.getLongUnaligned(bytes, offset - 36) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 28) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 20) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 12) != name4
+                || BYTES.getIntUnaligned(bytes, offset - 4) != name5
         ) {
             return false;
         }
@@ -1786,11 +1786,11 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 37) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name4
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name5
+        if (BYTES.getLongUnaligned(bytes, offset - 37) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 29) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 21) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 13) != name4
+                || BYTES.getIntUnaligned(bytes, offset - 5) != name5
                 || bytes[offset - 1] != ':'
         ) {
             return false;
@@ -1815,11 +1815,11 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 38) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name4
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name5
+        if (BYTES.getLongUnaligned(bytes, offset - 38) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 30) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 22) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 14) != name4
+                || BYTES.getIntUnaligned(bytes, offset - 6) != name5
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -1845,11 +1845,11 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 39) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 31) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 23) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name4
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name5
+        if (BYTES.getLongUnaligned(bytes, offset - 39) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 31) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 23) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 15) != name4
+                || BYTES.getIntUnaligned(bytes, offset - 7) != name5
                 || bytes[offset - 3] != c40
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
@@ -1876,11 +1876,11 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 40) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name4
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name5
+        if (BYTES.getLongUnaligned(bytes, offset - 40) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 32) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 24) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 16) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 8) != name5
         ) {
             return false;
         }
@@ -1904,11 +1904,11 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 41) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name4
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name5
+        if (BYTES.getLongUnaligned(bytes, offset - 41) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 33) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 25) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 17) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 9) != name5
                 || bytes[offset - 1] != ':'
         ) {
             return false;
@@ -1933,11 +1933,11 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 42) != name1
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 34) != name2
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name3
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name4
-                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name5
+        if (BYTES.getLongUnaligned(bytes, offset - 42) != name1
+                || BYTES.getLongUnaligned(bytes, offset - 34) != name2
+                || BYTES.getLongUnaligned(bytes, offset - 26) != name3
+                || BYTES.getLongUnaligned(bytes, offset - 18) != name4
+                || BYTES.getLongUnaligned(bytes, offset - 10) != name5
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
@@ -2096,7 +2096,7 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name1) {
+        if (BYTES.getIntUnaligned(bytes, offset - 4) != name1) {
             return false;
         }
 
@@ -2130,7 +2130,7 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name1
+        if (BYTES.getIntUnaligned(bytes, offset - 5) != name1
                 || bytes[offset - 1] != '"'
         ) {
             return false;
@@ -2166,7 +2166,7 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name1
+        if (BYTES.getIntUnaligned(bytes, offset - 6) != name1
                 || bytes[offset - 2] != c8
                 || bytes[offset - 1] != '"'
         ) {
@@ -2203,7 +2203,7 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name1
+        if (BYTES.getIntUnaligned(bytes, offset - 7) != name1
                 || bytes[offset - 3] != c8
                 || bytes[offset - 2] != c9
                 || bytes[offset - 1] != '"'
@@ -2241,7 +2241,7 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name1) {
+        if (BYTES.getLongUnaligned(bytes, offset - 8) != name1) {
             return false;
         }
 
@@ -2275,7 +2275,7 @@ class JSONReaderUTF8
             return false;
         }
 
-        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name1
+        if (BYTES.getLongUnaligned(bytes, offset - 9) != name1
                 || bytes[offset - 1] != '"'
         ) {
             return false;
@@ -6844,7 +6844,7 @@ class JSONReaderUTF8
     }
 
     static long parse4Nibbles(byte[] bytes, int offset) {
-        int x = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        int x = BYTES.getIntUnaligned(bytes, offset);
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
@@ -7178,7 +7178,7 @@ class JSONReaderUTF8
 
         if (offset + 6 >= end
                 || bytes[offset + 5] != ch
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1) != REF
+                || BYTES.getIntUnaligned(bytes, offset + 1) != REF
         ) {
             return false;
         }
