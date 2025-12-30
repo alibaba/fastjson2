@@ -58,7 +58,7 @@ public class MyArrayList<T>
     @Override
     public boolean remove(Object o) {
         int index = impl.indexOf(o);
-        var r = index >= 0;
+        boolean r = index >= 0;
         return r;
     }
 
@@ -70,7 +70,7 @@ public class MyArrayList<T>
     @Override
     public boolean addAll(Collection<? extends T> c) {
         impl.ensureCapacity(impl.size() + c.size());
-        for (var v : c) {
+        for (T v : c) {
             this.add(v);
         }
         return true;
@@ -79,7 +79,7 @@ public class MyArrayList<T>
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
         impl.ensureCapacity(impl.size() + c.size());
-        for (var v : c) {
+        for (T v : c) {
             this.add(index++, v);
         }
         return true;
@@ -87,7 +87,7 @@ public class MyArrayList<T>
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        for (var v : c) {
+        for (Object v : c) {
             this.remove(v);
         }
         return true;
@@ -113,7 +113,7 @@ public class MyArrayList<T>
 
     @Override
     public T set(int index, T element) {
-        var r = impl.set(index, element);
+        T r = impl.set(index, element);
         return r;
     }
 

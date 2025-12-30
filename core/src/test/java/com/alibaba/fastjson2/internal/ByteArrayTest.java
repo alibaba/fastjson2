@@ -9,8 +9,7 @@ public class ByteArrayTest {
     static ByteArray[] primitiveFunctionFactories() {
         return new ByteArray[] {
                 new ByteArray(),
-                new ByteArrayUnsafe(),
-                new ByteArrayV()
+                new ByteArrayUnsafe()
         };
     }
 

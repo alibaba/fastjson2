@@ -12,10 +12,10 @@ public class Issue3601 {
     public void test() {
         FastJson2Reader.init();
 
-        var game = new Game();
+        Game game = new Game();
         game.players.addAll(Arrays.asList(new Player(1, 100), new Player(2, 200)));
 
-        var gameJson = JSON.toJSONString(game);
+        String gameJson = JSON.toJSONString(game);
         Game deserializedGame1 = JSON.parseObject(gameJson, Game.class);
         assertTrue(deserializedGame1.players.get(0).getClass() == Player.class);
     }

@@ -46,12 +46,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.qualIdent;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 @SupportedAnnotationTypes({
         "com.alibaba.fastjson2.annotation.JSONCompiled",
         "com.alibaba.fastjson2.annotation.JSONBuilder",
@@ -1208,10 +1209,10 @@ public class JSONCompiledAnnotationProcessor
                         name1Bytes[1] = fieldNameUTF8[8];
                         name1Bytes[2] = '"';
                         name1Bytes[3] = ':';
-                        name12 = UNSAFE.getInt(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name12 = BYTES.getIntUnaligned(name1Bytes, 0);
 
                         name1Bytes[2] = '\'';
-                        name1SQ2 = UNSAFE.getInt(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ2 = BYTES.getIntUnaligned(name1Bytes, 0);
 
                         methodName = "writeName9Raw";
                         break;
@@ -1225,10 +1226,10 @@ public class JSONCompiledAnnotationProcessor
                         name1Bytes[2] = fieldNameUTF8[9];
                         name1Bytes[3] = '"';
                         name1Bytes[4] = ':';
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[3] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName10Raw";
                         break;
@@ -1244,10 +1245,10 @@ public class JSONCompiledAnnotationProcessor
                         name1Bytes[4] = '"';
                         name1Bytes[5] = ':';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[4] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName11Raw";
                         break;
@@ -1264,10 +1265,10 @@ public class JSONCompiledAnnotationProcessor
                         name1Bytes[5] = '"';
                         name1Bytes[6] = ':';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[5] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName12Raw";
                         break;
@@ -1285,10 +1286,10 @@ public class JSONCompiledAnnotationProcessor
                         name1Bytes[6] = '"';
                         name1Bytes[7] = ':';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[6] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName13Raw";
                         break;
@@ -1306,10 +1307,10 @@ public class JSONCompiledAnnotationProcessor
                         name1Bytes[6] = fieldNameUTF8[13];
                         name1Bytes[7] = '"';
 
-                        name1 = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1 = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         name1Bytes[7] = '\'';
-                        name1SQ = UNSAFE.getLong(name1Bytes, ARRAY_BYTE_BASE_OFFSET);
+                        name1SQ = BYTES.getLongUnaligned(name1Bytes, 0);
 
                         methodName = "writeName14Raw";
                         break;
@@ -1317,14 +1318,14 @@ public class JSONCompiledAnnotationProcessor
                     case 15: {
                         bytes[0] = '"';
                         System.arraycopy(fieldNameUTF8, 0, bytes, 1, 7);
-                        name1 = UNSAFE.getLong(fieldNameUTF8, ARRAY_BYTE_BASE_OFFSET + 7);
+                        name1 = BYTES.getLongUnaligned(fieldNameUTF8, 7);
                         name1SQ = name1;
                         methodName = "writeName15Raw";
                         break;
                     }
                     case 16: {
                         System.arraycopy(fieldNameUTF8, 0, bytes, 0, 8);
-                        name1 = UNSAFE.getLong(fieldNameUTF8, ARRAY_BYTE_BASE_OFFSET + 8);
+                        name1 = BYTES.getLongUnaligned(fieldNameUTF8, 8);
                         name1SQ = name1;
                         methodName = "writeName16Raw";
                         break;
@@ -1332,13 +1333,13 @@ public class JSONCompiledAnnotationProcessor
                     default:
                         throw new IllegalStateException("length : " + length);
                 }
-                long nameIn64DoubleQuote = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+                long nameIn64DoubleQuote = BYTES.getLongUnaligned(bytes, 0);
                 for (int j = 0; j < bytes.length; j++) {
                     if (bytes[j] == '"') {
                         bytes[j] = '\'';
                     }
                 }
-                long nameIn64SingleQuote = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+                long nameIn64SingleQuote = BYTES.getLongUnaligned(bytes, 0);
                 JCTree.JCConditional ternary = ternary(mwc.nameDirect, literal(nameIn64DoubleQuote), literal(nameIn64SingleQuote));
                 if (length == 9) {
                     ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
@@ -2439,7 +2440,7 @@ public class JSONCompiledAnnotationProcessor
                 System.arraycopy(fieldName, 0, name0Bytes, 1, 3);
             }
 
-            int name0 = UNSAFE.getInt(name0Bytes, ARRAY_BYTE_BASE_OFFSET);
+            int name0 = BYTES.getIntUnaligned(name0Bytes, 0);
 
             java.util.List<AttributeInfo> fieldReaders = name0Map.get(name0);
             if (fieldReaders == null) {
@@ -2489,7 +2490,7 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[1] = fieldName[4];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name1 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match5", literal(name1));
                         break;
                     }
@@ -2499,17 +2500,17 @@ public class JSONCompiledAnnotationProcessor
                         bytes4[1] = fieldName[4];
                         bytes4[2] = fieldName[5];
                         bytes4[3] = '"';
-                        int name1 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name1 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match6", literal(name1));
                         break;
                     }
                     case 7: {
-                        int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        int name1 = BYTES.getIntUnaligned(fieldName, 3);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match7", literal(name1));
                         break;
                     }
                     case 8: {
-                        int name1 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        int name1 = BYTES.getIntUnaligned(fieldName, 3);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match8", literal(name1), literal(fieldName[7]));
                         break;
                     }
@@ -2518,7 +2519,7 @@ public class JSONCompiledAnnotationProcessor
                         System.arraycopy(fieldName, 3, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name1 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match9", literal(name1));
                         break;
                     }
@@ -2526,317 +2527,317 @@ public class JSONCompiledAnnotationProcessor
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 3, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name1 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match10", literal(name1));
                         break;
                     }
                     case 11: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match11", literal(name1));
                         break;
                     }
                     case 12: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match12", literal(name1), literal(fieldName[11]));
                         break;
                     }
                     case 13: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[11];
                         bytes4[1] = fieldName[12];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name2 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match13", literal(name1), literal(name2));
                         break;
                     }
                     case 14: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[11];
                         bytes4[1] = fieldName[12];
                         bytes4[2] = fieldName[13];
                         bytes4[3] = '"';
-                        int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name2 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match14", name1, name2);
                         break;
                     }
                     case 15: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        int name2 = BYTES.getIntUnaligned(fieldName, 11);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match15", name1, name2);
                         break;
                     }
                     case 16: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        int name2 = BYTES.getIntUnaligned(fieldName, 11);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match16", name1, name2, fieldName[15]);
                         break;
                     }
                     case 17: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 11, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name2 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match17", name1, name2);
                         break;
                     }
                     case 18: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 11, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name2 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match18", name1, name2);
                         break;
                     }
                     case 19: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match19", name1, name2);
                         break;
                     }
                     case 20: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match20", name1, name2, fieldName[19]);
                         break;
                     }
                     case 21: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[19];
                         bytes4[1] = fieldName[20];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name3 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match21", name1, name2, name3);
                         break;
                     }
                     case 22: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[19];
                         bytes4[1] = fieldName[20];
                         bytes4[2] = fieldName[21];
                         bytes4[3] = '"';
-                        int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name3 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match22", name1, name2, name3);
                         break;
                     }
                     case 23: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        int name3 = BYTES.getIntUnaligned(fieldName, 19);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match23", name1, name2, name3);
                         break;
                     }
                     case 24: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        int name3 = BYTES.getIntUnaligned(fieldName, 19);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match24", name1, name2, name3, fieldName[23]);
                         break;
                     }
                     case 25: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 19, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name3 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match25", name1, name2, name3);
                         break;
                     }
                     case 26: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 19, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name3 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match26", name1, name2, name3);
                         break;
                     }
                     case 27: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match27", name1, name2, name3);
                         break;
                     }
                     case 28: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match28", name1, name2, name3, fieldName[27]);
                         break;
                     }
                     case 29: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[27];
                         bytes4[1] = fieldName[28];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name4 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match29", name1, name2, name3, name4);
                         break;
                     }
                     case 30: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[27];
                         bytes4[1] = fieldName[28];
                         bytes4[2] = fieldName[29];
                         bytes4[3] = '"';
-                        int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name4 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match30", name1, name2, name3, name4);
                         break;
                     }
                     case 31: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        int name4 = BYTES.getIntUnaligned(fieldName, 27);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match31", name1, name2, name3, name4);
                         break;
                     }
                     case 32: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        int name4 = BYTES.getIntUnaligned(fieldName, 27);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match32", name1, name2, name3, name4, fieldName[31]);
                         break;
                     }
                     case 33: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 27, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name4 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match33", name1, name2, name3, name4);
                         break;
                     }
                     case 34: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 27, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name4 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match34", name1, name2, name3, name4);
                         break;
                     }
                     case 35: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match35", name1, name2, name3, name4);
                         break;
                     }
                     case 36: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match36", name1, name2, name3, name4, fieldName[35]);
                         break;
                     }
                     case 37: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[35];
                         bytes4[1] = fieldName[36];
                         bytes4[2] = '"';
                         bytes4[3] = ':';
-                        int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name5 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match37", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 38: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
                         byte[] bytes4 = new byte[4];
                         bytes4[0] = fieldName[35];
                         bytes4[1] = fieldName[36];
                         bytes4[2] = fieldName[37];
                         bytes4[3] = '"';
-                        int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        int name5 = BYTES.getIntUnaligned(bytes4, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match38", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 39: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
+                        int name5 = BYTES.getIntUnaligned(fieldName, 35);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match39", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 40: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
+                        int name5 = BYTES.getIntUnaligned(fieldName, 35);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match40", name1, name2, name3, name4, name5, fieldName[39]);
                         break;
                     }
                     case 41: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
 
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 35, bytes8, 0, 6);
                         bytes8[6] = '"';
                         bytes8[7] = ':';
-                        long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name5 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match41", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 42: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
                         byte[] bytes8 = new byte[8];
                         System.arraycopy(fieldName, 35, bytes8, 0, 7);
                         bytes8[7] = '"';
-                        long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name5 = BYTES.getLongUnaligned(bytes8, 0);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match42", name1, name2, name3, name4, name5);
                         break;
                     }
                     case 43: {
-                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
-                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
-                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
-                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
-                        long name5 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+                        long name1 = BYTES.getLongUnaligned(fieldName, 3);
+                        long name2 = BYTES.getLongUnaligned(fieldName, 11);
+                        long name3 = BYTES.getLongUnaligned(fieldName, 19);
+                        long name4 = BYTES.getLongUnaligned(fieldName, 27);
+                        long name5 = BYTES.getLongUnaligned(fieldName, 35);
                         nextIfMethod = method(jsonReaderIdent, "nextIfName4Match43", name1, name2, name3, name4, name5);
                         break;
                     }

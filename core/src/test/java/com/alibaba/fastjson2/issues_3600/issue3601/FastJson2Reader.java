@@ -14,7 +14,7 @@ public class FastJson2Reader {
         @Override
         public ObjectReader getObjectReader(Type type) {
             if (type instanceof ParameterizedType) {
-                var ptype = (ParameterizedType) type;
+                ParameterizedType ptype = (ParameterizedType) type;
                 if (ptype.getRawType() == MyArrayList.class) {
                     return ObjectReaderImplList.of(type, null, 0);
                 }
