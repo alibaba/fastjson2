@@ -8,8 +8,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONReaderTest2 {
@@ -237,7 +236,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match5() {
         String str = "{\"a2345\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        int name0 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        int name0 = BYTES.getIntUnaligned(utf8, 5);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -262,7 +261,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match6() {
         String str = "{\"a23456\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        int name1 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        int name1 = BYTES.getIntUnaligned(utf8, 5);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -287,7 +286,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match7() {
         String str = "{\"a234567\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        int name1 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        int name1 = BYTES.getIntUnaligned(utf8, 5);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -312,7 +311,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match8() {
         String str = "{\"a2345678\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        int name1 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        int name1 = BYTES.getIntUnaligned(utf8, 5);
         byte name2 = '8';
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
@@ -338,7 +337,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match9() {
         String str = "{\"a23456789\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -363,7 +362,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match10() {
         String str = "{\"a234567890\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -388,7 +387,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match11() {
         String str = "{\"a2345678901\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -413,7 +412,7 @@ public class JSONReaderTest2 {
     public void nextIfName4Match12() {
         String str = "{\"a23456789012\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
         byte name2 = utf8[13];
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
@@ -439,8 +438,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match13() {
         String str = "{\"a234567890123\":   1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        int name2 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        int name2 = BYTES.getIntUnaligned(utf8, 13);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -465,8 +464,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match14() {
         String str = "{\"a2345678901234\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        int name2 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        int name2 = BYTES.getIntUnaligned(utf8, 13);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -500,8 +499,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match15() {
         String str = "{\"a23456789012345\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        int name2 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        int name2 = BYTES.getIntUnaligned(utf8, 13);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -535,8 +534,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match16() {
         String str = "{\"a234567890123456\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        int name2 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        int name2 = BYTES.getIntUnaligned(utf8, 13);
         byte name3 = utf8[17];
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
@@ -571,8 +570,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match17() {
         String str = "{\"a2345678901234567\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        long name2 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        long name2 = BYTES.getLongUnaligned(utf8, 13);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -606,8 +605,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match18() {
         String str = "{\"a23456789012345678\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        long name2 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        long name2 = BYTES.getLongUnaligned(utf8, 13);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -641,8 +640,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match19() {
         String str = "{\"a234567890123456789\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        long name2 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        long name2 = BYTES.getLongUnaligned(utf8, 13);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -676,8 +675,8 @@ public class JSONReaderTest2 {
     public void nextIfName4Match20() {
         String str = "{\"a2345678901234567890\":   1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        long name2 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        long name2 = BYTES.getLongUnaligned(utf8, 13);
         byte name3 = utf8[21];
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
@@ -712,9 +711,9 @@ public class JSONReaderTest2 {
     public void nextIfName4Match21() {
         String str = "{\"a23456789012345678901\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        long name2 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
-        int name3 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 21);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        long name2 = BYTES.getLongUnaligned(utf8, 13);
+        int name3 = BYTES.getIntUnaligned(utf8, 21);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -748,9 +747,9 @@ public class JSONReaderTest2 {
     public void nextIfName4Match22() {
         String str = "{\"a234567890123456789012\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        long name2 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
-        int name3 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 21);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        long name2 = BYTES.getLongUnaligned(utf8, 13);
+        int name3 = BYTES.getIntUnaligned(utf8, 21);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -784,9 +783,9 @@ public class JSONReaderTest2 {
     public void nextIfName4Match23() {
         String str = "{\"a2345678901234567890123\":  1}";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-        long name1 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 5);
-        long name2 = UNSAFE.getLong(utf8, ARRAY_BYTE_BASE_OFFSET + 13);
-        int name3 = UNSAFE.getInt(utf8, ARRAY_BYTE_BASE_OFFSET + 21);
+        long name1 = BYTES.getLongUnaligned(utf8, 5);
+        long name2 = BYTES.getLongUnaligned(utf8, 13);
+        int name3 = BYTES.getIntUnaligned(utf8, 21);
         {
             JSONReader jsonReader = JSONReader.of(str.getBytes(StandardCharsets.UTF_8));
             assertTrue(jsonReader.nextIfObjectStart());
@@ -829,7 +828,7 @@ public class JSONReaderTest2 {
                 assertEquals(nameLength, name.length());
                 String json = JSONObject.of(name, value).toJSONString();
                 byte[] jsonbBytes = json.getBytes(StandardCharsets.UTF_8);
-                int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
+                int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
 
                 JSONReader[] jsonReaders = new JSONReader[] {
                         JSONReader.of(jsonbBytes),
@@ -867,7 +866,7 @@ public class JSONReaderTest2 {
                             } else {
                                 byteIndex += 4;
                             }
-                            args[i] = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET);
+                            args[i] = BYTES.getIntUnaligned(bytes, 0);
                         } else if (paramType == long.class) {
                             byte[] bytes = Arrays.copyOfRange(jsonbBytes, byteIndex + 2, byteIndex + 10);
                             if (nameLength - byteIndex == 6) {
@@ -877,7 +876,7 @@ public class JSONReaderTest2 {
                             } else {
                                 byteIndex += 8;
                             }
-                            args[i] = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET);
+                            args[i] = BYTES.getLongUnaligned(bytes, 0);
                         } else {
                             throw new UnsupportedOperationException();
                         }
