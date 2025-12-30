@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -21,6 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.JSONWriter.Path.ROOT;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterTest {
@@ -2406,7 +2406,7 @@ public class JSONWriterTest {
         String name = "id";
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(Arrays.copyOf(bytes, 8), JDKUtils.ARRAY_BYTE_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(Arrays.copyOf(bytes, 8), 0);
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16();
             jsonWriter.startObject();
@@ -2427,7 +2427,7 @@ public class JSONWriterTest {
         String name = "x23";
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(Arrays.copyOf(bytes, 8), JDKUtils.ARRAY_BYTE_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(Arrays.copyOf(bytes, 8), 0);
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16();
             jsonWriter.startObject();
@@ -2448,7 +2448,7 @@ public class JSONWriterTest {
         String name = "x234";
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(Arrays.copyOf(bytes, 8), JDKUtils.ARRAY_BYTE_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(Arrays.copyOf(bytes, 8), 0);
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16();
             jsonWriter.startObject();
@@ -2469,7 +2469,7 @@ public class JSONWriterTest {
         String name = "x2345";
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(Arrays.copyOf(bytes, 8), JDKUtils.ARRAY_BYTE_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(Arrays.copyOf(bytes, 8), 0);
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16();
             jsonWriter.startObject();
@@ -2490,7 +2490,7 @@ public class JSONWriterTest {
         String name = "x23456";
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(Arrays.copyOf(bytes, 8), JDKUtils.ARRAY_BYTE_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(Arrays.copyOf(bytes, 8), 0);
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16();
             jsonWriter.startObject();
@@ -2525,7 +2525,7 @@ public class JSONWriterTest {
         String name = "x234567";
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(Arrays.copyOf(bytes, 8), JDKUtils.ARRAY_BYTE_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(Arrays.copyOf(bytes, 8), 0);
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16();
             jsonWriter.startObject();
@@ -2560,7 +2560,7 @@ public class JSONWriterTest {
         String name = "x2345678";
         String expect = "{\"" + name + "\":";
         byte[] bytes = name.getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(Arrays.copyOf(bytes, 8), JDKUtils.ARRAY_BYTE_BASE_OFFSET);
+        long nameValue = BYTES.getLongUnaligned(Arrays.copyOf(bytes, 8), 0);
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF16();
             jsonWriter.startObject();
@@ -2596,8 +2596,8 @@ public class JSONWriterTest {
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
         byte[] bytes16 = Arrays.copyOf(bytes, 16);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        int nameValue1 = JDKUtils.UNSAFE.getInt(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        int nameValue1 = BYTES.getIntUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2633,8 +2633,8 @@ public class JSONWriterTest {
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
         byte[] bytes16 = Arrays.copyOf(bytes, 16);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        long nameValue1 = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        long nameValue1 = BYTES.getLongUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2670,8 +2670,8 @@ public class JSONWriterTest {
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
         byte[] bytes16 = Arrays.copyOf(bytes, 16);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        long nameValue1 = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        long nameValue1 = BYTES.getLongUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2707,8 +2707,8 @@ public class JSONWriterTest {
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
         byte[] bytes16 = Arrays.copyOf(bytes, 16);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        long nameValue1 = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        long nameValue1 = BYTES.getLongUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2744,8 +2744,8 @@ public class JSONWriterTest {
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
         byte[] bytes16 = Arrays.copyOf(bytes, 16);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        long nameValue1 = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        long nameValue1 = BYTES.getLongUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2781,8 +2781,8 @@ public class JSONWriterTest {
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
         byte[] bytes16 = Arrays.copyOf(bytes, 16);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        long nameValue1 = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        long nameValue1 = BYTES.getLongUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2818,8 +2818,8 @@ public class JSONWriterTest {
         String expect = "{\"" + name + "\":";
         byte[] bytes = expect.substring(1).getBytes(StandardCharsets.UTF_8);
         byte[] bytes16 = Arrays.copyOf(bytes, 16);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        long nameValue1 = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        long nameValue1 = BYTES.getLongUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -2854,8 +2854,8 @@ public class JSONWriterTest {
         String name = "x234567890123456";
         String expect = "{\"" + name + "\":";
         byte[] bytes16 = name.getBytes(StandardCharsets.UTF_8);
-        long nameValue = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET);
-        long nameValue1 = JDKUtils.UNSAFE.getLong(bytes16, JDKUtils.ARRAY_BYTE_BASE_OFFSET + 8);
+        long nameValue = BYTES.getLongUnaligned(bytes16, 0);
+        long nameValue1 = BYTES.getLongUnaligned(bytes16, 8);
 
         {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
