@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
-import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONReaderJSONBTest2 {
@@ -22,7 +21,7 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(3, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -41,7 +40,7 @@ public class JSONReaderJSONBTest2 {
             assertEquals(4, name.length());
             byte[] latin1 = name.getBytes(StandardCharsets.ISO_8859_1);
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
             byte name1 = latin1[3];
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
@@ -60,8 +59,8 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(5, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            int name1 = UNSAFE.getShort(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            int name1 = BYTES.getShortUnaligned(jsonbBytes, 5);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -79,8 +78,8 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(6, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            int name1 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5) & 0xFFFFFF;
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            int name1 = BYTES.getIntUnaligned(jsonbBytes, 5) & 0xFFFFFF;
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -98,8 +97,8 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(7, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            int name1 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            int name1 = BYTES.getIntUnaligned(jsonbBytes, 5);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -118,8 +117,8 @@ public class JSONReaderJSONBTest2 {
             assertEquals(8, name.length());
             byte[] latin1 = name.getBytes(StandardCharsets.ISO_8859_1);
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            int name1 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            int name1 = BYTES.getIntUnaligned(jsonbBytes, 5);
             byte name2 = latin1[7];
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
@@ -138,8 +137,8 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(9, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5) & 0xFFFFFFFFFFFFL;
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5) & 0xFFFFFFFFFFFFL;
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -157,8 +156,8 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(10, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5) & 0xFFFFFFFFFFFFFFL;
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5) & 0xFFFFFFFFFFFFFFL;
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -176,8 +175,8 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(11, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -198,8 +197,8 @@ public class JSONReaderJSONBTest2 {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
             byte[] latin1 = name.getBytes(StandardCharsets.ISO_8859_1);
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -219,9 +218,9 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
-            int name2 = UNSAFE.getShort(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 13);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
+            int name2 = BYTES.getShortUnaligned(jsonbBytes, 13);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -241,9 +240,9 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
-            int name2 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 13) & 0xFFFFFF;
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
+            int name2 = BYTES.getIntUnaligned(jsonbBytes, 13) & 0xFFFFFF;
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -263,9 +262,9 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
-            int name2 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 13);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
+            int name2 = BYTES.getIntUnaligned(jsonbBytes, 13);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -285,9 +284,9 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
-            int name2 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 13);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
+            int name2 = BYTES.getIntUnaligned(jsonbBytes, 13);
             byte name3 = jsonbBytes[17];
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
@@ -308,9 +307,9 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
-            long name2 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 13) & 0xFFFF_FFFF_FFFFL;
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
+            long name2 = BYTES.getLongUnaligned(jsonbBytes, 13) & 0xFFFF_FFFF_FFFFL;
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -330,9 +329,9 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
-            long name2 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 13) & 0xFFFF_FFFF_FFFF_FFL;
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
+            long name2 = BYTES.getLongUnaligned(jsonbBytes, 13) & 0xFFFF_FFFF_FFFF_FFL;
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -352,9 +351,9 @@ public class JSONReaderJSONBTest2 {
         for (String name : names) {
             assertEquals(nameLength, name.length());
             byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-            int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
-            long name1 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 5);
-            long name2 = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 13);
+            int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
+            long name1 = BYTES.getLongUnaligned(jsonbBytes, 5);
+            long name2 = BYTES.getLongUnaligned(jsonbBytes, 13);
             JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
             assertTrue(jsonReader.nextIfObjectStart());
             assertEquals(name0, jsonReader.getRawInt());
@@ -375,7 +374,7 @@ public class JSONReaderJSONBTest2 {
             for (String name : names) {
                 assertEquals(nameLength, name.length());
                 byte[] jsonbBytes = JSONObject.of(name, value).toJSONBBytes();
-                int name0 = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + 1);
+                int name0 = BYTES.getIntUnaligned(jsonbBytes, 1);
                 JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
                 assertTrue(jsonReader.nextIfObjectStart());
                 assertEquals(name0, jsonReader.getRawInt());
@@ -401,26 +400,26 @@ public class JSONReaderJSONBTest2 {
                     } else if (paramType == int.class) {
                         int arg;
                         if (nameLength - byteIndex == 2) {
-                            arg = UNSAFE.getShort(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + byteIndex + 2);
+                            arg = BYTES.getShortUnaligned(jsonbBytes, byteIndex + 2);
                             byteIndex += 2;
                         } else if (nameLength - byteIndex == 3) {
-                            arg = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + byteIndex + 2) & 0xFFFFFF;
+                            arg = BYTES.getIntUnaligned(jsonbBytes, byteIndex + 2) & 0xFFFFFF;
                             byteIndex += 3;
                         } else {
-                            arg = UNSAFE.getInt(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + byteIndex + 2);
+                            arg = BYTES.getIntUnaligned(jsonbBytes, byteIndex + 2);
                             byteIndex += 4;
                         }
                         args[i] = arg;
                     } else if (paramType == long.class) {
                         long arg;
                         if (nameLength - byteIndex == 6) {
-                            arg = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + byteIndex + 2) & 0xFFFF_FFFF_FFFFL;
+                            arg = BYTES.getLongUnaligned(jsonbBytes, byteIndex + 2) & 0xFFFF_FFFF_FFFFL;
                             byteIndex += 6;
                         } else if (nameLength - byteIndex == 7) {
-                            arg = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + byteIndex + 2) & 0xFF_FFFF_FFFF_FFFFL;
+                            arg = BYTES.getLongUnaligned(jsonbBytes, byteIndex + 2) & 0xFF_FFFF_FFFF_FFFFL;
                             byteIndex += 7;
                         } else {
-                            arg = UNSAFE.getLong(jsonbBytes, ARRAY_BYTE_BASE_OFFSET + byteIndex + 2);
+                            arg = BYTES.getLongUnaligned(jsonbBytes, byteIndex + 2);
                             byteIndex += 8;
                         }
                         args[i] = arg;
