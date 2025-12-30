@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.NumberUtils;
 import com.alibaba.fastjson2.util.StringUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import sun.misc.Unsafe;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -56,11 +55,11 @@ class JSONWriterUTF16
 
         // char[] chars = new char[] {'\"', ':'};
         char[] chars = {'{', '"', '$', 'r', 'e', 'f', '"', ':'};
-        REF_0 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
-        REF_1 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + 8);
-        QUOTE2_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + 12);
+        REF_0 = BYTES.getLongUnaligned(chars, 0);
+        REF_1 = BYTES.getLongUnaligned(chars, 4);
+        QUOTE2_COLON = BYTES.getIntUnaligned(chars, 6);
         chars[6] = '\'';
-        QUOTE_COLON = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + 12);
+        QUOTE_COLON = BYTES.getIntUnaligned(chars, 6);
     }
 
     protected char[] chars;
@@ -606,18 +605,18 @@ class JSONWriterUTF16
     }
 
     protected final void writeStringEscapeUTF16(byte[] str) {
-        final int strlen = str.length;
+        final int strlen = str.length >> 1;
         final char quote = this.quote;
         boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         int off = this.off;
-        ensureCapacityInternal(off + strlen * 6 + 2);
+        ensureCapacityInternal(off + strlen * 12 + 2);
 
         final char[] chars = this.chars;
         chars[off++] = quote;
-        for (int i = 0; i < strlen; i += 2) {
-            char ch = UNSAFE.getChar(str, (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i);
+        for (int charIndex = 0; charIndex < strlen; charIndex++) {
+            char ch = BYTES.getChar(str, charIndex);
             switch (ch) {
                 case '"':
                 case '\'':
@@ -913,9 +912,8 @@ class JSONWriterUTF16
         if (off + 9 > chars.length) {
             chars = grow(off + 9);
         }
-        long address = ARRAY_BYTE_BASE_OFFSET + ((long) off << 1);
-        UNSAFE.putLong(chars, address, REF_0);
-        UNSAFE.putLong(chars, address + 8, REF_1);
+        BYTES.putLongUnaligned(chars, off, REF_0);
+        BYTES.putLongUnaligned(chars, off + 4, REF_1);
         this.off = off + 8;
         writeString(path);
         off = this.off;
@@ -1096,11 +1094,7 @@ class JSONWriterUTF16
 
     static void putLong(char[] buf, int off, int b0, int b1) {
         long v = HEX256[b0 & 0xff] | (((long) HEX256[b1 & 0xff]) << 32);
-        UNSAFE.putLong(
-                buf,
-                ARRAY_CHAR_BASE_OFFSET + ((long) off << 1),
-                BIG_ENDIAN ? Long.reverseBytes(v << 8) : v
-        );
+        BYTES.putLongLE(buf, off, v);
     }
 
     @Override
@@ -1635,13 +1629,12 @@ class JSONWriterUTF16
     }
 
     private static void putLong(char[] chars, int off, long name) {
-        final long base = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
-        UNSAFE.putLong(chars, base,
+        BYTES.putLongUnaligned(chars, off,
                 (name & 0xFFL)
                         | ((name & 0xFF00L) << 8)
                         | ((name & 0xFF_0000L) << 16)
                         | ((name & 0xFF00_0000L) << 24));
-        UNSAFE.putLong(chars, base + 8,
+        BYTES.putLongUnaligned(chars, off + 4,
                 ((name & 0xFF_0000_0000L) >> 32)
                         | ((name & 0xFF00_0000_0000L) >> 24)
                         | ((name & 0xFF_0000_0000_0000L) >> 16)
@@ -1649,20 +1642,19 @@ class JSONWriterUTF16
     }
 
     private static void putLong(char[] chars, int off, long name, int name1) {
-        final long base = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
-        UNSAFE.putLong(chars, base,
+        BYTES.putLongUnaligned(chars, off,
                 (name & 0xFFL)
                         | ((name & 0xFF00L) << 8)
                         | ((name & 0xFF_0000L) << 16)
                         | ((name & 0xFF00_0000L) << 24));
-        UNSAFE.putLong(chars, base + 8,
+        BYTES.putLongUnaligned(chars, off + 4,
                 ((name & 0xFF_0000_0000L) >> 32)
                         | ((name & 0xFF00_0000_0000L) >> 24)
                         | ((name & 0xFF_0000_0000_0000L) >> 16)
                         | ((name & 0xFF00_0000_0000_0000L) >> 8));
 
-        UNSAFE.putLong(chars,
-                base + 16,
+        BYTES.putLongUnaligned(chars,
+                off + 8,
                 (name1 & 0xFFL)
                         | ((name1 & 0xFF00L) << 8)
                         | ((name1 & 0xFF0000L) << 16)
@@ -1670,24 +1662,23 @@ class JSONWriterUTF16
     }
 
     private static void putLong(char[] chars, int off, long name, long name1) {
-        final long base = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
-        UNSAFE.putLong(chars, base,
+        BYTES.putLongUnaligned(chars, off,
                 (name & 0xFFL)
                         | ((name & 0xFF00L) << 8)
                         | ((name & 0xFF_0000L) << 16)
                         | ((name & 0xFF00_0000L) << 24));
-        UNSAFE.putLong(chars, base + 8,
+        BYTES.putLongUnaligned(chars, off + 4,
                 ((name & 0xFF_0000_0000L) >> 32)
                         | ((name & 0xFF00_0000_0000L) >> 24)
                         | ((name & 0xFF_0000_0000_0000L) >> 16)
                         | ((name & 0xFF00_0000_0000_0000L) >> 8));
 
-        UNSAFE.putLong(chars, base + 16,
+        BYTES.putLongUnaligned(chars, off + 8,
                 (name1 & 0xFFL)
                         | ((name1 & 0xFF00L) << 8)
                         | ((name1 & 0xFF_0000L) << 16)
                         | ((name1 & 0xFF00_0000L) << 24));
-        UNSAFE.putLong(chars, base + 24,
+        BYTES.putLongUnaligned(chars, off + 12,
                 ((name1 & 0xFF_0000_0000L) >> 32)
                         | ((name1 & 0xFF00_0000_0000L) >> 24)
                         | ((name1 & 0xFF_0000_0000_0000L) >> 16)
