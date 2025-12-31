@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.internal;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.function.*;
 
 import static com.alibaba.fastjson2.internal.Cast.*;
 
@@ -1157,7 +1159,88 @@ public class PropertyAccessorFactory {
             return new MethodAccessorBoolean(name, propertyType, propertyClass, getter, setter);
         }
 
-        return new MethodAccessorObject(name, propertyType, propertyClass, setter, setter);
+        return new MethodAccessorObject(name, propertyType, propertyClass, getter, setter);
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  ToByteFunction getterFunc,
+                                  ObjByteConsumer setterFunc) {
+        if (propertyClass == byte.class) {
+            return new FunctionAccessorByte(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  ToShortFunction getterFunc,
+                                  ObjShortConsumer setterFunc) {
+        if (propertyClass == short.class) {
+            return new FunctionAccessorShort(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  ToIntFunction getterFunc,
+                                  ObjIntConsumer setterFunc) {
+        if (propertyClass == int.class) {
+            return new FunctionAccessorInt(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  ToLongFunction getterFunc,
+                                  ObjLongConsumer setterFunc) {
+        if (propertyClass == long.class) {
+            return new FunctionAccessorLong(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  ToFloatFunction getterFunc,
+                                  ObjFloatConsumer setterFunc) {
+        if (propertyClass == float.class) {
+            return new FunctionAccessorFloat(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  ToDoubleFunction getterFunc,
+                                  ObjDoubleConsumer setterFunc) {
+        if (propertyClass == double.class) {
+            return new FunctionAccessorDouble(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  Function getterFunc,
+                                  ObjBoolConsumer setterFunc) {
+        if (propertyClass == boolean.class) {
+            return new FunctionAccessorBoolean(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  ToCharFunction getterFunc,
+                                  ObjCharConsumer setterFunc) {
+        if (propertyClass == char.class) {
+            return new FunctionAccessorChar(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                  Function getterFunc,
+                                  BiConsumer setterFunc) {
+        if (propertyClass == Object.class || propertyClass.isPrimitive() == false) {
+            return new FunctionAccessorObject(name, propertyType, propertyClass, getterFunc, setterFunc);
+        }
+        return null;
     }
 
     static final class MethodAccessorChar extends MethodAccessor implements PropertyAccessorChar {
@@ -1373,6 +1456,219 @@ public class PropertyAccessorFactory {
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw errorForSet(e);
             }
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorByte extends FunctionAccessor implements PropertyAccessorByte {
+        private final ToByteFunction getterFunc;
+        private final ObjByteConsumer setterFunc;
+
+        public FunctionAccessorByte(String name, Type propertyType, Class<?> propertyClass,
+                                   ToByteFunction getterFunc,
+                                   ObjByteConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public byte getByte(Object object) {
+            return getterFunc.applyAsByte(object);
+        }
+
+        @Override
+        public void setByte(Object object, byte value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorShort extends FunctionAccessor implements PropertyAccessorShort {
+        private final ToShortFunction getterFunc;
+        private final ObjShortConsumer setterFunc;
+
+        public FunctionAccessorShort(String name, Type propertyType, Class<?> propertyClass,
+                                    ToShortFunction getterFunc,
+                                    ObjShortConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public short getShort(Object object) {
+            return getterFunc.applyAsShort(object);
+        }
+
+        @Override
+        public void setShort(Object object, short value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorInt extends FunctionAccessor implements PropertyAccessorInt {
+        private final ToIntFunction getterFunc;
+        private final ObjIntConsumer setterFunc;
+
+        public FunctionAccessorInt(String name, Type propertyType, Class<?> propertyClass,
+                                  ToIntFunction getterFunc,
+                                  ObjIntConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public int getInt(Object object) {
+            return getterFunc.applyAsInt(object);
+        }
+
+        @Override
+        public void setInt(Object object, int value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorLong extends FunctionAccessor implements PropertyAccessorLong {
+        private final ToLongFunction getterFunc;
+        private final ObjLongConsumer setterFunc;
+
+        public FunctionAccessorLong(String name, Type propertyType, Class<?> propertyClass,
+                                   ToLongFunction getterFunc,
+                                   ObjLongConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public long getLong(Object object) {
+            return getterFunc.applyAsLong(object);
+        }
+
+        @Override
+        public void setLong(Object object, long value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorFloat extends FunctionAccessor implements PropertyAccessorFloat {
+        private final ToFloatFunction getterFunc;
+        private final ObjFloatConsumer setterFunc;
+
+        public FunctionAccessorFloat(String name, Type propertyType, Class<?> propertyClass,
+                                    ToFloatFunction getterFunc,
+                                    ObjFloatConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public float getFloat(Object object) {
+            return getterFunc.applyAsFloat(object);
+        }
+
+        @Override
+        public void setFloat(Object object, float value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorDouble extends FunctionAccessor implements PropertyAccessorDouble {
+        private final ToDoubleFunction getterFunc;
+        private final ObjDoubleConsumer setterFunc;
+
+        public FunctionAccessorDouble(String name, Type propertyType, Class<?> propertyClass,
+                                     ToDoubleFunction getterFunc,
+                                     ObjDoubleConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public double getDouble(Object object) {
+            return getterFunc.applyAsDouble(object);
+        }
+
+        @Override
+        public void setDouble(Object object, double value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorBoolean extends FunctionAccessor implements PropertyAccessorBoolean {
+        private final Function getterFunc;
+        private final ObjBoolConsumer setterFunc;
+
+        public FunctionAccessorBoolean(String name, Type propertyType, Class<?> propertyClass,
+                                      Function getterFunc,
+                                      ObjBoolConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public boolean getBoolean(Object object) {
+            return (Boolean) getterFunc.apply(object);
+        }
+
+        @Override
+        public void setBoolean(Object object, boolean value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorObject extends FunctionAccessor implements PropertyAccessorObject {
+        private final Function getterFunc;
+        private final BiConsumer setterFunc;
+
+        public FunctionAccessorObject(String name, Type propertyType, Class<?> propertyClass,
+                                     Function getterFunc,
+                                     BiConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public Object getObject(Object object) {
+            return getterFunc.apply(object);
+        }
+
+        @Override
+        public void setObject(Object object, Object value) {
+            setterFunc.accept(object, value);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static final class FunctionAccessorChar extends FunctionAccessor implements PropertyAccessorChar {
+        private final ToCharFunction getterFunc;
+        private final ObjCharConsumer setterFunc;
+        public FunctionAccessorChar(String name, Type propertyType, Class<?> propertyClass, ToCharFunction getterFunc, ObjCharConsumer setterFunc) {
+            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+
+        @Override
+        public char getChar(Object object) {
+            return getterFunc.applyAsChar(object);
+        }
+
+        @Override
+        public void setChar(Object object, char value) {
+            setterFunc.accept(object, value);
         }
     }
 }

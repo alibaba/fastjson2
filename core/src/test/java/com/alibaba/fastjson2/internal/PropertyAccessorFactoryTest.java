@@ -7,6 +7,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,24 +40,23 @@ public class PropertyAccessorFactoryTest {
                 new PropertyAccessorFactoryUnsafe()
         };
 
-        PropertyAccessor[] propertyAccessors = new PropertyAccessor[fields.length * factories.length * 2];
+        List<PropertyAccessor> propertyAccessors = new ArrayList<>();
 
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[0];
-            String fieldName = field.getName();
-            String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-            String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-            Method getter = clazz.getDeclaredMethod(getterName);
-            Method setter = clazz.getDeclaredMethod(setterName, field.getType());
+        for (PropertyAccessorFactory factory : factories) {
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[0];
+                String fieldName = field.getName();
+                String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                Method getter = clazz.getDeclaredMethod(getterName);
+                Method setter = clazz.getDeclaredMethod(setterName, field.getType());
 
-            for (int j = 0; j < factories.length; j++) {
-                int index = (i * factories.length + j) * 2;
-                propertyAccessors[index] = factories[j].create(field);
-                propertyAccessors[index + 1] = factories[j].create(fieldName, null, null, getter, setter);
+                propertyAccessors.add(factory.create(field));
+                propertyAccessors.add(factory.create(fieldName, null, null, getter, setter));
             }
         }
 
-        return propertyAccessors;
+        return propertyAccessors.toArray(new PropertyAccessor[0]);
     }
 
     @ParameterizedTest
