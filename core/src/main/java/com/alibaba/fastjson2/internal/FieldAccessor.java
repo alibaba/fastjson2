@@ -14,7 +14,7 @@ public abstract class FieldAccessor
         this.field = field;
         this.fieldClass = field.getType();
         this.fieldName = field.getName();
-        supportSet = !Modifier.isFinal(field.getModifiers());
+        supportSet = (field.getModifiers() & Modifier.FINAL) == 0;
     }
 
     @Override
