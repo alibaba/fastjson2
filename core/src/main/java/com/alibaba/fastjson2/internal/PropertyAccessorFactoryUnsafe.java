@@ -91,42 +91,42 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setObject(Object object, Object value) {
-            setBoolean(object, value instanceof Boolean ? (Boolean) value : false);
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
         public void setByte(Object object, byte value) {
-            setBoolean(object, value != 0);
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
         public void setChar(Object object, char value) {
-            setBoolean(object, value != '0');
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
         public void setShort(Object object, short value) {
-            setBoolean(object, value != 0);
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
         public void setInt(Object object, int value) {
-            setBoolean(object, value != 0);
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
         public void setLong(Object object, long value) {
-            setBoolean(object, value != 0);
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
         public void setFloat(Object object, float value) {
-            setBoolean(object, value != 0.0F);
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
         public void setDouble(Object object, double value) {
-            setBoolean(object, value != 0.0);
+            setBoolean(object, toBoolean(value));
         }
 
         @Override
@@ -185,12 +185,12 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public boolean getBoolean(Object object) {
-            return getByte(object) != 0;
+            return toBoolean(getByte(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setByte(object, value instanceof Number ? ((Number) value).byteValue() : (byte) 0);
+            setByte(object, toByte(value));
         }
 
         @Override
@@ -230,7 +230,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setByte(object, (byte) (value ? 1 : 0));
+            setByte(object, toByte(value));
         }
     }
 
@@ -284,12 +284,12 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public boolean getBoolean(Object object) {
-            return getShort(object) != 0;
+            return toBoolean(getShort(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setShort(object, value instanceof Number ? ((Number) value).shortValue() : (short) 0);
+            setShort(object, toShort(value));
         }
 
         @Override
@@ -329,7 +329,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setShort(object, (short) (value ? 1 : 0));
+            setShort(object, toShort(value));
         }
     }
 
@@ -383,12 +383,12 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public boolean getBoolean(Object object) {
-            return getInt(object) != 0;
+            return toBoolean(getInt(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setInt(object, value instanceof Number ? ((Number) value).intValue() : 0);
+            setInt(object, toInt(value));
         }
 
         @Override
@@ -428,7 +428,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setInt(object, value ? 1 : 0);
+            setInt(object, toInt(value));
         }
     }
 
@@ -487,7 +487,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setObject(Object object, Object value) {
-            setLong(object, value instanceof Number ? ((Number) value).longValue() : 0L);
+            setLong(object, toLong(value));
         }
 
         @Override
@@ -527,7 +527,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setLong(object, value ? 1L : 0L);
+            setLong(object, toLong(value));
         }
     }
 
@@ -581,12 +581,12 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public boolean getBoolean(Object object) {
-            return getFloat(object) != 0.0f;
+            return toBoolean(getFloat(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setFloat(object, value instanceof Number ? ((Number) value).floatValue() : 0.0f);
+            setFloat(object, toFloat(value));
         }
 
         @Override
@@ -626,7 +626,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setFloat(object, value ? 1.0f : 0.0f);
+            setFloat(object, toFloat(value));
         }
     }
 
@@ -680,42 +680,42 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public boolean getBoolean(Object object) {
-            return getDouble(object) != 0.0;
+            return toBoolean(getDouble(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setDouble(object, value instanceof Number ? ((Number) value).doubleValue() : 0.0);
+            setDouble(object, toDouble(value));
         }
 
         @Override
         public void setByte(Object object, byte value) {
-            setDouble(object, value);
+            setDouble(object, toDouble(value));
         }
 
         @Override
         public void setChar(Object object, char value) {
-            setDouble(object, value);
+            setDouble(object, toDouble(value));
         }
 
         @Override
         public void setShort(Object object, short value) {
-            setDouble(object, value);
+            setDouble(object, toDouble(value));
         }
 
         @Override
         public void setInt(Object object, int value) {
-            setDouble(object, value);
+            setDouble(object, toDouble(value));
         }
 
         @Override
         public void setLong(Object object, long value) {
-            setDouble(object, value);
+            setDouble(object, toDouble(value));
         }
 
         @Override
         public void setFloat(Object object, float value) {
-            setDouble(object, value);
+            setDouble(object, toDouble(value));
         }
 
         @Override
@@ -725,7 +725,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setDouble(object, value ? 1.0 : 0.0);
+            setDouble(object, toDouble(value));
         }
     }
 
@@ -779,12 +779,12 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public boolean getBoolean(Object object) {
-            return getChar(object) != 0;
+            return toBoolean(getChar(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setChar(object, value instanceof Character ? (Character) value : (char) 0);
+            setChar(object, toChar(value));
         }
 
         @Override
@@ -824,7 +824,7 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setChar(object, (char) (value ? 1 : 0));
+            setChar(object, toChar(value));
         }
     }
 

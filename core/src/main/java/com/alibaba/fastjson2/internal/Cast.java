@@ -19,7 +19,11 @@ public class Cast {
         } else if (value == null) {
             return 0;
         }
-        throw new JSONException("Cannot convert " + value + " to byte");
+        throw errorToByte(value);
+    }
+
+    private static JSONException errorToByte(Object value) {
+        return new JSONException("Cannot convert " + value + " to byte");
     }
 
     public static byte toByte(short value) {
@@ -73,7 +77,15 @@ public class Cast {
         } else if (value == null) {
             return 0;
         }
-        throw new JSONException("Cannot convert " + value + " to char");
+        throw errorToChar(value);
+    }
+
+    private static JSONException errorToChar(Object value) {
+        return new JSONException("Cannot convert " + value + " to char");
+    }
+
+    public static char toChar(boolean value) {
+        return value ? '1' : '0';
     }
 
     public static char toChar(short value) {
@@ -112,7 +124,11 @@ public class Cast {
         } else if (value == null) {
             return 0;
         }
-        throw new JSONException("Cannot convert " + value + " to short");
+        throw errorToShort(value);
+    }
+
+    private static JSONException errorToShort(Object value) {
+        return new JSONException("Cannot convert " + value + " to short");
     }
 
     public static short toShort(char value) {
@@ -151,14 +167,33 @@ public class Cast {
         if (value instanceof Boolean) {
             return (Boolean) value ? 1 : 0;
         } else if (value instanceof Character) {
-            return (int) ((Character) value).charValue();
+            return toInt(((Character) value).charValue());
         } else if (value == null) {
             return 0;
         }
-        throw new JSONException("Cannot convert " + value + " to int");
+        throw errorToInt(value);
+    }
+
+    private static JSONException errorToInt(Object value) {
+        return new JSONException("Cannot convert " + value + " to int");
+    }
+
+    public static int toInt(char value) {
+        if (value >= '0' && value <= '9') {
+            return value - '0';
+        }
+        throw errorToInt(value);
     }
 
     public static int toInt(long value) {
+        return (int) value;
+    }
+
+    public static int toInt(float value) {
+        return (int) value;
+    }
+
+    public static int toInt(double value) {
         return (int) value;
     }
 
@@ -178,7 +213,11 @@ public class Cast {
         } else if (value == null) {
             return 0L;
         }
-        throw new JSONException("Cannot convert " + value + " to long");
+        throw errorToLong(value);
+    }
+
+    private static JSONException errorToLong(Object value) {
+        return new JSONException("Cannot convert " + value + " to long");
     }
 
     public static long toLong(short value) {
@@ -220,7 +259,11 @@ public class Cast {
         } else if (value == null) {
             return 0.0f;
         }
-        throw new JSONException("Cannot convert " + value + " to float");
+        throw errorToFloat(value);
+    }
+
+    private static JSONException errorToFloat(Object value) {
+        return new JSONException("Cannot convert " + value + " to float");
     }
 
     public static float toFloat(short value) {
@@ -243,6 +286,10 @@ public class Cast {
         return (float) value;
     }
 
+    public static float toFloat(boolean value) {
+        return value ? 1.0f : 0.0f;
+    }
+
     public static double toDouble(Object value) {
         if (value instanceof Number) {
             return ((Number) value).doubleValue();
@@ -251,15 +298,38 @@ public class Cast {
         return toDoubleEx(value);
     }
 
+    public static double toDouble(int value) {
+        return value;
+    }
+
+    public static double toDouble(long value) {
+        return value;
+    }
+
     private static double toDoubleEx(Object value) {
         if (value instanceof Boolean) {
             return (Boolean) value ? 1.0 : 0.0;
         } else if (value instanceof Character) {
-            return (double) ((Character) value).charValue();
+            return toDouble(((Character) value).charValue());
         } else if (value == null) {
             return 0.0;
         }
-        throw new JSONException("Cannot convert " + value + " to double");
+        throw errorToDouble(value);
+    }
+
+    private static JSONException errorToDouble(Object value) {
+        return new JSONException("Cannot convert " + value + " to double");
+    }
+
+    public static double toDouble(boolean value) {
+        return value ? 1.0D : 0.0D;
+    }
+
+    public static double toDouble(char value) {
+        if (value >= '0' && value <= '9') {
+            return value - '0';
+        }
+        throw errorToDouble(value);
     }
 
     public static boolean toBoolean(Object value) {
@@ -278,7 +348,11 @@ public class Cast {
         } else if (value == null) {
             return false;
         }
-        throw new JSONException("Cannot convert " + value + " to boolean");
+        throw errorToBoolean(value);
+    }
+
+    private static JSONException errorToBoolean(Object value) {
+        return new JSONException("Cannot convert " + value + " to boolean");
     }
 
     public static boolean toBoolean(byte value) {
