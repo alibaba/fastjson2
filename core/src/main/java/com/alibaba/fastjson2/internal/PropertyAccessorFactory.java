@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -1080,8 +1081,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorChar extends MethodAccessor implements PropertyAccessorChar {
-        public MethodAccessorChar(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorChar(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1104,8 +1105,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorByte extends MethodAccessor implements PropertyAccessorByte {
-        public MethodAccessorByte(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorByte(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1128,8 +1129,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorShort extends MethodAccessor implements PropertyAccessorShort {
-        public MethodAccessorShort(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorShort(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1152,8 +1153,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorInt extends MethodAccessor implements PropertyAccessorInt {
-        public MethodAccessorInt(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorInt(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1176,8 +1177,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorLong extends MethodAccessor implements PropertyAccessorLong {
-        public MethodAccessorLong(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorLong(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1200,8 +1201,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorFloat extends MethodAccessor implements PropertyAccessorFloat {
-        public MethodAccessorFloat(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorFloat(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1224,8 +1225,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorDouble extends MethodAccessor implements PropertyAccessorDouble {
-        public MethodAccessorDouble(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorDouble(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1248,8 +1249,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorBoolean extends MethodAccessor implements PropertyAccessorBoolean {
-        public MethodAccessorBoolean(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorBoolean(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override
@@ -1272,8 +1273,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class MethodAccessorObject extends MethodAccessor implements PropertyAccessorObject {
-        public MethodAccessorObject(String name, Class<?> propertyClass, Method getter, Method setter) {
-            super(name, propertyClass, getter, setter);
+        public MethodAccessorObject(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
         }
 
         @Override

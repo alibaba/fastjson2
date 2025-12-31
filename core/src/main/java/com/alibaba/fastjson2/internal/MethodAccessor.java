@@ -7,12 +7,14 @@ import java.lang.reflect.Type;
 
 public abstract class MethodAccessor implements PropertyAccessor {
     protected final String name;
+    protected final Type propertyType;
     protected final Class<?> propertyClass;
     protected final Method getter;
     protected final Method setter;
 
-    public MethodAccessor(String name, Class<?> propertyClass, Method getter, Method setter) {
+    public MethodAccessor(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
         this.name = name;
+        this.propertyType = propertyType;
         this.propertyClass = propertyClass;
         this.getter = getter;
         this.setter = setter;
@@ -36,7 +38,7 @@ public abstract class MethodAccessor implements PropertyAccessor {
     }
 
     public final Type propertyType() {
-        return propertyClass;
+        return propertyType;
     }
 
     final JSONException errorForGet(Exception e) {
