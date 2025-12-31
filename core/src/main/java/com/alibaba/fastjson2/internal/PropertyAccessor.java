@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 public interface PropertyAccessor {
     Field field();
     String name();
+    Class<?> propertyClass();
 
     boolean supportGet();
     boolean supportSet();

@@ -7,12 +7,12 @@ public abstract class FieldAccessor
         implements PropertyAccessor {
     protected final Field field;
     protected final String fieldName;
-    protected final Class<?> fieldClass;
+    protected final Class<?> propertyClass;
     protected final boolean supportSet;
 
     protected FieldAccessor(Field field) {
         this.field = field;
-        this.fieldClass = field.getType();
+        this.propertyClass = field.getType();
         this.fieldName = field.getName();
         supportSet = (field.getModifiers() & Modifier.FINAL) == 0;
     }
@@ -20,6 +20,11 @@ public abstract class FieldAccessor
     @Override
     public final Field field() {
         return field;
+    }
+
+    @Override
+    public final Class<?> propertyClass() {
+        return propertyClass;
     }
 
     @Override
