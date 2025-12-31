@@ -7,21 +7,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import static com.alibaba.fastjson2.internal.Cast.*;
 
 public class PropertyAccessorFactory {
-    protected final ConcurrentMap<Object, PropertyAccessor> cache = new ConcurrentHashMap<>();
-
     public PropertyAccessor create(Field field) {
-        PropertyAccessor accessor = cache.get(field);
-        if (accessor == null) {
-            accessor = createInternal(field);
-            cache.put(field, accessor);
-        }
-        return accessor;
+        return createInternal(field);
     }
 
     protected PropertyAccessor createInternal(Field field) {
@@ -1077,73 +1068,96 @@ public class PropertyAccessorFactory {
         }
     }
 
-    protected PropertyAccessor createInternal(Method method) {
-        Class<?> returnClass = method.getReturnType();
-        Class<?>[] parameterClasses = method.getParameterTypes();
+    public PropertyAccessor create(Method method) {
         String methodName = method.getName();
-        if (parameterClasses.length == 0) {
-            String name = BeanUtils.getterName(methodName, null);
-            Type returnType = method.getGenericReturnType();
-            if (returnClass == byte.class) {
-                return new MethodAccessorByte(name, returnType, returnClass, method, null);
+        if (method.getParameterCount() == 0) {
+            return create(BeanUtils.getterName(methodName, null), null, null, method, null);
+        } else {
+            return create(BeanUtils.setterName(methodName, null), null, null, null, method);
+        }
+    }
+
+    protected PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType, Method getter, Method setter) {
+        if (getter != null) {
+            if (getter.getParameterCount() != 0) {
+                throw new JSONException("create PropertyAccessor error, method parameterCount is not 0");
             }
-            if (returnClass == short.class) {
-                return new MethodAccessorShort(name, returnType, returnClass, method, null);
+
+            if (name == null) {
+                name = BeanUtils.getterName(getter.getName(), null);
             }
-            if (returnClass == int.class) {
-                return new MethodAccessorInt(name, returnType, returnClass, method, null);
+            Class<?> returnClass = getter.getReturnType();
+            if (propertyClass == null) {
+                propertyClass = returnClass;
+            } else if (!propertyClass.equals(returnClass)) {
+                throw new JSONException("create PropertyAccessor error, propertyClass not match");
             }
-            if (returnClass == long.class) {
-                return new MethodAccessorLong(name, returnType, returnClass, method, null);
+
+            Type returnType = getter.getGenericReturnType();
+            if (propertyType == null) {
+                propertyType = returnType;
+            } else if (!propertyType.equals(propertyType)) {
+                throw new JSONException("create PropertyAccessor error, propertyType not match");
             }
-            if (returnClass == float.class) {
-                return new MethodAccessorFloat(name, returnType, returnClass, method, null);
+        }
+
+        if (setter != null) {
+            if (setter.getParameterCount() != 1) {
+                throw new JSONException("create PropertyAccessor error, method parameterCount is not 1");
             }
-            if (returnClass == double.class) {
-                return new MethodAccessorDouble(name, returnType, returnClass, method, null);
+
+            if (name == null) {
+                name = BeanUtils.setterName(setter.getName(), null);
             }
-            if (returnClass == char.class) {
-                return new MethodAccessorChar(name, returnType, returnClass, method, null);
-            }
-            if (returnClass == boolean.class) {
-                return new MethodAccessorBoolean(name, returnType, returnClass, method, null);
-            }
-            if (returnType == void.class) {
-                throw new JSONException("create PropertyAccessor error, method returnType is void");
-            }
-            return new MethodAccessorObject(name, returnType, returnClass, method, null);
-        } else if (parameterClasses.length == 1) {
-            String name = BeanUtils.setterName(methodName, null);
-            Type[] parameterTypes = method.getGenericParameterTypes();
+
+            Class<?>[] parameterClasses = setter.getParameterTypes();
+            Type[] parameterTypes = setter.getGenericParameterTypes();
             Class<?> parameterClass = parameterClasses[0];
             Type parameterType = parameterTypes[0];
-            if (parameterClass == byte.class) {
-                return new MethodAccessorByte(name, parameterType, parameterClass, null, method);
+
+            if (propertyClass == null) {
+                propertyClass = parameterClass;
+            } else if (!propertyClass.equals(parameterClass)) {
+                throw new JSONException("create PropertyAccessor error, propertyClass not match");
             }
-            if (parameterClass == short.class) {
-                return new MethodAccessorShort(name, parameterType, parameterClass, null, method);
+
+            if (propertyType == null) {
+                propertyType = parameterType;
+            } else if (!propertyType.equals(parameterType)) {
+                throw new JSONException("create PropertyAccessor error, propertyType not match");
             }
-            if (parameterClass == int.class) {
-                return new MethodAccessorInt(name, parameterType, parameterClass, null, method);
-            }
-            if (parameterClass == long.class) {
-                return new MethodAccessorLong(name, parameterType, parameterClass, null, method);
-            }
-            if (parameterClass == float.class) {
-                return new MethodAccessorFloat(name, parameterType, parameterClass, null, method);
-            }
-            if (parameterClass == double.class) {
-                return new MethodAccessorDouble(name, parameterType, parameterClass, null, method);
-            }
-            if (parameterClass == char.class) {
-                return new MethodAccessorChar(name, parameterType, parameterClass, null, method);
-            }
-            if (parameterClass == boolean.class) {
-                return new MethodAccessorBoolean(name, parameterType, parameterClass, null, method);
-            }
-            return new MethodAccessorObject(name, parameterType, parameterClass, null, method);
         }
-        throw new JSONException("create PropertyAccessor error");
+
+        if (propertyClass == void.class || propertyClass == Void.class) {
+            throw new JSONException("create PropertyAccessor error, method returnType is void");
+        }
+
+        if (propertyClass == byte.class) {
+            return new MethodAccessorByte(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == short.class) {
+            return new MethodAccessorShort(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == int.class) {
+            return new MethodAccessorInt(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == long.class) {
+            return new MethodAccessorLong(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == float.class) {
+            return new MethodAccessorFloat(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == double.class) {
+            return new MethodAccessorDouble(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == char.class) {
+            return new MethodAccessorChar(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == boolean.class) {
+            return new MethodAccessorBoolean(name, propertyType, propertyClass, getter, setter);
+        }
+
+        return new MethodAccessorObject(name, propertyType, propertyClass, setter, setter);
     }
 
     static final class MethodAccessorChar extends MethodAccessor implements PropertyAccessorChar {
