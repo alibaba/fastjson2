@@ -6,9 +6,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-class FieldWriterDoubleMethod<T>
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
+class FieldWriterDouble<T>
         extends FieldWriter<T> {
-    protected FieldWriterDoubleMethod(
+    FieldWriterDouble(
             String name,
             int ordinal,
             long features,
@@ -17,16 +19,17 @@ class FieldWriterDoubleMethod<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         Double value;
         try {
-            value = (Double) getFieldValue(object);
+            value = (Double) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -39,22 +42,24 @@ class FieldWriterDoubleMethod<T>
         }
 
         writeFieldName(jsonWriter);
+
         double doubleValue = value;
         if (decimalFormat != null) {
             jsonWriter.writeDouble(doubleValue, decimalFormat);
         } else {
-            if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            if ((features & WriteNonStringValueAsString.mask) != 0) {
                 jsonWriter.writeString(doubleValue);
             } else {
                 jsonWriter.writeDouble(doubleValue);
             }
         }
+
         return true;
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        Double value = (Double) getFieldValue(object);
+        Double value = (Double) propertyAccessor.getObject(object);
 
         if (value == null) {
             jsonWriter.writeNumberNull();

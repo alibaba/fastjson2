@@ -4425,11 +4425,11 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterDoubleVal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldWriterDoubleField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDouble(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == char.class) {

@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -183,6 +184,8 @@ public abstract class FieldWriter<T>
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, fieldClass, fieldType, (Function) function, null);
         } else if (function instanceof Predicate) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (Predicate) function, null);
+        } else if (function instanceof ToDoubleFunction) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (ToDoubleFunction) function, null);
         } else if (function instanceof ToCharFunction) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (ToCharFunction) function, null);
         } else if (method != null) {
