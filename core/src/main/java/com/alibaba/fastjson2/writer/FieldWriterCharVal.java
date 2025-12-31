@@ -5,45 +5,50 @@ import com.alibaba.fastjson2.function.ToCharFunction;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
-final class FieldWriterCharValFunc
-        extends FieldWriter {
-    final ToCharFunction function;
-
-    FieldWriterCharValFunc(
-            String fieldName,
+class FieldWriterCharVal
+        extends FieldWriterChar {
+    FieldWriterCharVal(
+            String name,
             int ordinal,
             long features,
             String format,
             String label,
+            Type fieldType,
+            Class fieldClass,
             Field field,
             Method method,
             ToCharFunction function
     ) {
-        super(fieldName, ordinal, features, format, null, label, char.class, char.class, field, method);
-        this.function = function;
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        return function.applyAsChar(object);
-    }
-
-    @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
-        char value = function.applyAsChar(object);
-        jsonWriter.writeChar(value);
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
-        char value = function.applyAsChar(object);
+        char value;
+        try {
+            value = propertyAccessor.getChar(object);
+        } catch (RuntimeException error) {
+            if (jsonWriter.isIgnoreErrorGetter()) {
+                return false;
+            }
+            throw error;
+        }
+
         long features = jsonWriter.getFeatures(this.features);
         if (value == '\0' && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
             return false;
         }
+
         writeFieldName(jsonWriter);
         jsonWriter.writeChar(value);
         return true;
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, Object object) {
+        char value = propertyAccessor.getChar(object);
+        jsonWriter.writeChar(value);
     }
 }
