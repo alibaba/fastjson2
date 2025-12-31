@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.internal;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
+import static com.alibaba.fastjson2.internal.Cast.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public final class PropertyAccessorFactoryUnsafe
@@ -842,42 +843,42 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public byte getByte(Object object) {
-            return ((Number) getObject(object)).byteValue();
+            return toByte(getObject(object));
         }
 
         @Override
         public char getChar(Object object) {
-            return (Character) getObject(object);
+            return toChar(getObject(object));
         }
 
         @Override
         public short getShort(Object object) {
-            return ((Number) getObject(object)).shortValue();
+            return toShort(getObject(object));
         }
 
         @Override
         public int getInt(Object object) {
-            return ((Number) getObject(object)).intValue();
+            return toInt(getObject(object));
         }
 
         @Override
         public long getLong(Object object) {
-            return ((Number) getObject(object)).longValue();
+            return toLong(getObject(object));
         }
 
         @Override
         public float getFloat(Object object) {
-            return ((Number) getObject(object)).floatValue();
+            return toFloat(getObject(object));
         }
 
         @Override
         public double getDouble(Object object) {
-            return ((Number) getObject(object)).doubleValue();
+            return toDouble(getObject(object));
         }
 
         @Override
         public boolean getBoolean(Object object) {
-            return (Boolean) getObject(object);
+            return toBoolean(getObject(object));
         }
 
         @Override

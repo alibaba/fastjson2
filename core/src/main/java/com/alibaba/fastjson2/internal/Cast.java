@@ -42,6 +42,14 @@ public class Cast {
         throw new JSONException("Cannot convert " + value + " to short");
     }
 
+    public static short toShort(int value) {
+        return (short) value;
+    }
+
+    public static short toShort(long value) {
+        return (short) value;
+    }
+
     public static int toInt(Object value) {
         if (value instanceof Number) {
             return ((Number) value).intValue();
@@ -53,6 +61,10 @@ public class Cast {
             return 0;
         }
         throw new JSONException("Cannot convert " + value + " to int");
+    }
+
+    public static int toInt(long value) {
+        return (int) value;
     }
 
     public static long toLong(Object value) {
@@ -81,6 +93,14 @@ public class Cast {
         throw new JSONException("Cannot convert " + value + " to float");
     }
 
+    public static float toFloat(int value) {
+        return (float) value;
+    }
+
+    public static float toFloat(long value) {
+        return (float) value;
+    }
+
     public static double toDouble(Object value) {
         if (value instanceof Number) {
             return ((Number) value).doubleValue();
@@ -105,5 +125,17 @@ public class Cast {
             return false;
         }
         throw new JSONException("Cannot convert " + value + " to boolean");
+    }
+
+    public static boolean toBoolean(short value) {
+        return value != 0;
+    }
+
+    public static boolean toBoolean(char value) {
+        return value != 0;
+    }
+
+    public static boolean toBoolean(int value) {
+        return value != 0;
     }
 }

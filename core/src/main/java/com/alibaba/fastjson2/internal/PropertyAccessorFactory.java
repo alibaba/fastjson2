@@ -330,12 +330,12 @@ public class PropertyAccessorFactory {
 
         @Override
         public boolean getBoolean(Object object) {
-            return getShort(object) != 0;
+            return toBoolean(getShort(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setShort(object, value instanceof Number ? ((Number) value).shortValue() : (short) 0);
+            setShort(object, toShort(value));
         }
 
         @Override
@@ -405,7 +405,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public short getShort(Object object) {
-            return (short) getInt(object);
+            return toShort(getInt(object));
         }
 
         @Override
@@ -424,7 +424,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public float getFloat(Object object) {
-            return getInt(object);
+            return toFloat(getInt(object));
         }
 
         @Override
@@ -434,12 +434,12 @@ public class PropertyAccessorFactory {
 
         @Override
         public boolean getBoolean(Object object) {
-            return getInt(object) != 0;
+            return toBoolean(getInt(object));
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setInt(object, value instanceof Number ? ((Number) value).intValue() : 0);
+            setInt(object, toInt(value));
         }
 
         @Override
@@ -509,12 +509,12 @@ public class PropertyAccessorFactory {
 
         @Override
         public short getShort(Object object) {
-            return (short) getLong(object);
+            return toShort(getLong(object));
         }
 
         @Override
         public int getInt(Object object) {
-            return (int) getLong(object);
+            return toInt(getLong(object));
         }
 
         @Override
@@ -528,7 +528,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public float getFloat(Object object) {
-            return getLong(object);
+            return toFloat(getLong(object));
         }
 
         @Override
