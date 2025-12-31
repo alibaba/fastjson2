@@ -196,32 +196,32 @@ public class PropertyAccessorFactory {
 
         @Override
         public char getChar(Object object) {
-            return (char) getByte(object);
+            return toChar(getByte(object));
         }
 
         @Override
         public short getShort(Object object) {
-            return getByte(object);
+            return toShort(getByte(object));
         }
 
         @Override
         public int getInt(Object object) {
-            return getByte(object);
+            return toInt(getByte(object));
         }
 
         @Override
         public long getLong(Object object) {
-            return getByte(object);
+            return toLong(getByte(object));
         }
 
         @Override
         public float getFloat(Object object) {
-            return getByte(object);
+            return toFloat(getByte(object));
         }
 
         @Override
         public double getDouble(Object object) {
-            return getByte(object);
+            return toDouble(getByte(object));
         }
 
         @Override
@@ -291,12 +291,12 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            return (byte) getShort(object);
+            return toByte(getShort(object));
         }
 
         @Override
         public char getChar(Object object) {
-            return (char) getShort(object);
+            return toChar(getShort(object));
         }
 
         @Override
@@ -310,22 +310,22 @@ public class PropertyAccessorFactory {
 
         @Override
         public int getInt(Object object) {
-            return getShort(object);
+            return toInt(getShort(object));
         }
 
         @Override
         public long getLong(Object object) {
-            return getShort(object);
+            return toLong(getShort(object));
         }
 
         @Override
         public float getFloat(Object object) {
-            return getShort(object);
+            return toFloat(getShort(object));
         }
 
         @Override
         public double getDouble(Object object) {
-            return getShort(object);
+            return toDouble(getShort(object));
         }
 
         @Override
@@ -395,12 +395,12 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            return (byte) getInt(object);
+            return toByte(getInt(object));
         }
 
         @Override
         public char getChar(Object object) {
-            return (char) getInt(object);
+            return toChar(getInt(object));
         }
 
         @Override
@@ -419,7 +419,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public long getLong(Object object) {
-            return getInt(object);
+            return toLong(getInt(object));
         }
 
         @Override
@@ -429,7 +429,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public double getDouble(Object object) {
-            return getInt(object);
+            return toDouble(getInt(object));
         }
 
         @Override
@@ -499,12 +499,12 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            return (byte) getLong(object);
+            return toByte(getLong(object));
         }
 
         @Override
         public char getChar(Object object) {
-            return (char) getLong(object);
+            return toChar(getLong(object));
         }
 
         @Override
@@ -533,7 +533,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public double getDouble(Object object) {
-            return getLong(object);
+            return toDouble(getLong(object));
         }
 
         @Override
@@ -603,27 +603,27 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            return (byte) getFloat(object);
+            return toByte(getFloat(object));
         }
 
         @Override
         public char getChar(Object object) {
-            return (char) getFloat(object);
+            return toChar(getFloat(object));
         }
 
         @Override
         public short getShort(Object object) {
-            return (short) getFloat(object);
+            return toShort(getFloat(object));
         }
 
         @Override
         public int getInt(Object object) {
-            return (int) getFloat(object);
+            return toInt(getFloat(object));
         }
 
         @Override
         public long getLong(Object object) {
-            return (long) getFloat(object);
+            return toLong(getFloat(object));
         }
 
         @Override
@@ -637,7 +637,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public double getDouble(Object object) {
-            return getFloat(object);
+            return toDouble(getFloat(object));
         }
 
         @Override
@@ -707,32 +707,32 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            return (byte) getDouble(object);
+            return toByte(getDouble(object));
         }
 
         @Override
         public char getChar(Object object) {
-            return (char) getDouble(object);
+            return toChar(getDouble(object));
         }
 
         @Override
         public short getShort(Object object) {
-            return (short) getDouble(object);
+            return toShort(getDouble(object));
         }
 
         @Override
         public int getInt(Object object) {
-            return (int) getDouble(object);
+            return toInt(getDouble(object));
         }
 
         @Override
         public long getLong(Object object) {
-            return (long) getDouble(object);
+            return toLong(getDouble(object));
         }
 
         @Override
         public float getFloat(Object object) {
-            return (float) getDouble(object);
+            return toFloat(getDouble(object));
         }
 
         @Override
@@ -811,7 +811,7 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            return (byte) getChar(object);
+            return toByte(getChar(object));
         }
 
         @Override
@@ -825,27 +825,27 @@ public class PropertyAccessorFactory {
 
         @Override
         public short getShort(Object object) {
-            return (short) getChar(object);
+            return toShort(getChar(object));
         }
 
         @Override
         public int getInt(Object object) {
-            return getChar(object);
+            return toInt(getChar(object));
         }
 
         @Override
         public long getLong(Object object) {
-            return getChar(object);
+            return toLong(getChar(object));
         }
 
         @Override
         public float getFloat(Object object) {
-            return getChar(object);
+            return toFloat(getChar(object));
         }
 
         @Override
         public double getDouble(Object object) {
-            return getChar(object);
+            return toDouble(getChar(object));
         }
 
         @Override
