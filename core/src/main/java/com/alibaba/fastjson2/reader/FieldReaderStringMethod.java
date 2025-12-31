@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
@@ -46,11 +45,7 @@ final class FieldReaderStringMethod<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setObject(object, fieldValue);
     }
 
     @Override
@@ -84,11 +79,7 @@ final class FieldReaderStringMethod<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, fieldValue);
     }
 
     public boolean supportAcceptType(Class valueClass) {

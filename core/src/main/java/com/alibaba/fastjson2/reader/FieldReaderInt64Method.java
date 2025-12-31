@@ -31,11 +31,7 @@ final class FieldReaderInt64Method<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setObject(object, fieldValue);
     }
 
     @Override
@@ -61,10 +57,6 @@ final class FieldReaderInt64Method<T>
             schema.assertValidate(longValue);
         }
 
-        try {
-            method.invoke(object, longValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, longValue);
     }
 }

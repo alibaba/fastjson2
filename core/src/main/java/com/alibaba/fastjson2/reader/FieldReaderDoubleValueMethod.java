@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -23,11 +22,7 @@ final class FieldReaderDoubleValueMethod<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setDouble(object, fieldValue);
     }
 
     @Override
@@ -38,11 +33,7 @@ final class FieldReaderDoubleValueMethod<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setDouble(object, fieldValue);
     }
 
     @Override
@@ -53,12 +44,7 @@ final class FieldReaderDoubleValueMethod<T>
             schema.assertValidate(doubleValue);
         }
 
-        try {
-            method.invoke(object,
-                    doubleValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setDouble(object, doubleValue);
     }
 
     @Override
@@ -67,10 +53,6 @@ final class FieldReaderDoubleValueMethod<T>
             schema.assertValidate(value);
         }
 
-        try {
-            method.invoke(object, (double) value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setDouble(object, value);
     }
 }

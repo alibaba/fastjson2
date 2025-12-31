@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -35,11 +34,7 @@ final class FieldReaderBigDecimalMethod<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setObject(object, fieldValue);
     }
 
     @Override
@@ -50,11 +45,7 @@ final class FieldReaderBigDecimalMethod<T>
             schema.assertValidate(decimalValue);
         }
 
-        try {
-            method.invoke(object, decimalValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, decimalValue);
     }
 
     @Override
@@ -63,11 +54,7 @@ final class FieldReaderBigDecimalMethod<T>
             schema.assertValidate(value);
         }
 
-        try {
-            method.invoke(object, BigDecimal.valueOf(value));
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, BigDecimal.valueOf(value));
     }
 
     @Override
@@ -76,10 +63,6 @@ final class FieldReaderBigDecimalMethod<T>
             schema.assertValidate(value);
         }
 
-        try {
-            method.invoke(object, BigDecimal.valueOf(value));
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, BigDecimal.valueOf(value));
     }
 }

@@ -91,7 +91,11 @@ public abstract class FieldReader<T>
             readOnly = true;
         }
         this.readOnly = readOnly;
-        this.propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
+        if (method != null) {
+            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
+        } else {
+            this.propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
+        }
 
         Class declaringClass = null;
         if (method != null) {

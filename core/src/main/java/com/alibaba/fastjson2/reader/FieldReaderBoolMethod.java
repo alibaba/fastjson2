@@ -44,10 +44,6 @@ final class FieldReaderBoolMethod<T>
     @Override
     public void accept(T object, Object value) {
         Boolean booleanValue = TypeUtils.toBoolean(value);
-        try {
-            method.invoke(object, booleanValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, booleanValue);
     }
 }

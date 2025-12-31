@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -23,11 +22,7 @@ final class FieldReaderFloatValueMethod<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setFloat(object, fieldValue);
     }
 
     @Override
@@ -38,11 +33,7 @@ final class FieldReaderFloatValueMethod<T>
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            method.invoke(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setFloat(object, fieldValue);
     }
 
     @Override
@@ -53,11 +44,7 @@ final class FieldReaderFloatValueMethod<T>
             schema.assertValidate(floatValue);
         }
 
-        try {
-            method.invoke(object, floatValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setFloat(object, floatValue);
     }
 
     @Override
@@ -66,10 +53,6 @@ final class FieldReaderFloatValueMethod<T>
             schema.assertValidate(value);
         }
 
-        try {
-            method.invoke(object, (float) value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setFloat(object, value);
     }
 }

@@ -12,6 +12,7 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.internal.Cast.*;
 
+@SuppressWarnings("ALL")
 public class PropertyAccessorFactory {
     public PropertyAccessor create(Field field) {
         return createInternal(field);
@@ -1072,7 +1073,8 @@ public class PropertyAccessorFactory {
 
     public PropertyAccessor create(Method method) {
         String methodName = method.getName();
-        if (method.getParameterCount() == 0) {
+        int parameterCount = method.getParameterCount();
+        if (parameterCount == 0) {
             return create(BeanUtils.getterName(methodName, null), null, null, method, null);
         } else {
             return create(BeanUtils.setterName(methodName, null), null, null, null, method);
@@ -1586,7 +1588,11 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setObject(Object object, Object value) {
-            setterFunc.accept((T) object, (V) value);
+            try {
+                setterFunc.accept((T) object, (V) value);
+            } catch (Exception e) {
+                throw errorForSet(e);
+            }
         }
     }
 

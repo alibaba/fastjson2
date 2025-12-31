@@ -288,8 +288,6 @@ public class FieldReaderObject<T>
         try {
             if (function != null) {
                 function.accept(object, value);
-            } else if (method != null) {
-                method.invoke(object, value);
             } else {
                 propertyAccessor.setObject(object, value);
             }

@@ -219,7 +219,12 @@ public final class PropertyAccessorFactoryUnsafe
             if (getter != null) {
                 propertyClass = getter.getReturnType();
             } else {
-                propertyClass = setter.getParameterTypes()[0];
+                Class<?>[] parameterTypes = setter.getParameterTypes();
+                if (parameterTypes.length == 1) {
+                    propertyClass = parameterTypes[0];
+                } else if (parameterTypes.length == 2 && String.class.equals(parameterTypes[0])) {
+                    propertyClass = parameterTypes[1];
+                }
             }
         }
 
@@ -263,10 +268,15 @@ public final class PropertyAccessorFactoryUnsafe
                     if (getter != null) {
                         propertyType = getter.getGenericReturnType();
                     } else {
-                        propertyType = setter.getGenericParameterTypes()[0];
+                        Type[] parameterTypes = setter.getGenericParameterTypes();
+                        if (parameterTypes.length == 1) {
+                            propertyType = parameterTypes[0];
+                        } else if (parameterTypes.length == 2 && String.class.equals(parameterTypes[0])) {
+                            propertyType = parameterTypes[1];
+                        }
                     }
                 }
-                return create(name, propertyClass, propertyType, getObject(getter), setObject(setter));
+                return create(name, propertyClass, propertyType, getObject(getter), setObject(name, setter));
             }
         }
 
@@ -397,6 +407,9 @@ public final class PropertyAccessorFactoryUnsafe
     }
 
     public Function<Object, Object> getObject(Method method) {
+        if (method == null) {
+            return null;
+        }
         Class<?> declaringClass = method.getDeclaringClass();
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
         try {
@@ -573,15 +586,41 @@ public final class PropertyAccessorFactoryUnsafe
     }
 
     public BiConsumer<Object, Object> setObject(Method method) {
+        return setObject(null, method);
+    }
+
+    public BiConsumer<Object, Object> setObject(String name, Method method) {
         if (method == null) {
             return null;
         }
 
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+
         Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length == 2
+                && parameterTypes[0].equals(String.class)
+        ) {
+            BiFunction<String, Object, Object> biFunction;
+            try {
+                MethodHandle handle = lookup.unreflect(method);
+                biFunction = (BiFunction<String, Object, Object>) LambdaMetafactory.metafactory(
+                        lookup,
+                        "accept",
+                        MethodType.methodType(BiFunction.class),
+                        MethodType.methodType(void.class, Object.class, Object.class, Object.class),
+                        handle,
+                        MethodType.methodType(void.class, method.getDeclaringClass(), String.class, method.getParameterTypes()[1])
+                ).getTarget().invokeExact();
+            } catch (Throwable e) {
+                throw new RuntimeException("Failed to create lambda for method: " + method, e);
+            }
+            return (obj, value) -> biFunction.apply(name, value);
+        }
+
         if (parameterTypes.length != 1) {
             throw new IllegalArgumentException("Method must have exactly one parameter");
         }
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+
         try {
             MethodHandle handle = lookup.unreflect(method);
             return (BiConsumer<Object, Object>) LambdaMetafactory.metafactory(

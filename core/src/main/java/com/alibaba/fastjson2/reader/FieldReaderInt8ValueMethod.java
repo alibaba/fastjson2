@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -23,11 +22,7 @@ final class FieldReaderInt8ValueMethod<T>
             schema.assertValidate(fieldInt);
         }
 
-        try {
-            method.invoke(object, (byte) fieldInt);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setByte(object, (byte) fieldInt);
     }
 
     @Override
@@ -38,11 +33,7 @@ final class FieldReaderInt8ValueMethod<T>
             schema.assertValidate(fieldInt);
         }
 
-        try {
-            method.invoke(object, (byte) fieldInt);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setByte(object, (byte) fieldInt);
     }
 
     @Override
@@ -53,11 +44,7 @@ final class FieldReaderInt8ValueMethod<T>
             schema.assertValidate(byteValue);
         }
 
-        try {
-            method.invoke(object, byteValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setByte(object, byteValue);
     }
 
     @Override
@@ -66,11 +53,7 @@ final class FieldReaderInt8ValueMethod<T>
             schema.assertValidate(value);
         }
 
-        try {
-            method.invoke(object, (byte) value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setByte(object, (byte) value);
     }
 
     @Override
