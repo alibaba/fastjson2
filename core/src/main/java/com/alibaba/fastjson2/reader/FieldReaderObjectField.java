@@ -15,7 +15,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class FieldReaderObjectField<T>
         extends FieldReaderObject<T> {
@@ -52,16 +51,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == boolean.class) {
-            UNSAFE.putBoolean(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setBoolean(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setBoolean(object, value);
     }
 
     @Override
@@ -70,16 +60,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == byte.class) {
-            UNSAFE.putByte(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setByte(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setByte(object, value);
     }
 
     @Override
@@ -88,16 +69,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == short.class) {
-            UNSAFE.putShort(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setShort(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setShort(object, value);
     }
 
     @Override
@@ -106,16 +78,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == int.class) {
-            UNSAFE.putInt(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setInt(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setInt(object, value);
     }
 
     @Override
@@ -124,16 +87,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == long.class) {
-            UNSAFE.putLong(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setLong(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setLong(object, value);
     }
 
     @Override
@@ -142,16 +96,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == float.class) {
-            UNSAFE.putFloat(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setFloat(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setFloat(object, value);
     }
 
     @Override
@@ -160,16 +105,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == double.class) {
-            UNSAFE.putDouble(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setDouble(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setDouble(object, value);
     }
 
     @Override
@@ -178,16 +114,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1 && fieldClass == char.class) {
-            UNSAFE.putChar(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setChar(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setChar(object, value);
     }
 
     @Override
@@ -237,16 +164,7 @@ class FieldReaderObjectField<T>
             }
         }
 
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.set(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, value);
     }
 
     final void acceptPrimitive(T object, Object value) {

@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.internal;
 
+import com.alibaba.fastjson2.JSONException;
+
 import java.lang.reflect.Field;
 import java.util.Objects;
 
@@ -864,7 +866,18 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setObject(Object object, Object value) {
-            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, typeCheck(value));
+        }
+
+        private Object typeCheck(Object value) {
+            if (value == null || fieldClass.isAssignableFrom(value.getClass())) {
+                return value;
+            }
+            throw typeCheckError(value);
+        }
+
+        private JSONException typeCheckError(Object value) {
+            return new JSONException("set " + name() + " error, type not support " + value.getClass());
         }
 
         @Override

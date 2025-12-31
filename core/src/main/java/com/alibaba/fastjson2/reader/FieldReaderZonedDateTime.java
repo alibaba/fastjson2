@@ -15,7 +15,6 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public class FieldReaderZonedDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
@@ -150,15 +149,6 @@ public class FieldReaderZonedDateTime<T>
             return;
         }
 
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, zdt);
-            return;
-        }
-
-        try {
-            field.set(object, zdt);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, zdt);
     }
 }

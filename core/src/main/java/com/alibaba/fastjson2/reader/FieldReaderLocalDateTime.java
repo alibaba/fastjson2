@@ -15,8 +15,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 public final class FieldReaderLocalDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
     final BiConsumer<T, ZonedDateTime> function;
@@ -146,15 +144,6 @@ public final class FieldReaderLocalDateTime<T>
             return;
         }
 
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.set(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, value);
     }
 }

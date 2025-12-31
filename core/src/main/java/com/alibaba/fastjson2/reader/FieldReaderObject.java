@@ -15,8 +15,6 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 public class FieldReaderObject<T>
         extends FieldReader<T> {
     protected ObjectReader initReader;
@@ -293,7 +291,7 @@ public class FieldReaderObject<T>
             } else if (method != null) {
                 method.invoke(object, value);
             } else {
-                UNSAFE.putObject(object, fieldOffset, value);
+                propertyAccessor.setObject(object, value);
             }
         } catch (Exception e) {
             throw new JSONException("set " + (function != null ? super.toString() : fieldName) + " error", e);

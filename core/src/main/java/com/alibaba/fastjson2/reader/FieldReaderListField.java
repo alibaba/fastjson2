@@ -7,8 +7,6 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Locale;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 final class FieldReaderListField<T>
         extends FieldReaderList<T, Object> {
     FieldReaderListField(
@@ -48,6 +46,6 @@ final class FieldReaderListField<T>
             schema.assertValidate(value);
         }
 
-        UNSAFE.putObject(object, fieldOffset, value);
+        propertyAccessor.setObject(object, value);
     }
 }

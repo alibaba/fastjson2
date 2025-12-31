@@ -16,8 +16,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 final class FieldReaderDate<T>
         extends FieldReaderDateTimeCodec<T> {
     final BiConsumer<T, Date> function;
@@ -91,16 +89,7 @@ final class FieldReaderDate<T>
             return;
         }
 
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.set(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, value);
     }
 
     @Override

@@ -5,8 +5,6 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 class FieldReaderStringField<T>
         extends FieldReaderObjectField<T> {
     final boolean trim;
@@ -39,7 +37,7 @@ class FieldReaderStringField<T>
             schema.assertValidate(fieldValue);
         }
 
-        UNSAFE.putObject(object, fieldOffset, fieldValue);
+        propertyAccessor.setObject(object, fieldValue);
     }
 
     @Override
@@ -101,6 +99,6 @@ class FieldReaderStringField<T>
             schema.assertValidate(fieldValue);
         }
 
-        UNSAFE.putObject(object, fieldOffset, fieldValue);
+        propertyAccessor.setObject(object, fieldValue);
     }
 }

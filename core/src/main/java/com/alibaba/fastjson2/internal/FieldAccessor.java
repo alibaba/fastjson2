@@ -6,10 +6,14 @@ import java.lang.reflect.Modifier;
 public abstract class FieldAccessor
         implements PropertyAccessor {
     protected final Field field;
+    protected final String fieldName;
+    protected final Class<?> fieldClass;
     protected final boolean supportSet;
 
     protected FieldAccessor(Field field) {
         this.field = field;
+        this.fieldClass = field.getType();
+        this.fieldName = field.getName();
         supportSet = !Modifier.isFinal(field.getModifiers());
     }
 
@@ -20,7 +24,7 @@ public abstract class FieldAccessor
 
     @Override
     public final String name() {
-        return field.getName();
+        return fieldName;
     }
 
     @Override

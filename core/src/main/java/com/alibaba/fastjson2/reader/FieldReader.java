@@ -9,10 +9,11 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.internal.Conf;
+import com.alibaba.fastjson2.internal.PropertyAccessor;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -22,8 +23,6 @@ import java.time.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
@@ -35,7 +34,7 @@ public abstract class FieldReader<T>
     public final String format;
     public final Method method;
     public final Field field;
-    protected final long fieldOffset;
+    protected final PropertyAccessor propertyAccessor;
     public final Object defaultValue;
     public final Locale locale;
     public final JSONSchema schema;
@@ -92,20 +91,7 @@ public abstract class FieldReader<T>
             readOnly = true;
         }
         this.readOnly = readOnly;
-
-        long fieldOffset = -1L;
-        if (field != null && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
-            fieldOffset = UNSAFE.objectFieldOffset(field);
-        }
-        this.fieldOffset = fieldOffset;
-
-        if (fieldOffset == -1 && field != null && method == null) {
-            try {
-                field.setAccessible(true);
-            } catch (Throwable e) {
-                JDKUtils.setReflectErrorLast(e);
-            }
-        }
+        this.propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
 
         Class declaringClass = null;
         if (method != null) {

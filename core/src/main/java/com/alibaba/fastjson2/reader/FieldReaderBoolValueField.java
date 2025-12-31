@@ -7,8 +7,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 final class FieldReaderBoolValueField<T>
         extends FieldReaderObjectField<T> {
     FieldReaderBoolValueField(
@@ -68,16 +66,7 @@ final class FieldReaderBoolValueField<T>
             schema.assertValidate(value);
         }
 
-        if (fieldOffset != -1) {
-            UNSAFE.putBoolean(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.setBoolean(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setBoolean(object, value);
     }
 
     @Override

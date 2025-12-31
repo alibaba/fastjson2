@@ -6,8 +6,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 class FieldReaderInt32ValueField<T>
         extends FieldReaderObjectField<T> {
     FieldReaderInt32ValueField(String fieldName, Class fieldType, int ordinal, String format, Integer defaultValue, JSONSchema schema, Field field) {
@@ -22,7 +20,7 @@ class FieldReaderInt32ValueField<T>
             schema.assertValidate(fieldInt);
         }
 
-        UNSAFE.putInt(object, fieldOffset, fieldInt);
+        propertyAccessor.setInt(object, fieldInt);
     }
 
     @Override
@@ -49,7 +47,7 @@ class FieldReaderInt32ValueField<T>
             schema.assertValidate(intValue);
         }
 
-        UNSAFE.putInt(object, fieldOffset, intValue);
+        propertyAccessor.setInt(object, intValue);
     }
 
     @Override
@@ -58,8 +56,7 @@ class FieldReaderInt32ValueField<T>
             schema.assertValidate(value);
         }
 
-        int intValue = (int) value;
-        UNSAFE.putInt(object, fieldOffset, intValue);
+        propertyAccessor.setLong(object, value);
     }
 
     @Override
