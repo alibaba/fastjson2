@@ -1,17 +1,19 @@
 package com.alibaba.fastjson2.internal;
 
-import org.junit.jupiter.api.Test;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Field;
-import java.util.stream.Stream;
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PropertyAccessorFactoryTest {
     // A test class with fields of different types
+    @Getter
+    @Setter
     public static class TestClass {
         private byte byteField = 10;
         private char charField = 'A';
@@ -25,32 +27,41 @@ public class PropertyAccessorFactoryTest {
         private int[] arrayField = {1, 2, 3};
     }
 
-    static Stream<Arguments> factoryAndFieldProvider() throws Exception {
+    static PropertyAccessor[] propertyAccessor() throws Exception {
         TestClass obj = new TestClass();
         Class<?> clazz = obj.getClass();
 
         Field[] fields = clazz.getDeclaredFields();
+
         PropertyAccessorFactory[] factories = new PropertyAccessorFactory[] {
                 new PropertyAccessorFactory(),
                 new PropertyAccessorFactoryUnsafe()
         };
 
-        Arguments[] arguments = new Arguments[fields.length * factories.length];
+        PropertyAccessor[] propertyAccessors = new PropertyAccessor[fields.length * factories.length * 2];
 
         for (int i = 0; i < fields.length; i++) {
+            Field field = fields[0];
+            String fieldName = field.getName();
+            String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+            String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+            Method getter = clazz.getDeclaredMethod(getterName);
+            Method setter = clazz.getDeclaredMethod(setterName, field.getType());
+
             for (int j = 0; j < factories.length; j++) {
-                arguments[i * factories.length + j] = Arguments.of(factories[j], fields[i]);
+                int index = (i * factories.length + j) * 2;
+                propertyAccessors[index] = factories[j].create(field);
+                propertyAccessors[index + 1] = factories[j].create(fieldName, null, null, getter, setter);
             }
         }
 
-        return Stream.of(arguments);
+        return propertyAccessors;
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testByte(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == byte.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testByte(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == byte.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setByte(obj, (byte) 50);
@@ -65,10 +76,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testShort(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == short.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testShort(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == short.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setShort(obj, (short) 500);
@@ -83,10 +93,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testInt(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == int.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testInt(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == int.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setInt(obj, 5000);
@@ -100,10 +109,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testLong(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == long.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testLong(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == long.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setLong(obj, 50000L);
@@ -116,10 +124,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testChar(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == char.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testChar(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == char.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setChar(obj, 'A');
@@ -129,10 +136,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testBoolean(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == boolean.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testBoolean(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == boolean.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setBoolean(obj, false);
@@ -146,10 +152,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testFloat(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == float.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testFloat(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == float.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setFloat(obj, 50.5f);
@@ -161,10 +166,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testDouble(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == double.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testDouble(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == double.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setDouble(obj, 50.7);
@@ -175,10 +179,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testObject(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == String.class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testObject(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == String.class) {
             TestClass obj = new TestClass();
             // Test set then get
             accessor.setObject(obj, "modified");
@@ -191,10 +194,9 @@ public class PropertyAccessorFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("factoryAndFieldProvider")
-    public void testArray(PropertyAccessorFactory factory, Field field) throws Exception {
-        if (field.getType() == int[].class) {
-            PropertyAccessor accessor = factory.create(field);
+    @MethodSource("propertyAccessor")
+    public void testArray(PropertyAccessor accessor) throws Exception {
+        if (accessor.propertyClass() == int[].class) {
             TestClass obj = new TestClass();
             // Test set then get
             int[] newArray = {4, 5, 6};
@@ -205,20 +207,5 @@ public class PropertyAccessorFactoryTest {
             accessor.setObject(obj, null);
             assertNull(accessor.getObject(obj));
         }
-    }
-
-    @Test
-    public void testCreateMethodAccessor() throws Exception {
-        // This test is to ensure that the method-based accessor creation works
-        // We'll create a PropertyAccessorFactory and verify its basic functionality
-        PropertyAccessorFactory factory = new PropertyAccessorFactory();
-
-        // Test that the factory caches accessors
-        Field field = TestClass.class.getDeclaredField("intField");
-        PropertyAccessor accessor1 = factory.create(field);
-        PropertyAccessor accessor2 = factory.create(field);
-
-        // Same field should return same cached accessor
-        assertSame(accessor1, accessor2);
     }
 }

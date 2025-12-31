@@ -1077,7 +1077,7 @@ public class PropertyAccessorFactory {
         }
     }
 
-    protected PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType, Method getter, Method setter) {
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType, Method getter, Method setter) {
         if (getter != null) {
             if (getter.getParameterCount() != 0) {
                 throw new JSONException("create PropertyAccessor error, method parameterCount is not 0");
