@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ToCharFunction;
+import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.internal.PropertyAccessor;
 import com.alibaba.fastjson2.util.*;
@@ -184,6 +185,8 @@ public abstract class FieldWriter<T>
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, fieldClass, fieldType, (Function) function, null);
         } else if (function instanceof Predicate) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (Predicate) function, null);
+        } else if (function instanceof ToFloatFunction) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (ToFloatFunction) function, null);
         } else if (function instanceof ToDoubleFunction) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (ToDoubleFunction) function, null);
         } else if (function instanceof ToCharFunction) {

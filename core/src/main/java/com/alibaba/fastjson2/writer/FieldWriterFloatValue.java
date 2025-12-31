@@ -1,51 +1,35 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.function.ToFloatFunction;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
-final class FieldWriterFloatValueFunc
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
+class FieldWriterFloatValue
         extends FieldWriter {
-    final ToFloatFunction function;
-    final boolean writeNonStringValueAsString;
-
-    FieldWriterFloatValueFunc(
-            String fieldName,
+    FieldWriterFloatValue(
+            String name,
             int ordinal,
             long features,
             String format,
             String label,
+            Type fieldType,
+            Class fieldClass,
             Field field,
             Method method,
-            ToFloatFunction function
+            Object function
     ) {
-        super(fieldName, ordinal, features, format, null, label, float.class, float.class, field, method);
-        this.function = function;
-        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        return function.applyAsFloat(object);
-    }
-
-    @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
-        float fieldValue = function.applyAsFloat(object);
-        if (decimalFormat != null) {
-            jsonWriter.writeDouble(fieldValue, decimalFormat);
-        } else {
-            jsonWriter.writeDouble(fieldValue);
-        }
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
         float value;
         try {
-            value = function.applyAsFloat(object);
+            value = propertyAccessor.getFloat(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -58,15 +42,27 @@ final class FieldWriterFloatValueFunc
         }
 
         writeFieldName(jsonWriter);
+
         if (decimalFormat != null) {
             jsonWriter.writeFloat(value, decimalFormat);
         } else {
-            if (writeNonStringValueAsString) {
+            if ((features & WriteNonStringValueAsString.mask) != 0) {
                 jsonWriter.writeString(value);
             } else {
                 jsonWriter.writeFloat(value);
             }
         }
+
         return true;
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, Object object) {
+        float value = propertyAccessor.getFloat(object);
+        if (decimalFormat != null) {
+            jsonWriter.writeFloat(value, decimalFormat);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 }
