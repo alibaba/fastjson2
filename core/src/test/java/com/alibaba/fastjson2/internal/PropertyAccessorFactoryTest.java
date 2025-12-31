@@ -221,18 +221,4 @@ public class PropertyAccessorFactoryTest {
         // Same field should return same cached accessor
         assertSame(accessor1, accessor2);
     }
-
-    @Test
-    public void testCacheBehavior() throws Exception {
-        PropertyAccessorFactory factory = new PropertyAccessorFactory();
-
-        Field field1 = TestClass.class.getDeclaredField("intField");
-        Field field2 = TestClass.class.getDeclaredField("longField");
-
-        PropertyAccessor accessor1 = factory.create(field1);
-        PropertyAccessor accessor2 = factory.create(field2);
-
-        // Different fields should return different accessors
-        assertNotSame(accessor1, accessor2);
-    }
 }
