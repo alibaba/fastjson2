@@ -1,8 +1,7 @@
 package com.alibaba.fastjson2.internal;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.function.ToByteFunction;
-import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.invoke.LambdaMetafactory;
@@ -224,15 +223,40 @@ public final class PropertyAccessorFactoryUnsafe
             }
         }
 
-        if (setter == null || !isChainableSetter(setter)) {
+        Class<?> declaringClass;
+        if (getter != null) {
+            declaringClass = getter.getDeclaringClass();
+        } else {
+            declaringClass = setter.getDeclaringClass();
+        }
+        boolean lambda = declaringClass.getName().contains("$$Lambda");
+
+        if (!lambda && (setter == null || !isChainableSetter(setter))) {
             if (propertyClass == boolean.class) {
                 return create(name, getBoolean(getter), setBoolean(setter));
+            }
+            if (JDKUtils.JVM_VERSION == 8) {
+                if (propertyClass == byte.class) {
+                    return create(name, getByte(getter), setByte(setter));
+                }
+                if (propertyClass == short.class) {
+                    return create(name, getShort(getter), setShort(setter));
+                }
+                if (propertyClass == char.class) {
+                    return create(name, getChar(getter), setChar(setter));
+                }
             }
             if (propertyClass == int.class) {
                 return create(name, getInt(getter), setInt(setter));
             }
             if (propertyClass == long.class) {
                 return create(name, getLong(getter), setLong(setter));
+            }
+            if (propertyClass == float.class) {
+                return create(name, getFloat(getter), setFloat(setter));
+            }
+            if (propertyClass == double.class) {
+                return create(name, getDouble(getter), setDouble(setter));
             }
             if (!propertyClass.isPrimitive()) {
                 if (propertyType == null) {
@@ -282,7 +306,7 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    public BiConsumer<Object, Boolean> setBoolean(Method method) {
+    public ObjBoolConsumer setBoolean(Method method) {
         if (method == null) {
             return null;
         }
@@ -291,7 +315,7 @@ public final class PropertyAccessorFactoryUnsafe
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
         try {
             MethodHandle handle = lookup.unreflect(method);
-            return (BiConsumer<Object, Boolean>) LambdaMetafactory.metafactory(
+            BiConsumer<Object, Boolean> biConsumer = (BiConsumer<Object, Boolean>) LambdaMetafactory.metafactory(
                     lookup,
                     "accept",
                     MethodType.methodType(BiConsumer.class),
@@ -299,16 +323,42 @@ public final class PropertyAccessorFactoryUnsafe
                     handle,
                     MethodType.methodType(void.class, method.getDeclaringClass(), Boolean.class)
             ).getTarget().invokeExact();
+            return biConsumer::accept;
         } catch (Throwable e) {
             throw new RuntimeException("Failed to create lambda for method: " + method, e);
         }
+    }
+
+    public ToByteFunction<Object> getByte(Method method) {
+        if (method == null) {
+            return null;
+        }
+        return o -> (byte) getInt(method).applyAsInt(o);
+    }
+
+    public ToShortFunction<Object> getShort(Method method) {
+        if (method == null) {
+            return null;
+        }
+        return o -> (short) getInt(method).applyAsInt(o);
+    }
+
+    public ToCharFunction<Object> getChar(Method method) {
+        if (method == null) {
+            return null;
+        }
+        return o -> (char) getInt(method).applyAsInt(o);
     }
 
     public ToIntFunction<Object> getInt(Method method) {
         if (method == null) {
             return null;
         }
-        validateMethodAndReturnType(method, int.class);
+        Class<?> returnType = method.getReturnType();
+        if (!returnType.equals(int.class) && !returnType.equals(short.class) && !returnType.equals(byte.class) && !returnType.equals(char.class)) {
+            throw validateMethodAndReturnTypeEror(method, int.class);
+        }
+
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
         try {
             MethodHandle handle = lookup.unreflect(method);
@@ -364,11 +414,36 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    public ObjByteConsumer<Object> setByte(Method method) {
+        if (method == null) {
+            return null;
+        }
+        return (o, v) -> setInt(method).accept(o, (int) v);
+    }
+
+    public ObjCharConsumer<Object> setChar(Method method) {
+        if (method == null) {
+            return null;
+        }
+        return (o, v) -> setInt(method).accept(o, (int) v);
+    }
+
+    public ObjShortConsumer<Object> setShort(Method method) {
+        if (method == null) {
+            return null;
+        }
+        return (o, v) -> setInt(method).accept(o, (int) v);
+    }
+
     public ObjIntConsumer<Object> setInt(Method method) {
         if (method == null) {
             return null;
         }
-        validateMethodAndParameterType(method, int.class);
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Class<?> paramType;
+        if (parameterTypes.length != 1 || (!(paramType = parameterTypes[0]).equals(int.class) && !paramType.equals(short.class) && !paramType.equals(byte.class) && !paramType.equals(char.class))) {
+            throw validateMethodAndParameterTypeError(int.class, parameterTypes);
+        }
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
         try {
             MethodHandle handle = lookup.unreflect(method);
@@ -378,7 +453,7 @@ public final class PropertyAccessorFactoryUnsafe
                     MethodType.methodType(ObjIntConsumer.class),
                     MethodType.methodType(void.class, Object.class, int.class),
                     handle,
-                    MethodType.methodType(void.class, method.getDeclaringClass(), int.class)
+                    MethodType.methodType(void.class, method.getDeclaringClass(), paramType)
             ).getTarget().invokeExact();
         } catch (Throwable e) {
             throw new RuntimeException("Failed to create lambda for method: " + method, e);
@@ -401,6 +476,96 @@ public final class PropertyAccessorFactoryUnsafe
                     MethodType.methodType(void.class, Object.class, long.class),
                     handle,
                     MethodType.methodType(void.class, method.getDeclaringClass(), long.class)
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ToFloatFunction<Object> getFloat(Method method) {
+        if (method == null) {
+            return null;
+        }
+
+        validateMethodAndReturnType(method, float.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            ToDoubleFunction<Object> toDouble = (ToDoubleFunction<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "applyAsDouble",
+                    MethodType.methodType(ToDoubleFunction.class),
+                    MethodType.methodType(double.class, Object.class),
+                    handle,
+                    MethodType.methodType(float.class, method.getDeclaringClass())
+            ).getTarget().invokeExact();
+
+            return (ToFloatFunction<Object>) (obj) -> (float) toDouble.applyAsDouble(obj);
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ObjFloatConsumer setFloat(Method method) {
+        if (method == null) {
+            return null;
+        }
+
+        validateMethodAndParameterType(method, float.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            BiConsumer<Object, Float> setDouble = (BiConsumer<Object, Float>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "accept",
+                    MethodType.methodType(BiConsumer.class),
+                    MethodType.methodType(void.class, Object.class, Object.class),
+                    handle,
+                    MethodType.methodType(void.class, method.getDeclaringClass(), Float.class)
+            ).getTarget().invokeExact();
+            return (obj, value) -> setDouble.accept(obj, (float) value);
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ToDoubleFunction<Object> getDouble(Method method) {
+        if (method == null) {
+            return null;
+        }
+        validateMethodAndReturnType(method, double.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (ToDoubleFunction<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "applyAsDouble",
+                    MethodType.methodType(ToDoubleFunction.class),
+                    MethodType.methodType(double.class, Object.class),
+                    handle,
+                    MethodType.methodType(double.class, method.getDeclaringClass())
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ObjDoubleConsumer<Object> setDouble(Method method) {
+        if (method == null) {
+            return null;
+        }
+
+        validateMethodAndParameterType(method, double.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (ObjDoubleConsumer<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "accept",
+                    MethodType.methodType(ObjDoubleConsumer.class),
+                    MethodType.methodType(void.class, Object.class, double.class),
+                    handle,
+                    MethodType.methodType(void.class, method.getDeclaringClass(), double.class)
             ).getTarget().invokeExact();
         } catch (Throwable e) {
             throw new RuntimeException("Failed to create lambda for method: " + method, e);

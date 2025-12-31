@@ -1,10 +1,8 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNulls;
@@ -22,15 +20,6 @@ final class FieldWriterCharMethod<T>
             Class fieldClass
     ) {
         super(fieldName, ordinal, features, format, null, label, fieldClass, fieldClass, field, method);
-    }
-
-    @Override
-    public Object getFieldValue(T object) {
-        try {
-            return method.invoke(object);
-        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("invoke getter method error, " + fieldName, e);
-        }
     }
 
     @Override

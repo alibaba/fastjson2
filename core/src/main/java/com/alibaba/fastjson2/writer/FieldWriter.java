@@ -160,7 +160,11 @@ public abstract class FieldWriter<T>
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
         nameWithColonUTF16 = chars;
-        propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
+        if (method != null) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
+        } else {
+            propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
+        }
     }
 
     public boolean isFieldClassSerializable() {

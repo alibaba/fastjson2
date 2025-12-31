@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.internal;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -14,8 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PropertyAccessorFactoryTest {
     // A test class with fields of different types
-    @Getter
-    @Setter
     public static class TestClass {
         private byte byteField = 10;
         private char charField = 'A';
@@ -27,6 +23,86 @@ public class PropertyAccessorFactoryTest {
         private boolean booleanField = true;
         private String stringField = "test";
         private int[] arrayField = {1, 2, 3};
+
+        public byte getByteField() {
+            return byteField;
+        }
+
+        public void setByteField(byte byteField) {
+            this.byteField = byteField;
+        }
+
+        public char getCharField() {
+            return charField;
+        }
+
+        public void setCharField(char charField) {
+            this.charField = charField;
+        }
+
+        public short getShortField() {
+            return shortField;
+        }
+
+        public void setShortField(short shortField) {
+            this.shortField = shortField;
+        }
+
+        public int getIntField() {
+            return intField;
+        }
+
+        public void setIntField(int intField) {
+            this.intField = intField;
+        }
+
+        public long getLongField() {
+            return longField;
+        }
+
+        public void setLongField(long longField) {
+            this.longField = longField;
+        }
+
+        public float getFloatField() {
+            return floatField;
+        }
+
+        public void setFloatField(float floatField) {
+            this.floatField = floatField;
+        }
+
+        public double getDoubleField() {
+            return doubleField;
+        }
+
+        public void setDoubleField(double doubleField) {
+            this.doubleField = doubleField;
+        }
+
+        public boolean isBooleanField() {
+            return booleanField;
+        }
+
+        public void setBooleanField(boolean booleanField) {
+            this.booleanField = booleanField;
+        }
+
+        public String getStringField() {
+            return stringField;
+        }
+
+        public void setStringField(String stringField) {
+            this.stringField = stringField;
+        }
+
+        public int[] getArrayField() {
+            return arrayField;
+        }
+
+        public void setArrayField(int[] arrayField) {
+            this.arrayField = arrayField;
+        }
     }
 
     static PropertyAccessor[] propertyAccessor() throws Exception {
