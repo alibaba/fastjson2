@@ -52,7 +52,7 @@ import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.*;
 import static com.alibaba.fastjson2.internal.processor.JavacTreeUtils.qualIdent;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
         "com.alibaba.fastjson2.annotation.JSONCompiled",
         "com.alibaba.fastjson2.annotation.JSONBuilder",

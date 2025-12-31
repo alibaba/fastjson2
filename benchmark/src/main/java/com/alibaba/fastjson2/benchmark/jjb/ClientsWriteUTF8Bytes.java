@@ -47,6 +47,11 @@ public class ClientsWriteUTF8Bytes {
     }
 
     @Benchmark
+    public void fastjson2_fieldBased(Blackhole bh) {
+        bh.consume(JSON.toJSONBytes(clients, JSONWriter.Feature.FieldBased));
+    }
+
+    @Benchmark
     public void wast(Blackhole bh) {
         bh.consume(io.github.wycst.wast.json.JSON.toJsonBytes(clients));
     }

@@ -1,11 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
-
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import java.util.Objects;
 
 final class FieldWriterCharValField<T>
         extends FieldWriter<T> {
@@ -26,21 +24,7 @@ final class FieldWriterCharValField<T>
     }
 
     public char getFieldValueChar(Object object) {
-        if (object == null) {
-            throw new JSONException("field.get error, " + fieldName);
-        }
-
-        try {
-            char value;
-            if (fieldOffset != -1) {
-                value = UNSAFE.getChar(object, fieldOffset);
-            } else {
-                value = field.getChar(object);
-            }
-            return value;
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + fieldName, e);
-        }
+        return propertyAccessor.getChar(Objects.requireNonNull(object));
     }
 
     @Override

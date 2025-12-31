@@ -6,6 +6,9 @@ public interface PropertyAccessor {
     Field field();
     String name();
 
+    boolean supportGet();
+    boolean supportSet();
+
     // Getter methods
     Object getObject(Object object);
     byte getByte(Object object);

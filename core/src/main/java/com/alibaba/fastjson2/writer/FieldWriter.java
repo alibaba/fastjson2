@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.internal.Conf;
+import com.alibaba.fastjson2.internal.PropertyAccessor;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.ByteArrayOutputStream;
@@ -24,6 +26,7 @@ import static java.time.temporal.ChronoField.YEAR;
 
 public abstract class FieldWriter<T>
         implements Comparable {
+    protected final PropertyAccessor propertyAccessor;
     public final String fieldName;
     public final Type fieldType;
     public final Class fieldClass;
@@ -166,6 +169,7 @@ public abstract class FieldWriter<T>
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
         nameWithColonUTF16 = chars;
+        propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
     }
 
     public boolean isFieldClassSerializable() {
@@ -367,21 +371,7 @@ public abstract class FieldWriter<T>
             throw new JSONException("field.get error, " + fieldName);
         }
 
-        if (field != null) {
-            try {
-                Object value;
-                if (fieldOffset != -1 && !primitive) {
-                    value = UNSAFE.getObject(object, fieldOffset);
-                } else {
-                    value = field.get(object);
-                }
-                return value;
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new JSONException("field.get error, " + fieldName, e);
-            }
-        }
-
-        throw new UnsupportedOperationException();
+        return propertyAccessor.getObject(object);
     }
 
     @Override

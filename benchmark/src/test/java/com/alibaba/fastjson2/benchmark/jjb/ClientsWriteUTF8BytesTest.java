@@ -46,6 +46,18 @@ public class ClientsWriteUTF8BytesTest {
         }
     }
 
+    public static void fastjson2_fieldBased() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2_fieldBased(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-fastjson2_fieldBased millis : " + millis);
+            // zulu11.68.17_reflect :
+        }
+    }
+
     public static void wast() {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
@@ -97,7 +109,8 @@ public class ClientsWriteUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
+//        fastjson2();
+        fastjson2_fieldBased();
 //        wast();
 //        jsonb();
 //        jsonb_beanToArray();
