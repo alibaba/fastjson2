@@ -5,8 +5,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.function.Predicate;
 
-abstract class FieldWriterBoolVal
+class FieldWriterBoolVal
         extends FieldWriterBoolean {
     FieldWriterBoolVal(
             String name,
@@ -17,16 +18,17 @@ abstract class FieldWriterBoolVal
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Predicate function
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
         boolean value;
         try {
-            value = (Boolean) getFieldValue(object);
+            value = propertyAccessor.getBoolean(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;

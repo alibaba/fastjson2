@@ -1048,7 +1048,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolValField(fieldName, ordinal, features, format, label, field, fieldClass);
+            return new FieldWriterBoolVal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == byte.class) {
@@ -1300,7 +1300,11 @@ public class ObjectWriterCreator {
                 ? null
                 : BeanUtils.getField(objectType, method);
 
-        if (fieldClass == boolean.class || fieldClass == Boolean.class) {
+        if (fieldClass == boolean.class) {
+            return new FieldWriterBoolVal(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == Boolean.class) {
             return new FieldWriterBoolean(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method, null);
         }
 
@@ -1494,7 +1498,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, Predicate<T> function) {
-        return new FieldWriterBoolValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterBoolVal(fieldName, 0, 0, null, null, boolean.class, boolean.class, null, null, function);
     }
 
     /**
@@ -2011,7 +2015,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolValFunc(fieldName, ordinal, features, format, label, field, method, (Predicate<T>) lambda);
+            return new FieldWriterBoolVal(fieldName, 0, 0, null, null, boolean.class, boolean.class, field, method, (Predicate<T>) lambda);
         }
 
         if (fieldClass == Boolean.class) {

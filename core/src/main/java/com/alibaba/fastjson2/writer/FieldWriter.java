@@ -17,6 +17,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -80,6 +81,7 @@ public abstract class FieldWriter<T>
         this(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
     }
 
+    @SuppressWarnings("unchecked")
     FieldWriter(
             String name,
             int ordinal,
@@ -178,6 +180,8 @@ public abstract class FieldWriter<T>
         nameWithColonUTF16 = chars;
         if (function instanceof Function) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, fieldClass, fieldType, (Function) function, null);
+        } else if (function instanceof Predicate) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (Predicate) function, null);
         } else if (method != null) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
         } else {

@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.function.Function;
 
 class FieldWriterBoolean
         extends FieldWriter {
@@ -29,7 +28,7 @@ class FieldWriterBoolean
             Class fieldClass,
             Field field,
             Method method,
-            Function function
+            Object function
     ) {
         super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
         {

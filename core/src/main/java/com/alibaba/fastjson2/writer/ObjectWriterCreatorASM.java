@@ -4394,7 +4394,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolValField(fieldName, ordinal, features, format, label, field, fieldClass);
+            return new FieldWriterBoolVal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == byte.class) {
