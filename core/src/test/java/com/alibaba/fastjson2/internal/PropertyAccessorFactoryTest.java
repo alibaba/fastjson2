@@ -43,10 +43,14 @@ public class PropertyAccessorFactoryTest {
         List<PropertyAccessor> propertyAccessors = new ArrayList<>();
 
         for (PropertyAccessorFactory factory : factories) {
-            for (int i = 0; i < fields.length; i++) {
-                Field field = fields[0];
+            for (Field field : fields) {
                 String fieldName = field.getName();
-                String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                String getterName;
+                if (field.getType() == boolean.class) {
+                    getterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                } else {
+                    getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                }
                 String setterName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                 Method getter = clazz.getDeclaredMethod(getterName);
                 Method setter = clazz.getDeclaredMethod(setterName, field.getType());

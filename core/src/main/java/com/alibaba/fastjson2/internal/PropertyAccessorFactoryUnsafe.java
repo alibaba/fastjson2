@@ -1,12 +1,23 @@
 package com.alibaba.fastjson2.internal;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.function.ToByteFunction;
+import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Objects;
+import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
+@SuppressWarnings("ALL")
 public final class PropertyAccessorFactoryUnsafe
         extends PropertyAccessorFactory {
     protected PropertyAccessor createInternal(Field field) {
@@ -198,5 +209,243 @@ public final class PropertyAccessorFactoryUnsafe
         private JSONException typeCheckError(Object value) {
             return new JSONException("set " + name() + " error, type not support " + value.getClass());
         }
+    }
+
+    public PropertyAccessor create(String name, Method getter, Method setter) {
+        return super.create(name, null, null, getter, setter);
+    }
+
+    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType, Method getter, Method setter) {
+        if (propertyClass == null) {
+            if (getter != null) {
+                propertyClass = getter.getReturnType();
+            } else {
+                propertyClass = setter.getParameterTypes()[0];
+            }
+        }
+
+        if (setter == null || !isChainableSetter(setter)) {
+            if (propertyClass == boolean.class) {
+                return create(name, getBoolean(getter), setBoolean(setter));
+            }
+            if (propertyClass == int.class) {
+                return create(name, getInt(getter), setInt(setter));
+            }
+            if (propertyClass == long.class) {
+                return create(name, getLong(getter), setLong(setter));
+            }
+            if (!propertyClass.isPrimitive()) {
+                if (propertyType == null) {
+                    if (getter != null) {
+                        propertyType = getter.getGenericReturnType();
+                    } else {
+                        propertyType = setter.getGenericParameterTypes()[0];
+                    }
+                }
+                return create(name, propertyClass, propertyType, getObject(getter), setObject(setter));
+            }
+        }
+
+        return super.create(name, propertyClass, propertyType, getter, setter);
+    }
+
+    static void validateMethodAndReturnType(Method method, Class<?> expectedReturnType) {
+        if (!method.getReturnType().equals(expectedReturnType)) {
+            throw validateMethodAndReturnTypeEror(method, expectedReturnType);
+        }
+    }
+
+    private static IllegalArgumentException validateMethodAndReturnTypeEror(Method method, Class<?> expectedReturnType) {
+        return new IllegalArgumentException(
+                "Method return type mismatch. Expected: " + expectedReturnType.getSimpleName() +
+                        ", Actual: " + method.getReturnType().getSimpleName());
+    }
+
+    public Predicate<Object> getBoolean(Method method) {
+        if (method == null) {
+            return null;
+        }
+        validateMethodAndReturnType(method, boolean.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (Predicate<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "test",
+                    MethodType.methodType(Predicate.class),
+                    MethodType.methodType(boolean.class, Object.class),
+                    handle,
+                    MethodType.methodType(boolean.class, method.getDeclaringClass())
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public BiConsumer<Object, Boolean> setBoolean(Method method) {
+        if (method == null) {
+            return null;
+        }
+
+        validateMethodAndParameterType(method, boolean.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (BiConsumer<Object, Boolean>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "accept",
+                    MethodType.methodType(BiConsumer.class),
+                    MethodType.methodType(void.class, Object.class, Object.class),
+                    handle,
+                    MethodType.methodType(void.class, method.getDeclaringClass(), Boolean.class)
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ToIntFunction<Object> getInt(Method method) {
+        if (method == null) {
+            return null;
+        }
+        validateMethodAndReturnType(method, int.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (ToIntFunction<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "applyAsInt",
+                    MethodType.methodType(ToIntFunction.class),
+                    MethodType.methodType(int.class, Object.class),
+                    handle,
+                    MethodType.methodType(int.class, method.getDeclaringClass())
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ToLongFunction<Object> getLong(Method method) {
+        if (method == null) {
+            return null;
+        }
+        validateMethodAndReturnType(method, long.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (ToLongFunction<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "applyAsLong",
+                    MethodType.methodType(ToLongFunction.class),
+                    MethodType.methodType(long.class, Object.class),
+                    handle,
+                    MethodType.methodType(long.class, method.getDeclaringClass())
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public Function<Object, Object> getObject(Method method) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (Function<Object, Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    MethodType.methodType(Function.class),
+                    MethodType.methodType(Object.class, Object.class),
+                    handle,
+                    MethodType.methodType(method.getReturnType(), method.getDeclaringClass())
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ObjIntConsumer<Object> setInt(Method method) {
+        if (method == null) {
+            return null;
+        }
+        validateMethodAndParameterType(method, int.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (ObjIntConsumer<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "accept",
+                    MethodType.methodType(ObjIntConsumer.class),
+                    MethodType.methodType(void.class, Object.class, int.class),
+                    handle,
+                    MethodType.methodType(void.class, method.getDeclaringClass(), int.class)
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public ObjLongConsumer<Object> setLong(Method method) {
+        if (method == null) {
+            return null;
+        }
+
+        validateMethodAndParameterType(method, long.class);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (ObjLongConsumer<Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "accept",
+                    MethodType.methodType(ObjLongConsumer.class),
+                    MethodType.methodType(void.class, Object.class, long.class),
+                    handle,
+                    MethodType.methodType(void.class, method.getDeclaringClass(), long.class)
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    public BiConsumer<Object, Object> setObject(Method method) {
+        if (method == null) {
+            return null;
+        }
+
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length != 1) {
+            throw new IllegalArgumentException("Method must have exactly one parameter");
+        }
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(method.getDeclaringClass());
+        try {
+            MethodHandle handle = lookup.unreflect(method);
+            return (BiConsumer<Object, Object>) LambdaMetafactory.metafactory(
+                    lookup,
+                    "accept",
+                    MethodType.methodType(BiConsumer.class),
+                    MethodType.methodType(void.class, Object.class, Object.class),
+                    handle,
+                    MethodType.methodType(void.class, method.getDeclaringClass(), method.getParameterTypes()[0])
+            ).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to create lambda for method: " + method, e);
+        }
+    }
+
+    static boolean isChainableSetter(Method method) {
+        return method.getReturnType() == method.getDeclaringClass();
+    }
+
+    static void validateMethodAndParameterType(Method method, Class<?> expectedParameterType) {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length != 1 || !parameterTypes[0].equals(expectedParameterType)) {
+            throw validateMethodAndParameterTypeError(expectedParameterType, parameterTypes);
+        }
+    }
+
+    private static IllegalArgumentException validateMethodAndParameterTypeError(Class<?> expectedParameterType, Class<?>[] parameterTypes) {
+        return new IllegalArgumentException(
+                "Method parameter type mismatch. Expected: " + expectedParameterType.getSimpleName() +
+                        ", Actual: " + (parameterTypes.length > 0 ? parameterTypes[0].getSimpleName() : "no parameters"));
     }
 }

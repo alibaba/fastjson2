@@ -358,10 +358,6 @@ public abstract class FieldWriter<T>
     }
 
     public Object getFieldValue(T object) {
-        if (object == null) {
-            throw new JSONException("field.get error, " + fieldName);
-        }
-
         return propertyAccessor.getObject(object);
     }
 

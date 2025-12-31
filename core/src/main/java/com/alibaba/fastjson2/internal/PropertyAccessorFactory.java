@@ -1186,8 +1186,8 @@ public class PropertyAccessorFactory {
         return new FunctionAccessorDouble<>(name, getterFunc, setterFunc);
     }
 
-    public <T> PropertyAccessor create(String name, Predicate<T> getterFunc, ObjBoolConsumer<T> setterFunc) {
-        return new FunctionAccessorBoolean<>(name, getterFunc, setterFunc);
+    public <T> PropertyAccessor create(String name, Predicate<T> getterFunc, BiConsumer<T, Boolean> setterFunc) {
+        return new FunctionAccessorBoolean<>(name, getterFunc, setterFunc::accept);
     }
 
     public <T> PropertyAccessor create(String name, ToCharFunction<T> getterFunc, ObjCharConsumer<T> setterFunc) {
