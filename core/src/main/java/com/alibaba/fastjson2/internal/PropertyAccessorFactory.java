@@ -1162,45 +1162,42 @@ public class PropertyAccessorFactory {
         return new MethodAccessorObject(name, propertyType, propertyClass, getter, setter);
     }
 
-    public PropertyAccessor create(String name, ToByteFunction getterFunc, ObjByteConsumer setterFunc) {
+    public <T> PropertyAccessor create(String name, ToByteFunction<T> getterFunc, ObjByteConsumer<T> setterFunc) {
         return new FunctionAccessorByte(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, ToShortFunction getterFunc, ObjShortConsumer setterFunc) {
+    public <T> PropertyAccessor create(String name, ToShortFunction<T> getterFunc, ObjShortConsumer<T> setterFunc) {
         return new FunctionAccessorShort(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, ToIntFunction getterFunc, ObjIntConsumer setterFunc) {
+    public <T> PropertyAccessor create(String name, ToIntFunction<T> getterFunc, ObjIntConsumer<T> setterFunc) {
         return new FunctionAccessorInt(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, ToLongFunction getterFunc, ObjLongConsumer setterFunc) {
+    public <T> PropertyAccessor create(String name, ToLongFunction<T> getterFunc, ObjLongConsumer<T> setterFunc) {
         return new FunctionAccessorLong(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, ToFloatFunction getterFunc, ObjFloatConsumer setterFunc) {
+    public <T> PropertyAccessor create(String name, ToFloatFunction<T> getterFunc, ObjFloatConsumer<T> setterFunc) {
         return new FunctionAccessorFloat(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, ToDoubleFunction getterFunc, ObjDoubleConsumer setterFunc) {
-        return new FunctionAccessorDouble(name, getterFunc, setterFunc);
+    public <T> PropertyAccessor create(String name, ToDoubleFunction<T> getterFunc, ObjDoubleConsumer<T> setterFunc) {
+        return new FunctionAccessorDouble<>(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Function getterFunc, ObjBoolConsumer setterFunc) {
-        return new FunctionAccessorBoolean(name, getterFunc, setterFunc);
+    public <T> PropertyAccessor create(String name, Predicate<T> getterFunc, ObjBoolConsumer<T> setterFunc) {
+        return new FunctionAccessorBoolean<>(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, ToCharFunction getterFunc, ObjCharConsumer setterFunc) {
+    public <T> PropertyAccessor create(String name, ToCharFunction<T> getterFunc, ObjCharConsumer<T> setterFunc) {
         return new FunctionAccessorChar(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  Function getterFunc,
-                                  BiConsumer setterFunc) {
-        if (propertyClass == Object.class || propertyClass.isPrimitive() == false) {
-            return new FunctionAccessorObject(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public <T, V> PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
+                                      Function<T, V> getterFunc,
+                                      BiConsumer<T, V> setterFunc) {
+        return new FunctionAccessorObject<T, V>(name, propertyType, propertyClass, getterFunc, setterFunc);
     }
 
     static final class MethodAccessorChar extends MethodAccessor implements PropertyAccessorChar {
@@ -1419,12 +1416,11 @@ public class PropertyAccessorFactory {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorByte extends FunctionAccessor implements PropertyAccessorByte {
-        private final ToByteFunction getterFunc;
-        private final ObjByteConsumer setterFunc;
+    static final class FunctionAccessorByte<T> extends FunctionAccessor<T> implements PropertyAccessorByte {
+        private final ToByteFunction<T> getterFunc;
+        private final ObjByteConsumer<T> setterFunc;
 
-        public FunctionAccessorByte(String name, ToByteFunction getterFunc, ObjByteConsumer setterFunc) {
+        public FunctionAccessorByte(String name, ToByteFunction<T> getterFunc, ObjByteConsumer<T> setterFunc) {
             super(name, byte.class, byte.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1432,21 +1428,20 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            return getterFunc.applyAsByte(object);
+            return getterFunc.applyAsByte((T) object);
         }
 
         @Override
         public void setByte(Object object, byte value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorShort extends FunctionAccessor implements PropertyAccessorShort {
-        private final ToShortFunction getterFunc;
-        private final ObjShortConsumer setterFunc;
+    static final class FunctionAccessorShort<T> extends FunctionAccessor<T> implements PropertyAccessorShort {
+        private final ToShortFunction<T> getterFunc;
+        private final ObjShortConsumer<T> setterFunc;
 
-        public FunctionAccessorShort(String name, ToShortFunction getterFunc, ObjShortConsumer setterFunc) {
+        public FunctionAccessorShort(String name, ToShortFunction<T> getterFunc, ObjShortConsumer<T> setterFunc) {
             super(name, short.class, short.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1454,21 +1449,20 @@ public class PropertyAccessorFactory {
 
         @Override
         public short getShort(Object object) {
-            return getterFunc.applyAsShort(object);
+            return getterFunc.applyAsShort((T) object);
         }
 
         @Override
         public void setShort(Object object, short value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorInt extends FunctionAccessor implements PropertyAccessorInt {
-        private final ToIntFunction getterFunc;
-        private final ObjIntConsumer setterFunc;
+    static final class FunctionAccessorInt<T> extends FunctionAccessor<T> implements PropertyAccessorInt {
+        private final ToIntFunction<T> getterFunc;
+        private final ObjIntConsumer<T> setterFunc;
 
-        public FunctionAccessorInt(String name, ToIntFunction getterFunc, ObjIntConsumer setterFunc) {
+        public FunctionAccessorInt(String name, ToIntFunction<T> getterFunc, ObjIntConsumer<T> setterFunc) {
             super(name, int.class, int.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1476,21 +1470,20 @@ public class PropertyAccessorFactory {
 
         @Override
         public int getInt(Object object) {
-            return getterFunc.applyAsInt(object);
+            return getterFunc.applyAsInt((T) object);
         }
 
         @Override
         public void setInt(Object object, int value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorLong extends FunctionAccessor implements PropertyAccessorLong {
-        private final ToLongFunction getterFunc;
-        private final ObjLongConsumer setterFunc;
+    static final class FunctionAccessorLong<T> extends FunctionAccessor<T> implements PropertyAccessorLong {
+        private final ToLongFunction<T> getterFunc;
+        private final ObjLongConsumer<T> setterFunc;
 
-        public FunctionAccessorLong(String name, ToLongFunction getterFunc, ObjLongConsumer setterFunc) {
+        public FunctionAccessorLong(String name, ToLongFunction<T> getterFunc, ObjLongConsumer<T> setterFunc) {
             super(name, long.class, long.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1498,21 +1491,20 @@ public class PropertyAccessorFactory {
 
         @Override
         public long getLong(Object object) {
-            return getterFunc.applyAsLong(object);
+            return getterFunc.applyAsLong((T) object);
         }
 
         @Override
         public void setLong(Object object, long value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorFloat extends FunctionAccessor implements PropertyAccessorFloat {
-        private final ToFloatFunction getterFunc;
-        private final ObjFloatConsumer setterFunc;
+    static final class FunctionAccessorFloat<T> extends FunctionAccessor<T> implements PropertyAccessorFloat {
+        private final ToFloatFunction<T> getterFunc;
+        private final ObjFloatConsumer<T> setterFunc;
 
-        public FunctionAccessorFloat(String name, ToFloatFunction getterFunc, ObjFloatConsumer setterFunc) {
+        public FunctionAccessorFloat(String name, ToFloatFunction<T> getterFunc, ObjFloatConsumer<T> setterFunc) {
             super(name, float.class, float.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1520,21 +1512,21 @@ public class PropertyAccessorFactory {
 
         @Override
         public float getFloat(Object object) {
-            return getterFunc.applyAsFloat(object);
+            return getterFunc.applyAsFloat((T) object);
         }
 
         @Override
         public void setFloat(Object object, float value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorDouble extends FunctionAccessor implements PropertyAccessorDouble {
-        private final ToDoubleFunction getterFunc;
-        private final ObjDoubleConsumer setterFunc;
+    static final class FunctionAccessorDouble<T> extends FunctionAccessor implements PropertyAccessorDouble {
+        private final ToDoubleFunction<T> getterFunc;
+        private final ObjDoubleConsumer<T> setterFunc;
 
-        public FunctionAccessorDouble(String name, ToDoubleFunction getterFunc, ObjDoubleConsumer setterFunc) {
+        public FunctionAccessorDouble(String name, ToDoubleFunction<T> getterFunc, ObjDoubleConsumer<T> setterFunc) {
             super(name, double.class, double.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1542,21 +1534,21 @@ public class PropertyAccessorFactory {
 
         @Override
         public double getDouble(Object object) {
-            return getterFunc.applyAsDouble(object);
+            return getterFunc.applyAsDouble((T) object);
         }
 
         @Override
         public void setDouble(Object object, double value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorBoolean extends FunctionAccessor implements PropertyAccessorBoolean {
-        private final Function getterFunc;
-        private final ObjBoolConsumer setterFunc;
+    @SuppressWarnings("unchecked")
+    static final class FunctionAccessorBoolean<T> extends FunctionAccessor<T> implements PropertyAccessorBoolean {
+        private final Predicate<T> getterFunc;
+        private final ObjBoolConsumer<T> setterFunc;
 
-        public FunctionAccessorBoolean(String name, Function getterFunc, ObjBoolConsumer setterFunc) {
+        public FunctionAccessorBoolean(String name, Predicate<T> getterFunc, ObjBoolConsumer<T> setterFunc) {
             super(name, boolean.class, boolean.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1564,25 +1556,24 @@ public class PropertyAccessorFactory {
 
         @Override
         public boolean getBoolean(Object object) {
-            return (Boolean) getterFunc.apply(object);
+            return getterFunc.test((T) object);
         }
 
         @Override
         public void setBoolean(Object object, boolean value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorObject extends FunctionAccessor implements PropertyAccessorObject {
-        private final Function getterFunc;
-        private final BiConsumer setterFunc;
+    static final class FunctionAccessorObject<T, V> extends FunctionAccessor implements PropertyAccessorObject {
+        private final Function<T, V> getterFunc;
+        private final BiConsumer<T, V> setterFunc;
 
         public FunctionAccessorObject(String name,
                 Type propertyType,
                 Class<?> propertyClass,
-                Function getterFunc,
-                BiConsumer setterFunc) {
+                Function<T, V> getterFunc,
+                BiConsumer<T, V> setterFunc) {
             super(name, propertyType, propertyClass, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1590,20 +1581,19 @@ public class PropertyAccessorFactory {
 
         @Override
         public Object getObject(Object object) {
-            return getterFunc.apply(object);
+            return getterFunc.apply((T) object);
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, (V) value);
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorChar extends FunctionAccessor implements PropertyAccessorChar {
-        private final ToCharFunction getterFunc;
-        private final ObjCharConsumer setterFunc;
-        public FunctionAccessorChar(String name, ToCharFunction getterFunc, ObjCharConsumer setterFunc) {
+    static final class FunctionAccessorChar<T> extends FunctionAccessor<T> implements PropertyAccessorChar {
+        private final ToCharFunction<T> getterFunc;
+        private final ObjCharConsumer<T> setterFunc;
+        public FunctionAccessorChar(String name, ToCharFunction<T> getterFunc, ObjCharConsumer<T> setterFunc) {
             super(name, char.class, char.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1611,12 +1601,12 @@ public class PropertyAccessorFactory {
 
         @Override
         public char getChar(Object object) {
-            return getterFunc.applyAsChar(object);
+            return getterFunc.applyAsChar((T) object);
         }
 
         @Override
         public void setChar(Object object, char value) {
-            setterFunc.accept(object, value);
+            setterFunc.accept((T) object, value);
         }
     }
 }

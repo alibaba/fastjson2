@@ -54,6 +54,16 @@ public class PropertyAccessorFactoryTest {
                 propertyAccessors.add(factory.create(field));
                 propertyAccessors.add(factory.create(fieldName, null, null, getter, setter));
             }
+            propertyAccessors.add(factory.create("byteField", TestClass::getByteField, TestClass::setByteField));
+            propertyAccessors.add(factory.create("shortField", TestClass::getShortField, TestClass::setShortField));
+            propertyAccessors.add(factory.create("intField", TestClass::getIntField, TestClass::setIntField));
+            propertyAccessors.add(factory.create("longField", TestClass::getLongField, TestClass::setLongField));
+            propertyAccessors.add(factory.create("floatField", TestClass::getFloatField, TestClass::setFloatField));
+            propertyAccessors.add(factory.create("doubleField", TestClass::getDoubleField, TestClass::setDoubleField));
+            propertyAccessors.add(factory.create("charField", TestClass::getCharField, TestClass::setCharField));
+            propertyAccessors.add(factory.create("booleanField", TestClass::isBooleanField, TestClass::setBooleanField));
+            propertyAccessors.add(factory.create("stringField", String.class, String.class, TestClass::getStringField, TestClass::setStringField));
+            propertyAccessors.add(factory.create("arrayField", int[].class, int[].class, TestClass::getArrayField, TestClass::setArrayField));
         }
 
         return propertyAccessors.toArray(new PropertyAccessor[0]);

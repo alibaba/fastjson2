@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 
 import java.lang.reflect.Type;
 
-public abstract class FunctionAccessor
+public abstract class FunctionAccessor<T>
         implements PropertyAccessor {
     protected final String name;
     protected final Type propertyType;
