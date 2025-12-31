@@ -20,7 +20,6 @@ import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
@@ -38,7 +37,6 @@ public abstract class FieldWriter<T>
     public final String label;
     public final Field field;
     public final Method method;
-    protected final long fieldOffset;
     protected final boolean primitive;
 
     final long hashCode;
@@ -115,13 +113,6 @@ public abstract class FieldWriter<T>
             decimalFormat = new DecimalFormat(format);
         }
         this.decimalFormat = decimalFormat;
-
-        long fieldOffset = -1L;
-        if (field != null) {
-            fieldOffset = UNSAFE.objectFieldOffset(field);
-        }
-        this.fieldOffset = fieldOffset;
-
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;

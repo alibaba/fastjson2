@@ -36,12 +36,17 @@ public final class PropertyAccessorFactoryUnsafe
         return new FieldAccessorUnsafeObject(field);
     }
 
-    static final class FieldAccessorUnsafeBoolean extends FieldAccessor {
-        private final long fieldOffset;
-
-        public FieldAccessorUnsafeBoolean(Field field) {
+    abstract static class FieldAccessorUnsafe extends FieldAccessor {
+        final long fieldOffset;
+        public FieldAccessorUnsafe(Field field) {
             super(field);
             this.fieldOffset = UNSAFE.objectFieldOffset(field);
+        }
+    }
+
+    static final class FieldAccessorUnsafeBoolean extends FieldAccessorUnsafe {
+        public FieldAccessorUnsafeBoolean(Field field) {
+            super(field);
         }
 
         @Override
@@ -135,12 +140,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeByte extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeByte extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeByte(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
@@ -234,12 +236,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeShort extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeShort extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeShort(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
@@ -333,12 +332,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeInt extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeInt extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeInt(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
@@ -432,12 +428,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeLong extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeLong extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeLong(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
@@ -531,12 +524,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeFloat extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeFloat extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeFloat(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
@@ -630,12 +620,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeDouble extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeDouble extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeDouble(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
@@ -729,12 +716,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeChar extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeChar extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeChar(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
@@ -828,12 +812,9 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
-    static final class FieldAccessorUnsafeObject extends FieldAccessor {
-        private final long fieldOffset;
-
+    static final class FieldAccessorUnsafeObject extends FieldAccessorUnsafe {
         public FieldAccessorUnsafeObject(Field field) {
             super(field);
-            this.fieldOffset = UNSAFE.objectFieldOffset(field);
         }
 
         @Override
