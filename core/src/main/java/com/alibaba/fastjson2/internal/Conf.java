@@ -1,7 +1,10 @@
 package com.alibaba.fastjson2.internal;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Properties;
+import java.util.function.ToLongFunction;
 
 public final class Conf {
     private static final boolean USE_UNSAFE;
@@ -92,5 +95,27 @@ public final class Conf {
         return propertyValue;
     }
 
-    public static final ByteArray BYTES = USE_UNSAFE ? new ByteArrayUnsafe() : new ByteArray();
+    public static final ByteArray BYTES = USE_UNSAFE
+            ? new ByteArrayUnsafe()
+            : new ByteArray();
+
+    public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY = USE_UNSAFE
+            ? new PropertyAccessorFactoryUnsafe()
+            : new PropertyAccessorFactory();
+
+    public static final ToLongFunction<BigDecimal> DECIMAL_INT_COMPACT;
+    static {
+        ToLongFunction<BigDecimal> intCompact = null;
+        for (Field field : BigDecimal.class.getDeclaredFields()) {
+            String fieldName = field.getName();
+            if (fieldName.equals("intCompact")
+                    || fieldName.equals("smallValue") // android
+            ) {
+                PropertyAccessor propertyAccessor = PROPERTY_ACCESSOR_FACTORY.create(field);
+                intCompact = propertyAccessor::getLong;
+                break;
+            }
+        }
+        DECIMAL_INT_COMPACT = intCompact;
+    }
 }

@@ -20,6 +20,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.Conf.BYTES;
+import static com.alibaba.fastjson2.internal.Conf.DECIMAL_INT_COMPACT;
 import static com.alibaba.fastjson2.util.DateUtils.OFFSET_8_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.IOUtils.*;
@@ -1443,8 +1444,8 @@ final class JSONWriterJSONB
         if (off + 15 > bytes.length) {
             bytes = grow(off + 15);
         }
-        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-            long intCompact = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+        if (precision < 19 && DECIMAL_INT_COMPACT != null) {
+            long intCompact = DECIMAL_INT_COMPACT.applyAsLong(value);
             if (scale == 0) {
                 bytes[off] = BC_DECIMAL_LONG;
                 this.off = JSONB.IO.writeInt64(bytes, off + 1, intCompact);

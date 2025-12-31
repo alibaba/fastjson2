@@ -6,7 +6,6 @@ import sun.misc.Unsafe;
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.util.List;
@@ -28,7 +27,6 @@ public class JDKUtils {
     public static final long FIELD_STRING_VALUE_OFFSET;
     public static volatile boolean FIELD_STRING_VALUE_ERROR;
 
-    public static final long FIELD_DECIMAL_INT_COMPACT_OFFSET;
     public static final long FIELD_BIGINTEGER_MAG_OFFSET;
 
     public static final Field FIELD_STRING_CODER;
@@ -189,21 +187,6 @@ public class JDKUtils {
             }
             FIELD_STRING_CODER_OFFSET = fieldCodeOffset;
             FIELD_STRING_CODER = fieldCode;
-        }
-
-        {
-            long fieldOffset = -1;
-            for (Field field : BigDecimal.class.getDeclaredFields()) {
-                String fieldName = field.getName();
-                if (fieldName.equals("intCompact")
-                        || fieldName.equals("smallValue") // android
-                ) {
-                    fieldOffset = UNSAFE.objectFieldOffset(field);
-                    break;
-                }
-            }
-
-            FIELD_DECIMAL_INT_COMPACT_OFFSET = fieldOffset;
         }
 
         {

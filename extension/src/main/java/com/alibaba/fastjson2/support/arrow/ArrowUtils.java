@@ -15,6 +15,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.alibaba.fastjson2.internal.Conf.DECIMAL_INT_COMPACT;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public class ArrowUtils {
@@ -405,8 +406,8 @@ public class ArrowUtils {
             decimal = decimal.setScale(scale, RoundingMode.CEILING);
         }
         int precision = decimal.precision();
-        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-            long unscaleValue = UNSAFE.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+        if (precision < 19 && DECIMAL_INT_COMPACT != null) {
+            long unscaleValue = DECIMAL_INT_COMPACT.applyAsLong(decimal);
             if (unscaleValue != Long.MIN_VALUE) {
                 BitVectorHelper.setBit(vector.getValidityBuffer(), row);
                 ArrowBuf dataBuffer = vector.getDataBuffer();
