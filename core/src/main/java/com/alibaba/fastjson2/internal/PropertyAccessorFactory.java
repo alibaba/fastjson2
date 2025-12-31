@@ -6,6 +6,8 @@ import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.alibaba.fastjson2.internal.Cast.*;
+
 public class PropertyAccessorFactory {
     protected final ConcurrentMap<Object, PropertyAccessor> cache = new ConcurrentHashMap<>();
 
@@ -46,177 +48,8 @@ public class PropertyAccessorFactory {
         return new FieldAccessorReflectObject(field);
     }
 
-    static class FieldAccessorReflect extends FieldAccessor {
+    abstract static class FieldAccessorReflect extends FieldAccessor {
         public FieldAccessorReflect(Field field) {
-            super(field);
-            if (getClass() == FieldAccessorReflect.class) {
-                try {
-                    field.setAccessible(true);
-                } catch (RuntimeException e) {
-                    throw errorOnSetAccessible(field, e);
-                }
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
-        }
-
-        public Object getObject(Object object) {
-            try {
-                return field.get(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public byte getByte(Object object) {
-            try {
-                return field.getByte(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public char getChar(Object object) {
-            try {
-                return field.getChar(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public short getShort(Object object) {
-            try {
-                return field.getShort(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public int getInt(Object object) {
-            try {
-                return field.getInt(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public long getLong(Object object) {
-            try {
-                return field.getLong(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public float getFloat(Object object) {
-            try {
-                return field.getFloat(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public double getDouble(Object object) {
-            try {
-                return field.getDouble(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public boolean getBoolean(Object object) {
-            try {
-                return field.getBoolean(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        public void setObject(Object object, Object value) {
-            try {
-                field.set(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setByte(Object object, byte value) {
-            try {
-                field.setByte(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setShort(Object object, short value) {
-            try {
-                field.setShort(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setChar(Object object, char value) {
-            try {
-                field.setChar(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setInt(Object object, int value) {
-            try {
-                field.setInt(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setLong(Object object, long value) {
-            try {
-                field.setLong(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setFloat(Object object, float value) {
-            try {
-                field.setFloat(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setDouble(Object object, double value) {
-            try {
-                field.setDouble(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        public void setBoolean(Object object, boolean value) {
-            try {
-                field.setBoolean(object, value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
-            }
-        }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
-    }
-
-    static final class FieldAccessorReflectBoolean extends FieldAccessor {
-        public FieldAccessorReflectBoolean(Field field) {
             super(field);
             try {
                 field.setAccessible(true);
@@ -227,6 +60,20 @@ public class PropertyAccessorFactory {
 
         private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
             return new JSONException(field.toString() + " setAccessible error", e);
+        }
+
+        final JSONException errorForGet(IllegalAccessException e) {
+            return new JSONException(field.toString() + " get error", e);
+        }
+
+        final JSONException errorForSet(IllegalAccessException e) {
+            return new JSONException(field.toString() + " set error", e);
+        }
+    }
+
+    static final class FieldAccessorReflectBoolean extends FieldAccessorReflect {
+        public FieldAccessorReflectBoolean(Field field) {
+            super(field);
         }
 
         @Override
@@ -326,28 +173,11 @@ public class PropertyAccessorFactory {
                 throw errorForSet(e);
             }
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectByte extends FieldAccessor {
+    static final class FieldAccessorReflectByte extends FieldAccessorReflect {
         public FieldAccessorReflectByte(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -447,28 +277,11 @@ public class PropertyAccessorFactory {
         public void setBoolean(Object object, boolean value) {
             setByte(object, (byte) (value ? 1 : 0));
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectShort extends FieldAccessor {
+    static final class FieldAccessorReflectShort extends FieldAccessorReflect {
         public FieldAccessorReflectShort(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -568,28 +381,11 @@ public class PropertyAccessorFactory {
         public void setBoolean(Object object, boolean value) {
             setShort(object, (short) (value ? 1 : 0));
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectInt extends FieldAccessor {
+    static final class FieldAccessorReflectInt extends FieldAccessorReflect {
         public FieldAccessorReflectInt(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -689,28 +485,11 @@ public class PropertyAccessorFactory {
         public void setBoolean(Object object, boolean value) {
             setInt(object, value ? 1 : 0);
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectLong extends FieldAccessor {
+    static final class FieldAccessorReflectLong extends FieldAccessorReflect {
         public FieldAccessorReflectLong(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -810,28 +589,11 @@ public class PropertyAccessorFactory {
         public void setBoolean(Object object, boolean value) {
             setLong(object, value ? 1L : 0L);
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectFloat extends FieldAccessor {
+    static final class FieldAccessorReflectFloat extends FieldAccessorReflect {
         public FieldAccessorReflectFloat(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -931,28 +693,11 @@ public class PropertyAccessorFactory {
         public void setBoolean(Object object, boolean value) {
             setFloat(object, value ? 1.0f : 0.0f);
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectDouble extends FieldAccessor {
+    static final class FieldAccessorReflectDouble extends FieldAccessorReflect {
         public FieldAccessorReflectDouble(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -1052,28 +797,11 @@ public class PropertyAccessorFactory {
         public void setBoolean(Object object, boolean value) {
             setDouble(object, value ? 1.0 : 0.0);
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectChar extends FieldAccessor {
+    static final class FieldAccessorReflectChar extends FieldAccessorReflect {
         public FieldAccessorReflectChar(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -1173,28 +901,11 @@ public class PropertyAccessorFactory {
         public void setBoolean(Object object, boolean value) {
             setChar(object, (char) (value ? 1 : 0));
         }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
-    static final class FieldAccessorReflectObject extends FieldAccessor {
+    static final class FieldAccessorReflectObject extends FieldAccessorReflect {
         public FieldAccessorReflectObject(Field field) {
             super(field);
-            try {
-                field.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw errorOnSetAccessible(field, e);
-            }
-        }
-
-        private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
-            return new JSONException(field.toString() + " setAccessible error", e);
         }
 
         @Override
@@ -1208,122 +919,42 @@ public class PropertyAccessorFactory {
 
         @Override
         public byte getByte(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Number) {
-                return ((Number) value).byteValue();
-            } else if (value instanceof Boolean) {
-                return (Boolean) value ? (byte) 1 : (byte) 0;
-            } else if (value instanceof Character) {
-                return (byte) ((Character) value).charValue();
-            } else if (value == null) {
-                return 0;
-            }
-            throw new JSONException("Cannot convert " + value + " to byte");
+            return toByte(getObject(object));
         }
 
         @Override
         public char getChar(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Character) {
-                return (Character) value;
-            } else if (value instanceof Number) {
-                return (char) ((Number) value).intValue();
-            } else if (value instanceof Boolean) {
-                return (Boolean) value ? (char) 1 : (char) 0;
-            } else if (value == null) {
-                return 0;
-            }
-            throw new JSONException("Cannot convert " + value + " to char");
+            return toChar(getObject(object));
         }
 
         @Override
         public short getShort(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Number) {
-                return ((Number) value).shortValue();
-            } else if (value instanceof Boolean) {
-                return (Boolean) value ? (short) 1 : (short) 0;
-            } else if (value instanceof Character) {
-                return (short) ((Character) value).charValue();
-            } else if (value == null) {
-                return 0;
-            }
-            throw new JSONException("Cannot convert " + value + " to short");
+            return toShort(getObject(object));
         }
 
         @Override
         public int getInt(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Number) {
-                return ((Number) value).intValue();
-            } else if (value instanceof Boolean) {
-                return (Boolean) value ? 1 : 0;
-            } else if (value instanceof Character) {
-                return (int) ((Character) value).charValue();
-            } else if (value == null) {
-                return 0;
-            }
-            throw new JSONException("Cannot convert " + value + " to int");
+            return toInt(getObject(object));
         }
 
         @Override
         public long getLong(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Number) {
-                return ((Number) value).longValue();
-            } else if (value instanceof Boolean) {
-                return (Boolean) value ? 1L : 0L;
-            } else if (value instanceof Character) {
-                return (long) ((Character) value).charValue();
-            } else if (value == null) {
-                return 0L;
-            }
-            throw new JSONException("Cannot convert " + value + " to long");
+            return toLong(getObject(object));
         }
 
         @Override
         public float getFloat(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Number) {
-                return ((Number) value).floatValue();
-            } else if (value instanceof Boolean) {
-                return (Boolean) value ? 1.0f : 0.0f;
-            } else if (value instanceof Character) {
-                return (float) ((Character) value).charValue();
-            } else if (value == null) {
-                return 0.0f;
-            }
-            throw new JSONException("Cannot convert " + value + " to float");
+            return toFloat(getObject(object));
         }
 
         @Override
         public double getDouble(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Number) {
-                return ((Number) value).doubleValue();
-            } else if (value instanceof Boolean) {
-                return (Boolean) value ? 1.0 : 0.0;
-            } else if (value instanceof Character) {
-                return (double) ((Character) value).charValue();
-            } else if (value == null) {
-                return 0.0;
-            }
-            throw new JSONException("Cannot convert " + value + " to double");
+            return toDouble(getObject(object));
         }
 
         @Override
         public boolean getBoolean(Object object) {
-            Object value = getObject(object);
-            if (value instanceof Boolean) {
-                return (Boolean) value;
-            } else if (value instanceof Number) {
-                return ((Number) value).doubleValue() != 0;
-            } else if (value instanceof Character) {
-                return ((Character) value).charValue() != 0;
-            } else if (value == null) {
-                return false;
-            }
-            throw new JSONException("Cannot convert " + value + " to boolean");
+            return toBoolean(getObject(object));
         }
 
         @Override
@@ -1373,14 +1004,6 @@ public class PropertyAccessorFactory {
         @Override
         public void setBoolean(Object object, boolean value) {
             setObject(object, value);
-        }
-
-        JSONException errorForGet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        JSONException errorForSet(IllegalAccessException e) {
-            return new JSONException(field.toString() + " set error", e);
         }
     }
 }
