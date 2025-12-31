@@ -2,22 +2,24 @@ package com.alibaba.fastjson2.internal;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
 public abstract class FieldAccessor
         implements PropertyAccessor {
     protected final Field field;
     protected final String fieldName;
     protected final Class<?> propertyClass;
+    protected final Type propertyType;
     protected final boolean supportSet;
 
     protected FieldAccessor(Field field) {
         this.field = field;
         this.propertyClass = field.getType();
+        this.propertyType = field.getGenericType();
         this.fieldName = field.getName();
         supportSet = (field.getModifiers() & Modifier.FINAL) == 0;
     }
 
-    @Override
     public final Field field() {
         return field;
     }
@@ -25,6 +27,11 @@ public abstract class FieldAccessor
     @Override
     public final Class<?> propertyClass() {
         return propertyClass;
+    }
+
+    @Override
+    public final Type propertyType() {
+        return propertyType;
     }
 
     @Override

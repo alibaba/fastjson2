@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.internal;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 public interface PropertyAccessor {
-    Field field();
     String name();
     Class<?> propertyClass();
+    Type propertyType();
 
     boolean supportGet();
     boolean supportSet();

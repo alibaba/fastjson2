@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.internal;
 import com.alibaba.fastjson2.JSONException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -769,11 +770,11 @@ public class PropertyAccessorFactory {
             return new JSONException(field.toString() + " setAccessible error", e);
         }
 
-        final JSONException errorForGet(IllegalAccessException e) {
+        final JSONException errorForGet(Exception e) {
             return new JSONException(field.toString() + " get error", e);
         }
 
-        final JSONException errorForSet(IllegalAccessException e) {
+        final JSONException errorForSet(Exception e) {
             return new JSONException(field.toString() + " set error", e);
         }
     }
@@ -1076,5 +1077,221 @@ public class PropertyAccessorFactory {
 
     protected PropertyAccessor createInternal(Method method) {
         return null;
+    }
+
+    static final class MethodAccessorChar extends MethodAccessor implements PropertyAccessorChar {
+        public MethodAccessorChar(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public char getChar(Object object) {
+            try {
+                return (char) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setChar(Object object, char value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorByte extends MethodAccessor implements PropertyAccessorByte {
+        public MethodAccessorByte(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public byte getByte(Object object) {
+            try {
+                return (byte) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setByte(Object object, byte value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorShort extends MethodAccessor implements PropertyAccessorShort {
+        public MethodAccessorShort(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public short getShort(Object object) {
+            try {
+                return (short) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setShort(Object object, short value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorInt extends MethodAccessor implements PropertyAccessorInt {
+        public MethodAccessorInt(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public int getInt(Object object) {
+            try {
+                return (int) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setInt(Object object, int value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorLong extends MethodAccessor implements PropertyAccessorLong {
+        public MethodAccessorLong(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public long getLong(Object object) {
+            try {
+                return (long) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setLong(Object object, long value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorFloat extends MethodAccessor implements PropertyAccessorFloat {
+        public MethodAccessorFloat(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public float getFloat(Object object) {
+            try {
+                return (float) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setFloat(Object object, float value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorDouble extends MethodAccessor implements PropertyAccessorDouble {
+        public MethodAccessorDouble(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public double getDouble(Object object) {
+            try {
+                return (double) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setDouble(Object object, double value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorBoolean extends MethodAccessor implements PropertyAccessorBoolean {
+        public MethodAccessorBoolean(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public boolean getBoolean(Object object) {
+            try {
+                return (boolean) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setBoolean(Object object, boolean value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorObject extends MethodAccessor implements PropertyAccessorObject {
+        public MethodAccessorObject(String name, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Object getObject(Object object) {
+            try {
+                return getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setObject(Object object, Object value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
     }
 }
