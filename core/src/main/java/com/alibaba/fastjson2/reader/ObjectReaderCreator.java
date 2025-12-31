@@ -2960,6 +2960,36 @@ public class ObjectReaderCreator {
 
                     return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
                 }
+            } else if (fieldTypeResolved instanceof Class || fieldTypeResolved == null) {
+                Type currentType = fieldTypeResolved != null ? fieldTypeResolved : fieldClass;
+                while (currentType != Object.class) {
+                    Class<?> currentClass = TypeUtils.getClass(currentType);
+                    if (currentClass == null) {
+                        break;
+                    }
+
+                    Type superType = currentClass.getGenericSuperclass();
+                    Type resolvedSuperType = BeanUtils.resolve(currentType, currentClass, superType);
+
+                    if (resolvedSuperType instanceof ParameterizedType) {
+                        ParameterizedType parameterizedType = (ParameterizedType) resolvedSuperType;
+                        Class<?> rawType = TypeUtils.getClass(parameterizedType);
+
+                        if (List.class.isAssignableFrom(rawType) || Collection.class.isAssignableFrom(rawType)) {
+                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                            if (actualTypeArguments.length == 1) {
+                                Type itemType = actualTypeArguments[0];
+                                Class itemClass = TypeUtils.getMapping(itemType);
+                                return new FieldReaderList(fieldName, fieldTypeResolved, fieldClass, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+                            }
+                        }
+                    }
+
+                    currentType = resolvedSuperType;
+                    if (currentType == null) {
+                        break;
+                    }
+                }
             }
             return new FieldReaderList(fieldName, fieldType, fieldClass, Object.class, Object.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
         }
