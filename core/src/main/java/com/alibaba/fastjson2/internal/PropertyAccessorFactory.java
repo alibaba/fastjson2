@@ -1162,76 +1162,36 @@ public class PropertyAccessorFactory {
         return new MethodAccessorObject(name, propertyType, propertyClass, getter, setter);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  ToByteFunction getterFunc,
-                                  ObjByteConsumer setterFunc) {
-        if (propertyClass == byte.class) {
-            return new FunctionAccessorByte(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, ToByteFunction getterFunc, ObjByteConsumer setterFunc) {
+        return new FunctionAccessorByte(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  ToShortFunction getterFunc,
-                                  ObjShortConsumer setterFunc) {
-        if (propertyClass == short.class) {
-            return new FunctionAccessorShort(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, ToShortFunction getterFunc, ObjShortConsumer setterFunc) {
+        return new FunctionAccessorShort(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  ToIntFunction getterFunc,
-                                  ObjIntConsumer setterFunc) {
-        if (propertyClass == int.class) {
-            return new FunctionAccessorInt(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, ToIntFunction getterFunc, ObjIntConsumer setterFunc) {
+        return new FunctionAccessorInt(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  ToLongFunction getterFunc,
-                                  ObjLongConsumer setterFunc) {
-        if (propertyClass == long.class) {
-            return new FunctionAccessorLong(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, ToLongFunction getterFunc, ObjLongConsumer setterFunc) {
+        return new FunctionAccessorLong(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  ToFloatFunction getterFunc,
-                                  ObjFloatConsumer setterFunc) {
-        if (propertyClass == float.class) {
-            return new FunctionAccessorFloat(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, ToFloatFunction getterFunc, ObjFloatConsumer setterFunc) {
+        return new FunctionAccessorFloat(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  ToDoubleFunction getterFunc,
-                                  ObjDoubleConsumer setterFunc) {
-        if (propertyClass == double.class) {
-            return new FunctionAccessorDouble(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, ToDoubleFunction getterFunc, ObjDoubleConsumer setterFunc) {
+        return new FunctionAccessorDouble(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  Function getterFunc,
-                                  ObjBoolConsumer setterFunc) {
-        if (propertyClass == boolean.class) {
-            return new FunctionAccessorBoolean(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, Function getterFunc, ObjBoolConsumer setterFunc) {
+        return new FunctionAccessorBoolean(name, getterFunc, setterFunc);
     }
 
-    public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
-                                  ToCharFunction getterFunc,
-                                  ObjCharConsumer setterFunc) {
-        if (propertyClass == char.class) {
-            return new FunctionAccessorChar(name, propertyType, propertyClass, getterFunc, setterFunc);
-        }
-        return null;
+    public PropertyAccessor create(String name, ToCharFunction getterFunc, ObjCharConsumer setterFunc) {
+        return new FunctionAccessorChar(name, getterFunc, setterFunc);
     }
 
     public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
@@ -1464,10 +1424,8 @@ public class PropertyAccessorFactory {
         private final ToByteFunction getterFunc;
         private final ObjByteConsumer setterFunc;
 
-        public FunctionAccessorByte(String name, Type propertyType, Class<?> propertyClass,
-                                   ToByteFunction getterFunc,
-                                   ObjByteConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorByte(String name, ToByteFunction getterFunc, ObjByteConsumer setterFunc) {
+            super(name, byte.class, byte.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
@@ -1488,10 +1446,8 @@ public class PropertyAccessorFactory {
         private final ToShortFunction getterFunc;
         private final ObjShortConsumer setterFunc;
 
-        public FunctionAccessorShort(String name, Type propertyType, Class<?> propertyClass,
-                                    ToShortFunction getterFunc,
-                                    ObjShortConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorShort(String name, ToShortFunction getterFunc, ObjShortConsumer setterFunc) {
+            super(name, short.class, short.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
@@ -1512,10 +1468,8 @@ public class PropertyAccessorFactory {
         private final ToIntFunction getterFunc;
         private final ObjIntConsumer setterFunc;
 
-        public FunctionAccessorInt(String name, Type propertyType, Class<?> propertyClass,
-                                  ToIntFunction getterFunc,
-                                  ObjIntConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorInt(String name, ToIntFunction getterFunc, ObjIntConsumer setterFunc) {
+            super(name, int.class, int.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
@@ -1536,10 +1490,8 @@ public class PropertyAccessorFactory {
         private final ToLongFunction getterFunc;
         private final ObjLongConsumer setterFunc;
 
-        public FunctionAccessorLong(String name, Type propertyType, Class<?> propertyClass,
-                                   ToLongFunction getterFunc,
-                                   ObjLongConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorLong(String name, ToLongFunction getterFunc, ObjLongConsumer setterFunc) {
+            super(name, long.class, long.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
@@ -1560,10 +1512,8 @@ public class PropertyAccessorFactory {
         private final ToFloatFunction getterFunc;
         private final ObjFloatConsumer setterFunc;
 
-        public FunctionAccessorFloat(String name, Type propertyType, Class<?> propertyClass,
-                                    ToFloatFunction getterFunc,
-                                    ObjFloatConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorFloat(String name, ToFloatFunction getterFunc, ObjFloatConsumer setterFunc) {
+            super(name, float.class, float.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
@@ -1584,10 +1534,8 @@ public class PropertyAccessorFactory {
         private final ToDoubleFunction getterFunc;
         private final ObjDoubleConsumer setterFunc;
 
-        public FunctionAccessorDouble(String name, Type propertyType, Class<?> propertyClass,
-                                     ToDoubleFunction getterFunc,
-                                     ObjDoubleConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorDouble(String name, ToDoubleFunction getterFunc, ObjDoubleConsumer setterFunc) {
+            super(name, double.class, double.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
@@ -1608,10 +1556,8 @@ public class PropertyAccessorFactory {
         private final Function getterFunc;
         private final ObjBoolConsumer setterFunc;
 
-        public FunctionAccessorBoolean(String name, Type propertyType, Class<?> propertyClass,
-                                      Function getterFunc,
-                                      ObjBoolConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorBoolean(String name, Function getterFunc, ObjBoolConsumer setterFunc) {
+            super(name, boolean.class, boolean.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
@@ -1632,9 +1578,11 @@ public class PropertyAccessorFactory {
         private final Function getterFunc;
         private final BiConsumer setterFunc;
 
-        public FunctionAccessorObject(String name, Type propertyType, Class<?> propertyClass,
-                                     Function getterFunc,
-                                     BiConsumer setterFunc) {
+        public FunctionAccessorObject(String name,
+                Type propertyType,
+                Class<?> propertyClass,
+                Function getterFunc,
+                BiConsumer setterFunc) {
             super(name, propertyType, propertyClass, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -1655,8 +1603,8 @@ public class PropertyAccessorFactory {
     static final class FunctionAccessorChar extends FunctionAccessor implements PropertyAccessorChar {
         private final ToCharFunction getterFunc;
         private final ObjCharConsumer setterFunc;
-        public FunctionAccessorChar(String name, Type propertyType, Class<?> propertyClass, ToCharFunction getterFunc, ObjCharConsumer setterFunc) {
-            super(name, propertyType, propertyClass, getterFunc, setterFunc);
+        public FunctionAccessorChar(String name, ToCharFunction getterFunc, ObjCharConsumer setterFunc) {
+            super(name, char.class, char.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
         }
