@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-abstract class FieldWriterInt16<T>
+class FieldWriterInt16<T>
         extends FieldWriter<T> {
     FieldWriterInt16(
             String name,
@@ -20,7 +20,7 @@ abstract class FieldWriterInt16<T>
         super(name, ordinal, features, format, null, label, fieldClass, fieldClass, field, method);
     }
 
-    protected final void writeInt16(JSONWriter jsonWriter, short value) {
+    public final void writeInt16(JSONWriter jsonWriter, short value) {
         if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue) && defaultValue == null) {
             return;
         }

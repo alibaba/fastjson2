@@ -8,11 +8,11 @@ import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
 
-abstract class FieldWriterInt32<T>
+class FieldWriterInt32<T>
         extends FieldWriter<T> {
     final boolean toString;
 
-    protected FieldWriterInt32(
+    public FieldWriterInt32(
             String name,
             int ordinal,
             long features,

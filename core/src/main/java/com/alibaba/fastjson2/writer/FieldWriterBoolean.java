@@ -6,8 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.function.Function;
 
-abstract class FieldWriterBoolean
+class FieldWriterBoolean
         extends FieldWriter {
     final byte[] utf8ValueTrue;
     final byte[] utf8ValueFalse;
@@ -27,9 +28,10 @@ abstract class FieldWriterBoolean
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Function function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
         {
             byte[] bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + 4);
             bytes[nameWithColonUTF8.length] = 't';

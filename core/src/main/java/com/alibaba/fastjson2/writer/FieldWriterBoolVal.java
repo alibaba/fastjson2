@@ -19,7 +19,7 @@ abstract class FieldWriterBoolVal
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
     }
 
     @Override

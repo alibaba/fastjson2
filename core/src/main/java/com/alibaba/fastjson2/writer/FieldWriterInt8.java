@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-abstract class FieldWriterInt8<T>
+class FieldWriterInt8<T>
         extends FieldWriter<T> {
     FieldWriterInt8(
             String name,

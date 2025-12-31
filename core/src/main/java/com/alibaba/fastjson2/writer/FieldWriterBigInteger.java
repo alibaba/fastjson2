@@ -5,29 +5,31 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.util.Locale;
 import java.util.function.Function;
 
-final class FieldWriterBigIntFunc<T>
+final class FieldWriterBigInteger<T>
         extends FieldWriter<T> {
     final Function<T, BigInteger> function;
 
-    FieldWriterBigIntFunc(
+    FieldWriterBigInteger(
             String fieldName,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Field field,
             Method method,
             Function<T, BigInteger> function
     ) {
-        super(fieldName, ordinal, features, format, null, label, BigInteger.class, BigInteger.class, null, method);
+        super(fieldName, ordinal, features, format, locale, label, BigInteger.class, BigInteger.class, field, method, function);
         this.function = function;
     }
 
     @Override
     public Object getFieldValue(T object) {
-        return function.apply(object);
+        return propertyAccessor.getObject(object);
     }
 
     @Override
@@ -38,7 +40,7 @@ final class FieldWriterBigIntFunc<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T o) {
-        BigInteger value = function.apply(o);
+        BigInteger value = (BigInteger) propertyAccessor.getObject(o);
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {

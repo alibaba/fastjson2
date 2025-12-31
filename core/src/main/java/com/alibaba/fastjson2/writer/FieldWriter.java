@@ -77,6 +77,22 @@ public abstract class FieldWriter<T>
             Field field,
             Method method
     ) {
+        this(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+    }
+
+    FieldWriter(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method,
+            Object function
+    ) {
         if ("string".equals(format) && fieldClass != String.class) {
             features |= WriteNonStringValueAsString.mask;
         }
@@ -160,7 +176,9 @@ public abstract class FieldWriter<T>
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
         nameWithColonUTF16 = chars;
-        if (method != null) {
+        if (function instanceof Function) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, fieldClass, fieldType, (Function) function, null);
+        } else if (method != null) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
         } else {
             propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;

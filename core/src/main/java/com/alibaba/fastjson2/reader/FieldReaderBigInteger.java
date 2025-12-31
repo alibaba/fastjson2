@@ -1,41 +1,53 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.util.Locale;
+import java.util.function.BiConsumer;
 
-final class FieldReaderBigIntegerField<T>
-        extends FieldReaderObjectField<T> {
-    FieldReaderBigIntegerField(
+final class FieldReaderBigInteger<T>
+        extends FieldReaderObject<T> {
+    FieldReaderBigInteger(
             String fieldName,
-            Class fieldType,
+            Type fieldType,
+            Class fieldClass,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             BigInteger defaultValue,
             JSONSchema schema,
-            Field field
+            Method method,
+            Field field,
+            BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        BigInteger fieldValue = jsonReader.readBigInteger();
+        BigInteger fieldValue;
+        try {
+            fieldValue = jsonReader.readBigInteger();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                fieldValue = null;
+            } else {
+                throw e;
+            }
+        }
 
         if (schema != null) {
             schema.assertValidate(fieldValue);
         }
 
-        try {
-            field.set(object, fieldValue);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-        }
+        propertyAccessor.setObject(object, fieldValue);
     }
 
     @Override
@@ -44,11 +56,7 @@ final class FieldReaderBigIntegerField<T>
             schema.assertValidate(value);
         }
 
-        try {
-            field.set(object, BigInteger.valueOf(value));
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, BigInteger.valueOf(value));
     }
 
     @Override
@@ -57,11 +65,7 @@ final class FieldReaderBigIntegerField<T>
             schema.assertValidate(value);
         }
 
-        try {
-            field.set(object, BigInteger.valueOf(value));
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, BigInteger.valueOf(value));
     }
 
     @Override
@@ -72,10 +76,6 @@ final class FieldReaderBigIntegerField<T>
             schema.assertValidate(bigInteger);
         }
 
-        try {
-            field.set(object, bigInteger);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, bigInteger);
     }
 }

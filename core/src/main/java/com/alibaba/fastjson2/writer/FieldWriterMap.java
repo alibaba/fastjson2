@@ -11,7 +11,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-abstract class FieldWriterMap
+class FieldWriterMap
         extends FieldWriterObject {
     protected final Class<?> contentAs;
     protected Type contentAsFieldType;

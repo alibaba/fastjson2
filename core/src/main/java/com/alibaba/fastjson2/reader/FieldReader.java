@@ -66,6 +66,23 @@ public abstract class FieldReader<T>
             Method method,
             Field field
     ) {
+        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, null);
+    }
+
+    public FieldReader(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            Object function
+    ) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
@@ -91,7 +108,9 @@ public abstract class FieldReader<T>
             readOnly = true;
         }
         this.readOnly = readOnly;
-        if (method != null) {
+        if (function instanceof BiConsumer) {
+            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, fieldClass, fieldType, null, (BiConsumer) function);
+        } else if (method != null) {
             this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
         } else {
             this.propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;

@@ -4437,11 +4437,11 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigInteger(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigDecimal<>(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == java.util.Date.class) {

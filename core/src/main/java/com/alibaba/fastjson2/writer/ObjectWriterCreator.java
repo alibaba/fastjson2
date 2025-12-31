@@ -1091,11 +1091,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigInteger(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigDecimal<>(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
         if (fieldClass == java.util.Date.class) {
@@ -1284,7 +1284,7 @@ public class ObjectWriterCreator {
         }
 
         if (initObjectWriter != null) {
-            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+            FieldWriterObject objMethod = new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
             objMethod.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
@@ -1301,11 +1301,11 @@ public class ObjectWriterCreator {
                 : BeanUtils.getField(objectType, method);
 
         if (fieldClass == boolean.class || fieldClass == Boolean.class) {
-            return new FieldWriterBoolMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);
+            return new FieldWriterBoolean(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == int.class || fieldClass == Integer.class) {
-            return new FieldWriterInt32Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+            return new FieldWriterInt32(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
         }
 
         if (fieldClass == float.class || fieldClass == Float.class) {
@@ -1318,18 +1318,18 @@ public class ObjectWriterCreator {
 
         if (fieldClass == long.class || fieldClass == Long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+                return new FieldWriterInt64(fieldName, ordinal, features, format, label, fieldClass, field, method);
             }
 
             return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
         }
 
         if (fieldClass == short.class || fieldClass == Short.class) {
-            return new FieldWriterInt16Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+            return new FieldWriterInt16(fieldName, ordinal, features, format, label, fieldClass, field, method);
         }
 
         if (fieldClass == byte.class || fieldClass == Byte.class) {
-            return new FieldWriterInt8Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+            return new FieldWriterInt8(fieldName, ordinal, features, format, label, fieldClass, field, method);
         }
 
         if (fieldClass == char.class || fieldClass == Character.class) {
@@ -1337,7 +1337,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalMethod<>(fieldName, ordinal, features, format, label, field, method);
+            return new FieldWriterBigDecimal<>(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
         if (fieldClass.isEnum()
@@ -1377,14 +1377,14 @@ public class ObjectWriterCreator {
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, contentAs);
         }
 
         if (fieldClass == Float[].class || fieldClass == Double[].class || fieldClass == BigDecimal[].class) {
             return new FieldWriterObjectArrayMethod(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method);
         }
 
-        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
     }
 
     /**
@@ -1771,11 +1771,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigInteger(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigDecimal<>(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == String.class) {
@@ -2015,7 +2015,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldWriterBooleanFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterBoolean(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, (Function) lambda);
         }
 
         if (fieldClass == short.class) {

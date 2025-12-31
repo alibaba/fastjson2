@@ -2790,7 +2790,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigInteger) defaultValue, jsonSchema, method);
+            return new FieldReaderBigInteger(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigInteger) defaultValue, jsonSchema, method, null, null);
         }
 
         if (fieldType == String.class) {
@@ -3280,7 +3280,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerField(fieldName, fieldClass, ordinal, features, format, (BigInteger) defaultValue, jsonSchema, field);
+            return new FieldReaderBigInteger(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigInteger) defaultValue, jsonSchema, null, field, null);
         }
 
         if (fieldClass == String.class) {
@@ -3583,7 +3583,8 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderBigInteger(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigInteger) defaultValue, schema, method, null, function);
+//            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Float.class) {

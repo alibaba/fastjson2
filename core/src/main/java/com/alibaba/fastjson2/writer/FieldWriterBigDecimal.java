@@ -5,34 +5,28 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.function.Function;
 
-final class FieldWriterBigDecimalFunc<T>
+final class FieldWriterBigDecimal<T>
         extends FieldWriter<T> {
-    final Function<T, BigDecimal> function;
-
-    FieldWriterBigDecimalFunc(
+    FieldWriterBigDecimal(
             String fieldName,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Field field,
             Method method,
-            Function<T, BigDecimal> function
+            Function function
     ) {
-        super(fieldName, ordinal, features, format, null, label, BigDecimal.class, BigDecimal.class, null, method);
-        this.function = function;
-    }
-
-    @Override
-    public Object getFieldValue(T object) {
-        return function.apply(object);
+        super(fieldName, ordinal, features, format, locale, label, BigDecimal.class, BigDecimal.class, field, method, function);
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        BigDecimal value = function.apply(object);
+        BigDecimal value = (BigDecimal) getFieldValue(object);
         jsonWriter.writeDecimal(value, features, decimalFormat);
     }
 
@@ -40,7 +34,7 @@ final class FieldWriterBigDecimalFunc<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         BigDecimal value;
         try {
-            value = function.apply(object);
+            value = (BigDecimal) getFieldValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -55,10 +49,5 @@ final class FieldWriterBigDecimalFunc<T>
         writeFieldName(jsonWriter);
         jsonWriter.writeDecimal(value, features, decimalFormat);
         return true;
-    }
-
-    @Override
-    public Function getFunction() {
-        return function;
     }
 }
