@@ -2,17 +2,16 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.time.ZoneId;
 import java.util.*;
@@ -27,34 +26,6 @@ import java.util.function.Supplier;
  * @since 2.0.59
  */
 public final class JSONFactory {
-    public static final class Conf {
-        static final Properties DEFAULT_PROPERTIES;
-
-        static {
-            Properties properties = new Properties();
-
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-            final String resourceFile = "fastjson2.properties";
-
-            InputStream inputStream = cl != null
-                    ? cl.getResourceAsStream(resourceFile)
-                    : ClassLoader.getSystemResourceAsStream(resourceFile);
-            if (inputStream != null) {
-                try {
-                    properties.load(inputStream);
-                } catch (java.io.IOException ignored) {
-                } finally {
-                    IOUtils.close(inputStream);
-                }
-            }
-            DEFAULT_PROPERTIES = properties;
-        }
-
-        public static String getProperty(String key) {
-            return DEFAULT_PROPERTIES.getProperty(key);
-        }
-    }
     static volatile Throwable initErrorLast;
 
     public static final String CREATOR;
@@ -66,10 +37,6 @@ public final class JSONFactory {
 
     static boolean useJacksonAnnotation;
     static boolean useGsonAnnotation;
-
-    public static String getProperty(String key) {
-        return Conf.getProperty(key);
-    }
 
     static long defaultReaderFeatures;
     static String defaultReaderFormat;
@@ -160,7 +127,6 @@ public final class JSONFactory {
     };
 
     static {
-        Properties properties = Conf.DEFAULT_PROPERTIES;
         {
             String property = System.getProperty("fastjson2.creator");
             if (property != null) {
@@ -168,7 +134,7 @@ public final class JSONFactory {
             }
 
             if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.creator");
+                property = Conf.getProperty("fastjson2.creator");
                 if (property != null) {
                     property = property.trim();
                 }
@@ -184,7 +150,7 @@ public final class JSONFactory {
                     disableSmartMatch0 = false;
             String features = System.getProperty("fastjson2.features");
             if (features == null) {
-                features = getProperty("fastjson2.features");
+                features = Conf.getProperty("fastjson2.features");
             }
             if (features != null) {
                 for (String feature : features.split(",")) {
@@ -217,59 +183,11 @@ public final class JSONFactory {
             disableSmartMatch = disableSmartMatch0;
         }
 
-        useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
-        useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
-        defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
-        defaultSkipTransient = getPropertyBool(properties, "fastjson2.writer.skipTransient", true);
-        defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
-    }
-
-    private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
-        boolean propertyValue = defaultValue;
-
-        String property = System.getProperty(name);
-        if (property != null) {
-            property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
-            }
-            if (defaultValue) {
-                if ("false".equals(property)) {
-                    propertyValue = false;
-                }
-            } else {
-                if ("true".equals(property)) {
-                    propertyValue = true;
-                }
-            }
-        }
-
-        return propertyValue;
-    }
-
-    private static int getPropertyInt(Properties properties, String name, int defaultValue) {
-        int propertyValue = defaultValue;
-
-        String property = System.getProperty(name);
-        if (property != null) {
-            property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
-            }
-        }
-        try {
-            propertyValue = Integer.parseInt(property);
-        } catch (NumberFormatException ignored) {
-            // ignore
-        }
-
-        return propertyValue;
+        useJacksonAnnotation = Conf.getPropertyBool("fastjson2.useJacksonAnnotation", true);
+        useGsonAnnotation = Conf.getPropertyBool("fastjson2.useGsonAnnotation", true);
+        defaultWriterAlphabetic = Conf.getPropertyBool("fastjson2.writer.alphabetic", true);
+        defaultSkipTransient = Conf.getPropertyBool("fastjson2.writer.skipTransient", true);
+        defaultMaxLevel = Conf.getPropertyInt("fastjson2.writer.maxLevel", 2048);
     }
 
     public static boolean isUseJacksonAnnotation() {

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.FieldBiConsumer;
 import com.alibaba.fastjson2.function.FieldConsumer;
+import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
@@ -89,7 +90,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_DENY_PROPERTY);
             if (property == null) {
-                property = JSONFactory.Conf.getProperty(PROPERTY_DENY_PROPERTY);
+                property = Conf.getProperty(PROPERTY_DENY_PROPERTY);
             }
             if (property != null && property.length() > 0) {
                 DENYS = property.split(",");
@@ -101,7 +102,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
             if (property == null) {
-                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
+                property = Conf.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
             }
             if (property != null && property.length() > 0) {
                 AUTO_TYPE_ACCEPT_LIST = property.split(",");
@@ -113,7 +114,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
+                property = Conf.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
             }
 
             if (property != null) {
@@ -136,7 +137,7 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
+                property = Conf.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
             }
 
             if (property != null) {
@@ -159,14 +160,14 @@ public class ObjectReaderProvider
         {
             String property = System.getProperty("fastjson.parser.safeMode");
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.Conf.getProperty("fastjson.parser.safeMode");
+                property = Conf.getProperty("fastjson.parser.safeMode");
             }
 
             if (property == null || property.isEmpty()) {
                 property = System.getProperty("fastjson2.parser.safeMode");
             }
             if (property == null || property.isEmpty()) {
-                property = JSONFactory.Conf.getProperty("fastjson2.parser.safeMode");
+                property = Conf.getProperty("fastjson2.parser.safeMode");
             }
 
             if (property != null) {

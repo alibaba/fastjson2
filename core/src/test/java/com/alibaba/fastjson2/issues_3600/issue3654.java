@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.filter.ExtraProcessor;
+import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -73,13 +74,13 @@ class Issue3654 {
 
     @Test
     void testConfGetProperty() {
-        String property = JSONFactory.Conf.getProperty("nonexistent.property");
+        String property = Conf.getProperty("nonexistent.property");
         assertNull(property);
     }
 
     @Test
     void testGetProperty() {
-        String property = JSONFactory.getProperty("nonexistent.property");
+        String property = Conf.getProperty("nonexistent.property");
         assertNull(property);
     }
 

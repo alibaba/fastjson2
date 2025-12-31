@@ -1,13 +1,11 @@
 package com.alibaba.fastjson2.internal;
 
-import com.alibaba.fastjson2.util.IOUtils;
-
 import java.io.InputStream;
 import java.util.Properties;
 
 public final class Conf {
     private static final boolean USE_UNSAFE;
-    static final Properties DEFAULT_PROPERTIES;
+    public static final Properties DEFAULT_PROPERTIES;
 
     static {
         Properties properties = new Properties();
@@ -16,15 +14,20 @@ public final class Conf {
 
         final String resourceFile = "fastjson2.properties";
 
-        InputStream inputStream = cl != null
+        InputStream is = cl != null
                 ? cl.getResourceAsStream(resourceFile)
                 : ClassLoader.getSystemResourceAsStream(resourceFile);
-        if (inputStream != null) {
+        if (is != null) {
             try {
-                properties.load(inputStream);
+                properties.load(is);
             } catch (java.io.IOException ignored) {
+                // ignore
             } finally {
-                IOUtils.close(inputStream);
+                try {
+                    is.close();
+                } catch (Exception ignored) {
+                    // ignore
+                }
             }
         }
         DEFAULT_PROPERTIES = properties;
@@ -35,8 +38,58 @@ public final class Conf {
         }
     }
 
-    static String getProperty(String key) {
+    public static String getProperty(String key) {
         return DEFAULT_PROPERTIES.getProperty(key);
+    }
+
+    public static boolean getPropertyBool(String name, boolean defaultValue) {
+        Properties properties = DEFAULT_PROPERTIES;
+        boolean propertyValue = defaultValue;
+
+        String property = System.getProperty(name);
+        if (property != null) {
+            property = property.trim();
+            if (property.isEmpty()) {
+                property = properties.getProperty(name);
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+            if (defaultValue) {
+                if ("false".equals(property)) {
+                    propertyValue = false;
+                }
+            } else {
+                if ("true".equals(property)) {
+                    propertyValue = true;
+                }
+            }
+        }
+
+        return propertyValue;
+    }
+
+    public static int getPropertyInt(String name, int defaultValue) {
+        Properties properties = DEFAULT_PROPERTIES;
+        int propertyValue = defaultValue;
+
+        String property = System.getProperty(name);
+        if (property != null) {
+            property = property.trim();
+            if (property.isEmpty()) {
+                property = properties.getProperty(name);
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+        }
+        try {
+            propertyValue = Integer.parseInt(property);
+        } catch (NumberFormatException ignored) {
+            // ignore
+        }
+
+        return propertyValue;
     }
 
     public static final ByteArray BYTES = USE_UNSAFE ? new ByteArrayUnsafe() : new ByteArray();

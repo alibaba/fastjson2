@@ -24,7 +24,7 @@ public class FieldAccessorTest {
         private int[] arrayField = {1, 2, 3};
     }
 
-    static FieldAccessor[] fieldAccessors() throws Exception {
+    static PropertyAccessor[] fieldAccessors() throws Exception {
         TestClass obj = new TestClass();
         Class<?> clazz = obj.getClass();
 
@@ -41,44 +41,44 @@ public class FieldAccessorTest {
         Field stringField = clazz.getDeclaredField("stringField");
         Field arrayField = clazz.getDeclaredField("arrayField");
 
-        return new FieldAccessor[] {
-            new FieldAccessor(byteField),
+        return new PropertyAccessor[] {
+            new FieldAccessorReflect(byteField),
             new FieldAccessorV(lookup, byteField),
             new FieldAccessorUnsafe(byteField),
 
-            new FieldAccessor(charField),
+            new FieldAccessorReflect(charField),
             new FieldAccessorV(lookup, charField),
             new FieldAccessorUnsafe(charField),
 
-            new FieldAccessor(shortField),
+            new FieldAccessorReflect(shortField),
             new FieldAccessorV(lookup, shortField),
             new FieldAccessorUnsafe(shortField),
 
-            new FieldAccessor(intField),
+            new FieldAccessorReflect(intField),
             new FieldAccessorV(lookup, intField),
             new FieldAccessorUnsafe(intField),
 
-            new FieldAccessor(longField),
+            new FieldAccessorReflect(longField),
             new FieldAccessorV(lookup, longField),
             new FieldAccessorUnsafe(longField),
 
-            new FieldAccessor(floatField),
+            new FieldAccessorReflect(floatField),
             new FieldAccessorV(lookup, floatField),
             new FieldAccessorUnsafe(floatField),
 
-            new FieldAccessor(doubleField),
+            new FieldAccessorReflect(doubleField),
             new FieldAccessorV(lookup, doubleField),
             new FieldAccessorUnsafe(doubleField),
 
-            new FieldAccessor(booleanField),
+            new FieldAccessorReflect(booleanField),
             new FieldAccessorV(lookup, booleanField),
             new FieldAccessorUnsafe(booleanField),
 
-            new FieldAccessor(stringField),
+            new FieldAccessorReflect(stringField),
             new FieldAccessorV(lookup, stringField),
             new FieldAccessorUnsafe(stringField),
 
-            new FieldAccessor(arrayField),
+            new FieldAccessorReflect(arrayField),
             new FieldAccessorV(lookup, arrayField),
             new FieldAccessorUnsafe(arrayField)
         };
@@ -86,7 +86,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testByte(FieldAccessor accessor) throws Exception {
+    public void testByte(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == byte.class) {
             TestClass obj = new TestClass();
@@ -98,7 +98,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testShort(FieldAccessor accessor) throws Exception {
+    public void testShort(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == short.class) {
             TestClass obj = new TestClass();
@@ -110,7 +110,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testInt(FieldAccessor accessor) throws Exception {
+    public void testInt(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == int.class) {
             TestClass obj = new TestClass();
@@ -122,7 +122,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testLong(FieldAccessor accessor) throws Exception {
+    public void testLong(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == long.class) {
             TestClass obj = new TestClass();
@@ -134,7 +134,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testChar(FieldAccessor accessor) throws Exception {
+    public void testChar(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == char.class) {
             TestClass obj = new TestClass();
@@ -146,7 +146,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testBoolean(FieldAccessor accessor) throws Exception {
+    public void testBoolean(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == boolean.class) {
             TestClass obj = new TestClass();
@@ -158,7 +158,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testFloat(FieldAccessor accessor) throws Exception {
+    public void testFloat(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == float.class) {
             TestClass obj = new TestClass();
@@ -170,7 +170,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testDouble(FieldAccessor accessor) throws Exception {
+    public void testDouble(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == double.class) {
             TestClass obj = new TestClass();
@@ -182,7 +182,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testObject(FieldAccessor accessor) throws Exception {
+    public void testObject(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == String.class) {
             TestClass obj = new TestClass();
@@ -194,7 +194,7 @@ public class FieldAccessorTest {
 
     @ParameterizedTest
     @MethodSource("fieldAccessors")
-    public void testArray(FieldAccessor accessor) throws Exception {
+    public void testArray(PropertyAccessor accessor) throws Exception {
         Field field = getFieldFromAccessor(accessor);
         if (field.getType() == int[].class) {
             TestClass obj = new TestClass();
@@ -250,14 +250,21 @@ public class FieldAccessorTest {
         assertEquals(100, obj.privateField);
     }
 
-    private Field getFieldFromAccessor(FieldAccessor accessor) throws NoSuchFieldException {
+    private Field getFieldFromAccessor(PropertyAccessor accessor) throws NoSuchFieldException {
         // Extract the field from the accessor by accessing its protected field
         try {
-            Field fieldField = FieldAccessor.class.getDeclaredField("field");
-            fieldField.setAccessible(true);
-            return (Field) fieldField.get(accessor);
+            // First try to cast to FieldAccessorReflect to access the field
+            if (accessor instanceof FieldAccessor) {
+                Field fieldField = FieldAccessor.class.getDeclaredField("field");
+                fieldField.setAccessible(true);
+                return (Field) fieldField.get(accessor);
+            } else {
+                throw new RuntimeException("Unknown FieldAccessor implementation: " + accessor.getClass().getName());
+            }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Failed to access field", e);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Field not found in accessor", e);
         }
     }
 }
