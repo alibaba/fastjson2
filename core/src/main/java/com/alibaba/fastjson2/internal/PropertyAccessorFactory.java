@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.internal;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -1077,7 +1078,72 @@ public class PropertyAccessorFactory {
     }
 
     protected PropertyAccessor createInternal(Method method) {
-        return null;
+        Class<?> returnClass = method.getReturnType();
+        Class<?>[] parameterClasses = method.getParameterTypes();
+        String methodName = method.getName();
+        if (parameterClasses.length == 0) {
+            String name = BeanUtils.getterName(methodName, null);
+            Type returnType = method.getGenericReturnType();
+            if (returnClass == byte.class) {
+                return new MethodAccessorByte(name, returnType, returnClass, method, null);
+            }
+            if (returnClass == short.class) {
+                return new MethodAccessorShort(name, returnType, returnClass, method, null);
+            }
+            if (returnClass == int.class) {
+                return new MethodAccessorInt(name, returnType, returnClass, method, null);
+            }
+            if (returnClass == long.class) {
+                return new MethodAccessorLong(name, returnType, returnClass, method, null);
+            }
+            if (returnClass == float.class) {
+                return new MethodAccessorFloat(name, returnType, returnClass, method, null);
+            }
+            if (returnClass == double.class) {
+                return new MethodAccessorDouble(name, returnType, returnClass, method, null);
+            }
+            if (returnClass == char.class) {
+                return new MethodAccessorChar(name, returnType, returnClass, method, null);
+            }
+            if (returnClass == boolean.class) {
+                return new MethodAccessorBoolean(name, returnType, returnClass, method, null);
+            }
+            if (returnType == void.class) {
+                throw new JSONException("create PropertyAccessor error, method returnType is void");
+            }
+            return new MethodAccessorObject(name, returnType, returnClass, method, null);
+        } else if (parameterClasses.length == 1) {
+            String name = BeanUtils.setterName(methodName, null);
+            Type[] parameterTypes = method.getGenericParameterTypes();
+            Class<?> parameterClass = parameterClasses[0];
+            Type parameterType = parameterTypes[0];
+            if (parameterClass == byte.class) {
+                return new MethodAccessorByte(name, parameterType, parameterClass, null, method);
+            }
+            if (parameterClass == short.class) {
+                return new MethodAccessorShort(name, parameterType, parameterClass, null, method);
+            }
+            if (parameterClass == int.class) {
+                return new MethodAccessorInt(name, parameterType, parameterClass, null, method);
+            }
+            if (parameterClass == long.class) {
+                return new MethodAccessorLong(name, parameterType, parameterClass, null, method);
+            }
+            if (parameterClass == float.class) {
+                return new MethodAccessorFloat(name, parameterType, parameterClass, null, method);
+            }
+            if (parameterClass == double.class) {
+                return new MethodAccessorDouble(name, parameterType, parameterClass, null, method);
+            }
+            if (parameterClass == char.class) {
+                return new MethodAccessorChar(name, parameterType, parameterClass, null, method);
+            }
+            if (parameterClass == boolean.class) {
+                return new MethodAccessorBoolean(name, parameterType, parameterClass, null, method);
+            }
+            return new MethodAccessorObject(name, parameterType, parameterClass, null, method);
+        }
+        throw new JSONException("create PropertyAccessor error");
     }
 
     static final class MethodAccessorChar extends MethodAccessor implements PropertyAccessorChar {
