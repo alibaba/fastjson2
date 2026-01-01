@@ -1108,7 +1108,7 @@ public class ObjectWriterCreator {
 //        }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterString(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass.isEnum()) {
@@ -1384,7 +1384,7 @@ public class ObjectWriterCreator {
 //        }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringMethod(fieldName, ordinal, format, label, features, field, method);
+            return new FieldWriterString(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
@@ -1800,7 +1800,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterString(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == Date.class) {
