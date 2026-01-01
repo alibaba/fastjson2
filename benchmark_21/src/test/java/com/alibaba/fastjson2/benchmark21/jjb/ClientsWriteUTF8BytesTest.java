@@ -1,0 +1,121 @@
+package com.alibaba.fastjson2.benchmark.jjb;
+
+import static com.alibaba.fastjson2.benchmark.JMH.BH;
+
+public class ClientsWriteUTF8BytesTest {
+    static final ClientsWriteUTF8Bytes benchmark = new ClientsWriteUTF8Bytes();
+
+    public static void jsonb() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.jsonb(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-jsonb millis : " + millis);
+            // zulu17.40.19 : 609 413
+            // zulu17.40.19_vec :
+        }
+    }
+
+    public static void jsonb_beanToArray() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.jsonb_beanToArray(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-jsonb_beanToArray millis : " + millis);
+            // zulu17.40.19 : 311 303
+            // zulu17.40.19_vec :
+        }
+    }
+
+    public static void fastjson2() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-fastjson2 millis : " + millis);
+            // zulu8.70.0.23 : 1533 1493 1374 1353
+            // zulu17.40.19 : 1419 1361 1356 1356 1317 1224 1212 1202 1182 979 949 914 944 915 889
+            // zulu17.40.19_vec : 1116
+            // zulu17.40.19_reflect : 1427
+        }
+    }
+
+    public static void fastjson2_fieldBased() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2_fieldBased(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-fastjson2_fieldBased millis : " + millis);
+            // zulu11.68.17_reflect :
+        }
+    }
+
+    public static void wast() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.wast(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-wast millis : " + millis);
+            // zulu8.70.0.23 : 1420
+            // zulu17.40.19 : 1364 1055
+            // zulu17.40.19_vec :
+            // zulu17.40.19_reflect :
+        }
+    }
+
+    public static void fastjson2_str() {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2_str(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-fastjson2_str millis : " + millis);
+            // zulu17.40.19 : 1158 1192
+        }
+    }
+
+    public static void dsljson() throws Exception {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.dsljson(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("ClientsWriteUTF8Bytes-dsljson millis : " + millis);
+            // zulu17.40.19 : 2169 1487
+        }
+    }
+
+    public static void jackson() throws Exception {
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.jackson(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("jackson millis : " + millis);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        fastjson2();
+//        fastjson2_fieldBased();
+//        wast();
+//        jsonb();
+//        jsonb_beanToArray();
+//        fastjson2_str();
+//        dsljson();
+//        jackson();
+    }
+}

@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.internal;
 
+import com.alibaba.fastjson2.util.JDKUtils;
+
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -36,7 +38,10 @@ public final class Conf {
         DEFAULT_PROPERTIES = properties;
 
         {
-            String property = properties.getProperty("fastjson2.unsafe");
+            String property = System.getProperty("fastjson2.unsafe");
+            if (property == null) {
+                property = properties.getProperty("fastjson2.unsafe");
+            }
             USE_UNSAFE = property == null || Boolean.parseBoolean(property);
         }
     }
@@ -95,9 +100,26 @@ public final class Conf {
         return propertyValue;
     }
 
-    public static final ByteArray BYTES = USE_UNSAFE
-            ? new ByteArrayUnsafe()
-            : new ByteArray();
+    public static final ByteArray BYTES;
+    static {
+        ByteArray bytes = null;
+        if (USE_UNSAFE) {
+            bytes = new ByteArrayUnsafe();
+        } else {
+            if (JDKUtils.JVM_VERSION >= 11) {
+                try {
+                    Class<?> classV = Conf.class.getClassLoader().loadClass("com.alibaba.fastjson2.internal.ByteArrayV");
+                    bytes = (ByteArray) classV.newInstance();
+                } catch (Exception ignored) {
+                    // ignore
+                }
+            }
+            if (bytes == null) {
+                bytes = new ByteArray();
+            }
+        }
+        BYTES = bytes;
+    }
 
     public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY = USE_UNSAFE
             ? new PropertyAccessorFactoryUnsafe()
@@ -106,14 +128,16 @@ public final class Conf {
     public static final ToLongFunction<BigDecimal> DECIMAL_INT_COMPACT;
     static {
         ToLongFunction<BigDecimal> intCompact = null;
-        for (Field field : BigDecimal.class.getDeclaredFields()) {
-            String fieldName = field.getName();
-            if (fieldName.equals("intCompact")
-                    || fieldName.equals("smallValue") // android
-            ) {
-                PropertyAccessor propertyAccessor = PROPERTY_ACCESSOR_FACTORY.create(field);
-                intCompact = propertyAccessor::getLong;
-                break;
+        if (USE_UNSAFE || JDKUtils.JVM_VERSION <= 11) {
+            for (Field field : BigDecimal.class.getDeclaredFields()) {
+                String fieldName = field.getName();
+                if (fieldName.equals("intCompact")
+                        || fieldName.equals("smallValue") // android
+                ) {
+                    PropertyAccessor propertyAccessor = PROPERTY_ACCESSOR_FACTORY.create(field);
+                    intCompact = propertyAccessor::getLong;
+                    break;
+                }
             }
         }
         DECIMAL_INT_COMPACT = intCompact;
