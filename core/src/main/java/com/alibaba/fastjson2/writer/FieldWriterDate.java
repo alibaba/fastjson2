@@ -8,8 +8,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
-abstract class FieldWriterDate<T>
+class FieldWriterDate<T>
         extends FieldWriter<T> {
     protected DateTimeFormatter formatter;
     final boolean formatMillis;
@@ -30,9 +31,10 @@ abstract class FieldWriterDate<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
         boolean formatyyyyMMdd8 = false, formatyyyyMMddhhmmss14 = false, formatyyyyMMddhhmmss19 = false;
@@ -304,5 +306,40 @@ abstract class FieldWriterDate<T>
         } else {
             jsonWriter.writeZonedDateTime(zdt);
         }
+    }
+
+    @Override
+    public Object getFieldValue(T object) {
+        return propertyAccessor.getObject(object);
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, T object) {
+        Date value = (Date) getFieldValue(object);
+
+        if (value == null) {
+            jsonWriter.writeNull();
+            return;
+        }
+        writeDate(jsonWriter, false, value.getTime());
+    }
+
+    @Override
+    public boolean write(JSONWriter jsonWriter, T object) {
+        Date value = (Date) getFieldValue(object);
+
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+                writeFieldName(jsonWriter);
+                jsonWriter.writeNull();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        writeDate(jsonWriter, value.getTime());
+        return true;
     }
 }

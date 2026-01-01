@@ -4,37 +4,45 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.function.Function;
 
-final class FieldWriterDateMethod<T>
+final class FieldWriterCalendar<T>
         extends FieldWriterDate<T> {
-    FieldWriterDateMethod(
+    FieldWriterCalendar(
             String fieldName,
             int ordinal,
             long features,
-            String format,
+            String dateTimeFormat,
             String label,
-            Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Function<T, Calendar> function
     ) {
-        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        super(fieldName, ordinal, features, dateTimeFormat, label, Calendar.class, Calendar.class, field, method, function);
+    }
+
+    @Override
+    public Object getFieldValue(T object) {
+        return propertyAccessor.getObject(object);
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        Date value = (Date) getFieldValue(object);
+        Calendar value = (Calendar) propertyAccessor.getObject(object);
 
         if (value == null) {
             jsonWriter.writeNull();
             return;
         }
-        writeDate(jsonWriter, false, value.getTime());
+
+        long millis = value.getTimeInMillis();
+        writeDate(jsonWriter, false, millis);
     }
 
     @Override
-    public boolean write(JSONWriter jsonWriter, T object) {
-        Date value = (Date) getFieldValue(object);
+    public boolean write(JSONWriter jsonWriter, T o) {
+        Calendar value = (Calendar) propertyAccessor.getObject(o);
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
@@ -47,7 +55,7 @@ final class FieldWriterDateMethod<T>
             }
         }
 
-        writeDate(jsonWriter, value.getTime());
+        writeDate(jsonWriter, value.getTimeInMillis());
         return true;
     }
 }

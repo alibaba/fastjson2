@@ -6,11 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.ToLongFunction;
 
-final class FieldWriterMillisFunc<T>
+final class FieldWriterMillis<T>
         extends FieldWriterDate<T> {
-    final ToLongFunction function;
-
-    FieldWriterMillisFunc(String fieldName,
+    FieldWriterMillis(String fieldName,
             int ordinal,
             long features,
             String dateTimeFormat,
@@ -19,19 +17,18 @@ final class FieldWriterMillisFunc<T>
             Method method,
             ToLongFunction function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class, field, method);
-        this.function = function;
+        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class, field, method, function);
     }
 
     @Override
     public Object getFieldValue(T object) {
-        return function.applyAsLong(object);
+        return propertyAccessor.getLong(object);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        long millis = function.applyAsLong(object);
-        if (millis == 0) {
+        long millis = propertyAccessor.getLong(object);
+        if (millis == 0 && !"iso8601".equals(this.format)) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
                 writeFieldName(jsonWriter);
@@ -48,7 +45,7 @@ final class FieldWriterMillisFunc<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        long millis = function.applyAsLong(object);
-        writeDate(jsonWriter, false, millis);
+        writeDate(jsonWriter, false,
+                propertyAccessor.getLong(object));
     }
 }

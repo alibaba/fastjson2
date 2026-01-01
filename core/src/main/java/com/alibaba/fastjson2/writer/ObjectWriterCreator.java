@@ -1067,7 +1067,7 @@ public class ObjectWriterCreator {
             if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64Val(fieldName, ordinal, features, format, label, field, null, null);
             }
-            return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterMillis(fieldName, ordinal, features, format, label, field, null, null);
         }
 
         if (fieldClass == float.class) {
@@ -1099,8 +1099,12 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == java.util.Date.class) {
-            return new FieldWriterDateField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDate(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
+// TODO FieldWriterCalendar field
+//        if (Calendar.class.isAssignableFrom(fieldClass)) {
+//            return new FieldWriterCalendar(fieldName, ordinal, features, format, label, field, null, null);
+//        }
 
         if (fieldClass == String.class) {
             return new FieldWriterStringField(fieldName, ordinal, features, format, label, field);
@@ -1333,7 +1337,7 @@ public class ObjectWriterCreator {
                 return new FieldWriterInt64(fieldName, ordinal, features, format, label, fieldClass, field, method, null);
             }
 
-            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterMillis(fieldName, ordinal, features, format, label, field, method, null);
         }
 
         if (fieldClass == short.class || fieldClass == Short.class) {
@@ -1371,8 +1375,12 @@ public class ObjectWriterCreator {
                 }
             }
 
-            return new FieldWriterDateMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterDate(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
+// TODO FieldWriterCalendar method
+//        if (Calendar.class.isAssignableFrom(fieldClass)) {
+//            return new FieldWriterCalendar(fieldName, ordinal, features, format, label, field, method, null);
+//        }
 
         if (fieldClass == String.class) {
             return new FieldWriterStringMethod(fieldName, ordinal, format, label, features, field, method);
@@ -1795,7 +1803,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldWriterDateFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterDate(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == LocalDate.class) {
@@ -1811,7 +1819,7 @@ public class ObjectWriterCreator {
         }
 
         if (Calendar.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterCalendarFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterCalendar(fieldName, ordinal, features, format, label, field, method, function);
         }
 
         if (fieldClass.isEnum()) {
@@ -2019,7 +2027,7 @@ public class ObjectWriterCreator {
                 return new FieldWriterInt64Val(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
             }
 
-            return new FieldWriterMillisFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
+            return new FieldWriterMillis(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
         }
 
         if (fieldClass == boolean.class) {

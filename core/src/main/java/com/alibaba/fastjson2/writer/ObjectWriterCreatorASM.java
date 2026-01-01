@@ -4413,7 +4413,7 @@ public class ObjectWriterCreatorASM
             if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64Val(fieldName, ordinal, features, format, label, field, null, null);
             }
-            return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterMillis(fieldName, ordinal, features, format, label, field, null, null);
         }
 
         if (fieldClass == float.class) {
@@ -4453,7 +4453,7 @@ public class ObjectWriterCreatorASM
                 }
             }
 
-            return new FieldWriterDateField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDate(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == String.class) {
