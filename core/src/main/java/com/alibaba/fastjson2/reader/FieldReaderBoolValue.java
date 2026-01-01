@@ -1,0 +1,68 @@
+package com.alibaba.fastjson2.reader;
+
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.ObjBoolConsumer;
+import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.TypeUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Locale;
+
+final class FieldReaderBoolValue<T>
+        extends FieldReaderObject<T> {
+    public FieldReaderBoolValue(
+            String fieldName,
+            Class fieldType,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Boolean defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            ObjBoolConsumer<T> function,
+            String paramName,
+            Parameter parameter
+    ) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+    }
+
+    @Override
+    public void readFieldValue(JSONReader jsonReader, T object) {
+        boolean fieldValue = jsonReader.readBoolValue();
+
+        if (schema != null) {
+            schema.assertValidate(fieldValue);
+        }
+
+        propertyAccessor.setBoolean(object, fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readBoolValue();
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        boolean booleanValue = TypeUtils.toBooleanValue(value);
+
+        if (schema != null) {
+            schema.assertValidate(booleanValue);
+        }
+
+        propertyAccessor.setBoolean(object, booleanValue);
+    }
+
+    @Override
+    public void accept(T object, boolean value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
+        propertyAccessor.setBoolean(object, value);
+    }
+}

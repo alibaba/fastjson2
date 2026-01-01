@@ -19,7 +19,6 @@ import java.util.function.Function;
 public class FieldReaderObject<T>
         extends FieldReader<T> {
     protected ObjectReader initReader;
-    protected final BiConsumer function;
 
     public FieldReaderObject(
             String fieldName,
@@ -33,7 +32,7 @@ public class FieldReaderObject<T>
             JSONSchema schema,
             Method method,
             Field field,
-            BiConsumer function
+            Object function
     ) {
         this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null, null);
     }
@@ -50,12 +49,11 @@ public class FieldReaderObject<T>
             JSONSchema schema,
             Method method,
             Field field,
-            BiConsumer function,
+            Object function,
             String paramName,
             Parameter parameter
     ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
-        this.function = function;
     }
 
     @Override
@@ -350,11 +348,6 @@ public class FieldReaderObject<T>
         }
 
         jsonReader.skipValue();
-    }
-
-    @Override
-    public BiConsumer getFunction() {
-        return function;
     }
 
     static void arrayToMap(

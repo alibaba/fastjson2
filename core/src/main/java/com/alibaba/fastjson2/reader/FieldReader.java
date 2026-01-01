@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.function.ObjBoolConsumer;
 import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.internal.PropertyAccessor;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -23,6 +24,7 @@ import java.time.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.ObjDoubleConsumer;
 
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
@@ -119,6 +121,10 @@ public abstract class FieldReader<T>
         this.readOnly = readOnly;
         if (function instanceof BiConsumer) {
             this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, fieldClass, fieldType, null, (BiConsumer) function);
+        } else if (function instanceof ObjDoubleConsumer) {
+            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjDoubleConsumer) function);
+        } else if (function instanceof ObjBoolConsumer) {
+            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjBoolConsumer) function);
         } else if (method != null) {
             this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
         } else {

@@ -46,6 +46,6 @@ final class FieldReaderObjectFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object, value);
+        propertyAccessor.setObject(object, value);
     }
 }

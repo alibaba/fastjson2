@@ -4,39 +4,30 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-final class FieldReaderBoolFunc<T, V>
-        extends FieldReader<T> {
-    final BiConsumer<T, V> function;
-
-    FieldReaderBoolFunc(
+final class FieldReaderBool<T>
+        extends FieldReaderObject<T> {
+    FieldReaderBool(
             String fieldName,
-            Class<V> fieldClass,
+            Class fieldType,
             int ordinal,
             long features,
             String format,
             Locale locale,
-            Object defaultValue,
+            Boolean defaultValue,
             JSONSchema schema,
             Method method,
-            BiConsumer<T, V> function
+            Field field,
+            BiConsumer function,
+            String paramName,
+            Parameter parameter
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
-        this.function = function;
-    }
-
-    @Override
-    public void accept(T object, Object value) {
-        Boolean booleanValue = TypeUtils.toBoolean(value);
-
-        if (schema != null) {
-            schema.validate(booleanValue);
-        }
-
-        function.accept(object, (V) booleanValue);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override
@@ -53,10 +44,14 @@ final class FieldReaderBoolFunc<T, V>
         }
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
-        function.accept(object, (V) fieldValue);
+        if (fieldValue == null && defaultValue != null) {
+            return;
+        }
+
+        propertyAccessor.setObject(object, fieldValue);
     }
 
     @Override
@@ -65,7 +60,13 @@ final class FieldReaderBoolFunc<T, V>
     }
 
     @Override
-    public BiConsumer getFunction() {
-        return function;
+    public void accept(T object, Object value) {
+        Boolean booleanValue = TypeUtils.toBoolean(value);
+
+        if (schema != null) {
+            schema.assertValidate(booleanValue);
+        }
+
+        propertyAccessor.setObject(object, booleanValue);
     }
 }

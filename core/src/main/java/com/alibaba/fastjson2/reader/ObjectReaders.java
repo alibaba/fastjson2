@@ -109,7 +109,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderBool(String fieldName, ObjBoolConsumer<T> function) {
-        return new FieldReaderBoolValFunc<>(fieldName, 0, null, null, function);
+        return new FieldReaderBoolValue(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderByte(String fieldName, ObjByteConsumer<T> function) {
@@ -137,7 +137,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderDouble(String fieldName, ObjDoubleConsumer<T> function) {
-        return new FieldReaderDoubleValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderDoubleValue(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderString(

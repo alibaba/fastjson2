@@ -31,6 +31,6 @@ class FieldReaderListFuncImpl<T, V>
 
     @Override
     public void accept(T object, Object list) {
-        function.accept(object, list);
+        propertyAccessor.setObject(object, list);
     }
 }
