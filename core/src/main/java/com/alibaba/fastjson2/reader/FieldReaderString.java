@@ -4,18 +4,46 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Locale;
+import java.util.function.BiConsumer;
 
-class FieldReaderStringField<T>
-        extends FieldReaderObjectField<T> {
+final class FieldReaderString<T, V>
+        extends FieldReaderObject<T> {
     final boolean trim;
     final boolean upper;
     final boolean emptyToNull;
 
-    FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
+    public FieldReaderString(
+            String fieldName,
+            Class<V> fieldType,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer<T, V> function,
+            String paramName,
+            Parameter parameter
+    ) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field,
+                function, paramName, parameter);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
         upper = "upper".equals(format);
         emptyToNull = (features & JSONReader.Feature.EmptyStringAsNull.mask) != 0;
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        String fieldValue = jsonReader.readString();
+        if (trim && fieldValue != null) {
+            fieldValue = fieldValue.trim();
+        }
+        return fieldValue;
     }
 
     @Override
@@ -63,25 +91,22 @@ class FieldReaderStringField<T>
     }
 
     @Override
-    public String readFieldValue(JSONReader jsonReader) {
-        String fieldValue = jsonReader.readString();
-        if (trim && fieldValue != null) {
-            fieldValue = fieldValue.trim();
-        }
-        return fieldValue;
+    public void accept(T object, int value) {
+        accept(object, Integer.toString(value));
     }
 
-    public boolean supportAcceptType(Class valueClass) {
-        return true;
+    @Override
+    public void accept(T object, long value) {
+        accept(object, Long.toString(value));
     }
 
     @Override
     public void accept(T object, Object value) {
         String fieldValue;
-        if (value != null && !(value instanceof String)) {
-            fieldValue = value.toString();
-        } else {
+        if (value instanceof String || value == null) {
             fieldValue = (String) value;
+        } else {
+            fieldValue = value.toString();
         }
 
         if (fieldValue != null) {
@@ -95,10 +120,16 @@ class FieldReaderStringField<T>
                 fieldValue = null;
             }
         }
+
         if (schema != null) {
             schema.assertValidate(fieldValue);
         }
 
+        // The propertyAccessor internally handles both field and functional access
         propertyAccessor.setObject(object, fieldValue);
+    }
+
+    public boolean supportAcceptType(Class valueClass) {
+        return true;
     }
 }

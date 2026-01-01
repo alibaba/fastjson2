@@ -144,7 +144,7 @@ public class ObjectReaders {
             String fieldName,
             BiConsumer<T, String> function
     ) {
-        return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, String.class, String.class, null, function);
+        return new FieldReaderString<>(fieldName, String.class, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T, V> FieldReader fieldReader(

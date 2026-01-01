@@ -2811,7 +2811,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == String.class) {
-            return new FieldReaderStringMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (String) defaultValue, jsonSchema, method);
+            return new FieldReaderString<>(fieldName, (Class<String>) fieldClass, ordinal, features, format, locale, (String) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == LocalDate.class) {
@@ -3300,7 +3300,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringField(fieldName, fieldClass, ordinal, features, format, (String) defaultValue, jsonSchema, field);
+            return new FieldReaderString(fieldName, fieldClass, ordinal, features, format, locale, (String) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldType == String[].class) {
@@ -3579,7 +3579,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderString<>(fieldName, fieldClass, ordinal, features, format, locale, (String) defaultValue, schema, method, null, function, null, null);
         }
 
         if (fieldClass == Boolean.class) {
