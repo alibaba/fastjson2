@@ -2914,7 +2914,7 @@ public class ObjectReaderCreator {
             }
 
             if (fieldClass == AtomicReference.class) {
-                return new FieldReaderAtomicReferenceMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicReference<>(fieldName, fieldType, fieldClass, ordinal, features, null, null, null, jsonSchema, method, null, null, null, null);
             }
 
             if (Collection.class.isAssignableFrom(fieldClass)) {
@@ -3337,7 +3337,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == AtomicReference.class) {
-            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, format, jsonSchema, field);
+            return new FieldReaderAtomicReference<>(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, jsonSchema, null, field, null, null, null);
         }
 
         Type fieldTypeResolved = null;
@@ -3618,6 +3618,10 @@ public class ObjectReaderCreator {
 
         if (fieldClass == AtomicBoolean.class) {
             return new FieldReaderAtomicBoolean<Object, AtomicBoolean>(fieldName, (Class<AtomicBoolean>) fieldClass, ordinal, features, format, locale, (AtomicBoolean) defaultValue, schema, method, null, (BiConsumer<Object, AtomicBoolean>) function, null, null);
+        }
+
+        if (fieldClass == AtomicReference.class) {
+            return new FieldReaderAtomicReference<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, function, null, null);
         }
 
         if (fieldClass == Short.class) {
