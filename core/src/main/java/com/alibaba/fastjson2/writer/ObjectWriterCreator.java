@@ -1137,7 +1137,7 @@ public class ObjectWriterCreator {
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, contentAs);
+            return new FieldWriterList(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, null, contentAs);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
@@ -1394,7 +1394,7 @@ public class ObjectWriterCreator {
             } else {
                 itemType = Object.class;
             }
-            return new FieldWriterListMethod(fieldName, itemType, ordinal, features, format, label, null, method, fieldType, fieldClass, contentAs);
+            return new FieldWriterList(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, null, method, contentAs);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
@@ -1855,9 +1855,10 @@ public class ObjectWriterCreator {
                 if (actualTypeArguments.length == 1) {
                     Type itemType = actualTypeArguments[0];
                     if (itemType == String.class) {
-                        return new FieldWriterListStrFunc(fieldName, ordinal, features, format, label, field, method, function, fieldType, fieldClass);
+                        // For string lists with function, create FieldWriterListStrFunc with function
+                        return new FieldWriterListStrFunc(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, contentAs, function);
                     }
-                    return new FieldWriterListFunc(fieldName, ordinal, features, format, label, itemType, field, method, function, fieldType, fieldClass, contentAs);
+                    return new FieldWriterList(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, function, contentAs);
                 }
             }
 

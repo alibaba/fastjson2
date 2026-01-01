@@ -11,23 +11,25 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
-final class FieldWriterListStrFunc<T>
+public class FieldWriterListStrFunc<T>
         extends FieldWriter<T> {
-    final Function<T, List> function;
+    final Function<T, List<String>> function;
 
-    FieldWriterListStrFunc(
+    public FieldWriterListStrFunc(
             String fieldName,
+            Type itemType,
             int ordinal,
             long features,
             String format,
             String label,
+            Type fieldType,
+            Class fieldClass,
             Field field,
             Method method,
-            Function<T, List> function,
-            Type fieldType,
-            Class fieldClass
+            Class<?> contentAs,
+            Function<T, List<String>> function
     ) {
-        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
         this.function = function;
     }
 
@@ -38,7 +40,7 @@ final class FieldWriterListStrFunc<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        List list;
+        List<String> list;
         try {
             list = toList(function.apply(object));
         } catch (RuntimeException error) {
@@ -70,7 +72,7 @@ final class FieldWriterListStrFunc<T>
             jsonWriter.startArray(size);
 
             for (int i = 0; i < size; i++) {
-                String item = (String) list.get(i);
+                String item = list.get(i);
                 if (item == null) {
                     jsonWriter.writeNull();
                     continue;
@@ -86,7 +88,7 @@ final class FieldWriterListStrFunc<T>
                 jsonWriter.writeComma();
             }
 
-            String item = (String) list.get(i);
+            String item = list.get(i);
             if (item == null) {
                 jsonWriter.writeNull();
                 continue;
@@ -100,7 +102,7 @@ final class FieldWriterListStrFunc<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        List list = toList(function.apply(object));
+        List<String> list = toList(function.apply(object));
         if (list == null) {
             jsonWriter.writeNull();
             return;
@@ -111,7 +113,7 @@ final class FieldWriterListStrFunc<T>
             jsonWriter.startArray(size);
 
             for (int i = 0; i < size; i++) {
-                String item = (String) list.get(i);
+                String item = list.get(i);
                 if (item == null) {
                     jsonWriter.writeNull();
                     continue;
@@ -127,7 +129,7 @@ final class FieldWriterListStrFunc<T>
                 jsonWriter.writeComma();
             }
 
-            String item = (String) list.get(i);
+            String item = list.get(i);
             if (item == null) {
                 jsonWriter.writeNull();
                 continue;
@@ -135,5 +137,10 @@ final class FieldWriterListStrFunc<T>
             jsonWriter.writeString(item);
         }
         jsonWriter.endArray();
+    }
+
+    @Override
+    public Function getFunction() {
+        return function;
     }
 }

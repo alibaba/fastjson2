@@ -10,10 +10,12 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
-public abstract class FieldWriterList<T>
+public class FieldWriterList<T>
         extends FieldWriter<T> {
     private static final Class<?> EMPTY_LIST_CLASS = Collections.emptyList().getClass();
     private static final Class<?> EMPTY_SET_CLASS = Collections.emptySet().getClass();
@@ -25,8 +27,9 @@ public abstract class FieldWriterList<T>
     ObjectWriter itemObjectWriter;
     final boolean writeAsString;
     final Class<?> contentAs;
+    final Function function;
 
-    FieldWriterList(
+    public FieldWriterList(
             String name,
             Type itemType,
             int ordinal,
@@ -37,9 +40,10 @@ public abstract class FieldWriterList<T>
             Class fieldClass,
             Field field,
             Method method,
+            Function function,
             Class<?> contentAs
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
         this.contentAs = contentAs;
 
         writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
@@ -66,6 +70,23 @@ public abstract class FieldWriterList<T>
                 itemObjectWriter = new ObjectWriterImplDate(format, null);
             }
         }
+        this.function = function;
+    }
+
+    FieldWriterList(
+            String name,
+            Type itemType,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method,
+            Class<?> contentAs
+    ) {
+        this(name, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, null, contentAs);
     }
 
     @Override
@@ -398,6 +419,75 @@ public abstract class FieldWriterList<T>
         }
 
         jsonWriter.writeString(list);
+    }
+
+    @Override
+    public Object getFieldValue(T object) {
+        if (function != null) {
+            return function.apply(object);
+        }
+        return super.getFieldValue(object);
+    }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
+
+    @Override
+    public boolean write(JSONWriter jsonWriter, T object) {
+        List value;
+        try {
+            value = toList(getFieldValue(object));
+        } catch (Exception error) {
+            if (jsonWriter.isIgnoreErrorGetter()) {
+                return false;
+            }
+            throw error;
+        }
+
+        long features = this.features | jsonWriter.getFeatures();
+        if (value == null) {
+            if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
+                writeFieldName(jsonWriter);
+                jsonWriter.writeArrayNull(features);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        if ((features & NotWriteEmptyArray.mask) != 0 && value.isEmpty()) {
+            return false;
+        }
+
+        String refPath = jsonWriter.setPath(this, value);
+        if (refPath != null) {
+            writeFieldName(jsonWriter);
+            jsonWriter.writeReference(refPath);
+            jsonWriter.popPath(value);
+            return true;
+        }
+
+        if (itemType == String.class) {
+            writeListStr(jsonWriter, true, value);
+        } else {
+            writeList(jsonWriter, value);
+        }
+        jsonWriter.popPath(value);
+        return true;
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, T object) {
+        List value = toList(getFieldValue(object));
+
+        if (value == null) {
+            jsonWriter.writeNull();
+            return;
+        }
+
+        writeListValue(jsonWriter, value);
     }
 
     public final boolean isRefDetect(Object object, long features) {
