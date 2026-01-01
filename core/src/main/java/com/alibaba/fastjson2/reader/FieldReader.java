@@ -28,7 +28,9 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.ObjDoubleConsumer;
+import java.util.function.ObjIntConsumer;
 
+@SuppressWarnings("ALL")
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
     public final int ordinal;
@@ -122,23 +124,7 @@ public abstract class FieldReader<T>
             readOnly = true;
         }
         this.readOnly = readOnly;
-        if (function instanceof BiConsumer) {
-            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, fieldClass, fieldType, null, (BiConsumer) function);
-        } else if (function instanceof ObjDoubleConsumer) {
-            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjDoubleConsumer) function);
-        } else if (function instanceof ObjBoolConsumer) {
-            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjBoolConsumer) function);
-        } else if (function instanceof ObjFloatConsumer) {
-            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjFloatConsumer) function);
-        } else if (function instanceof ObjByteConsumer) {
-            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjByteConsumer) function);
-        } else if (function instanceof ObjShortConsumer) {
-            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjShortConsumer) function);
-        } else if (method != null) {
-            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
-        } else {
-            this.propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
-        }
+        this.propertyAccessor = createPropertyAccessor(fieldName, fieldType, fieldClass, method, field, function);
 
         Class declaringClass = null;
         if (method != null) {
@@ -148,6 +134,34 @@ public abstract class FieldReader<T>
         }
 
         this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
+    }
+
+    private static PropertyAccessor createPropertyAccessor(String fieldName, Type fieldType, Class fieldClass, Method method, Field field, Object function) {
+        if (function instanceof BiConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, fieldClass, fieldType, null, (BiConsumer) function);
+        }
+        if (function instanceof ObjDoubleConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjDoubleConsumer) function);
+        }
+        if (function instanceof ObjBoolConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjBoolConsumer) function);
+        }
+        if (function instanceof ObjFloatConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjFloatConsumer) function);
+        }
+        if (function instanceof ObjByteConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjByteConsumer) function);
+        }
+        if (function instanceof ObjIntConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjIntConsumer) function);
+        }
+        if (function instanceof ObjShortConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjShortConsumer) function);
+        }
+        if (method != null) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
+        }
+        return field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
     }
 
     public void acceptDefaultValue(T object) {

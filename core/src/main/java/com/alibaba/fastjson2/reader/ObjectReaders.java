@@ -121,7 +121,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderInt(String fieldName, ObjIntConsumer<T> function) {
-        return new FieldReaderInt32ValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderInt32Value(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderLong(String fieldName, ObjLongConsumer<T> function) {

@@ -2526,7 +2526,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == int.class || fieldType == Integer.class) {
-            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
+            return new FieldReaderInt32(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, schema, null, null, null, paramName, parameter);
         }
 
         if (fieldType == long.class || fieldType == Long.class) {
@@ -2763,7 +2763,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == int.class) {
-            return new FieldReaderInt32ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Integer) defaultValue, jsonSchema, method);
+            return new FieldReaderInt32Value(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == long.class) {
@@ -2787,7 +2787,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == Integer.class) {
-            return new FieldReaderInt32Method(fieldName, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method);
+            return new FieldReaderInt32(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == Long.class) {
@@ -3237,10 +3237,10 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == int.class) {
-            return new FieldReaderInt32ValueField(fieldName, fieldClass, ordinal, format, (Integer) defaultValue, jsonSchema, field);
+            return new FieldReaderInt32Value(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, null, field, null, null, null);
         }
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Field(fieldName, fieldClass, ordinal, features, format, (Integer) defaultValue, jsonSchema, field);
+            return new FieldReaderInt32(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == long.class) {
@@ -3571,7 +3571,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderInt32(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, schema, method, null, function, null, null);
         }
 
         if (fieldClass == Long.class) {
@@ -3898,7 +3898,7 @@ public class ObjectReaderCreator {
 
         if (fieldType == int.class) {
             ObjIntConsumer function = (ObjIntConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt32ValueFunc<>(fieldName, ordinal, (Integer) defaultValue, jsonSchema, method, function);
+            return new FieldReaderInt32Value(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == long.class) {
