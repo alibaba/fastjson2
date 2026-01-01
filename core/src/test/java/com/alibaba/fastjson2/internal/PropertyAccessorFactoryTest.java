@@ -121,6 +121,9 @@ public class PropertyAccessorFactoryTest {
         for (PropertyAccessorFactory factory : factories) {
             for (Field field : fields) {
                 String fieldName = field.getName();
+                if (fieldName.indexOf('$') != -1) {
+                    continue;
+                }
                 String getterName;
                 if (field.getType() == boolean.class) {
                     getterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
