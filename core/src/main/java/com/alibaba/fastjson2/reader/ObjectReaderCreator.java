@@ -2545,6 +2545,23 @@ public class ObjectReaderCreator {
             return new FieldReaderBool(fieldName, fieldClass, ordinal, features, format, locale, TypeUtils.toBoolean(defaultValue), schema, null, null, null, paramName, parameter);
         }
 
+        if (fieldType == UUID.class) {
+            return new FieldReaderUUID(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    schema,
+                    null,
+                    null,
+                    null
+            );
+        }
+
         Type fieldTypeResolved = null;
         Class fieldClassResolved = null;
         if (!(fieldType instanceof Class) && objectType != null) {
@@ -3340,6 +3357,23 @@ public class ObjectReaderCreator {
             return new FieldReaderAtomicReference<>(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, jsonSchema, null, field, null, null, null);
         }
 
+        if (fieldClass == UUID.class || fieldType == UUID.class) {
+            return new FieldReaderUUID(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    null,
+                    field,
+                    null
+            );
+        }
+
         Type fieldTypeResolved = null;
         Class fieldClassResolved = null;
         if (!(fieldType instanceof Class)) {
@@ -3660,6 +3694,23 @@ public class ObjectReaderCreator {
 
         if (fieldClass == Date.class) {
             return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, null, method, function);
+        }
+
+        if (fieldClass == UUID.class) {
+            return new FieldReaderUUID(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    schema,
+                    method,
+                    null,
+                    function
+            );
         }
 
         Type fieldTypeResolved = null;
