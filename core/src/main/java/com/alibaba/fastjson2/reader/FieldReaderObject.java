@@ -285,15 +285,7 @@ public class FieldReaderObject<T>
             value = TypeUtils.cast(value, fieldType);
         }
 
-        try {
-            if (function != null) {
-                function.accept(object, value);
-            } else {
-                propertyAccessor.setObject(object, value);
-            }
-        } catch (Exception e) {
-            throw new JSONException("set " + (function != null ? super.toString() : fieldName) + " error", e);
-        }
+        propertyAccessor.setObject(object, value);
     }
 
     @Override
