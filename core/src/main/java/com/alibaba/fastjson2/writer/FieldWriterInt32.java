@@ -21,9 +21,10 @@ class FieldWriterInt32<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
         toString = (features & WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
     }

@@ -4398,20 +4398,20 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt8Val(fieldName, ordinal, features, format, label, field, null, null);
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt16Val(fieldName, ordinal, features, format, label, field, null, null);
         }
 
         if (fieldClass == int.class) {
-            return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field, null, null);
         }
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
+                return new FieldWriterInt64Val(fieldName, ordinal, features, format, label, field, null, null);
             }
             return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
         }

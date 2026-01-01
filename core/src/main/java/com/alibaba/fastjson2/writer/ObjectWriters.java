@@ -63,7 +63,7 @@ public class ObjectWriters {
 
     public static <T> ObjectWriter ofToInt(ToIntFunction function) {
         return INSTANCE.createObjectWriter(
-                new FieldWriterInt32ValFunc(
+                new FieldWriterInt32Val(
                         "toInt",
                         0,
                         FieldInfo.VALUE_MASK,
@@ -78,7 +78,7 @@ public class ObjectWriters {
 
     public static <T> ObjectWriter ofToLong(ToLongFunction function) {
         return INSTANCE.createObjectWriter(
-                new FieldWriterInt64ValFunc(
+                new FieldWriterInt64Val(
                         "toLong",
                         0,
                         FieldInfo.VALUE_MASK,

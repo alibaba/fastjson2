@@ -3,33 +3,35 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
+import java.lang.reflect.Method;
+import java.util.function.ToIntFunction;
 
-final class FieldWriterInt32Val<T>
-        extends FieldWriterInt32<T> {
+class FieldWriterInt32Val
+        extends FieldWriterInt32 {
     FieldWriterInt32Val(
             String name,
             int ordinal,
             long features,
             String format,
             String label,
-            Field field
+            Field field,
+            Method method,
+            ToIntFunction function
     ) {
-        super(name, ordinal, features, format, label, int.class, int.class, field, null);
+        super(name, ordinal, features, format, label, int.class, int.class, field, method, function);
     }
 
     @Override
-    public Object getFieldValue(T object) {
-        return getFieldValueInt(object);
-    }
-
-    public int getFieldValueInt(T object) {
-        return propertyAccessor.getInt(Objects.requireNonNull(object));
-    }
-
-    @Override
-    public boolean write(JSONWriter jsonWriter, T object) {
-        int value = getFieldValueInt(object);
+    public boolean write(JSONWriter jsonWriter, Object object) {
+        int value;
+        try {
+            value = propertyAccessor.getInt(object);
+        } catch (RuntimeException error) {
+            if (jsonWriter.isIgnoreErrorGetter()) {
+                return false;
+            }
+            throw error;
+        }
 
         if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue) && defaultValue == null) {
             return false;
@@ -40,8 +42,9 @@ final class FieldWriterInt32Val<T>
     }
 
     @Override
-    public void writeValue(JSONWriter jsonWriter, T object) {
-        int value = getFieldValueInt(object);
-        jsonWriter.writeInt32(value);
+    public void writeValue(JSONWriter jsonWriter, Object object) {
+        jsonWriter.writeInt32(
+                propertyAccessor.getInt(object)
+        );
     }
 }

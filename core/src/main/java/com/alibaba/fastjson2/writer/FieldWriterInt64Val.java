@@ -4,36 +4,28 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
-final class FieldWriterInt32ValFunc
-        extends FieldWriterInt32 {
-    final ToIntFunction function;
-
-    FieldWriterInt32ValFunc(
-            String fieldName,
+class FieldWriterInt64Val
+        extends FieldWriterInt64 {
+    FieldWriterInt64Val(
+            String name,
             int ordinal,
             long features,
             String format,
             String label,
             Field field,
             Method method,
-            ToIntFunction function
+            ToLongFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, int.class, int.class, field, method);
-        this.function = function;
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        return function.applyAsInt(object);
+        super(name, ordinal, features, format, label, long.class, field, method, function);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
-        int value;
+        long value;
         try {
-            value = function.applyAsInt(object);
+            value = propertyAccessor.getLong(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -41,13 +33,18 @@ final class FieldWriterInt32ValFunc
             throw error;
         }
 
-        writeInt32(jsonWriter, value);
+        if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue) && defaultValue == null) {
+            return false;
+        }
+
+        writeInt64(jsonWriter, value);
         return true;
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
-        int value = function.applyAsInt(object);
-        jsonWriter.writeInt32(value);
+        jsonWriter.writeInt64(
+                propertyAccessor.getLong(object)
+        );
     }
 }

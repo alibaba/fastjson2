@@ -15,9 +15,10 @@ class FieldWriterInt16<T>
             String label,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(name, ordinal, features, format, null, label, fieldClass, fieldClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldClass, fieldClass, field, method, function);
     }
 
     public final void writeInt16(JSONWriter jsonWriter, short value) {

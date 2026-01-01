@@ -6,12 +6,10 @@ import com.alibaba.fastjson2.function.ToByteFunction;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-final class FieldWriterInt8ValFunc
+class FieldWriterInt8Val
         extends FieldWriterInt8 {
-    final ToByteFunction function;
-
-    FieldWriterInt8ValFunc(
-            String fieldName,
+    FieldWriterInt8Val(
+            String name,
             int ordinal,
             long features,
             String format,
@@ -20,33 +18,32 @@ final class FieldWriterInt8ValFunc
             Method method,
             ToByteFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, byte.class, field, method);
-        this.function = function;
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        return function.applyAsByte(object);
-    }
-
-    @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
-        byte value = function.applyAsByte(object);
-        jsonWriter.writeInt32(value);
+        super(name, ordinal, features, format, label, byte.class, field, method, function);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
         byte value;
         try {
-            value = function.applyAsByte(object);
+            value = propertyAccessor.getByte(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
             }
             throw error;
         }
+
+        if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue) && defaultValue == null) {
+            return false;
+        }
+
         writeInt8(jsonWriter, value);
         return true;
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, Object object) {
+        byte value = propertyAccessor.getByte(object);
+        jsonWriter.writeInt32(value);
     }
 }

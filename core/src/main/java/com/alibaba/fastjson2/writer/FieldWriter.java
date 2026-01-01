@@ -61,6 +61,7 @@ public abstract class FieldWriter<T>
     transient JSONWriter.Path path;
     volatile ObjectWriter initObjectWriter;
     Object defaultValue;
+    protected Function function;
 
     static final AtomicReferenceFieldUpdater<FieldWriter, ObjectWriter>
             initObjectWriterUpdater = AtomicReferenceFieldUpdater.newUpdater(
@@ -183,6 +184,7 @@ public abstract class FieldWriter<T>
         nameWithColonUTF16 = chars;
         if (function instanceof Function) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, fieldClass, fieldType, (Function) function, null);
+            this.function = (Function) function;
         } else if (function instanceof Predicate) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (Predicate) function, null);
         } else if (function instanceof ToFloatFunction) {
@@ -191,6 +193,14 @@ public abstract class FieldWriter<T>
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (ToDoubleFunction) function, null);
         } else if (function instanceof ToCharFunction) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (ToCharFunction) function, null);
+        } else if (function instanceof java.util.function.ToIntFunction) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (java.util.function.ToIntFunction) function, null);
+        } else if (function instanceof com.alibaba.fastjson2.function.ToByteFunction) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (com.alibaba.fastjson2.function.ToByteFunction) function, null);
+        } else if (function instanceof com.alibaba.fastjson2.function.ToShortFunction) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (com.alibaba.fastjson2.function.ToShortFunction) function, null);
+        } else if (function instanceof java.util.function.ToLongFunction) {
+            propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (java.util.function.ToLongFunction) function, null);
         } else if (method != null) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
         } else {
@@ -1052,7 +1062,7 @@ public abstract class FieldWriter<T>
     }
 
     public Function getFunction() {
-        return null;
+        return function;
     }
 
     protected final boolean writeFloatNull(JSONWriter jsonWriter) {
