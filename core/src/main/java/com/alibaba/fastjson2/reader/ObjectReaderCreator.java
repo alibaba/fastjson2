@@ -2571,11 +2571,9 @@ public class ObjectReaderCreator {
             }
         }
         if (fieldClassResolved != null && Collection.class.isAssignableFrom(fieldClassResolved) && itemType != null) {
-            return new FieldReaderListParam(
+            return new FieldReaderList(
                     fieldName,
                     fieldTypeResolved,
-                    paramName,
-                    parameter,
                     fieldClassResolved,
                     itemType,
                     itemClass,
@@ -2584,7 +2582,12 @@ public class ObjectReaderCreator {
                     format,
                     locale,
                     defaultValue,
-                    schema);
+                    schema,
+                    null,
+                    null,
+                    null,
+                    paramName,
+                    parameter);
         }
 
         return new FieldReaderObject(fieldName,
@@ -3351,16 +3354,16 @@ public class ObjectReaderCreator {
                     if (itemClass == String.class) {
                         if (finalField) {
                             if ((features & JSONReader.Feature.FieldBased.mask) != 0) {
-                                return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
+                                return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, null, field, null);
                             }
 
                             return new FieldReaderCollectionFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
                         }
 
-                        return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, null, field, null);
                     }
 
-                    return new FieldReaderListField(
+                    return new FieldReaderList(
                             fieldName,
                             fieldTypeResolved,
                             fieldClassResolved,
@@ -3372,7 +3375,9 @@ public class ObjectReaderCreator {
                             locale,
                             (Collection) defaultValue,
                             jsonSchema,
-                            field
+                            null,
+                            field,
+                            null
                     );
                 }
             }
@@ -3389,7 +3394,7 @@ public class ObjectReaderCreator {
             }
             Class itemClass = TypeUtils.getClass(itemType);
 
-            return new FieldReaderListField(
+            return new FieldReaderList(
                     fieldName,
                     fieldType,
                     fieldClass,
@@ -3401,7 +3406,9 @@ public class ObjectReaderCreator {
                     locale,
                     (Collection) defaultValue,
                     jsonSchema,
-                    field
+                    null,
+                    field,
+                    null
             );
         }
 

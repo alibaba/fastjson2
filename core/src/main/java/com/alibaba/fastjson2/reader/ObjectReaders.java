@@ -194,7 +194,7 @@ public class ObjectReaders {
             BiConsumer<T, List<V>> function,
             ObjectReader<V> itemObjectReader
     ) {
-        return new FieldReaderListFuncImpl<>(listCreator, itemObjectReader, function, itemType, fieldName);
+        return FieldReaderList.createWithListFunction(fieldName, List.class, List.class, itemType, TypeUtils.getClass(itemType), 0, 0, null, null, null, null, null, null, function, null, null, listCreator, itemObjectReader);
     }
 
     public static <T, V> FieldReader fieldReaderList(
@@ -203,14 +203,14 @@ public class ObjectReaders {
             Supplier<List<V>> listCreator,
             BiConsumer<T, List<V>> function
     ) {
-        return new FieldReaderListFuncImpl<>(listCreator, null, function, itemType, fieldName);
+        return FieldReaderList.createWithListFunction(fieldName, List.class, List.class, itemType, TypeUtils.getClass(itemType), 0, 0, null, null, null, null, null, null, function, null, null, listCreator, null);
     }
 
     public static <T> FieldReader fieldReaderListStr(
             String fieldName,
             BiConsumer<T, List<String>> function
     ) {
-        return new FieldReaderListFuncImpl<>(ArrayList::new, null, function, String.class, fieldName);
+        return FieldReaderList.createWithListFunction(fieldName, List.class, List.class, String.class, String.class, 0, 0, null, null, null, null, null, null, function, null, null, ArrayList::new, null);
     }
 
     public static <T, V> FieldReader fieldReaderList(

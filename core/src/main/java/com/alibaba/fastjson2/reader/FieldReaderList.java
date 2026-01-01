@@ -9,15 +9,20 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class FieldReaderList<T, V>
         extends FieldReaderObject<T> {
     final long fieldClassHash;
     final long itemClassHash;
+    Supplier<List<V>> listCreator;
+    ObjectReader<V> itemObjectReader;
+    BiConsumer<T, List<V>> listFunction;
 
     public FieldReaderList(
             String fieldName,
@@ -33,13 +38,16 @@ public class FieldReaderList<T, V>
             JSONSchema schema,
             Method method,
             Field field,
-            BiConsumer function
+            BiConsumer<T, V> function
     ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
         this.itemType = itemType;
         this.itemClass = itemClass;
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
         this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
+        this.listCreator = null;
+        this.itemObjectReader = null;
+        this.listFunction = null;
 
         if (format != null) {
             if (itemType == Date.class) {
@@ -49,11 +57,136 @@ public class FieldReaderList<T, V>
     }
 
     @Override
+    public void accept(T object, Object value) {
+        if (listFunction != null) {
+            // Use the listFunction when it's available (for lambda-style setters)
+            listFunction.accept(object, (List<V>) value);
+        } else {
+            if (schema != null) {
+                schema.assertValidate(value);
+            }
+
+            // The propertyAccessor internally handles both field and functional access
+            propertyAccessor.setObject(object, value);
+        }
+    }
+
+    public FieldReaderList(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            Type itemType,
+            Class itemClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer<T, V> function,
+            String paramName,
+            Parameter parameter
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        this.itemType = itemType;
+        this.itemClass = itemClass;
+        this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
+        this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
+        this.listCreator = null;
+        this.itemObjectReader = null;
+        this.listFunction = null;
+
+        if (format != null) {
+            if (itemType == Date.class) {
+                itemReader = new ObjectReaderImplDate(format, locale);
+            }
+        }
+    }
+
+    public FieldReaderList(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            Type itemType,
+            Class itemClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer<T, V> function,
+            String paramName,
+            Parameter parameter,
+            Supplier<List<V>> listCreator,
+            ObjectReader<V> itemObjectReader
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        this.itemType = itemType;
+        this.itemClass = itemClass;
+        this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
+        this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
+        this.listCreator = listCreator;
+        this.itemObjectReader = itemObjectReader;
+        this.listFunction = null;
+
+        if (format != null && itemObjectReader == null) {
+            if (itemType == Date.class) {
+                itemReader = new ObjectReaderImplDate(format, locale);
+            }
+        }
+    }
+
+    // Static factory method for creating FieldReaderList with listFunction
+    public static <T, V> FieldReaderList<T, V> createWithListFunction(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            Type itemType,
+            Class itemClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer<T, List<V>> listFunction,  // Note: List<V> instead of V
+            String paramName,
+            Parameter parameter,
+            Supplier<List<V>> listCreator,
+            ObjectReader<V> itemObjectReader
+    ) {
+        FieldReaderList<T, V> instance = new FieldReaderList<T, V>(
+                fieldName, fieldType, fieldClass, itemType, itemClass, ordinal, features, format, locale, defaultValue, schema, method, field, (BiConsumer<T, V>) null
+        );
+        instance.listCreator = listCreator;
+        instance.itemObjectReader = itemObjectReader;
+        instance.listFunction = listFunction;
+
+        if (format != null && itemObjectReader == null) {
+            if (itemType == Date.class) {
+                instance.itemReader = new ObjectReaderImplDate(format, locale);
+            }
+        }
+        return instance;
+    }
+
+    @Override
     public long getItemClassHash() {
         return itemClassHash;
     }
 
     public Collection<V> createList(JSONReader.Context context) {
+        if (listCreator != null) {
+            return listCreator.get();
+        }
+
         if (fieldClass == List.class || fieldClass == Collection.class || fieldClass == ArrayList.class) {
             return new ArrayList<>();
         }
@@ -98,7 +231,7 @@ public class FieldReaderList<T, V>
 
         char current = jsonReader.current();
         if (current == '[') {
-            ObjectReader itemObjectReader = getItemObjectReader(context);
+            ObjectReader actualItemObjectReader = this.itemObjectReader != null ? this.itemObjectReader : getItemObjectReader(context);
 
             Collection list = createList(context);
             jsonReader.next();
@@ -112,7 +245,7 @@ public class FieldReaderList<T, V>
                 }
 
                 list.add(
-                        itemObjectReader.readObject(jsonReader, null, null, 0)
+                        actualItemObjectReader.readObject(jsonReader, null, null, 0)
                 );
 
                 jsonReader.nextIfComma();
@@ -124,7 +257,7 @@ public class FieldReaderList<T, V>
 
             jsonReader.nextIfComma();
             return;
-        } else if (current == '{' && getItemObjectReader(context) instanceof ObjectReaderBean) {
+        } else if (current == '{' && (this.itemObjectReader != null ? this.itemObjectReader : getItemObjectReader(context)) instanceof ObjectReaderBean) {
             Object itemValue = jsonReader.jsonb
                     ? itemReader.readJSONBObject(jsonReader, null, null, features)
                     : itemReader.readObject(jsonReader, null, null, features);
@@ -153,24 +286,22 @@ public class FieldReaderList<T, V>
                 return null;
             }
             Object[] array = new Object[entryCnt];
-            ObjectReader itemObjectReader
-                    = getItemObjectReader(
-                    jsonReader.getContext());
+            ObjectReader actualItemObjectReader = this.itemObjectReader != null ? this.itemObjectReader : getItemObjectReader(jsonReader.getContext());
             for (int i = 0; i < entryCnt; ++i) {
-                array[i] = itemObjectReader.readObject(jsonReader, null, null, 0);
+                array[i] = actualItemObjectReader.readObject(jsonReader, null, null, 0);
             }
             return Arrays.asList(array);
         }
 
         if (jsonReader.current() == '[') {
             JSONReader.Context ctx = jsonReader.getContext();
-            ObjectReader itemObjectReader = getItemObjectReader(ctx);
+            ObjectReader actualItemObjectReader = this.itemObjectReader != null ? this.itemObjectReader : getItemObjectReader(ctx);
 
             Collection list = createList(ctx);
             jsonReader.next();
             while (!jsonReader.nextIfArrayEnd()) {
                 list.add(
-                        itemObjectReader.readObject(jsonReader, fieldType, fieldName, 0)
+                        actualItemObjectReader.readObject(jsonReader, fieldType, fieldName, 0)
                 );
 
                 jsonReader.nextIfComma();
