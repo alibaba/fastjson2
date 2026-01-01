@@ -2944,16 +2944,21 @@ public class ObjectReaderCreator {
                     String getterName = BeanUtils.getterName(methodName, PropertyNamingStrategy.CamelCase.name());
                     field = BeanUtils.getDeclaredField(method.getDeclaringClass(), getterName);
                 }
-                return new FieldReaderMapMethodReadOnly(
+                return new FieldReaderMapReadOnly(
                         fieldName,
                         fieldType,
                         fieldClass,
                         ordinal,
                         features,
                         format,
+                        null,
+                        null,
                         jsonSchema,
                         method,
                         field,
+                        null,
+                        null,
+                        null,
                         keyName,
                         arrayToMapDuplicateHandler
                 );
@@ -3419,15 +3424,21 @@ public class ObjectReaderCreator {
 
                 if (actualTypeArguments.length == 2) {
                     if (finalField && ((features & JSONReader.Feature.FieldBased.mask) == 0)) {
-                        return new FieldReaderMapFieldReadOnly(
+                        return new FieldReaderMapReadOnly(
                                 fieldName,
                                 fieldTypeResolved,
                                 fieldClassResolved,
                                 ordinal,
                                 features,
                                 format,
+                                null,
+                                null,
                                 jsonSchema,
+                                null,
                                 field,
+                                null,
+                                null,
+                                null,
                                 keyName,
                                 arrayToMapDuplicateHandler
                         );
@@ -3450,14 +3461,20 @@ public class ObjectReaderCreator {
             if ((features & FieldInfo.UNWRAPPED_MASK) != 0
                     && Map.class.isAssignableFrom(fieldClassResolved)
             ) {
-                return new FieldReaderMapFieldReadOnly(fieldName,
+                return new FieldReaderMapReadOnly(fieldName,
                         fieldTypeResolved,
                         fieldClass,
                         ordinal,
                         features,
                         format,
+                        null,
+                        null,
                         jsonSchema,
+                        null,
                         field,
+                        null,
+                        null,
+                        null,
                         keyName,
                         arrayToMapDuplicateHandler
                 );
@@ -3465,14 +3482,20 @@ public class ObjectReaderCreator {
 
             if (Map.class.isAssignableFrom(fieldClassResolved)) {
                 if ((features & FieldInfo.UNWRAPPED_MASK) != 0) {
-                    return new FieldReaderMapFieldReadOnly(fieldName,
+                    return new FieldReaderMapReadOnly(fieldName,
                             fieldTypeResolved,
                             fieldClass,
                             ordinal,
                             features,
                             format,
+                            null,
+                            null,
                             jsonSchema,
+                            null,
                             field,
+                            null,
+                            null,
+                            null,
                             keyName,
                             arrayToMapDuplicateHandler
                     );
