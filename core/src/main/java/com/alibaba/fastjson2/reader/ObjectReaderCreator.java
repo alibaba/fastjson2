@@ -3288,7 +3288,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldReaderCharValueField(fieldName, ordinal, features, format, (Character) defaultValue, jsonSchema, field);
+            return new FieldReaderCharValue(fieldName, fieldClass, ordinal, features, format, locale, (Character) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
@@ -3908,7 +3908,7 @@ public class ObjectReaderCreator {
 
         if (fieldType == char.class) {
             ObjCharConsumer function = (ObjCharConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderCharValueFunc<>(fieldName, ordinal, format, (Character) defaultValue, jsonSchema, method, function);
+            return new FieldReaderCharValue(fieldName, fieldClass, ordinal, features, format, locale, (Character) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == float.class) {

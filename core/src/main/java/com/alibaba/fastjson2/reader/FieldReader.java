@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ObjBoolConsumer;
 import com.alibaba.fastjson2.function.ObjByteConsumer;
+import com.alibaba.fastjson2.function.ObjCharConsumer;
 import com.alibaba.fastjson2.function.ObjFloatConsumer;
 import com.alibaba.fastjson2.function.ObjShortConsumer;
 import com.alibaba.fastjson2.internal.Conf;
@@ -158,6 +159,9 @@ public abstract class FieldReader<T>
         }
         if (function instanceof ObjLongConsumer) {
             return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjLongConsumer) function);
+        }
+        if (function instanceof ObjCharConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjCharConsumer) function);
         }
         if (function instanceof ObjShortConsumer) {
             return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjShortConsumer) function);
