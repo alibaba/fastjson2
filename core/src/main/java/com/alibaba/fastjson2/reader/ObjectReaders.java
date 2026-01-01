@@ -133,7 +133,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderFloat(String fieldName, ObjFloatConsumer<T> function) {
-        return new FieldReaderFloatValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderFloatValue(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderDouble(String fieldName, ObjDoubleConsumer<T> function) {
