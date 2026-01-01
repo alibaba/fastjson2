@@ -2767,7 +2767,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == long.class) {
-            return new FieldReaderInt64ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method);
+            return new FieldReaderInt64Value(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == float.class) {
@@ -3244,7 +3244,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == long.class) {
-            return new FieldReaderInt64ValueField(fieldName, fieldClass, ordinal, features, format, (Long) defaultValue, jsonSchema, field);
+            return new FieldReaderInt64Value(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, null, field, null, null, null);
         }
         if (fieldClass == Long.class) {
             return new FieldReaderInt64(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, null, field, null, null, null);
@@ -3903,7 +3903,7 @@ public class ObjectReaderCreator {
 
         if (fieldType == long.class) {
             ObjLongConsumer function = (ObjLongConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt64ValueFunc<>(fieldName, ordinal, (Long) defaultValue, jsonSchema, method, function);
+            return new FieldReaderInt64Value(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == char.class) {

@@ -29,6 +29,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjIntConsumer;
+import java.util.function.ObjLongConsumer;
 
 @SuppressWarnings("ALL")
 public abstract class FieldReader<T>
@@ -154,6 +155,9 @@ public abstract class FieldReader<T>
         }
         if (function instanceof ObjIntConsumer) {
             return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjIntConsumer) function);
+        }
+        if (function instanceof ObjLongConsumer) {
+            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjLongConsumer) function);
         }
         if (function instanceof ObjShortConsumer) {
             return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjShortConsumer) function);

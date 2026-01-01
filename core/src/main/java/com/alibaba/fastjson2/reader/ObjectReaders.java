@@ -125,7 +125,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderLong(String fieldName, ObjLongConsumer<T> function) {
-        return new FieldReaderInt64ValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderInt64Value(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderChar(String fieldName, ObjCharConsumer<T> function) {
