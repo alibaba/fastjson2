@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+@SuppressWarnings("ALL")
 final class FieldReaderCollectionReadOnly<T>
         extends FieldReaderObject<T> {
     final Type itemType;
@@ -67,8 +68,8 @@ final class FieldReaderCollectionReadOnly<T>
             return;
         }
 
-        if (method != null) {
-            // For method-based access (getter), we handle the collection differently
+        if (itemType instanceof Class) {
+            Class itemClass = (Class) itemType;
             Collection values = (Collection) value;
             for (Object item : values) {
                 if (item == null) {
@@ -76,8 +77,8 @@ final class FieldReaderCollectionReadOnly<T>
                     continue;
                 }
 
-                if (item instanceof Map && itemType instanceof Class) {
-                    if (!((Class) itemType).isAssignableFrom(item.getClass())) {
+                if (item instanceof Map) {
+                    if (!(itemClass.isAssignableFrom(item.getClass()))) {
                         if (itemReader == null) {
                             itemReader = JSONFactory
                                     .getDefaultObjectReaderProvider()
