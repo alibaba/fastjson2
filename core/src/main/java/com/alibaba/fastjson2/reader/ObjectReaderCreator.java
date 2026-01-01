@@ -3449,7 +3449,7 @@ public class ObjectReaderCreator {
 
         if (finalField) {
             if (fieldClass == int[].class) {
-                return new FieldReaderInt32ValueArrayFinalField(fieldName, fieldClass, ordinal, features, format, (int[]) defaultValue, jsonSchema, field);
+                return new FieldReaderInt32ValueArrayReadOnly(fieldName, fieldClass, ordinal, features, format, locale, (int[]) defaultValue, jsonSchema, null, field, null, null);
             }
 
             if (fieldClass == long[].class) {
