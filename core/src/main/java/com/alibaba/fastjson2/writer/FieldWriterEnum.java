@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.function.Function;
 
 class FieldWriterEnum
         extends FieldWriter {
@@ -34,9 +35,10 @@ class FieldWriterEnum
             Type fieldType,
             Class<? extends Enum> enumClass,
             Field field,
-            Method method
+            Method method,
+            Function function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, enumClass, field, method);
+        super(name, ordinal, features, format, null, label, fieldType, enumClass, field, method, function);
 
         this.enumType = enumClass;
         this.enumConstants = enumClass.getEnumConstants();
@@ -319,13 +321,14 @@ class FieldWriterEnum
 
     @Override
     public final void writeValue(JSONWriter jsonWriter, Object object) {
-        Enum value = (Enum) getFieldValue(object);
-        jsonWriter.writeEnum(value);
+        jsonWriter.writeEnum(
+                (Enum) propertyAccessor.getObject(object)
+        );
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
-        Enum value = (Enum) getFieldValue(object);
+        Enum value = (Enum) propertyAccessor.getObject(object);
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
