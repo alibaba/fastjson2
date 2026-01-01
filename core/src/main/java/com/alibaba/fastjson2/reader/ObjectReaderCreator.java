@@ -3453,7 +3453,7 @@ public class ObjectReaderCreator {
             }
 
             if (fieldClass == long[].class) {
-                return new FieldReaderInt64ValueArrayFinalField(fieldName, fieldClass, ordinal, features, format, (long[]) defaultValue, jsonSchema, field);
+                return new FieldReaderInt64ValueArrayReadOnly(fieldName, fieldClass, ordinal, features, format, locale, (long[]) defaultValue, jsonSchema, null, field, null, null);
             }
         }
 
