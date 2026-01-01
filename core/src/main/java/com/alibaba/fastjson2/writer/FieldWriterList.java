@@ -480,14 +480,29 @@ public class FieldWriterList<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        List value = toList(getFieldValue(object));
+        List value = (List) getFieldValue(object);
 
         if (value == null) {
             jsonWriter.writeNull();
             return;
         }
 
+        boolean refDetect = jsonWriter.isRefDetect();
+
+        if (refDetect) {
+            String refPath = jsonWriter.setPath(fieldName, value);
+            if (refPath != null) {
+                jsonWriter.writeReference(refPath);
+                jsonWriter.popPath(value);
+                return;
+            }
+        }
+
         writeListValue(jsonWriter, value);
+
+        if (refDetect) {
+            jsonWriter.popPath(value);
+        }
     }
 
     public final boolean isRefDetect(Object object, long features) {
