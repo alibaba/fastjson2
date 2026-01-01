@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
 
-class FieldWriterDouble<T>
+final class FieldWriterDouble<T>
         extends FieldWriter<T> {
     FieldWriterDouble(
             String name,

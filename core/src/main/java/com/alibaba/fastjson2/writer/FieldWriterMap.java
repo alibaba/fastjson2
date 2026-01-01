@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.function.Function;
 
-class FieldWriterMap
+final class FieldWriterMap
         extends FieldWriterObject {
     protected final Class<?> contentAs;
     protected Type contentAsFieldType;

@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-class FieldWriterCharVal
+final class FieldWriterCharVal
         extends FieldWriterChar {
     FieldWriterCharVal(
             String name,

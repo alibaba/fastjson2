@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.ToIntFunction;
 
-class FieldWriterInt32Val
+final class FieldWriterInt32Val
         extends FieldWriterInt32 {
     FieldWriterInt32Val(
             String name,

@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
 
-class FieldWriterFloat
+final class FieldWriterFloat
         extends FieldWriter {
     FieldWriterFloat(
             String name,

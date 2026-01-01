@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 
-class FieldWriterString<T>
+final class FieldWriterString<T>
         extends FieldWriter<T> {
     FieldWriterString(
             String name,

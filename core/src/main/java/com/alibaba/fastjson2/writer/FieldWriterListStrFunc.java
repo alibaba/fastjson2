@@ -11,7 +11,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
-public class FieldWriterListStrFunc<T>
+public final class FieldWriterListStrFunc<T>
         extends FieldWriter<T> {
     final Function<T, List<String>> function;
 

@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.Predicate;
 
-class FieldWriterBoolVal
+final class FieldWriterBoolVal
         extends FieldWriterBoolean {
     FieldWriterBoolVal(
             String name,

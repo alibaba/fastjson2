@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
 
-class FieldWriterDoubleVal<T>
+final class FieldWriterDoubleVal<T>
         extends FieldWriter<T> {
     @SuppressWarnings("unchecked")
     FieldWriterDoubleVal(

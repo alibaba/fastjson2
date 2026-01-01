@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.ToLongFunction;
 
-class FieldWriterInt64Val
+final class FieldWriterInt64Val
         extends FieldWriterInt64 {
     FieldWriterInt64Val(
             String name,
