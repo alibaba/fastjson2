@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
@@ -44,9 +45,10 @@ public class FieldWriterObject<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Function function
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         this.unwrapped = (features & FieldInfo.UNWRAPPED_MASK) != 0;
 
         if (fieldClass == Currency.class) {
@@ -59,6 +61,21 @@ public class FieldWriterObject<T>
                 || fieldClass == AtomicLongArray.class
                 || fieldClass == AtomicIntegerArray.class;
         number = Number.class.isAssignableFrom(fieldClass);
+    }
+
+    protected FieldWriterObject(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        this(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
     }
 
     @Override

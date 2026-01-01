@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Locale;
+import java.util.function.Function;
 
 class FieldWriterMap
         extends FieldWriterObject {
@@ -20,6 +21,7 @@ class FieldWriterMap
     private final Type valueType;
     final boolean valueTypeRefDetect;
     volatile ObjectWriter valueWriter;
+    final Function function;
 
     protected FieldWriterMap(
             String name,
@@ -32,9 +34,10 @@ class FieldWriterMap
             Class fieldClass,
             Field field,
             Method method,
+            Function function,
             Class<?> contentAs
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         Type keyType = null, valueType = null;
         Type contentAsFieldType = null;
         if (fieldType instanceof ParameterizedType) {
@@ -59,6 +62,20 @@ class FieldWriterMap
         this.keyType = keyType;
         this.valueType = valueType;
         this.valueTypeRefDetect = !ObjectWriterProvider.isNotReferenceDetect(TypeUtils.getClass(valueType));
+        this.function = function;
+    }
+
+    @Override
+    public Object getFieldValue(Object object) {
+        if (function != null) {
+            return function.apply(object);
+        }
+        return super.getFieldValue(object);
+    }
+
+    @Override
+    public Function getFunction() {
+        return function;
     }
 
     @Override

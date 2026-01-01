@@ -1141,7 +1141,7 @@ public class ObjectWriterCreator {
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapField(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, null, contentAs);
         }
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
@@ -1398,7 +1398,7 @@ public class ObjectWriterCreator {
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, null, contentAs);
         }
 
         if (fieldClass == Float[].class || fieldClass == Double[].class || fieldClass == BigDecimal[].class) {
@@ -1862,7 +1862,7 @@ public class ObjectWriterCreator {
             }
 
             if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
-                return new FieldWriterMapFunction(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
+                return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
             }
         }
 

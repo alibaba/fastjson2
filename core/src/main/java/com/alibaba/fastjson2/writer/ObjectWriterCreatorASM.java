@@ -4491,7 +4491,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapField(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, null, contentAs);
         }
 
         if (fieldClass.isArray()) {
