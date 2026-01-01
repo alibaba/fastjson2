@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class FieldReaderObjectFieldTest {
+public class FieldReaderObjectTest {
     @Test
     public void test() throws Throwable {
         Field f0 = Bean.class.getDeclaredField("f0");
@@ -21,22 +21,22 @@ public class FieldReaderObjectFieldTest {
         Field f7 = Bean.class.getDeclaredField("f7");
         Field f8 = Bean.class.getDeclaredField("f8");
 
-        FieldReaderObjectField fr0 = new FieldReaderObjectField("f0", byte.class, byte.class, 0, 0, null, null, null, null, f0);
-        FieldReaderObjectField fr1 = new FieldReaderObjectField("f1", short.class, short.class, 0, 0, null, null, null, null, f1);
-        FieldReaderObjectField fr2 = new FieldReaderObjectField("f2", int.class, int.class, 0, 0, null, null, null, null, f2);
-        FieldReaderObjectField fr3 = new FieldReaderObjectField("f3", long.class, long.class, 0, 0, null, null, null, null, f3);
-        FieldReaderObjectField fr4 = new FieldReaderObjectField("f4", float.class, float.class, 0, 0, null, null, null, null, f4);
-        FieldReaderObjectField fr5 = new FieldReaderObjectField("f5", double.class, double.class, 0, 0, null, null, null, null, f5);
-        FieldReaderObjectField fr6 = new FieldReaderObjectField("f6", boolean.class, boolean.class, 0, 0, null, null, null, null, f6);
-        FieldReaderObjectField fr7 = new FieldReaderObjectField("f7", char.class, char.class, 0, 0, null, null, null, null, f7);
-        FieldReaderObjectField fr8 = new FieldReaderObjectField("f8", Integer.class, Integer.class, 0, 0, null, null, null, null, f8);
+        FieldReaderObject fr0 = new FieldReaderObject("f0", byte.class, byte.class, 0, 0, null, null, null, null, null, f0, null);
+        FieldReaderObject fr1 = new FieldReaderObject("f1", short.class, short.class, 0, 0, null, null, null, null, null, f1, null);
+        FieldReaderObject fr2 = new FieldReaderObject("f2", int.class, int.class, 0, 0, null, null, null, null, null, f2, null);
+        FieldReaderObject fr3 = new FieldReaderObject("f3", long.class, long.class, 0, 0, null, null, null, null, null, f3, null);
+        FieldReaderObject fr4 = new FieldReaderObject("f4", float.class, float.class, 0, 0, null, null, null, null, null, f4, null);
+        FieldReaderObject fr5 = new FieldReaderObject("f5", double.class, double.class, 0, 0, null, null, null, null, null, f5, null);
+        FieldReaderObject fr6 = new FieldReaderObject("f6", boolean.class, boolean.class, 0, 0, null, null, null, null, null, f6, null);
+        FieldReaderObject fr7 = new FieldReaderObject("f7", char.class, char.class, 0, 0, null, null, null, null, null, f7, null);
+        FieldReaderObject fr8 = new FieldReaderObject("f8", Integer.class, Integer.class, 0, 0, null, null, null, null, null, f8, null);
 
-        FieldReaderObjectField[] fieldReaders = new FieldReaderObjectField[]{
+        FieldReaderObject[] fieldReaders = new FieldReaderObject[]{
                 fr0, fr1, fr2, fr3, fr4, fr5, fr6, fr7
         };
 
         Bean bean = new Bean();
-        for (FieldReaderObjectField fieldReader : fieldReaders) {
+        for (FieldReaderObject fieldReader : fieldReaders) {
             assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
         }
 
@@ -81,22 +81,22 @@ public class FieldReaderObjectFieldTest {
 
         long features = FieldInfo.DISABLE_UNSAFE;
 
-        FieldReaderObjectField fr0 = new FieldReaderObjectField("f0", byte.class, byte.class, 0, features, null, null, null, null, f0);
-        FieldReaderObjectField fr1 = new FieldReaderObjectField("f1", short.class, short.class, 0, features, null, null, null, null, f1);
-        FieldReaderObjectField fr2 = new FieldReaderObjectField("f2", int.class, int.class, 0, features, null, null, null, null, f2);
-        FieldReaderObjectField fr3 = new FieldReaderObjectField("f3", long.class, long.class, 0, features, null, null, null, null, f3);
-        FieldReaderObjectField fr4 = new FieldReaderObjectField("f4", float.class, float.class, 0, features, null, null, null, null, f4);
-        FieldReaderObjectField fr5 = new FieldReaderObjectField("f5", double.class, double.class, 0, features, null, null, null, null, f5);
-        FieldReaderObjectField fr6 = new FieldReaderObjectField("f6", boolean.class, boolean.class, 0, features, null, null, null, null, f6);
-        FieldReaderObjectField fr7 = new FieldReaderObjectField("f7", char.class, char.class, 0, features, null, null, null, null, f7);
-        FieldReaderObjectField fr8 = new FieldReaderObjectField("f8", Integer.class, Integer.class, 0, features, null, null, null, null, f8);
+        FieldReaderObject fr0 = new FieldReaderObject("f0", byte.class, byte.class, 0, features, null, null, null, null, null, f0, null);
+        FieldReaderObject fr1 = new FieldReaderObject("f1", short.class, short.class, 0, features, null, null, null, null, null, f1, null);
+        FieldReaderObject fr2 = new FieldReaderObject("f2", int.class, int.class, 0, features, null, null, null, null, null, f2, null);
+        FieldReaderObject fr3 = new FieldReaderObject("f3", long.class, long.class, 0, features, null, null, null, null, null, f3, null);
+        FieldReaderObject fr4 = new FieldReaderObject("f4", float.class, float.class, 0, features, null, null, null, null, null, f4, null);
+        FieldReaderObject fr5 = new FieldReaderObject("f5", double.class, double.class, 0, features, null, null, null, null, null, f5, null);
+        FieldReaderObject fr6 = new FieldReaderObject("f6", boolean.class, boolean.class, 0, features, null, null, null, null, null, f6, null);
+        FieldReaderObject fr7 = new FieldReaderObject("f7", char.class, char.class, 0, features, null, null, null, null, null, f7, null);
+        FieldReaderObject fr8 = new FieldReaderObject("f8", Integer.class, Integer.class, 0, features, null, null, null, null, null, f8, null);
 
-        FieldReaderObjectField[] fieldReaders = new FieldReaderObjectField[]{
+        FieldReaderObject[] fieldReaders = new FieldReaderObject[]{
                 fr0, fr1, fr2, fr3, fr4, fr5, fr6, fr7
         };
 
         Bean bean = new Bean();
-        for (FieldReaderObjectField fieldReader : fieldReaders) {
+        for (FieldReaderObject fieldReader : fieldReaders) {
             assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
         }
 

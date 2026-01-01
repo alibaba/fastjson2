@@ -3239,7 +3239,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, locale, defaultValue, jsonSchema, field);
+            FieldReaderObject fieldReader = new FieldReaderObject<>(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, locale, defaultValue, jsonSchema, null, field, null);
             fieldReader.initReader = initReader;
             return fieldReader;
         }
@@ -3519,7 +3519,7 @@ public class ObjectReaderCreator {
                 );
             }
 
-            return new FieldReaderObjectField(
+            return new FieldReaderObject(
                     fieldName,
                     fieldTypeResolved,
                     fieldClass,
@@ -3529,7 +3529,10 @@ public class ObjectReaderCreator {
                     locale,
                     defaultValue,
                     jsonSchema,
-                    field);
+                    null,
+                    field,
+                    null
+            );
         }
 
         if (fieldClass == LocalDateTime.class) {
@@ -3544,7 +3547,7 @@ public class ObjectReaderCreator {
             return new FieldReaderInstant(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
         }
 
-        return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field);
+        return new FieldReaderObject<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, field, null);
     }
 
     public <T, V> FieldReader createFieldReader(
