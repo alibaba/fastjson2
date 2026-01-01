@@ -3025,7 +3025,7 @@ public class ObjectReaderCreator {
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldReaderMapMethod(
+            return new FieldReaderMap(
                     fieldName,
                     fieldTypeResolved != null ? fieldTypeResolved : fieldType,
                     fieldClass,
@@ -3501,7 +3501,7 @@ public class ObjectReaderCreator {
                     );
                 }
 
-                return new FieldReaderMapField(
+                return new FieldReaderMap(
                         fieldName,
                         fieldTypeResolved,
                         fieldClass,
@@ -3511,7 +3511,9 @@ public class ObjectReaderCreator {
                         locale,
                         defaultValue,
                         jsonSchema,
+                        null,
                         field,
+                        null,
                         keyName,
                         arrayToMapDuplicateHandler
                 );

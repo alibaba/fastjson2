@@ -269,14 +269,8 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader instanceof FieldReaderMapField
-                        && ((FieldReaderMapField<?>) fieldReader).arrayToMapKey != null) {
-                    match = false;
-                    break;
-                }
-
-                if (fieldReader instanceof FieldReaderMapMethod
-                        && ((FieldReaderMapMethod<?>) fieldReader).arrayToMapKey != null) {
+                if (fieldReader instanceof FieldReaderMap
+                        && ((FieldReaderMap<?>) fieldReader).arrayToMapKey != null) {
                     match = false;
                     break;
                 }
@@ -393,14 +387,8 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader instanceof FieldReaderMapField
-                        && ((FieldReaderMapField<?>) fieldReader).arrayToMapKey != null) {
-                    match = false;
-                    break;
-                }
-
-                if (fieldReader instanceof FieldReaderMapMethod
-                        && ((FieldReaderMapMethod<?>) fieldReader).arrayToMapKey != null) {
+                if (fieldReader instanceof FieldReaderMap
+                        && ((FieldReaderMap<?>) fieldReader).arrayToMapKey != null) {
                     match = false;
                     break;
                 }
