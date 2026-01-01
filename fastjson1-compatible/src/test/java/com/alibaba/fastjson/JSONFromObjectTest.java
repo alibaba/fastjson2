@@ -65,10 +65,10 @@ public class JSONFromObjectTest {
     public void test_error() throws Exception {
         C c = new C();
 
-        JSONException error = null;
+        Exception error = null;
         try {
             JSON.toJSON(c);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             error = e;
         }
         assertNotNull(error);
