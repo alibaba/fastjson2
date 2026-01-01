@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.time.temporal.Temporal;
 import java.util.*;
@@ -34,7 +35,26 @@ public class FieldReaderObject<T>
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null, null);
+    }
+
+    public FieldReaderObject(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer function,
+            String paramName,
+            Parameter parameter
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
         this.function = function;
     }
 
@@ -266,7 +286,7 @@ public class FieldReaderObject<T>
             schema.assertValidate(value);
         }
 
-        if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
+        if (isParameter() || (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0)) {
             return;
         }
 

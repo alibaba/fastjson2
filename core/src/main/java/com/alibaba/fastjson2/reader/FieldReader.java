@@ -43,6 +43,10 @@ public abstract class FieldReader<T>
     final long fieldNameHash;
     final long fieldNameHashLCase;
 
+    final Parameter parameter;
+    final String paramName;
+    final long paramNameHash;
+
     volatile ObjectReader reader;
 
     volatile JSONPath referenceCache;
@@ -66,7 +70,7 @@ public abstract class FieldReader<T>
             Method method,
             Field field
     ) {
-        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, null);
+        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, null, null, null);
     }
 
     public FieldReader(
@@ -81,7 +85,9 @@ public abstract class FieldReader<T>
             JSONSchema schema,
             Method method,
             Field field,
-            Object function
+            Object function,
+            String paramName,
+            Parameter parameter
     ) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
@@ -100,6 +106,9 @@ public abstract class FieldReader<T>
         this.schema = schema;
         this.method = method;
         this.field = field;
+        this.paramName = paramName;
+        this.paramNameHash = paramName != null ? Fnv.hashCode64(paramName) : 0;
+        this.parameter = parameter;
 
         boolean readOnly = false;
         if (method != null && method.getParameterCount() == 0) {
@@ -635,5 +644,9 @@ public abstract class FieldReader<T>
 
     private boolean needCompareToActualFieldClass(Class clazz) {
         return clazz.isEnum() || clazz.isInterface();
+    }
+
+    public final boolean isParameter() {
+        return paramNameHash != 0;
     }
 }

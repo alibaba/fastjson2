@@ -8,7 +8,7 @@ import java.lang.reflect.Parameter;
 import java.util.Locale;
 
 final class FieldReaderInt32Param<T>
-        extends FieldReaderObjectParam<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt32Param(
             String fieldName,
             Class fieldType,
@@ -20,7 +20,7 @@ final class FieldReaderInt32Param<T>
             Locale locale,
             Object defaultValue,
             JSONSchema schema) {
-        super(fieldName, fieldType, fieldType, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, null, null, null, paramName, parameter);
     }
 
     @Override

@@ -2497,18 +2497,21 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            FieldReaderObjectParam paramReader = new FieldReaderObjectParam(
+            FieldReaderObject paramReader = new FieldReaderObject(
                     fieldName,
                     fieldType,
                     fieldClass,
-                    paramName,
-                    parameter,
                     ordinal,
                     features,
                     format,
                     locale,
                     defaultValue,
-                    schema
+                    schema,
+                    null,
+                    null,
+                    null,
+                    paramName,
+                    parameter
             );
             paramReader.initReader = initReader;
             return paramReader;
@@ -2527,7 +2530,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == long.class || fieldType == Long.class) {
-            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
+            return new FieldReaderInt64(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, schema, null, null, null, paramName, parameter);
         }
 
         Type fieldTypeResolved = null;
@@ -2572,18 +2575,20 @@ public class ObjectReaderCreator {
                     schema);
         }
 
-        return new FieldReaderObjectParam(
-                fieldName,
+        return new FieldReaderObject(fieldName,
                 fieldTypeResolved,
                 fieldClassResolved,
-                paramName,
-                parameter,
                 ordinal,
                 features,
                 format,
                 locale,
                 defaultValue,
-                schema);
+                schema,
+                null,
+                null,
+                null,
+                paramName,
+                parameter);
     }
 
     /**
@@ -2774,7 +2779,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == Long.class) {
-            return new FieldReaderInt64Method(fieldName, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method);
+            return new FieldReaderInt64(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == Float.class) {
@@ -3230,7 +3235,7 @@ public class ObjectReaderCreator {
             return new FieldReaderInt64ValueField(fieldName, fieldClass, ordinal, features, format, (Long) defaultValue, jsonSchema, field);
         }
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Field(fieldName, fieldClass, ordinal, features, format, (Long) defaultValue, jsonSchema, field);
+            return new FieldReaderInt64(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == short.class) {
@@ -3559,7 +3564,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderInt64(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, schema, method, null, function, null, null);
         }
 
         if (fieldClass == String.class) {
