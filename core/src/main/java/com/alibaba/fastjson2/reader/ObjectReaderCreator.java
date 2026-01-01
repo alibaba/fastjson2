@@ -2522,7 +2522,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == short.class || fieldType == Short.class) {
-            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, locale, defaultValue, schema);
+            return new FieldReaderInt16(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, schema, null, null, null, paramName, parameter);
         }
 
         if (fieldType == int.class || fieldType == Integer.class) {
@@ -2759,7 +2759,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == short.class) {
-            return new FieldReaderInt16ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method);
+            return new FieldReaderInt16Value(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == int.class) {
@@ -2783,7 +2783,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == Short.class) {
-            return new FieldReaderInt16Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method);
+            return new FieldReaderInt16(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == Integer.class) {
@@ -3251,11 +3251,11 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == short.class) {
-            return new FieldReaderInt16ValueField(fieldName, fieldClass, ordinal, features, format, (Short) defaultValue, jsonSchema, field);
+            return new FieldReaderInt16Value(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Field(fieldName, fieldClass, ordinal, features, format, (Short) defaultValue, jsonSchema, field);
+            return new FieldReaderInt16(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == boolean.class) {
@@ -3587,7 +3587,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderInt16(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, schema, method, null, function, null, null);
         }
 
         if (fieldClass == Byte.class) {
@@ -3893,7 +3893,7 @@ public class ObjectReaderCreator {
 
         if (fieldType == short.class) {
             ObjShortConsumer function = (ObjShortConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt16ValueFunc<>(fieldName, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, function);
+            return new FieldReaderInt16Value(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == int.class) {

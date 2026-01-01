@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ObjBoolConsumer;
 import com.alibaba.fastjson2.function.ObjByteConsumer;
 import com.alibaba.fastjson2.function.ObjFloatConsumer;
+import com.alibaba.fastjson2.function.ObjShortConsumer;
 import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.internal.PropertyAccessor;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -131,6 +132,8 @@ public abstract class FieldReader<T>
             this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjFloatConsumer) function);
         } else if (function instanceof ObjByteConsumer) {
             this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjByteConsumer) function);
+        } else if (function instanceof ObjShortConsumer) {
+            this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjShortConsumer) function);
         } else if (method != null) {
             this.propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
         } else {

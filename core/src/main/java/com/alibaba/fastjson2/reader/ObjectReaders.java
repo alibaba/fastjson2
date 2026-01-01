@@ -117,7 +117,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderShort(String fieldName, ObjShortConsumer<T> function) {
-        return new FieldReaderInt16ValueFunc<>(fieldName, 0, 0L, null, null, null, null, null, function);
+        return new FieldReaderInt16Value(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderInt(String fieldName, ObjIntConsumer<T> function) {
