@@ -2806,7 +2806,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigDecimal) defaultValue, jsonSchema, method);
+            return new FieldReaderBigDecimal<>(fieldName, (Class<BigDecimal>) fieldClass, ordinal, features, format, locale, (BigDecimal) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -3300,7 +3300,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalField(fieldName, fieldClass, ordinal, features, format, (BigDecimal) defaultValue, jsonSchema, field);
+            return new FieldReaderBigDecimal(fieldName, fieldClass, ordinal, features, format, locale, (BigDecimal) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -3629,7 +3629,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderBigDecimal<>(fieldName, fieldClass, ordinal, features, format, locale, (BigDecimal) defaultValue, schema, method, null, function, null, null);
         }
 
         if (fieldClass == BigInteger.class) {
