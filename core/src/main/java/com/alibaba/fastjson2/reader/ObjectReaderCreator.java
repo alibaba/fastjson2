@@ -2910,7 +2910,7 @@ public class ObjectReaderCreator {
             }
 
             if (fieldClass == AtomicBoolean.class) {
-                return new FieldReaderAtomicBooleanMethodReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicBoolean<>(fieldName, (Class<AtomicBoolean>) fieldClass, ordinal, features, null, null, (AtomicBoolean) defaultValue, jsonSchema, method, null, null, null, null);
             }
 
             if (fieldClass == AtomicReference.class) {
@@ -3328,7 +3328,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == AtomicBoolean.class) {
-            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, format, (AtomicBoolean) defaultValue, jsonSchema, field);
+            return new FieldReaderAtomicBoolean<>(fieldName, fieldClass, ordinal, features, format, null, (AtomicBoolean) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == AtomicReference.class) {
@@ -3591,6 +3591,10 @@ public class ObjectReaderCreator {
 
         if (fieldClass == Boolean.class) {
             return new FieldReaderBool(fieldName, fieldClass, ordinal, features, format, locale, (Boolean) defaultValue, schema, method, null, function, null, null);
+        }
+
+        if (fieldClass == AtomicBoolean.class) {
+            return new FieldReaderAtomicBoolean<Object, AtomicBoolean>(fieldName, (Class<AtomicBoolean>) fieldClass, ordinal, features, format, locale, (AtomicBoolean) defaultValue, schema, method, null, (BiConsumer<Object, AtomicBoolean>) function, null, null);
         }
 
         if (fieldClass == Short.class) {

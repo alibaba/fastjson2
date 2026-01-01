@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FieldReaderAtomicBooleanFieldReadOnlyTest {
+public class FieldReaderAtomicBooleanFieldTest {
     @Test
     public void test() {
         String str = "{\"value\":true}";
