@@ -2924,7 +2924,7 @@ public class ObjectReaderCreator {
                     String getterName = BeanUtils.getterName(methodName, PropertyNamingStrategy.CamelCase.name());
                     field = BeanUtils.getDeclaredField(method.getDeclaringClass(), getterName);
                 }
-                return new FieldReaderCollectionMethodReadOnly(
+                return new FieldReaderCollectionReadOnly(
                         fieldName,
                         fieldTypeResolved != null ? fieldTypeResolved : fieldType,
                         fieldClass,
@@ -3357,7 +3357,7 @@ public class ObjectReaderCreator {
                                 return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, null, field, null);
                             }
 
-                            return new FieldReaderCollectionFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
+                            return new FieldReaderCollectionReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, null, field);
                         }
 
                         return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, null, field, null);

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -13,9 +12,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-class FieldReaderCollectionMethodReadOnly<T>
+final class FieldReaderCollectionReadOnly<T>
         extends FieldReaderObject<T> {
-    FieldReaderCollectionMethodReadOnly(
+    final Type itemType;
+
+    FieldReaderCollectionReadOnly(
             String fieldName,
             Type fieldType,
             Class fieldClass,
@@ -23,10 +24,10 @@ class FieldReaderCollectionMethodReadOnly<T>
             long features,
             String format,
             JSONSchema schema,
-            Method setter,
+            Method method,
             Field field
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, setter, field, null);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method, field, null);
         Type itemType = null;
         if (fieldType instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
@@ -43,13 +44,10 @@ class FieldReaderCollectionMethodReadOnly<T>
             return;
         }
 
-        Collection collection;
-        try {
-            collection = (Collection) method.invoke(object);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+        if (propertyAccessor == null) {
+            return;
         }
-
+        Collection collection = (Collection) propertyAccessor.getObject(object);
         if (collection == Collections.EMPTY_LIST
                 || collection == Collections.EMPTY_SET
                 || collection == null
@@ -57,7 +55,6 @@ class FieldReaderCollectionMethodReadOnly<T>
             if (schema != null) {
                 schema.assertValidate(collection);
             }
-
             return;
         }
 
@@ -70,24 +67,30 @@ class FieldReaderCollectionMethodReadOnly<T>
             return;
         }
 
-        Collection values = (Collection) value;
-        for (Object item : values) {
-            if (item == null) {
-                collection.add(null);
-                continue;
-            }
-
-            if (item instanceof Map && itemType instanceof Class) {
-                if (!((Class) itemType).isAssignableFrom(item.getClass())) {
-                    if (itemReader == null) {
-                        itemReader = JSONFactory
-                                .getDefaultObjectReaderProvider()
-                                .getObjectReader(itemType);
-                    }
-                    item = itemReader.createInstance((Map) item, 0L);
+        if (method != null) {
+            // For method-based access (getter), we handle the collection differently
+            Collection values = (Collection) value;
+            for (Object item : values) {
+                if (item == null) {
+                    collection.add(null);
+                    continue;
                 }
+
+                if (item instanceof Map && itemType instanceof Class) {
+                    if (!((Class) itemType).isAssignableFrom(item.getClass())) {
+                        if (itemReader == null) {
+                            itemReader = JSONFactory
+                                    .getDefaultObjectReaderProvider()
+                                    .getObjectReader(itemType);
+                        }
+                        item = itemReader.createInstance((Map) item, 0L);
+                    }
+                }
+                collection.add(item);
             }
-            collection.add(item);
+        } else {
+            // For field-based access, we use addAll
+            collection.addAll((Collection) value);
         }
 
         if (schema != null) {
