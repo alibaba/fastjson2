@@ -3069,6 +3069,9 @@ class JSONReaderUTF8
                         continue;
                     }
                     case 15: {
+                        if (offset + 3 >= bytes.length) {
+                            throw new JSONException("malformed input around byte " + offset);
+                        }
                         int b1 = bytes[offset + 1] & 0xFF;
                         int b2 = bytes[offset + 2] & 0xFF;
                         int b3 = bytes[offset + 3] & 0xFF;
@@ -3079,6 +3082,9 @@ class JSONReaderUTF8
                                 | ((b1 & 0x3F) << 12)
                                 | ((b2 & 0x3F) << 6)
                                 | (b3 & 0x3F);
+                        if (codePoint < 0x10000 || codePoint > 0x10FFFF) {
+                            throw new JSONException("malformed input around byte " + offset);
+                        }
                         offset += 4;
                         chars[i++] = Character.highSurrogate(codePoint);
                         chars[i++] = Character.lowSurrogate(codePoint);
