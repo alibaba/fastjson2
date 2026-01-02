@@ -18,9 +18,32 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
+/**
+ * A specialized property accessor factory that uses Unsafe operations for field access
+ * to provide better performance compared to reflection-based access.
+ * This factory creates property accessors that use direct memory access via Unsafe
+ * to get and set field values, which is faster than traditional reflection.
+ * <p>
+ * Note: This factory is named "Unsafe" because it uses sun.misc.Unsafe, which is
+ * not part of the standard Java API and may not be available in all JVM implementations.
+ * </p>
+ * <p>
+ * This class extends PropertyAccessorFactory and overrides specific methods to provide
+ * Unsafe-based implementations for field access while maintaining compatibility with
+ * the parent class's method-based and function-based access patterns.
+ * </p>
+ */
 @SuppressWarnings("ALL")
 public final class PropertyAccessorFactoryUnsafe
         extends PropertyAccessorFactory {
+    /**
+     * Creates an Unsafe-based property accessor for the specified field.
+     * This method analyzes the field type and returns an appropriate
+     * accessor implementation optimized for that type using Unsafe operations.
+     *
+     * @param field the field to create an accessor for
+     * @return a PropertyAccessor instance for the specified field using Unsafe operations
+     */
     protected PropertyAccessor createInternal(Field field) {
         if (field.getType() == byte.class) {
             return new FieldAccessorUnsafeByte(field);
@@ -58,6 +81,11 @@ public final class PropertyAccessorFactoryUnsafe
         return new FieldAccessorUnsafeObject(field);
     }
 
+    /**
+     * Abstract base class for Unsafe-based field accessors.
+     * Provides common functionality for accessing fields using Unsafe operations,
+     * which are faster than traditional reflection-based access.
+     */
     abstract static class FieldAccessorUnsafe extends FieldAccessor {
         final long fieldOffset;
         public FieldAccessorUnsafe(Field field) {
@@ -66,6 +94,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for boolean-typed properties.
+     * Provides efficient getter and setter operations for boolean fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeBoolean extends FieldAccessorUnsafe implements PropertyAccessorBoolean {
         public FieldAccessorUnsafeBoolean(Field field) {
             super(field);
@@ -82,6 +114,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for byte-typed properties.
+     * Provides efficient getter and setter operations for byte fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeByte extends FieldAccessorUnsafe implements PropertyAccessorByte {
         public FieldAccessorUnsafeByte(Field field) {
             super(field);
@@ -98,6 +134,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for short-typed properties.
+     * Provides efficient getter and setter operations for short fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeShort extends FieldAccessorUnsafe implements PropertyAccessorShort {
         public FieldAccessorUnsafeShort(Field field) {
             super(field);
@@ -114,6 +154,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for int-typed properties.
+     * Provides efficient getter and setter operations for int fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeInt extends FieldAccessorUnsafe implements PropertyAccessorInt {
         public FieldAccessorUnsafeInt(Field field) {
             super(field);
@@ -130,6 +174,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for long-typed properties.
+     * Provides efficient getter and setter operations for long fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeLong extends FieldAccessorUnsafe implements PropertyAccessorLong {
         public FieldAccessorUnsafeLong(Field field) {
             super(field);
@@ -146,6 +194,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for float-typed properties.
+     * Provides efficient getter and setter operations for float fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeFloat extends FieldAccessorUnsafe implements PropertyAccessorFloat {
         public FieldAccessorUnsafeFloat(Field field) {
             super(field);
@@ -162,6 +214,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for double-typed properties.
+     * Provides efficient getter and setter operations for double fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeDouble extends FieldAccessorUnsafe implements PropertyAccessorDouble {
         public FieldAccessorUnsafeDouble(Field field) {
             super(field);
@@ -178,6 +234,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for char-typed properties.
+     * Provides efficient getter and setter operations for char fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeChar extends FieldAccessorUnsafe implements PropertyAccessorChar {
         public FieldAccessorUnsafeChar(Field field) {
             super(field);
@@ -194,6 +254,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for Object-typed properties.
+     * Provides efficient getter and setter operations for Object fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeObject extends FieldAccessorUnsafe implements PropertyAccessorObject {
         public FieldAccessorUnsafeObject(Field field) {
             super(field);
@@ -221,6 +285,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for String-typed properties.
+     * Provides efficient getter and setter operations for String fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeString extends FieldAccessorUnsafe implements PropertyAccessorString {
         public FieldAccessorUnsafeString(Field field) {
             super(field);
@@ -237,6 +305,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for BigInteger-typed properties.
+     * Provides efficient getter and setter operations for BigInteger fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeBigInteger extends FieldAccessorUnsafe implements PropertyAccessorBigInteger {
         public FieldAccessorUnsafeBigInteger(Field field) {
             super(field);
@@ -253,6 +325,10 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Unsafe-based field accessor implementation for BigDecimal-typed properties.
+     * Provides efficient getter and setter operations for BigDecimal fields using Unsafe operations.
+     */
     static final class FieldAccessorUnsafeBigDecimal extends FieldAccessorUnsafe implements PropertyAccessorBigDecimal {
         public FieldAccessorUnsafeBigDecimal(Field field) {
             super(field);
@@ -269,10 +345,31 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Creates a property accessor using getter and/or setter methods.
+     * This method delegates to the parent class's implementation.
+     *
+     * @param name the property name
+     * @param getter the getter method (optional, may be null)
+     * @param setter the setter method (optional, may be null)
+     * @return a PropertyAccessor instance for the specified getter/setter methods
+     */
     public PropertyAccessor create(String name, Method getter, Method setter) {
         return super.create(name, null, null, getter, setter);
     }
 
+    /**
+     * Creates a property accessor using getter and/or setter methods with explicit type information.
+     * This method attempts to optimize access by using LambdaMetafactory to create
+     * efficient functional interfaces for property access when possible.
+     *
+     * @param name the property name
+     * @param propertyClass the class of the property value
+     * @param propertyType the generic type of the property value
+     * @param getter the getter method (optional, may be null)
+     * @param setter the setter method (optional, may be null)
+     * @return a PropertyAccessor instance for the specified getter/setter methods
+     */
     public PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType, Method getter, Method setter) {
         if (propertyClass == null) {
             if (getter != null) {
@@ -342,18 +439,39 @@ public final class PropertyAccessorFactoryUnsafe
         return super.create(name, propertyClass, propertyType, getter, setter);
     }
 
+    /**
+     * Validates that the method has the expected return type.
+     * Throws an IllegalArgumentException if the return type doesn't match.
+     *
+     * @param method the method to validate
+     * @param expectedReturnType the expected return type
+     */
     static void validateMethodAndReturnType(Method method, Class<?> expectedReturnType) {
         if (!method.getReturnType().equals(expectedReturnType)) {
             throw validateMethodAndReturnTypeEror(method, expectedReturnType);
         }
     }
 
+    /**
+     * Creates an IllegalArgumentException for method return type validation errors.
+     *
+     * @param method the method with the mismatched return type
+     * @param expectedReturnType the expected return type
+     * @return an IllegalArgumentException with details about the error
+     */
     private static IllegalArgumentException validateMethodAndReturnTypeEror(Method method, Class<?> expectedReturnType) {
         return new IllegalArgumentException(
                 "Method return type mismatch. Expected: " + expectedReturnType.getSimpleName() +
                         ", Actual: " + method.getReturnType().getSimpleName());
     }
 
+    /**
+     * Creates a Predicate functional interface to access a boolean property via the given getter method.
+     * Uses LambdaMetafactory to create an efficient functional interface that wraps the method call.
+     *
+     * @param method the getter method for the boolean property
+     * @return a Predicate that can access the boolean property, or null if method is null
+     */
     public Predicate<Object> getBoolean(Method method) {
         if (method == null) {
             return null;
@@ -375,6 +493,13 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Creates an ObjBoolConsumer functional interface to set a boolean property via the given setter method.
+     * Uses LambdaMetafactory to create an efficient functional interface that wraps the method call.
+     *
+     * @param method the setter method for the boolean property
+     * @return an ObjBoolConsumer that can set the boolean property, or null if method is null
+     */
     public ObjBoolConsumer setBoolean(Method method) {
         if (method == null) {
             return null;
@@ -398,6 +523,13 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Creates a ToByteFunction functional interface to access a byte property via the given getter method.
+     * For JDK 8, this implementation delegates to getInt and converts the result to byte.
+     *
+     * @param method the getter method for the byte property
+     * @return a ToByteFunction that can access the byte property, or null if method is null
+     */
     public ToByteFunction<Object> getByte(Method method) {
         if (method == null) {
             return null;
@@ -405,6 +537,13 @@ public final class PropertyAccessorFactoryUnsafe
         return o -> (byte) getInt(method).applyAsInt(o);
     }
 
+    /**
+     * Creates a ToShortFunction functional interface to access a short property via the given getter method.
+     * For JDK 8, this implementation delegates to getInt and converts the result to short.
+     *
+     * @param method the getter method for the short property
+     * @return a ToShortFunction that can access the short property, or null if method is null
+     */
     public ToShortFunction<Object> getShort(Method method) {
         if (method == null) {
             return null;
@@ -412,6 +551,13 @@ public final class PropertyAccessorFactoryUnsafe
         return o -> (short) getInt(method).applyAsInt(o);
     }
 
+    /**
+     * Creates a ToCharFunction functional interface to access a char property via the given getter method.
+     * For JDK 8, this implementation delegates to getInt and converts the result to char.
+     *
+     * @param method the getter method for the char property
+     * @return a ToCharFunction that can access the char property, or null if method is null
+     */
     public ToCharFunction<Object> getChar(Method method) {
         if (method == null) {
             return null;
@@ -419,6 +565,13 @@ public final class PropertyAccessorFactoryUnsafe
         return o -> (char) getInt(method).applyAsInt(o);
     }
 
+    /**
+     * Creates a ToIntFunction functional interface to access an int property via the given getter method.
+     * Uses LambdaMetafactory to create an efficient functional interface that wraps the method call.
+     *
+     * @param method the getter method for the int property
+     * @return a ToIntFunction that can access the int property, or null if method is null
+     */
     public ToIntFunction<Object> getInt(Method method) {
         if (method == null) {
             return null;
@@ -644,10 +797,26 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Creates a BiConsumer functional interface to set an Object property via the given setter method.
+     * Uses LambdaMetafactory to create an efficient functional interface that wraps the method call.
+     *
+     * @param method the setter method for the Object property
+     * @return a BiConsumer that can set the Object property, or null if method is null
+     */
     public BiConsumer<Object, Object> setObject(Method method) {
         return setObject(null, method);
     }
 
+    /**
+     * Creates a BiConsumer functional interface to set an Object property via the given setter method,
+     * with the option to pass a property name for chainable setters.
+     * Uses LambdaMetafactory to create an efficient functional interface that wraps the method call.
+     *
+     * @param name the property name (for chainable setters)
+     * @param method the setter method for the Object property
+     * @return a BiConsumer that can set the Object property, or null if method is null
+     */
     public BiConsumer<Object, Object> setObject(String name, Method method) {
         if (method == null) {
             return null;
@@ -695,10 +864,25 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Checks if the given method is a chainable setter (fluent setter).
+     * A chainable setter is one that returns the same type as the declaring class,
+     * allowing for method chaining.
+     *
+     * @param method the method to check
+     * @return true if the method is a chainable setter, false otherwise
+     */
     static boolean isChainableSetter(Method method) {
         return method.getReturnType() == method.getDeclaringClass();
     }
 
+    /**
+     * Validates that the method has exactly one parameter of the expected type.
+     * Throws an IllegalArgumentException if the parameter type doesn't match.
+     *
+     * @param method the method to validate
+     * @param expectedParameterType the expected parameter type
+     */
     static void validateMethodAndParameterType(Method method, Class<?> expectedParameterType) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length != 1 || !parameterTypes[0].equals(expectedParameterType)) {
@@ -706,6 +890,13 @@ public final class PropertyAccessorFactoryUnsafe
         }
     }
 
+    /**
+     * Creates an IllegalArgumentException for method parameter type validation errors.
+     *
+     * @param expectedParameterType the expected parameter type
+     * @param parameterTypes the actual parameter types
+     * @return an IllegalArgumentException with details about the error
+     */
     private static IllegalArgumentException validateMethodAndParameterTypeError(Class<?> expectedParameterType, Class<?>[] parameterTypes) {
         return new IllegalArgumentException(
                 "Method parameter type mismatch. Expected: " + expectedParameterType.getSimpleName() +

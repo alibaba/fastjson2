@@ -4,39 +4,242 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+/**
+ * Interface for accessing object properties generically.
+ * Provides unified methods for getting and setting properties of objects,
+ * supporting both primitive types and objects through various accessor methods.
+ * Used internally by fastjson2 for efficient property access during serialization
+ * and deserialization operations.
+ */
 public interface PropertyAccessor {
+    /**
+     * Returns the name of the property being accessed.
+     *
+     * @return the property name
+     */
     String name();
+
+    /**
+     * Returns the runtime class of the property.
+     *
+     * @return the property class
+     */
     Class<?> propertyClass();
+
+    /**
+     * Returns the generic type of the property.
+     *
+     * @return the property type
+     */
     Type propertyType();
 
+    /**
+     * Checks if the property supports getting values.
+     *
+     * @return true if the property can be read, false otherwise
+     */
     boolean supportGet();
+
+    /**
+     * Checks if the property supports setting values.
+     *
+     * @return true if the property can be written, false otherwise
+     */
     boolean supportSet();
 
     // Getter methods
+
+    /**
+     * Gets the property value as an Object.
+     *
+     * @param object the object to get the property from
+     * @return the property value as Object
+     */
     Object getObject(Object object);
+
+    /**
+     * Gets the property value as a byte.
+     *
+     * @param object the object to get the property from
+     * @return the property value as byte
+     */
     byte getByte(Object object);
+
+    /**
+     * Gets the property value as a char.
+     *
+     * @param object the object to get the property from
+     * @return the property value as char
+     */
     char getChar(Object object);
+
+    /**
+     * Gets the property value as a short.
+     *
+     * @param object the object to get the property from
+     * @return the property value as short
+     */
     short getShort(Object object);
+
+    /**
+     * Gets the property value as an int.
+     *
+     * @param object the object to get the property from
+     * @return the property value as int
+     */
     int getInt(Object object);
+
+    /**
+     * Gets the property value as a long.
+     *
+     * @param object the object to get the property from
+     * @return the property value as long
+     */
     long getLong(Object object);
+
+    /**
+     * Gets the property value as a float.
+     *
+     * @param object the object to get the property from
+     * @return the property value as float
+     */
     float getFloat(Object object);
+
+    /**
+     * Gets the property value as a double.
+     *
+     * @param object the object to get the property from
+     * @return the property value as double
+     */
     double getDouble(Object object);
+
+    /**
+     * Gets the property value as a boolean.
+     *
+     * @param object the object to get the property from
+     * @return the property value as boolean
+     */
     boolean getBoolean(Object object);
+
+    /**
+     * Gets the property value as a String.
+     *
+     * @param object the object to get the property from
+     * @return the property value as String
+     */
     String getString(Object object);
+
+    /**
+     * Gets the property value as a BigInteger.
+     *
+     * @param object the object to get the property from
+     * @return the property value as BigInteger
+     */
     BigInteger getBigInteger(Object object);
+
+    /**
+     * Gets the property value as a BigDecimal.
+     *
+     * @param object the object to get the property from
+     * @return the property value as BigDecimal
+     */
     BigDecimal getBigDecimal(Object object);
 
     // Setter methods
+
+    /**
+     * Sets the property value from an Object.
+     *
+     * @param object the object to set the property on
+     * @param value the value to set
+     */
     void setObject(Object object, Object value);
+
+    /**
+     * Sets the property value from a byte.
+     *
+     * @param object the object to set the property on
+     * @param value the byte value to set
+     */
     void setByte(Object object, byte value);
-    void setShort(Object object, short value);
+
+    /**
+     * Sets the property value from a char.
+     *
+     * @param object the object to set the property on
+     * @param value the char value to set
+     */
     void setChar(Object object, char value);
+
+    /**
+     * Sets the property value from a short.
+     *
+     * @param object the object to set the property on
+     * @param value the short value to set
+     */
+    void setShort(Object object, short value);
+
+    /**
+     * Sets the property value from an int.
+     *
+     * @param object the object to set the property on
+     * @param value the int value to set
+     */
     void setInt(Object object, int value);
+
+    /**
+     * Sets the property value from a long.
+     *
+     * @param object the object to set the property on
+     * @param value the long value to set
+     */
     void setLong(Object object, long value);
+
+    /**
+     * Sets the property value from a float.
+     *
+     * @param object the object to set the property on
+     * @param value the float value to set
+     */
     void setFloat(Object object, float value);
+
+    /**
+     * Sets the property value from a double.
+     *
+     * @param object the object to set the property on
+     * @param value the double value to set
+     */
     void setDouble(Object object, double value);
+
+    /**
+     * Sets the property value from a boolean.
+     *
+     * @param object the object to set the property on
+     * @param value the boolean value to set
+     */
     void setBoolean(Object object, boolean value);
+
+    /**
+     * Sets the property value from a String.
+     *
+     * @param object the object to set the property on
+     * @param value the String value to set
+     */
     void setString(Object object, String value);
+
+    /**
+     * Sets the property value from a BigInteger.
+     *
+     * @param object the object to set the property on
+     * @param value the BigInteger value to set
+     */
     void setBigInteger(Object object, BigInteger value);
+
+    /**
+     * Sets the property value from a BigDecimal.
+     *
+     * @param object the object to set the property on
+     * @param value the BigDecimal value to set
+     */
     void setBigDecimal(Object object, BigDecimal value);
 }
