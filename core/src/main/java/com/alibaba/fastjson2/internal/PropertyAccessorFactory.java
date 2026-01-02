@@ -45,6 +45,15 @@ public class PropertyAccessorFactory {
         if (field.getType() == char.class) {
             return new FieldAccessorReflectChar(field);
         }
+        if (field.getType() == String.class) {
+            return new FieldAccessorReflectString(field);
+        }
+        if (field.getType() == BigInteger.class) {
+            return new FieldAccessorReflectBigInteger(field);
+        }
+        if (field.getType() == BigDecimal.class) {
+            return new FieldAccessorReflectBigDecimal(field);
+        }
         return new FieldAccessorReflectObject(field);
     }
 
@@ -1095,6 +1104,11 @@ public class PropertyAccessorFactory {
         }
 
         @Override
+        default Object getObject(Object object) {
+            return getString(object);
+        }
+
+        @Override
         default void setObject(Object object, Object value) {
             setString(object, (String) value);
         }
@@ -1137,8 +1151,13 @@ public class PropertyAccessorFactory {
         }
 
         @Override
+        default Object getObject(Object object) {
+            return getString(object);
+        }
+
+        @Override
         default void setObject(Object object, Object value) {
-            setBigInteger(object, (BigInteger) value);
+            setString(object, (String) value);
         }
     }
 
@@ -1179,8 +1198,13 @@ public class PropertyAccessorFactory {
         }
 
         @Override
+        default Object getObject(Object object) {
+            return getString(object);
+        }
+
+        @Override
         default void setObject(Object object, Object value) {
-            setBigDecimal(object, (BigDecimal) value);
+            setString(object, (String) value);
         }
     }
 
@@ -1213,92 +1237,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public Object getObject(Object object) {
-            return getBoolean(object);
-        }
-
-        @Override
-        public byte getByte(Object object) {
-            return toByte(getBoolean(object));
-        }
-
-        @Override
-        public char getChar(Object object) {
-            return toChar(getBoolean(object));
-        }
-
-        @Override
-        public short getShort(Object object) {
-            return toShort(getBoolean(object));
-        }
-
-        @Override
-        public int getInt(Object object) {
-            return toInt(getBoolean(object));
-        }
-
-        @Override
-        public long getLong(Object object) {
-            return toLong(getBoolean(object));
-        }
-
-        @Override
-        public float getFloat(Object object) {
-            return toFloat(getBoolean(object));
-        }
-
-        @Override
-        public double getDouble(Object object) {
-            return toDouble(getBoolean(object));
-        }
-
-        @Override
         public boolean getBoolean(Object object) {
             try {
                 return field.getBoolean(object);
             } catch (IllegalAccessException e) {
                 throw errorForGet(e);
             }
-        }
-
-        @Override
-        public void setObject(Object object, Object value) {
-            setBoolean(object, toBoolean(value));
-        }
-
-        @Override
-        public void setByte(Object object, byte value) {
-            setBoolean(object, toBoolean(value));
-        }
-
-        @Override
-        public void setChar(Object object, char value) {
-            setBoolean(object, toBoolean(value));
-        }
-
-        @Override
-        public void setShort(Object object, short value) {
-            setBoolean(object, toBoolean(value));
-        }
-
-        @Override
-        public void setInt(Object object, int value) {
-            setBoolean(object, toBoolean(value));
-        }
-
-        @Override
-        public void setLong(Object object, long value) {
-            setBoolean(object, toBoolean(value));
-        }
-
-        @Override
-        public void setFloat(Object object, float value) {
-            setBoolean(object, toBoolean(value));
-        }
-
-        @Override
-        public void setDouble(Object object, double value) {
-            setBoolean(object, toBoolean(value));
         }
 
         @Override
@@ -1499,6 +1443,96 @@ public class PropertyAccessorFactory {
                 field.set(object, value);
             } catch (IllegalAccessException e) {
                 throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectString extends FieldAccessorReflect implements PropertyAccessorString {
+        public FieldAccessorReflectString(Field field) {
+            super(field);
+        }
+
+        @Override
+        public String getString(Object object) {
+            try {
+                return (String) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setString(Object object, String value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectBigInteger extends FieldAccessorReflect implements PropertyAccessorBigInteger {
+        public FieldAccessorReflectBigInteger(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Object getObject(Object object) {
+            try {
+                return field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public BigInteger getBigInteger(Object object) {
+            try {
+                return (BigInteger) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setObject(Object object, Object value) {
+            try {
+                field.set(object, (BigInteger) value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public void setBigInteger(Object object, BigInteger value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectBigDecimal extends FieldAccessorReflect implements PropertyAccessorBigDecimal {
+        public FieldAccessorReflectBigDecimal(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Object getObject(Object object) {
+            try {
+                return field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public BigDecimal getBigDecimal(Object object) {
+            try {
+                return (BigDecimal) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
             }
         }
     }
