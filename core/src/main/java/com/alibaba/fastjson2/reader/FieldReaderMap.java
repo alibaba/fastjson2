@@ -33,7 +33,7 @@ public class FieldReaderMap<T>
             String arrayToMapKey,
             BiConsumer arrayToMapDuplicateHandler
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null);
         this.valueType = TypeUtils.getMapValueType(fieldType);
         this.arrayToMapKey = arrayToMapKey;
         this.namingStrategy = PropertyNamingStrategy.of(format);

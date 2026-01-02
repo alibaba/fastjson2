@@ -25,8 +25,7 @@ final class FieldReaderStringArray
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
-        initReader = ObjectReaderImplStringArray.INSTANCE;
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, ObjectReaderImplStringArray.INSTANCE);
     }
 
     @Override

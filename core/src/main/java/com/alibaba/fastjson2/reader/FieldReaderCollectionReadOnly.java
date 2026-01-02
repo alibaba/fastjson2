@@ -28,7 +28,7 @@ final class FieldReaderCollectionReadOnly<T>
             Method method,
             Field field
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method, field, null);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method, field, null, null);
         Type itemType = null;
         if (fieldType instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();

@@ -2497,7 +2497,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            FieldReaderObject paramReader = new FieldReaderObject(
+            return new FieldReaderObject(
                     fieldName,
                     fieldType,
                     fieldClass,
@@ -2511,10 +2511,9 @@ public class ObjectReaderCreator {
                     null,
                     null,
                     paramName,
-                    parameter
+                    parameter,
+                    initReader
             );
-            paramReader.initReader = initReader;
-            return paramReader;
         }
 
         if (fieldType == byte.class || fieldType == Byte.class) {
@@ -2620,7 +2619,8 @@ public class ObjectReaderCreator {
                 null,
                 null,
                 paramName,
-                parameter);
+                parameter,
+                null);
     }
 
     /**
@@ -2748,7 +2748,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            FieldReaderObject fieldReaderObjectMethod = new FieldReaderObject(
+            return new FieldReaderObject(
                     fieldName,
                     fieldType,
                     fieldClass,
@@ -2760,10 +2760,11 @@ public class ObjectReaderCreator {
                     jsonSchema,
                     method,
                     null,
-                    null
+                    null,
+                    null,
+                    null,
+                    initReader
             );
-            fieldReaderObjectMethod.initReader = initReader;
-            return fieldReaderObjectMethod;
         }
 
         if (fieldType == boolean.class) {
@@ -3072,6 +3073,7 @@ public class ObjectReaderCreator {
                 jsonSchema,
                 method,
                 field,
+                null,
                 null
         );
     }
@@ -3256,9 +3258,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            FieldReaderObject fieldReader = new FieldReaderObject<>(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, locale, defaultValue, jsonSchema, null, field, null);
-            fieldReader.initReader = initReader;
-            return fieldReader;
+            return new FieldReaderObject<>(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, locale, defaultValue, jsonSchema, null, field, null, null, null, initReader);
         }
 
         if (fieldClass == int.class) {
@@ -3565,6 +3565,7 @@ public class ObjectReaderCreator {
                     jsonSchema,
                     null,
                     field,
+                    null,
                     null
             );
         }
@@ -3581,7 +3582,7 @@ public class ObjectReaderCreator {
             return new FieldReaderInstant(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
         }
 
-        return new FieldReaderObject<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, field, null);
+        return new FieldReaderObject<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, field, null, null);
     }
 
     public <T, V> FieldReader createFieldReader(
@@ -3621,7 +3622,7 @@ public class ObjectReaderCreator {
             ObjectReader initReader
     ) {
         if (initReader != null) {
-            FieldReaderObject fieldReaderObjectMethod = new FieldReaderObject(
+            return new FieldReaderObject(
                     fieldName,
                     fieldType,
                     fieldClass,
@@ -3633,10 +3634,11 @@ public class ObjectReaderCreator {
                     schema,
                     method,
                     null,
-                    function
+                    function,
+                    null,
+                    null,
+                    initReader
             );
-            fieldReaderObjectMethod.initReader = initReader;
-            return fieldReaderObjectMethod;
         }
 
         if (fieldClass == Integer.class) {

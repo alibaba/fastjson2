@@ -26,7 +26,7 @@ final class FieldReaderInt8Value<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, byte.class, byte.class, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, byte.class, byte.class, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter, null);
     }
 
     @Override

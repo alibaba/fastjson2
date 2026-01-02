@@ -26,7 +26,7 @@ final class FieldReaderOffsetDateTime
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null);
         initReader = ObjectReaderImplOffsetDateTime.of(format, locale);
     }
 

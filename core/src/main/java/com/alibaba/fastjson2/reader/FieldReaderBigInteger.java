@@ -27,7 +27,7 @@ final class FieldReaderBigInteger<T>
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null);
     }
 
     @Override

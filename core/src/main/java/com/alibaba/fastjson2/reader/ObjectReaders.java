@@ -243,7 +243,8 @@ public class ObjectReaders {
                 null,
                 null,
                 null,
-                function
+                function,
+                null
         );
     }
 

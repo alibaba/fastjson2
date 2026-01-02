@@ -27,7 +27,7 @@ final class FieldReaderInt16Value<T>
             Parameter parameter
     ) {
         super(fieldName, short.class, short.class, ordinal, features, format, locale, defaultValue, schema, method, field,
-                function, paramName, parameter);
+                function, paramName, parameter, null);
     }
 
     @Override

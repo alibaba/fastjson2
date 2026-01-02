@@ -27,7 +27,7 @@ final class FieldReaderInt64Value<T>
             Parameter parameter
     ) {
         super(fieldName, long.class, long.class, ordinal, features, format, locale, defaultValue, schema, method, field,
-                function, paramName, parameter);
+                function, paramName, parameter, null);
     }
 
     @Override

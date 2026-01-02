@@ -26,7 +26,7 @@ final class FieldReaderLocalDate
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null);
         initReader = ObjectReaderImplLocalDate.of(format, locale);
     }
 

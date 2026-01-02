@@ -26,7 +26,7 @@ final class FieldReaderFloatValue<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, float.class, float.class, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, float.class, float.class, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter, null);
     }
 
     @Override

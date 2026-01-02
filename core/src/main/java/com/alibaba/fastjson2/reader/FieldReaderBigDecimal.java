@@ -29,7 +29,7 @@ final class FieldReaderBigDecimal<T, V>
             Parameter parameter
     ) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field,
-                function, paramName, parameter);
+                function, paramName, parameter, null);
     }
 
     @Override

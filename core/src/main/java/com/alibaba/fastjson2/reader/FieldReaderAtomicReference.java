@@ -28,7 +28,7 @@ public final class FieldReaderAtomicReference<T, V>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter, null);
 
         Type referenceType = null;
         if (fieldType instanceof ParameterizedType) {

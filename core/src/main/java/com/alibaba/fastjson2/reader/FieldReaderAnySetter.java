@@ -17,7 +17,7 @@ class FieldReaderAnySetter<T>
             String format,
             JSONSchema schema,
             Method method) {
-        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, schema, method, null, null);
+        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, schema, method, null, null, null);
     }
 
     @Override

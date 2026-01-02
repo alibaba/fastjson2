@@ -45,7 +45,7 @@ final class FieldReaderMapReadOnly<T, V>
             String arrayToMapKey,
             BiConsumer arrayToMapDuplicateHandler
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter, null);
         this.function = function;
         this.valueType = TypeUtils.getMapValueType(fieldType);
         this.arrayToMapKey = arrayToMapKey;

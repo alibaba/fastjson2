@@ -25,8 +25,7 @@ final class FieldReaderUUID
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
-        initReader = ObjectReaderImplUUID.INSTANCE;
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, ObjectReaderImplUUID.INSTANCE);
     }
 
     @Override

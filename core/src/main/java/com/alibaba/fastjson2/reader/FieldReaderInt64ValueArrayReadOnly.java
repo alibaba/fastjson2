@@ -26,7 +26,7 @@ final class FieldReaderInt64ValueArrayReadOnly<T>
             Parameter parameter
     ) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field,
-                null, paramName, parameter);
+                null, paramName, parameter, null);
     }
 
     @Override

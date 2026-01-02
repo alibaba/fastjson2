@@ -27,7 +27,7 @@ final class FieldReaderCharValue<T>
             Parameter parameter
     ) {
         super(fieldName, char.class, char.class, ordinal, features, format, locale, defaultValue, schema, method, field,
-                function, paramName, parameter);
+                function, paramName, parameter, null);
     }
 
     @Override

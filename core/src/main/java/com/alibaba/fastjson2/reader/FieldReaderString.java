@@ -31,7 +31,7 @@ final class FieldReaderString<T, V>
             Parameter parameter
     ) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field,
-                function, paramName, parameter);
+                function, paramName, parameter, null);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
         upper = "upper".equals(format);
         emptyToNull = (features & JSONReader.Feature.EmptyStringAsNull.mask) != 0;

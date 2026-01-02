@@ -32,9 +32,10 @@ public class FieldReaderObject<T>
             JSONSchema schema,
             Method method,
             Field field,
-            Object function
+            Object function,
+            ObjectReader initReader
     ) {
-        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null, null);
+        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null, null, initReader);
     }
 
     public FieldReaderObject(
@@ -51,9 +52,11 @@ public class FieldReaderObject<T>
             Field field,
             Object function,
             String paramName,
-            Parameter parameter
+            Parameter parameter,
+            ObjectReader initReader
     ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        this.initReader = initReader;
     }
 
     @Override

@@ -24,7 +24,7 @@ final class FieldReaderObjectFunc<T, V>
             BiConsumer<T, V> function,
             ObjectReader fieldObjectReader
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, function, null);
         this.initReader = fieldObjectReader;
     }
 

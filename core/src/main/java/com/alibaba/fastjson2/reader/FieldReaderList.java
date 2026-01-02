@@ -40,7 +40,7 @@ public class FieldReaderList<T, V>
             Field field,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null);
         this.itemType = itemType;
         this.itemClass = itemClass;
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
@@ -89,7 +89,7 @@ public class FieldReaderList<T, V>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter, null);
         this.itemType = itemType;
         this.itemClass = itemClass;
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
@@ -125,7 +125,7 @@ public class FieldReaderList<T, V>
             Supplier<List<V>> listCreator,
             ObjectReader<V> itemObjectReader
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter, null);
         this.itemType = itemType;
         this.itemClass = itemClass;
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
@@ -163,7 +163,7 @@ public class FieldReaderList<T, V>
             ObjectReader<V> itemObjectReader
     ) {
         FieldReaderList<T, V> instance = new FieldReaderList<T, V>(
-                fieldName, fieldType, fieldClass, itemType, itemClass, ordinal, features, format, locale, defaultValue, schema, method, field, (BiConsumer<T, V>) null
+                fieldName, fieldType, fieldClass, itemType, itemClass, ordinal, features, format, locale, defaultValue, schema, method, field, (BiConsumer<T, V>) null, null, null
         );
         instance.listCreator = listCreator;
         instance.itemObjectReader = itemObjectReader;
