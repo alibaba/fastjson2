@@ -9,7 +9,7 @@ import java.util.Properties;
 import java.util.function.ToLongFunction;
 
 public final class Conf {
-    private static final boolean USE_UNSAFE;
+    public static final boolean USE_UNSAFE;
     public static final Properties DEFAULT_PROPERTIES;
 
     static {
@@ -121,9 +121,27 @@ public final class Conf {
         BYTES = bytes;
     }
 
-    public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY = USE_UNSAFE
-            ? new PropertyAccessorFactoryUnsafe()
-            : new PropertyAccessorFactory();
+    public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY;
+    static {
+        PropertyAccessorFactory propertyAccessorFactory;
+        if (USE_UNSAFE) {
+            propertyAccessorFactory = null;
+            if (JDKUtils.JVM_VERSION >= 11) {
+                try {
+                    Class<?> classV = Conf.class.getClassLoader().loadClass("com.alibaba.fastjson2.internal.PropertyAccessorFactoryVarHandle");
+                    propertyAccessorFactory = (PropertyAccessorFactory) classV.newInstance();
+                } catch (Exception ignored) {
+                    // ignore
+                }
+            }
+            if (propertyAccessorFactory == null) {
+                propertyAccessorFactory = new PropertyAccessorFactoryUnsafe();
+            }
+        } else {
+            propertyAccessorFactory = new PropertyAccessorFactory();
+        }
+        PROPERTY_ACCESSOR_FACTORY = propertyAccessorFactory;
+    }
 
     public static final ToLongFunction<BigDecimal> DECIMAL_INT_COMPACT;
     static {
