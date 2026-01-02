@@ -14,7 +14,6 @@ final class FieldReaderInt16Value<T>
         extends FieldReaderObject<T> {
     public FieldReaderInt16Value(
             String fieldName,
-            Class fieldType,
             int ordinal,
             long features,
             String format,
@@ -27,7 +26,7 @@ final class FieldReaderInt16Value<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field,
+        super(fieldName, short.class, short.class, ordinal, features, format, locale, defaultValue, schema, method, field,
                 function, paramName, parameter);
     }
 

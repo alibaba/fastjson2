@@ -113,11 +113,11 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderByte(String fieldName, ObjByteConsumer<T> function) {
-        return new FieldReaderInt8Value(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderInt8Value(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderShort(String fieldName, ObjShortConsumer<T> function) {
-        return new FieldReaderInt16Value(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderInt16Value(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderInt(String fieldName, ObjIntConsumer<T> function) {

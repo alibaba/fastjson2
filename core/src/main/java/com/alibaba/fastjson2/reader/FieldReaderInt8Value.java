@@ -14,7 +14,6 @@ final class FieldReaderInt8Value<T>
         extends FieldReaderObject<T> {
     public FieldReaderInt8Value(
             String fieldName,
-            Class fieldType,
             int ordinal,
             long features,
             String format,
@@ -27,7 +26,7 @@ final class FieldReaderInt8Value<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, byte.class, byte.class, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override

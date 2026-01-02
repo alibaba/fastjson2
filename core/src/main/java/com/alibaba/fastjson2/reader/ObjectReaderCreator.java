@@ -2775,11 +2775,11 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == byte.class) {
-            return new FieldReaderInt8Value(fieldName, fieldClass, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, method, null, null, null, null);
+            return new FieldReaderInt8Value(fieldName, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == short.class) {
-            return new FieldReaderInt16Value(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, null, null, null, null);
+            return new FieldReaderInt16Value(fieldName, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == int.class) {
@@ -3276,7 +3276,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == short.class) {
-            return new FieldReaderInt16Value(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderInt16Value(fieldName, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == Short.class) {
@@ -3291,7 +3291,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == byte.class) {
-            return new FieldReaderInt8Value(fieldName, fieldClass, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderInt8Value(fieldName, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == Byte.class) {
@@ -3982,12 +3982,12 @@ public class ObjectReaderCreator {
 
         if (fieldType == byte.class) {
             ObjByteConsumer function = (ObjByteConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt8Value(fieldName, fieldClass, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderInt8Value(fieldName, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == short.class) {
             ObjShortConsumer function = (ObjShortConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt16Value(fieldName, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderInt16Value(fieldName, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == int.class) {
