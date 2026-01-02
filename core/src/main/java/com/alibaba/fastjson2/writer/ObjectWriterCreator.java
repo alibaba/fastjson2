@@ -2033,7 +2033,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolVal(fieldName, 0, 0, null, null, boolean.class, boolean.class, field, method, (Predicate<T>) lambda);
+            return new FieldWriterBoolVal(fieldName, ordinal, features, format, label, boolean.class, boolean.class, field, method, (Predicate<T>) lambda);
         }
 
         if (fieldClass == Boolean.class) {
