@@ -1703,6 +1703,15 @@ public class PropertyAccessorFactory {
     public <T, V> PropertyAccessor create(String name, Class<?> propertyClass, Type propertyType,
                                       Function<T, V> getterFunc,
                                       BiConsumer<T, V> setterFunc) {
+        if (propertyClass == String.class) {
+            return new FunctionAccessorString<T>(name, (Function<T, String>) getterFunc, (BiConsumer<T, String>) setterFunc);
+        }
+        if (propertyClass == BigInteger.class) {
+            return new FunctionAccessorBigInteger<T>(name, (Function<T, BigInteger>) getterFunc, (BiConsumer<T, BigInteger>) setterFunc);
+        }
+        if (propertyClass == BigDecimal.class) {
+            return new FunctionAccessorBigDecimal<T>(name, (Function<T, BigDecimal>) getterFunc, (BiConsumer<T, BigDecimal>) setterFunc);
+        }
         return new FunctionAccessorObject<T, V>(name, propertyType, propertyClass, getterFunc, setterFunc);
     }
 
@@ -2163,6 +2172,60 @@ public class PropertyAccessorFactory {
             } catch (Exception e) {
                 throw errorForSet(e);
             }
+        }
+    }
+
+    static final class FunctionAccessorString<T> extends FunctionAccessor<T> implements PropertyAccessorString {
+        private final Function<T, String> getterFunc;
+        private final BiConsumer<T, String> setterFunc;
+        public FunctionAccessorString(String name, Function<T, String> getterFunc, BiConsumer<T, String> setterFunc) {
+            super(name, String.class, String.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public String getString(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setString(Object object, String value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    static final class FunctionAccessorBigInteger<T> extends FunctionAccessor<T> implements PropertyAccessorBigInteger {
+        private final Function<T, BigInteger> getterFunc;
+        private final BiConsumer<T, BigInteger> setterFunc;
+        public FunctionAccessorBigInteger(String name, Function<T, BigInteger> getterFunc, BiConsumer<T, BigInteger> setterFunc) {
+            super(name, BigInteger.class, BigInteger.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public BigInteger getBigInteger(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setBigInteger(Object object, BigInteger value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    static final class FunctionAccessorBigDecimal<T> extends FunctionAccessor<T> implements PropertyAccessorBigDecimal {
+        private final Function<T, BigDecimal> getterFunc;
+        private final BiConsumer<T, BigDecimal> setterFunc;
+        public FunctionAccessorBigDecimal(String name, Function<T, BigDecimal> getterFunc, BiConsumer<T, BigDecimal> setterFunc) {
+            super(name, BigDecimal.class, BigDecimal.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public BigDecimal getBigDecimal(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setBigDecimal(Object object, BigDecimal value) {
+            setterFunc.accept((T) object, value);
         }
     }
 

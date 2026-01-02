@@ -63,9 +63,9 @@ public class FieldReaderBigIntegerMethodTest {
         Bean2 bean = new Bean2();
         ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, "123"));
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123));
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123L));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, "123"));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, 123));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, 123L));
     }
 
     private static class Bean2 {

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.issues_3700;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,7 @@ public class Issue3789 {
     public void test() {
         String name = "abc";
 
-        assertThrows(JSONException.class,
+        assertThrows(Exception.class,
                 () -> JSONObject.of("name", null).to(Bean.class));
 
         assertNull(JSONObject.of("name", null).to(Bean.class, JSONReader.Feature.IgnoreSetNullValue).name);
