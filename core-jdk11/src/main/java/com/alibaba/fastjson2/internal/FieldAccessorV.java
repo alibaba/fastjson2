@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public final class FieldAccessorV extends FieldAccessor {
     final VarHandle varHandle;
@@ -67,6 +69,21 @@ public final class FieldAccessorV extends FieldAccessor {
     }
 
     @Override
+    public String getString(Object object) {
+        return (String) varHandle.get(object);
+    }
+
+    @Override
+    public BigInteger getBigInteger(Object object) {
+        return (BigInteger) varHandle.get(object);
+    }
+
+    @Override
+    public BigDecimal getBigDecimal(Object object) {
+        return (BigDecimal) varHandle.get(object);
+    }
+
+    @Override
     public void setObject(Object object, Object value) {
         varHandle.set(object, value);
     }
@@ -108,6 +125,21 @@ public final class FieldAccessorV extends FieldAccessor {
 
     @Override
     public void setBoolean(Object object, boolean value) {
+        varHandle.set(object, value);
+    }
+
+    @Override
+    public void setString(Object object, String value) {
+        varHandle.set(object, value);
+    }
+
+    @Override
+    public void setBigInteger(Object object, BigInteger value) {
+        varHandle.set(object, value);
+    }
+
+    @Override
+    public void setBigDecimal(Object object, BigDecimal value) {
         varHandle.set(object, value);
     }
 }
