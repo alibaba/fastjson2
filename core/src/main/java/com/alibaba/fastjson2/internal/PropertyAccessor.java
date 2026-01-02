@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.internal;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface PropertyAccessor {
     String name();
@@ -20,6 +22,9 @@ public interface PropertyAccessor {
     float getFloat(Object object);
     double getDouble(Object object);
     boolean getBoolean(Object object);
+    String getString(Object object);
+    BigInteger getBigInteger(Object object);
+    BigDecimal getBigDecimal(Object object);
 
     // Setter methods
     void setObject(Object object, Object value);
@@ -31,4 +36,7 @@ public interface PropertyAccessor {
     void setFloat(Object object, float value);
     void setDouble(Object object, double value);
     void setBoolean(Object object, boolean value);
+    void setString(Object object, String value);
+    void setBigInteger(Object object, BigInteger value);
+    void setBigDecimal(Object object, BigDecimal value);
 }

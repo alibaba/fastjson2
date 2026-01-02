@@ -8,6 +8,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.internal.Cast.*;
@@ -749,6 +751,147 @@ public class PropertyAccessorFactory {
         @Override
         default void setBoolean(Object object, boolean value) {
             setObject(object, value);
+        }
+    }
+
+    protected interface PropertyAccessorString extends PropertyAccessorObject {
+        @Override
+        default byte getByte(Object object) {
+            return toByte(getString(object));
+        }
+
+        @Override
+        default char getChar(Object object) {
+            return toChar(getString(object));
+        }
+
+        @Override
+        default short getShort(Object object) {
+            return toShort(getString(object));
+        }
+
+        @Override
+        default int getInt(Object object) {
+            return toInt(getString(object));
+        }
+
+        @Override
+        default long getLong(Object object) {
+            return toLong(getString(object));
+        }
+
+        @Override
+        default float getFloat(Object object) {
+            return toFloat(getString(object));
+        }
+
+        @Override
+        default double getDouble(Object object) {
+            return toDouble(getString(object));
+        }
+
+        @Override
+        default boolean getBoolean(Object object) {
+            return toBoolean(getString(object));
+        }
+
+        @Override
+        default String getString(Object object) {
+            return (String) getObject(object);
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setObject(object, value);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setString(object, (String) value);
+        }
+    }
+
+    protected interface PropertyAccessorBigInteger extends PropertyAccessorObject {
+        @Override
+        default byte getByte(Object object) {
+            return toByte(getBigInteger(object));
+        }
+
+        @Override
+        default short getShort(Object object) {
+            return toShort(getBigInteger(object));
+        }
+
+        @Override
+        default int getInt(Object object) {
+            return toInt(getBigInteger(object));
+        }
+
+        @Override
+        default long getLong(Object object) {
+            return toLong(getBigInteger(object));
+        }
+
+        @Override
+        default float getFloat(Object object) {
+            return toFloat(getBigInteger(object));
+        }
+
+        @Override
+        default double getDouble(Object object) {
+            return toDouble(getBigInteger(object));
+        }
+
+        @Override
+        default boolean getBoolean(Object object) {
+            return toBoolean(getBigInteger(object));
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setBigInteger(object, (BigInteger) value);
+        }
+    }
+
+    protected interface PropertyAccessorBigDecimal extends PropertyAccessorObject {
+        @Override
+        default byte getByte(Object object) {
+            return toByte(getBigDecimal(object));
+        }
+
+        @Override
+        default short getShort(Object object) {
+            return toShort(getBigDecimal(object));
+        }
+
+        @Override
+        default int getInt(Object object) {
+            return toInt(getBigDecimal(object));
+        }
+
+        @Override
+        default long getLong(Object object) {
+            return toLong(getBigDecimal(object));
+        }
+
+        @Override
+        default float getFloat(Object object) {
+            return toFloat(getBigDecimal(object));
+        }
+
+        @Override
+        default double getDouble(Object object) {
+            return toDouble(getBigDecimal(object));
+        }
+
+        @Override
+        default boolean getBoolean(Object object) {
+            return toBoolean(getBigDecimal(object));
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setBigDecimal(object, (BigDecimal) value);
         }
     }
 
