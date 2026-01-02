@@ -980,20 +980,17 @@ public class PropertyAccessorFactory {
 
         @Override
         default String getString(Object object) {
-            Object value = getObject(object);
-            return value != null ? value.toString() : null;
+            return Cast.toString(getObject(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            Object value = getObject(object);
-            return value != null ? toBigInteger(value) : null;
+            return toBigInteger(getObject(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            Object value = getObject(object);
-            return value != null ? toBigDecimal(value) : null;
+            return toBigDecimal(getObject(object));
         }
 
         @Override
@@ -1112,6 +1109,26 @@ public class PropertyAccessorFactory {
         default void setObject(Object object, Object value) {
             setString(object, (String) value);
         }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getString(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setString(object, Cast.toString(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getString(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setString(object, Cast.toString(value));
+        }
     }
 
     protected interface PropertyAccessorBigInteger extends PropertyAccessorObject {
@@ -1152,12 +1169,32 @@ public class PropertyAccessorFactory {
 
         @Override
         default Object getObject(Object object) {
-            return getString(object);
+            return getBigInteger(object);
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setString(object, (String) value);
+            setBigInteger(object, toBigInteger(value));
+        }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getBigInteger(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setBigInteger(object, toBigInteger(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getBigInteger(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setBigInteger(object, toBigInteger(value));
         }
     }
 
@@ -1198,13 +1235,33 @@ public class PropertyAccessorFactory {
         }
 
         @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getBigDecimal(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setBigDecimal(object, toBigDecimal(value));
+        }
+
+        @Override
         default Object getObject(Object object) {
-            return getString(object);
+            return getBigDecimal(object);
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setString(object, (String) value);
+            setBigDecimal(object, (BigDecimal) value);
+        }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getBigDecimal(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setBigDecimal(object, toBigDecimal(value));
         }
     }
 
@@ -1477,29 +1534,11 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public Object getObject(Object object) {
-            try {
-                return field.get(object);
-            } catch (IllegalAccessException e) {
-                throw errorForGet(e);
-            }
-        }
-
-        @Override
         public BigInteger getBigInteger(Object object) {
             try {
                 return (BigInteger) field.get(object);
             } catch (IllegalAccessException e) {
                 throw errorForGet(e);
-            }
-        }
-
-        @Override
-        public void setObject(Object object, Object value) {
-            try {
-                field.set(object, (BigInteger) value);
-            } catch (IllegalAccessException e) {
-                throw errorForSet(e);
             }
         }
 
@@ -1519,18 +1558,18 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public Object getObject(Object object) {
+        public BigDecimal getBigDecimal(Object object) {
             try {
-                return field.get(object);
+                return (BigDecimal) field.get(object);
             } catch (IllegalAccessException e) {
                 throw errorForGet(e);
             }
         }
 
         @Override
-        public BigDecimal getBigDecimal(Object object) {
+        public void setBigDecimal(Object object, BigDecimal value) {
             try {
-                return (BigDecimal) field.get(object);
+                field.set(object, value);
             } catch (IllegalAccessException e) {
                 throw errorForGet(e);
             }

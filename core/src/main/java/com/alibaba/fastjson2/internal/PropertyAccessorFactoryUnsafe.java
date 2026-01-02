@@ -279,18 +279,8 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public Object getObject(Object object) {
-            return UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
-        }
-
-        @Override
         public BigDecimal getBigDecimal(Object object) {
             return (BigDecimal) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
-        }
-
-        @Override
-        public void setObject(Object object, Object value) {
-            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, (BigDecimal) value);
         }
 
         @Override
