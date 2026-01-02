@@ -11,6 +11,8 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.function.*;
 
@@ -43,6 +45,15 @@ public final class PropertyAccessorFactoryUnsafe
         }
         if (field.getType() == char.class) {
             return new FieldAccessorUnsafeChar(field);
+        }
+        if (field.getType() == String.class) {
+            return new FieldAccessorUnsafeString(field);
+        }
+        if (field.getType() == BigInteger.class) {
+            return new FieldAccessorUnsafeBigInteger(field);
+        }
+        if (field.getType() == BigDecimal.class) {
+            return new FieldAccessorUnsafeBigDecimal(field);
         }
         return new FieldAccessorUnsafeObject(field);
     }
@@ -207,6 +218,84 @@ public final class PropertyAccessorFactoryUnsafe
 
         private JSONException typeCheckError(Object value) {
             return new JSONException("set " + name() + " error, type not support " + value.getClass());
+        }
+    }
+
+    static final class FieldAccessorUnsafeString extends FieldAccessorUnsafe implements PropertyAccessorString {
+        public FieldAccessorUnsafeString(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Object getObject(Object object) {
+            return UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public String getString(Object object) {
+            return (String) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setObject(Object object, Object value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, (String) value);
+        }
+
+        @Override
+        public void setString(Object object, String value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    static final class FieldAccessorUnsafeBigInteger extends FieldAccessorUnsafe implements PropertyAccessorBigInteger {
+        public FieldAccessorUnsafeBigInteger(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Object getObject(Object object) {
+            return UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public BigInteger getBigInteger(Object object) {
+            return (BigInteger) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setObject(Object object, Object value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, (BigInteger) value);
+        }
+
+        @Override
+        public void setBigInteger(Object object, BigInteger value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    static final class FieldAccessorUnsafeBigDecimal extends FieldAccessorUnsafe implements PropertyAccessorBigDecimal {
+        public FieldAccessorUnsafeBigDecimal(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Object getObject(Object object) {
+            return UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public BigDecimal getBigDecimal(Object object) {
+            return (BigDecimal) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setObject(Object object, Object value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, (BigDecimal) value);
+        }
+
+        @Override
+        public void setBigDecimal(Object object, BigDecimal value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
 
