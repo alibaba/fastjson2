@@ -3,7 +3,9 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,7 +25,7 @@ public class Issue126 {
     }
 
     @Test
-    public void test_people() {
+    public void test_people() throws JSONException {
         People people = new People();
         people.setAge(20);
         people.setAdult(true);
@@ -31,7 +33,7 @@ public class Issue126 {
         people.setName("MASON");
         people.setHeight(185.5f);
         String peopleStr = JSON.toJSONString(people);
-        assertEquals("{\"height\":185.5,\"name\":\"MASON\",\"age\":20,\"adult\":true,\"weight\":145.5}", peopleStr);
+        JSONAssert.assertEquals("{\"height\":185.5,\"name\":\"MASON\",\"age\":20,\"adult\":true,\"weight\":145.5}", peopleStr, true);
     }
 
     @Data
