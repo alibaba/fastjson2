@@ -74,82 +74,86 @@ public class PropertyAccessorFactoryTest {
     public void testByte(PropertyAccessorFactory factory) throws Exception {
         Field field = fieldMap.get(byte.class);
 
-        PropertyAccessor propertyAccessor = factory.create(field);
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), field.getType(), null, getters.get(byte.class), setters.get(byte.class))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            byte value = 50;
+            TestClass object = new TestClass();
+            propertyAccessor.setByte(object, value);
+            assertEquals(value, propertyAccessor.getByte(object));
+            assertEquals(value, object.getByteField());
 
-        byte value = 50;
-        TestClass object = new TestClass();
-        propertyAccessor.setByte(object, value);
-        assertEquals(value, propertyAccessor.getByte(object));
-        assertEquals(value, object.getByteField());
+            short shortValue = 51;
+            propertyAccessor.setShort(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShort(object));
+            assertEquals((byte) shortValue, object.getByteField());
 
-        short shortValue = 51;
-        propertyAccessor.setShort(object, shortValue);
-        assertEquals(shortValue, propertyAccessor.getShort(object));
-        assertEquals((byte) shortValue, object.getByteField());
+            int intValue = 52;
+            propertyAccessor.setInt(object, intValue);
+            assertEquals(intValue, propertyAccessor.getInt(object));
+            assertEquals((byte) intValue, object.getByteField());
 
-        int intValue = 52;
-        propertyAccessor.setInt(object, intValue);
-        assertEquals(intValue, propertyAccessor.getInt(object));
-        assertEquals((byte) intValue, object.getByteField());
+            // Test long methods
+            long longValue = 53L;
+            propertyAccessor.setLong(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLong(object));
+            assertEquals((byte) longValue, object.getByteField());
 
-        // Test long methods
-        long longValue = 53L;
-        propertyAccessor.setLong(object, longValue);
-        assertEquals(longValue, propertyAccessor.getLong(object));
-        assertEquals((byte) longValue, object.getByteField());
+            // Test float methods
+            float floatValue = 54.5f;
+            propertyAccessor.setFloat(object, floatValue);
+            assertEquals((float) ((byte) floatValue), propertyAccessor.getFloat(object), 0.01f); // 54.5f -> 54 (byte) -> 54.0f
+            assertEquals((byte) floatValue, object.getByteField()); // 54.5f -> 54 when cast to byte
 
-        // Test float methods
-        float floatValue = 54.5f;
-        propertyAccessor.setFloat(object, floatValue);
-        assertEquals((float) ((byte) floatValue), propertyAccessor.getFloat(object), 0.01f); // 54.5f -> 54 (byte) -> 54.0f
-        assertEquals((byte) floatValue, object.getByteField()); // 54.5f -> 54 when cast to byte
+            // Test double methods
+            double doubleValue = 55.7;
+            propertyAccessor.setDouble(object, doubleValue);
+            assertEquals((double) ((byte) doubleValue), propertyAccessor.getDouble(object), 0.01); // 55.7 -> 55 (byte) -> 55.0
+            assertEquals((byte) doubleValue, object.getByteField()); // 55.7 -> 55 when cast to byte
 
-        // Test double methods
-        double doubleValue = 55.7;
-        propertyAccessor.setDouble(object, doubleValue);
-        assertEquals((double) ((byte) doubleValue), propertyAccessor.getDouble(object), 0.01); // 55.7 -> 55 (byte) -> 55.0
-        assertEquals((byte) doubleValue, object.getByteField()); // 55.7 -> 55 when cast to byte
+            // Test char methods
+            char charValue = 'X';
+            propertyAccessor.setChar(object, charValue);
+            assertEquals(charValue, propertyAccessor.getChar(object));
+            assertEquals((byte) charValue, object.getByteField());
 
-        // Test char methods
-        char charValue = 'X';
-        propertyAccessor.setChar(object, charValue);
-        assertEquals(charValue, propertyAccessor.getChar(object));
-        assertEquals((byte) charValue, object.getByteField());
+            // Test boolean methods
+            boolean booleanValue = true;
+            propertyAccessor.setBoolean(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            assertEquals((byte) (booleanValue ? 1 : 0), object.getByteField());
 
-        // Test boolean methods
-        boolean booleanValue = true;
-        propertyAccessor.setBoolean(object, booleanValue);
-        assertEquals(booleanValue, propertyAccessor.getBoolean(object));
-        assertEquals((byte) (booleanValue ? 1 : 0), object.getByteField());
+            // Test String methods
+            String stringValue = "56";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals((byte) 56, object.getByteField());
 
-        // Test String methods
-        String stringValue = "56";
-        propertyAccessor.setString(object, stringValue);
-        assertEquals(stringValue, propertyAccessor.getString(object));
-        assertEquals((byte) 56, object.getByteField());
+            // Test Object methods (setting a byte value as object)
+            Byte byteObj = (byte) 57;
+            propertyAccessor.setObject(object, byteObj);
+            assertEquals(byteObj, propertyAccessor.getObject(object));
+            assertEquals(byteObj, object.getByteField());
 
-        // Test Object methods (setting a byte value as object)
-        Byte byteObj = (byte) 57;
-        propertyAccessor.setObject(object, byteObj);
-        assertEquals(byteObj, propertyAccessor.getObject(object));
-        assertEquals(byteObj, object.getByteField());
+            // Test BigInteger methods
+            BigInteger bigIntegerValue = new BigInteger("58");
+            propertyAccessor.setBigInteger(object, bigIntegerValue);
+            assertEquals(bigIntegerValue, propertyAccessor.getBigInteger(object));
+            assertEquals((byte) 58, object.getByteField());
 
-        // Test BigInteger methods
-        BigInteger bigIntegerValue = new BigInteger("58");
-        propertyAccessor.setBigInteger(object, bigIntegerValue);
-        assertEquals(bigIntegerValue, propertyAccessor.getBigInteger(object));
-        assertEquals((byte) 58, object.getByteField());
+            // Test BigDecimal methods
+            BigDecimal bigDecimalValue = new BigDecimal("59.9");
+            propertyAccessor.setBigDecimal(object, bigDecimalValue);
+            assertEquals(new BigDecimal((byte) 59), propertyAccessor.getBigDecimal(object)); // 59.9 -> 59 (byte) -> BigDecimal(59)
+            assertEquals((byte) 59, object.getByteField());
 
-        // Test BigDecimal methods
-        BigDecimal bigDecimalValue = new BigDecimal("59.9");
-        propertyAccessor.setBigDecimal(object, bigDecimalValue);
-        assertEquals(new BigDecimal((byte) 59), propertyAccessor.getBigDecimal(object)); // 59.9 -> 59 (byte) -> BigDecimal(59)
-        assertEquals((byte) 59, object.getByteField());
-
-        // Test Object methods with different types
-        propertyAccessor.setObject(object, "60");
-        assertEquals((byte) 60, object.getByteField());
-        assertEquals("60", propertyAccessor.getString(object));
+            // Test Object methods with different types
+            propertyAccessor.setObject(object, "60");
+            assertEquals((byte) 60, object.getByteField());
+            assertEquals("60", propertyAccessor.getString(object));
+        }
     }
 
     @ParameterizedTest
