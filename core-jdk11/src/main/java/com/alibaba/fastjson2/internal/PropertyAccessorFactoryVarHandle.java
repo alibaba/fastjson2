@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.internal;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.JDKUtils;
 
@@ -44,7 +43,8 @@ public class PropertyAccessorFactoryVarHandle
         try {
             varHandle = lookup.findVarHandle(field.getDeclaringClass(), field.getName(), field.getType());
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new JSONException("findVarHandle error", e);
+            // ignore
+            return super.createInternal(field);
         }
 
         if (field.getType() == byte.class) {

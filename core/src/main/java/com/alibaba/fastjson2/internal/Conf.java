@@ -123,22 +123,17 @@ public final class Conf {
 
     public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY;
     static {
-        PropertyAccessorFactory propertyAccessorFactory;
-        if (USE_UNSAFE) {
-            propertyAccessorFactory = null;
-            if (JDKUtils.JVM_VERSION >= 11) {
-                try {
-                    Class<?> classV = Conf.class.getClassLoader().loadClass("com.alibaba.fastjson2.internal.PropertyAccessorFactoryVarHandle");
-                    propertyAccessorFactory = (PropertyAccessorFactory) classV.newInstance();
-                } catch (Exception ignored) {
-                    // ignore
-                }
+        PropertyAccessorFactory propertyAccessorFactory = null;
+        if (JDKUtils.JVM_VERSION >= 11) {
+            try {
+                Class<?> classV = Conf.class.getClassLoader().loadClass("com.alibaba.fastjson2.internal.PropertyAccessorFactoryVarHandle");
+                propertyAccessorFactory = (PropertyAccessorFactory) classV.newInstance();
+            } catch (Exception ignored) {
+                // ignore
             }
-            if (propertyAccessorFactory == null) {
-                propertyAccessorFactory = new PropertyAccessorFactoryUnsafe();
-            }
-        } else {
-            propertyAccessorFactory = new PropertyAccessorFactory();
+        }
+        if (propertyAccessorFactory == null) {
+            propertyAccessorFactory = USE_UNSAFE ? new PropertyAccessorFactoryUnsafe() : new PropertyAccessorFactory();
         }
         PROPERTY_ACCESSOR_FACTORY = propertyAccessorFactory;
     }
