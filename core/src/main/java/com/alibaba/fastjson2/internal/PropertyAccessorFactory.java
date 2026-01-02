@@ -1091,23 +1091,13 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default String getString(Object object) {
-            return (String) getObject(object);
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setObject(object, value);
-        }
-
-        @Override
         default Object getObject(Object object) {
             return getString(object);
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setString(object, (String) value);
+            setString(object, Cast.toString(value));
         }
 
         @Override
@@ -1251,7 +1241,7 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setObject(Object object, Object value) {
-            setBigDecimal(object, (BigDecimal) value);
+            setBigDecimal(object, toBigDecimal(value));
         }
 
         @Override
@@ -1665,6 +1655,15 @@ public class PropertyAccessorFactory {
         if (propertyClass == boolean.class) {
             return new MethodAccessorBoolean(name, propertyType, propertyClass, getter, setter);
         }
+        if (propertyClass == String.class) {
+            return new MethodAccessorString(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == BigInteger.class) {
+            return new MethodAccessorBigInteger(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == BigDecimal.class) {
+            return new MethodAccessorBigDecimal(name, propertyType, propertyClass, getter, setter);
+        }
 
         return new MethodAccessorObject(name, propertyType, propertyClass, getter, setter);
     }
@@ -1891,6 +1890,72 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setBoolean(Object object, boolean value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorString extends MethodAccessor implements PropertyAccessorString {
+        public MethodAccessorString(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+        @Override
+        public String getString(Object object) {
+            try {
+                return (String) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+        @Override
+        public void setString(Object object, String value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorBigInteger extends MethodAccessor implements PropertyAccessorBigInteger {
+        public MethodAccessorBigInteger(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+        @Override
+        public BigInteger getBigInteger(Object object) {
+            try {
+                return (BigInteger) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+        @Override
+        public void setBigInteger(Object object, BigInteger value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    static final class MethodAccessorBigDecimal extends MethodAccessor implements PropertyAccessorBigDecimal {
+        public MethodAccessorBigDecimal(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+        @Override
+        public BigDecimal getBigDecimal(Object object) {
+            try {
+                return (BigDecimal) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+        @Override
+        public void setBigDecimal(Object object, BigDecimal value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {

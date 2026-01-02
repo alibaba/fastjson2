@@ -227,18 +227,8 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public Object getObject(Object object) {
-            return UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
-        }
-
-        @Override
         public String getString(Object object) {
             return (String) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
-        }
-
-        @Override
-        public void setObject(Object object, Object value) {
-            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, (String) value);
         }
 
         @Override
@@ -253,18 +243,8 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public Object getObject(Object object) {
-            return UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
-        }
-
-        @Override
         public BigInteger getBigInteger(Object object) {
             return (BigInteger) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
-        }
-
-        @Override
-        public void setObject(Object object, Object value) {
-            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, (BigInteger) value);
         }
 
         @Override

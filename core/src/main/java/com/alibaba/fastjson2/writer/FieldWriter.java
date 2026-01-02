@@ -182,9 +182,16 @@ public abstract class FieldWriter<T>
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
         nameWithColonUTF16 = chars;
+        propertyAccessor = createPropertyAccessor(name, fieldType, fieldClass, field, method, function);
+        if (function instanceof Function) {
+            this.function = (Function) function;
+        }
+    }
+
+    private static PropertyAccessor createPropertyAccessor(String name, Type fieldType, Class fieldClass, Field field, Method method, Object function) {
+        PropertyAccessor propertyAccessor;
         if (function instanceof Function) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, fieldClass, fieldType, (Function) function, null);
-            this.function = (Function) function;
         } else if (function instanceof Predicate) {
             propertyAccessor = Conf.PROPERTY_ACCESSOR_FACTORY.create(name, (Predicate) function, null);
         } else if (function instanceof ToFloatFunction) {
@@ -206,6 +213,7 @@ public abstract class FieldWriter<T>
         } else {
             propertyAccessor = field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
         }
+        return propertyAccessor;
     }
 
     public boolean isFieldClassSerializable() {

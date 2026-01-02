@@ -1030,7 +1030,7 @@ public class Cast {
      * @return the converted boolean value
      */
     public static boolean toBoolean(char value) {
-        return value != 0;
+        return value == '1' || value == 't' || value == 'T';
     }
 
     /**
@@ -1109,6 +1109,9 @@ public class Cast {
      * the main method small and delegating complex logic to toBigIntegerEx.
      */
     public static BigInteger toBigInteger(Object value) {
+        if (value == null) {
+            return null;
+        }
         if (value instanceof BigInteger) {
             return (BigInteger) value;
         }
@@ -1131,8 +1134,6 @@ public class Cast {
             return BigInteger.valueOf((Character) value);
         } else if (value instanceof String) {
             return new BigInteger((String) value);
-        } else if (value == null) {
-            return BigInteger.ZERO;
         }
         throw errorToBigInteger(value);
     }
@@ -1225,7 +1226,7 @@ public class Cast {
      */
     public static BigInteger toBigInteger(String value) {
         if (value == null) {
-            return BigInteger.ZERO;
+            return null;
         }
         try {
             return new BigInteger(value);
@@ -1244,6 +1245,9 @@ public class Cast {
      * the main method small and delegating complex logic to toBigDecimalEx.
      */
     public static BigDecimal toBigDecimal(Object value) {
+        if (value == null) {
+            return null;
+        }
         if (value instanceof BigDecimal) {
             return (BigDecimal) value;
         }
@@ -1364,7 +1368,7 @@ public class Cast {
      */
     public static BigDecimal toBigDecimal(String value) {
         if (value == null) {
-            return BigDecimal.ZERO;
+            return null;
         }
         try {
             return new BigDecimal(value);
@@ -1384,7 +1388,7 @@ public class Cast {
      */
     public static String toString(Object value) {
         if (value == null) {
-            return "null";
+            return null;
         }
         return value.toString();
     }
@@ -1467,6 +1471,9 @@ public class Cast {
      * @return the converted String value
      */
     public static String toString(BigInteger value) {
+        if (value == null) {
+            return null;
+        }
         return value.toString();
     }
 
@@ -1476,6 +1483,9 @@ public class Cast {
      * @return the converted String value
      */
     public static String toString(BigDecimal value) {
+        if (value == null) {
+            return null;
+        }
         return value.toString();
     }
 
