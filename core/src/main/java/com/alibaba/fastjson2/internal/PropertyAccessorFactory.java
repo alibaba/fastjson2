@@ -49,67 +49,113 @@ public class PropertyAccessorFactory {
     }
 
     protected interface PropertyAccessorBoolean extends PropertyAccessor {
+        @Override
         default Object getObject(Object object) {
             return getBoolean(object);
         }
 
+        @Override
         default byte getByte(Object object) {
             return toByte(getBoolean(object));
         }
 
+        @Override
         default char getChar(Object object) {
             return toChar(getBoolean(object));
         }
 
+        @Override
         default short getShort(Object object) {
             return toShort(getBoolean(object));
         }
 
+        @Override
         default int getInt(Object object) {
             return toInt(getBoolean(object));
         }
 
+        @Override
         default long getLong(Object object) {
             return toLong(getBoolean(object));
         }
 
+        @Override
         default float getFloat(Object object) {
             return toFloat(getBoolean(object));
         }
 
+        @Override
         default double getDouble(Object object) {
             return toDouble(getBoolean(object));
         }
 
+        @Override
         default void setObject(Object object, Object value) {
             setBoolean(object, toBoolean(value));
         }
 
+        @Override
         default void setByte(Object object, byte value) {
             setBoolean(object, toBoolean(value));
         }
 
+        @Override
         default void setChar(Object object, char value) {
             setBoolean(object, toBoolean(value));
         }
 
+        @Override
         default void setShort(Object object, short value) {
             setBoolean(object, toBoolean(value));
         }
 
+        @Override
         default void setInt(Object object, int value) {
             setBoolean(object, toBoolean(value));
         }
 
+        @Override
         default void setLong(Object object, long value) {
             setBoolean(object, toBoolean(value));
         }
 
+        @Override
         default void setFloat(Object object, float value) {
             setBoolean(object, toBoolean(value));
         }
 
+        @Override
         default void setDouble(Object object, double value) {
+            setBoolean(object, toBoolean(value));
+        }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getBoolean(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getBoolean(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getBoolean(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setBoolean(object, toBoolean(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setBoolean(object, toBoolean(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
             setBoolean(object, toBoolean(value));
         }
     }
@@ -194,6 +240,36 @@ public class PropertyAccessorFactory {
         default void setBoolean(Object object, boolean value) {
             setByte(object, toByte(value));
         }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getByte(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getByte(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getByte(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setByte(object, toByte(value));
+        }
     }
 
     protected interface PropertyAccessorShort extends PropertyAccessor {
@@ -258,6 +334,36 @@ public class PropertyAccessorFactory {
         }
 
         default void setBoolean(Object object, boolean value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getShort(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getShort(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getShort(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
             setShort(object, toShort(value));
         }
     }
@@ -342,6 +448,36 @@ public class PropertyAccessorFactory {
         default void setBoolean(Object object, boolean value) {
             setInt(object, toInt(value));
         }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getInt(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getInt(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getInt(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setInt(object, toInt(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setInt(object, toInt(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setInt(object, toInt(value));
+        }
     }
 
     protected interface PropertyAccessorLong extends PropertyAccessor {
@@ -422,6 +558,36 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setBoolean(Object object, boolean value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getLong(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getLong(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getLong(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
             setLong(object, toLong(value));
         }
     }
@@ -506,6 +672,36 @@ public class PropertyAccessorFactory {
         default void setBoolean(Object object, boolean value) {
             setFloat(object, toFloat(value));
         }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getFloat(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getFloat(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getFloat(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setFloat(object, toFloat(value));
+        }
     }
 
     protected interface PropertyAccessorDouble extends PropertyAccessor {
@@ -586,6 +782,36 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setBoolean(Object object, boolean value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getDouble(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getDouble(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getDouble(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
             setDouble(object, toDouble(value));
         }
     }
@@ -670,6 +896,36 @@ public class PropertyAccessorFactory {
         default void setBoolean(Object object, boolean value) {
             setChar(object, toChar(value));
         }
+
+        @Override
+        default String getString(Object object) {
+            return Cast.toString(getChar(object));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getChar(object));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getChar(object));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setChar(object, toChar(value));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setChar(object, toChar(value));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setChar(object, toChar(value));
+        }
     }
 
     protected interface PropertyAccessorObject extends PropertyAccessor {
@@ -714,6 +970,24 @@ public class PropertyAccessorFactory {
         }
 
         @Override
+        default String getString(Object object) {
+            Object value = getObject(object);
+            return value != null ? value.toString() : null;
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            Object value = getObject(object);
+            return value != null ? toBigInteger(value) : null;
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            Object value = getObject(object);
+            return value != null ? toBigDecimal(value) : null;
+        }
+
+        @Override
         default void setByte(Object object, byte value) {
             setObject(object, value);
         }
@@ -750,6 +1024,21 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setBoolean(Object object, boolean value) {
+            setObject(object, value);
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setObject(object, value);
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setObject(object, value);
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
             setObject(object, value);
         }
     }
@@ -918,7 +1207,7 @@ public class PropertyAccessorFactory {
         }
     }
 
-    static final class FieldAccessorReflectBoolean extends FieldAccessorReflect {
+    static final class FieldAccessorReflectBoolean extends FieldAccessorReflect implements PropertyAccessorBoolean {
         public FieldAccessorReflectBoolean(Field field) {
             super(field);
         }
