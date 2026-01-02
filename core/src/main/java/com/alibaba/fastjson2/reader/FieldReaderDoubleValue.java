@@ -14,7 +14,6 @@ final class FieldReaderDoubleValue<T>
         extends FieldReaderObject<T> {
     public FieldReaderDoubleValue(
             String fieldName,
-            Class fieldType,
             int ordinal,
             long features,
             String format,
@@ -27,7 +26,7 @@ final class FieldReaderDoubleValue<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, double.class, double.class, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override

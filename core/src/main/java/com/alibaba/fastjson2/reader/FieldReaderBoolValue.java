@@ -14,7 +14,6 @@ final class FieldReaderBoolValue<T>
         extends FieldReaderObject<T> {
     public FieldReaderBoolValue(
             String fieldName,
-            Class fieldType,
             int ordinal,
             long features,
             String format,
@@ -27,7 +26,7 @@ final class FieldReaderBoolValue<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, boolean.class, boolean.class, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override

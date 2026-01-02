@@ -109,7 +109,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderBool(String fieldName, ObjBoolConsumer<T> function) {
-        return new FieldReaderBoolValue(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderBoolValue(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderByte(String fieldName, ObjByteConsumer<T> function) {
@@ -121,23 +121,23 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderInt(String fieldName, ObjIntConsumer<T> function) {
-        return new FieldReaderInt32Value(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderInt32Value(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderLong(String fieldName, ObjLongConsumer<T> function) {
-        return new FieldReaderInt64Value(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderInt64Value(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderChar(String fieldName, ObjCharConsumer<T> function) {
-        return new FieldReaderCharValue(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderCharValue(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderFloat(String fieldName, ObjFloatConsumer<T> function) {
-        return new FieldReaderFloatValue(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderFloatValue(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderDouble(String fieldName, ObjDoubleConsumer<T> function) {
-        return new FieldReaderDoubleValue(fieldName, null, 0, 0, null, null, null, null, null, null, function, null, null);
+        return new FieldReaderDoubleValue(fieldName, 0, 0, null, null, null, null, null, null, function, null, null);
     }
 
     public static <T> FieldReader fieldReaderString(

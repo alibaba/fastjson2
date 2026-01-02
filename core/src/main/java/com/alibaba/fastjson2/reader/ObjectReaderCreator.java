@@ -2767,7 +2767,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == boolean.class) {
-            return new FieldReaderBoolValue(fieldName, fieldClass, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, method, null, null, null, null);
+            return new FieldReaderBoolValue(fieldName, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == Boolean.class) {
@@ -2783,19 +2783,19 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == int.class) {
-            return new FieldReaderInt32Value(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method, null, null, null, null);
+            return new FieldReaderInt32Value(fieldName, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == long.class) {
-            return new FieldReaderInt64Value(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method, null, null, null, null);
+            return new FieldReaderInt64Value(fieldName, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == float.class) {
-            return new FieldReaderFloatValue(fieldName, fieldClass, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method, null, null, null, null);
+            return new FieldReaderFloatValue(fieldName, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == double.class) {
-            return new FieldReaderDoubleValue(fieldName, fieldClass, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, method, null, null, null, null);
+            return new FieldReaderDoubleValue(fieldName, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, method, null, null, null, null);
         }
 
         if (fieldType == Byte.class) {
@@ -3262,14 +3262,14 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == int.class) {
-            return new FieldReaderInt32Value(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderInt32Value(fieldName, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, null, field, null, null, null);
         }
         if (fieldClass == Integer.class) {
             return new FieldReaderInt32(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == long.class) {
-            return new FieldReaderInt64Value(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderInt64Value(fieldName, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, null, field, null, null, null);
         }
         if (fieldClass == Long.class) {
             return new FieldReaderInt64(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, null, field, null, null, null);
@@ -3284,7 +3284,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldReaderBoolValue(fieldName, fieldClass, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderBoolValue(fieldName, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, null, field, null, null, null);
         }
         if (fieldClass == Boolean.class) {
             return new FieldReaderBool(fieldName, fieldClass, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, null, field, null, null, null);
@@ -3299,21 +3299,21 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == float.class) {
-            return new FieldReaderFloatValue(fieldName, fieldClass, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderFloatValue(fieldName, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, null, field, null, null, null);
         }
         if (fieldClass == Float.class) {
             return new FieldReaderFloat(fieldName, fieldClass, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == double.class) {
-            return new FieldReaderDoubleValue(fieldName, fieldClass, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderDoubleValue(fieldName, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, null, field, null, null, null);
         }
         if (fieldClass == Double.class) {
             return new FieldReaderDouble(fieldName, fieldClass, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == char.class) {
-            return new FieldReaderCharValue(fieldName, fieldClass, ordinal, features, format, locale, (Character) defaultValue, jsonSchema, null, field, null, null, null);
+            return new FieldReaderCharValue(fieldName, ordinal, features, format, locale, (Character) defaultValue, jsonSchema, null, field, null, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
@@ -3977,7 +3977,7 @@ public class ObjectReaderCreator {
 
         if (fieldType == boolean.class) {
             ObjBoolConsumer function = (ObjBoolConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderBoolValue(fieldName, fieldClass, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderBoolValue(fieldName, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == byte.class) {
@@ -3992,27 +3992,27 @@ public class ObjectReaderCreator {
 
         if (fieldType == int.class) {
             ObjIntConsumer function = (ObjIntConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt32Value(fieldName, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderInt32Value(fieldName, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == long.class) {
             ObjLongConsumer function = (ObjLongConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt64Value(fieldName, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderInt64Value(fieldName, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == char.class) {
             ObjCharConsumer function = (ObjCharConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderCharValue(fieldName, fieldClass, ordinal, features, format, locale, (Character) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderCharValue(fieldName, ordinal, features, format, locale, (Character) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == float.class) {
             ObjFloatConsumer function = (ObjFloatConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderFloatValue(fieldName, fieldClass, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderFloatValue(fieldName, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         if (fieldType == double.class) {
             ObjDoubleConsumer function = (ObjDoubleConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderDoubleValue(fieldName, fieldClass, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, method, null, function, null, null);
+            return new FieldReaderDoubleValue(fieldName, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, method, null, function, null, null);
         }
 
         BiConsumer consumer = (BiConsumer) lambdaSetter(objectClass, fieldClass, method);

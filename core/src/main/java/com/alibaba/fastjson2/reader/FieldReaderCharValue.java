@@ -14,7 +14,6 @@ final class FieldReaderCharValue<T>
         extends FieldReaderObject<T> {
     public FieldReaderCharValue(
             String fieldName,
-            Class fieldType,
             int ordinal,
             long features,
             String format,
@@ -27,7 +26,7 @@ final class FieldReaderCharValue<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field,
+        super(fieldName, char.class, char.class, ordinal, features, format, locale, defaultValue, schema, method, field,
                 function, paramName, parameter);
     }
 

@@ -14,7 +14,6 @@ final class FieldReaderInt32Value<T>
         extends FieldReaderObject<T> {
     public FieldReaderInt32Value(
             String fieldName,
-            Class fieldType,
             int ordinal,
             long features,
             String format,
@@ -27,7 +26,7 @@ final class FieldReaderInt32Value<T>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, method, field,
+        super(fieldName, int.class, int.class, ordinal, features, format, locale, defaultValue, schema, method, field,
                 function, paramName, parameter);
     }
 
