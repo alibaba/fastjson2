@@ -3948,13 +3948,17 @@ public class PropertyAccessorFactory {
         @Override
         public boolean getBooleanValue(Object object) {
             boolean value = impl.getBooleanValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setBooleanValue(Object object, boolean value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setBooleanValue(object, value);
         }
     }
@@ -3971,13 +3975,17 @@ public class PropertyAccessorFactory {
         @Override
         public byte getByteValue(Object object) {
             byte value = impl.getByteValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setByteValue(Object object, byte value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setByteValue(object, value);
         }
     }
@@ -3994,13 +4002,17 @@ public class PropertyAccessorFactory {
         @Override
         public short getShortValue(Object object) {
             short value = impl.getShortValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setShortValue(Object object, short value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setShortValue(object, value);
         }
     }
@@ -4017,13 +4029,17 @@ public class PropertyAccessorFactory {
         @Override
         public int getIntValue(Object object) {
             int value = impl.getIntValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setIntValue(Object object, int value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setIntValue(object, value);
         }
     }
@@ -4040,13 +4056,17 @@ public class PropertyAccessorFactory {
         @Override
         public long getLongValue(Object object) {
             long value = impl.getLongValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setLongValue(Object object, long value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setLongValue(object, value);
         }
     }
@@ -4063,13 +4083,17 @@ public class PropertyAccessorFactory {
         @Override
         public float getFloatValue(Object object) {
             float value = impl.getFloatValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setFloatValue(Object object, float value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setFloatValue(object, value);
         }
     }
@@ -4086,13 +4110,17 @@ public class PropertyAccessorFactory {
         @Override
         public double getDoubleValue(Object object) {
             double value = impl.getDoubleValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setDoubleValue(Object object, double value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setDoubleValue(object, value);
         }
     }
@@ -4109,13 +4137,17 @@ public class PropertyAccessorFactory {
         @Override
         public char getCharValue(Object object) {
             char value = impl.getCharValue(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
 
         @Override
         public void setCharValue(Object object, char value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             impl.setCharValue(object, value);
         }
     }
@@ -4133,14 +4165,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setBoolean(Object object, Boolean value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             booleanImpl.setBoolean(object, value);
         }
 
         @Override
         public Boolean getBoolean(Object object) {
             Boolean value = booleanImpl.getBoolean(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4158,14 +4194,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setByte(Object object, Byte value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             byteImpl.setByte(object, value);
         }
 
         @Override
         public Byte getByte(Object object) {
             Byte value = byteImpl.getByte(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4183,14 +4223,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setCharacter(Object object, Character value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             characterImpl.setCharacter(object, value);
         }
 
         @Override
         public Character getCharacter(Object object) {
             Character value = characterImpl.getCharacter(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4208,14 +4252,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setShort(Object object, Short value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             shortImpl.setShort(object, value);
         }
 
         @Override
         public Short getShort(Object object) {
             Short value = shortImpl.getShort(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4233,14 +4281,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setInteger(Object object, Integer value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             integerImpl.setInteger(object, value);
         }
 
         @Override
         public Integer getInteger(Object object) {
             Integer value = integerImpl.getInteger(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4258,14 +4310,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setLong(Object object, Long value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             longImpl.setLong(object, value);
         }
 
         @Override
         public Long getLong(Object object) {
             Long value = longImpl.getLong(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4283,14 +4339,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setFloat(Object object, Float value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             floatImpl.setFloat(object, value);
         }
 
         @Override
         public Float getFloat(Object object) {
             Float value = floatImpl.getFloat(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4308,14 +4368,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setDouble(Object object, Double value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             doubleImpl.setDouble(object, value);
         }
 
         @Override
         public Double getDouble(Object object) {
             Double value = doubleImpl.getDouble(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4333,14 +4397,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setString(Object object, String value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             stringImpl.setString(object, value);
         }
 
         @Override
         public String getString(Object object) {
             String value = stringImpl.getString(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4358,14 +4426,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setBigInteger(Object object, BigInteger value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             bigIntegerImpl.setBigInteger(object, value);
         }
 
         @Override
         public BigInteger getBigInteger(Object object) {
             BigInteger value = bigIntegerImpl.getBigInteger(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4383,14 +4455,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setBigDecimal(Object object, BigDecimal value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             bigDecimalImpl.setBigDecimal(object, value);
         }
 
         @Override
         public BigDecimal getBigDecimal(Object object) {
             BigDecimal value = bigDecimalImpl.getBigDecimal(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
@@ -4408,14 +4484,18 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setObject(Object object, Object value) {
-            setterConsumer.accept(object, value);
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
             objImpl.setObject(object, value);
         }
 
         @Override
         public Object getObject(Object object) {
             Object value = objImpl.getObject(object);
-            getterConsumer.accept(object, value);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
             return value;
         }
     }
