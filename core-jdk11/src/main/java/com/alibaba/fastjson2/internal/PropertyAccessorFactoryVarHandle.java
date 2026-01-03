@@ -79,8 +79,29 @@ public class PropertyAccessorFactoryVarHandle
         if (fieldType == BigDecimal.class) {
             return new FieldAccessorVarHandleBigDecimal(field, varHandle);
         }
+        if (fieldType == Boolean.class) {
+            return new FieldAccessorVarHandleBoolean(field, varHandle);
+        }
+        if (fieldType == Byte.class) {
+            return new FieldAccessorVarHandleByte(field, varHandle);
+        }
+        if (fieldType == Character.class) {
+            return new FieldAccessorVarHandleCharacter(field, varHandle);
+        }
+        if (fieldType == Short.class) {
+            return new FieldAccessorVarHandleShort(field, varHandle);
+        }
         if (fieldType == Integer.class) {
             return new FieldAccessorVarHandleInteger(field, varHandle);
+        }
+        if (fieldType == Long.class) {
+            return new FieldAccessorVarHandleLong(field, varHandle);
+        }
+        if (fieldType == Float.class) {
+            return new FieldAccessorVarHandleFloat(field, varHandle);
+        }
+        if (fieldType == Double.class) {
+            return new FieldAccessorVarHandleDouble(field, varHandle);
         }
         return new FieldAccessorVarHandleObject(field, varHandle);
     }
@@ -212,6 +233,90 @@ public class PropertyAccessorFactoryVarHandle
     }
 
     /**
+     * Field accessor implementation for Boolean fields using VarHandle.
+     * Provides efficient Boolean field access operations.
+     */
+    static final class FieldAccessorVarHandleBoolean
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorBoolean
+    {
+        public FieldAccessorVarHandleBoolean(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Boolean getBoolean(Object object) {
+            return (Boolean) varHandle.get(object);
+        }
+        @Override
+        public void setBoolean(Object object, Boolean value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Byte fields using VarHandle.
+     * Provides efficient Byte field access operations.
+     */
+    static final class FieldAccessorVarHandleByte
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorByte
+    {
+        public FieldAccessorVarHandleByte(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Byte getByte(Object object) {
+            return (Byte) varHandle.get(object);
+        }
+        @Override
+        public void setByte(Object object, Byte value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Character fields using VarHandle.
+     * Provides efficient Character field access operations.
+     */
+    static final class FieldAccessorVarHandleCharacter
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorCharacter
+    {
+        public FieldAccessorVarHandleCharacter(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Character getCharacter(Object object) {
+            return (Character) varHandle.get(object);
+        }
+        @Override
+        public void setCharacter(Object object, Character value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Short fields using VarHandle.
+     * Provides efficient Short field access operations.
+     */
+    static final class FieldAccessorVarHandleShort
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorShort
+    {
+        public FieldAccessorVarHandleShort(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Short getShort(Object object) {
+            return (Short) varHandle.get(object);
+        }
+        @Override
+        public void setShort(Object object, Short value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
      * Field accessor implementation for Integer fields using VarHandle.
      * Provides efficient Integer field access operations.
      */
@@ -228,6 +333,69 @@ public class PropertyAccessorFactoryVarHandle
         }
         @Override
         public void setInteger(Object object, Integer value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Long fields using VarHandle.
+     * Provides efficient Long field access operations.
+     */
+    static final class FieldAccessorVarHandleLong
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorLong
+    {
+        public FieldAccessorVarHandleLong(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Long getLong(Object object) {
+            return (Long) varHandle.get(object);
+        }
+        @Override
+        public void setLong(Object object, Long value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Float fields using VarHandle.
+     * Provides efficient Float field access operations.
+     */
+    static final class FieldAccessorVarHandleFloat
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorFloat
+    {
+        public FieldAccessorVarHandleFloat(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Float getFloat(Object object) {
+            return (Float) varHandle.get(object);
+        }
+        @Override
+        public void setFloat(Object object, Float value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Double fields using VarHandle.
+     * Provides efficient Double field access operations.
+     */
+    static final class FieldAccessorVarHandleDouble
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorDouble
+    {
+        public FieldAccessorVarHandleDouble(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Double getDouble(Object object) {
+            return (Double) varHandle.get(object);
+        }
+        @Override
+        public void setDouble(Object object, Double value) {
             varHandle.set(object, value);
         }
     }

@@ -70,8 +70,29 @@ public final class PropertyAccessorFactoryUnsafe
         if (fieldType == BigDecimal.class) {
             return new FieldAccessorUnsafeBigDecimal(field);
         }
+        if (fieldType == Boolean.class) {
+            return new FieldAccessorUnsafeBoolean(field);
+        }
+        if (fieldType == Byte.class) {
+            return new FieldAccessorUnsafeByte(field);
+        }
+        if (fieldType == Character.class) {
+            return new FieldAccessorUnsafeCharacter(field);
+        }
+        if (fieldType == Short.class) {
+            return new FieldAccessorUnsafeShort(field);
+        }
         if (fieldType == Integer.class) {
             return new FieldAccessorUnsafeInteger(field);
+        }
+        if (fieldType == Long.class) {
+            return new FieldAccessorUnsafeLong(field);
+        }
+        if (fieldType == Float.class) {
+            return new FieldAccessorUnsafeFloat(field);
+        }
+        if (fieldType == Double.class) {
+            return new FieldAccessorUnsafeDouble(field);
         }
         return new FieldAccessorUnsafeObject(field);
     }
@@ -178,6 +199,90 @@ public final class PropertyAccessorFactoryUnsafe
     }
 
     /**
+     * Unsafe-based field accessor implementation for Boolean-typed properties.
+     * Provides efficient getter and setter operations for Boolean fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeBoolean
+            extends FieldAccessorUnsafe implements PropertyAccessorBoolean {
+        public FieldAccessorUnsafeBoolean(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Boolean getBoolean(Object object) {
+            return (Boolean) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setBoolean(Object object, Boolean value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Byte-typed properties.
+     * Provides efficient getter and setter operations for Byte fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeByte
+            extends FieldAccessorUnsafe implements PropertyAccessorByte {
+        public FieldAccessorUnsafeByte(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Byte getByte(Object object) {
+            return (Byte) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setByte(Object object, Byte value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Character-typed properties.
+     * Provides efficient getter and setter operations for Character fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeCharacter
+            extends FieldAccessorUnsafe implements PropertyAccessorCharacter {
+        public FieldAccessorUnsafeCharacter(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Character getCharacter(Object object) {
+            return (Character) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setCharacter(Object object, Character value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Short-typed properties.
+     * Provides efficient getter and setter operations for Short fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeShort
+            extends FieldAccessorUnsafe implements PropertyAccessorShort {
+        public FieldAccessorUnsafeShort(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Short getShort(Object object) {
+            return (Short) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setShort(Object object, Short value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
      * Unsafe-based field accessor implementation for Integer-typed properties.
      * Provides efficient getter and setter operations for Integer fields using Unsafe operations.
      */
@@ -194,6 +299,69 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setInteger(Object object, Integer value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Long-typed properties.
+     * Provides efficient getter and setter operations for Long fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeLong
+            extends FieldAccessorUnsafe implements PropertyAccessorLong {
+        public FieldAccessorUnsafeLong(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Long getLong(Object object) {
+            return (Long) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setLong(Object object, Long value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Float-typed properties.
+     * Provides efficient getter and setter operations for Float fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeFloat
+            extends FieldAccessorUnsafe implements PropertyAccessorFloat {
+        public FieldAccessorUnsafeFloat(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Float getFloat(Object object) {
+            return (Float) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setFloat(Object object, Float value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Double-typed properties.
+     * Provides efficient getter and setter operations for Double fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeDouble
+            extends FieldAccessorUnsafe implements PropertyAccessorDouble {
+        public FieldAccessorUnsafeDouble(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Double getDouble(Object object) {
+            return (Double) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setDouble(Object object, Double value) {
             UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
         }
     }

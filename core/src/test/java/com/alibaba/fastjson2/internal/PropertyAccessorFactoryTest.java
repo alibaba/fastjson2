@@ -29,6 +29,16 @@ public class PropertyAccessorFactoryTest {
         private int[] arrayField = {1, 2, 3};
         private BigInteger bigIntegerField = new BigInteger("100000");
         private BigDecimal bigDecimalField = new BigDecimal("100000.123");
+
+        // Wrapper type fields
+        private Byte byteObjField = 10;
+        private Character charObjField = 'A';
+        private Short shortObjField = 100;
+        private Integer intObjField = 1000;
+        private Long longObjField = 10000L;
+        private Float floatObjField = 10.5f;
+        private Double doubleObjField = 20.7;
+        private Boolean booleanObjField = true;
     }
 
     public static java.util.Map<Class<?>, Field> fieldMap = new java.util.HashMap<>();
@@ -47,8 +57,13 @@ public class PropertyAccessorFactoryTest {
 
             try {
                 String getterName;
-                if (fieldType == boolean.class) {
-                    getterName = "is" + name.substring(0, 1).toUpperCase() + name.substring(1);
+                if (fieldType == boolean.class || fieldType == Boolean.class) {
+                    if (name.startsWith("is")) {
+                        getterName = name;
+                    } else {
+                        getterName = (fieldType == boolean.class) ? "is" + name.substring(0, 1).toUpperCase() + name.substring(1)
+                                : "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
+                    }
                 } else {
                     getterName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
                 }
@@ -1033,6 +1048,300 @@ public class PropertyAccessorFactoryTest {
             propertyAccessor.setObject(object, testArray);
             assertArrayEquals(testArray, (int[]) propertyAccessor.getObject(object));
             assertArrayEquals(testArray, object.getArrayField());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testByteObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Byte.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Byte value = 50;
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getByteObjField());
+
+            // Test String methods
+            String stringValue = "57";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Byte.valueOf((byte) 57), object.getByteObjField());
+
+            // Test primitive setters that can be converted to Byte
+            byte byteValue = 51;
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(Byte.valueOf(byteValue), propertyAccessor.getObject(object));
+            assertEquals(Byte.valueOf(byteValue), object.getByteObjField());
+
+            // Test with boolean (0 or 1) - using small values that fit in byte range
+            boolean boolValue = true;
+            propertyAccessor.setBooleanValue(object, boolValue);
+            assertEquals(Byte.valueOf((byte) (boolValue ? 1 : 0)), propertyAccessor.getObject(object));
+            assertEquals(Byte.valueOf((byte) (boolValue ? 1 : 0)), object.getByteObjField());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testShortObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Short.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Short value = 200;
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getShortObjField());
+
+            // Test String methods
+            String stringValue = "254";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Short.valueOf((short) 254), object.getShortObjField());
+
+            // Test primitive setters that can be converted to Short
+            short shortValue = 201;
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(Short.valueOf(shortValue), propertyAccessor.getObject(object));
+            assertEquals(Short.valueOf(shortValue), object.getShortObjField());
+
+            // Test with integer values in short range
+            int intValue = 10000;
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(Short.valueOf((short) intValue), propertyAccessor.getObject(object));
+            assertEquals(Short.valueOf((short) intValue), object.getShortObjField());
+
+            // Test with boolean (0 or 1)
+            boolean boolValue = true;
+            propertyAccessor.setBooleanValue(object, boolValue);
+            assertEquals(Short.valueOf((short) (boolValue ? 1 : 0)), propertyAccessor.getObject(object));
+            assertEquals(Short.valueOf((short) (boolValue ? 1 : 0)), object.getShortObjField());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testIntegerObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Integer.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Integer value = 2000;
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getIntObjField());
+
+            // Test String methods
+            String stringValue = "2005";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Integer.valueOf((int) 2005), object.getIntObjField());
+
+            // Test primitive setters that can be converted to Integer
+            int intValue = 2001;
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(Integer.valueOf(intValue), propertyAccessor.getObject(object));
+            assertEquals(Integer.valueOf(intValue), object.getIntObjField());
+
+            // Test with boolean (0 or 1)
+            boolean boolValue = true;
+            propertyAccessor.setBooleanValue(object, boolValue);
+            assertEquals(Integer.valueOf((boolValue ? 1 : 0)), propertyAccessor.getObject(object));
+            assertEquals(Integer.valueOf((boolValue ? 1 : 0)), object.getIntObjField());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testLongObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Long.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Long value = 20000L;
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getLongObjField());
+
+            // Test String methods
+            String stringValue = "20004";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Long.valueOf((long) 20004), object.getLongObjField());
+
+            // Test primitive setters that can be converted to Long
+            long longValue = 20001L;
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(Long.valueOf(longValue), propertyAccessor.getObject(object));
+            assertEquals(Long.valueOf(longValue), object.getLongObjField());
+
+            // Test with boolean (0 or 1)
+            boolean boolValue = true;
+            propertyAccessor.setBooleanValue(object, boolValue);
+            assertEquals(Long.valueOf((boolValue ? 1L : 0L)), propertyAccessor.getObject(object));
+            assertEquals(Long.valueOf((boolValue ? 1L : 0L)), object.getLongObjField());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testFloatObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Float.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Float value = 30.5f;
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getFloatObjField(), 0.01f);
+
+            // Test String methods
+            String stringValue = "31.7";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Float.valueOf(Float.parseFloat(stringValue)), object.getFloatObjField(), 0.01f);
+
+            // Test primitive setters that can be converted to Float
+            float floatValue = 45.6f;
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals(Float.valueOf(floatValue), propertyAccessor.getObject(object));
+            assertEquals(Float.valueOf(floatValue), object.getFloatObjField(), 0.01f);
+
+            // Test with boolean (0 or 1)
+            boolean boolValue = true;
+            propertyAccessor.setBooleanValue(object, boolValue);
+            assertEquals(Float.valueOf((boolValue ? 1.0f : 0.0f)), propertyAccessor.getObject(object));
+            assertEquals(Float.valueOf((boolValue ? 1.0f : 0.0f)), object.getFloatObjField(), 0.01f);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testDoubleObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Double.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Double value = 40.7;
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getDoubleObjField(), 0.01);
+
+            // Test String methods
+            String stringValue = "45.8";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Double.valueOf(Double.parseDouble(stringValue)), object.getDoubleObjField(), 0.01);
+
+            // Test primitive setters that can be converted to Double
+            double doubleValue = 55.9;
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals(Double.valueOf(doubleValue), propertyAccessor.getObject(object));
+            assertEquals(Double.valueOf(doubleValue), object.getDoubleObjField(), 0.01);
+
+            // Test with boolean (0 or 1)
+            boolean boolValue = true;
+            propertyAccessor.setBooleanValue(object, boolValue);
+            assertEquals(Double.valueOf((boolValue ? 1.0 : 0.0)), propertyAccessor.getObject(object));
+            assertEquals(Double.valueOf((boolValue ? 1.0 : 0.0)), object.getDoubleObjField(), 0.01);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testCharacterObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Character.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Character value = 'Z';
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getCharObjField());
+
+            // Test String methods
+            String stringValue = "G";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Character.valueOf('G'), object.getCharObjField());
+
+            // Test primitive setters that can be converted to Character
+            char charValue = 'H';
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(Character.valueOf(charValue), propertyAccessor.getObject(object));
+            assertEquals(Character.valueOf(charValue), object.getCharObjField());
+
+            // Test with integer (ASCII value)
+            int intValue = 65; // 'A' in ASCII
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(Character.valueOf((char) intValue), propertyAccessor.getObject(object));
+            assertEquals(Character.valueOf((char) intValue), object.getCharObjField());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void testBooleanObj(PropertyAccessorFactory factory) throws Exception {
+        Field field = fieldMap.get(Boolean.class);
+        Class<?> fieldType = field.getType();
+        PropertyAccessor[] propertyAccessors = {
+                factory.create(field),
+                factory.create(field.getName(), fieldType, null, getters.get(fieldType), setters.get(fieldType))
+        };
+        for (PropertyAccessor propertyAccessor : propertyAccessors) {
+            Boolean value = false;
+            TestClass object = new TestClass();
+            propertyAccessor.setObject(object, value);
+            assertEquals(value, propertyAccessor.getObject(object));
+            assertEquals(value, object.getBooleanObjField());
+
+            // Test String methods
+            String stringValue = "true";
+            propertyAccessor.setString(object, stringValue);
+            assertEquals(stringValue, propertyAccessor.getString(object));
+            assertEquals(Boolean.valueOf(true), object.getBooleanObjField());
+
+            // Test primitive setters that can be converted to Boolean
+            boolean boolValue = true;
+            propertyAccessor.setBooleanValue(object, boolValue);
+            assertEquals(Boolean.valueOf(boolValue), propertyAccessor.getObject(object));
+            assertEquals(Boolean.valueOf(boolValue), object.getBooleanObjField());
+
+            // Test with integer (0 or 1)
+            int intValue = 0; // false
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(Boolean.valueOf(intValue != 0), propertyAccessor.getObject(object));
+            assertEquals(Boolean.valueOf(intValue != 0), object.getBooleanObjField());
         }
     }
 }

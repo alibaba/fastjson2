@@ -89,8 +89,29 @@ public class PropertyAccessorFactory {
         if (field.getType() == BigDecimal.class) {
             return new FieldAccessorReflectBigDecimal(field);
         }
+        if (field.getType() == Boolean.class) {
+            return new FieldAccessorReflectBoolean(field);
+        }
+        if (field.getType() == Byte.class) {
+            return new FieldAccessorReflectByte(field);
+        }
+        if (field.getType() == Character.class) {
+            return new FieldAccessorReflectCharacter(field);
+        }
+        if (field.getType() == Short.class) {
+            return new FieldAccessorReflectShort(field);
+        }
         if (field.getType() == Integer.class) {
             return new FieldAccessorReflectInteger(field);
+        }
+        if (field.getType() == Long.class) {
+            return new FieldAccessorReflectLong(field);
+        }
+        if (field.getType() == Float.class) {
+            return new FieldAccessorReflectFloat(field);
+        }
+        if (field.getType() == Double.class) {
+            return new FieldAccessorReflectDouble(field);
         }
         return new FieldAccessorReflectObject(field);
     }
@@ -1361,6 +1382,432 @@ public class PropertyAccessorFactory {
         }
     }
 
+    protected interface PropertyAccessorBoolean extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getBoolean(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getBoolean(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getBoolean(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getBoolean(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getBoolean(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getBoolean(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getBoolean(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getBoolean(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getBoolean(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setBoolean(object, Cast.toBoolean(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getBoolean(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setBoolean(object, Cast.toBoolean(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getBoolean(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setBoolean(object, Cast.toBoolean(value));
+        }
+
+        void setBoolean(Object object, Boolean value);
+        Boolean getBoolean(Object object);
+    }
+
+    protected interface PropertyAccessorByte extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getByte(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getByte(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getByte(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getByte(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getByte(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getByte(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getByte(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getByte(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getByte(object);
+        }
+
+        @Override
+        default void setByteValue(Object object, byte value) {
+            setByte(object, value);
+        }
+
+        @Override
+        default void setCharValue(Object object, char value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setShortValue(Object object, short value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setIntValue(Object object, int value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setLongValue(Object object, long value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setFloatValue(Object object, float value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setDoubleValue(Object object, double value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setBooleanValue(Object object, boolean value) {
+            setByte(object, toByte(value));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setByte(object, Cast.toByte(value));
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setByte(object, Cast.toByte(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getByte(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setByte(object, Cast.toByte(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getByte(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setByte(object, Cast.toByte(value));
+        }
+
+        void setByte(Object object, Byte value);
+        Byte getByte(Object object);
+    }
+
+    protected interface PropertyAccessorCharacter extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getCharacter(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getCharacter(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getCharacter(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getCharacter(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getCharacter(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getCharacter(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getCharacter(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getCharacter(object));
+        }
+
+        default void setByteValue(Object object, byte value) {
+            setCharacter(object, toCharacter(value));
+        }
+
+        default void setCharValue(Object object, char value) {
+            setCharacter(object, value);
+        }
+
+        default void setShortValue(Object object, short value) {
+            setCharacter(object, toCharacter(value));
+        }
+
+        default void setIntValue(Object object, int value) {
+            setCharacter(object, toCharacter(value));
+        }
+
+        default void setLongValue(Object object, long value) {
+            setCharacter(object, toCharacter(value));
+        }
+
+        default void setFloatValue(Object object, float value) {
+            setCharacter(object, toCharacter(value));
+        }
+
+        default void setDoubleValue(Object object, double value) {
+            setCharacter(object, toCharacter(value));
+        }
+
+        default void setBooleanValue(Object object, boolean value) {
+            setCharacter(object, toCharacter(value));
+        }
+
+        default void setString(Object object, String value) {
+            setCharacter(object, Cast.toCharacter(value));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getCharacter(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setCharacter(object, Cast.toCharacter(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getCharacter(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setCharacter(object, Cast.toCharacter(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getCharacter(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setCharacter(object, Cast.toCharacter(value));
+        }
+
+        void setCharacter(Object object, Character value);
+        Character getCharacter(Object object);
+    }
+
+    protected interface PropertyAccessorShort extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getShort(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getShort(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getShort(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getShort(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getShort(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getShort(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getShort(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getShort(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getShort(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setShort(object, Cast.toShort(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getShort(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setShort(object, Cast.toShort(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getShort(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setShort(object, Cast.toShort(value));
+        }
+
+        @Override
+        default void setByteValue(Object object, byte value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setCharValue(Object object, char value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setShortValue(Object object, short value) {
+            setShort(object, value);
+        }
+
+        @Override
+        default void setIntValue(Object object, int value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setLongValue(Object object, long value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setFloatValue(Object object, float value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setDoubleValue(Object object, double value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setBooleanValue(Object object, boolean value) {
+            setShort(object, toShort(value));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setShort(object, Cast.toShort(value));
+        }
+
+        void setShort(Object object, Short value);
+        Short getShort(Object object);
+    }
+
     protected interface PropertyAccessorInteger extends PropertyAccessorObject {
         @Override
         default byte getByteValue(Object object) {
@@ -1432,8 +1879,403 @@ public class PropertyAccessorFactory {
             setInteger(object, Cast.toInteger(value));
         }
 
+        @Override
+        default void setByteValue(Object object, byte value) {
+            setInteger(object, toInteger(value));
+        }
+
+        @Override
+        default void setCharValue(Object object, char value) {
+            setInteger(object, toInteger(value));
+        }
+
+        @Override
+        default void setShortValue(Object object, short value) {
+            setInteger(object, toInteger(value));
+        }
+
+        @Override
+        default void setIntValue(Object object, int value) {
+            setInteger(object, value);
+        }
+
+        @Override
+        default void setLongValue(Object object, long value) {
+            setInteger(object, toInteger(value));
+        }
+
+        @Override
+        default void setFloatValue(Object object, float value) {
+            setInteger(object, toInteger(value));
+        }
+
+        @Override
+        default void setDoubleValue(Object object, double value) {
+            setInteger(object, toInteger(value));
+        }
+
         void setInteger(Object object, Integer value);
         Integer getInteger(Object object);
+    }
+
+    protected interface PropertyAccessorLong extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getLong(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getLong(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getLong(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getLong(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getLong(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getLong(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getLong(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getLong(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getLong(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setLong(object, Cast.toLong(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getLong(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setLong(object, Cast.toLong(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getLong(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setLong(object, Cast.toLong(value));
+        }
+
+        @Override
+        default void setByteValue(Object object, byte value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setCharValue(Object object, char value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setShortValue(Object object, short value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setIntValue(Object object, int value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setLongValue(Object object, long value) {
+            setLong(object, value);
+        }
+
+        @Override
+        default void setFloatValue(Object object, float value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setDoubleValue(Object object, double value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setBooleanValue(Object object, boolean value) {
+            setLong(object, toLong(value));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setLong(object, Cast.toLong(value));
+        }
+
+        void setLong(Object object, Long value);
+        Long getLong(Object object);
+    }
+
+    protected interface PropertyAccessorFloat extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getFloat(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getFloat(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getFloat(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getFloat(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getFloat(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getFloat(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getFloat(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getFloat(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getFloat(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setFloat(object, Cast.toFloat(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getFloat(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setFloat(object, Cast.toFloat(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getFloat(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setFloat(object, Cast.toFloat(value));
+        }
+
+        @Override
+        default void setByteValue(Object object, byte value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setCharValue(Object object, char value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setShortValue(Object object, short value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setIntValue(Object object, int value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setLongValue(Object object, long value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setFloatValue(Object object, float value) {
+            setFloat(object, value);
+        }
+
+        @Override
+        default void setDoubleValue(Object object, double value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setBooleanValue(Object object, boolean value) {
+            setFloat(object, toFloat(value));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setFloat(object, Cast.toFloat(value));
+        }
+
+        void setFloat(Object object, Float value);
+        Float getFloat(Object object);
+    }
+
+    protected interface PropertyAccessorDouble extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getDouble(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getDouble(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getDouble(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getDouble(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getDouble(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getDouble(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getDouble(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getDouble(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getDouble(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setDouble(object, Cast.toDouble(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getDouble(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setDouble(object, Cast.toDouble(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getDouble(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setDouble(object, Cast.toDouble(value));
+        }
+
+        @Override
+        default void setByteValue(Object object, byte value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setCharValue(Object object, char value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setShortValue(Object object, short value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setIntValue(Object object, int value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setLongValue(Object object, long value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setFloatValue(Object object, float value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setDoubleValue(Object object, double value) {
+            setDouble(object, value);
+        }
+
+        @Override
+        default void setBooleanValue(Object object, boolean value) {
+            setDouble(object, toDouble(value));
+        }
+
+        @Override
+        default void setString(Object object, String value) {
+            setDouble(object, Cast.toDouble(value));
+        }
+
+        void setDouble(Object object, Double value);
+        Double getDouble(Object object);
     }
 
     /**
@@ -1816,6 +2658,110 @@ public class PropertyAccessorFactory {
         }
     }
 
+    static final class FieldAccessorReflectBoolean
+            extends FieldAccessorReflect
+            implements PropertyAccessorBoolean {
+        public FieldAccessorReflectBoolean(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setBoolean(Object object, Boolean value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Boolean getBoolean(Object object) {
+            try {
+                return (Boolean) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectByte
+            extends FieldAccessorReflect
+            implements PropertyAccessorByte {
+        public FieldAccessorReflectByte(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setByte(Object object, Byte value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Byte getByte(Object object) {
+            try {
+                return (Byte) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectCharacter
+            extends FieldAccessorReflect
+            implements PropertyAccessorCharacter {
+        public FieldAccessorReflectCharacter(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setCharacter(Object object, Character value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Character getCharacter(Object object) {
+            try {
+                return (Character) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectShort
+            extends FieldAccessorReflect
+            implements PropertyAccessorShort {
+        public FieldAccessorReflectShort(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setShort(Object object, Short value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Short getShort(Object object) {
+            try {
+                return (Short) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
     static final class FieldAccessorReflectInteger
             extends FieldAccessorReflect
             implements PropertyAccessorInteger {
@@ -1836,6 +2782,84 @@ public class PropertyAccessorFactory {
         public Integer getInteger(Object object) {
             try {
                 return (Integer) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectLong
+            extends FieldAccessorReflect
+            implements PropertyAccessorLong {
+        public FieldAccessorReflectLong(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setLong(Object object, Long value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Long getLong(Object object) {
+            try {
+                return (Long) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectFloat
+            extends FieldAccessorReflect
+            implements PropertyAccessorFloat {
+        public FieldAccessorReflectFloat(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setFloat(Object object, Float value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Float getFloat(Object object) {
+            try {
+                return (Float) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
+    static final class FieldAccessorReflectDouble
+            extends FieldAccessorReflect
+            implements PropertyAccessorDouble {
+        public FieldAccessorReflectDouble(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setDouble(Object object, Double value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Double getDouble(Object object) {
+            try {
+                return (Double) field.get(object);
             } catch (IllegalAccessException e) {
                 throw errorForGet(e);
             }
@@ -1961,8 +2985,29 @@ public class PropertyAccessorFactory {
         if (propertyClass == BigDecimal.class) {
             return new MethodAccessorBigDecimal(name, propertyType, propertyClass, getter, setter);
         }
+        if (propertyClass == Boolean.class) {
+            return new MethodAccessorBoolean(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Byte.class) {
+            return new MethodAccessorByte(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Character.class) {
+            return new MethodAccessorCharacter(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Short.class) {
+            return new MethodAccessorShort(name, propertyType, propertyClass, getter, setter);
+        }
         if (propertyClass == Integer.class) {
             return new MethodAccessorInteger(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Long.class) {
+            return new MethodAccessorLong(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Float.class) {
+            return new MethodAccessorFloat(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Double.class) {
+            return new MethodAccessorDouble(name, propertyType, propertyClass, getter, setter);
         }
 
         return new MethodAccessorObject(name, propertyType, propertyClass, getter, setter);
@@ -2106,8 +3151,29 @@ public class PropertyAccessorFactory {
         if (propertyClass == BigDecimal.class) {
             return new FunctionAccessorBigDecimal<T>(name, (Function<T, BigDecimal>) getterFunc, (BiConsumer<T, BigDecimal>) setterFunc);
         }
+        if (propertyClass == Boolean.class) {
+            return new FunctionAccessorBoolean<T>(name, (Function<T, Boolean>) getterFunc, (BiConsumer<T, Boolean>) setterFunc);
+        }
+        if (propertyClass == Byte.class) {
+            return new FunctionAccessorByte<T>(name, (Function<T, Byte>) getterFunc, (BiConsumer<T, Byte>) setterFunc);
+        }
+        if (propertyClass == Character.class) {
+            return new FunctionAccessorCharacter<T>(name, (Function<T, Character>) getterFunc, (BiConsumer<T, Character>) setterFunc);
+        }
+        if (propertyClass == Short.class) {
+            return new FunctionAccessorShort<T>(name, (Function<T, Short>) getterFunc, (BiConsumer<T, Short>) setterFunc);
+        }
         if (propertyClass == Integer.class) {
             return new FunctionAccessorInteger<T>(name, (Function<T, Integer>) getterFunc, (BiConsumer<T, Integer>) setterFunc);
+        }
+        if (propertyClass == Long.class) {
+            return new FunctionAccessorLong<T>(name, (Function<T, Long>) getterFunc, (BiConsumer<T, Long>) setterFunc);
+        }
+        if (propertyClass == Float.class) {
+            return new FunctionAccessorFloat<T>(name, (Function<T, Float>) getterFunc, (BiConsumer<T, Float>) setterFunc);
+        }
+        if (propertyClass == Double.class) {
+            return new FunctionAccessorDouble<T>(name, (Function<T, Double>) getterFunc, (BiConsumer<T, Double>) setterFunc);
         }
         return new FunctionAccessorObject<T, V>(name, propertyType, propertyClass, getterFunc, setterFunc);
     }
@@ -2233,6 +3299,126 @@ public class PropertyAccessorFactory {
     }
 
     /**
+     * Method accessor implementation for Boolean-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Boolean properties via method calls.
+     */
+    static final class MethodAccessorBoolean
+            extends MethodAccessor implements PropertyAccessorBoolean
+    {
+        public MethodAccessorBoolean(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Boolean getBoolean(Object object) {
+            try {
+                return (Boolean) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setBoolean(Object object, Boolean value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
+     * Method accessor implementation for Byte-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Byte properties via method calls.
+     */
+    static final class MethodAccessorByte
+            extends MethodAccessor implements PropertyAccessorByte
+    {
+        public MethodAccessorByte(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Byte getByte(Object object) {
+            try {
+                return (Byte) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setByte(Object object, Byte value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
+     * Method accessor implementation for Character-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Character properties via method calls.
+     */
+    static final class MethodAccessorCharacter
+            extends MethodAccessor implements PropertyAccessorCharacter
+    {
+        public MethodAccessorCharacter(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Character getCharacter(Object object) {
+            try {
+                return (Character) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setCharacter(Object object, Character value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
+     * Method accessor implementation for Short-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Short properties via method calls.
+     */
+    static final class MethodAccessorShort
+            extends MethodAccessor implements PropertyAccessorShort
+    {
+        public MethodAccessorShort(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Short getShort(Object object) {
+            try {
+                return (Short) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setShort(Object object, Short value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
      * Method accessor implementation for Integer-typed properties using method invocation.
      * Provides efficient getter and setter operations for Integer properties via method calls.
      */
@@ -2254,6 +3440,96 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setInteger(Object object, Integer value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
+     * Method accessor implementation for Long-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Long properties via method calls.
+     */
+    static final class MethodAccessorLong
+            extends MethodAccessor implements PropertyAccessorLong
+    {
+        public MethodAccessorLong(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Long getLong(Object object) {
+            try {
+                return (Long) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setLong(Object object, Long value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
+     * Method accessor implementation for Float-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Float properties via method calls.
+     */
+    static final class MethodAccessorFloat
+            extends MethodAccessor implements PropertyAccessorFloat
+    {
+        public MethodAccessorFloat(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Float getFloat(Object object) {
+            try {
+                return (Float) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setFloat(Object object, Float value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
+     * Method accessor implementation for Double-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Double properties via method calls.
+     */
+    static final class MethodAccessorDouble
+            extends MethodAccessor implements PropertyAccessorDouble
+    {
+        public MethodAccessorDouble(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Double getDouble(Object object) {
+            try {
+                return (Double) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setDouble(Object object, Double value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2723,6 +3999,102 @@ public class PropertyAccessorFactory {
     }
 
     /**
+     * Function accessor implementation for Boolean-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Boolean properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorBoolean<T> extends FunctionAccessor<T> implements PropertyAccessorBoolean {
+        private final Function<T, Boolean> getterFunc;
+        private final BiConsumer<T, Boolean> setterFunc;
+        public FunctionAccessorBoolean(String name, Function<T, Boolean> getterFunc, BiConsumer<T, Boolean> setterFunc) {
+            super(name, Boolean.class, Boolean.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Boolean getBoolean(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setBoolean(Object object, Boolean value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
+     * Function accessor implementation for Byte-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Byte properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorByte<T> extends FunctionAccessor<T> implements PropertyAccessorByte {
+        private final Function<T, Byte> getterFunc;
+        private final BiConsumer<T, Byte> setterFunc;
+        public FunctionAccessorByte(String name, Function<T, Byte> getterFunc, BiConsumer<T, Byte> setterFunc) {
+            super(name, Byte.class, Byte.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Byte getByte(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setByte(Object object, Byte value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
+     * Function accessor implementation for Character-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Character properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorCharacter<T> extends FunctionAccessor<T> implements PropertyAccessorCharacter {
+        private final Function<T, Character> getterFunc;
+        private final BiConsumer<T, Character> setterFunc;
+        public FunctionAccessorCharacter(String name, Function<T, Character> getterFunc, BiConsumer<T, Character> setterFunc) {
+            super(name, Character.class, Character.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Character getCharacter(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setCharacter(Object object, Character value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
+     * Function accessor implementation for Short-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Short properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorShort<T> extends FunctionAccessor<T> implements PropertyAccessorShort {
+        private final Function<T, Short> getterFunc;
+        private final BiConsumer<T, Short> setterFunc;
+        public FunctionAccessorShort(String name, Function<T, Short> getterFunc, BiConsumer<T, Short> setterFunc) {
+            super(name, Short.class, Short.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Short getShort(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setShort(Object object, Short value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
      * Function accessor implementation for Integer-typed properties using functional interfaces.
      * Provides efficient getter and setter operations for Integer properties via functional interfaces.
      *
@@ -2742,6 +4114,78 @@ public class PropertyAccessorFactory {
         }
         @Override
         public void setInteger(Object object, Integer value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
+     * Function accessor implementation for Long-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Long properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorLong<T> extends FunctionAccessor<T> implements PropertyAccessorLong {
+        private final Function<T, Long> getterFunc;
+        private final BiConsumer<T, Long> setterFunc;
+        public FunctionAccessorLong(String name, Function<T, Long> getterFunc, BiConsumer<T, Long> setterFunc) {
+            super(name, Long.class, Long.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Long getLong(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setLong(Object object, Long value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
+     * Function accessor implementation for Float-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Float properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorFloat<T> extends FunctionAccessor<T> implements PropertyAccessorFloat {
+        private final Function<T, Float> getterFunc;
+        private final BiConsumer<T, Float> setterFunc;
+        public FunctionAccessorFloat(String name, Function<T, Float> getterFunc, BiConsumer<T, Float> setterFunc) {
+            super(name, Float.class, Float.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Float getFloat(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setFloat(Object object, Float value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
+     * Function accessor implementation for Double-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Double properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorDouble<T> extends FunctionAccessor<T> implements PropertyAccessorDouble {
+        private final Function<T, Double> getterFunc;
+        private final BiConsumer<T, Double> setterFunc;
+        public FunctionAccessorDouble(String name, Function<T, Double> getterFunc, BiConsumer<T, Double> setterFunc) {
+            super(name, Double.class, Double.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Double getDouble(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setDouble(Object object, Double value) {
             setterFunc.accept((T) object, value);
         }
     }
