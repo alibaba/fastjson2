@@ -160,32 +160,39 @@ public abstract class FieldReader<T>
         }
 
         if (schema != null) {
-            if (fieldClass == boolean.class) {
-                propertyAccessor = factory.create(propertyAccessor, (BoolConsumer) schema::assertValidate);
-            }
-            if (fieldClass == byte.class) {
-                propertyAccessor = factory.create(propertyAccessor, (ByteConsumer) schema::assertValidate);
-            }
-            if (fieldClass == char.class) {
-                propertyAccessor = factory.create(propertyAccessor, (com.alibaba.fastjson2.function.CharConsumer) schema::assertValidate);
-            }
-            if (fieldClass == short.class) {
-                propertyAccessor = factory.create(propertyAccessor, (com.alibaba.fastjson2.function.ShortConsumer) schema::assertValidate);
-            }
-            if (fieldClass == int.class) {
-                propertyAccessor = factory.create(propertyAccessor, (IntConsumer) schema::assertValidate);
-            }
-            if (fieldClass == long.class) {
-                propertyAccessor = factory.create(propertyAccessor, (LongConsumer) schema::assertValidate);
-            }
-            if (fieldClass == float.class) {
-                propertyAccessor = factory.create(propertyAccessor, (com.alibaba.fastjson2.function.FloatConsumer) schema::assertValidate);
-            }
-            if (fieldClass == double.class) {
-                propertyAccessor = factory.create(propertyAccessor, (DoubleConsumer) schema::assertValidate);
-            }
+            propertyAccessor = schema(propertyAccessor, schema);
         }
 
+        return propertyAccessor;
+    }
+
+    private static PropertyAccessor schema(PropertyAccessor propertyAccessor, JSONSchema schema) {
+        PropertyAccessorFactory factory = Conf.PROPERTY_ACCESSOR_FACTORY;
+        Class fieldClass = propertyAccessor.propertyClass();
+        if (fieldClass == boolean.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjBoolConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        if (fieldClass == byte.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjByteConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        if (fieldClass == char.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjCharConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        if (fieldClass == short.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjShortConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        if (fieldClass == int.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjIntConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        if (fieldClass == long.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjLongConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        if (fieldClass == float.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjFloatConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        if (fieldClass == double.class) {
+            propertyAccessor = factory.create(propertyAccessor, (ObjDoubleConsumer) (o, v) -> schema.assertValidate(v));
+        }
         return propertyAccessor;
     }
 

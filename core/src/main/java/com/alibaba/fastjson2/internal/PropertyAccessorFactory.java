@@ -3834,35 +3834,35 @@ public class PropertyAccessorFactory {
         }
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, BoolConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjBoolConsumer valueConsumer) {
         return new PropertyAccessorWrapperBooleanValue(impl, valueConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ByteConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjByteConsumer valueConsumer) {
         return new PropertyAccessorWrapperByteValue(impl, valueConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, com.alibaba.fastjson2.function.CharConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjCharConsumer valueConsumer) {
         return new PropertyAccessorWrapperCharValue(impl, valueConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, com.alibaba.fastjson2.function.ShortConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjShortConsumer valueConsumer) {
         return new PropertyAccessorWrapperShortValue(impl, valueConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, IntConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjIntConsumer valueConsumer) {
         return new PropertyAccessorWrapperIntValue(impl, valueConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, LongConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjLongConsumer valueConsumer) {
         return new PropertyAccessorWrapperLongValue(impl, valueConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, com.alibaba.fastjson2.function.FloatConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjFloatConsumer valueConsumer) {
         return new PropertyAccessorWrapperFloatValue(impl, valueConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, DoubleConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, ObjDoubleConsumer valueConsumer) {
         return new PropertyAccessorWrapperDoubleValue(impl, valueConsumer);
     }
 
@@ -3899,8 +3899,8 @@ public class PropertyAccessorFactory {
     }
 
     static final class PropertyAccessorWrapperBooleanValue extends PropertyAccessorWrapper implements PropertyAccessorBooleanValue {
-        private final BoolConsumer valueConsumer;
-        public PropertyAccessorWrapperBooleanValue(PropertyAccessor impl, BoolConsumer predicate) {
+        private final ObjBoolConsumer valueConsumer;
+        public PropertyAccessorWrapperBooleanValue(PropertyAccessor impl, ObjBoolConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -3908,20 +3908,20 @@ public class PropertyAccessorFactory {
         @Override
         public boolean getBooleanValue(Object object) {
             boolean value = impl.getBooleanValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setBooleanValue(Object object, boolean value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setBooleanValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperByteValue extends PropertyAccessorWrapper implements PropertyAccessorByteValue {
-        private final ByteConsumer valueConsumer;
-        public PropertyAccessorWrapperByteValue(PropertyAccessor impl, ByteConsumer predicate) {
+        private final ObjByteConsumer valueConsumer;
+        public PropertyAccessorWrapperByteValue(PropertyAccessor impl, ObjByteConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -3929,20 +3929,20 @@ public class PropertyAccessorFactory {
         @Override
         public byte getByteValue(Object object) {
             byte value = impl.getByteValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setByteValue(Object object, byte value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setByteValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperShortValue extends PropertyAccessorWrapper implements PropertyAccessorShortValue {
-        private final ShortConsumer valueConsumer;
-        public PropertyAccessorWrapperShortValue(PropertyAccessor impl, ShortConsumer predicate) {
+        private final ObjShortConsumer valueConsumer;
+        public PropertyAccessorWrapperShortValue(PropertyAccessor impl, ObjShortConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -3950,20 +3950,20 @@ public class PropertyAccessorFactory {
         @Override
         public short getShortValue(Object object) {
             short value = impl.getShortValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setShortValue(Object object, short value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setShortValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperIntValue extends PropertyAccessorWrapper implements PropertyAccessorIntValue {
-        private final IntConsumer valueConsumer;
-        public PropertyAccessorWrapperIntValue(PropertyAccessor impl, IntConsumer predicate) {
+        private final ObjIntConsumer valueConsumer;
+        public PropertyAccessorWrapperIntValue(PropertyAccessor impl, ObjIntConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -3971,20 +3971,20 @@ public class PropertyAccessorFactory {
         @Override
         public int getIntValue(Object object) {
             int value = impl.getIntValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setIntValue(Object object, int value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setIntValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperLongValue extends PropertyAccessorWrapper implements PropertyAccessorLongValue {
-        private final LongConsumer valueConsumer;
-        public PropertyAccessorWrapperLongValue(PropertyAccessor impl, LongConsumer predicate) {
+        private final ObjLongConsumer valueConsumer;
+        public PropertyAccessorWrapperLongValue(PropertyAccessor impl, ObjLongConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -3992,20 +3992,20 @@ public class PropertyAccessorFactory {
         @Override
         public long getLongValue(Object object) {
             long value = impl.getLongValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setLongValue(Object object, long value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setLongValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperFloatValue extends PropertyAccessorWrapper implements PropertyAccessorFloatValue {
-        private final FloatConsumer valueConsumer;
-        public PropertyAccessorWrapperFloatValue(PropertyAccessor impl, FloatConsumer predicate) {
+        private final ObjFloatConsumer valueConsumer;
+        public PropertyAccessorWrapperFloatValue(PropertyAccessor impl, ObjFloatConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -4013,20 +4013,20 @@ public class PropertyAccessorFactory {
         @Override
         public float getFloatValue(Object object) {
             float value = impl.getFloatValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setFloatValue(Object object, float value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setFloatValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperDoubleValue extends PropertyAccessorWrapper implements PropertyAccessorDoubleValue {
-        private final DoubleConsumer valueConsumer;
-        public PropertyAccessorWrapperDoubleValue(PropertyAccessor impl, DoubleConsumer predicate) {
+        private final ObjDoubleConsumer valueConsumer;
+        public PropertyAccessorWrapperDoubleValue(PropertyAccessor impl, ObjDoubleConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -4034,20 +4034,20 @@ public class PropertyAccessorFactory {
         @Override
         public double getDoubleValue(Object object) {
             double value = impl.getDoubleValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setDoubleValue(Object object, double value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setDoubleValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperCharValue extends PropertyAccessorWrapper implements PropertyAccessorCharValue {
-        private final CharConsumer valueConsumer;
-        public PropertyAccessorWrapperCharValue(PropertyAccessor impl, com.alibaba.fastjson2.function.CharConsumer predicate) {
+        private final ObjCharConsumer valueConsumer;
+        public PropertyAccessorWrapperCharValue(PropertyAccessor impl, ObjCharConsumer predicate) {
             super(impl);
             this.valueConsumer = predicate;
         }
@@ -4055,13 +4055,13 @@ public class PropertyAccessorFactory {
         @Override
         public char getCharValue(Object object) {
             char value = impl.getCharValue(object);
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setCharValue(Object object, char value) {
-            valueConsumer.accept(value);
+            valueConsumer.accept(object, value);
             impl.setCharValue(object, value);
         }
     }
