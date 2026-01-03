@@ -66,10 +66,6 @@ final class FieldReaderInt32ValueArrayReadOnly<T>
                 array = newArray;
             }
 
-            if (schema != null) {
-                schema.assertValidate(array);
-            }
-
             propertyAccessor.setObject(object, array);
         }
     }
@@ -126,10 +122,6 @@ final class FieldReaderInt32ValueArrayReadOnly<T>
             throw new JSONException("can't convert " + value + " to int[]");
         } else {
             throw new JSONException("can't convert " + value + " to int[]");
-        }
-
-        if (schema != null) {
-            schema.assertValidate(intArray);
         }
 
         propertyAccessor.setObject(object, intArray);

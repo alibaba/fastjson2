@@ -93,10 +93,6 @@ final class FieldReaderCollectionReadOnly<T>
             // For field-based access, we use addAll
             collection.addAll((Collection) value);
         }
-
-        if (schema != null) {
-            schema.assertValidate(collection);
-        }
     }
 
     @Override

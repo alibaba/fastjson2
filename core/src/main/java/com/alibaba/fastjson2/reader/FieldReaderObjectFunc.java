@@ -42,10 +42,6 @@ final class FieldReaderObjectFunc<T, V>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         propertyAccessor.setObject(object, value);
     }
 }

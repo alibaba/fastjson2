@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
@@ -123,32 +122,9 @@ public class FieldReaderZonedDateTime<T>
 
     @Override
     protected void accept(T object, ZonedDateTime zdt) {
-        if (schema != null) {
-            schema.assertValidate(zdt);
-        }
-
         if (zdt == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
         }
-
-        if (object == null) {
-            throw new JSONException("set " + fieldName + " error, object is null");
-        }
-
-        if (function != null) {
-            function.accept(object, zdt);
-            return;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(object, zdt);
-            } catch (Exception e) {
-                throw new JSONException("set " + fieldName + " error", e);
-            }
-            return;
-        }
-
         propertyAccessor.setObject(object, zdt);
     }
 }

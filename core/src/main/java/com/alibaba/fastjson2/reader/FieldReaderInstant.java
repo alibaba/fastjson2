@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
@@ -118,29 +117,7 @@ public final class FieldReaderInstant<T>
 
     @Override
     protected void accept(T object, Instant instant) {
-        if (schema != null) {
-            schema.assertValidate(instant);
-        }
-
-        if (object == null) {
-            throw new JSONException("set " + fieldName + " error, object is null");
-        }
-
         if (instant == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
-            return;
-        }
-
-        if (function != null) {
-            function.accept(object, instant);
-            return;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(object, instant);
-            } catch (Exception e) {
-                throw new JSONException("set " + fieldName + " error", e);
-            }
             return;
         }
 

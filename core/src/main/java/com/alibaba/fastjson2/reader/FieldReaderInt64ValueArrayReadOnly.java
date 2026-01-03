@@ -128,10 +128,6 @@ final class FieldReaderInt64ValueArrayReadOnly<T>
             throw new JSONException("can't convert " + value + " to long[]");
         }
 
-        if (schema != null) {
-            schema.assertValidate(longArray);
-        }
-
         propertyAccessor.setObject(object, longArray);
     }
 }
