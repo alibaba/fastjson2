@@ -42,7 +42,7 @@ final class FieldReaderInt8Value<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setByte(object, fieldValue);
+        propertyAccessor.setByteValue(object, fieldValue);
     }
 
     @Override
@@ -53,7 +53,7 @@ final class FieldReaderInt8Value<T>
             schema.assertValidate(byteValue);
         }
 
-        propertyAccessor.setByte(object, byteValue);
+        propertyAccessor.setByteValue(object, byteValue);
     }
 
     @Override
@@ -62,6 +62,6 @@ final class FieldReaderInt8Value<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setByte(object, value);
+        propertyAccessor.setByteValue(object, value);
     }
 }

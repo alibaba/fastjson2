@@ -43,7 +43,7 @@ final class FieldReaderInt64Value<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setLong(object, fieldValue);
+        propertyAccessor.setLongValue(object, fieldValue);
     }
 
     @Override
@@ -54,7 +54,7 @@ final class FieldReaderInt64Value<T>
             schema.assertValidate(longValue);
         }
 
-        propertyAccessor.setLong(object, longValue);
+        propertyAccessor.setLongValue(object, longValue);
     }
 
     @Override
@@ -63,6 +63,6 @@ final class FieldReaderInt64Value<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setLong(object, value);
+        propertyAccessor.setLongValue(object, value);
     }
 }

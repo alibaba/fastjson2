@@ -97,12 +97,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public boolean getBoolean(Object object) {
+        public boolean getBooleanValue(Object object) {
             return UNSAFE.getBoolean(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setBoolean(Object object, boolean value) {
+        public void setBooleanValue(Object object, boolean value) {
             UNSAFE.putBoolean(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
@@ -117,12 +117,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public byte getByte(Object object) {
+        public byte getByteValue(Object object) {
             return UNSAFE.getByte(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setByte(Object object, byte value) {
+        public void setByteValue(Object object, byte value) {
             UNSAFE.putByte(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
@@ -137,12 +137,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public short getShort(Object object) {
+        public short getShortValue(Object object) {
             return UNSAFE.getShort(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setShort(Object object, short value) {
+        public void setShortValue(Object object, short value) {
             UNSAFE.putShort(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
@@ -157,12 +157,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public int getInt(Object object) {
+        public int getIntValue(Object object) {
             return UNSAFE.getInt(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setInt(Object object, int value) {
+        public void setIntValue(Object object, int value) {
             UNSAFE.putInt(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
@@ -177,12 +177,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public long getLong(Object object) {
+        public long getLongValue(Object object) {
             return UNSAFE.getLong(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setLong(Object object, long value) {
+        public void setLongValue(Object object, long value) {
             UNSAFE.putLong(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
@@ -197,12 +197,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public float getFloat(Object object) {
+        public float getFloatValue(Object object) {
             return UNSAFE.getFloat(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setFloat(Object object, float value) {
+        public void setFloatValue(Object object, float value) {
             UNSAFE.putFloat(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
@@ -217,12 +217,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public double getDouble(Object object) {
+        public double getDoubleValue(Object object) {
             return UNSAFE.getDouble(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setDouble(Object object, double value) {
+        public void setDoubleValue(Object object, double value) {
             UNSAFE.putDouble(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
@@ -237,12 +237,12 @@ public final class PropertyAccessorFactoryUnsafe
         }
 
         @Override
-        public char getChar(Object object) {
+        public char getCharValue(Object object) {
             return UNSAFE.getChar(Objects.requireNonNull(object), fieldOffset);
         }
 
         @Override
-        public void setChar(Object object, char value) {
+        public void setCharValue(Object object, char value) {
             UNSAFE.putChar(Objects.requireNonNull(object), fieldOffset, value);
         }
     }

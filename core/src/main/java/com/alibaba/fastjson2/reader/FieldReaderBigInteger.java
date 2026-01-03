@@ -65,7 +65,7 @@ final class FieldReaderBigInteger<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setLong(object, value);
+        propertyAccessor.setLongValue(object, value);
     }
 
     @Override

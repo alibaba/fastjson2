@@ -25,7 +25,7 @@ final class FieldWriterInt32Val
     public boolean write(JSONWriter jsonWriter, Object object) {
         int value;
         try {
-            value = propertyAccessor.getInt(object);
+            value = propertyAccessor.getIntValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -44,7 +44,7 @@ final class FieldWriterInt32Val
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         jsonWriter.writeInt32(
-                propertyAccessor.getInt(object)
+                propertyAccessor.getIntValue(object)
         );
     }
 }

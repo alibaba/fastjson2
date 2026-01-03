@@ -25,7 +25,7 @@ final class FieldWriterCharVal
     public boolean write(JSONWriter jsonWriter, Object object) {
         char value;
         try {
-            value = propertyAccessor.getChar(object);
+            value = propertyAccessor.getCharValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -45,7 +45,7 @@ final class FieldWriterCharVal
 
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
-        char value = propertyAccessor.getChar(object);
+        char value = propertyAccessor.getCharValue(object);
         jsonWriter.writeChar(value);
     }
 }

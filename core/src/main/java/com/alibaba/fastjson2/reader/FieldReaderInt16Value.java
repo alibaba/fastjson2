@@ -43,7 +43,7 @@ final class FieldReaderInt16Value<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setShort(object, fieldValue);
+        propertyAccessor.setShortValue(object, fieldValue);
     }
 
     @Override
@@ -54,7 +54,7 @@ final class FieldReaderInt16Value<T>
             schema.assertValidate(shortValue);
         }
 
-        propertyAccessor.setShort(object, shortValue);
+        propertyAccessor.setShortValue(object, shortValue);
     }
 
     @Override
@@ -63,6 +63,6 @@ final class FieldReaderInt16Value<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setShort(object, value);
+        propertyAccessor.setShortValue(object, value);
     }
 }

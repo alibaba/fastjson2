@@ -30,7 +30,7 @@ final class FieldWriterDoubleVal<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         double value;
         try {
-            value = propertyAccessor.getDouble(object);
+            value = propertyAccessor.getDoubleValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -57,7 +57,7 @@ final class FieldWriterDoubleVal<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        double value = propertyAccessor.getDouble(object);
+        double value = propertyAccessor.getDoubleValue(object);
 
         if (decimalFormat != null) {
             jsonWriter.writeDouble(value, decimalFormat);

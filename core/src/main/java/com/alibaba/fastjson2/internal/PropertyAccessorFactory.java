@@ -100,112 +100,112 @@ public class PropertyAccessorFactory {
     protected interface PropertyAccessorBoolean extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
-            return getBoolean(object);
+            return getBooleanValue(object);
         }
 
         @Override
-        default byte getByte(Object object) {
-            return toByteValue(getBoolean(object));
+        default byte getByteValue(Object object) {
+            return toByteValue(getBooleanValue(object));
         }
 
         @Override
-        default char getChar(Object object) {
-            return toCharValue(getBoolean(object));
+        default char getCharValue(Object object) {
+            return toCharValue(getBooleanValue(object));
         }
 
         @Override
-        default short getShort(Object object) {
-            return toShortValue(getBoolean(object));
+        default short getShortValue(Object object) {
+            return toShortValue(getBooleanValue(object));
         }
 
         @Override
-        default int getInt(Object object) {
-            return toIntValue(getBoolean(object));
+        default int getIntValue(Object object) {
+            return toIntValue(getBooleanValue(object));
         }
 
         @Override
-        default long getLong(Object object) {
-            return toLongValue(getBoolean(object));
+        default long getLongValue(Object object) {
+            return toLongValue(getBooleanValue(object));
         }
 
         @Override
-        default float getFloat(Object object) {
-            return toFloatValue(getBoolean(object));
+        default float getFloatValue(Object object) {
+            return toFloatValue(getBooleanValue(object));
         }
 
         @Override
-        default double getDouble(Object object) {
-            return toDoubleValue(getBoolean(object));
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getBooleanValue(object));
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setBoolean(object, toBooleanValue(value));
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
-        default void setByte(Object object, byte value) {
-            setBoolean(object, toBooleanValue(value));
+        default void setByteValue(Object object, byte value) {
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
-        default void setChar(Object object, char value) {
-            setBoolean(object, toBooleanValue(value));
+        default void setCharValue(Object object, char value) {
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
-        default void setShort(Object object, short value) {
-            setBoolean(object, toBooleanValue(value));
+        default void setShortValue(Object object, short value) {
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
-        default void setInt(Object object, int value) {
-            setBoolean(object, toBooleanValue(value));
+        default void setIntValue(Object object, int value) {
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
-        default void setLong(Object object, long value) {
-            setBoolean(object, toBooleanValue(value));
+        default void setLongValue(Object object, long value) {
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
-        default void setFloat(Object object, float value) {
-            setBoolean(object, toBooleanValue(value));
+        default void setFloatValue(Object object, float value) {
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
-        default void setDouble(Object object, double value) {
-            setBoolean(object, toBooleanValue(value));
+        default void setDoubleValue(Object object, double value) {
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getBoolean(object));
+            return Cast.toString(getBooleanValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getBoolean(object));
+            return toBigInteger(getBooleanValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getBoolean(object));
+            return toBigDecimal(getBooleanValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setBoolean(object, toBooleanValue(value));
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setBoolean(object, toBooleanValue(value));
+            setBooleanValue(object, toBooleanValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setBoolean(object, toBooleanValue(value));
+            setBooleanValue(object, toBooleanValue(value));
         }
     }
 
@@ -217,112 +217,112 @@ public class PropertyAccessorFactory {
     protected interface PropertyAccessorByte extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
-            return getByte(object);
+            return getByteValue(object);
         }
 
         @Override
-        default char getChar(Object object) {
-            return toCharValue(getByte(object));
+        default char getCharValue(Object object) {
+            return toCharValue(getByteValue(object));
         }
 
         @Override
-        default short getShort(Object object) {
-            return toShortValue(getByte(object));
+        default short getShortValue(Object object) {
+            return toShortValue(getByteValue(object));
         }
 
         @Override
-        default int getInt(Object object) {
-            return toIntValue(getByte(object));
+        default int getIntValue(Object object) {
+            return toIntValue(getByteValue(object));
         }
 
         @Override
-        default long getLong(Object object) {
-            return toLongValue(getByte(object));
+        default long getLongValue(Object object) {
+            return toLongValue(getByteValue(object));
         }
 
         @Override
-        default float getFloat(Object object) {
-            return toFloatValue(getByte(object));
+        default float getFloatValue(Object object) {
+            return toFloatValue(getByteValue(object));
         }
 
         @Override
-        default double getDouble(Object object) {
-            return toDoubleValue(getByte(object));
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getByteValue(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
-            return toBooleanValue(getByte(object));
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getByteValue(object));
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setByte(object, toByteValue(value));
+            setByteValue(object, toByteValue(value));
         }
 
         @Override
-        default void setChar(Object object, char value) {
-            setByte(object, (byte) value);
+        default void setCharValue(Object object, char value) {
+            setByteValue(object, (byte) value);
         }
 
         @Override
-        default void setShort(Object object, short value) {
-            setByte(object, (byte) value);
+        default void setShortValue(Object object, short value) {
+            setByteValue(object, (byte) value);
         }
 
         @Override
-        default void setInt(Object object, int value) {
-            setByte(object, (byte) value);
+        default void setIntValue(Object object, int value) {
+            setByteValue(object, (byte) value);
         }
 
         @Override
-        default void setLong(Object object, long value) {
-            setByte(object, (byte) value);
+        default void setLongValue(Object object, long value) {
+            setByteValue(object, (byte) value);
         }
 
         @Override
-        default void setFloat(Object object, float value) {
-            setByte(object, (byte) value);
+        default void setFloatValue(Object object, float value) {
+            setByteValue(object, (byte) value);
         }
 
         @Override
-        default void setDouble(Object object, double value) {
-            setByte(object, (byte) value);
+        default void setDoubleValue(Object object, double value) {
+            setByteValue(object, (byte) value);
         }
 
         @Override
-        default void setBoolean(Object object, boolean value) {
-            setByte(object, toByteValue(value));
+        default void setBooleanValue(Object object, boolean value) {
+            setByteValue(object, toByteValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getByte(object));
+            return Cast.toString(getByteValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getByte(object));
+            return toBigInteger(getByteValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getByte(object));
+            return toBigDecimal(getByteValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setByte(object, toByteValue(value));
+            setByteValue(object, toByteValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setByte(object, toByteValue(value));
+            setByteValue(object, toByteValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setByte(object, toByteValue(value));
+            setByteValue(object, toByteValue(value));
         }
     }
 
@@ -333,97 +333,97 @@ public class PropertyAccessorFactory {
      */
     protected interface PropertyAccessorShort extends PropertyAccessor {
         default Object getObject(Object object) {
-            return getShort(object);
+            return getShortValue(object);
         }
 
-        default byte getByte(Object object) {
-            return toByteValue(getShort(object));
+        default byte getByteValue(Object object) {
+            return toByteValue(getShortValue(object));
         }
 
-        default char getChar(Object object) {
-            return toCharValue(getShort(object));
+        default char getCharValue(Object object) {
+            return toCharValue(getShortValue(object));
         }
 
-        default int getInt(Object object) {
-            return toIntValue(getShort(object));
+        default int getIntValue(Object object) {
+            return toIntValue(getShortValue(object));
         }
 
-        default long getLong(Object object) {
-            return toLongValue(getShort(object));
+        default long getLongValue(Object object) {
+            return toLongValue(getShortValue(object));
         }
 
-        default float getFloat(Object object) {
-            return toFloatValue(getShort(object));
+        default float getFloatValue(Object object) {
+            return toFloatValue(getShortValue(object));
         }
 
-        default double getDouble(Object object) {
-            return toDoubleValue(getShort(object));
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getShortValue(object));
         }
 
-        default boolean getBoolean(Object object) {
-            return toBooleanValue(getShort(object));
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getShortValue(object));
         }
 
         default void setObject(Object object, Object value) {
-            setShort(object, toShortValue(value));
+            setShortValue(object, toShortValue(value));
         }
 
-        default void setByte(Object object, byte value) {
-            setShort(object, value);
+        default void setByteValue(Object object, byte value) {
+            setShortValue(object, value);
         }
 
-        default void setChar(Object object, char value) {
-            setShort(object, (short) value);
+        default void setCharValue(Object object, char value) {
+            setShortValue(object, (short) value);
         }
 
-        default void setInt(Object object, int value) {
-            setShort(object, (short) value);
+        default void setIntValue(Object object, int value) {
+            setShortValue(object, (short) value);
         }
 
-        default void setLong(Object object, long value) {
-            setShort(object, (short) value);
+        default void setLongValue(Object object, long value) {
+            setShortValue(object, (short) value);
         }
 
-        default void setFloat(Object object, float value) {
-            setShort(object, (short) value);
+        default void setFloatValue(Object object, float value) {
+            setShortValue(object, (short) value);
         }
 
-        default void setDouble(Object object, double value) {
-            setShort(object, (short) value);
+        default void setDoubleValue(Object object, double value) {
+            setShortValue(object, (short) value);
         }
 
-        default void setBoolean(Object object, boolean value) {
-            setShort(object, toShortValue(value));
+        default void setBooleanValue(Object object, boolean value) {
+            setShortValue(object, toShortValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getShort(object));
+            return Cast.toString(getShortValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getShort(object));
+            return toBigInteger(getShortValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getShort(object));
+            return toBigDecimal(getShortValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setShort(object, toShortValue(value));
+            setShortValue(object, toShortValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setShort(object, toShortValue(value));
+            setShortValue(object, toShortValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setShort(object, toShortValue(value));
+            setShortValue(object, toShortValue(value));
         }
     }
 
@@ -435,112 +435,112 @@ public class PropertyAccessorFactory {
     protected interface PropertyAccessorInt extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
-            return getInt(object);
+            return getIntValue(object);
         }
 
         @Override
-        default byte getByte(Object object) {
-            return toByteValue(getInt(object));
+        default byte getByteValue(Object object) {
+            return toByteValue(getIntValue(object));
         }
 
         @Override
-        default char getChar(Object object) {
-            return toCharValue(getInt(object));
+        default char getCharValue(Object object) {
+            return toCharValue(getIntValue(object));
         }
 
         @Override
-        default short getShort(Object object) {
-            return toShortValue(getInt(object));
+        default short getShortValue(Object object) {
+            return toShortValue(getIntValue(object));
         }
 
         @Override
-        default long getLong(Object object) {
-            return toLongValue(getInt(object));
+        default long getLongValue(Object object) {
+            return toLongValue(getIntValue(object));
         }
 
         @Override
-        default float getFloat(Object object) {
-            return toFloatValue(getInt(object));
+        default float getFloatValue(Object object) {
+            return toFloatValue(getIntValue(object));
         }
 
         @Override
-        default double getDouble(Object object) {
-            return toDoubleValue(getInt(object));
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getIntValue(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
-            return toBooleanValue(getInt(object));
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getIntValue(object));
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setInt(object, toIntValue(value));
+            setIntValue(object, toIntValue(value));
         }
 
         @Override
-        default void setByte(Object object, byte value) {
-            setInt(object, value);
+        default void setByteValue(Object object, byte value) {
+            setIntValue(object, value);
         }
 
         @Override
-        default void setShort(Object object, short value) {
-            setInt(object, value);
+        default void setShortValue(Object object, short value) {
+            setIntValue(object, value);
         }
 
         @Override
-        default void setChar(Object object, char value) {
-            setInt(object, value);
+        default void setCharValue(Object object, char value) {
+            setIntValue(object, value);
         }
 
         @Override
-        default void setLong(Object object, long value) {
-            setInt(object, (int) value);
+        default void setLongValue(Object object, long value) {
+            setIntValue(object, (int) value);
         }
 
         @Override
-        default void setFloat(Object object, float value) {
-            setInt(object, (int) value);
+        default void setFloatValue(Object object, float value) {
+            setIntValue(object, (int) value);
         }
 
         @Override
-        default void setDouble(Object object, double value) {
-            setInt(object, (int) value);
+        default void setDoubleValue(Object object, double value) {
+            setIntValue(object, (int) value);
         }
 
         @Override
-        default void setBoolean(Object object, boolean value) {
-            setInt(object, toIntValue(value));
+        default void setBooleanValue(Object object, boolean value) {
+            setIntValue(object, toIntValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getInt(object));
+            return Cast.toString(getIntValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getInt(object));
+            return toBigInteger(getIntValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getInt(object));
+            return toBigDecimal(getIntValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setInt(object, toIntValue(value));
+            setIntValue(object, toIntValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setInt(object, toIntValue(value));
+            setIntValue(object, toIntValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setInt(object, toIntValue(value));
+            setIntValue(object, toIntValue(value));
         }
     }
 
@@ -552,112 +552,112 @@ public class PropertyAccessorFactory {
     protected interface PropertyAccessorLong extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
-            return getLong(object);
+            return getLongValue(object);
         }
 
         @Override
-        default byte getByte(Object object) {
-            return toByteValue(getLong(object));
+        default byte getByteValue(Object object) {
+            return toByteValue(getLongValue(object));
         }
 
         @Override
-        default char getChar(Object object) {
-            return toCharValue(getLong(object));
+        default char getCharValue(Object object) {
+            return toCharValue(getLongValue(object));
         }
 
         @Override
-        default short getShort(Object object) {
-            return toShortValue(getLong(object));
+        default short getShortValue(Object object) {
+            return toShortValue(getLongValue(object));
         }
 
         @Override
-        default int getInt(Object object) {
-            return toIntValue(getLong(object));
+        default int getIntValue(Object object) {
+            return toIntValue(getLongValue(object));
         }
 
         @Override
-        default float getFloat(Object object) {
-            return toFloatValue(getLong(object));
+        default float getFloatValue(Object object) {
+            return toFloatValue(getLongValue(object));
         }
 
         @Override
-        default double getDouble(Object object) {
-            return toDoubleValue(getLong(object));
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getLongValue(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
-            return toBooleanValue(getLong(object));
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getLongValue(object));
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setLong(object, toLongValue(value));
+            setLongValue(object, toLongValue(value));
         }
 
         @Override
-        default void setByte(Object object, byte value) {
-            setLong(object, value);
+        default void setByteValue(Object object, byte value) {
+            setLongValue(object, value);
         }
 
         @Override
-        default void setChar(Object object, char value) {
-            setLong(object, value);
+        default void setCharValue(Object object, char value) {
+            setLongValue(object, value);
         }
 
         @Override
-        default void setShort(Object object, short value) {
-            setLong(object, value);
+        default void setShortValue(Object object, short value) {
+            setLongValue(object, value);
         }
 
         @Override
-        default void setInt(Object object, int value) {
-            setLong(object, value);
+        default void setIntValue(Object object, int value) {
+            setLongValue(object, value);
         }
 
         @Override
-        default void setFloat(Object object, float value) {
-            setLong(object, (long) value);
+        default void setFloatValue(Object object, float value) {
+            setLongValue(object, (long) value);
         }
 
         @Override
-        default void setDouble(Object object, double value) {
-            setLong(object, (long) value);
+        default void setDoubleValue(Object object, double value) {
+            setLongValue(object, (long) value);
         }
 
         @Override
-        default void setBoolean(Object object, boolean value) {
-            setLong(object, toLongValue(value));
+        default void setBooleanValue(Object object, boolean value) {
+            setLongValue(object, toLongValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getLong(object));
+            return Cast.toString(getLongValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getLong(object));
+            return toBigInteger(getLongValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getLong(object));
+            return toBigDecimal(getLongValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setLong(object, toLongValue(value));
+            setLongValue(object, toLongValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setLong(object, toLongValue(value));
+            setLongValue(object, toLongValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setLong(object, toLongValue(value));
+            setLongValue(object, toLongValue(value));
         }
     }
 
@@ -669,112 +669,112 @@ public class PropertyAccessorFactory {
     interface PropertyAccessorFloat extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
-            return getFloat(object);
+            return getFloatValue(object);
         }
 
         @Override
-        default byte getByte(Object object) {
-            return toByteValue(getFloat(object));
+        default byte getByteValue(Object object) {
+            return toByteValue(getFloatValue(object));
         }
 
         @Override
-        default char getChar(Object object) {
-            return toCharValue(getFloat(object));
+        default char getCharValue(Object object) {
+            return toCharValue(getFloatValue(object));
         }
 
         @Override
-        default short getShort(Object object) {
-            return toShortValue(getFloat(object));
+        default short getShortValue(Object object) {
+            return toShortValue(getFloatValue(object));
         }
 
         @Override
-        default int getInt(Object object) {
-            return toIntValue(getFloat(object));
+        default int getIntValue(Object object) {
+            return toIntValue(getFloatValue(object));
         }
 
         @Override
-        default long getLong(Object object) {
-            return toLongValue(getFloat(object));
+        default long getLongValue(Object object) {
+            return toLongValue(getFloatValue(object));
         }
 
         @Override
-        default double getDouble(Object object) {
-            return toDoubleValue(getFloat(object));
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getFloatValue(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
-            return toBooleanValue(getFloat(object));
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getFloatValue(object));
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setFloat(object, toFloatValue(value));
+            setFloatValue(object, toFloatValue(value));
         }
 
         @Override
-        default void setByte(Object object, byte value) {
-            setFloat(object, value);
+        default void setByteValue(Object object, byte value) {
+            setFloatValue(object, value);
         }
 
         @Override
-        default void setChar(Object object, char value) {
-            setFloat(object, value);
+        default void setCharValue(Object object, char value) {
+            setFloatValue(object, value);
         }
 
         @Override
-        default void setShort(Object object, short value) {
-            setFloat(object, value);
+        default void setShortValue(Object object, short value) {
+            setFloatValue(object, value);
         }
 
         @Override
-        default void setInt(Object object, int value) {
-            setFloat(object, value);
+        default void setIntValue(Object object, int value) {
+            setFloatValue(object, value);
         }
 
         @Override
-        default void setLong(Object object, long value) {
-            setFloat(object, value);
+        default void setLongValue(Object object, long value) {
+            setFloatValue(object, value);
         }
 
         @Override
-        default void setDouble(Object object, double value) {
-            setFloat(object, (float) value);
+        default void setDoubleValue(Object object, double value) {
+            setFloatValue(object, (float) value);
         }
 
         @Override
-        default void setBoolean(Object object, boolean value) {
-            setFloat(object, toFloatValue(value));
+        default void setBooleanValue(Object object, boolean value) {
+            setFloatValue(object, toFloatValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getFloat(object));
+            return Cast.toString(getFloatValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getFloat(object));
+            return toBigInteger(getFloatValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getFloat(object));
+            return toBigDecimal(getFloatValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setFloat(object, toFloatValue(value));
+            setFloatValue(object, toFloatValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setFloat(object, toFloatValue(value));
+            setFloatValue(object, toFloatValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setFloat(object, toFloatValue(value));
+            setFloatValue(object, toFloatValue(value));
         }
     }
 
@@ -786,112 +786,112 @@ public class PropertyAccessorFactory {
     protected interface PropertyAccessorDouble extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
-            return getDouble(object);
+            return getDoubleValue(object);
         }
 
         @Override
-        default byte getByte(Object object) {
-            return toByteValue(getDouble(object));
+        default byte getByteValue(Object object) {
+            return toByteValue(getDoubleValue(object));
         }
 
         @Override
-        default char getChar(Object object) {
-            return toCharValue(getDouble(object));
+        default char getCharValue(Object object) {
+            return toCharValue(getDoubleValue(object));
         }
 
         @Override
-        default short getShort(Object object) {
-            return toShortValue(getDouble(object));
+        default short getShortValue(Object object) {
+            return toShortValue(getDoubleValue(object));
         }
 
         @Override
-        default int getInt(Object object) {
-            return toIntValue(getDouble(object));
+        default int getIntValue(Object object) {
+            return toIntValue(getDoubleValue(object));
         }
 
         @Override
-        default long getLong(Object object) {
-            return toLongValue(getDouble(object));
+        default long getLongValue(Object object) {
+            return toLongValue(getDoubleValue(object));
         }
 
         @Override
-        default float getFloat(Object object) {
-            return toFloatValue(getDouble(object));
+        default float getFloatValue(Object object) {
+            return toFloatValue(getDoubleValue(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
-            return toBooleanValue(getDouble(object));
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getDoubleValue(object));
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setDouble(object, toDoubleValue(value));
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
-        default void setByte(Object object, byte value) {
-            setDouble(object, toDoubleValue(value));
+        default void setByteValue(Object object, byte value) {
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
-        default void setChar(Object object, char value) {
-            setDouble(object, toDoubleValue(value));
+        default void setCharValue(Object object, char value) {
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
-        default void setShort(Object object, short value) {
-            setDouble(object, toDoubleValue(value));
+        default void setShortValue(Object object, short value) {
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
-        default void setInt(Object object, int value) {
-            setDouble(object, toDoubleValue(value));
+        default void setIntValue(Object object, int value) {
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
-        default void setLong(Object object, long value) {
-            setDouble(object, toDoubleValue(value));
+        default void setLongValue(Object object, long value) {
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
-        default void setFloat(Object object, float value) {
-            setDouble(object, value);
+        default void setFloatValue(Object object, float value) {
+            setDoubleValue(object, value);
         }
 
         @Override
-        default void setBoolean(Object object, boolean value) {
-            setDouble(object, toDoubleValue(value));
+        default void setBooleanValue(Object object, boolean value) {
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getDouble(object));
+            return Cast.toString(getDoubleValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getDouble(object));
+            return toBigInteger(getDoubleValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getDouble(object));
+            return toBigDecimal(getDoubleValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setDouble(object, toDoubleValue(value));
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setDouble(object, toDoubleValue(value));
+            setDoubleValue(object, toDoubleValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setDouble(object, toDoubleValue(value));
+            setDoubleValue(object, toDoubleValue(value));
         }
     }
 
@@ -903,112 +903,112 @@ public class PropertyAccessorFactory {
     protected interface PropertyAccessorChar extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
-            return getChar(object);
+            return getCharValue(object);
         }
 
         @Override
-        default byte getByte(Object object) {
-            return toByteValue(getChar(object));
+        default byte getByteValue(Object object) {
+            return toByteValue(getCharValue(object));
         }
 
         @Override
-        default short getShort(Object object) {
-            return toShortValue(getChar(object));
+        default short getShortValue(Object object) {
+            return toShortValue(getCharValue(object));
         }
 
         @Override
-        default int getInt(Object object) {
-            return toIntValue(getChar(object));
+        default int getIntValue(Object object) {
+            return toIntValue(getCharValue(object));
         }
 
         @Override
-        default long getLong(Object object) {
-            return toLongValue(getChar(object));
+        default long getLongValue(Object object) {
+            return toLongValue(getCharValue(object));
         }
 
         @Override
-        default float getFloat(Object object) {
-            return toFloatValue(getChar(object));
+        default float getFloatValue(Object object) {
+            return toFloatValue(getCharValue(object));
         }
 
         @Override
-        default double getDouble(Object object) {
-            return toDoubleValue(getChar(object));
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getCharValue(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
-            return toBooleanValue(getChar(object));
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getCharValue(object));
         }
 
         @Override
         default void setObject(Object object, Object value) {
-            setChar(object, toCharValue(value));
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
-        default void setByte(Object object, byte value) {
-            setChar(object, (char) value);
+        default void setByteValue(Object object, byte value) {
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
-        default void setShort(Object object, short value) {
-            setChar(object, (char) value);
+        default void setShortValue(Object object, short value) {
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
-        default void setInt(Object object, int value) {
-            setChar(object, (char) value);
+        default void setIntValue(Object object, int value) {
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
-        default void setLong(Object object, long value) {
-            setChar(object, (char) value);
+        default void setLongValue(Object object, long value) {
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
-        default void setFloat(Object object, float value) {
-            setChar(object, (char) value);
+        default void setFloatValue(Object object, float value) {
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
-        default void setDouble(Object object, double value) {
-            setChar(object, (char) value);
+        default void setDoubleValue(Object object, double value) {
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
-        default void setBoolean(Object object, boolean value) {
-            setChar(object, toCharValue(value));
+        default void setBooleanValue(Object object, boolean value) {
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
         default String getString(Object object) {
-            return Cast.toString(getChar(object));
+            return Cast.toString(getCharValue(object));
         }
 
         @Override
         default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getChar(object));
+            return toBigInteger(getCharValue(object));
         }
 
         @Override
         default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getChar(object));
+            return toBigDecimal(getCharValue(object));
         }
 
         @Override
         default void setString(Object object, String value) {
-            setChar(object, toCharValue(value));
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
         default void setBigInteger(Object object, BigInteger value) {
-            setChar(object, toCharValue(value));
+            setCharValue(object, toCharValue(value));
         }
 
         @Override
         default void setBigDecimal(Object object, BigDecimal value) {
-            setChar(object, toCharValue(value));
+            setCharValue(object, toCharValue(value));
         }
     }
 
@@ -1019,42 +1019,42 @@ public class PropertyAccessorFactory {
      */
     protected interface PropertyAccessorObject extends PropertyAccessor {
         @Override
-        default byte getByte(Object object) {
+        default byte getByteValue(Object object) {
             return toByteValue(getObject(object));
         }
 
         @Override
-        default char getChar(Object object) {
+        default char getCharValue(Object object) {
             return toCharValue(getObject(object));
         }
 
         @Override
-        default short getShort(Object object) {
+        default short getShortValue(Object object) {
             return toShortValue(getObject(object));
         }
 
         @Override
-        default int getInt(Object object) {
+        default int getIntValue(Object object) {
             return toIntValue(getObject(object));
         }
 
         @Override
-        default long getLong(Object object) {
+        default long getLongValue(Object object) {
             return toLongValue(getObject(object));
         }
 
         @Override
-        default float getFloat(Object object) {
+        default float getFloatValue(Object object) {
             return toFloatValue(getObject(object));
         }
 
         @Override
-        default double getDouble(Object object) {
+        default double getDoubleValue(Object object) {
             return toDoubleValue(getObject(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
+        default boolean getBooleanValue(Object object) {
             return toBooleanValue(getObject(object));
         }
 
@@ -1074,42 +1074,42 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default void setByte(Object object, byte value) {
+        default void setByteValue(Object object, byte value) {
             setObject(object, value);
         }
 
         @Override
-        default void setShort(Object object, short value) {
+        default void setShortValue(Object object, short value) {
             setObject(object, value);
         }
 
         @Override
-        default void setChar(Object object, char value) {
+        default void setCharValue(Object object, char value) {
             setObject(object, value);
         }
 
         @Override
-        default void setInt(Object object, int value) {
+        default void setIntValue(Object object, int value) {
             setObject(object, value);
         }
 
         @Override
-        default void setLong(Object object, long value) {
+        default void setLongValue(Object object, long value) {
             setObject(object, value);
         }
 
         @Override
-        default void setFloat(Object object, float value) {
+        default void setFloatValue(Object object, float value) {
             setObject(object, value);
         }
 
         @Override
-        default void setDouble(Object object, double value) {
+        default void setDoubleValue(Object object, double value) {
             setObject(object, value);
         }
 
         @Override
-        default void setBoolean(Object object, boolean value) {
+        default void setBooleanValue(Object object, boolean value) {
             setObject(object, value);
         }
 
@@ -1136,42 +1136,42 @@ public class PropertyAccessorFactory {
      */
     protected interface PropertyAccessorString extends PropertyAccessorObject {
         @Override
-        default byte getByte(Object object) {
+        default byte getByteValue(Object object) {
             return toByteValue(getString(object));
         }
 
         @Override
-        default char getChar(Object object) {
+        default char getCharValue(Object object) {
             return toCharValue(getString(object));
         }
 
         @Override
-        default short getShort(Object object) {
+        default short getShortValue(Object object) {
             return toShortValue(getString(object));
         }
 
         @Override
-        default int getInt(Object object) {
+        default int getIntValue(Object object) {
             return toIntValue(getString(object));
         }
 
         @Override
-        default long getLong(Object object) {
+        default long getLongValue(Object object) {
             return toLongValue(getString(object));
         }
 
         @Override
-        default float getFloat(Object object) {
+        default float getFloatValue(Object object) {
             return toFloatValue(getString(object));
         }
 
         @Override
-        default double getDouble(Object object) {
+        default double getDoubleValue(Object object) {
             return toDoubleValue(getString(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
+        default boolean getBooleanValue(Object object) {
             return toBooleanValue(getString(object));
         }
 
@@ -1213,37 +1213,37 @@ public class PropertyAccessorFactory {
      */
     protected interface PropertyAccessorBigInteger extends PropertyAccessorObject {
         @Override
-        default byte getByte(Object object) {
+        default byte getByteValue(Object object) {
             return toByteValue(getBigInteger(object));
         }
 
         @Override
-        default short getShort(Object object) {
+        default short getShortValue(Object object) {
             return toShortValue(getBigInteger(object));
         }
 
         @Override
-        default int getInt(Object object) {
+        default int getIntValue(Object object) {
             return toIntValue(getBigInteger(object));
         }
 
         @Override
-        default long getLong(Object object) {
+        default long getLongValue(Object object) {
             return toLongValue(getBigInteger(object));
         }
 
         @Override
-        default float getFloat(Object object) {
+        default float getFloatValue(Object object) {
             return toFloatValue(getBigInteger(object));
         }
 
         @Override
-        default double getDouble(Object object) {
+        default double getDoubleValue(Object object) {
             return toDoubleValue(getBigInteger(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
+        default boolean getBooleanValue(Object object) {
             return toBooleanValue(getBigInteger(object));
         }
 
@@ -1285,37 +1285,37 @@ public class PropertyAccessorFactory {
      */
     protected interface PropertyAccessorBigDecimal extends PropertyAccessorObject {
         @Override
-        default byte getByte(Object object) {
+        default byte getByteValue(Object object) {
             return toByteValue(getBigDecimal(object));
         }
 
         @Override
-        default short getShort(Object object) {
+        default short getShortValue(Object object) {
             return toShortValue(getBigDecimal(object));
         }
 
         @Override
-        default int getInt(Object object) {
+        default int getIntValue(Object object) {
             return toIntValue(getBigDecimal(object));
         }
 
         @Override
-        default long getLong(Object object) {
+        default long getLongValue(Object object) {
             return toLongValue(getBigDecimal(object));
         }
 
         @Override
-        default float getFloat(Object object) {
+        default float getFloatValue(Object object) {
             return toFloatValue(getBigDecimal(object));
         }
 
         @Override
-        default double getDouble(Object object) {
+        default double getDoubleValue(Object object) {
             return toDoubleValue(getBigDecimal(object));
         }
 
         @Override
-        default boolean getBoolean(Object object) {
+        default boolean getBooleanValue(Object object) {
             return toBooleanValue(getBigDecimal(object));
         }
 
@@ -1388,7 +1388,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public boolean getBoolean(Object object) {
+        public boolean getBooleanValue(Object object) {
             try {
                 return field.getBoolean(object);
             } catch (IllegalAccessException e) {
@@ -1397,7 +1397,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setBoolean(Object object, boolean value) {
+        public void setBooleanValue(Object object, boolean value) {
             try {
                 field.setBoolean(object, value);
             } catch (IllegalAccessException e) {
@@ -1416,7 +1416,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public byte getByte(Object object) {
+        public byte getByteValue(Object object) {
             try {
                 return field.getByte(object);
             } catch (IllegalAccessException e) {
@@ -1425,7 +1425,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setByte(Object object, byte value) {
+        public void setByteValue(Object object, byte value) {
             try {
                 field.setByte(object, value);
             } catch (IllegalAccessException e) {
@@ -1444,7 +1444,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public short getShort(Object object) {
+        public short getShortValue(Object object) {
             try {
                 return field.getShort(object);
             } catch (IllegalAccessException e) {
@@ -1453,7 +1453,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setShort(Object object, short value) {
+        public void setShortValue(Object object, short value) {
             try {
                 field.setShort(object, value);
             } catch (IllegalAccessException e) {
@@ -1472,7 +1472,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public int getInt(Object object) {
+        public int getIntValue(Object object) {
             try {
                 return field.getInt(object);
             } catch (IllegalAccessException e) {
@@ -1481,7 +1481,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setInt(Object object, int value) {
+        public void setIntValue(Object object, int value) {
             try {
                 field.setInt(object, value);
             } catch (IllegalAccessException e) {
@@ -1500,7 +1500,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public long getLong(Object object) {
+        public long getLongValue(Object object) {
             try {
                 return field.getLong(object);
             } catch (IllegalAccessException e) {
@@ -1509,7 +1509,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setLong(Object object, long value) {
+        public void setLongValue(Object object, long value) {
             try {
                 field.setLong(object, value);
             } catch (IllegalAccessException e) {
@@ -1528,7 +1528,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public float getFloat(Object object) {
+        public float getFloatValue(Object object) {
             try {
                 return field.getFloat(object);
             } catch (IllegalAccessException e) {
@@ -1537,7 +1537,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setFloat(Object object, float value) {
+        public void setFloatValue(Object object, float value) {
             try {
                 field.setFloat(object, value);
             } catch (IllegalAccessException e) {
@@ -1556,7 +1556,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public double getDouble(Object object) {
+        public double getDoubleValue(Object object) {
             try {
                 return field.getDouble(object);
             } catch (IllegalAccessException e) {
@@ -1565,7 +1565,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setDouble(Object object, double value) {
+        public void setDoubleValue(Object object, double value) {
             try {
                 field.setDouble(object, value);
             } catch (IllegalAccessException e) {
@@ -1584,7 +1584,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public char getChar(Object object) {
+        public char getCharValue(Object object) {
             try {
                 return field.getChar(object);
             } catch (IllegalAccessException e) {
@@ -1593,7 +1593,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setChar(Object object, char value) {
+        public void setCharValue(Object object, char value) {
             try {
                 field.setChar(object, value);
             } catch (IllegalAccessException e) {
@@ -1988,7 +1988,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public char getChar(Object object) {
+        public char getCharValue(Object object) {
             try {
                 return (char) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -1997,7 +1997,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setChar(Object object, char value) {
+        public void setCharValue(Object object, char value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2016,7 +2016,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public byte getByte(Object object) {
+        public byte getByteValue(Object object) {
             try {
                 return (byte) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2025,7 +2025,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setByte(Object object, byte value) {
+        public void setByteValue(Object object, byte value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2044,7 +2044,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public short getShort(Object object) {
+        public short getShortValue(Object object) {
             try {
                 return (short) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2053,7 +2053,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setShort(Object object, short value) {
+        public void setShortValue(Object object, short value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2072,7 +2072,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public int getInt(Object object) {
+        public int getIntValue(Object object) {
             try {
                 return (int) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2081,7 +2081,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setInt(Object object, int value) {
+        public void setIntValue(Object object, int value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2100,7 +2100,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public long getLong(Object object) {
+        public long getLongValue(Object object) {
             try {
                 return (long) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2109,7 +2109,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setLong(Object object, long value) {
+        public void setLongValue(Object object, long value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2128,7 +2128,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public float getFloat(Object object) {
+        public float getFloatValue(Object object) {
             try {
                 return (float) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2137,7 +2137,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setFloat(Object object, float value) {
+        public void setFloatValue(Object object, float value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2156,7 +2156,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public double getDouble(Object object) {
+        public double getDoubleValue(Object object) {
             try {
                 return (double) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2165,7 +2165,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setDouble(Object object, double value) {
+        public void setDoubleValue(Object object, double value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2184,7 +2184,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public boolean getBoolean(Object object) {
+        public boolean getBooleanValue(Object object) {
             try {
                 return (boolean) getter.invoke(object);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2193,7 +2193,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public void setBoolean(Object object, boolean value) {
+        public void setBooleanValue(Object object, boolean value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2325,12 +2325,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public byte getByte(Object object) {
+        public byte getByteValue(Object object) {
             return getterFunc.applyAsByte((T) object);
         }
 
         @Override
-        public void setByte(Object object, byte value) {
+        public void setByteValue(Object object, byte value) {
             setterFunc.accept((T) object, value);
         }
     }
@@ -2352,12 +2352,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public short getShort(Object object) {
+        public short getShortValue(Object object) {
             return getterFunc.applyAsShort((T) object);
         }
 
         @Override
-        public void setShort(Object object, short value) {
+        public void setShortValue(Object object, short value) {
             setterFunc.accept((T) object, value);
         }
     }
@@ -2379,12 +2379,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public int getInt(Object object) {
+        public int getIntValue(Object object) {
             return getterFunc.applyAsInt((T) object);
         }
 
         @Override
-        public void setInt(Object object, int value) {
+        public void setIntValue(Object object, int value) {
             setterFunc.accept((T) object, value);
         }
     }
@@ -2406,12 +2406,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public long getLong(Object object) {
+        public long getLongValue(Object object) {
             return getterFunc.applyAsLong((T) object);
         }
 
         @Override
-        public void setLong(Object object, long value) {
+        public void setLongValue(Object object, long value) {
             setterFunc.accept((T) object, value);
         }
     }
@@ -2433,12 +2433,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public float getFloat(Object object) {
+        public float getFloatValue(Object object) {
             return getterFunc.applyAsFloat((T) object);
         }
 
         @Override
-        public void setFloat(Object object, float value) {
+        public void setFloatValue(Object object, float value) {
             setterFunc.accept((T) object, value);
         }
     }
@@ -2461,12 +2461,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public double getDouble(Object object) {
+        public double getDoubleValue(Object object) {
             return getterFunc.applyAsDouble((T) object);
         }
 
         @Override
-        public void setDouble(Object object, double value) {
+        public void setDoubleValue(Object object, double value) {
             setterFunc.accept((T) object, value);
         }
     }
@@ -2489,12 +2489,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public boolean getBoolean(Object object) {
+        public boolean getBooleanValue(Object object) {
             return getterFunc.test((T) object);
         }
 
         @Override
-        public void setBoolean(Object object, boolean value) {
+        public void setBooleanValue(Object object, boolean value) {
             setterFunc.accept((T) object, value);
         }
     }
@@ -2623,12 +2623,12 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        public char getChar(Object object) {
+        public char getCharValue(Object object) {
             return getterFunc.applyAsChar((T) object);
         }
 
         @Override
-        public void setChar(Object object, char value) {
+        public void setCharValue(Object object, char value) {
             setterFunc.accept((T) object, value);
         }
     }

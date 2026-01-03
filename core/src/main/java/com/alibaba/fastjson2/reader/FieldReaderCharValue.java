@@ -46,7 +46,7 @@ final class FieldReaderCharValue<T>
             schema.assertValidate(ch);
         }
 
-        propertyAccessor.setChar(object, ch);
+        propertyAccessor.setCharValue(object, ch);
     }
 
     @Override
@@ -55,7 +55,7 @@ final class FieldReaderCharValue<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setChar(object, value);
+        propertyAccessor.setCharValue(object, value);
     }
 
     @Override
@@ -78,6 +78,6 @@ final class FieldReaderCharValue<T>
             schema.assertValidate(charValue);
         }
 
-        propertyAccessor.setChar(object, charValue);
+        propertyAccessor.setCharValue(object, charValue);
     }
 }

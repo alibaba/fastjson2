@@ -37,7 +37,7 @@ final class FieldReaderBoolValue<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setBoolean(object, fieldValue);
+        propertyAccessor.setBooleanValue(object, fieldValue);
     }
 
     @Override
@@ -53,7 +53,7 @@ final class FieldReaderBoolValue<T>
             schema.assertValidate(booleanValue);
         }
 
-        propertyAccessor.setBoolean(object, booleanValue);
+        propertyAccessor.setBooleanValue(object, booleanValue);
     }
 
     @Override
@@ -62,6 +62,6 @@ final class FieldReaderBoolValue<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setBoolean(object, value);
+        propertyAccessor.setBooleanValue(object, value);
     }
 }

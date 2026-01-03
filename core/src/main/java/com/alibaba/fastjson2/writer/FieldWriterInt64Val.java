@@ -25,7 +25,7 @@ final class FieldWriterInt64Val
     public boolean write(JSONWriter jsonWriter, Object object) {
         long value;
         try {
-            value = propertyAccessor.getLong(object);
+            value = propertyAccessor.getLongValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -44,7 +44,7 @@ final class FieldWriterInt64Val
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         jsonWriter.writeInt64(
-                propertyAccessor.getLong(object)
+                propertyAccessor.getLongValue(object)
         );
     }
 }

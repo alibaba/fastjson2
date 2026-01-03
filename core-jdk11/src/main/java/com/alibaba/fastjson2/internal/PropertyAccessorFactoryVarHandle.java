@@ -113,12 +113,12 @@ public class PropertyAccessorFactoryVarHandle
         }
 
         @Override
-        public boolean getBoolean(Object object) {
+        public boolean getBooleanValue(Object object) {
             return (boolean) varHandle.get(object);
         }
 
         @Override
-        public void setBoolean(Object object, boolean value) {
+        public void setBooleanValue(Object object, boolean value) {
             varHandle.set(object, value);
         }
     }
@@ -133,11 +133,11 @@ public class PropertyAccessorFactoryVarHandle
             super(field, varHandle);
         }
         @Override
-        public byte getByte(Object object) {
+        public byte getByteValue(Object object) {
             return (byte) varHandle.get(object);
         }
         @Override
-        public void setByte(Object object, byte value) {
+        public void setByteValue(Object object, byte value) {
             varHandle.set(object, value);
         }
     }
@@ -152,11 +152,11 @@ public class PropertyAccessorFactoryVarHandle
             super(field, varHandle);
         }
         @Override
-        public char getChar(Object object) {
+        public char getCharValue(Object object) {
             return (char) varHandle.get(object);
         }
         @Override
-        public void setChar(Object object, char value) {
+        public void setCharValue(Object object, char value) {
             varHandle.set(object, value);
         }
     }
@@ -171,11 +171,11 @@ public class PropertyAccessorFactoryVarHandle
             super(field, varHandle);
         }
         @Override
-        public short getShort(Object object) {
+        public short getShortValue(Object object) {
             return (short) varHandle.get(object);
         }
         @Override
-        public void setShort(Object object, short value) {
+        public void setShortValue(Object object, short value) {
             varHandle.set(object, value);
         }
     }
@@ -190,11 +190,11 @@ public class PropertyAccessorFactoryVarHandle
             super(field, varHandle);
         }
         @Override
-        public int getInt(Object object) {
+        public int getIntValue(Object object) {
             return (int) varHandle.get(object);
         }
         @Override
-        public void setInt(Object object, int value) {
+        public void setIntValue(Object object, int value) {
             varHandle.set(object, value);
         }
     }
@@ -209,11 +209,11 @@ public class PropertyAccessorFactoryVarHandle
             super(field, varHandle);
         }
         @Override
-        public long getLong(Object object) {
+        public long getLongValue(Object object) {
             return (long) varHandle.get(object);
         }
         @Override
-        public void setLong(Object object, long value) {
+        public void setLongValue(Object object, long value) {
             varHandle.set(object, value);
         }
     }
@@ -228,11 +228,11 @@ public class PropertyAccessorFactoryVarHandle
             super(field, varHandle);
         }
         @Override
-        public float getFloat(Object object) {
+        public float getFloatValue(Object object) {
             return (float) varHandle.get(object);
         }
         @Override
-        public void setFloat(Object object, float value) {
+        public void setFloatValue(Object object, float value) {
             varHandle.set(object, value);
         }
     }
@@ -247,11 +247,11 @@ public class PropertyAccessorFactoryVarHandle
             super(field, varHandle);
         }
         @Override
-        public double getDouble(Object object) {
+        public double getDoubleValue(Object object) {
             return (double) varHandle.get(object);
         }
         @Override
-        public void setDouble(Object object, double value) {
+        public void setDoubleValue(Object object, double value) {
             varHandle.set(object, value);
         }
     }

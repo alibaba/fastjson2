@@ -83,48 +83,48 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             byte value = 50;
             TestClass object = new TestClass();
-            propertyAccessor.setByte(object, value);
-            assertEquals(value, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, value);
+            assertEquals(value, propertyAccessor.getByteValue(object));
             assertEquals(value, object.getByteField());
 
             short shortValue = 51;
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals((byte) shortValue, object.getByteField());
 
             int intValue = 52;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals((byte) intValue, object.getByteField());
 
             // Test long methods
             long longValue = 53L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals((byte) longValue, object.getByteField());
 
             // Test float methods
             float floatValue = 54.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) ((byte) floatValue), propertyAccessor.getFloat(object), 0.01f); // 54.5f -> 54 (byte) -> 54.0f
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) ((byte) floatValue), propertyAccessor.getFloatValue(object), 0.01f); // 54.5f -> 54 (byte) -> 54.0f
             assertEquals((byte) floatValue, object.getByteField()); // 54.5f -> 54 when cast to byte
 
             // Test double methods
             double doubleValue = 55.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) ((byte) doubleValue), propertyAccessor.getDouble(object), 0.01); // 55.7 -> 55 (byte) -> 55.0
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) ((byte) doubleValue), propertyAccessor.getDoubleValue(object), 0.01); // 55.7 -> 55 (byte) -> 55.0
             assertEquals((byte) doubleValue, object.getByteField()); // 55.7 -> 55 when cast to byte
 
             // Test char methods
             char charValue = 'X';
-            propertyAccessor.setChar(object, charValue);
-            assertEquals(charValue, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(charValue, propertyAccessor.getCharValue(object));
             assertEquals((byte) charValue, object.getByteField());
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals((byte) (booleanValue ? 1 : 0), object.getByteField());
 
             // Test String methods
@@ -170,48 +170,48 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             short value = 200;
             TestClass object = new TestClass();
-            propertyAccessor.setShort(object, value);
-            assertEquals(value, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, value);
+            assertEquals(value, propertyAccessor.getShortValue(object));
             assertEquals(value, object.getShortField());
 
             byte byteValue = 50;
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals((short) byteValue, object.getShortField());
 
             int intValue = 250;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals((short) intValue, object.getShortField());
 
             // Test long methods
             long longValue = 251L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals((short) longValue, object.getShortField());
 
             // Test float methods
             float floatValue = 252.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) ((short) floatValue), propertyAccessor.getFloat(object), 0.01f); // 252.5f -> 252 (short) -> 252.0f
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) ((short) floatValue), propertyAccessor.getFloatValue(object), 0.01f); // 252.5f -> 252 (short) -> 252.0f
             assertEquals((short) floatValue, object.getShortField()); // 252.5f -> 252 when cast to short
 
             // Test double methods
             double doubleValue = 253.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) ((short) doubleValue), propertyAccessor.getDouble(object), 0.01); // 253.7 -> 253 (short) -> 253.0
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) ((short) doubleValue), propertyAccessor.getDoubleValue(object), 0.01); // 253.7 -> 253 (short) -> 253.0
             assertEquals((short) doubleValue, object.getShortField()); // 253.7 -> 253 when cast to short
 
             // Test char methods
             char charValue = 'Y';
-            propertyAccessor.setChar(object, charValue);
-            assertEquals(charValue, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(charValue, propertyAccessor.getCharValue(object));
             assertEquals((short) charValue, object.getShortField());
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals((short) (booleanValue ? 1 : 0), object.getShortField());
 
             // Test String methods
@@ -258,48 +258,48 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             int value = 2000;
             TestClass object = new TestClass();
-            propertyAccessor.setInt(object, value);
-            assertEquals(value, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, value);
+            assertEquals(value, propertyAccessor.getIntValue(object));
             assertEquals(value, object.getIntField());
 
             byte byteValue = 50;
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals((int) byteValue, object.getIntField());
 
             short shortValue = 200;
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals((int) shortValue, object.getIntField());
 
             // Test long methods
             long longValue = 2001L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals((int) longValue, object.getIntField());
 
             // Test float methods
             float floatValue = 2002.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) ((int) floatValue), propertyAccessor.getFloat(object), 0.01f); // 2002.5f -> 2002 (int) -> 2002.0f
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) ((int) floatValue), propertyAccessor.getFloatValue(object), 0.01f); // 2002.5f -> 2002 (int) -> 2002.0f
             assertEquals((int) floatValue, object.getIntField()); // 2002.5f -> 2002 when cast to int
 
             // Test double methods
             double doubleValue = 2003.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) ((int) doubleValue), propertyAccessor.getDouble(object), 0.01); // 2003.7 -> 2003 (int) -> 2003.0
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) ((int) doubleValue), propertyAccessor.getDoubleValue(object), 0.01); // 2003.7 -> 2003 (int) -> 2003.0
             assertEquals((int) doubleValue, object.getIntField()); // 2003.7 -> 2003 when cast to int
 
             // Test char methods
             char charValue = 'Z';
-            propertyAccessor.setChar(object, charValue);
-            assertEquals(charValue, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(charValue, propertyAccessor.getCharValue(object));
             assertEquals((int) charValue, object.getIntField());
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals((int) (booleanValue ? 1 : 0), object.getIntField());
 
             // Test String methods
@@ -345,47 +345,47 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             long value = 20000L;
             TestClass object = new TestClass();
-            propertyAccessor.setLong(object, value);
-            assertEquals(value, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, value);
+            assertEquals(value, propertyAccessor.getLongValue(object));
             assertEquals(value, object.getLongField());
 
             byte byteValue = 50;
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals((long) byteValue, object.getLongField());
 
             short shortValue = 200;
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals((long) shortValue, object.getLongField());
 
             int intValue = 2000;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals((long) intValue, object.getLongField());
 
             // Test float methods
             float floatValue = 20001.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) ((long) floatValue), propertyAccessor.getFloat(object), 0.01f); // 20001.5f -> 20001 (long) -> 20001.0f
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) ((long) floatValue), propertyAccessor.getFloatValue(object), 0.01f); // 20001.5f -> 20001 (long) -> 20001.0f
             assertEquals((long) floatValue, object.getLongField()); // 20001.5f -> 20001 when cast to long
 
             // Test double methods
             double doubleValue = 20002.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) ((long) doubleValue), propertyAccessor.getDouble(object), 0.01); // 20002.7 -> 20002 (long) -> 20002.0
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) ((long) doubleValue), propertyAccessor.getDoubleValue(object), 0.01); // 20002.7 -> 20002 (long) -> 20002.0
             assertEquals((long) doubleValue, object.getLongField()); // 20002.7 -> 20002 when cast to long
 
             // Test char methods
             char charValue = 'A';
-            propertyAccessor.setChar(object, charValue);
-            assertEquals(charValue, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(charValue, propertyAccessor.getCharValue(object));
             assertEquals((long) charValue, object.getLongField());
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals((long) (booleanValue ? 1 : 0), object.getLongField());
 
             // Test String methods
@@ -431,8 +431,8 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             float value = 30.5f;
             TestClass object = new TestClass();
-            propertyAccessor.setFloat(object, value);
-            assertEquals(value, propertyAccessor.getFloat(object), 0.01f);
+            propertyAccessor.setFloatValue(object, value);
+            assertEquals(value, propertyAccessor.getFloatValue(object), 0.01f);
             assertEquals(value, object.getFloatField(), 0.01f);
 
             // Test Object methods (setting a float value as object)
@@ -454,41 +454,41 @@ public class PropertyAccessorFactoryVarHandleTest
 
             // Test primitive setters that can be converted to float
             byte byteValue = 50;
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals((float) byteValue, object.getFloatField(), 0.01f);
 
             short shortValue = 200;
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals((float) shortValue, object.getFloatField(), 0.01f);
 
             int intValue = 2000;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals((float) intValue, object.getFloatField(), 0.01f);
 
             long longValue = 20000L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals((float) longValue, object.getFloatField(), 0.01f);
 
             // Test double methods
             double doubleValue = 20001.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) ((float) doubleValue), propertyAccessor.getDouble(object), 0.01); // 20001.7 -> 20001 (float) -> 20001.0
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) ((float) doubleValue), propertyAccessor.getDoubleValue(object), 0.01); // 20001.7 -> 20001 (float) -> 20001.0
             assertEquals((float) doubleValue, object.getFloatField(), 0.01f); // 20001.7 -> 20001 when cast to float
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals((float) (booleanValue ? 1 : 0), object.getFloatField(), 0.01f);
 
             // Test char methods
             char charValue = 'A'; // Use a character that can be converted to a number
-            propertyAccessor.setChar(object, charValue);
-            assertEquals(charValue, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(charValue, propertyAccessor.getCharValue(object));
             assertEquals((float) charValue, object.getFloatField(), 0.01f);
 
             // Test BigInteger methods
@@ -517,8 +517,8 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             double value = 40.7;
             TestClass object = new TestClass();
-            propertyAccessor.setDouble(object, value);
-            assertEquals(value, propertyAccessor.getDouble(object), 0.01);
+            propertyAccessor.setDoubleValue(object, value);
+            assertEquals(value, propertyAccessor.getDoubleValue(object), 0.01);
             assertEquals(value, object.getDoubleField(), 0.01);
 
             // Test Object methods (setting a double value as object)
@@ -540,41 +540,41 @@ public class PropertyAccessorFactoryVarHandleTest
 
             // Test primitive setters that can be converted to double
             byte byteValue = 50;
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals((double) byteValue, object.getDoubleField(), 0.01);
 
             short shortValue = 200;
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals((double) shortValue, object.getDoubleField(), 0.01);
 
             int intValue = 2000;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals((double) intValue, object.getDoubleField(), 0.01);
 
             long longValue = 20000L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals((double) longValue, object.getDoubleField(), 0.01);
 
             // Test float methods
             float floatValue = 20001.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) ((double) floatValue), propertyAccessor.getFloat(object), 0.01f); // 20001.5f -> 20001 (double) -> 20001.0f
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) ((double) floatValue), propertyAccessor.getFloatValue(object), 0.01f); // 20001.5f -> 20001 (double) -> 20001.0f
             assertEquals((double) floatValue, object.getDoubleField(), 0.01); // 20001.5f -> 20001 when cast to double
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals((double) (booleanValue ? 1 : 0), object.getDoubleField(), 0.01);
 
             // Test char methods
             char charValue = '3'; // Use a character that can be converted to a number
-            propertyAccessor.setChar(object, charValue);
-            assertEquals((char) 3, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals((char) 3, propertyAccessor.getCharValue(object));
             assertEquals((double) 3, object.getDoubleField());
 
             // Test BigInteger methods
@@ -603,8 +603,8 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             char value = 'Z';
             TestClass object = new TestClass();
-            propertyAccessor.setChar(object, value);
-            assertEquals(value, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, value);
+            assertEquals(value, propertyAccessor.getCharValue(object));
             assertEquals(value, object.getCharField());
 
             // Test Object methods (setting a char value as object)
@@ -626,41 +626,41 @@ public class PropertyAccessorFactoryVarHandleTest
 
             // Test primitive setters that can be converted to char
             byte byteValue = 65; // 'A' in ASCII
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals((char) byteValue, object.getCharField());
 
             short shortValue = 66; // 'B' in ASCII
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals((char) shortValue, object.getCharField());
 
             int intValue = '3'; // 'C' in ASCII
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(3, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(3, propertyAccessor.getIntValue(object));
             assertEquals((char) intValue, object.getCharField());
 
             long longValue = 68L; // 'D' in ASCII
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals((char) longValue, object.getCharField());
 
             // Test float methods
             float floatValue = 69.0f; // 'E' in ASCII
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) ((char) floatValue), propertyAccessor.getFloat(object), 0.01f); // 69.0f -> 69 (char) -> 69.0f
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) ((char) floatValue), propertyAccessor.getFloatValue(object), 0.01f); // 69.0f -> 69 (char) -> 69.0f
             assertEquals((char) floatValue, object.getCharField()); // 69.0f -> 69 when cast to char
 
             // Test double methods
             double doubleValue = '6'; // 'F' in ASCII
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals(6, propertyAccessor.getDouble(object), 0.01); // 70.0 -> 70 (char) -> 70.0
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals(6, propertyAccessor.getDoubleValue(object), 0.01); // 70.0 -> 70 (char) -> 70.0
             assertEquals('6', object.getCharField()); // 70.0 -> 70 when cast to char
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals('1', object.getCharField());
 
             // Test BigInteger methods
@@ -689,8 +689,8 @@ public class PropertyAccessorFactoryVarHandleTest
         for (PropertyAccessor propertyAccessor : propertyAccessors) {
             boolean value = false;
             TestClass object = new TestClass();
-            propertyAccessor.setBoolean(object, value);
-            assertEquals(value, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, value);
+            assertEquals(value, propertyAccessor.getBooleanValue(object));
             assertEquals(value, object.isBooleanField());
 
             // Test Object methods (setting a boolean value as object)
@@ -712,46 +712,46 @@ public class PropertyAccessorFactoryVarHandleTest
 
             // Test primitive setters that can be converted to boolean
             byte byteValue = 1; // true when converted to boolean
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals((boolean) (byteValue != 0), object.isBooleanField());
 
             short shortValue = 0; // false when converted to boolean
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals((boolean) (shortValue != 0), object.isBooleanField());
 
             int intValue = 1; // true when converted to boolean
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals((boolean) (intValue != 0), object.isBooleanField());
 
             long longValue = 0L; // false when converted to boolean
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals((boolean) (longValue != 0), object.isBooleanField());
 
             // Test float methods
             float floatValue = 1.0f; // true when converted to boolean
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) ((boolean) (floatValue != 0) ? 1 : 0), propertyAccessor.getFloat(object), 0.01f);
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) ((boolean) (floatValue != 0) ? 1 : 0), propertyAccessor.getFloatValue(object), 0.01f);
             assertEquals((boolean) (floatValue != 0), object.isBooleanField());
 
             // Test double methods
             double doubleValue = 0.0; // false when converted to boolean
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) ((boolean) (doubleValue != 0) ? 1 : 0), propertyAccessor.getDouble(object), 0.01);
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) ((boolean) (doubleValue != 0) ? 1 : 0), propertyAccessor.getDoubleValue(object), 0.01);
             assertEquals((boolean) (doubleValue != 0), object.isBooleanField());
 
             // Test char methods
             char charValue = '1'; // true when converted to boolean (non-zero)
-            propertyAccessor.setChar(object, charValue);
-            assertEquals(charValue, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(charValue, propertyAccessor.getCharValue(object));
             assertEquals(true, object.isBooleanField());
 
             char charValue2 = '0'; // false when converted to boolean (zero)
-            propertyAccessor.setChar(object, charValue2);
-            assertEquals(charValue2, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue2);
+            assertEquals(charValue2, propertyAccessor.getCharValue(object));
             assertEquals(false, object.isBooleanField());
 
             // Test BigInteger methods
@@ -797,47 +797,47 @@ public class PropertyAccessorFactoryVarHandleTest
 
             // Test primitive setters that can be converted to string
             byte byteValue = 3; // 'A' in ASCII
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(3, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(3, propertyAccessor.getByteValue(object));
             assertEquals("3", object.getStringField());
 
             short shortValue = 4; // 'B' in ASCII
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals("4", object.getStringField());
 
             int intValue = 2000;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals(String.valueOf(intValue), object.getStringField());
 
             long longValue = 20000L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals(String.valueOf(longValue), object.getStringField());
 
             // Test float methods
             float floatValue = 20001.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) Float.parseFloat(String.valueOf(floatValue)), propertyAccessor.getFloat(object), 0.01f);
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) Float.parseFloat(String.valueOf(floatValue)), propertyAccessor.getFloatValue(object), 0.01f);
             assertEquals(String.valueOf(floatValue), object.getStringField());
 
             // Test double methods
             double doubleValue = 20002.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) Double.parseDouble(String.valueOf(doubleValue)), propertyAccessor.getDouble(object), 0.01);
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) Double.parseDouble(String.valueOf(doubleValue)), propertyAccessor.getDoubleValue(object), 0.01);
             assertEquals(String.valueOf(doubleValue), object.getStringField());
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals(String.valueOf(booleanValue), object.getStringField());
 
             // Test char methods
             char charValue = 'Z';
-            propertyAccessor.setChar(object, charValue);
-            assertEquals(charValue, propertyAccessor.getChar(object));
+            propertyAccessor.setCharValue(object, charValue);
+            assertEquals(charValue, propertyAccessor.getCharValue(object));
             assertEquals(String.valueOf(charValue), object.getStringField());
 
             // Test BigInteger methods
@@ -895,41 +895,41 @@ public class PropertyAccessorFactoryVarHandleTest
 
             // Test primitive setters that can be converted to BigInteger
             byte byteValue = 50;
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals(BigInteger.valueOf(byteValue), object.getBigIntegerField());
 
             short shortValue = 200;
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals(BigInteger.valueOf(shortValue), object.getBigIntegerField());
 
             int intValue = 2000;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals(BigInteger.valueOf(intValue), object.getBigIntegerField());
 
             long longValue = 20000L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals(BigInteger.valueOf(longValue), object.getBigIntegerField());
 
             // Test float methods
             float floatValue = 20001.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) BigInteger.valueOf((long) floatValue).floatValue(), propertyAccessor.getFloat(object), 0.01f);
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) BigInteger.valueOf((long) floatValue).floatValue(), propertyAccessor.getFloatValue(object), 0.01f);
             assertEquals(BigInteger.valueOf((long) floatValue), object.getBigIntegerField()); // 20001.5f -> 20001 as integer part
 
             // Test double methods
             double doubleValue = 20002.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) BigInteger.valueOf((long) doubleValue).doubleValue(), propertyAccessor.getDouble(object), 0.01);
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) BigInteger.valueOf((long) doubleValue).doubleValue(), propertyAccessor.getDoubleValue(object), 0.01);
             assertEquals(BigInteger.valueOf((long) doubleValue), object.getBigIntegerField()); // 20002.7 -> 20002 as integer part
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals(BigInteger.valueOf(booleanValue ? 1 : 0), object.getBigIntegerField());
         }
     }
@@ -975,41 +975,41 @@ public class PropertyAccessorFactoryVarHandleTest
 
             // Test primitive setters that can be converted to BigDecimal
             byte byteValue = 50;
-            propertyAccessor.setByte(object, byteValue);
-            assertEquals(byteValue, propertyAccessor.getByte(object));
+            propertyAccessor.setByteValue(object, byteValue);
+            assertEquals(byteValue, propertyAccessor.getByteValue(object));
             assertEquals(BigDecimal.valueOf(byteValue), object.getBigDecimalField());
 
             short shortValue = 200;
-            propertyAccessor.setShort(object, shortValue);
-            assertEquals(shortValue, propertyAccessor.getShort(object));
+            propertyAccessor.setShortValue(object, shortValue);
+            assertEquals(shortValue, propertyAccessor.getShortValue(object));
             assertEquals(BigDecimal.valueOf(shortValue), object.getBigDecimalField());
 
             int intValue = 2000;
-            propertyAccessor.setInt(object, intValue);
-            assertEquals(intValue, propertyAccessor.getInt(object));
+            propertyAccessor.setIntValue(object, intValue);
+            assertEquals(intValue, propertyAccessor.getIntValue(object));
             assertEquals(BigDecimal.valueOf(intValue), object.getBigDecimalField());
 
             long longValue = 20000L;
-            propertyAccessor.setLong(object, longValue);
-            assertEquals(longValue, propertyAccessor.getLong(object));
+            propertyAccessor.setLongValue(object, longValue);
+            assertEquals(longValue, propertyAccessor.getLongValue(object));
             assertEquals(BigDecimal.valueOf(longValue), object.getBigDecimalField());
 
             // Test float methods
             float floatValue = 20001.5f;
-            propertyAccessor.setFloat(object, floatValue);
-            assertEquals((float) BigDecimal.valueOf(floatValue).floatValue(), propertyAccessor.getFloat(object), 0.01f);
+            propertyAccessor.setFloatValue(object, floatValue);
+            assertEquals((float) BigDecimal.valueOf(floatValue).floatValue(), propertyAccessor.getFloatValue(object), 0.01f);
             assertEquals(BigDecimal.valueOf(floatValue), object.getBigDecimalField());
 
             // Test double methods
             double doubleValue = 20002.7;
-            propertyAccessor.setDouble(object, doubleValue);
-            assertEquals((double) BigDecimal.valueOf(doubleValue).doubleValue(), propertyAccessor.getDouble(object), 0.01);
+            propertyAccessor.setDoubleValue(object, doubleValue);
+            assertEquals((double) BigDecimal.valueOf(doubleValue).doubleValue(), propertyAccessor.getDoubleValue(object), 0.01);
             assertEquals(BigDecimal.valueOf(doubleValue), object.getBigDecimalField());
 
             // Test boolean methods
             boolean booleanValue = true;
-            propertyAccessor.setBoolean(object, booleanValue);
-            assertEquals(booleanValue, propertyAccessor.getBoolean(object));
+            propertyAccessor.setBooleanValue(object, booleanValue);
+            assertEquals(booleanValue, propertyAccessor.getBooleanValue(object));
             assertEquals(BigDecimal.valueOf(booleanValue ? 1 : 0), object.getBigDecimalField());
         }
     }

@@ -43,7 +43,7 @@ final class FieldReaderInt32Value<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setInt(object, fieldValue);
+        propertyAccessor.setIntValue(object, fieldValue);
     }
 
     @Override
@@ -54,7 +54,7 @@ final class FieldReaderInt32Value<T>
             schema.assertValidate(intValue);
         }
 
-        propertyAccessor.setInt(object, intValue);
+        propertyAccessor.setIntValue(object, intValue);
     }
 
     @Override
@@ -63,6 +63,6 @@ final class FieldReaderInt32Value<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setInt(object, value);
+        propertyAccessor.setIntValue(object, value);
     }
 }

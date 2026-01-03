@@ -148,7 +148,7 @@ public final class Conf {
                         || fieldName.equals("smallValue") // android
                 ) {
                     PropertyAccessor propertyAccessor = PROPERTY_ACCESSOR_FACTORY.create(field);
-                    intCompact = propertyAccessor::getLong;
+                    intCompact = propertyAccessor::getLongValue;
                     break;
                 }
             }

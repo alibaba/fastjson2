@@ -29,7 +29,7 @@ class FieldWriterFloatValue
     public boolean write(JSONWriter jsonWriter, Object object) {
         float value;
         try {
-            value = propertyAccessor.getFloat(object);
+            value = propertyAccessor.getFloatValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -58,7 +58,7 @@ class FieldWriterFloatValue
 
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
-        float value = propertyAccessor.getFloat(object);
+        float value = propertyAccessor.getFloatValue(object);
         if (decimalFormat != null) {
             jsonWriter.writeFloat(value, decimalFormat);
         } else {

@@ -28,7 +28,7 @@ final class FieldWriterBoolVal
     public boolean write(JSONWriter jsonWriter, Object object) {
         boolean value;
         try {
-            value = propertyAccessor.getBoolean(object);
+            value = propertyAccessor.getBooleanValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;

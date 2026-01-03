@@ -63,7 +63,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as byte
      */
-    byte getByte(Object object);
+    byte getByteValue(Object object);
 
     /**
      * Gets the property value as a char.
@@ -71,7 +71,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as char
      */
-    char getChar(Object object);
+    char getCharValue(Object object);
 
     /**
      * Gets the property value as a short.
@@ -79,7 +79,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as short
      */
-    short getShort(Object object);
+    short getShortValue(Object object);
 
     /**
      * Gets the property value as an int.
@@ -87,7 +87,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as int
      */
-    int getInt(Object object);
+    int getIntValue(Object object);
 
     /**
      * Gets the property value as a long.
@@ -95,7 +95,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as long
      */
-    long getLong(Object object);
+    long getLongValue(Object object);
 
     /**
      * Gets the property value as a float.
@@ -103,7 +103,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as float
      */
-    float getFloat(Object object);
+    float getFloatValue(Object object);
 
     /**
      * Gets the property value as a double.
@@ -111,7 +111,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as double
      */
-    double getDouble(Object object);
+    double getDoubleValue(Object object);
 
     /**
      * Gets the property value as a boolean.
@@ -119,7 +119,7 @@ public interface PropertyAccessor {
      * @param object the object to get the property from
      * @return the property value as boolean
      */
-    boolean getBoolean(Object object);
+    boolean getBooleanValue(Object object);
 
     /**
      * Gets the property value as a String.
@@ -161,7 +161,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the byte value to set
      */
-    void setByte(Object object, byte value);
+    void setByteValue(Object object, byte value);
 
     /**
      * Sets the property value from a char.
@@ -169,7 +169,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the char value to set
      */
-    void setChar(Object object, char value);
+    void setCharValue(Object object, char value);
 
     /**
      * Sets the property value from a short.
@@ -177,7 +177,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the short value to set
      */
-    void setShort(Object object, short value);
+    void setShortValue(Object object, short value);
 
     /**
      * Sets the property value from an int.
@@ -185,7 +185,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the int value to set
      */
-    void setInt(Object object, int value);
+    void setIntValue(Object object, int value);
 
     /**
      * Sets the property value from a long.
@@ -193,7 +193,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the long value to set
      */
-    void setLong(Object object, long value);
+    void setLongValue(Object object, long value);
 
     /**
      * Sets the property value from a float.
@@ -201,7 +201,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the float value to set
      */
-    void setFloat(Object object, float value);
+    void setFloatValue(Object object, float value);
 
     /**
      * Sets the property value from a double.
@@ -209,7 +209,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the double value to set
      */
-    void setDouble(Object object, double value);
+    void setDoubleValue(Object object, double value);
 
     /**
      * Sets the property value from a boolean.
@@ -217,7 +217,7 @@ public interface PropertyAccessor {
      * @param object the object to set the property on
      * @param value the boolean value to set
      */
-    void setBoolean(Object object, boolean value);
+    void setBooleanValue(Object object, boolean value);
 
     /**
      * Sets the property value from a String.

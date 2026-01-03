@@ -33,6 +33,90 @@ public class Cast {
     }
 
     /**
+     * Converts an Object to Short.
+     * @param value the Object to convert
+     * @return the converted Short value
+     */
+    public static Short toShort(Object value) {
+        if (value == null || value instanceof Short) {
+            return (Short) value;
+        }
+        return toShortEx(value);
+    }
+
+    /**
+     * Converts an Object to Integer.
+     * @param value the Object to convert
+     * @return the converted Integer value
+     */
+    public static Integer toInteger(Object value) {
+        if (value == null || value instanceof Integer) {
+            return (Integer) value;
+        }
+        return toIntEx(value);
+    }
+
+    /**
+     * Converts an Object to Long.
+     * @param value the Object to convert
+     * @return the converted Long value
+     */
+    public static Long toLong(Object value) {
+        if (value == null || value instanceof Long) {
+            return (Long) value;
+        }
+        return toLongEx(value);
+    }
+
+    /**
+     * Converts an Object to Float.
+     * @param value the Object to convert
+     * @return the converted Float value
+     */
+    public static Float toFloat(Object value) {
+        if (value == null || value instanceof Float) {
+            return (Float) value;
+        }
+        return toFloatEx(value);
+    }
+
+    /**
+     * Converts an Object to Double.
+     * @param value the Object to convert
+     * @return the converted Double value
+     */
+    public static Double toDouble(Object value) {
+        if (value == null || value instanceof Double) {
+            return (Double) value;
+        }
+        return toDoubleEx(value);
+    }
+
+    /**
+     * Converts an Object to Character.
+     * @param value the Object to convert
+     * @return the converted Character value
+     */
+    public static Character toCharacter(Object value) {
+        if (value == null || value instanceof Character) {
+            return (Character) value;
+        }
+        return toCharEx(value);
+    }
+
+    /**
+     * Converts an Object to Boolean.
+     * @param value the Object to convert
+     * @return the converted Boolean value
+     */
+    public static Boolean toBoolean(Object value) {
+        if (value == null || value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        return toBooleanEx(value);
+    }
+
+    /**
      * Helper method for converting non-Number objects to byte.
      * @param value the Object to convert
      * @return the converted byte value
@@ -600,6 +684,8 @@ public class Cast {
             return toLongValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
             return toLongValue((BigDecimal) value);
+        } else if (value instanceof Number) {
+            return toLongValue(((Number) value).longValue());
         } else if (value == null) {
             return 0L;
         }

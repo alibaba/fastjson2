@@ -37,7 +37,7 @@ final class FieldReaderFloatValue<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setFloat(object, fieldValue);
+        propertyAccessor.setFloatValue(object, fieldValue);
     }
 
     @Override
@@ -53,7 +53,7 @@ final class FieldReaderFloatValue<T>
             schema.assertValidate(floatValue);
         }
 
-        propertyAccessor.setFloat(object, floatValue);
+        propertyAccessor.setFloatValue(object, floatValue);
     }
 
     @Override
@@ -62,6 +62,6 @@ final class FieldReaderFloatValue<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setFloat(object, value);
+        propertyAccessor.setFloatValue(object, value);
     }
 }

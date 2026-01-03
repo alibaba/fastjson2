@@ -37,7 +37,7 @@ final class FieldReaderDoubleValue<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setDouble(object, fieldValue);
+        propertyAccessor.setDoubleValue(object, fieldValue);
     }
 
     @Override
@@ -48,7 +48,7 @@ final class FieldReaderDoubleValue<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setDouble(object, fieldValue);
+        propertyAccessor.setDoubleValue(object, fieldValue);
     }
 
     @Override
@@ -64,7 +64,7 @@ final class FieldReaderDoubleValue<T>
             schema.assertValidate(doubleValue);
         }
 
-        propertyAccessor.setDouble(object, doubleValue);
+        propertyAccessor.setDoubleValue(object, doubleValue);
     }
 
     @Override
@@ -73,7 +73,7 @@ final class FieldReaderDoubleValue<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setDouble(object, value);
+        propertyAccessor.setDoubleValue(object, value);
     }
 
     @Override
@@ -82,6 +82,6 @@ final class FieldReaderDoubleValue<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setDouble(object, value);
+        propertyAccessor.setDoubleValue(object, value);
     }
 }

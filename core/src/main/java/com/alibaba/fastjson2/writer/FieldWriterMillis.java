@@ -22,12 +22,12 @@ final class FieldWriterMillis<T>
 
     @Override
     public Object getFieldValue(T object) {
-        return propertyAccessor.getLong(object);
+        return propertyAccessor.getLongValue(object);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        long millis = propertyAccessor.getLong(object);
+        long millis = propertyAccessor.getLongValue(object);
         if (millis == 0 && !"iso8601".equals(this.format)) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
@@ -46,6 +46,6 @@ final class FieldWriterMillis<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         writeDate(jsonWriter, false,
-                propertyAccessor.getLong(object));
+                propertyAccessor.getLongValue(object));
     }
 }

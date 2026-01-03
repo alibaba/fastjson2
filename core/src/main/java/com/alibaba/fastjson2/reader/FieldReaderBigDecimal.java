@@ -74,7 +74,7 @@ final class FieldReaderBigDecimal<T, V>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setInt(object, value);
+        propertyAccessor.setIntValue(object, value);
     }
 
     @Override
