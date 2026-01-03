@@ -85,6 +85,7 @@ public class Model {
 | WriteEnumUsingToString            | 序列化enum使用toString方法                                                                                              |
 | IgnoreErrorGetter                 | 忽略getter方法的错误                                                                                                    |
 | PrettyFormat                      | 格式化输出                                                                                                            |
+| PrettyFormatInlineArrays          | 配合PrettyFormat使用，将数组元素保持在同一行，而不是每个元素单独一行。与原fastjson行为一致                                                           |
 | ReferenceDetection                | 打开引用检测，这个缺省是关闭的，和fastjson 1.x不一致                                                                                 |
 | WriteNameAsSymbol                 | 将字段名按照symbol输出，这个仅在JSONB下起作用                                                                                     |
 | WriteBigDecimalAsPlain            | 序列化BigDecimal使用toPlainString，避免科学计数法                                                                             |
