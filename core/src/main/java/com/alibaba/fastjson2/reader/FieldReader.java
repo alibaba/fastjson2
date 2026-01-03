@@ -172,45 +172,45 @@ public abstract class FieldReader<T>
         PropertyAccessorFactory factory = Conf.PROPERTY_ACCESSOR_FACTORY;
         Class fieldClass = propertyAccessor.propertyClass();
         if (fieldClass == boolean.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjBoolConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjBoolConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Boolean.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == byte.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjByteConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjByteConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Byte.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == char.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjCharConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjCharConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Character.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == short.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjShortConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjShortConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Short.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == int.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjIntConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjIntConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Integer.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == long.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjLongConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjLongConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Long.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == float.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjFloatConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjFloatConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Float.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == double.class) {
-            propertyAccessor = factory.create(propertyAccessor, (ObjDoubleConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjDoubleConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == Double.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == String.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == BigInteger.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else if (fieldClass == BigDecimal.class) {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         } else {
-            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
         }
         return propertyAccessor;
     }

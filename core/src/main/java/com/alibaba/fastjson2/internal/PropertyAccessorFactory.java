@@ -3834,74 +3834,74 @@ public class PropertyAccessorFactory {
         }
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjBoolConsumer valueConsumer) {
-        return new PropertyAccessorWrapperBooleanValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjBoolConsumer getterConsumer, ObjBoolConsumer setterConsumer) {
+        return new PropertyAccessorWrapperBooleanValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjByteConsumer valueConsumer) {
-        return new PropertyAccessorWrapperByteValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjByteConsumer getterConsumer, ObjByteConsumer setterConsumer) {
+        return new PropertyAccessorWrapperByteValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjCharConsumer valueConsumer) {
-        return new PropertyAccessorWrapperCharValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjCharConsumer getterConsumer, ObjCharConsumer setterConsumer) {
+        return new PropertyAccessorWrapperCharValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjShortConsumer valueConsumer) {
-        return new PropertyAccessorWrapperShortValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjShortConsumer getterConsumer, ObjShortConsumer setterConsumer) {
+        return new PropertyAccessorWrapperShortValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjIntConsumer valueConsumer) {
-        return new PropertyAccessorWrapperIntValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjIntConsumer getterConsumer, ObjIntConsumer setterConsumer) {
+        return new PropertyAccessorWrapperIntValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjLongConsumer valueConsumer) {
-        return new PropertyAccessorWrapperLongValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjLongConsumer getterConsumer, ObjLongConsumer setterConsumer) {
+        return new PropertyAccessorWrapperLongValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjFloatConsumer valueConsumer) {
-        return new PropertyAccessorWrapperFloatValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjFloatConsumer getterConsumer, ObjFloatConsumer setterConsumer) {
+        return new PropertyAccessorWrapperFloatValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, ObjDoubleConsumer valueConsumer) {
-        return new PropertyAccessorWrapperDoubleValue(impl, valueConsumer);
+    public PropertyAccessor create(PropertyAccessor impl, ObjDoubleConsumer getterConsumer, ObjDoubleConsumer setterConsumer) {
+        return new PropertyAccessorWrapperDoubleValue(impl, getterConsumer, setterConsumer);
     }
 
-    public PropertyAccessor create(PropertyAccessor impl, BiConsumer valueConsumer) {
+    public PropertyAccessor create(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
         Class<?> propertyClass = impl.propertyClass();
         if (propertyClass == Boolean.class) {
-            return new PropertyAccessorWrapperBoolean(impl, valueConsumer);
+            return new PropertyAccessorWrapperBoolean(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == Byte.class) {
-            return new PropertyAccessorWrapperByte(impl, valueConsumer);
+            return new PropertyAccessorWrapperByte(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == Character.class) {
-            return new PropertyAccessorWrapperCharacter(impl, valueConsumer);
+            return new PropertyAccessorWrapperCharacter(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == Short.class) {
-            return new PropertyAccessorWrapperShort(impl, valueConsumer);
+            return new PropertyAccessorWrapperShort(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == Integer.class) {
-            return new PropertyAccessorWrapperInteger(impl, valueConsumer);
+            return new PropertyAccessorWrapperInteger(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == Long.class) {
-            return new PropertyAccessorWrapperLong(impl, valueConsumer);
+            return new PropertyAccessorWrapperLong(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == Float.class) {
-            return new PropertyAccessorWrapperFloat(impl, valueConsumer);
+            return new PropertyAccessorWrapperFloat(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == Double.class) {
-            return new PropertyAccessorWrapperDouble(impl, valueConsumer);
+            return new PropertyAccessorWrapperDouble(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == String.class) {
-            return new PropertyAccessorWrapperString(impl, valueConsumer);
+            return new PropertyAccessorWrapperString(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == BigInteger.class) {
-            return new PropertyAccessorWrapperBigInteger(impl, valueConsumer);
+            return new PropertyAccessorWrapperBigInteger(impl, getterConsumer, setterConsumer);
         }
         if (propertyClass == BigDecimal.class) {
-            return new PropertyAccessorWrapperBigDecimal(impl, valueConsumer);
+            return new PropertyAccessorWrapperBigDecimal(impl, getterConsumer, setterConsumer);
         }
-        return new PropertyAccessorWrapperObject(impl, valueConsumer);
+        return new PropertyAccessorWrapperObject(impl, getterConsumer, setterConsumer);
     }
 
     abstract static class PropertyAccessorWrapper implements PropertyAccessor {
@@ -3937,446 +3937,486 @@ public class PropertyAccessorFactory {
     }
 
     static final class PropertyAccessorWrapperBooleanValue extends PropertyAccessorWrapper implements PropertyAccessorBooleanValue {
-        private final ObjBoolConsumer valueConsumer;
-        public PropertyAccessorWrapperBooleanValue(PropertyAccessor impl, ObjBoolConsumer predicate) {
+        private final ObjBoolConsumer getterConsumer;
+        private final ObjBoolConsumer setterConsumer;
+        public PropertyAccessorWrapperBooleanValue(PropertyAccessor impl, ObjBoolConsumer getterConsumer, ObjBoolConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public boolean getBooleanValue(Object object) {
             boolean value = impl.getBooleanValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setBooleanValue(Object object, boolean value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setBooleanValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperByteValue extends PropertyAccessorWrapper implements PropertyAccessorByteValue {
-        private final ObjByteConsumer valueConsumer;
-        public PropertyAccessorWrapperByteValue(PropertyAccessor impl, ObjByteConsumer predicate) {
+        private final ObjByteConsumer getterConsumer;
+        private final ObjByteConsumer setterConsumer;
+        public PropertyAccessorWrapperByteValue(PropertyAccessor impl, ObjByteConsumer getterConsumer, ObjByteConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public byte getByteValue(Object object) {
             byte value = impl.getByteValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setByteValue(Object object, byte value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setByteValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperShortValue extends PropertyAccessorWrapper implements PropertyAccessorShortValue {
-        private final ObjShortConsumer valueConsumer;
-        public PropertyAccessorWrapperShortValue(PropertyAccessor impl, ObjShortConsumer predicate) {
+        private final ObjShortConsumer getterConsumer;
+        private final ObjShortConsumer setterConsumer;
+        public PropertyAccessorWrapperShortValue(PropertyAccessor impl, ObjShortConsumer getterConsumer, ObjShortConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public short getShortValue(Object object) {
             short value = impl.getShortValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setShortValue(Object object, short value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setShortValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperIntValue extends PropertyAccessorWrapper implements PropertyAccessorIntValue {
-        private final ObjIntConsumer valueConsumer;
-        public PropertyAccessorWrapperIntValue(PropertyAccessor impl, ObjIntConsumer predicate) {
+        private final ObjIntConsumer getterConsumer;
+        private final ObjIntConsumer setterConsumer;
+        public PropertyAccessorWrapperIntValue(PropertyAccessor impl, ObjIntConsumer getterConsumer, ObjIntConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public int getIntValue(Object object) {
             int value = impl.getIntValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setIntValue(Object object, int value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setIntValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperLongValue extends PropertyAccessorWrapper implements PropertyAccessorLongValue {
-        private final ObjLongConsumer valueConsumer;
-        public PropertyAccessorWrapperLongValue(PropertyAccessor impl, ObjLongConsumer predicate) {
+        private final ObjLongConsumer getterConsumer;
+        private final ObjLongConsumer setterConsumer;
+        public PropertyAccessorWrapperLongValue(PropertyAccessor impl, ObjLongConsumer getterConsumer, ObjLongConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public long getLongValue(Object object) {
             long value = impl.getLongValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setLongValue(Object object, long value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setLongValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperFloatValue extends PropertyAccessorWrapper implements PropertyAccessorFloatValue {
-        private final ObjFloatConsumer valueConsumer;
-        public PropertyAccessorWrapperFloatValue(PropertyAccessor impl, ObjFloatConsumer predicate) {
+        private final ObjFloatConsumer getterConsumer;
+        private final ObjFloatConsumer setterConsumer;
+        public PropertyAccessorWrapperFloatValue(PropertyAccessor impl, ObjFloatConsumer getterConsumer, ObjFloatConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public float getFloatValue(Object object) {
             float value = impl.getFloatValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setFloatValue(Object object, float value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setFloatValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperDoubleValue extends PropertyAccessorWrapper implements PropertyAccessorDoubleValue {
-        private final ObjDoubleConsumer valueConsumer;
-        public PropertyAccessorWrapperDoubleValue(PropertyAccessor impl, ObjDoubleConsumer predicate) {
+        private final ObjDoubleConsumer getterConsumer;
+        private final ObjDoubleConsumer setterConsumer;
+        public PropertyAccessorWrapperDoubleValue(PropertyAccessor impl, ObjDoubleConsumer getterConsumer, ObjDoubleConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public double getDoubleValue(Object object) {
             double value = impl.getDoubleValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setDoubleValue(Object object, double value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setDoubleValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperCharValue extends PropertyAccessorWrapper implements PropertyAccessorCharValue {
-        private final ObjCharConsumer valueConsumer;
-        public PropertyAccessorWrapperCharValue(PropertyAccessor impl, ObjCharConsumer predicate) {
+        private final ObjCharConsumer getterConsumer;
+        private final ObjCharConsumer setterConsumer;
+        public PropertyAccessorWrapperCharValue(PropertyAccessor impl, ObjCharConsumer getterConsumer, ObjCharConsumer setterConsumer) {
             super(impl);
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public char getCharValue(Object object) {
             char value = impl.getCharValue(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
 
         @Override
         public void setCharValue(Object object, char value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             impl.setCharValue(object, value);
         }
     }
 
     static final class PropertyAccessorWrapperBoolean extends PropertyAccessorWrapper implements PropertyAccessorBoolean {
         private PropertyAccessorBoolean booleanImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperBoolean(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperBoolean(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             booleanImpl = (PropertyAccessorBoolean) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setBoolean(Object object, Boolean value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             booleanImpl.setBoolean(object, value);
         }
 
         @Override
         public Boolean getBoolean(Object object) {
             Boolean value = booleanImpl.getBoolean(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperByte extends PropertyAccessorWrapper implements PropertyAccessorByte {
         private PropertyAccessorByte byteImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperByte(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperByte(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             byteImpl = (PropertyAccessorByte) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setByte(Object object, Byte value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             byteImpl.setByte(object, value);
         }
 
         @Override
         public Byte getByte(Object object) {
             Byte value = byteImpl.getByte(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperCharacter extends PropertyAccessorWrapper implements PropertyAccessorCharacter {
         private PropertyAccessorCharacter characterImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperCharacter(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperCharacter(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             characterImpl = (PropertyAccessorCharacter) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setCharacter(Object object, Character value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             characterImpl.setCharacter(object, value);
         }
 
         @Override
         public Character getCharacter(Object object) {
             Character value = characterImpl.getCharacter(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperShort extends PropertyAccessorWrapper implements PropertyAccessorShort {
         private PropertyAccessorShort shortImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperShort(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperShort(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             shortImpl = (PropertyAccessorShort) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setShort(Object object, Short value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             shortImpl.setShort(object, value);
         }
 
         @Override
         public Short getShort(Object object) {
             Short value = shortImpl.getShort(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperInteger extends PropertyAccessorWrapper implements PropertyAccessorInteger {
         private PropertyAccessorInteger integerImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperInteger(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperInteger(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             integerImpl = (PropertyAccessorInteger) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setInteger(Object object, Integer value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             integerImpl.setInteger(object, value);
         }
 
         @Override
         public Integer getInteger(Object object) {
             Integer value = integerImpl.getInteger(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperLong extends PropertyAccessorWrapper implements PropertyAccessorLong {
         private PropertyAccessorLong longImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperLong(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperLong(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             longImpl = (PropertyAccessorLong) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setLong(Object object, Long value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             longImpl.setLong(object, value);
         }
 
         @Override
         public Long getLong(Object object) {
             Long value = longImpl.getLong(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperFloat extends PropertyAccessorWrapper implements PropertyAccessorFloat {
         private PropertyAccessorFloat floatImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperFloat(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperFloat(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             floatImpl = (PropertyAccessorFloat) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setFloat(Object object, Float value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             floatImpl.setFloat(object, value);
         }
 
         @Override
         public Float getFloat(Object object) {
             Float value = floatImpl.getFloat(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperDouble extends PropertyAccessorWrapper implements PropertyAccessorDouble {
         private PropertyAccessorDouble doubleImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperDouble(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperDouble(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             doubleImpl = (PropertyAccessorDouble) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setDouble(Object object, Double value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             doubleImpl.setDouble(object, value);
         }
 
         @Override
         public Double getDouble(Object object) {
             Double value = doubleImpl.getDouble(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperString extends PropertyAccessorWrapper implements PropertyAccessorString {
         private PropertyAccessorString stringImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperString(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperString(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             stringImpl = (PropertyAccessorString) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setString(Object object, String value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             stringImpl.setString(object, value);
         }
 
         @Override
         public String getString(Object object) {
             String value = stringImpl.getString(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperBigInteger extends PropertyAccessorWrapper implements PropertyAccessorBigInteger {
         private PropertyAccessorBigInteger bigIntegerImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperBigInteger(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperBigInteger(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             bigIntegerImpl = (PropertyAccessorBigInteger) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setBigInteger(Object object, BigInteger value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             bigIntegerImpl.setBigInteger(object, value);
         }
 
         @Override
         public BigInteger getBigInteger(Object object) {
             BigInteger value = bigIntegerImpl.getBigInteger(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperBigDecimal extends PropertyAccessorWrapper implements PropertyAccessorBigDecimal {
         private PropertyAccessorBigDecimal bigDecimalImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperBigDecimal(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperBigDecimal(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             bigDecimalImpl = (PropertyAccessorBigDecimal) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setBigDecimal(Object object, BigDecimal value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             bigDecimalImpl.setBigDecimal(object, value);
         }
 
         @Override
         public BigDecimal getBigDecimal(Object object) {
             BigDecimal value = bigDecimalImpl.getBigDecimal(object);
-            valueConsumer.accept(object, value);
+            getterConsumer.accept(object, value);
             return value;
         }
     }
 
     static final class PropertyAccessorWrapperObject extends PropertyAccessorWrapper implements PropertyAccessorObject {
         private PropertyAccessorObject objImpl;
-        private final BiConsumer valueConsumer;
-        public PropertyAccessorWrapperObject(PropertyAccessor impl, BiConsumer predicate) {
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperObject(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
             super(impl);
             objImpl = (PropertyAccessorObject) impl;
-            this.valueConsumer = predicate;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
         }
 
         @Override
         public void setObject(Object object, Object value) {
-            valueConsumer.accept(object, value);
+            setterConsumer.accept(object, value);
             objImpl.setObject(object, value);
         }
 
         @Override
         public Object getObject(Object object) {
             Object value = objImpl.getObject(object);
-            valueConsumer.accept(object, value);
-            return objImpl.getObject(object);
+            getterConsumer.accept(object, value);
+            return value;
         }
     }
 }
