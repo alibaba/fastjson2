@@ -434,8 +434,10 @@ public class ObjectWriterCreator {
 
         if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
             try {
-                return (ObjectWriter) beanInfo.serializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = beanInfo.serializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectWriter) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 throw new JSONException("create serializer error", e);
             }
         }
@@ -1069,6 +1071,10 @@ public class ObjectWriterCreator {
                 return new FieldWriterInt64Val(fieldName, ordinal, features, format, label, field, null, null);
             }
             return new FieldWriterMillis(fieldName, ordinal, features, format, label, field, null, null);
+        }
+
+        if (fieldClass == Long.class) {
+            return new FieldWriterInt64(fieldName, ordinal, features, format, label, fieldClass, field, null, null);
         }
 
         if (fieldClass == float.class) {

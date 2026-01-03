@@ -4416,6 +4416,10 @@ public class ObjectWriterCreatorASM
             return new FieldWriterMillis(fieldName, ordinal, features, format, label, field, null, null);
         }
 
+        if (fieldClass == Long.class) {
+            return new FieldWriterInt64(fieldName, ordinal, features, format, label, fieldClass, field, null, null);
+        }
+
         if (fieldClass == float.class) {
             return new FieldWriterFloatValue(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }

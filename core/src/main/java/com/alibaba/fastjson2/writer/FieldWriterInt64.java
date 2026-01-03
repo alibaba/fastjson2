@@ -63,7 +63,11 @@ class FieldWriterInt64<T>
                 return false;
             }
             writeFieldName(jsonWriter);
-            jsonWriter.writeNumberNull();
+            if ((features & WriteLongAsString.mask) != 0) {
+                jsonWriter.writeString("0");
+            } else {
+                jsonWriter.writeNumberNull();
+            }
             return true;
         }
 
