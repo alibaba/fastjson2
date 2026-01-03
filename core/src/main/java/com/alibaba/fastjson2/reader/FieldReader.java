@@ -21,6 +21,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
 import java.util.function.*;
@@ -171,27 +173,44 @@ public abstract class FieldReader<T>
         Class fieldClass = propertyAccessor.propertyClass();
         if (fieldClass == boolean.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjBoolConsumer) (o, v) -> schema.assertValidate(v));
-        }
-        if (fieldClass == byte.class) {
+        } else if (fieldClass == Boolean.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == byte.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjByteConsumer) (o, v) -> schema.assertValidate(v));
-        }
-        if (fieldClass == char.class) {
+        } else if (fieldClass == Byte.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == char.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjCharConsumer) (o, v) -> schema.assertValidate(v));
-        }
-        if (fieldClass == short.class) {
+        } else if (fieldClass == Character.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == short.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjShortConsumer) (o, v) -> schema.assertValidate(v));
-        }
-        if (fieldClass == int.class) {
+        } else if (fieldClass == Short.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == int.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjIntConsumer) (o, v) -> schema.assertValidate(v));
-        }
-        if (fieldClass == long.class) {
+        } else if (fieldClass == Integer.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == long.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjLongConsumer) (o, v) -> schema.assertValidate(v));
-        }
-        if (fieldClass == float.class) {
+        } else if (fieldClass == Long.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == float.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjFloatConsumer) (o, v) -> schema.assertValidate(v));
-        }
-        if (fieldClass == double.class) {
+        } else if (fieldClass == Float.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == double.class) {
             propertyAccessor = factory.create(propertyAccessor, (ObjDoubleConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Double.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == String.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == BigInteger.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == BigDecimal.class) {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else {
+            propertyAccessor = factory.create(propertyAccessor, (BiConsumer) (o, v) -> schema.assertValidate(v));
         }
         return propertyAccessor;
     }
