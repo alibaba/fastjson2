@@ -188,7 +188,11 @@ class JSONWriterUTF16
 
         chars[off++] = (byte) ',';
         if (pretty != PRETTY_NON) {
-            off = indent(chars, off);
+            // Check if we're in an array context with inline arrays enabled
+            boolean inArrayContext = (levelArray & (1L << level)) != 0;
+            if (!(prettyInlineArrays && inArrayContext)) {
+                off = indent(chars, off);
+            }
         }
         this.off = off;
     }
@@ -198,6 +202,8 @@ class JSONWriterUTF16
         if (++level > context.maxLevel) {
             overflowLevel();
         }
+        // Mark current level as array context
+        levelArray |= (1L << level);
 
         int off = this.off;
         int minCapacity = off + 3 + pretty * level;
@@ -207,7 +213,7 @@ class JSONWriterUTF16
         }
 
         chars[off++] = (byte) '[';
-        if (pretty != PRETTY_NON) {
+        if (pretty != PRETTY_NON && !prettyInlineArrays) {
             off = indent(chars, off);
         }
         this.off = off;
@@ -215,6 +221,8 @@ class JSONWriterUTF16
 
     @Override
     public final void endArray() {
+        // Clear array context for current level before decrementing
+        levelArray &= ~(1L << level);
         level--;
         int off = this.off;
         int minCapacity = off + 1 + (pretty == 0 ? 0 : pretty * level + 1);
@@ -223,7 +231,7 @@ class JSONWriterUTF16
             chars = grow(minCapacity);
         }
 
-        if (pretty != PRETTY_NON) {
+        if (pretty != PRETTY_NON && !prettyInlineArrays) {
             off = indent(chars, off);
         }
         chars[off] = (byte) ']';

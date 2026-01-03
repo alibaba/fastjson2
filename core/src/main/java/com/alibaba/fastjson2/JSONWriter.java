@@ -84,12 +84,22 @@ public abstract class JSONWriter
 
     protected boolean startObject;
     protected int level;
+    /**
+     * Bitmask tracking which nesting levels are arrays (vs objects).
+     * Bit N is set if level N is an array context.
+     */
+    protected long levelArray;
     protected int off;
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
     protected byte pretty;
+    /**
+     * When true and pretty formatting is enabled, arrays are written inline
+     * (on a single line) rather than with line breaks between elements.
+     */
+    protected boolean prettyInlineArrays;
     protected Object attachment;
 
     protected JSONWriter(
@@ -119,6 +129,7 @@ public abstract class JSONWriter
         } else {
             pretty = PRETTY_NON;
         }
+        prettyInlineArrays = (context.features & PrettyFormatInlineArrays.mask) != 0;
     }
 
     /**
@@ -4430,7 +4441,18 @@ public abstract class JSONWriter
          *
          * @since 2.0.61
          */
-        WriteFloatSpecialAsString(1L << 45);
+        WriteFloatSpecialAsString(1L << 45),
+
+        /**
+         * Feature that controls whether arrays are formatted inline (on a single line) when using PrettyFormat.
+         * When enabled along with PrettyFormat, array elements will be written on a single line like [1, 2, 3]
+         * instead of having each element on a separate line.
+         *
+         * <p>This feature requires {@link PrettyFormat} to also be enabled to have any effect.</p>
+         *
+         * @since 2.0.61
+         */
+        PrettyFormatInlineArrays(1L << 46);
 
         public final long mask;
 
