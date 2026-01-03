@@ -202,36 +202,6 @@ public class PropertyAccessorFactory {
         default void setDoubleValue(Object object, double value) {
             setBooleanValue(object, toBooleanValue(value));
         }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getBooleanValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getBooleanValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getBooleanValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setBooleanValue(object, toBooleanValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setBooleanValue(object, toBooleanValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setBooleanValue(object, toBooleanValue(value));
-        }
     }
 
     /**
@@ -320,36 +290,6 @@ public class PropertyAccessorFactory {
         default void setBooleanValue(Object object, boolean value) {
             setByteValue(object, toByteValue(value));
         }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getByteValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getByteValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getByteValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setByteValue(object, toByteValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setByteValue(object, toByteValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setByteValue(object, toByteValue(value));
-        }
     }
 
     /**
@@ -420,36 +360,6 @@ public class PropertyAccessorFactory {
         }
 
         default void setBooleanValue(Object object, boolean value) {
-            setShortValue(object, toShortValue(value));
-        }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getShortValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getShortValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getShortValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setShortValue(object, toShortValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setShortValue(object, toShortValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
             setShortValue(object, toShortValue(value));
         }
     }
@@ -540,36 +450,6 @@ public class PropertyAccessorFactory {
         default void setBooleanValue(Object object, boolean value) {
             setIntValue(object, toIntValue(value));
         }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getIntValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getIntValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getIntValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setIntValue(object, toIntValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setIntValue(object, toIntValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setIntValue(object, toIntValue(value));
-        }
     }
 
     /**
@@ -656,36 +536,6 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setBooleanValue(Object object, boolean value) {
-            setLongValue(object, toLongValue(value));
-        }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getLongValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getLongValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getLongValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setLongValue(object, toLongValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setLongValue(object, toLongValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
             setLongValue(object, toLongValue(value));
         }
     }
@@ -776,36 +626,6 @@ public class PropertyAccessorFactory {
         default void setBooleanValue(Object object, boolean value) {
             setFloatValue(object, toFloatValue(value));
         }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getFloatValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getFloatValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getFloatValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setFloatValue(object, toFloatValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setFloatValue(object, toFloatValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setFloatValue(object, toFloatValue(value));
-        }
     }
 
     /**
@@ -892,36 +712,6 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setBooleanValue(Object object, boolean value) {
-            setDoubleValue(object, toDoubleValue(value));
-        }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getDoubleValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getDoubleValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getDoubleValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setDoubleValue(object, toDoubleValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setDoubleValue(object, toDoubleValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
             setDoubleValue(object, toDoubleValue(value));
         }
     }
@@ -1012,36 +802,6 @@ public class PropertyAccessorFactory {
         default void setBooleanValue(Object object, boolean value) {
             setCharValue(object, toCharValue(value));
         }
-
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getCharValue(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getCharValue(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getCharValue(object));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setCharValue(object, toCharValue(value));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setCharValue(object, toCharValue(value));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setCharValue(object, toCharValue(value));
-        }
     }
 
     /**
@@ -1091,21 +851,6 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default String getString(Object object) {
-            return Cast.toString(getObject(object));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getObject(object));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getObject(object));
-        }
-
-        @Override
         default void setByteValue(Object object, byte value) {
             setObject(object, value);
         }
@@ -1142,21 +887,6 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setBooleanValue(Object object, boolean value) {
-            setObject(object, value);
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setObject(object, value);
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setObject(object, value);
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
             setObject(object, value);
         }
     }
@@ -1217,25 +947,21 @@ public class PropertyAccessorFactory {
             setString(object, Cast.toString(value));
         }
 
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getString(object));
-        }
+        /**
+         * Gets the property value as a String.
+         *
+         * @param object the object to get the property from
+         * @return the property value as String
+         */
+        String getString(Object object);
 
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setString(object, Cast.toString(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getString(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setString(object, Cast.toString(value));
-        }
+        /**
+         * Sets the property value from a String.
+         *
+         * @param object the object to set the property on
+         * @param value the String value to set
+         */
+        void setString(Object object, String value);
     }
 
     /**
@@ -1289,25 +1015,21 @@ public class PropertyAccessorFactory {
             setBigInteger(object, toBigInteger(value));
         }
 
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getBigInteger(object));
-        }
+        /**
+         * Gets the property value as a BigInteger.
+         *
+         * @param object the object to get the property from
+         * @return the property value as BigInteger
+         */
+        BigInteger getBigInteger(Object object);
 
-        @Override
-        default void setString(Object object, String value) {
-            setBigInteger(object, toBigInteger(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getBigInteger(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setBigInteger(object, toBigInteger(value));
-        }
+        /**
+         * Sets the property value from a BigInteger.
+         *
+         * @param object the object to set the property on
+         * @param value the BigInteger value to set
+         */
+        void setBigInteger(Object object, BigInteger value);
     }
 
     /**
@@ -1352,16 +1074,6 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getBigDecimal(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setBigDecimal(object, toBigDecimal(value));
-        }
-
-        @Override
         default Object getObject(Object object) {
             return getBigDecimal(object);
         }
@@ -1371,15 +1083,21 @@ public class PropertyAccessorFactory {
             setBigDecimal(object, toBigDecimal(value));
         }
 
-        @Override
-        default String getString(Object object) {
-            return Cast.toString(getBigDecimal(object));
-        }
+        /**
+         * Gets the property value as a BigDecimal.
+         *
+         * @param object the object to get the property from
+         * @return the property value as BigDecimal
+         */
+        BigDecimal getBigDecimal(Object object);
 
-        @Override
-        default void setString(Object object, String value) {
-            setBigDecimal(object, toBigDecimal(value));
-        }
+        /**
+         * Sets the property value from a BigDecimal.
+         *
+         * @param object the object to set the property on
+         * @param value the BigDecimal value to set
+         */
+        void setBigDecimal(Object object, BigDecimal value);
     }
 
     protected interface PropertyAccessorBoolean extends PropertyAccessorObject {
@@ -1430,26 +1148,6 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setObject(Object object, Object value) {
-            setBoolean(object, Cast.toBoolean(value));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getBoolean(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setBoolean(object, Cast.toBoolean(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getBoolean(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
             setBoolean(object, Cast.toBoolean(value));
         }
 
@@ -1544,32 +1242,7 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default void setString(Object object, String value) {
-            setByte(object, Cast.toByte(value));
-        }
-
-        @Override
         default void setObject(Object object, Object value) {
-            setByte(object, Cast.toByte(value));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getByte(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setByte(object, Cast.toByte(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getByte(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
             setByte(object, Cast.toByte(value));
         }
 
@@ -1664,26 +1337,6 @@ public class PropertyAccessorFactory {
             setCharacter(object, Cast.toCharacter(value));
         }
 
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getCharacter(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setCharacter(object, Cast.toCharacter(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getCharacter(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setCharacter(object, Cast.toCharacter(value));
-        }
-
         void setCharacter(Object object, Character value);
         Character getCharacter(Object object);
     }
@@ -1740,26 +1393,6 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getShort(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setShort(object, Cast.toShort(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getShort(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setShort(object, Cast.toShort(value));
-        }
-
-        @Override
         default void setByteValue(Object object, byte value) {
             setShort(object, toShort(value));
         }
@@ -1797,11 +1430,6 @@ public class PropertyAccessorFactory {
         @Override
         default void setBooleanValue(Object object, boolean value) {
             setShort(object, toShort(value));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setShort(object, Cast.toShort(value));
         }
 
         void setShort(Object object, Short value);
@@ -1856,26 +1484,6 @@ public class PropertyAccessorFactory {
 
         @Override
         default void setObject(Object object, Object value) {
-            setInteger(object, Cast.toInteger(value));
-        }
-
-        @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getInteger(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setInteger(object, Cast.toInteger(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getInteger(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
             setInteger(object, Cast.toInteger(value));
         }
 
@@ -1970,26 +1578,6 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getLong(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setLong(object, Cast.toLong(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getLong(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setLong(object, Cast.toLong(value));
-        }
-
-        @Override
         default void setByteValue(Object object, byte value) {
             setLong(object, toLong(value));
         }
@@ -2027,11 +1615,6 @@ public class PropertyAccessorFactory {
         @Override
         default void setBooleanValue(Object object, boolean value) {
             setLong(object, toLong(value));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setLong(object, Cast.toLong(value));
         }
 
         void setLong(Object object, Long value);
@@ -2090,26 +1673,6 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getFloat(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setFloat(object, Cast.toFloat(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getFloat(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setFloat(object, Cast.toFloat(value));
-        }
-
-        @Override
         default void setByteValue(Object object, byte value) {
             setFloat(object, toFloat(value));
         }
@@ -2147,11 +1710,6 @@ public class PropertyAccessorFactory {
         @Override
         default void setBooleanValue(Object object, boolean value) {
             setFloat(object, toFloat(value));
-        }
-
-        @Override
-        default void setString(Object object, String value) {
-            setFloat(object, Cast.toFloat(value));
         }
 
         void setFloat(Object object, Float value);
@@ -2210,26 +1768,6 @@ public class PropertyAccessorFactory {
         }
 
         @Override
-        default BigInteger getBigInteger(Object object) {
-            return toBigInteger(getDouble(object));
-        }
-
-        @Override
-        default void setBigInteger(Object object, BigInteger value) {
-            setDouble(object, Cast.toDouble(value));
-        }
-
-        @Override
-        default BigDecimal getBigDecimal(Object object) {
-            return toBigDecimal(getDouble(object));
-        }
-
-        @Override
-        default void setBigDecimal(Object object, BigDecimal value) {
-            setDouble(object, Cast.toDouble(value));
-        }
-
-        @Override
         default void setByteValue(Object object, byte value) {
             setDouble(object, toDouble(value));
         }
@@ -2269,12 +1807,20 @@ public class PropertyAccessorFactory {
             setDouble(object, toDouble(value));
         }
 
-        @Override
-        default void setString(Object object, String value) {
-            setDouble(object, Cast.toDouble(value));
-        }
-
+        /**
+         * Sets the property value from a double.
+         *
+         * @param object the object to set the property on
+         * @param value the double value to set
+         */
         void setDouble(Object object, Double value);
+
+        /**
+         * Gets the property value as a double.
+         *
+         * @param object the object to get the property from
+         * @return the property value as a double
+         */
         Double getDouble(Object object);
     }
 

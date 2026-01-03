@@ -40,7 +40,7 @@ final class FieldWriterBigInteger<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T o) {
-        BigInteger value = propertyAccessor.getBigInteger(o);
+        BigInteger value = (BigInteger) propertyAccessor.getObject(o);
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {

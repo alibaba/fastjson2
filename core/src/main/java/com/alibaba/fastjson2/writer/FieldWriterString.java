@@ -47,7 +47,7 @@ final class FieldWriterString<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         String value;
         try {
-            value = propertyAccessor.getString(object);
+            value = (String) propertyAccessor.getObject(object);
         } catch (Exception error) {
             if ((jsonWriter.getFeatures(features) | JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0) {
                 return false;

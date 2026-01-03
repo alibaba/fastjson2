@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.internal;
 
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 /**
  * Interface for accessing object properties generically.
@@ -121,30 +119,6 @@ public interface PropertyAccessor {
      */
     boolean getBooleanValue(Object object);
 
-    /**
-     * Gets the property value as a String.
-     *
-     * @param object the object to get the property from
-     * @return the property value as String
-     */
-    String getString(Object object);
-
-    /**
-     * Gets the property value as a BigInteger.
-     *
-     * @param object the object to get the property from
-     * @return the property value as BigInteger
-     */
-    BigInteger getBigInteger(Object object);
-
-    /**
-     * Gets the property value as a BigDecimal.
-     *
-     * @param object the object to get the property from
-     * @return the property value as BigDecimal
-     */
-    BigDecimal getBigDecimal(Object object);
-
     // Setter methods
 
     /**
@@ -218,28 +192,4 @@ public interface PropertyAccessor {
      * @param value the boolean value to set
      */
     void setBooleanValue(Object object, boolean value);
-
-    /**
-     * Sets the property value from a String.
-     *
-     * @param object the object to set the property on
-     * @param value the String value to set
-     */
-    void setString(Object object, String value);
-
-    /**
-     * Sets the property value from a BigInteger.
-     *
-     * @param object the object to set the property on
-     * @param value the BigInteger value to set
-     */
-    void setBigInteger(Object object, BigInteger value);
-
-    /**
-     * Sets the property value from a BigDecimal.
-     *
-     * @param object the object to set the property on
-     * @param value the BigDecimal value to set
-     */
-    void setBigDecimal(Object object, BigDecimal value);
 }
