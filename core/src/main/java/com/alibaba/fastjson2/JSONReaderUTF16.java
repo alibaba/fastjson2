@@ -3191,6 +3191,10 @@ final class JSONReaderUTF16
     }
 
     private static int skipNumber(JSONReaderUTF16 jsonReader, char[] bytes, int offset, int end) {
+        return skipNumber(jsonReader, bytes, offset, end, false);
+    }
+
+    private static int skipNumber(JSONReaderUTF16 jsonReader, char[] bytes, int offset, int end, boolean allowColon) {
         int ch = jsonReader.ch;
         if (ch == '-' || ch == '+') {
             if (offset < end) {
@@ -3267,7 +3271,7 @@ final class JSONReaderUTF16
             if ((ch == '}' || ch == ']' || ch == EOI)) {
                 throw jsonReader.error(offset, ch);
             }
-        } else if (ch != '}' && ch != ']' && ch != EOI) {
+        } else if (ch != '}' && ch != ']' && ch != EOI && !(allowColon && ch == ':')) {
             throw jsonReader.error(offset, ch);
         }
 
@@ -3357,7 +3361,24 @@ final class JSONReaderUTF16
             if (i != 0 && !jsonReader.comma) {
                 throw jsonReader.valueError();
             }
-            offset = skipName(jsonReader, bytes, offset, end);
+
+            char ch = jsonReader.ch;
+            if ((ch >= '0' && ch <= '9') || ch == '-' || ch == '+') {
+                jsonReader.comma = false;
+                offset = skipNumber(jsonReader, bytes, offset, end, true);
+                ch = jsonReader.ch;
+                // skip colon
+                if (ch == ':') {
+                    ch = offset == end ? EOI : bytes[offset++];
+                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                        ch = offset == end ? EOI : bytes[offset++];
+                    }
+                    jsonReader.ch = ch;
+                }
+            } else {
+                offset = skipName(jsonReader, bytes, offset, end);
+            }
+
             offset = skipValue(jsonReader, bytes, offset, end);
         }
 
