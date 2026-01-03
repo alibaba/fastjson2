@@ -89,6 +89,9 @@ public class PropertyAccessorFactory {
         if (field.getType() == BigDecimal.class) {
             return new FieldAccessorReflectBigDecimal(field);
         }
+        if (field.getType() == Integer.class) {
+            return new FieldAccessorReflectInteger(field);
+        }
         return new FieldAccessorReflectObject(field);
     }
 
@@ -1358,6 +1361,81 @@ public class PropertyAccessorFactory {
         }
     }
 
+    protected interface PropertyAccessorInteger extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getInteger(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getInteger(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getInteger(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getInteger(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getInteger(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getInteger(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getInteger(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getInteger(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getInteger(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setInteger(object, Cast.toInteger(value));
+        }
+
+        @Override
+        default BigInteger getBigInteger(Object object) {
+            return toBigInteger(getInteger(object));
+        }
+
+        @Override
+        default void setBigInteger(Object object, BigInteger value) {
+            setInteger(object, Cast.toInteger(value));
+        }
+
+        @Override
+        default BigDecimal getBigDecimal(Object object) {
+            return toBigDecimal(getInteger(object));
+        }
+
+        @Override
+        default void setBigDecimal(Object object, BigDecimal value) {
+            setInteger(object, Cast.toInteger(value));
+        }
+
+        void setInteger(Object object, Integer value);
+        Integer getInteger(Object object);
+    }
+
     /**
      * Abstract base class for field-based property accessors that use
      * reflection to access field values. Provides common functionality
@@ -1738,6 +1816,32 @@ public class PropertyAccessorFactory {
         }
     }
 
+    static final class FieldAccessorReflectInteger
+            extends FieldAccessorReflect
+            implements PropertyAccessorInteger {
+        public FieldAccessorReflectInteger(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setInteger(Object object, Integer value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Integer getInteger(Object object) {
+            try {
+                return (Integer) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
     /**
      * Creates a property accessor for the specified method.
      * This method determines if the method is a getter (no parameters) or setter (one parameter)
@@ -1856,6 +1960,9 @@ public class PropertyAccessorFactory {
         }
         if (propertyClass == BigDecimal.class) {
             return new MethodAccessorBigDecimal(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Integer.class) {
+            return new MethodAccessorInteger(name, propertyType, propertyClass, getter, setter);
         }
 
         return new MethodAccessorObject(name, propertyType, propertyClass, getter, setter);
@@ -1999,6 +2106,9 @@ public class PropertyAccessorFactory {
         if (propertyClass == BigDecimal.class) {
             return new FunctionAccessorBigDecimal<T>(name, (Function<T, BigDecimal>) getterFunc, (BiConsumer<T, BigDecimal>) setterFunc);
         }
+        if (propertyClass == Integer.class) {
+            return new FunctionAccessorInteger<T>(name, (Function<T, Integer>) getterFunc, (BiConsumer<T, Integer>) setterFunc);
+        }
         return new FunctionAccessorObject<T, V>(name, propertyType, propertyClass, getterFunc, setterFunc);
     }
 
@@ -2114,6 +2224,36 @@ public class PropertyAccessorFactory {
 
         @Override
         public void setIntValue(Object object, int value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
+     * Method accessor implementation for Integer-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Integer properties via method calls.
+     */
+    static final class MethodAccessorInteger
+            extends MethodAccessor implements PropertyAccessorInteger
+    {
+        public MethodAccessorInteger(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Integer getInteger(Object object) {
+            try {
+                return (Integer) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setInteger(Object object, Integer value) {
             try {
                 setter.invoke(object, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2579,6 +2719,30 @@ public class PropertyAccessorFactory {
             } catch (Exception e) {
                 throw errorForSet(e);
             }
+        }
+    }
+
+    /**
+     * Function accessor implementation for Integer-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Integer properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorInteger<T> extends FunctionAccessor<T> implements PropertyAccessorInteger {
+        private final Function<T, Integer> getterFunc;
+        private final BiConsumer<T, Integer> setterFunc;
+        public FunctionAccessorInteger(String name, Function<T, Integer> getterFunc, BiConsumer<T, Integer> setterFunc) {
+            super(name, Integer.class, Integer.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Integer getInteger(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setInteger(Object object, Integer value) {
+            setterFunc.accept((T) object, value);
         }
     }
 

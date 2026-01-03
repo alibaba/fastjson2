@@ -38,45 +38,49 @@ public class PropertyAccessorFactoryVarHandle
     protected PropertyAccessor createInternal(Field field) {
         MethodHandles.Lookup lookup = lookup(field.getDeclaringClass());
         VarHandle varHandle;
+        Class<?> fieldType = field.getType();
         try {
-            varHandle = lookup.findVarHandle(field.getDeclaringClass(), field.getName(), field.getType());
+            varHandle = lookup.findVarHandle(field.getDeclaringClass(), field.getName(), fieldType);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             // ignore
             return super.createInternal(field);
         }
 
-        if (field.getType() == byte.class) {
+        if (fieldType == byte.class) {
             return new FieldAccessorVarHandleByteValue(field, varHandle);
         }
-        if (field.getType() == short.class) {
+        if (fieldType == short.class) {
             return new FieldAccessorVarHandleShortValue(field, varHandle);
         }
-        if (field.getType() == int.class) {
+        if (fieldType == int.class) {
             return new FieldAccessorVarHandleIntValue(field, varHandle);
         }
-        if (field.getType() == long.class) {
+        if (fieldType == long.class) {
             return new FieldAccessorVarHandleLongValue(field, varHandle);
         }
-        if (field.getType() == float.class) {
+        if (fieldType == float.class) {
             return new FieldAccessorVarHandleFloatValue(field, varHandle);
         }
-        if (field.getType() == double.class) {
+        if (fieldType == double.class) {
             return new FieldAccessorVarHandleDoubleValue(field, varHandle);
         }
-        if (field.getType() == boolean.class) {
+        if (fieldType == boolean.class) {
             return new FieldAccessorVarHandleBooleanValue(field, varHandle);
         }
-        if (field.getType() == char.class) {
+        if (fieldType == char.class) {
             return new FieldAccessorVarHandleCharValue(field, varHandle);
         }
-        if (field.getType() == String.class) {
+        if (fieldType == String.class) {
             return new FieldAccessorVarHandleString(field, varHandle);
         }
-        if (field.getType() == BigInteger.class) {
+        if (fieldType == BigInteger.class) {
             return new FieldAccessorVarHandleBigInteger(field, varHandle);
         }
-        if (field.getType() == BigDecimal.class) {
+        if (fieldType == BigDecimal.class) {
             return new FieldAccessorVarHandleBigDecimal(field, varHandle);
+        }
+        if (fieldType == Integer.class) {
+            return new FieldAccessorVarHandleInteger(field, varHandle);
         }
         return new FieldAccessorVarHandleObject(field, varHandle);
     }
@@ -203,6 +207,27 @@ public class PropertyAccessorFactoryVarHandle
         }
         @Override
         public void setIntValue(Object object, int value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Integer fields using VarHandle.
+     * Provides efficient Integer field access operations.
+     */
+    static final class FieldAccessorVarHandleInteger
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorInteger
+    {
+        public FieldAccessorVarHandleInteger(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Integer getInteger(Object object) {
+            return (Integer) varHandle.get(object);
+        }
+        @Override
+        public void setInteger(Object object, Integer value) {
             varHandle.set(object, value);
         }
     }

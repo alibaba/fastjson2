@@ -36,38 +36,42 @@ public final class PropertyAccessorFactoryUnsafe
      * @return a PropertyAccessor instance for the specified field using Unsafe operations
      */
     protected PropertyAccessor createInternal(Field field) {
-        if (field.getType() == byte.class) {
+        Class<?> fieldType = field.getType();
+        if (fieldType == byte.class) {
             return new FieldAccessorUnsafeByteValue(field);
         }
-        if (field.getType() == short.class) {
+        if (fieldType == short.class) {
             return new FieldAccessorUnsafeShortValue(field);
         }
-        if (field.getType() == int.class) {
+        if (fieldType == int.class) {
             return new FieldAccessorUnsafeIntValue(field);
         }
-        if (field.getType() == long.class) {
+        if (fieldType == long.class) {
             return new FieldAccessorUnsafeLongValue(field);
         }
-        if (field.getType() == float.class) {
+        if (fieldType == float.class) {
             return new FieldAccessorUnsafeFloatValue(field);
         }
-        if (field.getType() == double.class) {
+        if (fieldType == double.class) {
             return new FieldAccessorUnsafeDoubleValue(field);
         }
-        if (field.getType() == boolean.class) {
+        if (fieldType == boolean.class) {
             return new FieldAccessorUnsafeBooleanValue(field);
         }
-        if (field.getType() == char.class) {
+        if (fieldType == char.class) {
             return new FieldAccessorUnsafeCharValue(field);
         }
-        if (field.getType() == String.class) {
+        if (fieldType == String.class) {
             return new FieldAccessorUnsafeString(field);
         }
-        if (field.getType() == BigInteger.class) {
+        if (fieldType == BigInteger.class) {
             return new FieldAccessorUnsafeBigInteger(field);
         }
-        if (field.getType() == BigDecimal.class) {
+        if (fieldType == BigDecimal.class) {
             return new FieldAccessorUnsafeBigDecimal(field);
+        }
+        if (fieldType == Integer.class) {
+            return new FieldAccessorUnsafeInteger(field);
         }
         return new FieldAccessorUnsafeObject(field);
     }
@@ -170,6 +174,27 @@ public final class PropertyAccessorFactoryUnsafe
         @Override
         public void setIntValue(Object object, int value) {
             UNSAFE.putInt(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Integer-typed properties.
+     * Provides efficient getter and setter operations for Integer fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeInteger
+            extends FieldAccessorUnsafe implements PropertyAccessorInteger {
+        public FieldAccessorUnsafeInteger(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Integer getInteger(Object object) {
+            return (Integer) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setInteger(Object object, Integer value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
         }
     }
 
