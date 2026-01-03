@@ -1,13 +1,11 @@
 package com.alibaba.fastjson2.internal;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.function.*;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
-import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
@@ -39,28 +37,28 @@ public final class PropertyAccessorFactoryUnsafe
      */
     protected PropertyAccessor createInternal(Field field) {
         if (field.getType() == byte.class) {
-            return new FieldAccessorUnsafeByte(field);
+            return new FieldAccessorUnsafeByteValue(field);
         }
         if (field.getType() == short.class) {
-            return new FieldAccessorUnsafeShort(field);
+            return new FieldAccessorUnsafeShortValue(field);
         }
         if (field.getType() == int.class) {
-            return new FieldAccessorUnsafeInt(field);
+            return new FieldAccessorUnsafeIntValue(field);
         }
         if (field.getType() == long.class) {
-            return new FieldAccessorUnsafeLong(field);
+            return new FieldAccessorUnsafeLongValue(field);
         }
         if (field.getType() == float.class) {
-            return new FieldAccessorUnsafeFloat(field);
+            return new FieldAccessorUnsafeFloatValue(field);
         }
         if (field.getType() == double.class) {
-            return new FieldAccessorUnsafeDouble(field);
+            return new FieldAccessorUnsafeDoubleValue(field);
         }
         if (field.getType() == boolean.class) {
-            return new FieldAccessorUnsafeBoolean(field);
+            return new FieldAccessorUnsafeBooleanValue(field);
         }
         if (field.getType() == char.class) {
-            return new FieldAccessorUnsafeChar(field);
+            return new FieldAccessorUnsafeCharValue(field);
         }
         if (field.getType() == String.class) {
             return new FieldAccessorUnsafeString(field);
@@ -91,8 +89,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for boolean-typed properties.
      * Provides efficient getter and setter operations for boolean fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeBoolean extends FieldAccessorUnsafe implements PropertyAccessorBoolean {
-        public FieldAccessorUnsafeBoolean(Field field) {
+    static final class FieldAccessorUnsafeBooleanValue
+            extends FieldAccessorUnsafe implements PropertyAccessorBooleanValue
+    {
+        public FieldAccessorUnsafeBooleanValue(Field field) {
             super(field);
         }
 
@@ -111,8 +111,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for byte-typed properties.
      * Provides efficient getter and setter operations for byte fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeByte extends FieldAccessorUnsafe implements PropertyAccessorByte {
-        public FieldAccessorUnsafeByte(Field field) {
+    static final class FieldAccessorUnsafeByteValue
+            extends FieldAccessorUnsafe implements PropertyAccessorByteValue
+    {
+        public FieldAccessorUnsafeByteValue(Field field) {
             super(field);
         }
 
@@ -131,8 +133,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for short-typed properties.
      * Provides efficient getter and setter operations for short fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeShort extends FieldAccessorUnsafe implements PropertyAccessorShort {
-        public FieldAccessorUnsafeShort(Field field) {
+    static final class FieldAccessorUnsafeShortValue
+            extends FieldAccessorUnsafe implements PropertyAccessorShortValue
+    {
+        public FieldAccessorUnsafeShortValue(Field field) {
             super(field);
         }
 
@@ -151,8 +155,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for int-typed properties.
      * Provides efficient getter and setter operations for int fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeInt extends FieldAccessorUnsafe implements PropertyAccessorInt {
-        public FieldAccessorUnsafeInt(Field field) {
+    static final class FieldAccessorUnsafeIntValue
+            extends FieldAccessorUnsafe implements PropertyAccessorIntValue
+    {
+        public FieldAccessorUnsafeIntValue(Field field) {
             super(field);
         }
 
@@ -171,8 +177,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for long-typed properties.
      * Provides efficient getter and setter operations for long fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeLong extends FieldAccessorUnsafe implements PropertyAccessorLong {
-        public FieldAccessorUnsafeLong(Field field) {
+    static final class FieldAccessorUnsafeLongValue
+            extends FieldAccessorUnsafe implements PropertyAccessorLongValue
+    {
+        public FieldAccessorUnsafeLongValue(Field field) {
             super(field);
         }
 
@@ -191,8 +199,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for float-typed properties.
      * Provides efficient getter and setter operations for float fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeFloat extends FieldAccessorUnsafe implements PropertyAccessorFloat {
-        public FieldAccessorUnsafeFloat(Field field) {
+    static final class FieldAccessorUnsafeFloatValue
+            extends FieldAccessorUnsafe implements PropertyAccessorFloatValue
+    {
+        public FieldAccessorUnsafeFloatValue(Field field) {
             super(field);
         }
 
@@ -211,8 +221,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for double-typed properties.
      * Provides efficient getter and setter operations for double fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeDouble extends FieldAccessorUnsafe implements PropertyAccessorDouble {
-        public FieldAccessorUnsafeDouble(Field field) {
+    static final class FieldAccessorUnsafeDoubleValue
+            extends FieldAccessorUnsafe implements PropertyAccessorDoubleValue
+    {
+        public FieldAccessorUnsafeDoubleValue(Field field) {
             super(field);
         }
 
@@ -231,8 +243,10 @@ public final class PropertyAccessorFactoryUnsafe
      * Unsafe-based field accessor implementation for char-typed properties.
      * Provides efficient getter and setter operations for char fields using Unsafe operations.
      */
-    static final class FieldAccessorUnsafeChar extends FieldAccessorUnsafe implements PropertyAccessorChar {
-        public FieldAccessorUnsafeChar(Field field) {
+    static final class FieldAccessorUnsafeCharValue
+            extends FieldAccessorUnsafe implements PropertyAccessorCharValue
+    {
+        public FieldAccessorUnsafeCharValue(Field field) {
             super(field);
         }
 

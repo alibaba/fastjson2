@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.internal;
 
-import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.invoke.MethodHandles;
@@ -8,7 +7,6 @@ import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.function.*;
 
 /**
  * Property accessor factory that uses VarHandle for field access.
@@ -48,28 +46,28 @@ public class PropertyAccessorFactoryVarHandle
         }
 
         if (field.getType() == byte.class) {
-            return new FieldAccessorVarHandleByte(field, varHandle);
+            return new FieldAccessorVarHandleByteValue(field, varHandle);
         }
         if (field.getType() == short.class) {
-            return new FieldAccessorVarHandleShort(field, varHandle);
+            return new FieldAccessorVarHandleShortValue(field, varHandle);
         }
         if (field.getType() == int.class) {
-            return new FieldAccessorVarHandleInt(field, varHandle);
+            return new FieldAccessorVarHandleIntValue(field, varHandle);
         }
         if (field.getType() == long.class) {
-            return new FieldAccessorVarHandleLong(field, varHandle);
+            return new FieldAccessorVarHandleLongValue(field, varHandle);
         }
         if (field.getType() == float.class) {
-            return new FieldAccessorVarHandleFloat(field, varHandle);
+            return new FieldAccessorVarHandleFloatValue(field, varHandle);
         }
         if (field.getType() == double.class) {
-            return new FieldAccessorVarHandleDouble(field, varHandle);
+            return new FieldAccessorVarHandleDoubleValue(field, varHandle);
         }
         if (field.getType() == boolean.class) {
-            return new FieldAccessorVarHandleBoolean(field, varHandle);
+            return new FieldAccessorVarHandleBooleanValue(field, varHandle);
         }
         if (field.getType() == char.class) {
-            return new FieldAccessorVarHandleChar(field, varHandle);
+            return new FieldAccessorVarHandleCharValue(field, varHandle);
         }
         if (field.getType() == String.class) {
             return new FieldAccessorVarHandleString(field, varHandle);
@@ -106,9 +104,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for boolean fields using VarHandle.
      * Provides efficient boolean field access operations.
      */
-    static final class FieldAccessorVarHandleBoolean extends FieldAccessorVarHandle
-            implements PropertyAccessorBoolean {
-        public FieldAccessorVarHandleBoolean(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleBooleanValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorBooleanValue
+    {
+        public FieldAccessorVarHandleBooleanValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
 
@@ -127,9 +127,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for byte fields using VarHandle.
      * Provides efficient byte field access operations.
      */
-    static final class FieldAccessorVarHandleByte extends FieldAccessorVarHandle
-            implements PropertyAccessorByte {
-        public FieldAccessorVarHandleByte(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleByteValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorByteValue
+    {
+        public FieldAccessorVarHandleByteValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
         @Override
@@ -146,9 +148,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for char fields using VarHandle.
      * Provides efficient char field access operations.
      */
-    static final class FieldAccessorVarHandleChar extends FieldAccessorVarHandle
-            implements PropertyAccessorChar {
-        public FieldAccessorVarHandleChar(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleCharValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorCharValue
+    {
+        public FieldAccessorVarHandleCharValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
         @Override
@@ -165,9 +169,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for short fields using VarHandle.
      * Provides efficient short field access operations.
      */
-    static final class FieldAccessorVarHandleShort extends FieldAccessorVarHandle
-            implements PropertyAccessorShort {
-        public FieldAccessorVarHandleShort(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleShortValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorShortValue
+    {
+        public FieldAccessorVarHandleShortValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
         @Override
@@ -184,9 +190,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for int fields using VarHandle.
      * Provides efficient int field access operations.
      */
-    static final class FieldAccessorVarHandleInt extends FieldAccessorVarHandle
-            implements PropertyAccessorInt {
-        public FieldAccessorVarHandleInt(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleIntValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorIntValue
+    {
+        public FieldAccessorVarHandleIntValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
         @Override
@@ -203,9 +211,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for long fields using VarHandle.
      * Provides efficient long field access operations.
      */
-    static final class FieldAccessorVarHandleLong extends FieldAccessorVarHandle
-            implements PropertyAccessorLong {
-        public FieldAccessorVarHandleLong(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleLongValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorLongValue
+    {
+        public FieldAccessorVarHandleLongValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
         @Override
@@ -222,9 +232,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for float fields using VarHandle.
      * Provides efficient float field access operations.
      */
-    static final class FieldAccessorVarHandleFloat extends FieldAccessorVarHandle
-            implements PropertyAccessorFloat {
-        public FieldAccessorVarHandleFloat(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleFloatValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorFloatValue
+    {
+        public FieldAccessorVarHandleFloatValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
         @Override
@@ -241,9 +253,11 @@ public class PropertyAccessorFactoryVarHandle
      * Field accessor implementation for double fields using VarHandle.
      * Provides efficient double field access operations.
      */
-    static final class FieldAccessorVarHandleDouble extends FieldAccessorVarHandle
-            implements PropertyAccessorDouble {
-        public FieldAccessorVarHandleDouble(Field field, VarHandle varHandle) {
+    static final class FieldAccessorVarHandleDoubleValue
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorDoubleValue
+    {
+        public FieldAccessorVarHandleDoubleValue(Field field, VarHandle varHandle) {
             super(field, varHandle);
         }
         @Override

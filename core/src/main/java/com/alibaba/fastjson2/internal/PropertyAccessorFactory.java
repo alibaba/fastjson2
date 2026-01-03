@@ -57,28 +57,28 @@ public class PropertyAccessorFactory {
      */
     protected PropertyAccessor createInternal(Field field) {
         if (field.getType() == byte.class) {
-            return new FieldAccessorReflectByte(field);
+            return new FieldAccessorReflectByteValue(field);
         }
         if (field.getType() == short.class) {
-            return new FieldAccessorReflectShort(field);
+            return new FieldAccessorReflectShortValue(field);
         }
         if (field.getType() == int.class) {
-            return new FieldAccessorReflectInt(field);
+            return new FieldAccessorReflectIntValue(field);
         }
         if (field.getType() == long.class) {
-            return new FieldAccessorReflectLong(field);
+            return new FieldAccessorReflectLongValue(field);
         }
         if (field.getType() == float.class) {
-            return new FieldAccessorReflectFloat(field);
+            return new FieldAccessorReflectFloatValue(field);
         }
         if (field.getType() == double.class) {
-            return new FieldAccessorReflectDouble(field);
+            return new FieldAccessorReflectDoubleValue(field);
         }
         if (field.getType() == boolean.class) {
-            return new FieldAccessorReflectBoolean(field);
+            return new FieldAccessorReflectBooleanValue(field);
         }
         if (field.getType() == char.class) {
-            return new FieldAccessorReflectChar(field);
+            return new FieldAccessorReflectCharValue(field);
         }
         if (field.getType() == String.class) {
             return new FieldAccessorReflectString(field);
@@ -97,7 +97,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set boolean values, with conversions to
      * other types as needed.
      */
-    protected interface PropertyAccessorBoolean extends PropertyAccessor {
+    protected interface PropertyAccessorBooleanValue
+            extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
             return getBooleanValue(object);
@@ -214,7 +215,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set byte values, with conversions to
      * other types as needed.
      */
-    protected interface PropertyAccessorByte extends PropertyAccessor {
+    protected interface PropertyAccessorByteValue
+            extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
             return getByteValue(object);
@@ -331,7 +333,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set short values, with conversions to
      * other types as needed.
      */
-    protected interface PropertyAccessorShort extends PropertyAccessor {
+    protected interface PropertyAccessorShortValue
+            extends PropertyAccessor {
         default Object getObject(Object object) {
             return getShortValue(object);
         }
@@ -432,7 +435,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set int values, with conversions to
      * other types as needed.
      */
-    protected interface PropertyAccessorInt extends PropertyAccessor {
+    protected interface PropertyAccessorIntValue
+            extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
             return getIntValue(object);
@@ -549,7 +553,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set long values, with conversions to
      * other types as needed.
      */
-    protected interface PropertyAccessorLong extends PropertyAccessor {
+    protected interface PropertyAccessorLongValue
+            extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
             return getLongValue(object);
@@ -666,7 +671,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set float values, with conversions to
      * other types as needed.
      */
-    interface PropertyAccessorFloat extends PropertyAccessor {
+    interface PropertyAccessorFloatValue
+            extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
             return getFloatValue(object);
@@ -783,7 +789,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set double values, with conversions to
      * other types as needed.
      */
-    protected interface PropertyAccessorDouble extends PropertyAccessor {
+    protected interface PropertyAccessorDoubleValue
+            extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
             return getDoubleValue(object);
@@ -900,7 +907,8 @@ public class PropertyAccessorFactory {
      * Provides methods to get and set char values, with conversions to
      * other types as needed.
      */
-    protected interface PropertyAccessorChar extends PropertyAccessor {
+    protected interface PropertyAccessorCharValue
+            extends PropertyAccessor {
         @Override
         default Object getObject(Object object) {
             return getCharValue(object);
@@ -1382,8 +1390,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for boolean-typed properties using reflection.
      * Provides efficient getter and setter operations for boolean fields via reflection.
      */
-    static final class FieldAccessorReflectBoolean extends FieldAccessorReflect implements PropertyAccessorBoolean {
-        public FieldAccessorReflectBoolean(Field field) {
+    static final class FieldAccessorReflectBooleanValue
+            extends FieldAccessorReflect implements PropertyAccessorBooleanValue
+    {
+        public FieldAccessorReflectBooleanValue(Field field) {
             super(field);
         }
 
@@ -1410,8 +1420,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for byte-typed properties using reflection.
      * Provides efficient getter and setter operations for byte fields via reflection.
      */
-    static final class FieldAccessorReflectByte extends FieldAccessorReflect implements PropertyAccessorByte {
-        public FieldAccessorReflectByte(Field field) {
+    static final class FieldAccessorReflectByteValue
+            extends FieldAccessorReflect implements PropertyAccessorByteValue
+    {
+        public FieldAccessorReflectByteValue(Field field) {
             super(field);
         }
 
@@ -1438,8 +1450,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for short-typed properties using reflection.
      * Provides efficient getter and setter operations for short fields via reflection.
      */
-    static final class FieldAccessorReflectShort extends FieldAccessorReflect implements PropertyAccessorShort {
-        public FieldAccessorReflectShort(Field field) {
+    static final class FieldAccessorReflectShortValue
+            extends FieldAccessorReflect implements PropertyAccessorShortValue
+    {
+        public FieldAccessorReflectShortValue(Field field) {
             super(field);
         }
 
@@ -1466,8 +1480,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for int-typed properties using reflection.
      * Provides efficient getter and setter operations for int fields via reflection.
      */
-    static final class FieldAccessorReflectInt extends FieldAccessorReflect implements PropertyAccessorInt {
-        public FieldAccessorReflectInt(Field field) {
+    static final class FieldAccessorReflectIntValue
+            extends FieldAccessorReflect implements PropertyAccessorIntValue
+    {
+        public FieldAccessorReflectIntValue(Field field) {
             super(field);
         }
 
@@ -1494,8 +1510,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for long-typed properties using reflection.
      * Provides efficient getter and setter operations for long fields via reflection.
      */
-    static final class FieldAccessorReflectLong extends FieldAccessorReflect implements PropertyAccessorLong {
-        public FieldAccessorReflectLong(Field field) {
+    static final class FieldAccessorReflectLongValue
+            extends FieldAccessorReflect implements PropertyAccessorLongValue
+    {
+        public FieldAccessorReflectLongValue(Field field) {
             super(field);
         }
 
@@ -1522,8 +1540,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for float-typed properties using reflection.
      * Provides efficient getter and setter operations for float fields via reflection.
      */
-    static final class FieldAccessorReflectFloat extends FieldAccessorReflect implements PropertyAccessorFloat {
-        public FieldAccessorReflectFloat(Field field) {
+    static final class FieldAccessorReflectFloatValue
+            extends FieldAccessorReflect implements PropertyAccessorFloatValue
+    {
+        public FieldAccessorReflectFloatValue(Field field) {
             super(field);
         }
 
@@ -1550,8 +1570,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for double-typed properties using reflection.
      * Provides efficient getter and setter operations for double fields via reflection.
      */
-    static final class FieldAccessorReflectDouble extends FieldAccessorReflect implements PropertyAccessorDouble {
-        public FieldAccessorReflectDouble(Field field) {
+    static final class FieldAccessorReflectDoubleValue
+            extends FieldAccessorReflect implements PropertyAccessorDoubleValue
+    {
+        public FieldAccessorReflectDoubleValue(Field field) {
             super(field);
         }
 
@@ -1578,8 +1600,10 @@ public class PropertyAccessorFactory {
      * Field accessor implementation for char-typed properties using reflection.
      * Provides efficient getter and setter operations for char fields via reflection.
      */
-    static final class FieldAccessorReflectChar extends FieldAccessorReflect implements PropertyAccessorChar {
-        public FieldAccessorReflectChar(Field field) {
+    static final class FieldAccessorReflectCharValue
+            extends FieldAccessorReflect implements PropertyAccessorCharValue
+    {
+        public FieldAccessorReflectCharValue(Field field) {
             super(field);
         }
 
@@ -1801,28 +1825,28 @@ public class PropertyAccessorFactory {
         }
 
         if (propertyClass == byte.class) {
-            return new MethodAccessorByte(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorByteValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == short.class) {
-            return new MethodAccessorShort(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorShortValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == int.class) {
-            return new MethodAccessorInt(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorIntValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == long.class) {
-            return new MethodAccessorLong(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorLongValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == float.class) {
-            return new MethodAccessorFloat(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorFloatValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == double.class) {
-            return new MethodAccessorDouble(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorDoubleValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == char.class) {
-            return new MethodAccessorChar(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorCharValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == boolean.class) {
-            return new MethodAccessorBoolean(name, propertyType, propertyClass, getter, setter);
+            return new MethodAccessorBooleanValue(name, propertyType, propertyClass, getter, setter);
         }
         if (propertyClass == String.class) {
             return new MethodAccessorString(name, propertyType, propertyClass, getter, setter);
@@ -1848,7 +1872,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, ToByteFunction<T> getterFunc, ObjByteConsumer<T> setterFunc) {
-        return new FunctionAccessorByte(name, getterFunc, setterFunc);
+        return new FunctionAccessorByteValue(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1862,7 +1886,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, ToShortFunction<T> getterFunc, ObjShortConsumer<T> setterFunc) {
-        return new FunctionAccessorShort(name, getterFunc, setterFunc);
+        return new FunctionAccessorShortValue(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1876,7 +1900,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, ToIntFunction<T> getterFunc, ObjIntConsumer<T> setterFunc) {
-        return new FunctionAccessorInt(name, getterFunc, setterFunc);
+        return new FunctionAccessorIntValue(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1890,7 +1914,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, ToLongFunction<T> getterFunc, ObjLongConsumer<T> setterFunc) {
-        return new FunctionAccessorLong(name, getterFunc, setterFunc);
+        return new FunctionAccessorLongValue(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1904,7 +1928,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, ToFloatFunction<T> getterFunc, ObjFloatConsumer<T> setterFunc) {
-        return new FunctionAccessorFloat(name, getterFunc, setterFunc);
+        return new FunctionAccessorFloatValue(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1918,7 +1942,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, ToDoubleFunction<T> getterFunc, ObjDoubleConsumer<T> setterFunc) {
-        return new FunctionAccessorDouble<>(name, getterFunc, setterFunc);
+        return new FunctionAccessorDoubleValue<>(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1932,7 +1956,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, Predicate<T> getterFunc, ObjBoolConsumer<T> setterFunc) {
-        return new FunctionAccessorBoolean<>(name, getterFunc, setterFunc);
+        return new FunctionAccessorBooleanValue<>(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1946,7 +1970,7 @@ public class PropertyAccessorFactory {
      * @return a PropertyAccessor instance using functional interfaces
      */
     public <T> PropertyAccessor create(String name, ToCharFunction<T> getterFunc, ObjCharConsumer<T> setterFunc) {
-        return new FunctionAccessorChar(name, getterFunc, setterFunc);
+        return new FunctionAccessorCharValue(name, getterFunc, setterFunc);
     }
 
     /**
@@ -1982,8 +2006,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for char-typed properties using method invocation.
      * Provides efficient getter and setter operations for char properties via method calls.
      */
-    static final class MethodAccessorChar extends MethodAccessor implements PropertyAccessorChar {
-        public MethodAccessorChar(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorCharValue
+            extends MethodAccessor implements PropertyAccessorCharValue
+    {
+        public MethodAccessorCharValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2010,8 +2036,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for byte-typed properties using method invocation.
      * Provides efficient getter and setter operations for byte properties via method calls.
      */
-    static final class MethodAccessorByte extends MethodAccessor implements PropertyAccessorByte {
-        public MethodAccessorByte(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorByteValue
+            extends MethodAccessor implements PropertyAccessorByteValue
+    {
+        public MethodAccessorByteValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2038,8 +2066,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for short-typed properties using method invocation.
      * Provides efficient getter and setter operations for short properties via method calls.
      */
-    static final class MethodAccessorShort extends MethodAccessor implements PropertyAccessorShort {
-        public MethodAccessorShort(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorShortValue
+            extends MethodAccessor implements PropertyAccessorShortValue
+    {
+        public MethodAccessorShortValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2066,8 +2096,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for int-typed properties using method invocation.
      * Provides efficient getter and setter operations for int properties via method calls.
      */
-    static final class MethodAccessorInt extends MethodAccessor implements PropertyAccessorInt {
-        public MethodAccessorInt(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorIntValue
+            extends MethodAccessor implements PropertyAccessorIntValue
+    {
+        public MethodAccessorIntValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2094,8 +2126,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for long-typed properties using method invocation.
      * Provides efficient getter and setter operations for long properties via method calls.
      */
-    static final class MethodAccessorLong extends MethodAccessor implements PropertyAccessorLong {
-        public MethodAccessorLong(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorLongValue
+            extends MethodAccessor implements PropertyAccessorLongValue
+    {
+        public MethodAccessorLongValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2122,8 +2156,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for float-typed properties using method invocation.
      * Provides efficient getter and setter operations for float properties via method calls.
      */
-    static final class MethodAccessorFloat extends MethodAccessor implements PropertyAccessorFloat {
-        public MethodAccessorFloat(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorFloatValue
+            extends MethodAccessor implements PropertyAccessorFloatValue
+    {
+        public MethodAccessorFloatValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2150,8 +2186,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for double-typed properties using method invocation.
      * Provides efficient getter and setter operations for double properties via method calls.
      */
-    static final class MethodAccessorDouble extends MethodAccessor implements PropertyAccessorDouble {
-        public MethodAccessorDouble(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorDoubleValue
+            extends MethodAccessor implements PropertyAccessorDoubleValue
+    {
+        public MethodAccessorDoubleValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2178,8 +2216,10 @@ public class PropertyAccessorFactory {
      * Method accessor implementation for boolean-typed properties using method invocation.
      * Provides efficient getter and setter operations for boolean properties via method calls.
      */
-    static final class MethodAccessorBoolean extends MethodAccessor implements PropertyAccessorBoolean {
-        public MethodAccessorBoolean(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+    static final class MethodAccessorBooleanValue
+            extends MethodAccessor implements PropertyAccessorBooleanValue
+    {
+        public MethodAccessorBooleanValue(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
             super(name, propertyType, propertyClass, getter, setter);
         }
 
@@ -2314,11 +2354,12 @@ public class PropertyAccessorFactory {
      *
      * @param <T> the type of the object containing the property
      */
-    static final class FunctionAccessorByte<T> extends FunctionAccessor<T> implements PropertyAccessorByte {
+    static final class FunctionAccessorByteValue<T> extends FunctionAccessor<T> implements PropertyAccessorByteValue
+    {
         private final ToByteFunction<T> getterFunc;
         private final ObjByteConsumer<T> setterFunc;
 
-        public FunctionAccessorByte(String name, ToByteFunction<T> getterFunc, ObjByteConsumer<T> setterFunc) {
+        public FunctionAccessorByteValue(String name, ToByteFunction<T> getterFunc, ObjByteConsumer<T> setterFunc) {
             super(name, byte.class, byte.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -2341,11 +2382,12 @@ public class PropertyAccessorFactory {
      *
      * @param <T> the type of the object containing the property
      */
-    static final class FunctionAccessorShort<T> extends FunctionAccessor<T> implements PropertyAccessorShort {
+    static final class FunctionAccessorShortValue<T> extends FunctionAccessor<T> implements PropertyAccessorShortValue
+    {
         private final ToShortFunction<T> getterFunc;
         private final ObjShortConsumer<T> setterFunc;
 
-        public FunctionAccessorShort(String name, ToShortFunction<T> getterFunc, ObjShortConsumer<T> setterFunc) {
+        public FunctionAccessorShortValue(String name, ToShortFunction<T> getterFunc, ObjShortConsumer<T> setterFunc) {
             super(name, short.class, short.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -2368,11 +2410,12 @@ public class PropertyAccessorFactory {
      *
      * @param <T> the type of the object containing the property
      */
-    static final class FunctionAccessorInt<T> extends FunctionAccessor<T> implements PropertyAccessorInt {
+    static final class FunctionAccessorIntValue<T> extends FunctionAccessor<T> implements PropertyAccessorIntValue
+    {
         private final ToIntFunction<T> getterFunc;
         private final ObjIntConsumer<T> setterFunc;
 
-        public FunctionAccessorInt(String name, ToIntFunction<T> getterFunc, ObjIntConsumer<T> setterFunc) {
+        public FunctionAccessorIntValue(String name, ToIntFunction<T> getterFunc, ObjIntConsumer<T> setterFunc) {
             super(name, int.class, int.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -2395,11 +2438,12 @@ public class PropertyAccessorFactory {
      *
      * @param <T> the type of the object containing the property
      */
-    static final class FunctionAccessorLong<T> extends FunctionAccessor<T> implements PropertyAccessorLong {
+    static final class FunctionAccessorLongValue<T> extends FunctionAccessor<T> implements PropertyAccessorLongValue
+    {
         private final ToLongFunction<T> getterFunc;
         private final ObjLongConsumer<T> setterFunc;
 
-        public FunctionAccessorLong(String name, ToLongFunction<T> getterFunc, ObjLongConsumer<T> setterFunc) {
+        public FunctionAccessorLongValue(String name, ToLongFunction<T> getterFunc, ObjLongConsumer<T> setterFunc) {
             super(name, long.class, long.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -2422,11 +2466,12 @@ public class PropertyAccessorFactory {
      *
      * @param <T> the type of the object containing the property
      */
-    static final class FunctionAccessorFloat<T> extends FunctionAccessor<T> implements PropertyAccessorFloat {
+    static final class FunctionAccessorFloatValue<T> extends FunctionAccessor<T> implements PropertyAccessorFloatValue
+    {
         private final ToFloatFunction<T> getterFunc;
         private final ObjFloatConsumer<T> setterFunc;
 
-        public FunctionAccessorFloat(String name, ToFloatFunction<T> getterFunc, ObjFloatConsumer<T> setterFunc) {
+        public FunctionAccessorFloatValue(String name, ToFloatFunction<T> getterFunc, ObjFloatConsumer<T> setterFunc) {
             super(name, float.class, float.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -2450,11 +2495,12 @@ public class PropertyAccessorFactory {
      * @param <T> the type of the object containing the property
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    static final class FunctionAccessorDouble<T> extends FunctionAccessor implements PropertyAccessorDouble {
+    static final class FunctionAccessorDoubleValue<T> extends FunctionAccessor implements PropertyAccessorDoubleValue
+    {
         private final ToDoubleFunction<T> getterFunc;
         private final ObjDoubleConsumer<T> setterFunc;
 
-        public FunctionAccessorDouble(String name, ToDoubleFunction<T> getterFunc, ObjDoubleConsumer<T> setterFunc) {
+        public FunctionAccessorDoubleValue(String name, ToDoubleFunction<T> getterFunc, ObjDoubleConsumer<T> setterFunc) {
             super(name, double.class, double.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -2478,11 +2524,12 @@ public class PropertyAccessorFactory {
      * @param <T> the type of the object containing the property
      */
     @SuppressWarnings("unchecked")
-    static final class FunctionAccessorBoolean<T> extends FunctionAccessor<T> implements PropertyAccessorBoolean {
+    static final class FunctionAccessorBooleanValue<T> extends FunctionAccessor<T> implements PropertyAccessorBooleanValue
+    {
         private final Predicate<T> getterFunc;
         private final ObjBoolConsumer<T> setterFunc;
 
-        public FunctionAccessorBoolean(String name, Predicate<T> getterFunc, ObjBoolConsumer<T> setterFunc) {
+        public FunctionAccessorBooleanValue(String name, Predicate<T> getterFunc, ObjBoolConsumer<T> setterFunc) {
             super(name, boolean.class, boolean.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
@@ -2613,10 +2660,11 @@ public class PropertyAccessorFactory {
      *
      * @param <T> the type of the object containing the property
      */
-    static final class FunctionAccessorChar<T> extends FunctionAccessor<T> implements PropertyAccessorChar {
+    static final class FunctionAccessorCharValue<T> extends FunctionAccessor<T> implements PropertyAccessorCharValue
+    {
         private final ToCharFunction<T> getterFunc;
         private final ObjCharConsumer<T> setterFunc;
-        public FunctionAccessorChar(String name, ToCharFunction<T> getterFunc, ObjCharConsumer<T> setterFunc) {
+        public FunctionAccessorCharValue(String name, ToCharFunction<T> getterFunc, ObjCharConsumer<T> setterFunc) {
             super(name, char.class, char.class, getterFunc, setterFunc);
             this.getterFunc = getterFunc;
             this.setterFunc = setterFunc;
