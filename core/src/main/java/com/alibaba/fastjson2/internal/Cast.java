@@ -25,6 +25,13 @@ public class Cast {
         return toByteEx(value);
     }
 
+    public static Byte toByte(Object value) {
+        if (value == null || value instanceof Byte) {
+            return (Byte) value;
+        }
+        return toByteEx(value);
+    }
+
     /**
      * Helper method for converting non-Number objects to byte.
      * @param value the Object to convert
