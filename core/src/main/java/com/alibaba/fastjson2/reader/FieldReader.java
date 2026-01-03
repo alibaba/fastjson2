@@ -9,13 +9,10 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.ObjBoolConsumer;
-import com.alibaba.fastjson2.function.ObjByteConsumer;
-import com.alibaba.fastjson2.function.ObjCharConsumer;
-import com.alibaba.fastjson2.function.ObjFloatConsumer;
-import com.alibaba.fastjson2.function.ObjShortConsumer;
+import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.internal.PropertyAccessor;
+import com.alibaba.fastjson2.internal.PropertyAccessorFactory;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
@@ -26,11 +23,7 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.ObjDoubleConsumer;
-import java.util.function.ObjIntConsumer;
-import java.util.function.ObjLongConsumer;
+import java.util.function.*;
 
 @SuppressWarnings("ALL")
 public abstract class FieldReader<T>
@@ -126,7 +119,7 @@ public abstract class FieldReader<T>
             readOnly = true;
         }
         this.readOnly = readOnly;
-        this.propertyAccessor = createPropertyAccessor(fieldName, fieldType, fieldClass, method, field, function);
+        this.propertyAccessor = createPropertyAccessor(fieldName, fieldType, fieldClass, method, field, function, schema);
 
         Class declaringClass = null;
         if (method != null) {
@@ -138,38 +131,62 @@ public abstract class FieldReader<T>
         this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
     }
 
-    private static PropertyAccessor createPropertyAccessor(String fieldName, Type fieldType, Class fieldClass, Method method, Field field, Object function) {
+    private PropertyAccessor createPropertyAccessor(String fieldName, Type fieldType, Class fieldClass, Method method, Field field, Object function, JSONSchema schema) {
+        PropertyAccessorFactory factory = Conf.PROPERTY_ACCESSOR_FACTORY;
+
+        PropertyAccessor propertyAccessor;
         if (function instanceof BiConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, fieldClass, fieldType, null, (BiConsumer) function);
+            propertyAccessor = factory.create(fieldName, fieldClass, fieldType, null, (BiConsumer) function);
+        } else if (function instanceof ObjDoubleConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjDoubleConsumer) function);
+        } else if (function instanceof ObjBoolConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjBoolConsumer) function);
+        } else if (function instanceof ObjFloatConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjFloatConsumer) function);
+        } else if (function instanceof ObjByteConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjByteConsumer) function);
+        } else if (function instanceof ObjIntConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjIntConsumer) function);
+        } else if (function instanceof ObjLongConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjLongConsumer) function);
+        } else if (function instanceof ObjCharConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjCharConsumer) function);
+        } else if (function instanceof ObjShortConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjShortConsumer) function);
+        } else if (method != null) {
+            propertyAccessor = factory.create(method);
+        } else {
+            propertyAccessor = field != null ? factory.create(field) : null;
         }
-        if (function instanceof ObjDoubleConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjDoubleConsumer) function);
+
+        if (schema != null) {
+            if (fieldClass == boolean.class) {
+                propertyAccessor = factory.create(propertyAccessor, (BoolConsumer) schema::assertValidate);
+            }
+            if (fieldClass == byte.class) {
+                propertyAccessor = factory.create(propertyAccessor, (ByteConsumer) schema::assertValidate);
+            }
+            if (fieldClass == char.class) {
+                propertyAccessor = factory.create(propertyAccessor, (com.alibaba.fastjson2.function.CharConsumer) schema::assertValidate);
+            }
+            if (fieldClass == short.class) {
+                propertyAccessor = factory.create(propertyAccessor, (com.alibaba.fastjson2.function.ShortConsumer) schema::assertValidate);
+            }
+            if (fieldClass == int.class) {
+                propertyAccessor = factory.create(propertyAccessor, (IntConsumer) schema::assertValidate);
+            }
+            if (fieldClass == long.class) {
+                propertyAccessor = factory.create(propertyAccessor, (LongConsumer) schema::assertValidate);
+            }
+            if (fieldClass == float.class) {
+                propertyAccessor = factory.create(propertyAccessor, (com.alibaba.fastjson2.function.FloatConsumer) schema::assertValidate);
+            }
+            if (fieldClass == double.class) {
+                propertyAccessor = factory.create(propertyAccessor, (DoubleConsumer) schema::assertValidate);
+            }
         }
-        if (function instanceof ObjBoolConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjBoolConsumer) function);
-        }
-        if (function instanceof ObjFloatConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjFloatConsumer) function);
-        }
-        if (function instanceof ObjByteConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjByteConsumer) function);
-        }
-        if (function instanceof ObjIntConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjIntConsumer) function);
-        }
-        if (function instanceof ObjLongConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjLongConsumer) function);
-        }
-        if (function instanceof ObjCharConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjCharConsumer) function);
-        }
-        if (function instanceof ObjShortConsumer) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(fieldName, null, (ObjShortConsumer) function);
-        }
-        if (method != null) {
-            return Conf.PROPERTY_ACCESSOR_FACTORY.create(method);
-        }
-        return field != null ? Conf.PROPERTY_ACCESSOR_FACTORY.create(field) : null;
+
+        return propertyAccessor;
     }
 
     public void acceptDefaultValue(T object) {
