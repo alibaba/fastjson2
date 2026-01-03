@@ -39,10 +39,6 @@ final class FieldReaderInt64Value<T>
     public void readFieldValue(JSONReader jsonReader, T object) {
         long fieldValue = jsonReader.readInt64Value();
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setLongValue(object, fieldValue);
     }
 
@@ -50,19 +46,6 @@ final class FieldReaderInt64Value<T>
     public void accept(T object, Object value) {
         long longValue = TypeUtils.toLongValue(value);
 
-        if (schema != null) {
-            schema.assertValidate(longValue);
-        }
-
         propertyAccessor.setLongValue(object, longValue);
-    }
-
-    @Override
-    public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setLongValue(object, value);
     }
 }

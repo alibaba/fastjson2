@@ -60,6 +60,7 @@ public abstract class FieldReader<T>
     Type itemType;
     Class itemClass;
     volatile ObjectReader itemReader;
+    final BiConsumer function;
 
     public FieldReader(
             String fieldName,
@@ -122,6 +123,7 @@ public abstract class FieldReader<T>
         }
         this.readOnly = readOnly;
         this.propertyAccessor = createPropertyAccessor(fieldName, fieldType, fieldClass, method, field, function, schema);
+        this.function = function instanceof BiConsumer ? (BiConsumer) function : null;
 
         Class declaringClass = null;
         if (method != null) {
@@ -480,7 +482,7 @@ public abstract class FieldReader<T>
     public abstract Object readFieldValue(JSONReader jsonReader);
 
     public void accept(T object, boolean value) {
-        accept(object, Boolean.valueOf(value));
+        propertyAccessor.setBooleanValue(object, value);
     }
 
     public boolean supportAcceptType(Class valueClass) {
@@ -488,31 +490,31 @@ public abstract class FieldReader<T>
     }
 
     public void accept(T object, byte value) {
-        accept(object, Byte.valueOf(value));
+        propertyAccessor.setByteValue(object, value);
     }
 
     public void accept(T object, short value) {
-        accept(object, Short.valueOf(value));
+        propertyAccessor.setShortValue(object, value);
     }
 
     public void accept(T object, int value) {
-        accept(object, Integer.valueOf(value));
+        propertyAccessor.setIntValue(object, value);
     }
 
     public void accept(T object, long value) {
-        accept(object, Long.valueOf(value));
+        propertyAccessor.setLongValue(object, value);
     }
 
     public void accept(T object, char value) {
-        accept(object, Character.valueOf(value));
+        propertyAccessor.setCharValue(object, value);
     }
 
     public void accept(T object, float value) {
-        accept(object, Float.valueOf(value));
+        propertyAccessor.setFloatValue(object, value);
     }
 
     public void accept(T object, double value) {
-        accept(object, Double.valueOf(value));
+        propertyAccessor.setDoubleValue(object, value);
     }
 
     public abstract void accept(T object, Object value);
@@ -676,7 +678,7 @@ public abstract class FieldReader<T>
     }
 
     public BiConsumer getFunction() {
-        return null;
+        return function;
     }
 
     public boolean sameTo(FieldReader other) {

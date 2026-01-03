@@ -41,21 +41,7 @@ final class FieldReaderCharValue<T>
         if (ch == '\0' && jsonReader.wasNull()) {
             return;
         }
-
-        if (schema != null) {
-            schema.assertValidate(ch);
-        }
-
         propertyAccessor.setCharValue(object, ch);
-    }
-
-    @Override
-    public void accept(T object, char value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setCharValue(object, value);
     }
 
     @Override
@@ -72,10 +58,6 @@ final class FieldReaderCharValue<T>
             charValue = (Character) value;
         } else {
             throw new JSONException("cast to char error");
-        }
-
-        if (schema != null) {
-            schema.assertValidate(charValue);
         }
 
         propertyAccessor.setCharValue(object, charValue);

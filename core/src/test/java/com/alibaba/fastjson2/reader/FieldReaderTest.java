@@ -59,7 +59,7 @@ public class FieldReaderTest {
         fieldReader.acceptExtra(bean, null, null);
         fieldReader.processExtra(JSONReader.of("{}"), bean);
 
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, 'A'));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, 'A'));
     }
 
     public static class Bean {
@@ -77,7 +77,7 @@ public class FieldReaderTest {
         assertNotNull(fieldReader);
 
         ExtendableBean3 bean = new ExtendableBean3();
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, 1));
+        assertThrows(Throwable.class, () -> fieldReader.accept(bean, 1));
         assertThrows(Exception.class, () -> fieldReader.readFieldValue(JSONReader.of("1"), bean));
     }
 

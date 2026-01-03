@@ -38,10 +38,6 @@ final class FieldReaderInt8Value<T>
     public void readFieldValue(JSONReader jsonReader, T object) {
         byte fieldValue = (byte) jsonReader.readInt32Value();
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setByteValue(object, fieldValue);
     }
 
@@ -49,19 +45,6 @@ final class FieldReaderInt8Value<T>
     public void accept(T object, Object value) {
         byte byteValue = TypeUtils.toByteValue(value);
 
-        if (schema != null) {
-            schema.assertValidate(byteValue);
-        }
-
         propertyAccessor.setByteValue(object, byteValue);
-    }
-
-    @Override
-    public void accept(T object, byte value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setByteValue(object, value);
     }
 }

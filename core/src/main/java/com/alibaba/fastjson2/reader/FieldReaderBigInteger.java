@@ -43,39 +43,12 @@ final class FieldReaderBigInteger<T>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setObject(object, fieldValue);
-    }
-
-    @Override
-    public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setObject(object, BigInteger.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setLongValue(object, value);
     }
 
     @Override
     public void accept(T object, Object value) {
         BigInteger bigInteger = TypeUtils.toBigInteger(value);
-
-        if (schema != null) {
-            schema.assertValidate(bigInteger);
-        }
-
         propertyAccessor.setObject(object, bigInteger);
     }
 }

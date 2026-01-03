@@ -61,10 +61,6 @@ final class FieldReaderString<T, V>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setObject(object, fieldValue);
     }
 
@@ -83,21 +79,7 @@ final class FieldReaderString<T, V>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         accept(object, fieldValue);
-    }
-
-    @Override
-    public void accept(T object, int value) {
-        accept(object, Integer.toString(value));
-    }
-
-    @Override
-    public void accept(T object, long value) {
-        accept(object, Long.toString(value));
     }
 
     @Override
@@ -119,10 +101,6 @@ final class FieldReaderString<T, V>
             if (emptyToNull && fieldValue.isEmpty()) {
                 fieldValue = null;
             }
-        }
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
         }
 
         // The propertyAccessor internally handles both field and functional access

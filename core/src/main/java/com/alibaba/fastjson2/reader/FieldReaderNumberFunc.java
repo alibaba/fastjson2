@@ -9,8 +9,6 @@ import java.util.function.BiConsumer;
 
 final class FieldReaderNumberFunc<T, V>
         extends FieldReader<T> {
-    final BiConsumer<T, V> function;
-
     public FieldReaderNumberFunc(
             String fieldName,
             Class<V> fieldClass,
@@ -23,39 +21,16 @@ final class FieldReaderNumberFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
-        this.function = function;
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, function, null, null);
     }
 
     @Override
     public void accept(T object, Object value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         if (value instanceof Boolean) {
             value = (Boolean) value ? 1 : 0;
         }
 
-        function.accept(object, (V) value);
-    }
-
-    @Override
-    public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        function.accept(object, (V) Integer.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        function.accept(object, (V) Long.valueOf(value));
+        propertyAccessor.setObject(object, value);
     }
 
     @Override
@@ -71,20 +46,16 @@ final class FieldReaderNumberFunc<T, V>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
+        propertyAccessor.setObject(object, fieldValue);
+    }
 
-        function.accept(object, (V) fieldValue);
+    @Override
+    public void accept(T object, boolean value) {
+        propertyAccessor.setIntValue(object, value ? 1 : 0);
     }
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readNumber();
-    }
-
-    @Override
-    public BiConsumer getFunction() {
-        return function;
     }
 }

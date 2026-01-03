@@ -58,10 +58,6 @@ final class FieldReaderInt32<T>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         if (fieldValue == null && defaultValue != null) {
             return;
         }
@@ -83,10 +79,6 @@ final class FieldReaderInt32<T>
     @Override
     public void accept(T object, Object value) {
         Integer intValue = TypeUtils.toInteger(value);
-
-        if (schema != null) {
-            schema.assertValidate(intValue);
-        }
 
         propertyAccessor.setObject(object, intValue);
     }

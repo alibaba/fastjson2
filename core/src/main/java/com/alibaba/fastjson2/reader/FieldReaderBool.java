@@ -43,10 +43,6 @@ final class FieldReaderBool<T>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         if (fieldValue == null && defaultValue != null) {
             return;
         }
@@ -62,10 +58,6 @@ final class FieldReaderBool<T>
     @Override
     public void accept(T object, Object value) {
         Boolean booleanValue = TypeUtils.toBoolean(value);
-
-        if (schema != null) {
-            schema.assertValidate(booleanValue);
-        }
 
         propertyAccessor.setObject(object, booleanValue);
     }

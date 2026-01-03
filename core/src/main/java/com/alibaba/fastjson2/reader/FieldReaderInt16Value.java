@@ -38,31 +38,12 @@ final class FieldReaderInt16Value<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         short fieldValue = (short) jsonReader.readInt32Value();
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setShortValue(object, fieldValue);
     }
 
     @Override
     public void accept(T object, Object value) {
         short shortValue = TypeUtils.toShortValue(value);
-
-        if (schema != null) {
-            schema.assertValidate(shortValue);
-        }
-
         propertyAccessor.setShortValue(object, shortValue);
-    }
-
-    @Override
-    public void accept(T object, short value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setShortValue(object, value);
     }
 }

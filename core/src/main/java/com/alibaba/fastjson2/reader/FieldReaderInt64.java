@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -44,10 +43,6 @@ final class FieldReaderInt64<T>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setObject(object, fieldValue);
     }
 
@@ -60,26 +55,5 @@ final class FieldReaderInt64<T>
             throw new JSONException(jsonReader.info("long value not support input null"));
         }
         return value;
-    }
-
-    @Override
-    public void accept(T object, float value) {
-        accept(object, Long.valueOf((long) value));
-    }
-
-    @Override
-    public void accept(T object, double value) {
-        accept(object, Long.valueOf((long) value));
-    }
-
-    @Override
-    public void accept(T object, Object value) {
-        Long longValue = TypeUtils.toLong(value);
-
-        if (schema != null) {
-            schema.assertValidate(longValue);
-        }
-
-        propertyAccessor.setObject(object, longValue);
     }
 }

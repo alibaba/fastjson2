@@ -58,10 +58,6 @@ final class FieldReaderInt8<T>
 
         Byte byteValue = fieldValue == null ? null : fieldValue.byteValue();
 
-        if (schema != null) {
-            schema.assertValidate(byteValue);
-        }
-
         if (byteValue == null && defaultValue != null) {
             return;
         }
@@ -83,10 +79,6 @@ final class FieldReaderInt8<T>
     @Override
     public void accept(T object, Object value) {
         Byte byteValue = TypeUtils.toByte(value);
-
-        if (schema != null) {
-            schema.assertValidate(byteValue);
-        }
 
         propertyAccessor.setObject(object, byteValue);
     }

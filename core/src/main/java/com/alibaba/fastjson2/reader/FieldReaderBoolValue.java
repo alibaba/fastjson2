@@ -33,10 +33,6 @@ final class FieldReaderBoolValue<T>
     public void readFieldValue(JSONReader jsonReader, T object) {
         boolean fieldValue = jsonReader.readBoolValue();
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setBooleanValue(object, fieldValue);
     }
 
@@ -49,19 +45,6 @@ final class FieldReaderBoolValue<T>
     public void accept(T object, Object value) {
         boolean booleanValue = TypeUtils.toBooleanValue(value);
 
-        if (schema != null) {
-            schema.assertValidate(booleanValue);
-        }
-
         propertyAccessor.setBooleanValue(object, booleanValue);
-    }
-
-    @Override
-    public void accept(T object, boolean value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setBooleanValue(object, value);
     }
 }

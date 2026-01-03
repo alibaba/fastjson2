@@ -59,10 +59,6 @@ final class FieldReaderInt16<T>
 
         Short shortValue = fieldValue == null ? null : fieldValue.shortValue();
 
-        if (schema != null) {
-            schema.assertValidate(shortValue);
-        }
-
         if (shortValue == null && defaultValue != null) {
             return;
         }
@@ -84,10 +80,6 @@ final class FieldReaderInt16<T>
     @Override
     public void accept(T object, Object value) {
         Short shortValue = TypeUtils.toShort(value);
-
-        if (schema != null) {
-            schema.assertValidate(shortValue);
-        }
 
         propertyAccessor.setObject(object, shortValue);
     }

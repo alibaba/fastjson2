@@ -32,11 +32,6 @@ final class FieldReaderFloatValue<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         float fieldValue = jsonReader.readFloatValue();
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setFloatValue(object, fieldValue);
     }
 
@@ -48,20 +43,6 @@ final class FieldReaderFloatValue<T>
     @Override
     public void accept(T object, Object value) {
         float floatValue = TypeUtils.toFloatValue(value);
-
-        if (schema != null) {
-            schema.assertValidate(floatValue);
-        }
-
         propertyAccessor.setFloatValue(object, floatValue);
-    }
-
-    @Override
-    public void accept(T object, float value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setFloatValue(object, value);
     }
 }

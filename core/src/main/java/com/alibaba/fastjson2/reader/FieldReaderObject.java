@@ -242,51 +242,7 @@ public class FieldReaderObject<T>
     }
 
     @Override
-    public void accept(T object, boolean value) {
-        accept(object, Boolean.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, byte value) {
-        accept(object, Byte.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, short value) {
-        accept(object, Short.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, int value) {
-        accept(object, Integer.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, long value) {
-        accept(object, Long.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, float value) {
-        accept(object, Float.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, double value) {
-        accept(object, Double.valueOf(value));
-    }
-
-    @Override
-    public void accept(T object, char value) {
-        accept(object, Character.valueOf(value));
-    }
-
-    @Override
     public void accept(T object, Object value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         if (isParameter() || (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0)) {
             return;
         }

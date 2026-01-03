@@ -45,10 +45,6 @@ final class FieldReaderBigDecimal<T, V>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setObject(object, fieldValue);
     }
 
@@ -61,28 +57,6 @@ final class FieldReaderBigDecimal<T, V>
     public void accept(T object, Object value) {
         BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
 
-        if (schema != null) {
-            schema.assertValidate(decimalValue);
-        }
-
         propertyAccessor.setObject(object, decimalValue);
-    }
-
-    @Override
-    public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setIntValue(object, value);
-    }
-
-    @Override
-    public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setObject(object, BigDecimal.valueOf(value));
     }
 }

@@ -132,10 +132,6 @@ public final class FieldReaderLocalDateTime<T>
     }
 
     public void accept(Object object, LocalDateTime value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         if (object == null) {
             throw new JSONException("set " + fieldName + " error, object is null");
         }

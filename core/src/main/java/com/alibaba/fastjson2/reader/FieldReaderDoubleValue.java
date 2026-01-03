@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -32,56 +31,17 @@ final class FieldReaderDoubleValue<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         double fieldValue = jsonReader.readDoubleValue();
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setDoubleValue(object, fieldValue);
     }
 
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         double fieldValue = jsonReader.readDoubleValue();
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         propertyAccessor.setDoubleValue(object, fieldValue);
     }
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readDoubleValue();
-    }
-
-    @Override
-    public void accept(T object, Object value) {
-        double doubleValue = TypeUtils.toDoubleValue(value);
-
-        if (schema != null) {
-            schema.assertValidate(doubleValue);
-        }
-
-        propertyAccessor.setDoubleValue(object, doubleValue);
-    }
-
-    @Override
-    public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setDoubleValue(object, value);
-    }
-
-    @Override
-    public void accept(T object, double value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setDoubleValue(object, value);
     }
 }

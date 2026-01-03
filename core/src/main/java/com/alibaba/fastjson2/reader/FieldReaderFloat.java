@@ -56,10 +56,6 @@ final class FieldReaderFloat<T>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         if (fieldValue == null && defaultValue != null) {
             return;
         }
@@ -81,10 +77,6 @@ final class FieldReaderFloat<T>
     @Override
     public void accept(T object, Object value) {
         Float floatValue = TypeUtils.toFloat(value);
-
-        if (schema != null) {
-            schema.assertValidate(floatValue);
-        }
 
         propertyAccessor.setObject(object, floatValue);
     }

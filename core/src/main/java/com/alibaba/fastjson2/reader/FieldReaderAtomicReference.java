@@ -66,10 +66,6 @@ public final class FieldReaderAtomicReference<T, V>
             return;
         }
 
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         if (isParameter() || (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0)) {
             return;
         }

@@ -44,10 +44,6 @@ final class FieldReaderDouble<T>
             }
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         if (fieldValue == null && defaultValue != null) {
             return;
         }
@@ -69,10 +65,6 @@ final class FieldReaderDouble<T>
     @Override
     public void accept(T object, Object value) {
         Double doubleValue = TypeUtils.toDouble(value);
-
-        if (schema != null) {
-            schema.assertValidate(doubleValue);
-        }
 
         propertyAccessor.setObject(object, doubleValue);
     }
