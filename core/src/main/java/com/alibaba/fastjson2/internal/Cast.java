@@ -128,10 +128,8 @@ public class Cast {
             return (byte) ((Character) value).charValue();
         } else if (value instanceof String) {
             return toByteValue((String) value);
-        } else if (value instanceof BigInteger) {
-            return toByteValue((BigInteger) value);
-        } else if (value instanceof BigDecimal) {
-            return toByteValue((BigDecimal) value);
+        } else if (value instanceof Number) {
+            return toByteValue(((Number) value).doubleValue());
         } else if (value == null) {
             return 0;
         }
