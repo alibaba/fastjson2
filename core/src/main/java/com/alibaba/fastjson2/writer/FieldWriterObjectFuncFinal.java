@@ -11,7 +11,6 @@ import java.util.function.Function;
 
 final class FieldWriterObjectFuncFinal<T>
         extends FieldWriterObjectFinal<T> {
-    final Function function;
     final boolean isArray;
 
     FieldWriterObjectFuncFinal(
@@ -27,8 +26,7 @@ final class FieldWriterObjectFuncFinal<T>
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
-        this.function = function;
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         isArray = fieldClass == AtomicIntegerArray.class
                 || fieldClass == AtomicLongArray.class
                 || fieldClass == AtomicReferenceArray.class

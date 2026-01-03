@@ -49,7 +49,7 @@ final class FieldReaderBigDecimal<T, V>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setObject(object, fieldValue);
+        propertyAccessor.setBigDecimal(object, fieldValue);
     }
 
     @Override
@@ -65,7 +65,7 @@ final class FieldReaderBigDecimal<T, V>
             schema.assertValidate(decimalValue);
         }
 
-        propertyAccessor.setObject(object, decimalValue);
+        propertyAccessor.setBigDecimal(object, decimalValue);
     }
 
     @Override
@@ -74,7 +74,7 @@ final class FieldReaderBigDecimal<T, V>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setObject(object, BigDecimal.valueOf(value));
+        propertyAccessor.setInt(object, value);
     }
 
     @Override

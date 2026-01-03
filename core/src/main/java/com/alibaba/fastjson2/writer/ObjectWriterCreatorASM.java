@@ -4433,7 +4433,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharVal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
+            return new FieldWriterCharVal(fieldName, ordinal, features, format, label, field, null, null);
         }
 
         if (fieldClass == BigInteger.class) {

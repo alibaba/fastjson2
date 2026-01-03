@@ -281,7 +281,7 @@ public class FieldWriterObject<T>
 
         Object value;
         try {
-            value = getFieldValue(object);
+            value = propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;

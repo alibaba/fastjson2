@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Locale;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 
@@ -26,9 +27,10 @@ abstract class FieldWriterObjectFinal<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Function function
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
         this.refDetect = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);

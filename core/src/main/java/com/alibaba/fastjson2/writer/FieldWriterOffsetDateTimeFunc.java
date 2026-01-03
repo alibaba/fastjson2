@@ -11,8 +11,6 @@ import java.util.function.Function;
 
 final class FieldWriterOffsetDateTimeFunc<T>
         extends FieldWriterObjectFinal<T> {
-    final Function function;
-
     FieldWriterOffsetDateTimeFunc(
             String name,
             int ordinal,
@@ -26,8 +24,7 @@ final class FieldWriterOffsetDateTimeFunc<T>
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
-        this.function = function;
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override

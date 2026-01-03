@@ -1088,7 +1088,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharVal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
+            return new FieldWriterCharVal(fieldName, ordinal, features, format, label, field, null, null);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -1313,7 +1313,11 @@ public class ObjectWriterCreator {
             return new FieldWriterBoolean(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == int.class || fieldClass == Integer.class) {
+        if (fieldClass == int.class) {
+            return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field, method, null);
+        }
+
+        if (fieldClass == Integer.class) {
             return new FieldWriterInt32(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
@@ -1333,23 +1337,39 @@ public class ObjectWriterCreator {
             return new FieldWriterDouble(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
-        if (fieldClass == long.class || fieldClass == Long.class) {
+        if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64(fieldName, ordinal, features, format, label, fieldClass, field, method, null);
+                return new FieldWriterInt64Val(fieldName, ordinal, features, format, label, field, method, null);
             }
 
             return new FieldWriterMillis(fieldName, ordinal, features, format, label, field, method, null);
         }
 
-        if (fieldClass == short.class || fieldClass == Short.class) {
+        if (fieldClass == Long.class) {
+            return new FieldWriterInt64(fieldName, ordinal, features, format, label, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == short.class) {
+            return new FieldWriterInt16Val(fieldName, ordinal, features, format, label, field, method, null);
+        }
+
+        if (fieldClass == Short.class) {
             return new FieldWriterInt16(fieldName, ordinal, features, format, label, fieldClass, field, method, null);
         }
 
-        if (fieldClass == byte.class || fieldClass == Byte.class) {
+        if (fieldClass == byte.class) {
+            return new FieldWriterInt8Val(fieldName, ordinal, features, format, label, field, method, null);
+        }
+
+        if (fieldClass == Byte.class) {
             return new FieldWriterInt8(fieldName, ordinal, features, format, label, fieldClass, field, method, null);
         }
 
-        if (fieldClass == char.class || fieldClass == Character.class) {
+        if (fieldClass == char.class) {
+            return new FieldWriterCharVal(fieldName, ordinal, features, format, label, field, method, null);
+        }
+
+        if (fieldClass == Character.class) {
             return new FieldWriterChar(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method, null);
         }
 
@@ -1503,7 +1523,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToCharFunction<T> function) {
-        return new FieldWriterCharVal(fieldName, 0, 0, null, null, char.class, char.class, null, null, function);
+        return new FieldWriterCharVal(fieldName, 0, 0, null, null, null, null, function);
     }
 
     /**
@@ -2065,7 +2085,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharVal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, (ToCharFunction) lambda);
+            return new FieldWriterCharVal(fieldName, ordinal, features, format, label, field, method, (ToCharFunction) lambda);
         }
 
         Function function = (Function) lambda;

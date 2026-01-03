@@ -47,7 +47,7 @@ final class FieldReaderBigInteger<T>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setObject(object, fieldValue);
+        propertyAccessor.setBigInteger(object, fieldValue);
     }
 
     @Override
@@ -56,7 +56,7 @@ final class FieldReaderBigInteger<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setObject(object, BigInteger.valueOf(value));
+        propertyAccessor.setBigInteger(object, BigInteger.valueOf(value));
     }
 
     @Override
@@ -65,7 +65,7 @@ final class FieldReaderBigInteger<T>
             schema.assertValidate(value);
         }
 
-        propertyAccessor.setObject(object, BigInteger.valueOf(value));
+        propertyAccessor.setLong(object, value);
     }
 
     @Override
@@ -76,6 +76,6 @@ final class FieldReaderBigInteger<T>
             schema.assertValidate(bigInteger);
         }
 
-        propertyAccessor.setObject(object, bigInteger);
+        propertyAccessor.setBigInteger(object, bigInteger);
     }
 }

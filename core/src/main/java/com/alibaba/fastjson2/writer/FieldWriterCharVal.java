@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.function.ToCharFunction;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 final class FieldWriterCharVal
         extends FieldWriterChar {
@@ -15,13 +14,11 @@ final class FieldWriterCharVal
             long features,
             String format,
             String label,
-            Type fieldType,
-            Class fieldClass,
             Field field,
             Method method,
             ToCharFunction function
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+        super(name, ordinal, features, format, label, char.class, char.class, field, method, function);
     }
 
     @Override

@@ -11,8 +11,6 @@ import java.util.function.Function;
 
 final class FieldWriterLocalDateFunc<T>
         extends FieldWriterObjectFinal<T> {
-    final Function function;
-
     FieldWriterLocalDateFunc(
             String name,
             int ordinal,
@@ -26,8 +24,7 @@ final class FieldWriterLocalDateFunc<T>
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
-        this.function = function;
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override

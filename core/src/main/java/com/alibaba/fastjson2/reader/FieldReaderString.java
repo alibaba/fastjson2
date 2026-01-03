@@ -65,7 +65,7 @@ final class FieldReaderString<T, V>
             schema.assertValidate(fieldValue);
         }
 
-        propertyAccessor.setObject(object, fieldValue);
+        propertyAccessor.setString(object, fieldValue);
     }
 
     @Override
@@ -126,7 +126,7 @@ final class FieldReaderString<T, V>
         }
 
         // The propertyAccessor internally handles both field and functional access
-        propertyAccessor.setObject(object, fieldValue);
+        propertyAccessor.setString(object, fieldValue);
     }
 
     public boolean supportAcceptType(Class valueClass) {

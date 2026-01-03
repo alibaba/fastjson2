@@ -34,7 +34,7 @@ final class FieldWriterBigDecimal<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         BigDecimal value;
         try {
-            value = (BigDecimal) getFieldValue(object);
+            value = propertyAccessor.getBigDecimal(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
