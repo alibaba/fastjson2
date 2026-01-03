@@ -17,7 +17,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted byte value
      */
-    public static byte toByte(Object value) {
+    public static byte toByteValue(Object value) {
         if (value instanceof Byte) {
             return (Byte) value;
         }
@@ -36,11 +36,11 @@ public class Cast {
         } else if (value instanceof Character) {
             return (byte) ((Character) value).charValue();
         } else if (value instanceof String) {
-            return toByte((String) value);
+            return toByteValue((String) value);
         } else if (value instanceof BigInteger) {
-            return toByte((BigInteger) value);
+            return toByteValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toByte((BigDecimal) value);
+            return toByteValue((BigDecimal) value);
         } else if (value == null) {
             return 0;
         }
@@ -61,7 +61,7 @@ public class Cast {
      * @param value the short to convert
      * @return the converted byte value
      */
-    public static byte toByte(short value) {
+    public static byte toByteValue(short value) {
         return (byte) value;
     }
 
@@ -70,7 +70,7 @@ public class Cast {
      * @param value the int to convert
      * @return the converted byte value
      */
-    public static byte toByte(int value) {
+    public static byte toByteValue(int value) {
         return (byte) value;
     }
 
@@ -79,7 +79,7 @@ public class Cast {
      * @param value the long to convert
      * @return the converted byte value
      */
-    public static byte toByte(long value) {
+    public static byte toByteValue(long value) {
         return (byte) value;
     }
 
@@ -88,7 +88,7 @@ public class Cast {
      * @param value the char to convert
      * @return the converted byte value
      */
-    public static byte toByte(char value) {
+    public static byte toByteValue(char value) {
         return (byte) value;
     }
 
@@ -97,7 +97,7 @@ public class Cast {
      * @param value the boolean to convert
      * @return the converted byte value
      */
-    public static byte toByte(boolean value) {
+    public static byte toByteValue(boolean value) {
         return (byte) (value ? 1 : 0);
     }
 
@@ -106,7 +106,7 @@ public class Cast {
      * @param value the float to convert
      * @return the converted byte value
      */
-    public static byte toByte(float value) {
+    public static byte toByteValue(float value) {
         return (byte) value;
     }
 
@@ -115,7 +115,7 @@ public class Cast {
      * @param value the double to convert
      * @return the converted byte value
      */
-    public static byte toByte(double value) {
+    public static byte toByteValue(double value) {
         return (byte) value;
     }
 
@@ -124,7 +124,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted byte value
      */
-    public static byte toByte(String value) {
+    public static byte toByteValue(String value) {
         if (value == null) {
             return 0;
         }
@@ -140,7 +140,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted byte value
      */
-    public static byte toByte(BigInteger value) {
+    public static byte toByteValue(BigInteger value) {
         return value.byteValue();
     }
 
@@ -149,7 +149,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted byte value
      */
-    public static byte toByte(BigDecimal value) {
+    public static byte toByteValue(BigDecimal value) {
         return value.byteValue();
     }
 
@@ -162,7 +162,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted char value
      */
-    public static char toChar(Object value) {
+    public static char toCharValue(Object value) {
         if (value instanceof Character) {
             return (Character) value;
         }
@@ -176,23 +176,23 @@ public class Cast {
      */
     private static char toCharEx(Object value) {
         if (value instanceof Short) {
-            return toChar(((Short) value).shortValue());
+            return toCharValue(((Short) value).shortValue());
         } else if (value instanceof Integer) {
-            return toChar(((Integer) value).intValue());
+            return toCharValue(((Integer) value).intValue());
         } else if (value instanceof Long) {
-            return toChar(((Long) value).longValue());
+            return toCharValue(((Long) value).longValue());
         } else if (value instanceof Float) {
-            return toChar(((Float) value).floatValue());
+            return toCharValue(((Float) value).floatValue());
         } else if (value instanceof Double) {
-            return toChar(((Double) value).doubleValue());
+            return toCharValue(((Double) value).doubleValue());
         } else if (value instanceof Boolean) {
             return (Boolean) value ? (char) 1 : (char) 0;
         } else if (value instanceof String) {
-            return toChar((String) value);
+            return toCharValue((String) value);
         } else if (value instanceof BigInteger) {
-            return toChar((BigInteger) value);
+            return toCharValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toChar((BigDecimal) value);
+            return toCharValue((BigDecimal) value);
         } else if (value == null) {
             return 0;
         }
@@ -213,7 +213,7 @@ public class Cast {
      * @param value the boolean to convert
      * @return the converted char value
      */
-    public static char toChar(boolean value) {
+    public static char toCharValue(boolean value) {
         return value ? '1' : '0';
     }
 
@@ -222,7 +222,7 @@ public class Cast {
      * @param value the short to convert
      * @return the converted char value
      */
-    public static char toChar(short value) {
+    public static char toCharValue(short value) {
         return (char) value;
     }
 
@@ -231,7 +231,7 @@ public class Cast {
      * @param value the int to convert
      * @return the converted char value
      */
-    public static char toChar(int value) {
+    public static char toCharValue(int value) {
         return (char) value;
     }
 
@@ -240,7 +240,7 @@ public class Cast {
      * @param value the long to convert
      * @return the converted char value
      */
-    public static char toChar(long value) {
+    public static char toCharValue(long value) {
         return (char) value;
     }
 
@@ -249,7 +249,7 @@ public class Cast {
      * @param value the float to convert
      * @return the converted char value
      */
-    public static char toChar(float value) {
+    public static char toCharValue(float value) {
         return (char) value;
     }
 
@@ -258,7 +258,7 @@ public class Cast {
      * @param value the double to convert
      * @return the converted char value
      */
-    public static char toChar(double value) {
+    public static char toCharValue(double value) {
         return (char) value;
     }
 
@@ -267,7 +267,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted char value
      */
-    public static char toChar(String value) {
+    public static char toCharValue(String value) {
         if (value == null) {
             return '\0';
         }
@@ -286,7 +286,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted char value
      */
-    public static char toChar(BigInteger value) {
+    public static char toCharValue(BigInteger value) {
         return (char) value.intValue();
     }
 
@@ -295,7 +295,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted char value
      */
-    public static char toChar(BigDecimal value) {
+    public static char toCharValue(BigDecimal value) {
         return (char) value.intValue();
     }
 
@@ -308,7 +308,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted short value
      */
-    public static short toShort(Object value) {
+    public static short toShortValue(Object value) {
         if (value instanceof Short) {
             return (Short) value;
         }
@@ -327,13 +327,13 @@ public class Cast {
         } else if (value instanceof Character) {
             return (short) ((Character) value).charValue();
         } else if (value instanceof String) {
-            return toShort((String) value);
+            return toShortValue((String) value);
         } else if (value instanceof BigInteger) {
-            return toShort((BigInteger) value);
+            return toShortValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toShort((BigDecimal) value);
+            return toShortValue((BigDecimal) value);
         } else if (value instanceof Number) {
-            return toShort(((Number) value).shortValue());
+            return toShortValue(((Number) value).shortValue());
         } else if (value == null) {
             return 0;
         }
@@ -354,7 +354,7 @@ public class Cast {
      * @param value the char to convert
      * @return the converted short value
      */
-    public static short toShort(char value) {
+    public static short toShortValue(char value) {
         return (short) value;
     }
 
@@ -363,7 +363,7 @@ public class Cast {
      * @param value the boolean to convert
      * @return the converted short value
      */
-    public static short toShort(boolean value) {
+    public static short toShortValue(boolean value) {
         return (short) (value ? 1 : 0);
     }
 
@@ -372,7 +372,7 @@ public class Cast {
      * @param value the int to convert
      * @return the converted short value
      */
-    public static short toShort(int value) {
+    public static short toShortValue(int value) {
         return (short) value;
     }
 
@@ -381,7 +381,7 @@ public class Cast {
      * @param value the long to convert
      * @return the converted short value
      */
-    public static short toShort(long value) {
+    public static short toShortValue(long value) {
         return (short) value;
     }
 
@@ -390,7 +390,7 @@ public class Cast {
      * @param value the float to convert
      * @return the converted short value
      */
-    public static short toShort(float value) {
+    public static short toShortValue(float value) {
         return (short) value;
     }
 
@@ -399,7 +399,7 @@ public class Cast {
      * @param value the double to convert
      * @return the converted short value
      */
-    public static short toShort(double value) {
+    public static short toShortValue(double value) {
         return (short) value;
     }
 
@@ -408,7 +408,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted short value
      */
-    public static short toShort(String value) {
+    public static short toShortValue(String value) {
         if (value == null) {
             return 0;
         }
@@ -424,7 +424,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted short value
      */
-    public static short toShort(BigInteger value) {
+    public static short toShortValue(BigInteger value) {
         return value.shortValue();
     }
 
@@ -433,7 +433,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted short value
      */
-    public static short toShort(BigDecimal value) {
+    public static short toShortValue(BigDecimal value) {
         return value.shortValue();
     }
 
@@ -446,7 +446,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted int value
      */
-    public static int toInt(Object value) {
+    public static int toIntValue(Object value) {
         if (value instanceof Integer) {
             return (Integer) value;
         }
@@ -463,15 +463,15 @@ public class Cast {
         if (value instanceof Boolean) {
             return (Boolean) value ? 1 : 0;
         } else if (value instanceof Character) {
-            return toInt(((Character) value).charValue());
+            return toIntValue(((Character) value).charValue());
         } else if (value instanceof String) {
-            return toInt((String) value);
+            return toIntValue((String) value);
         } else if (value instanceof BigInteger) {
-            return toInt((BigInteger) value);
+            return toIntValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toInt((BigDecimal) value);
+            return toIntValue((BigDecimal) value);
         } else if (value instanceof Number) {
-            return toInt(((Number) value).intValue());
+            return toIntValue(((Number) value).intValue());
         } else if (value == null) {
             return 0;
         }
@@ -492,7 +492,7 @@ public class Cast {
      * @param value the char to convert
      * @return the converted int value
      */
-    public static int toInt(char value) {
+    public static int toIntValue(char value) {
         if (value >= '0' && value <= '9') {
             return value - '0';
         }
@@ -504,7 +504,7 @@ public class Cast {
      * @param value the long to convert
      * @return the converted int value
      */
-    public static int toInt(long value) {
+    public static int toIntValue(long value) {
         return (int) value;
     }
 
@@ -513,7 +513,7 @@ public class Cast {
      * @param value the float to convert
      * @return the converted int value
      */
-    public static int toInt(float value) {
+    public static int toIntValue(float value) {
         return (int) value;
     }
 
@@ -522,7 +522,7 @@ public class Cast {
      * @param value the double to convert
      * @return the converted int value
      */
-    public static int toInt(double value) {
+    public static int toIntValue(double value) {
         return (int) value;
     }
 
@@ -531,7 +531,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted int value
      */
-    public static int toInt(String value) {
+    public static int toIntValue(String value) {
         if (value == null) {
             return 0;
         }
@@ -547,7 +547,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted int value
      */
-    public static int toInt(BigInteger value) {
+    public static int toIntValue(BigInteger value) {
         return value.intValue();
     }
 
@@ -556,7 +556,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted int value
      */
-    public static int toInt(BigDecimal value) {
+    public static int toIntValue(BigDecimal value) {
         return value.intValue();
     }
 
@@ -569,7 +569,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted long value
      */
-    public static long toLong(Object value) {
+    public static long toLongValue(Object value) {
         if (value instanceof Long) {
             return (Long) value;
         }
@@ -584,15 +584,15 @@ public class Cast {
      */
     private static long toLongEx(Object value) {
         if (value instanceof Boolean) {
-            return toLong(((Boolean) value).booleanValue());
+            return toLongValue(((Boolean) value).booleanValue());
         } else if (value instanceof Character) {
-            return toLong(((Character) value).charValue());
+            return toLongValue(((Character) value).charValue());
         } else if (value instanceof String) {
-            return toLong((String) value);
+            return toLongValue((String) value);
         } else if (value instanceof BigInteger) {
-            return toLong((BigInteger) value);
+            return toLongValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toLong((BigDecimal) value);
+            return toLongValue((BigDecimal) value);
         } else if (value == null) {
             return 0L;
         }
@@ -613,7 +613,7 @@ public class Cast {
      * @param value the short to convert
      * @return the converted long value
      */
-    public static long toLong(short value) {
+    public static long toLongValue(short value) {
         return value;
     }
 
@@ -622,7 +622,7 @@ public class Cast {
      * @param value the char to convert
      * @return the converted long value
      */
-    public static long toLong(char value) {
+    public static long toLongValue(char value) {
         return value;
     }
 
@@ -631,7 +631,7 @@ public class Cast {
      * @param value the boolean to convert
      * @return the converted long value
      */
-    public static long toLong(boolean value) {
+    public static long toLongValue(boolean value) {
         return value ? 1L : 0L;
     }
 
@@ -640,7 +640,7 @@ public class Cast {
      * @param value the int to convert
      * @return the converted long value
      */
-    public static long toLong(int value) {
+    public static long toLongValue(int value) {
         return value;
     }
 
@@ -649,7 +649,7 @@ public class Cast {
      * @param value the float to convert
      * @return the converted long value
      */
-    public static long toLong(float value) {
+    public static long toLongValue(float value) {
         return (long) value;
     }
 
@@ -658,7 +658,7 @@ public class Cast {
      * @param value the double to convert
      * @return the converted long value
      */
-    public static long toLong(double value) {
+    public static long toLongValue(double value) {
         return (long) value;
     }
 
@@ -667,7 +667,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted long value
      */
-    public static long toLong(String value) {
+    public static long toLongValue(String value) {
         if (value == null) {
             return 0L;
         }
@@ -683,7 +683,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted long value
      */
-    public static long toLong(BigInteger value) {
+    public static long toLongValue(BigInteger value) {
         return value.longValue();
     }
 
@@ -692,7 +692,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted long value
      */
-    public static long toLong(BigDecimal value) {
+    public static long toLongValue(BigDecimal value) {
         return value.longValue();
     }
 
@@ -705,7 +705,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted float value
      */
-    public static float toFloat(Object value) {
+    public static float toFloatValue(Object value) {
         if (value instanceof Float) {
             return (Float) value;
         }
@@ -721,13 +721,13 @@ public class Cast {
         if (value instanceof Boolean) {
             return (Boolean) value ? 1.0f : 0.0f;
         } else if (value instanceof Character) {
-            return toFloat(((Character) value).charValue());
+            return toFloatValue(((Character) value).charValue());
         } else if (value instanceof String) {
-            return toFloat((String) value);
+            return toFloatValue((String) value);
         } else if (value instanceof BigInteger) {
-            return toFloat((BigInteger) value);
+            return toFloatValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toFloat((BigDecimal) value);
+            return toFloatValue((BigDecimal) value);
         } else if (value instanceof Number) {
             return ((Number) value).floatValue();
         } else if (value == null) {
@@ -750,7 +750,7 @@ public class Cast {
      * @param value the short to convert
      * @return the converted float value
      */
-    public static float toFloat(short value) {
+    public static float toFloatValue(short value) {
         return value;
     }
 
@@ -759,7 +759,7 @@ public class Cast {
      * @param value the char to convert
      * @return the converted float value
      */
-    public static float toFloat(char value) {
+    public static float toFloatValue(char value) {
         return value;
     }
 
@@ -768,7 +768,7 @@ public class Cast {
      * @param value the int to convert
      * @return the converted float value
      */
-    public static float toFloat(int value) {
+    public static float toFloatValue(int value) {
         return (float) value;
     }
 
@@ -777,7 +777,7 @@ public class Cast {
      * @param value the long to convert
      * @return the converted float value
      */
-    public static float toFloat(long value) {
+    public static float toFloatValue(long value) {
         return (float) value;
     }
 
@@ -786,7 +786,7 @@ public class Cast {
      * @param value the double to convert
      * @return the converted float value
      */
-    public static float toFloat(double value) {
+    public static float toFloatValue(double value) {
         return (float) value;
     }
 
@@ -795,7 +795,7 @@ public class Cast {
      * @param value the boolean to convert
      * @return the converted float value
      */
-    public static float toFloat(boolean value) {
+    public static float toFloatValue(boolean value) {
         return value ? 1.0f : 0.0f;
     }
 
@@ -804,7 +804,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted float value
      */
-    public static float toFloat(String value) {
+    public static float toFloatValue(String value) {
         if (value == null) {
             return 0.0f;
         }
@@ -820,7 +820,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted float value
      */
-    public static float toFloat(BigInteger value) {
+    public static float toFloatValue(BigInteger value) {
         return value.floatValue();
     }
 
@@ -829,7 +829,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted float value
      */
-    public static float toFloat(BigDecimal value) {
+    public static float toFloatValue(BigDecimal value) {
         return value.floatValue();
     }
 
@@ -842,7 +842,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted double value
      */
-    public static double toDouble(Object value) {
+    public static double toDoubleValue(Object value) {
         if (value instanceof Double) {
             return (Double) value;
         }
@@ -855,7 +855,7 @@ public class Cast {
      * @param value the int to convert
      * @return the converted double value
      */
-    public static double toDouble(int value) {
+    public static double toDoubleValue(int value) {
         return value;
     }
 
@@ -864,7 +864,7 @@ public class Cast {
      * @param value the long to convert
      * @return the converted double value
      */
-    public static double toDouble(long value) {
+    public static double toDoubleValue(long value) {
         return value;
     }
 
@@ -877,13 +877,13 @@ public class Cast {
         if (value instanceof Boolean) {
             return (Boolean) value ? 1.0 : 0.0;
         } else if (value instanceof Character) {
-            return toDouble(((Character) value).charValue());
+            return toDoubleValue(((Character) value).charValue());
         } else if (value instanceof String) {
-            return toDouble((String) value);
+            return toDoubleValue((String) value);
         } else if (value instanceof BigInteger) {
-            return toDouble((BigInteger) value);
+            return toDoubleValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toDouble((BigDecimal) value);
+            return toDoubleValue((BigDecimal) value);
         } else if (value instanceof Number) {
             return ((Number) value).doubleValue();
         } else if (value == null) {
@@ -906,7 +906,7 @@ public class Cast {
      * @param value the boolean to convert
      * @return the converted double value
      */
-    public static double toDouble(boolean value) {
+    public static double toDoubleValue(boolean value) {
         return value ? 1.0D : 0.0D;
     }
 
@@ -915,7 +915,7 @@ public class Cast {
      * @param value the char to convert
      * @return the converted double value
      */
-    public static double toDouble(char value) {
+    public static double toDoubleValue(char value) {
         if (value >= '0' && value <= '9') {
             return value - '0';
         }
@@ -927,7 +927,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted double value
      */
-    public static double toDouble(String value) {
+    public static double toDoubleValue(String value) {
         if (value == null) {
             return 0.0;
         }
@@ -943,7 +943,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted double value
      */
-    public static double toDouble(BigInteger value) {
+    public static double toDoubleValue(BigInteger value) {
         return value.doubleValue();
     }
 
@@ -952,7 +952,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted double value
      */
-    public static double toDouble(BigDecimal value) {
+    public static double toDoubleValue(BigDecimal value) {
         return value.doubleValue();
     }
 
@@ -965,7 +965,7 @@ public class Cast {
      * @param value the Object to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(Object value) {
+    public static boolean toBooleanValue(Object value) {
         if (value instanceof Boolean) {
             return (Boolean) value;
         }
@@ -980,16 +980,16 @@ public class Cast {
      */
     private static boolean toBooleanEx(Object value) {
         if (value instanceof BigInteger) {
-            return toBoolean((BigInteger) value);
+            return toBooleanValue((BigInteger) value);
         } else if (value instanceof BigDecimal) {
-            return toBoolean((BigDecimal) value);
+            return toBooleanValue((BigDecimal) value);
         } else if (value instanceof Number) {
             return ((Number) value).doubleValue() != 0;
         } else if (value instanceof Character) {
             return (Character) value != 0;
         }
         else if (value instanceof String) {
-            return toBoolean((String) value);
+            return toBooleanValue((String) value);
         }
         else if (value == null) {
             return false;
@@ -1011,7 +1011,7 @@ public class Cast {
      * @param value the byte to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(byte value) {
+    public static boolean toBooleanValue(byte value) {
         return value != 0;
     }
 
@@ -1020,7 +1020,7 @@ public class Cast {
      * @param value the short to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(short value) {
+    public static boolean toBooleanValue(short value) {
         return value != 0;
     }
 
@@ -1029,7 +1029,7 @@ public class Cast {
      * @param value the char to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(char value) {
+    public static boolean toBooleanValue(char value) {
         return value == '1' || value == 't' || value == 'T';
     }
 
@@ -1038,7 +1038,7 @@ public class Cast {
      * @param value the int to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(int value) {
+    public static boolean toBooleanValue(int value) {
         return value != 0;
     }
 
@@ -1047,7 +1047,7 @@ public class Cast {
      * @param value the long to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(long value) {
+    public static boolean toBooleanValue(long value) {
         return value != 0;
     }
 
@@ -1056,7 +1056,7 @@ public class Cast {
      * @param value the float to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(float value) {
+    public static boolean toBooleanValue(float value) {
         return value != 0.0f;
     }
 
@@ -1065,7 +1065,7 @@ public class Cast {
      * @param value the double to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(double value) {
+    public static boolean toBooleanValue(double value) {
         return value != 0.0;
     }
 
@@ -1074,7 +1074,7 @@ public class Cast {
      * @param value the String to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(String value) {
+    public static boolean toBooleanValue(String value) {
         if (value == null) {
             return false;
         }
@@ -1086,7 +1086,7 @@ public class Cast {
      * @param value the BigInteger to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(BigInteger value) {
+    public static boolean toBooleanValue(BigInteger value) {
         return !value.equals(BigInteger.ZERO);
     }
 
@@ -1095,7 +1095,7 @@ public class Cast {
      * @param value the BigDecimal to convert
      * @return the converted boolean value
      */
-    public static boolean toBoolean(BigDecimal value) {
+    public static boolean toBooleanValue(BigDecimal value) {
         return value.compareTo(BigDecimal.ZERO) != 0;
     }
 
