@@ -143,7 +143,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "56";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Byte.parseByte(stringValue), propertyAccessor.getObject(object));
             assertEquals((byte) 56, object.getByteField());
 
             // Test Object methods (setting a byte value as object)
@@ -155,19 +155,19 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("58");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(bigIntegerValue.byteValue(), propertyAccessor.getObject(object));
             assertEquals((byte) 58, object.getByteField());
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("59.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal((byte) 59), propertyAccessor.getObject(object)); // 59.9 -> 59 (byte) -> BigDecimal(59)
+            assertEquals(bigDecimalValue.byteValue(), propertyAccessor.getObject(object)); // 59.9 -> 59 (byte) -> BigDecimal(59)
             assertEquals((byte) 59, object.getByteField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "60");
             assertEquals((byte) 60, object.getByteField());
-            assertEquals("60", propertyAccessor.getObject(object));
+            assertEquals((byte) 60, propertyAccessor.getObject(object));
         }
     }
 
@@ -230,7 +230,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "254";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Short.parseShort(stringValue), propertyAccessor.getObject(object));
             assertEquals((short) 254, object.getShortField());
 
             // Test Object methods (setting a short value as object)
@@ -242,19 +242,19 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("256");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(bigIntegerValue.shortValue(), propertyAccessor.getObject(object));
             assertEquals((short) 256, object.getShortField());
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("257.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal((short) 257), propertyAccessor.getObject(object)); // 257.9 -> 257 (short) -> BigDecimal(257)
+            assertEquals(bigDecimalValue.shortValue(), propertyAccessor.getObject(object)); // 257.9 -> 257 (short) -> BigDecimal(257)
             assertEquals((short) 257, object.getShortField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "258");
             assertEquals((short) 258, object.getShortField());
-            assertEquals("258", propertyAccessor.getObject(object));
+            assertEquals((short) 258, propertyAccessor.getObject(object));
         }
     }
 
@@ -318,7 +318,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "2004";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Integer.parseInt(stringValue), propertyAccessor.getObject(object));
             assertEquals((int) 2004, object.getIntField());
 
             // Test Object methods (setting an int value as object)
@@ -330,19 +330,19 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("2006");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(bigIntegerValue.intValue(), propertyAccessor.getObject(object));
             assertEquals((int) 2006, object.getIntField());
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("2007.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal((int) 2007), propertyAccessor.getObject(object)); // 2007.9 -> 2007 (int) -> BigDecimal(2007)
+            assertEquals(bigDecimalValue.intValue(), propertyAccessor.getObject(object)); // 2007.9 -> 2007 (int) -> BigDecimal(2007)
             assertEquals((int) 2007, object.getIntField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "2008");
             assertEquals((int) 2008, object.getIntField());
-            assertEquals("2008", propertyAccessor.getObject(object));
+            assertEquals(2008, propertyAccessor.getObject(object));
         }
     }
 
@@ -404,7 +404,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "20003";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Long.parseLong(stringValue), propertyAccessor.getObject(object));
             assertEquals((long) 20003, object.getLongField());
 
             // Test Object methods (setting a long value as object)
@@ -416,19 +416,19 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("20005");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(bigIntegerValue.longValue(), propertyAccessor.getObject(object));
             assertEquals((long) 20005, object.getLongField());
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("20006.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal((long) 20006), propertyAccessor.getObject(object)); // 20006.9 -> 20006 (long) -> BigDecimal(20006)
+            assertEquals(bigDecimalValue.longValue(), propertyAccessor.getObject(object)); // 20006.9 -> 20006 (long) -> BigDecimal(20006)
             assertEquals((long) 20006, object.getLongField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "20007");
             assertEquals((long) 20007, object.getLongField());
-            assertEquals("20007", propertyAccessor.getObject(object));
+            assertEquals(20007L, propertyAccessor.getObject(object));
         }
     }
 
@@ -457,13 +457,13 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "20002";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals("20002.0", propertyAccessor.getObject(object));
+            assertEquals(Float.parseFloat(stringValue), propertyAccessor.getObject(object));
             assertEquals((float) 20002, object.getFloatField(), 0.01f);
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "20006");
             assertEquals((float) 20006, object.getFloatField(), 0.01f);
-            assertEquals("20006.0", propertyAccessor.getObject(object));
+            assertEquals((float) 20006.0, propertyAccessor.getObject(object));
 
             // Test primitive setters that can be converted to float
             byte byteValue = 50;
@@ -507,13 +507,13 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("20004");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(bigIntegerValue.floatValue(), propertyAccessor.getObject(object));
             assertEquals((float) 20004, object.getFloatField(), 0.01f);
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("20005.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal(bigDecimalValue.floatValue()), propertyAccessor.getObject(object)); // 20005.9 -> 20005 (float) -> BigDecimal(20005)
+            assertEquals(bigDecimalValue.floatValue(), propertyAccessor.getObject(object)); // 20005.9 -> 20005 (float) -> BigDecimal(20005)
             assertEquals(bigDecimalValue.floatValue(), object.getFloatField());
         }
     }
@@ -543,13 +543,13 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "20002";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals("20002.0", propertyAccessor.getObject(object));
+            assertEquals(Double.parseDouble(stringValue), propertyAccessor.getObject(object));
             assertEquals((double) 20002, object.getDoubleField(), 0.01);
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "20006");
             assertEquals((double) 20006, object.getDoubleField(), 0.01);
-            assertEquals("20006.0", propertyAccessor.getObject(object));
+            assertEquals((double) 20006.0, propertyAccessor.getObject(object));
 
             // Test primitive setters that can be converted to double
             byte byteValue = 50;
@@ -593,13 +593,13 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("20004");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(bigIntegerValue.doubleValue(), propertyAccessor.getObject(object));
             assertEquals((double) 20004, object.getDoubleField(), 0.01);
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("20005.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(BigDecimal.valueOf(bigDecimalValue.doubleValue()), propertyAccessor.getObject(object)); // 20005.9 -> 20005 (double) -> BigDecimal(20005)
+            assertEquals(bigDecimalValue.doubleValue(), propertyAccessor.getObject(object)); // 20005.9 -> 20005 (double) -> BigDecimal(20005)
             assertEquals(bigDecimalValue.doubleValue(), object.getDoubleField());
         }
     }
@@ -629,13 +629,13 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "G";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(stringValue.charAt(0), propertyAccessor.getObject(object));
             assertEquals('G', object.getCharField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "K");
             assertEquals('K', object.getCharField());
-            assertEquals("K", propertyAccessor.getObject(object));
+            assertEquals('K', propertyAccessor.getObject(object));
 
             // Test primitive setters that can be converted to char
             byte byteValue = 65; // 'A' in ASCII
@@ -679,13 +679,13 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("7"); // 'I' in ASCII
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals((char) bigIntegerValue.intValue(), propertyAccessor.getObject(object));
             assertEquals((char) bigIntegerValue.intValue(), object.getCharField());
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("4"); // 'J' in ASCII
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal(4), propertyAccessor.getObject(object)); // 74 -> 74 (char) -> BigDecimal(74)
+            assertEquals((char) bigDecimalValue.intValue(), propertyAccessor.getObject(object)); // 74 -> 74 (char) -> BigDecimal(74)
             assertEquals((char) bigDecimalValue.intValue(), object.getCharField());
         }
     }
@@ -715,13 +715,13 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "true";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Boolean.parseBoolean(stringValue), propertyAccessor.getObject(object));
             assertEquals(true, object.isBooleanField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "false");
             assertEquals(false, object.isBooleanField());
-            assertEquals("false", propertyAccessor.getObject(object));
+            assertEquals(false, propertyAccessor.getObject(object));
 
             // Test primitive setters that can be converted to boolean
             byte byteValue = 1; // true when converted to boolean
@@ -770,13 +770,13 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("1"); // true when converted to boolean
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(bigIntegerValue.intValue() != 0, propertyAccessor.getObject(object));
             assertEquals(true, object.isBooleanField());
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("0.0"); // false when converted to boolean
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal((boolean) (bigDecimalValue.compareTo(BigDecimal.ZERO) != 0) ? 1 : 0), propertyAccessor.getObject(object));
+            assertEquals(bigDecimalValue.compareTo(BigDecimal.ZERO) != 0, propertyAccessor.getObject(object));
             assertEquals(false, object.isBooleanField());
         }
     }
@@ -856,13 +856,13 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("20003");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(String.valueOf(bigIntegerValue), propertyAccessor.getObject(object));
             assertEquals(String.valueOf(bigIntegerValue), object.getStringField());
 
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("20004.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(bigDecimalValue, propertyAccessor.getObject(object));
+            assertEquals(String.valueOf(bigDecimalValue), propertyAccessor.getObject(object));
             assertEquals(String.valueOf(bigDecimalValue), object.getStringField());
         }
     }
@@ -892,19 +892,19 @@ public class PropertyAccessorFactoryTest {
             // Test BigDecimal methods
             BigDecimal bigDecimalValue = new BigDecimal("20005.9");
             propertyAccessor.setObject(object, bigDecimalValue);
-            assertEquals(new BigDecimal(BigInteger.valueOf(20005)), propertyAccessor.getObject(object)); // 20005.9 -> 20005 as integer part
+            assertEquals(bigDecimalValue.toBigInteger(), propertyAccessor.getObject(object)); // 20005.9 -> 20005 as integer part
             assertEquals(BigInteger.valueOf(20005), object.getBigIntegerField());
 
             // Test String methods
             String stringValue = "20003";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(new BigInteger(stringValue), propertyAccessor.getObject(object));
             assertEquals(new BigInteger("20003"), object.getBigIntegerField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "20006");
             assertEquals(new BigInteger("20006"), object.getBigIntegerField());
-            assertEquals("20006", propertyAccessor.getObject(object));
+            assertEquals(new BigInteger("20006"), propertyAccessor.getObject(object));
 
             // Test primitive setters that can be converted to BigInteger
             byte byteValue = 50;
@@ -972,19 +972,19 @@ public class PropertyAccessorFactoryTest {
             // Test BigInteger methods
             BigInteger bigIntegerValue = new BigInteger("20005");
             propertyAccessor.setObject(object, bigIntegerValue);
-            assertEquals(bigIntegerValue, propertyAccessor.getObject(object));
+            assertEquals(new BigDecimal(bigIntegerValue), propertyAccessor.getObject(object));
             assertEquals(new BigDecimal(bigIntegerValue), object.getBigDecimalField());
 
             // Test String methods
             String stringValue = "20003.8";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(new BigDecimal(stringValue), propertyAccessor.getObject(object));
             assertEquals(new BigDecimal("20003.8"), object.getBigDecimalField());
 
             // Test Object methods with different types
             propertyAccessor.setObject(object, "20006.1");
             assertEquals(new BigDecimal("20006.1"), object.getBigDecimalField());
-            assertEquals("20006.1", propertyAccessor.getObject(object));
+            assertEquals(new BigDecimal("20006.1"), propertyAccessor.getObject(object));
 
             // Test primitive setters that can be converted to BigDecimal
             byte byteValue = 50;
@@ -1070,7 +1070,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "57";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Byte.valueOf((byte) 57), propertyAccessor.getObject(object));
             assertEquals(Byte.valueOf((byte) 57), object.getByteObjField());
 
             // Test primitive setters that can be converted to Byte
@@ -1106,7 +1106,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "254";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Short.valueOf((short) 254), propertyAccessor.getObject(object));
             assertEquals(Short.valueOf((short) 254), object.getShortObjField());
 
             // Test primitive setters that can be converted to Short
@@ -1148,7 +1148,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "2005";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Integer.valueOf((int) 2005), propertyAccessor.getObject(object));
             assertEquals(Integer.valueOf((int) 2005), object.getIntObjField());
 
             // Test primitive setters that can be converted to Integer
@@ -1256,7 +1256,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "45.8";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Double.parseDouble(stringValue), propertyAccessor.getObject(object));
             assertEquals(Double.valueOf(Double.parseDouble(stringValue)), object.getDoubleObjField(), 0.01);
 
             // Test primitive setters that can be converted to Double
@@ -1292,7 +1292,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "G";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(stringValue.charAt(0), propertyAccessor.getObject(object));
             assertEquals(Character.valueOf('G'), object.getCharObjField());
 
             // Test primitive setters that can be converted to Character
@@ -1328,7 +1328,7 @@ public class PropertyAccessorFactoryTest {
             // Test String methods
             String stringValue = "true";
             propertyAccessor.setObject(object, stringValue);
-            assertEquals(stringValue, propertyAccessor.getObject(object));
+            assertEquals(Boolean.parseBoolean(stringValue), propertyAccessor.getObject(object));
             assertEquals(Boolean.valueOf(true), object.getBooleanObjField());
 
             // Test primitive setters that can be converted to Boolean
