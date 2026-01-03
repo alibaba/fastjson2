@@ -3043,9 +3043,13 @@ class JSONReaderUTF8
             return new String(bytes, offset, length, nameAscii ? ISO_8859_1 : UTF_8);
         }
 
-        char[] chars = new char[nameLength];
+        char[] chars = new char[nameLength + 4];
+        int i = 0;
+        for (int end = this.end; offset < nameEnd; ) {
+            if (i + 2 >= chars.length) {
+                chars = Arrays.copyOf(chars, chars.length + 8);
+            }
 
-        for (int i = 0, end = this.end; offset < nameEnd; ++i) {
             int ch = bytes[offset];
             if (ch < 0) {
                 ch &= 0xFF;
@@ -3055,19 +3059,41 @@ class JSONReaderUTF8
                         /* 110x xxxx   10xx xxxx*/
                         ch = char2_utf8(ch, bytes[offset + 1], offset);
                         offset += 2;
-                        break;
+                        chars[i++] = (char) ch;
+                        continue;
                     }
                     case 14: {
                         ch = char2_utf8(ch, bytes[offset + 1], bytes[offset + 2], offset);
                         offset += 3;
-                        break;
+                        chars[i++] = (char) ch;
+                        continue;
+                    }
+                    case 15: {
+                        if (offset + 3 >= bytes.length) {
+                            throw new JSONException("malformed input around byte " + offset);
+                        }
+                        int b1 = bytes[offset + 1] & 0xFF;
+                        int b2 = bytes[offset + 2] & 0xFF;
+                        int b3 = bytes[offset + 3] & 0xFF;
+                        if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80 || (b3 & 0xC0) != 0x80) {
+                            throw new JSONException("malformed input around byte " + offset);
+                        }
+                        int codePoint = ((ch & 0x07) << 18)
+                                | ((b1 & 0x3F) << 12)
+                                | ((b2 & 0x3F) << 6)
+                                | (b3 & 0x3F);
+                        if (codePoint < 0x10000 || codePoint > 0x10FFFF) {
+                            throw new JSONException("malformed input around byte " + offset);
+                        }
+                        offset += 4;
+                        chars[i++] = Character.highSurrogate(codePoint);
+                        chars[i++] = Character.lowSurrogate(codePoint);
+                        continue;
                     }
                     default:
                         /* 10xx xxxx,  1111 xxxx */
                         throw new JSONException("malformed input around byte " + offset);
                 }
-                chars[i] = (char) ch;
-                continue;
             }
 
             if (ch == '\\') {
@@ -3103,11 +3129,11 @@ class JSONReaderUTF8
             } else if (ch == '"') {
                 break;
             }
-            chars[i] = (char) ch;
+            chars[i++] = (char) ch;
             offset++;
         }
 
-        return new String(chars);
+        return new String(chars, 0, i);
     }
 
     @Override
