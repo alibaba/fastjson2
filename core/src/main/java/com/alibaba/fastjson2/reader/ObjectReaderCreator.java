@@ -2983,6 +2983,22 @@ public class ObjectReaderCreator {
                 }
             }
             if (itemType == null) {
+                Type[] genericInterfaces = ((Class<?>) fieldType).getGenericInterfaces();
+                for (Type genericInterface : genericInterfaces) {
+                    if (genericInterface instanceof ParameterizedType) {
+                        ParameterizedType parameterizedType = (ParameterizedType) genericInterface;
+                        Type rawType = parameterizedType.getRawType();
+                        if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
+                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                            if (actualTypeArguments.length > 0) {
+                                itemType = actualTypeArguments[0];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (itemType == null) {
                 itemType = Object.class;
             }
             Class itemClass = TypeUtils.getMapping(itemType);
