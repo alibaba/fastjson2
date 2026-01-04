@@ -9,7 +9,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +39,13 @@ public class PropertyAccessorFactoryVarHandleTest {
         private Float floatObjField = 10.5f;
         private Double doubleObjField = 20.7;
         private Boolean booleanObjField = true;
+
+        public TestClass() {
+        }
+
+        public TestClass(Byte byteObjField) {
+            this.byteObjField = byteObjField;
+        }
     }
 
     public static java.util.Map<Class<?>, Field> fieldMap = new java.util.HashMap<>();
@@ -98,8 +104,10 @@ public class PropertyAccessorFactoryVarHandleTest {
     @ParameterizedTest
     @MethodSource("propertyAccessorFactories")
     public void allocate(PropertyAccessorFactory factory) throws Exception {
-        Supplier supplier = factory.createSupplier(TestClass.class.getDeclaredConstructor());
-        assertNotNull(supplier.get());
+        assertNotNull(factory.createSupplier(TestClass.class.getDeclaredConstructor())
+                .get());
+
+        assertEquals((byte) 50, ((TestClass) factory.createFunction(TestClass.class.getDeclaredConstructor(Byte.class)).apply((byte) 50)).byteObjField);
     }
 
     @ParameterizedTest

@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -42,6 +43,7 @@ public final class PropertyAccessorFactoryMethodHandle
      * @param constructor the constructor to use for object instantiation
      * @return a Supplier that creates new instances using the provided constructor
      */
+    @Override
     public Supplier createSupplier(Constructor constructor) {
         try {
             MethodHandles.Lookup lookup = lookup(constructor.getDeclaringClass());
@@ -56,6 +58,32 @@ public final class PropertyAccessorFactoryMethodHandle
         } catch (Throwable ignored) {
             // ignore
             return super.createSupplier(constructor);
+        }
+    }
+
+    /**
+     * Creates a Function that can instantiate objects using the given constructor
+     * via MethodHandle for better performance than traditional reflection.
+     * If the MethodHandle approach fails, it falls back to the parent class implementation.
+     *
+     * @param constructor the constructor to use for object instantiation
+     * @return a Supplier that creates new instances using the provided constructor
+     */
+    @Override
+    public Function createFunction(Constructor constructor) {
+        try {
+            MethodHandles.Lookup lookup = lookup(constructor.getDeclaringClass());
+            MethodHandle methodHandle = lookup.unreflectConstructor(constructor);
+            return (arg) -> {
+                try {
+                    return methodHandle.invoke(arg);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (Throwable ignored) {
+            // ignore
+            return super.createFunction(constructor);
         }
     }
 

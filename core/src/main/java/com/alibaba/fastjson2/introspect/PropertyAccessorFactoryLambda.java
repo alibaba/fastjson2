@@ -10,8 +10,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.*;
 
-import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT;
-import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_SUPPLIER;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT_OBJECT;
 
 @SuppressWarnings("ALL")
 public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFactory {
@@ -57,6 +57,60 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
             // ignore
         }
         return super.createSupplier(constructor);
+    }
+
+    public Function createFunction(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class, param0)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT,
+                    methodHandle,
+                    MethodType.methodType(declaringClass, box(param0))
+            );
+            return (Function) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            return super.createFunction(constructor);
+        }
+    }
+
+    static Class<?> box(Class cls) {
+        if (cls == int.class) {
+            return Integer.class;
+        }
+        if (cls == long.class) {
+            return Long.class;
+        }
+        if (cls == boolean.class) {
+            return Boolean.class;
+        }
+        if (cls == short.class) {
+            return Short.class;
+        }
+        if (cls == byte.class) {
+            return Byte.class;
+        }
+        if (cls == char.class) {
+            return Character.class;
+        }
+        if (cls == float.class) {
+            return Float.class;
+        }
+        if (cls == double.class) {
+            return Double.class;
+        }
+        return cls;
     }
 
     /**
