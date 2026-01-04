@@ -14,6 +14,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -57,6 +58,7 @@ public class PropertyAccessorBenchmark {
     })
     public String factory;
     private PropertyAccessorFactory propertyAccessorFactory;
+    private Supplier supplier;
     private TestClass testObject;
 
     private PropertyAccessor
@@ -85,6 +87,13 @@ public class PropertyAccessorBenchmark {
             doubleGetterAccessor,
             doubleSetterAccessor;
 
+    /**
+     * Setup method that initializes the PropertyAccessorFactory based on the factory parameter
+     * and creates property accessors for different field types in the TestClass.
+     * This method is executed once before each benchmark run.
+     *
+     * @throws Exception if an error occurs during setup
+     */
     @Setup
     public void setup() throws Exception {
         propertyAccessorFactory = switch (factory) {
@@ -176,9 +185,28 @@ public class PropertyAccessorBenchmark {
         doubleSetterAccessor = propertyAccessorFactory.create(
                 clazz.getDeclaredMethod("setDoubleField", double.class));
 
-        testObject = new TestClass();
+        supplier = propertyAccessorFactory.createSupplier(clazz.getDeclaredConstructor());
     }
 
+    /**
+     * Benchmark for measuring object allocation performance using Supplier.
+     * This test measures how quickly objects can be instantiated using the
+     * Supplier created by the PropertyAccessorFactory.
+     *
+     * @param bh Blackhole to prevent dead code elimination
+     */
+    @Benchmark
+    public void allocate(Blackhole bh) {
+        bh.consume(supplier.get());
+    }
+
+    /**
+     * Benchmark for measuring field getter performance.
+     * This test measures the performance of getting field values using
+     * PropertyAccessor implementations for different primitive types.
+     *
+     * @param bh Blackhole to prevent dead code elimination
+     */
     @Benchmark
     public void fieldGet(Blackhole bh) {
         bh.consume(byteFieldAccessor.getByteValue(testObject));
@@ -191,6 +219,13 @@ public class PropertyAccessorBenchmark {
         bh.consume(doubleFieldAccessor.getDoubleValue(testObject));
     }
 
+    /**
+     * Benchmark for measuring field setter performance.
+     * This test measures the performance of setting field values using
+     * PropertyAccessor implementations for different primitive types.
+     *
+     * @param bh Blackhole to prevent dead code elimination
+     */
     @Benchmark
     public void fieldSet(Blackhole bh) {
         byteFieldAccessor.setByteValue(testObject, (byte) 30);
@@ -204,6 +239,13 @@ public class PropertyAccessorBenchmark {
         bh.consume(testObject);
     }
 
+    /**
+     * Benchmark for measuring method getter performance.
+     * This test measures the performance of getting values through getter methods
+     * using PropertyAccessor implementations for different primitive types.
+     *
+     * @param bh Blackhole to prevent dead code elimination
+     */
     @Benchmark
     public void getter(Blackhole bh) {
         bh.consume(byteGetterAccessor.getByteValue(testObject));
@@ -216,6 +258,13 @@ public class PropertyAccessorBenchmark {
         bh.consume(doubleGetterAccessor.getDoubleValue(testObject));
     }
 
+    /**
+     * Benchmark for measuring method setter performance.
+     * This test measures the performance of setting values through setter methods
+     * using PropertyAccessor implementations for different primitive types.
+     *
+     * @param bh Blackhole to prevent dead code elimination
+     */
     @Benchmark
     public void setter(Blackhole bh) {
         byteSetterAccessor.setByteValue(testObject, (byte) 30);
@@ -229,9 +278,18 @@ public class PropertyAccessorBenchmark {
         bh.consume(testObject);
     }
 
+    /**
+     * Main method to run the PropertyAccessorBenchmark.
+     * This method sets up the benchmark options and runs the Runner.
+     * It specifically includes only the allocate benchmark method,
+     * with 1 warmup iteration, 1 measurement iteration, and 1 fork.
+     *
+     * @param args command-line arguments (not used)
+     * @throws Exception if an error occurs during benchmark execution
+     */
     public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
-                .include(PropertyAccessorBenchmark.class.getSimpleName())
+                .include(PropertyAccessorBenchmark.class.getSimpleName() + ".allocate")
                 .warmupIterations(1)
                 .measurementIterations(1)
                 .forks(1)

@@ -4,13 +4,14 @@ import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.util.JDKUtils;
 
-import java.lang.invoke.LambdaMetafactory;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.lang.invoke.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.*;
+
+import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT;
+import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_SUPPLIER;
 
 @SuppressWarnings("ALL")
 public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFactory {
@@ -27,6 +28,38 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
     }
 
     /**
+     * Creates a Supplier that can instantiate objects using the given constructor
+     * via MethodHandle and LambdaMetafactory for better performance than reflection.
+     * If the MethodHandle approach fails, it falls back to the parent class implementation.
+     *
+     * @param constructor the constructor to use for object instantiation
+     * @return a Supplier that creates new instances using the provided constructor
+     */
+    public Supplier createSupplier(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "get",
+                    METHOD_TYPE_SUPPLIER,
+                    METHOD_TYPE_OBJECT,
+                    methodHandle,
+                    MethodType.methodType(declaringClass)
+            );
+            return (Supplier) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            // ignore
+        }
+        return super.createSupplier(constructor);
+    }
+
+    /**
      * Creates a property accessor using getter and/or setter methods.
      * This method delegates to the parent class's implementation.
      *
@@ -35,7 +68,7 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
      * @param setter the setter method (optional, may be null)
      * @return a PropertyAccessor instance for the specified getter/setter methods
      */
-    public PropertyAccessor create(String name, Method getter, Method setter) {
+    public PropertyAccessor createSupplier(String name, Method getter, Method setter) {
         return super.create(name, null, null, getter, setter);
     }
 

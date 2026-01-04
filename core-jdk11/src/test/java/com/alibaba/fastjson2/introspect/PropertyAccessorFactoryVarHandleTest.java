@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -84,6 +85,21 @@ public class PropertyAccessorFactoryVarHandleTest {
                 new PropertyAccessorFactoryVarHandle(),
                 new PropertyAccessorFactoryMethodHandle()
         };
+    }
+
+    /**
+     * Tests the createSupplier method of PropertyAccessorFactory.
+     * This test verifies that the factory can create a Supplier that successfully
+     * instantiates objects using the given constructor.
+     *
+     * @param factory the PropertyAccessorFactory to test
+     * @throws Exception if an error occurs during the test
+     */
+    @ParameterizedTest
+    @MethodSource("propertyAccessorFactories")
+    public void allocate(PropertyAccessorFactory factory) throws Exception {
+        Supplier supplier = factory.createSupplier(TestClass.class.getDeclaredConstructor());
+        assertNotNull(supplier.get());
     }
 
     @ParameterizedTest

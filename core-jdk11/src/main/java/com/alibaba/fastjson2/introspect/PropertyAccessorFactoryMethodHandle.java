@@ -7,11 +7,13 @@ import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.function.Supplier;
 
 /**
  * Property accessor factory that uses MethodHandles.Lookup for field access.
@@ -19,7 +21,7 @@ import java.math.BigInteger;
  * instead of VarHandle for field access, providing an alternative way to access
  * object properties efficiently.
  */
-public class PropertyAccessorFactoryMethodHandle
+public final class PropertyAccessorFactoryMethodHandle
         extends PropertyAccessorFactoryLambda {
     public PropertyAccessorFactoryMethodHandle() {
     }
@@ -29,6 +31,31 @@ public class PropertyAccessorFactoryMethodHandle
             return JDKUtils.trustedLookup(declaringClass);
         } else {
             return MethodHandles.lookup().in(declaringClass);
+        }
+    }
+
+    /**
+     * Creates a Supplier that can instantiate objects using the given constructor
+     * via MethodHandle for better performance than traditional reflection.
+     * If the MethodHandle approach fails, it falls back to the parent class implementation.
+     *
+     * @param constructor the constructor to use for object instantiation
+     * @return a Supplier that creates new instances using the provided constructor
+     */
+    public Supplier createSupplier(Constructor constructor) {
+        try {
+            MethodHandles.Lookup lookup = lookup(constructor.getDeclaringClass());
+            MethodHandle methodHandle = lookup.unreflectConstructor(constructor);
+            return () -> {
+                try {
+                    return methodHandle.invoke();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (Throwable ignored) {
+            // ignore
+            return super.createSupplier(constructor);
         }
     }
 

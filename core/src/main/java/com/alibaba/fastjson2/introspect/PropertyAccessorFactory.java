@@ -5,10 +5,7 @@ import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.Cast;
 import com.alibaba.fastjson2.util.BeanUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.function.*;
@@ -35,6 +32,85 @@ import static com.alibaba.fastjson2.internal.Cast.*;
  */
 @SuppressWarnings("ALL")
 public class PropertyAccessorFactory {
+    /**
+     * Creates a Supplier that can instantiate objects using the given constructor.
+     * This method provides a way to create object instances via constructor reflection
+     * in a functional programming style.
+     *
+     * @param constructor the constructor to use for object instantiation
+     * @return a Supplier that creates new instances using the provided constructor
+     */
+    public Supplier createSupplier(Constructor constructor) {
+        return new ConstructorSupplier(constructor);
+    }
+
+    /**
+     * A Supplier implementation that uses reflection to create new instances
+     * of a class via its constructor. This class handles constructor accessibility
+     * and instantiation errors appropriately.
+     */
+    class ConstructorSupplier implements Supplier {
+        private final Constructor constructor;
+
+        /**
+         * Creates a ConstructorSupplier for the given constructor.
+         * Automatically makes the constructor accessible.
+         *
+         * @param constructor the constructor to use for instantiation
+         */
+        public ConstructorSupplier(Constructor constructor) {
+            this.constructor = constructor;
+            setAccessible();
+        }
+
+        /**
+         * Makes the constructor accessible, handling any security exceptions
+         * that might occur during the process.
+         */
+        protected void setAccessible() {
+            try {
+                constructor.setAccessible(true);
+            } catch (Exception e) {
+                throw new JSONException(e.getMessage(), e);
+            }
+        }
+
+        /**
+         * Creates a specific JSON exception for constructor accessibility errors.
+         *
+         * @param e the original exception that occurred
+         * @return a JSONException with detailed error information
+         */
+        protected JSONException errorOnSetAccessible(Exception e) {
+            return new JSONException(constructor.toString().concat(" setAccessible error"), e);
+        }
+
+        /**
+         * Creates a specific JSON exception for constructor instantiation errors.
+         *
+         * @param e the original exception that occurred
+         * @return a JSONException with detailed error information
+         */
+        protected JSONException errorOnNewInstance(Exception e) {
+            return new JSONException(constructor.toString().concat(" newInstance error"), e);
+        }
+
+        /**
+         * Creates a new instance of the class using the constructor.
+         *
+         * @return a new instance of the class
+         * @throws JSONException if instantiation fails
+         */
+        @Override
+        public Object get() {
+            try {
+                return constructor.newInstance();
+            } catch (Exception e) {
+                throw errorOnNewInstance(e);
+            }
+        }
+    }
+
     /**
      * Creates a property accessor for the specified field.
      * This method analyzes the field type and returns an appropriate
