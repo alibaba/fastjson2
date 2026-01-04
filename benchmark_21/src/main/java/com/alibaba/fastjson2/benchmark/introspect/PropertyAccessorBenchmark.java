@@ -1,10 +1,10 @@
-package com.alibaba.fastjson2.benchmark.reflect;
+package com.alibaba.fastjson2.benchmark.introspect;
 
-import com.alibaba.fastjson2.reflect.PropertyAccessor;
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactory;
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactoryMethodHandle;
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactoryUnsafe;
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactoryVarHandle;
+import com.alibaba.fastjson2.introspect.PropertyAccessor;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactoryMethodHandle;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactoryUnsafe;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactoryVarHandle;
 import lombok.Getter;
 import lombok.Setter;
 import org.openjdk.jmh.annotations.*;

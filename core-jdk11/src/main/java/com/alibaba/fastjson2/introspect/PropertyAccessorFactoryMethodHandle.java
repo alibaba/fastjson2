@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.reflect;
+package com.alibaba.fastjson2.introspect;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.internal.Conf;

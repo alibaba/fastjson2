@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.internal;
 
-import com.alibaba.fastjson2.reflect.PropertyAccessor;
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactory;
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactoryUnsafe;
+import com.alibaba.fastjson2.introspect.PropertyAccessor;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactoryUnsafe;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.io.InputStream;

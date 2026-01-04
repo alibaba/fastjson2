@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.reflect;
+package com.alibaba.fastjson2.introspect;
 
 import java.lang.reflect.Type;
 

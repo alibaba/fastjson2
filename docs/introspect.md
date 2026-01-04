@@ -76,19 +76,20 @@ The `PropertyAccessorFactoryLambda` extends the base factory to provide:
 ### Creating Field-Based Accessors
 
 ```java
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactory;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
+
 import java.lang.reflect.Field;
 
 public class Example {
     private int value;
     private String name;
-    
+
     public static void main(String[] args) throws NoSuchFieldException {
         PropertyAccessorFactory factory = new PropertyAccessorFactory();
-        
+
         Field valueField = Example.class.getDeclaredField("value");
         PropertyAccessor valueAccessor = factory.create(valueField);
-        
+
         Example obj = new Example();
         valueAccessor.setIntValue(obj, 42);
         int value = valueAccessor.getIntValue(obj);
@@ -100,23 +101,29 @@ public class Example {
 ### Creating Method-Based Accessors
 
 ```java
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactory;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
+
 import java.lang.reflect.Method;
 
 public class Example {
     private String name;
-    
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public static void main(String[] args) throws NoSuchMethodException {
         PropertyAccessorFactory factory = new PropertyAccessorFactory();
-        
+
         Method getter = Example.class.getMethod("getName");
         Method setter = Example.class.getMethod("setName", String.class);
-        
+
         PropertyAccessor accessor = factory.create("name", getter, setter);
-        
+
         Example obj = new Example();
         accessor.setObject(obj, "Hello");
         String name = (String) accessor.getObject(obj);
@@ -128,23 +135,23 @@ public class Example {
 ### Creating Function-Based Accessors
 
 ```java
-import com.alibaba.fastjson2.reflect.PropertyAccessorFactory;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
 
 import java.util.function.Function;
 import java.util.function.BiConsumer;
 
 public class Example {
     public String value;
-    
+
     public static void main(String[] args) {
         PropertyAccessorFactory factory = new PropertyAccessorFactory();
-        
+
         Function<Example, String> getter = obj -> obj.value;
         BiConsumer<Example, String> setter = (obj, val) -> obj.value = val;
-        
+
         PropertyAccessor accessor = factory.create(
-            "value", String.class, String.class, getter, setter);
-            
+                "value", String.class, String.class, getter, setter);
+
         Example obj = new Example();
         accessor.setObject(obj, "Test");
         String value = (String) accessor.getObject(obj);

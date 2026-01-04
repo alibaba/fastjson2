@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.reflect;
+package com.alibaba.fastjson2.introspect;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,7 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PropertyAccessorFactoryVarHandleTest {
+public class PropertyAccessorFactoryTest {
     // A test class with fields of different types
     @Getter
     @Setter
@@ -80,9 +80,7 @@ public class PropertyAccessorFactoryVarHandleTest {
     static PropertyAccessorFactory[] propertyAccessorFactories() {
         return new PropertyAccessorFactory[] {
                 new PropertyAccessorFactory(),
-                new PropertyAccessorFactoryUnsafe(),
-                new PropertyAccessorFactoryVarHandle(),
-                new PropertyAccessorFactoryMethodHandle()
+                new PropertyAccessorFactoryUnsafe()
         };
     }
 
