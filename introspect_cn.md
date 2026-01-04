@@ -94,6 +94,83 @@
 - `createFunction(Constructor)`：创建一个可以使用给定构造函数实例化对象的 Function
 - `createIntFunction(Constructor)`、`createLongFunction(Constructor)`、`createDoubleFunction(Constructor)`：为不同类型参数创建专门的函数类型
 
+## 架构图示
+
+### 类继承层次图
+
+```
+                                    PropertyAccessor (接口)
+                                           |
+                                    PropertyAccessorObject
+                                           |
+                   +------------------------+------------------------+
+                   |                        |                        |
+            FieldAccessor              MethodAccessor        FunctionAccessor
+                   |                        |                        |
+         +---------+---------+              |                        |
+         |         |         |              |                        |
+   FieldAccessor   |         |              |                        |
+  Reflect/Unsafe/  |         |              |                        |
+  MethodHandle/    |         |              |                        |
+  VarHandle        |         |              |                        |
+         |         |         |              |                        |
+         +---------+---------+              |                        |
+                   |                        |                        |
+                   +------------------------+------------------------+
+                                            |
+                                    PropertyAccessorFactory
+                                            |
+                   +------------------------+------------------------+
+                   |                        |                        |
+      PropertyAccessorFactoryLambda  PropertyAccessorFactoryUnsafe  |
+                   |                        |                        |
+                   |            +-----------+-----------+            |
+                   |            |           |           |            |
+                   |    PropertyAccessorFactoryVarHandle |            |
+                   |            |           |           |            |
+                   |            |    PropertyAccessorFactoryMethodHandle
+                   |            |           |           |
+                   |            |           |           |
+         (基于Lambda)       (基于VarHandle)       (基于MethodHandle)
+```
+
+### 组件交互图
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Fastjson2 内省包                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────────┐    ┌─────────────────────┐    ┌─────────────┐ │
+│  │    用户代码     │    │    属性访问器       │    │    对象     │ │
+│  │  (JSON序列化/    │◄──►│  (PropertyAccessor) │◄──►│   字段/     │ │
+│  │   反序列化)     │    │                     │    │  方法/函数  │ │
+│  └─────────────────┘    └─────────────────────┘    └─────────────┘ │
+│         │                        │                                    │
+│         │                        │                                    │
+│         │    ┌─────────────────────────────────────────────────────┐ │
+│         └───►│ 工厂层次结构                                        │ │
+│              │                                                     │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ Factory (Base)      │ │ FactoryMethodHandle     │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              │        ▲                           ▲                │ │
+│              │        │                           │                │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ FactoryLambda       │ │ FactoryVarHandle        │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              │        ▲                           ▲                │ │
+│              │        │                           │                │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ FactoryUnsafe       │ │ FactoryMethodHandle     │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
 ## 性能考虑
 
 内省包在设计时考虑了性能：

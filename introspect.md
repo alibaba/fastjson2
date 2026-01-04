@@ -94,6 +94,83 @@ The factory also provides methods to create constructor-based functions:
 - `createFunction(Constructor)`: Creates a Function that can instantiate objects using the given constructor
 - `createIntFunction(Constructor)`, `createLongFunction(Constructor)`, `createDoubleFunction(Constructor)`: Create specialized function types for different parameter types
 
+## Architecture Diagrams
+
+### Class Hierarchy Diagram
+
+```
+                                    PropertyAccessor (Interface)
+                                           |
+                                    PropertyAccessorObject
+                                           |
+                   +------------------------+------------------------+
+                   |                        |                        |
+            FieldAccessor              MethodAccessor        FunctionAccessor
+                   |                        |                        |
+         +---------+---------+              |                        |
+         |         |         |              |                        |
+   FieldAccessor   |         |              |                        |
+  Reflect/Unsafe/  |         |              |                        |
+  MethodHandle/    |         |              |                        |
+  VarHandle        |         |              |                        |
+         |         |         |              |                        |
+         +---------+---------+              |                        |
+                   |                        |                        |
+                   +------------------------+------------------------+
+                                            |
+                                    PropertyAccessorFactory
+                                            |
+                   +------------------------+------------------------+
+                   |                        |                        |
+      PropertyAccessorFactoryLambda  PropertyAccessorFactoryUnsafe  |
+                   |                        |                        |
+                   |            +-----------+-----------+            |
+                   |            |           |           |            |
+                   |    PropertyAccessorFactoryVarHandle |            |
+                   |            |           |           |            |
+                   |            |    PropertyAccessorFactoryMethodHandle
+                   |            |           |           |
+                   |            |           |           |
+         (Lambda-based)    (VarHandle-based)    (MethodHandle-based)
+```
+
+### Component Interaction Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Fastjson2 Introspect Package                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────────┐    ┌─────────────────────┐    ┌─────────────┐ │
+│  │   User Code     │    │  Property Accessor  │    │   Object    │ │
+│  │ (JSON Ser/Des)  │◄──►│  (PropertyAccessor) │◄──►│   Fields/   │ │
+│  └─────────────────┘    └─────────────────────┘    │ Methods/    │ │
+│         │                        │                  │ Functions   │ │
+│         │                        │                  └─────────────┘ │
+│         │                        │                                    │
+│         │    ┌─────────────────────────────────────────────────────┐ │
+│         └───►│ Factory Hierarchy                                   │ │
+│              │                                                     │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ Factory (Base)      │ │ FactoryMethodHandle     │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              │        ▲                           ▲                │ │
+│              │        │                           │                │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ FactoryLambda       │ │ FactoryVarHandle        │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              │        ▲                           ▲                │ │
+│              │        │                           │                │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ FactoryUnsafe       │ │ FactoryMethodHandle     │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
 ## Performance Considerations
 
 The introspect package is designed with performance in mind:
