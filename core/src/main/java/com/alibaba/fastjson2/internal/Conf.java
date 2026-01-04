@@ -126,7 +126,8 @@ public final class Conf {
         PropertyAccessorFactory propertyAccessorFactory = null;
         if (JDKUtils.JVM_VERSION >= 11) {
             try {
-                Class<?> classV = Conf.class.getClassLoader().loadClass("com.alibaba.fastjson2.internal.PropertyAccessorFactoryVarHandle");
+                String factoryClassNameJDK11 = "com.alibaba.fastjson2.internal.PropertyAccessorFactoryMethodHandle";
+                Class<?> classV = Conf.class.getClassLoader().loadClass(factoryClassNameJDK11);
                 propertyAccessorFactory = (PropertyAccessorFactory) classV.newInstance();
             } catch (Exception ignored) {
                 // ignore
