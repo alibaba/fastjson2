@@ -1475,7 +1475,7 @@ public class TypeUtils {
         }
 
         if (targetClass == String.class) {
-            if (obj instanceof Character) {
+            if (obj instanceof Character || obj instanceof Number || obj instanceof Boolean || obj instanceof Enum) {
                 return (T) obj.toString();
             }
 
