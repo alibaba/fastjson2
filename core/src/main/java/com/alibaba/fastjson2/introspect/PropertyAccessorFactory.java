@@ -54,20 +54,40 @@ public class PropertyAccessorFactory {
     }
 
     /**
-     * A Supplier implementation that uses reflection to create new instances
-     * of a class via its constructor. This class handles constructor accessibility
-     * and instantiation errors appropriately.
+     * Creates a Function that can instantiate objects using the given constructor.
+     * @param constructor the constructor to use for object instantiation
+     * @return a Function that creates new instances using the provided constructor
      */
-    static final class ConstructorSupplier implements Supplier {
-        private final Constructor constructor;
+    public IntFunction createIntFunction(Constructor constructor) {
+        return new ConstructorIntFunction(constructor);
+    }
 
-        /**
-         * Creates a ConstructorSupplier for the given constructor.
-         * Automatically makes the constructor accessible.
-         *
-         * @param constructor the constructor to use for instantiation
-         */
-        public ConstructorSupplier(Constructor constructor) {
+    /**
+     * Creates a Function that can instantiate objects using the given constructor.
+     * @param constructor the constructor to use for object instantiation
+     * @return a Function that creates new instances using the provided constructor
+     */
+    public LongFunction createLongFunction(Constructor constructor) {
+        return new ConstructorLongFunction(constructor);
+    }
+
+    /**
+     * Creates a Function that can instantiate objects using the given constructor.
+     * @param constructor the constructor to use for object instantiation
+     * @return a Function that creates new instances using the provided constructor
+     */
+    public DoubleFunction createDoubleFunction(Constructor constructor) {
+        return new ConstructorDoubleFunction(constructor);
+    }
+
+    /**
+     * Base class for Constructor-based Function implementations.
+     * Handles constructor accessibility and instantiation errors.
+     */
+    abstract static class ConstructorFunctionBase {
+        protected final Constructor constructor;
+
+        public ConstructorFunctionBase(Constructor constructor) {
             this.constructor = constructor;
             setAccessible();
         }
@@ -102,6 +122,17 @@ public class PropertyAccessorFactory {
          */
         protected JSONException errorOnNewInstance(Exception e) {
             return new JSONException(constructor.toString().concat(" newInstance error"), e);
+        }
+    }
+
+    /**
+     * A Supplier implementation that uses reflection to create new instances
+     * of a class via its constructor. This class handles constructor accessibility
+     * and instantiation errors appropriately.
+     */
+    static final class ConstructorSupplier extends ConstructorFunctionBase implements Supplier {
+        public ConstructorSupplier(Constructor constructor) {
+            super(constructor);
         }
 
         /**
@@ -120,9 +151,7 @@ public class PropertyAccessorFactory {
         }
     }
 
-    static final class ConstructorFunction implements Function {
-        private final Constructor constructor;
-
+    static final class ConstructorFunction extends ConstructorFunctionBase implements Function {
         /**
          * Creates a ConstructorSupplier for the given constructor.
          * Automatically makes the constructor accessible.
@@ -130,44 +159,83 @@ public class PropertyAccessorFactory {
          * @param constructor the constructor to use for instantiation
          */
         public ConstructorFunction(Constructor constructor) {
-            this.constructor = constructor;
-            setAccessible();
-        }
-
-        /**
-         * Makes the constructor accessible, handling any security exceptions
-         * that might occur during the process.
-         */
-        protected void setAccessible() {
-            try {
-                constructor.setAccessible(true);
-            } catch (Exception e) {
-                throw new JSONException(e.getMessage(), e);
-            }
-        }
-
-        /**
-         * Creates a specific JSON exception for constructor accessibility errors.
-         *
-         * @param e the original exception that occurred
-         * @return a JSONException with detailed error information
-         */
-        protected JSONException errorOnSetAccessible(Exception e) {
-            return new JSONException(constructor.toString().concat(" setAccessible error"), e);
-        }
-
-        /**
-         * Creates a specific JSON exception for constructor instantiation errors.
-         *
-         * @param e the original exception that occurred
-         * @return a JSONException with detailed error information
-         */
-        protected JSONException errorOnNewInstance(Exception e) {
-            return new JSONException(constructor.toString().concat(" newInstance error"), e);
+            super(constructor);
         }
 
         @Override
         public Object apply(Object arg) {
+            try {
+                return constructor.newInstance(arg);
+            } catch (Exception e) {
+                throw errorOnNewInstance(e);
+            }
+        }
+    }
+
+    /**
+     * A Supplier implementation that uses reflection to create new instances
+     * of a class via its constructor. This class handles constructor accessibility
+     * and instantiation errors appropriately.
+     */
+    static final class ConstructorIntFunction extends ConstructorFunctionBase implements IntFunction {
+        /**
+         * Creates a ConstructorSupplier for the given constructor.
+         * Automatically makes the constructor accessible.
+         *
+         * @param constructor the constructor to use for instantiation
+         */
+        public ConstructorIntFunction(Constructor constructor) {
+            super(constructor);
+        }
+
+        @Override
+        public Object apply(int arg) {
+            try {
+                return constructor.newInstance(arg);
+            } catch (Exception e) {
+                throw errorOnNewInstance(e);
+            }
+        }
+    }
+
+    /**
+     * A Supplier implementation that uses reflection to create new instances
+     * of a class via its constructor. This class handles constructor accessibility
+     * and instantiation errors appropriately.
+     */
+    static final class ConstructorLongFunction extends ConstructorFunctionBase implements LongFunction {
+        /**
+         * Creates a ConstructorSupplier for the given constructor.
+         * Automatically makes the constructor accessible.
+         *
+         * @param constructor the constructor to use for instantiation
+         */
+        public ConstructorLongFunction(Constructor constructor) {
+            super(constructor);
+        }
+
+        @Override
+        public Object apply(long arg) {
+            try {
+                return constructor.newInstance(arg);
+            } catch (Exception e) {
+                throw errorOnNewInstance(e);
+            }
+        }
+    }
+
+    /**
+     * A Supplier implementation that uses reflection to create new instances
+     * of a class via its constructor. This class handles constructor accessibility
+     * and instantiation errors appropriately.
+     */
+    static final class ConstructorDoubleFunction extends ConstructorFunctionBase implements DoubleFunction {
+        public ConstructorDoubleFunction(Constructor constructor) {
+            super(constructor);
+        }
+
+        @Override
+        public Object apply(double arg) {
             try {
                 return constructor.newInstance(arg);
             } catch (Exception e) {

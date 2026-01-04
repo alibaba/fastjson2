@@ -85,6 +85,80 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         }
     }
 
+    public IntFunction createIntFunction(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class, param0)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_INT_FUNCTION,
+                    METHOD_TYPE_OBJECT_INT,
+                    methodHandle,
+                    MethodType.methodType(declaringClass, box(param0))
+            );
+            return (IntFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            return super.createIntFunction(constructor);
+        }
+    }
+
+    public LongFunction createLongFunction(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class, param0)
+            );
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_LONG_FUNCTION,
+                    METHOD_TYPE_OBJECT_LONG,
+                    methodHandle,
+                    MethodType.methodType(declaringClass, box(param0))
+            );
+            return (LongFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            return super.createLongFunction(constructor);
+        }
+    }
+
+    public DoubleFunction createDoubleFunction(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class, param0)
+            );
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_DOUBLE_FUNCTION,
+                    METHOD_TYPE_OBJECT_DOUBLE,
+                    methodHandle,
+                    MethodType.methodType(declaringClass, box(param0))
+            );
+            return (DoubleFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            return super.createDoubleFunction(constructor);
+        }
+    }
+
     static Class<?> box(Class cls) {
         if (cls == int.class) {
             return Integer.class;

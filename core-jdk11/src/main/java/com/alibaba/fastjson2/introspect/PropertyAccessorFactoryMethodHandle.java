@@ -13,8 +13,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * Property accessor factory that uses MethodHandles.Lookup for field access.
@@ -84,6 +83,60 @@ public final class PropertyAccessorFactoryMethodHandle
         } catch (Throwable ignored) {
             // ignore
             return super.createFunction(constructor);
+        }
+    }
+
+    @Override
+    public IntFunction createIntFunction(Constructor constructor) {
+        try {
+            MethodHandles.Lookup lookup = lookup(constructor.getDeclaringClass());
+            MethodHandle methodHandle = lookup.unreflectConstructor(constructor);
+            return (arg) -> {
+                try {
+                    return methodHandle.invoke(arg);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (Throwable ignored) {
+            // ignore
+            return super.createIntFunction(constructor);
+        }
+    }
+
+    @Override
+    public LongFunction createLongFunction(Constructor constructor) {
+        try {
+            MethodHandles.Lookup lookup = lookup(constructor.getDeclaringClass());
+            MethodHandle methodHandle = lookup.unreflectConstructor(constructor);
+            return (arg) -> {
+                try {
+                    return methodHandle.invoke(arg);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (Throwable ignored) {
+            // ignore
+            return super.createLongFunction(constructor);
+        }
+    }
+
+    @Override
+    public DoubleFunction createDoubleFunction(Constructor constructor) {
+        try {
+            MethodHandles.Lookup lookup = lookup(constructor.getDeclaringClass());
+            MethodHandle methodHandle = lookup.unreflectConstructor(constructor);
+            return (arg) -> {
+                try {
+                    return methodHandle.invoke(arg);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (Throwable ignored) {
+            // ignore
+            return super.createDoubleFunction(constructor);
         }
     }
 

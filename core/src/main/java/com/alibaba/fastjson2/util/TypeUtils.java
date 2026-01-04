@@ -50,6 +50,7 @@ public class TypeUtils {
     public static final MethodType METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class);
     public static final MethodType METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
     public static final MethodType METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class);
+    public static final MethodType METHOD_TYPE_DOUBLE_FUNCTION = MethodType.methodType(DoubleFunction.class);
     public static final MethodType METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class);
     public static final MethodType METHOD_TYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class);
     public static final MethodType METHOD_TYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class);
@@ -60,6 +61,7 @@ public class TypeUtils {
     public static final MethodType METHOD_TYPE_LONG_OBJECT = MethodType.methodType(long.class, Object.class);
     public static final MethodType METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class);
     public static final MethodType METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class);
+    public static final MethodType METHOD_TYPE_OBJECT_DOUBLE = MethodType.methodType(Object.class, double.class);
     public static final MethodType METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class);
     public static final MethodType METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class);
 

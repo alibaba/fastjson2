@@ -43,6 +43,18 @@ public class PropertyAccessorFactoryVarHandleTest {
         public TestClass() {
         }
 
+        public TestClass(int intField) {
+            this.intField = intField;
+        }
+
+        public TestClass(long longField) {
+            this.longField = longField;
+        }
+
+        public TestClass(double doubleField) {
+            this.doubleField = doubleField;
+        }
+
         public TestClass(Byte byteObjField) {
             this.byteObjField = byteObjField;
         }
@@ -108,6 +120,9 @@ public class PropertyAccessorFactoryVarHandleTest {
                 .get());
 
         assertEquals((byte) 50, ((TestClass) factory.createFunction(TestClass.class.getDeclaredConstructor(Byte.class)).apply((byte) 50)).byteObjField);
+        assertEquals(1001, ((TestClass) factory.createIntFunction(TestClass.class.getDeclaredConstructor(int.class)).apply(1001)).intField);
+        assertEquals(1002L, ((TestClass) factory.createLongFunction(TestClass.class.getDeclaredConstructor(long.class)).apply(1002L)).longField);
+        assertEquals(123.45D, ((TestClass) factory.createDoubleFunction(TestClass.class.getDeclaredConstructor(double.class)).apply(123.45D)).doubleField);
     }
 
     @ParameterizedTest
