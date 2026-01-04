@@ -1,7 +1,8 @@
-package com.alibaba.fastjson2.internal;
+package com.alibaba.fastjson2.reflect;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.internal.Cast;
 import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.lang.reflect.Field;

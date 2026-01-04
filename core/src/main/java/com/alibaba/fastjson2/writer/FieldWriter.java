@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ToCharFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.internal.Conf;
-import com.alibaba.fastjson2.internal.PropertyAccessor;
+import com.alibaba.fastjson2.reflect.PropertyAccessor;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.ByteArrayOutputStream;

@@ -1,5 +1,6 @@
-package com.alibaba.fastjson2.internal;
+package com.alibaba.fastjson2.reflect;
 
+import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.invoke.MethodHandles;

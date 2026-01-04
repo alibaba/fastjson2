@@ -1,5 +1,8 @@
 package com.alibaba.fastjson2.internal;
 
+import com.alibaba.fastjson2.reflect.PropertyAccessor;
+import com.alibaba.fastjson2.reflect.PropertyAccessorFactory;
+import com.alibaba.fastjson2.reflect.PropertyAccessorFactoryUnsafe;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.io.InputStream;
@@ -126,7 +129,7 @@ public final class Conf {
         PropertyAccessorFactory propertyAccessorFactory = null;
         if (JDKUtils.JVM_VERSION >= 11) {
             try {
-                String factoryClassNameJDK11 = "com.alibaba.fastjson2.internal.PropertyAccessorFactoryMethodHandle";
+                String factoryClassNameJDK11 = "com.alibaba.fastjson2.reflect.PropertyAccessorFactoryMethodHandle";
                 Class<?> classV = Conf.class.getClassLoader().loadClass(factoryClassNameJDK11);
                 propertyAccessorFactory = (PropertyAccessorFactory) classV.newInstance();
             } catch (Exception ignored) {
