@@ -1,199 +1,189 @@
-# Fastjson2 Reflection Package Documentation
+# Fastjson2 Introspect Package Documentation
 
 ## Overview
 
-The `com.alibaba.fastjson2.reflect` package provides an efficient and flexible property access mechanism that serves as the backbone for JSON serialization and deserialization in fastjson2. This package abstracts different property access strategies (field access, method invocation, and functional interfaces) behind a unified `PropertyAccessor` interface, enabling high-performance property access with automatic type conversion capabilities.
+The `com.alibaba.fastjson2.introspect` package provides a comprehensive reflection-based property access functionality for fastjson2. This package contains classes and interfaces for efficient property access during JSON serialization and deserialization operations.
 
-## Key Components
+The core of this package is the `PropertyAccessor` interface, which provides a unified API for getting and setting object properties regardless of the underlying access mechanism (field access, method calls, or functional interfaces).
+
+The `PropertyAccessorFactory` class serves as the main factory for creating optimized property accessors based on the property type and access method, providing implementations for primitive types, wrapper classes, and complex objects.
+
+## Key Features
+
+- Optimized accessors for primitive types to avoid boxing/unboxing overhead
+- Support for both field-based and method-based property access
+- Functional interface-based accessors for maximum performance
+- Automatic type conversion between compatible types
+- Exception handling with detailed error messages
+- Multiple implementation strategies for different performance requirements
+
+## Architecture
+
+The introspect package implements a hierarchical architecture with multiple access strategies:
 
 ### 1. PropertyAccessor Interface
 
-The `PropertyAccessor` interface is the central abstraction in this package. It provides methods to:
+The `PropertyAccessor` interface is the core abstraction that defines methods for accessing object properties generically. It provides unified methods for getting and setting properties of objects, supporting both primitive types and objects through various accessor methods.
 
-- Get and set property values for all primitive types and objects
-- Access property metadata (name, type, class)
-- Check whether getting or setting is supported for the property
-- Handle type conversions between compatible types
+Key methods include:
+- `getObject()`, `getByteValue()`, `getCharValue()`, `getShortValue()`, `getIntValue()`, `getLongValue()`, `getFloatValue()`, `getDoubleValue()`, `getBooleanValue()`
+- `setObject()`, `setByteValue()`, `setCharValue()`, `setShortValue()`, `setIntValue()`, `setLongValue()`, `setFloatValue()`, `setDoubleValue()`, `setBooleanValue()`
 
-### 2. Property Accessor Implementations
+### 2. Base Accessor Classes
 
-The package supports three main types of property access:
+The package provides three abstract base classes that implement different access strategies:
 
-#### Field-based Access
-- Direct field access through reflection
-- Implemented in `FieldAccessor` and its specialized subclasses
-- Optimized for each primitive type to avoid boxing/unboxing
+#### FieldAccessor
+- Abstract base class for field-based property accessors
+- Provides common functionality for accessing object fields using reflection
+- Handles field metadata and determines if the field supports setting based on whether the field is declared as final
+- Implements PropertyAccessor interface using direct field access through reflection
 
-#### Method-based Access  
-- Getter/setter method invocation
-- Implemented in `MethodAccessor` and its specialized subclasses
-- Supports standard JavaBean patterns
+#### MethodAccessor
+- Abstract base class for method-based property accessors
+- Provides common functionality for accessing object properties using getter and setter methods
+- Allows for accessing properties through standard getter/setter method pairs
+- Implements PropertyAccessor interface using method invocation for property access
 
-#### Function-based Access
-- Functional interface access using lambdas/method handles
-- Implemented in `FunctionAccessor` and its specialized subclasses
-- Provides the highest performance for repeated access
+#### FunctionAccessor
+- Abstract base class for function-based property accessors
+- Provides common functionality for accessing object properties using getter and setter functions
+- Allows for accessing properties through functional interfaces rather than direct field access or method invocation
+- Implements PropertyAccessor interface using functional interfaces for property access
 
-### 3. PropertyAccessorFactory
+### 3. Property Accessor Factory Hierarchy
 
-The `PropertyAccessorFactory` class is responsible for:
+The package includes a sophisticated factory hierarchy that provides multiple strategies for property access:
 
-- Creating optimized property accessors based on the property type
-- Supporting field-based, method-based, and function-based access strategies
-- Providing specialized implementations for each primitive and wrapper type
-- Handling automatic type conversions between compatible types
+#### PropertyAccessorFactory
+- The main factory class that creates property accessors using reflection
+- Provides optimized accessor implementations for different data types (primitives, String, BigInteger, BigDecimal) to optimize performance and avoid boxing/unboxing overhead where possible
+- Creates specialized accessor implementations for different data types
 
-### 4. PropertyAccessorFactoryLambda
+#### PropertyAccessorFactoryLambda
+- Extends PropertyAccessorFactory and adds support for LambdaMetafactory-based access
+- Creates efficient functional interfaces for property access when possible
+- Provides optimized constructor instantiation using MethodHandle and LambdaMetafactory
 
-The `PropertyAccessorFactoryLambda` extends the base factory to provide:
+#### PropertyAccessorFactoryMethodHandle
+- Available on JDK 11+, uses MethodHandles.Lookup for field and method access
+- Uses MethodHandles.Lookup's unreflectGetter/unreflectSetter instead of VarHandle for field access
+- Provides an alternative way to access object properties efficiently
 
-- Lambda-based property access using `LambdaMetafactory`
-- High-performance functional interfaces created at runtime
-- Optimized access through method handles
-- Support for chainable/fluent setters
+#### PropertyAccessorFactoryVarHandle
+- Available on JDK 11+, uses VarHandle for field access
+- Provides high-performance property access using the VarHandle API which is more efficient than traditional reflection or Unsafe-based approaches
 
-## Design Principles
+#### PropertyAccessorFactoryUnsafe
+- Uses Unsafe operations for field access to provide better performance compared to reflection-based access
+- Creates property accessors that use direct memory access via Unsafe to get and set field values, which is faster than traditional reflection
+- Note: Uses sun.misc.Unsafe, which is not part of the standard Java API and may not be available in all JVM implementations
 
-### Performance Optimization
-- Specialized accessor implementations for each primitive type to minimize boxing/unboxing
-- Direct field access when possible for maximum speed
-- Lambda-based access for frequently accessed properties
-- Automatic type conversion methods to handle common use cases
+## Type-Specific Accessor Interfaces
 
-### Type Safety
-- Strict validation of method signatures during accessor creation
-- Compile-time type checking where possible
-- Runtime error handling with detailed exception messages
+The package includes specialized interfaces for different data types to optimize performance:
 
-### Flexibility
-- Support for multiple access patterns (field, method, functional)
-- Extensible interface design allowing custom accessor implementations
-- Generic type information preservation
-- Support for complex object hierarchies
+- `PropertyAccessorBooleanValue`, `PropertyAccessorByteValue`, `PropertyAccessorShortValue`, `PropertyAccessorIntValue`, `PropertyAccessorLongValue`, `PropertyAccessorFloatValue`, `PropertyAccessorDoubleValue`, `PropertyAccessorCharValue`
+- `PropertyAccessorObject`, `PropertyAccessorString`, `PropertyAccessorBigInteger`, `PropertyAccessorBigDecimal`, `PropertyAccessorNumber`
+- These interfaces provide type-specific getter and setter methods and handle conversions between compatible types
 
-## Usage Examples
+## Constructor Support
 
-### Creating Field-Based Accessors
+The factory also provides methods to create constructor-based functions:
+- `createSupplier(Constructor)`: Creates a Supplier that can instantiate objects using the given constructor
+- `createFunction(Constructor)`: Creates a Function that can instantiate objects using the given constructor
+- `createIntFunction(Constructor)`, `createLongFunction(Constructor)`, `createDoubleFunction(Constructor)`: Create specialized function types for different parameter types
 
-```java
-import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
+## Architecture Diagrams
 
-import java.lang.reflect.Field;
+### Class Hierarchy Diagram
 
-public class Example {
-    private int value;
-    private String name;
-
-    public static void main(String[] args) throws NoSuchFieldException {
-        PropertyAccessorFactory factory = new PropertyAccessorFactory();
-
-        Field valueField = Example.class.getDeclaredField("value");
-        PropertyAccessor valueAccessor = factory.create(valueField);
-
-        Example obj = new Example();
-        valueAccessor.setIntValue(obj, 42);
-        int value = valueAccessor.getIntValue(obj);
-        System.out.println("Value: " + value); // Value: 42
-    }
-}
+```
+                                    PropertyAccessor (Interface)
+                                           |
+                                    PropertyAccessorObject
+                                           |
+                   +------------------------+------------------------+
+                   |                        |                        |
+            FieldAccessor              MethodAccessor        FunctionAccessor
+                   |                        |                        |
+         +---------+---------+              |                        |
+         |         |         |              |                        |
+   FieldAccessor   |         |              |                        |
+  Reflect/Unsafe/  |         |              |                        |
+  MethodHandle/    |         |              |                        |
+  VarHandle        |         |              |                        |
+         |         |         |              |                        |
+         +---------+---------+              |                        |
+                   |                        |                        |
+                   +------------------------+------------------------+
+                                            |
+                                    PropertyAccessorFactory
+                                            |
+                   +------------------------+------------------------+
+                   |                        |                        |
+      PropertyAccessorFactoryLambda  PropertyAccessorFactoryUnsafe  |
+                   |                        |                        |
+                   |            +-----------+-----------+            |
+                   |            |           |           |            |
+                   |    PropertyAccessorFactoryVarHandle |            |
+                   |            |           |           |            |
+                   |            |    PropertyAccessorFactoryMethodHandle
+                   |            |           |           |
+                   |            |           |           |
+         (Lambda-based)    (VarHandle-based)    (MethodHandle-based)
 ```
 
-### Creating Method-Based Accessors
+### Component Interaction Diagram
 
-```java
-import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
-
-import java.lang.reflect.Method;
-
-public class Example {
-    private String name;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public static void main(String[] args) throws NoSuchMethodException {
-        PropertyAccessorFactory factory = new PropertyAccessorFactory();
-
-        Method getter = Example.class.getMethod("getName");
-        Method setter = Example.class.getMethod("setName", String.class);
-
-        PropertyAccessor accessor = factory.create("name", getter, setter);
-
-        Example obj = new Example();
-        accessor.setObject(obj, "Hello");
-        String name = (String) accessor.getObject(obj);
-        System.out.println("Name: " + name); // Name: Hello
-    }
-}
 ```
-
-### Creating Function-Based Accessors
-
-```java
-import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
-
-import java.util.function.Function;
-import java.util.function.BiConsumer;
-
-public class Example {
-    public String value;
-
-    public static void main(String[] args) {
-        PropertyAccessorFactory factory = new PropertyAccessorFactory();
-
-        Function<Example, String> getter = obj -> obj.value;
-        BiConsumer<Example, String> setter = (obj, val) -> obj.value = val;
-
-        PropertyAccessor accessor = factory.create(
-                "value", String.class, String.class, getter, setter);
-
-        Example obj = new Example();
-        accessor.setObject(obj, "Test");
-        String value = (String) accessor.getObject(obj);
-        System.out.println("Value: " + value); // Value: Test
-    }
-}
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Fastjson2 Introspect Package                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────────┐    ┌─────────────────────┐    ┌─────────────┐ │
+│  │   User Code     │    │  Property Accessor  │    │   Object    │ │
+│  │ (JSON Ser/Des)  │◄──►│  (PropertyAccessor) │◄──►│   Fields/   │ │
+│  └─────────────────┘    └─────────────────────┘    │ Methods/    │ │
+│         │                        │                  │ Functions   │ │
+│         │                        │                  └─────────────┘ │
+│         │                        │                                    │
+│         │    ┌─────────────────────────────────────────────────────┐ │
+│         └───►│ Factory Hierarchy                                   │ │
+│              │                                                     │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ Factory (Base)      │ │ FactoryMethodHandle     │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              │        ▲                           ▲                │ │
+│              │        │                           │                │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ FactoryLambda       │ │ FactoryVarHandle        │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              │        ▲                           ▲                │ │
+│              │        │                           │                │ │
+│              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
+│              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
+│              │ │ FactoryUnsafe       │ │ FactoryMethodHandle     │ │ │
+│              │ └─────────────────────┘ └─────────────────────────┘ │ │
+│              └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
 ```
-
-## Type Conversion
-
-The property accessor implementations automatically handle conversions between compatible types:
-
-- Primitive to wrapper types (e.g., `int` to `Integer`)
-- Numeric type widening (e.g., `int` to `long`, `float` to `double`)
-- String to primitive conversions for setter methods
-- Object to primitive conversions when possible
-
-## Error Handling
-
-All accessor implementations provide detailed error messages in case of reflection failures:
-
-- `JSONException` with property name and operation context
-- Cause preservation to help debug the underlying issue
-- Specific error messages for field accessibility issues
 
 ## Performance Considerations
 
-1. **Field Access**: Fastest for direct field access, but requires appropriate field permissions
-2. **Method Access**: Good performance for standard getter/setter patterns
-3. **Lambda Access**: Best for frequently accessed properties due to JVM optimizations
-4. **Type-Specific Accessors**: Use the primitive-specific methods (e.g., `getIntValue`) rather than generic `getObject` for better performance
+The introspect package is designed with performance in mind:
 
-## Thread Safety
+1. **Type-Specific Accessors**: Different accessor implementations are created based on the field type to provide optimal performance for each specific type
+2. **Avoiding Boxing/Unboxing**: Specialized accessor interfaces for primitive types avoid the overhead of boxing and unboxing
+3. **Multiple Access Strategies**: The package provides multiple access strategies (reflection, MethodHandle, VarHandle, Unsafe) to choose the most efficient one for the runtime environment
+4. **LambdaMetafactory Integration**: Uses LambdaMetafactory to create efficient functional interfaces for property access
 
-Property accessors are generally immutable after creation and can be safely shared across threads. However, the objects they access may not be thread-safe, so proper synchronization is still required at the application level.
+## Error Handling
 
-## Integration with Fastjson2
+All accessor implementations provide proper error handling with detailed exception messages. When errors occur during property access, the implementations create JSON exceptions with detailed information about the operation that failed.
 
-This package is primarily used internally by fastjson2 for:
+## Usage in Fastjson2
 
-- Object serialization to JSON
-- JSON deserialization to objects
-- Property name mapping and transformation
-- Type conversion during serialization/deserialization
-- Custom property filtering and validation
+The introspect package is used internally by fastjson2 for efficient property access during serialization and deserialization operations. It allows fastjson2 to efficiently read and write object properties regardless of whether they are accessed through fields, getter/setter methods, or functional interfaces.
