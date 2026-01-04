@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.internal;
 
+import com.alibaba.fastjson2.JSONException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -74,5 +76,30 @@ public abstract class FieldAccessor
     @Override
     public final boolean supportSet() {
         return supportSet;
+    }
+
+    @Override
+    public String toString() {
+        return field.toString();
+    }
+
+    /**
+     * Creates a JSON exception for getter errors.
+     *
+     * @param e the exception that occurred during getting
+     * @return a JSONException with details about the getter error
+     */
+    final JSONException errorForGet(Throwable e) {
+        return new JSONException(field.toString().concat(" get error"), e);
+    }
+
+    /**
+     * Creates a JSON exception for setter errors.
+     *
+     * @param e the exception that occurred during setting
+     * @return a JSONException with details about the setter error
+     */
+    final JSONException errorForSet(Throwable e) {
+        return new JSONException(field.toString().concat(" set error"), e);
     }
 }

@@ -340,12 +340,24 @@ public class PropertyAccessorFactoryMethodHandle
             return setter != null;
         }
 
+        /**
+         * Creates a JSON exception for getter errors.
+         *
+         * @param e the exception that occurred during getting
+         * @return a JSONException with details about the getter error
+         */
         final JSONException errorForGet(Throwable e) {
-            return new JSONException("MethodHandle get error", e);
+            return new JSONException(name.concat(" get error"), e);
         }
 
+        /**
+         * Creates a JSON exception for setter errors.
+         *
+         * @param e the exception that occurred during setting
+         * @return a JSONException with details about the setter error
+         */
         final JSONException errorForSet(Throwable e) {
-            return new JSONException("MethodHandle set error", e);
+            return new JSONException(name.concat(" set error"), e);
         }
     }
 
@@ -1815,42 +1827,6 @@ public class PropertyAccessorFactoryMethodHandle
         @Override
         public void setBooleanValue(Object object, boolean value) {
             setObject(object, value ? 1 : 0);
-        }
-
-        // Additional methods required by PropertyAccessorObject hierarchy that PropertyAccessorNumber implements
-        public Number getNumber(Object object) {
-            return (Number) getObject(object);
-        }
-
-        public void setNumber(Object object, Number value) {
-            setObject(object, value);
-        }
-
-        public String getString(Object object) {
-            Number num = (Number) getObject(object);
-            return num != null ? num.toString() : null;
-        }
-
-        public void setString(Object object, String value) {
-            setObject(object, value != null ? Double.valueOf(value) : null);
-        }
-
-        public BigInteger getBigInteger(Object object) {
-            Number num = (Number) getObject(object);
-            return num != null ? BigInteger.valueOf(num.longValue()) : null;
-        }
-
-        public void setBigInteger(Object object, BigInteger value) {
-            setObject(object, value != null ? value : null);
-        }
-
-        public BigDecimal getBigDecimal(Object object) {
-            Number num = (Number) getObject(object);
-            return num != null ? new BigDecimal(num.toString()) : null;
-        }
-
-        public void setBigDecimal(Object object, BigDecimal value) {
-            setObject(object, value != null ? value : null);
         }
     }
 }

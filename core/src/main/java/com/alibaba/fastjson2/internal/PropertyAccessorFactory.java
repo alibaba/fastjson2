@@ -1941,14 +1941,6 @@ public class PropertyAccessorFactory {
         private static JSONException errorOnSetAccessible(Field field, RuntimeException e) {
             return new JSONException(field.toString() + " setAccessible error", e);
         }
-
-        final JSONException errorForGet(Exception e) {
-            return new JSONException(field.toString() + " get error", e);
-        }
-
-        final JSONException errorForSet(Exception e) {
-            return new JSONException(field.toString() + " set error", e);
-        }
     }
 
     /**

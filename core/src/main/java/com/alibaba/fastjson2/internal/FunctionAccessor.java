@@ -85,8 +85,8 @@ public abstract class FunctionAccessor<T>
      * @param e the exception that occurred during getting
      * @return a JSONException with details about the getter error
      */
-    final JSONException errorForGet(Exception e) {
-        return new JSONException(getter.toString().concat(" get error"), e);
+    final JSONException errorForGet(Throwable e) {
+        return new JSONException(name.concat(" get error"), e);
     }
 
     /**
@@ -95,7 +95,7 @@ public abstract class FunctionAccessor<T>
      * @param e the exception that occurred during setting
      * @return a JSONException with details about the setter error
      */
-    final JSONException errorForSet(Exception e) {
-        return new JSONException(setter.toString().concat(" set error"), e);
+    final JSONException errorForSet(Throwable e) {
+        return new JSONException(name.concat(" set error"), e);
     }
 }

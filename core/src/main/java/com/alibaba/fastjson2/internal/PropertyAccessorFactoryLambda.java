@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.*;
 
+@SuppressWarnings("ALL")
 public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFactory {
     private MethodHandles.Lookup lookup(Method method) {
         return lookup(method.getDeclaringClass());
