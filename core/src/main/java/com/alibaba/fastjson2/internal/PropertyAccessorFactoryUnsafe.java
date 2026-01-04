@@ -94,6 +94,9 @@ public final class PropertyAccessorFactoryUnsafe
         if (fieldType == Double.class) {
             return new FieldAccessorUnsafeDouble(field);
         }
+        if (fieldType == Number.class) {
+            return new FieldAccessorUnsafeNumber(field);
+        }
         return new FieldAccessorUnsafeObject(field);
     }
 
@@ -541,6 +544,27 @@ public final class PropertyAccessorFactoryUnsafe
 
         @Override
         public void setBigDecimal(Object object, BigDecimal value) {
+            UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
+        }
+    }
+
+    /**
+     * Unsafe-based field accessor implementation for Number-typed properties.
+     * Provides efficient getter and setter operations for Number fields using Unsafe operations.
+     */
+    static final class FieldAccessorUnsafeNumber
+            extends FieldAccessorUnsafe implements PropertyAccessorNumber {
+        public FieldAccessorUnsafeNumber(Field field) {
+            super(field);
+        }
+
+        @Override
+        public Number getNumber(Object object) {
+            return (Number) UNSAFE.getObject(Objects.requireNonNull(object), fieldOffset);
+        }
+
+        @Override
+        public void setNumber(Object object, Number value) {
             UNSAFE.putObject(Objects.requireNonNull(object), fieldOffset, value);
         }
     }

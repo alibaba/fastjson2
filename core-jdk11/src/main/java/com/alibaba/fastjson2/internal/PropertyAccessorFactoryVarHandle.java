@@ -103,6 +103,9 @@ public class PropertyAccessorFactoryVarHandle
         if (fieldType == Double.class) {
             return new FieldAccessorVarHandleDouble(field, varHandle);
         }
+        if (fieldType == Number.class) {
+            return new FieldAccessorVarHandleNumber(field, varHandle);
+        }
         return new FieldAccessorVarHandleObject(field, varHandle);
     }
 
@@ -535,6 +538,26 @@ public class PropertyAccessorFactoryVarHandle
         }
         @Override
         public void setBigDecimal(Object object, BigDecimal value) {
+            varHandle.set(object, value);
+        }
+    }
+
+    /**
+     * Field accessor implementation for Number fields using VarHandle.
+     * Provides efficient Number field access operations.
+     */
+    static final class FieldAccessorVarHandleNumber
+            extends FieldAccessorVarHandle
+            implements PropertyAccessorNumber {
+        public FieldAccessorVarHandleNumber(Field field, VarHandle varHandle) {
+            super(field, varHandle);
+        }
+        @Override
+        public Number getNumber(Object object) {
+            return (Number) varHandle.get(object);
+        }
+        @Override
+        public void setNumber(Object object, Number value) {
             varHandle.set(object, value);
         }
     }

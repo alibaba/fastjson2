@@ -1581,4 +1581,178 @@ public class Cast {
     }
 
     // endregion
+
+    // region Number Conversion Methods
+
+    /**
+     * Converts an Object to Number.
+     * @param value the Object to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(Object value) {
+        if (value == null || value instanceof Number) {
+            return (Number) value;
+        }
+        return toNumberEx(value);
+    }
+
+    /**
+     * Helper method for converting non-Number objects to Number.
+     * @param value the Object to convert
+     * @return the converted Number value
+     */
+    private static Number toNumberEx(Object value) {
+        if (value instanceof Boolean) {
+            return ((Boolean) value) ? 1 : 0;
+        } else if (value instanceof Character) {
+            return (double) ((Character) value).charValue();
+        } else if (value instanceof String) {
+            String str = (String) value;
+            if (str == null) {
+                return null;
+            }
+            // Try to parse as integer first, then as double
+            try {
+                // Check if it contains decimal point or scientific notation
+                if (str.contains(".") || str.toLowerCase().contains("e")) {
+                    return Double.parseDouble(str);
+                } else {
+                    // Try long first to handle larger integers
+                    return Long.parseLong(str);
+                }
+            } catch (NumberFormatException e) {
+                throw errorToNumber(value);
+            }
+        } else if (value instanceof BigDecimal) {
+            return (BigDecimal) value;
+        } else if (value instanceof BigInteger) {
+            return (BigInteger) value;
+        } else if (value == null) {
+            return null;
+        }
+        throw errorToNumber(value);
+    }
+
+    /**
+     * Creates a JSONException for Number conversion errors.
+     * @param value the value that caused the error
+     * @return the JSONException
+     */
+    private static JSONException errorToNumber(Object value) {
+        return new JSONException("Cannot convert " + value + " to Number");
+    }
+
+    /**
+     * Converts a byte to Number.
+     * @param value the byte to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(byte value) {
+        return value;
+    }
+
+    /**
+     * Converts a short to Number.
+     * @param value the short to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(short value) {
+        return value;
+    }
+
+    /**
+     * Converts a char to Number.
+     * @param value the char to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(char value) {
+        return (int) value;
+    }
+
+    /**
+     * Converts an int to Number.
+     * @param value the int to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(int value) {
+        return value;
+    }
+
+    /**
+     * Converts a long to Number.
+     * @param value the long to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(long value) {
+        return value;
+    }
+
+    /**
+     * Converts a float to Number.
+     * @param value the float to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(float value) {
+        return value;
+    }
+
+    /**
+     * Converts a double to Number.
+     * @param value the double to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(double value) {
+        return value;
+    }
+
+    /**
+     * Converts a boolean to Number.
+     * @param value the boolean to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(boolean value) {
+        return value ? 1 : 0;
+    }
+
+    /**
+     * Converts a String to Number.
+     * @param value the String to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            // Check if it contains decimal point or scientific notation
+            if (value.contains(".") || value.toLowerCase().contains("e")) {
+                return Double.parseDouble(value);
+            } else {
+                // Try long first to handle larger integers
+                return Long.parseLong(value);
+            }
+        } catch (NumberFormatException e) {
+            throw errorToNumber(value);
+        }
+    }
+
+    /**
+     * Converts a BigInteger to Number.
+     * @param value the BigInteger to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(BigInteger value) {
+        return value;
+    }
+
+    /**
+     * Converts a BigDecimal to Number.
+     * @param value the BigDecimal to convert
+     * @return the converted Number value
+     */
+    public static Number toNumber(BigDecimal value) {
+        return value;
+    }
+
+    // endregion
 }

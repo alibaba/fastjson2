@@ -113,6 +113,9 @@ public class PropertyAccessorFactory {
         if (field.getType() == Double.class) {
             return new FieldAccessorReflectDouble(field);
         }
+        if (field.getType() == Number.class) {
+            return new FieldAccessorReflectNumber(field);
+        }
         return new FieldAccessorReflectObject(field);
     }
 
@@ -1824,6 +1827,102 @@ public class PropertyAccessorFactory {
         Double getDouble(Object object);
     }
 
+    protected interface PropertyAccessorNumber extends PropertyAccessorObject {
+        @Override
+        default byte getByteValue(Object object) {
+            return toByteValue(getNumber(object));
+        }
+
+        @Override
+        default char getCharValue(Object object) {
+            return toCharValue(getNumber(object));
+        }
+
+        @Override
+        default short getShortValue(Object object) {
+            return toShortValue(getNumber(object));
+        }
+
+        @Override
+        default int getIntValue(Object object) {
+            return toIntValue(getNumber(object));
+        }
+
+        @Override
+        default long getLongValue(Object object) {
+            return toLongValue(getNumber(object));
+        }
+
+        @Override
+        default float getFloatValue(Object object) {
+            return toFloatValue(getNumber(object));
+        }
+
+        @Override
+        default double getDoubleValue(Object object) {
+            return toDoubleValue(getNumber(object));
+        }
+
+        @Override
+        default boolean getBooleanValue(Object object) {
+            return toBooleanValue(getNumber(object));
+        }
+
+        @Override
+        default Object getObject(Object object) {
+            return getNumber(object);
+        }
+
+        @Override
+        default void setObject(Object object, Object value) {
+            setNumber(object, toNumber(value));
+        }
+
+        @Override
+        default void setByteValue(Object object, byte value) {
+            setNumber(object, toNumber(value));
+        }
+
+        @Override
+        default void setCharValue(Object object, char value) {
+            setNumber(object, toNumber(value));
+        }
+
+        @Override
+        default void setShortValue(Object object, short value) {
+            setNumber(object, toNumber(value));
+        }
+
+        @Override
+        default void setIntValue(Object object, int value) {
+            setNumber(object, toNumber(value));
+        }
+
+        @Override
+        default void setLongValue(Object object, long value) {
+            setNumber(object, toNumber(value));
+        }
+
+        @Override
+        default void setFloatValue(Object object, float value) {
+            setNumber(object, toNumber(value));
+        }
+
+        @Override
+        default void setDoubleValue(Object object, double value) {
+            setNumber(object, value);
+        }
+
+        @Override
+        default void setBooleanValue(Object object, boolean value) {
+            setNumber(object, toNumber(value));
+        }
+
+        void setNumber(Object object, Number value);
+
+        Number getNumber(Object object);
+    }
+
     /**
      * Abstract base class for field-based property accessors that use
      * reflection to access field values. Provides common functionality
@@ -2413,6 +2512,36 @@ public class PropertyAccessorFactory {
     }
 
     /**
+     * Field accessor implementation for Number-typed properties using reflection.
+     * Provides efficient getter and setter operations for Number fields via reflection.
+     */
+    static final class FieldAccessorReflectNumber
+            extends FieldAccessorReflect
+            implements PropertyAccessorNumber {
+        public FieldAccessorReflectNumber(Field field) {
+            super(field);
+        }
+
+        @Override
+        public void setNumber(Object object, Number value) {
+            try {
+                field.set(object, value);
+            } catch (IllegalAccessException e) {
+                throw errorForSet(e);
+            }
+        }
+
+        @Override
+        public Number getNumber(Object object) {
+            try {
+                return (Number) field.get(object);
+            } catch (IllegalAccessException e) {
+                throw errorForGet(e);
+            }
+        }
+    }
+
+    /**
      * Creates a property accessor for the specified method.
      * This method determines if the method is a getter (no parameters) or setter (one parameter)
      * and creates an appropriate accessor that uses method invocation for property access.
@@ -2554,6 +2683,9 @@ public class PropertyAccessorFactory {
         }
         if (propertyClass == Double.class) {
             return new MethodAccessorDouble(name, propertyType, propertyClass, getter, setter);
+        }
+        if (propertyClass == Number.class) {
+            return new MethodAccessorNumber(name, propertyType, propertyClass, getter, setter);
         }
 
         return new MethodAccessorObject(name, propertyType, propertyClass, getter, setter);
@@ -2720,6 +2852,9 @@ public class PropertyAccessorFactory {
         }
         if (propertyClass == Double.class) {
             return new FunctionAccessorDouble<T>(name, (Function<T, Double>) getterFunc, (BiConsumer<T, Double>) setterFunc);
+        }
+        if (propertyClass == Number.class) {
+            return new FunctionAccessorNumber<T>(name, (Function<T, Number>) getterFunc, (BiConsumer<T, Number>) setterFunc);
         }
         return new FunctionAccessorObject<T, V>(name, propertyType, propertyClass, getterFunc, setterFunc);
     }
@@ -3311,6 +3446,36 @@ public class PropertyAccessorFactory {
     }
 
     /**
+     * Method accessor implementation for Number-typed properties using method invocation.
+     * Provides efficient getter and setter operations for Number properties via method calls.
+     */
+    static final class MethodAccessorNumber
+            extends MethodAccessor implements PropertyAccessorNumber
+    {
+        public MethodAccessorNumber(String name, Type propertyType, Class<?> propertyClass, Method getter, Method setter) {
+            super(name, propertyType, propertyClass, getter, setter);
+        }
+
+        @Override
+        public Number getNumber(Object object) {
+            try {
+                return (Number) getter.invoke(object);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForGet(e);
+            }
+        }
+
+        @Override
+        public void setNumber(Object object, Number value) {
+            try {
+                setter.invoke(object, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw errorForSet(e);
+            }
+        }
+    }
+
+    /**
      * Function accessor implementation for byte-typed properties using functional interfaces.
      * Provides efficient getter and setter operations for byte properties via functional interfaces.
      *
@@ -3809,6 +3974,30 @@ public class PropertyAccessorFactory {
     }
 
     /**
+     * Function accessor implementation for Number-typed properties using functional interfaces.
+     * Provides efficient getter and setter operations for Number properties via functional interfaces.
+     *
+     * @param <T> the type of the object containing the property
+     */
+    static final class FunctionAccessorNumber<T> extends FunctionAccessor<T> implements PropertyAccessorNumber {
+        private final Function<T, Number> getterFunc;
+        private final BiConsumer<T, Number> setterFunc;
+        public FunctionAccessorNumber(String name, Function<T, Number> getterFunc, BiConsumer<T, Number> setterFunc) {
+            super(name, Number.class, Number.class, getterFunc, setterFunc);
+            this.getterFunc = getterFunc;
+            this.setterFunc = setterFunc;
+        }
+        @Override
+        public Number getNumber(Object object) {
+            return getterFunc.apply((T) object);
+        }
+        @Override
+        public void setNumber(Object object, Number value) {
+            setterFunc.accept((T) object, value);
+        }
+    }
+
+    /**
      * Function accessor implementation for char-typed properties using functional interfaces.
      * Provides efficient getter and setter operations for char properties via functional interfaces.
      *
@@ -3900,6 +4089,9 @@ public class PropertyAccessorFactory {
         }
         if (propertyClass == BigDecimal.class) {
             return new PropertyAccessorWrapperBigDecimal(impl, getterConsumer, setterConsumer);
+        }
+        if (propertyClass == Number.class) {
+            return new PropertyAccessorWrapperNumber(impl, getterConsumer, setterConsumer);
         }
         return new PropertyAccessorWrapperObject(impl, getterConsumer, setterConsumer);
     }
@@ -4464,6 +4656,35 @@ public class PropertyAccessorFactory {
         @Override
         public BigDecimal getBigDecimal(Object object) {
             BigDecimal value = bigDecimalImpl.getBigDecimal(object);
+            if (getterConsumer != null) {
+                getterConsumer.accept(object, value);
+            }
+            return value;
+        }
+    }
+
+    static final class PropertyAccessorWrapperNumber extends PropertyAccessorWrapper implements PropertyAccessorNumber {
+        private PropertyAccessorNumber numberImpl;
+        private final BiConsumer getterConsumer;
+        private final BiConsumer setterConsumer;
+        public PropertyAccessorWrapperNumber(PropertyAccessor impl, BiConsumer getterConsumer, BiConsumer setterConsumer) {
+            super(impl);
+            numberImpl = (PropertyAccessorNumber) impl;
+            this.getterConsumer = getterConsumer;
+            this.setterConsumer = setterConsumer;
+        }
+
+        @Override
+        public void setNumber(Object object, Number value) {
+            if (setterConsumer != null) {
+                setterConsumer.accept(object, value);
+            }
+            numberImpl.setNumber(object, value);
+        }
+
+        @Override
+        public Number getNumber(Object object) {
+            Number value = numberImpl.getNumber(object);
             if (getterConsumer != null) {
                 getterConsumer.accept(object, value);
             }

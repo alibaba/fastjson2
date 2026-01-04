@@ -50,11 +50,6 @@ final class FieldReaderNumberFunc<T, V>
     }
 
     @Override
-    public void accept(T object, boolean value) {
-        propertyAccessor.setIntValue(object, value ? 1 : 0);
-    }
-
-    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readNumber();
     }
