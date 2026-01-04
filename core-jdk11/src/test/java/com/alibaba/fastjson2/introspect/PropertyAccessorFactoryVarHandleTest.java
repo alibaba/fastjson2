@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,6 +58,11 @@ public class PropertyAccessorFactoryVarHandleTest {
 
         public TestClass(Byte byteObjField) {
             this.byteObjField = byteObjField;
+        }
+
+        public TestClass(Character charObjField, Short shortObjField) {
+            this.charObjField = charObjField;
+            this.shortObjField = shortObjField;
         }
     }
 
@@ -123,6 +129,12 @@ public class PropertyAccessorFactoryVarHandleTest {
         assertEquals(1001, ((TestClass) factory.createIntFunction(TestClass.class.getDeclaredConstructor(int.class)).apply(1001)).intField);
         assertEquals(1002L, ((TestClass) factory.createLongFunction(TestClass.class.getDeclaredConstructor(long.class)).apply(1002L)).longField);
         assertEquals(123.45D, ((TestClass) factory.createDoubleFunction(TestClass.class.getDeclaredConstructor(double.class)).apply(123.45D)).doubleField);
+        {
+            BiFunction biFunction = factory.createBiFunction(TestClass.class.getDeclaredConstructor(Character.class, Short.class));
+            TestClass x = (TestClass) biFunction.apply('X', (short) 100);
+            assertEquals('X', x.charObjField);
+            assertEquals((short) 100, x.shortObjField);
+        }
     }
 
     @ParameterizedTest

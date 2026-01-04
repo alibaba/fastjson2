@@ -159,6 +159,32 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         }
     }
 
+    @Override
+    public BiFunction createBiFunction(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+            Class<?> param1 = parameterTypes[1];
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class, param0, param1)
+            );
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_BI_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT_OBJECT,
+                    methodHandle,
+                    MethodType.methodType(declaringClass, box(param0), box(param1))
+            );
+            return (BiFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            return super.createBiFunction(constructor);
+        }
+    }
+
     static Class<?> box(Class cls) {
         if (cls == int.class) {
             return Integer.class;

@@ -81,6 +81,15 @@ public class PropertyAccessorFactory {
     }
 
     /**
+     * Creates a BiFunction that can instantiate objects using the given constructor.
+     * @param constructor the constructor to use for object instantiation
+     * @return a BiFunction that creates new instances using the provided constructor
+     */
+    public BiFunction createBiFunction(Constructor constructor) {
+        return new ConstructorBiFunction(constructor);
+    }
+
+    /**
      * Base class for Constructor-based Function implementations.
      * Handles constructor accessibility and instantiation errors.
      */
@@ -238,6 +247,32 @@ public class PropertyAccessorFactory {
         public Object apply(double arg) {
             try {
                 return constructor.newInstance(arg);
+            } catch (Exception e) {
+                throw errorOnNewInstance(e);
+            }
+        }
+    }
+
+    /**
+     * A Supplier implementation that uses reflection to create new instances
+     * of a class via its constructor. This class handles constructor accessibility
+     * and instantiation errors appropriately.
+     */
+    static final class ConstructorBiFunction extends ConstructorFunctionBase implements BiFunction {
+        /**
+         * Creates a ConstructorBiFunction for the given constructor.
+         * Automatically makes the constructor accessible.
+         *
+         * @param constructor the constructor to use for instantiation
+         */
+        public ConstructorBiFunction(Constructor constructor) {
+            super(constructor);
+        }
+
+        @Override
+        public Object apply(Object t, Object u) {
+            try {
+                return constructor.newInstance(t, u);
             } catch (Exception e) {
                 throw errorOnNewInstance(e);
             }

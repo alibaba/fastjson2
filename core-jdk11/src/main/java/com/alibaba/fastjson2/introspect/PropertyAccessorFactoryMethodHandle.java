@@ -140,6 +140,24 @@ public final class PropertyAccessorFactoryMethodHandle
         }
     }
 
+    @Override
+    public BiFunction createBiFunction(Constructor constructor) {
+        try {
+            MethodHandles.Lookup lookup = lookup(constructor.getDeclaringClass());
+            MethodHandle methodHandle = lookup.unreflectConstructor(constructor);
+            return (arg1, arg2) -> {
+                try {
+                    return methodHandle.invoke(arg1, arg2);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (Throwable ignored) {
+            // ignore
+            return super.createBiFunction(constructor);
+        }
+    }
+
     /**
      * Creates a property accessor for the given field using MethodHandle-based implementation.
      * Different accessor implementations are created based on the field type to provide
