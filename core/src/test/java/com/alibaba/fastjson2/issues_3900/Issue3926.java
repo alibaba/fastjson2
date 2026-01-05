@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_3900;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -38,6 +39,20 @@ public class Issue3926 {
 
     @Test
     public void testCustomList() {
+        String json = "{\"myList\":[{\"name\":\"张三\"}]}";
+        MyDTO1 myDTO = JSON.parseObject(json, MyDTO1.class);
+
+        assertEquals(1, myDTO.getMyList().size());
+
+        Object obj = myDTO.getMyList().get(0);
+        assertTrue(obj != null, "Element should be MyObject, but is " + obj.getClass().getName());
+
+        MyObject1 myObject = myDTO.getMyList().get(0);
+        assertEquals("张三", myObject.getName());
+    }
+
+    @Test
+    public void testCustomListMultiple() {
         String json = "{\"myList\":[{\"name\":\"张三\"},{\"name\":\"李四\"}]}";
         MyDTO1 myDTO = JSON.parseObject(json, MyDTO1.class);
 
@@ -53,6 +68,24 @@ public class Issue3926 {
 
         MyObject1 myObject2 = myDTO.getMyList().get(1);
         assertEquals("李四", myObject2.getName());
+    }
+
+    @Test
+    public void testFieldBasedList() {
+        String json = "{\"myList\":[{\"name\":\"张三\"}]}";
+        MyDTO1 myDTO = JSON.parseObject(json, MyDTO1.class, JSONReader.Feature.FieldBased);
+        assertEquals(1, myDTO.myList.size());
+        MyObject1 myObject = myDTO.myList.get(0);
+        assertEquals("张三", myObject.name);
+    }
+
+    @Test
+    public void testFieldBasedListMultiple() {
+        String json = "{\"myList\":[{\"name\":\"张三\"},{\"name\":\"李四\"}]}";
+        MyDTO1 myDTO = JSON.parseObject(json, MyDTO1.class, JSONReader.Feature.FieldBased);
+        assertEquals(2, myDTO.myList.size());
+        assertEquals("张三", myDTO.myList.get(0).name);
+        assertEquals("李四", myDTO.myList.get(1).name);
     }
 
     public static class MyDTO2 {
@@ -86,7 +119,7 @@ public class Issue3926 {
     }
 
     @Test
-    public void testCustomListWithInterfaceSingle() {
+    public void testCustomListWithInterface() {
         String json = "{\"myList\":[{\"name\":\"张三\"}]}";
         MyDTO2 myDTO = JSON.parseObject(json, MyDTO2.class);
 
@@ -100,7 +133,7 @@ public class Issue3926 {
     }
 
     @Test
-    public void testCustomListWithInterface() {
+    public void testCustomListWithInterfaceMultiple() {
         String json = "{\"myList\":[{\"name\":\"张三\"},{\"name\":\"李四\"}]}";
         MyDTO2 myDTO = JSON.parseObject(json, MyDTO2.class);
 
@@ -116,5 +149,23 @@ public class Issue3926 {
 
         MyObject2 myObject2 = myDTO.getMyList().get(1);
         assertEquals("李四", myObject2.getName());
+    }
+
+    @Test
+    public void testFieldBasedInterfaceList() {
+        String json = "{\"myList\":[{\"name\":\"张三\"}]}";
+        MyDTO2 myDTO = JSON.parseObject(json, MyDTO2.class, JSONReader.Feature.FieldBased);
+        assertEquals(1, myDTO.myList.size());
+        MyObject2 myObject = myDTO.myList.get(0);
+        assertEquals("张三", myObject.name);
+    }
+
+    @Test
+    public void testFieldBasedInterfaceListMultiple() {
+        String json = "{\"myList\":[{\"name\":\"张三\"},{\"name\":\"李四\"}]}";
+        MyDTO2 myDTO = JSON.parseObject(json, MyDTO2.class, JSONReader.Feature.FieldBased);
+        assertEquals(2, myDTO.myList.size());
+        assertEquals("张三", myDTO.myList.get(0).name);
+        assertEquals("李四", myDTO.myList.get(1).name);
     }
 }

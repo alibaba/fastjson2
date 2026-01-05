@@ -2982,7 +2982,7 @@ public class ObjectReaderCreator {
                     }
                 }
             }
-            if (itemType == null) {
+            if (itemType == null && fieldType instanceof Class) {
                 Type[] genericInterfaces = ((Class<?>) fieldType).getGenericInterfaces();
                 for (Type genericInterface : genericInterfaces) {
                     if (genericInterface instanceof ParameterizedType) {
@@ -3412,6 +3412,43 @@ public class ObjectReaderCreator {
                 Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
                 if (actualTypeArguments.length > 0) {
                     itemType = actualTypeArguments[0];
+                }
+            }
+            if (itemType == null && fieldType instanceof Class) {
+                Type genericSuperclass = ((Class<?>) fieldType).getGenericSuperclass();
+                while (genericSuperclass != null && genericSuperclass != Object.class) {
+                    if (genericSuperclass instanceof ParameterizedType) {
+                        ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
+                        Type rawType = parameterizedType.getRawType();
+                        if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
+                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                            if (actualTypeArguments.length > 0) {
+                                itemType = actualTypeArguments[0];
+                                break;
+                            }
+                        }
+                    }
+                    if (genericSuperclass instanceof Class) {
+                        genericSuperclass = ((Class<?>) genericSuperclass).getGenericSuperclass();
+                    } else {
+                        break;
+                    }
+                }
+            }
+            if (itemType == null && fieldType instanceof Class) {
+                Type[] genericInterfaces = ((Class<?>) fieldType).getGenericInterfaces();
+                for (Type genericInterface : genericInterfaces) {
+                    if (genericInterface instanceof ParameterizedType) {
+                        ParameterizedType parameterizedType = (ParameterizedType) genericInterface;
+                        Type rawType = parameterizedType.getRawType();
+                        if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
+                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                            if (actualTypeArguments.length > 0) {
+                                itemType = actualTypeArguments[0];
+                                break;
+                            }
+                        }
+                    }
                 }
             }
             if (itemType == null) {
