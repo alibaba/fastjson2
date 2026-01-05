@@ -9,9 +9,9 @@ import java.time.LocalDate;
 import java.util.Locale;
 import java.util.function.Function;
 
-final class FieldWriterLocalDateFunc<T>
+final class FieldWriterLocalDate<T>
         extends FieldWriterObjectFinal<T> {
-    FieldWriterLocalDateFunc(
+    FieldWriterLocalDate(
             String name,
             int ordinal,
             long features,
@@ -29,12 +29,12 @@ final class FieldWriterLocalDateFunc<T>
 
     @Override
     public Object getFieldValue(Object object) {
-        return function.apply(object);
+        return propertyAccessor.getObject(object);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        LocalDate localDate = (LocalDate) function.apply(object);
+        LocalDate localDate = (LocalDate) propertyAccessor.getObject(object);
         if (localDate == null) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
