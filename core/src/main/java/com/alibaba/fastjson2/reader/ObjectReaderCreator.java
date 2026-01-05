@@ -2947,67 +2947,25 @@ public class ObjectReaderCreator {
         boolean list = List.class.isAssignableFrom(fieldClass)
                 || "cn.hutool.json.JSONArray".equals(fieldClass.getName());
         if (list) {
-            Type itemType = null;
             if (fieldTypeResolved instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) fieldTypeResolved;
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
                 if (actualTypeArguments.length == 1) {
-                    itemType = actualTypeArguments[0];
-                }
-            }
-            if (itemType == null && fieldType instanceof ParameterizedType) {
-                Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
-                if (actualTypeArguments.length > 0) {
-                    itemType = actualTypeArguments[0];
-                }
-            }
-            if (itemType == null && fieldType instanceof Class) {
-                Type genericSuperclass = ((Class<?>) fieldType).getGenericSuperclass();
-                while (genericSuperclass != null && genericSuperclass != Object.class) {
-                    if (genericSuperclass instanceof ParameterizedType) {
-                        ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
-                        Type rawType = parameterizedType.getRawType();
-                        if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
-                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                            if (actualTypeArguments.length > 0) {
-                                itemType = actualTypeArguments[0];
-                                break;
-                            }
-                        }
-                    }
-                    if (genericSuperclass instanceof Class) {
-                        genericSuperclass = ((Class<?>) genericSuperclass).getGenericSuperclass();
-                    } else {
-                        break;
-                    }
-                }
-            }
-            if (itemType == null && fieldType instanceof Class) {
-                Type[] genericInterfaces = ((Class<?>) fieldType).getGenericInterfaces();
-                for (Type genericInterface : genericInterfaces) {
-                    if (genericInterface instanceof ParameterizedType) {
-                        ParameterizedType parameterizedType = (ParameterizedType) genericInterface;
-                        Type rawType = parameterizedType.getRawType();
-                        if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
-                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                            if (actualTypeArguments.length > 0) {
-                                itemType = actualTypeArguments[0];
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            if (itemType == null) {
-                itemType = Object.class;
-            }
-            Class itemClass = TypeUtils.getMapping(itemType);
+                    Type itemType = actualTypeArguments[0];
+                    Class itemClass = TypeUtils.getMapping(itemType);
 
-            if (itemClass == String.class) {
-                return new FieldReaderList(fieldName, fieldTypeResolved != null ? fieldTypeResolved : fieldType, fieldClass, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
-            }
+                    if (itemClass == String.class) {
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClass, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+                    }
 
-            return new FieldReaderList(fieldName, fieldTypeResolved != null ? fieldTypeResolved : fieldType, fieldClassResolved != null ? fieldClassResolved : fieldClass, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+                }
+            } else {
+                Type itemType = BeanUtils.resolveCollectionItemType(fieldType);
+                Class itemClass = TypeUtils.getMapping(itemType);
+                return new FieldReaderList(fieldName, fieldTypeResolved != null ? fieldTypeResolved : fieldType, fieldClassResolved != null ? fieldClassResolved : fieldClass, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+            }
+            return new FieldReaderList(fieldName, fieldType, fieldClass, Object.class, Object.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
         }
 
         if (fieldClass == Date.class) {
@@ -3407,53 +3365,7 @@ public class ObjectReaderCreator {
                 }
             }
 
-            Type itemType = null;
-            if (fieldType instanceof ParameterizedType) {
-                Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
-                if (actualTypeArguments.length > 0) {
-                    itemType = actualTypeArguments[0];
-                }
-            }
-            if (itemType == null && fieldType instanceof Class) {
-                Type genericSuperclass = ((Class<?>) fieldType).getGenericSuperclass();
-                while (genericSuperclass != null && genericSuperclass != Object.class) {
-                    if (genericSuperclass instanceof ParameterizedType) {
-                        ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
-                        Type rawType = parameterizedType.getRawType();
-                        if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
-                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                            if (actualTypeArguments.length > 0) {
-                                itemType = actualTypeArguments[0];
-                                break;
-                            }
-                        }
-                    }
-                    if (genericSuperclass instanceof Class) {
-                        genericSuperclass = ((Class<?>) genericSuperclass).getGenericSuperclass();
-                    } else {
-                        break;
-                    }
-                }
-            }
-            if (itemType == null && fieldType instanceof Class) {
-                Type[] genericInterfaces = ((Class<?>) fieldType).getGenericInterfaces();
-                for (Type genericInterface : genericInterfaces) {
-                    if (genericInterface instanceof ParameterizedType) {
-                        ParameterizedType parameterizedType = (ParameterizedType) genericInterface;
-                        Type rawType = parameterizedType.getRawType();
-                        if (Collection.class.isAssignableFrom((Class<?>) rawType)) {
-                            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                            if (actualTypeArguments.length > 0) {
-                                itemType = actualTypeArguments[0];
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            if (itemType == null) {
-                itemType = Object.class;
-            }
+            Type itemType = BeanUtils.resolveCollectionItemType(fieldType);
             Class itemClass = TypeUtils.getClass(itemType);
 
             return new FieldReaderListField(
