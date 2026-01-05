@@ -1918,10 +1918,10 @@ public class ObjectWriterCreator {
         }
 
         if (Modifier.isFinal(fieldClass.getModifiers())) {
-            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterObjectFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     static class LambdaInfo {

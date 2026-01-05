@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 
-abstract class FieldWriterObjectFinal<T>
+class FieldWriterObjectFinal<T>
         extends FieldWriterObject<T> {
     final Type fieldType;
     final Class fieldClass;
