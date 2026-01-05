@@ -5,12 +5,14 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.function.ObjDoubleConsumer;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
 
 final class FieldWriterDoubleVal<T>
         extends FieldWriter<T> {
-    @SuppressWarnings("unchecked")
+    private final ObjDoubleConsumer<JSONWriter> writerImpl;
+
     FieldWriterDoubleVal(
             String name,
             int ordinal,
@@ -24,6 +26,16 @@ final class FieldWriterDoubleVal<T>
             Object function
     ) {
         super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
+
+        if (decimalFormat != null) {
+            writerImpl = (w, v) -> w.writeDouble(v, decimalFormat);
+        } else {
+            if ((features & WriteNonStringValueAsString.mask) != 0) {
+                writerImpl = JSONWriter::writeString;
+            } else {
+                writerImpl = JSONWriter::writeDouble;
+            }
+        }
     }
 
     @Override
@@ -43,30 +55,12 @@ final class FieldWriterDoubleVal<T>
         }
 
         writeFieldName(jsonWriter);
-        if (decimalFormat != null) {
-            jsonWriter.writeDouble(value, decimalFormat);
-        } else {
-            if ((features & WriteNonStringValueAsString.mask) != 0) {
-                jsonWriter.writeString(value);
-            } else {
-                jsonWriter.writeDouble(value);
-            }
-        }
+        writerImpl.accept(jsonWriter, value);
         return true;
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        double value = propertyAccessor.getDoubleValue(object);
-
-        if (decimalFormat != null) {
-            jsonWriter.writeDouble(value, decimalFormat);
-        } else {
-            if ((features & WriteNonStringValueAsString.mask) != 0) {
-                jsonWriter.writeString(value);
-            } else {
-                jsonWriter.writeDouble(value);
-            }
-        }
+        writerImpl.accept(jsonWriter, propertyAccessor.getDoubleValue(object));
     }
 }
