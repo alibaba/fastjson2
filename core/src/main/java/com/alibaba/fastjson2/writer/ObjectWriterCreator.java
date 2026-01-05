@@ -1121,6 +1121,10 @@ public class ObjectWriterCreator {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
+        }
+
         if (fieldClass.isEnum()) {
             BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
@@ -1419,6 +1423,10 @@ public class ObjectWriterCreator {
 
         if (fieldClass == LocalDate.class) {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
@@ -1846,7 +1854,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == OffsetDateTime.class) {
-            return new FieldWriterOffsetDateTimeFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == UUID.class) {
