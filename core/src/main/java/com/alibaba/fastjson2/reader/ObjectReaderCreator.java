@@ -2962,7 +2962,16 @@ public class ObjectReaderCreator {
                 }
             } else {
                 Type itemType = BeanUtils.resolveCollectionItemType(fieldTypeResolved, fieldClass);
-                Class itemClass = TypeUtils.getMapping(itemType);
+                Class itemClass;
+                if (itemType == null) {
+                    itemType = Object.class;
+                    itemClass = Object.class;
+                } else {
+                    itemClass = TypeUtils.getMapping(itemType);
+                    if (itemClass == String.class) {
+                        return new FieldReaderList(fieldName, fieldTypeResolved != null ? fieldTypeResolved : fieldType, fieldClassResolved != null ? fieldClassResolved : fieldClass, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+                    }
+                }
                 return new FieldReaderList(fieldName, fieldTypeResolved != null ? fieldTypeResolved : fieldType, fieldClassResolved != null ? fieldClassResolved : fieldClass, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
             }
             return new FieldReaderList(fieldName, fieldType, fieldClass, Object.class, Object.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
@@ -3365,7 +3374,15 @@ public class ObjectReaderCreator {
                 }
             }
 
-            Type itemType = BeanUtils.resolveCollectionItemType(fieldTypeResolved, fieldClass);
+            Type itemType = null;
+            if (fieldType instanceof ParameterizedType) {
+                Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
+                if (actualTypeArguments.length > 0) {
+                    itemType = actualTypeArguments[0];
+                }
+            } else {
+                itemType = BeanUtils.resolveCollectionItemType(fieldTypeResolved, fieldClass);
+            }
             if (itemType == null) {
                 itemType = Object.class;
             }
