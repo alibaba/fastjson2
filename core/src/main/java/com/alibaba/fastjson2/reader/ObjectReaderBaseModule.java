@@ -1630,15 +1630,15 @@ public class ObjectReaderBaseModule
         }
 
         if (type == Year.class) {
-            return new ObjectReaderImplFromString(Year.class, (Function<String, Year>) Year::parse);
+            return ObjectReaderImplYear.INSTANCE;
         }
 
         if (type == YearMonth.class) {
-            return new ObjectReaderImplFromString(YearMonth.class, (Function<String, YearMonth>) YearMonth::parse);
+            return ObjectReaderImplYearMonth.INSTANCE;
         }
 
         if (type == MonthDay.class) {
-            return new ObjectReaderImplFromString(MonthDay.class, (Function<String, MonthDay>) MonthDay::parse);
+            return ObjectReaderImplMonthDay.INSTANCE;
         }
 
         if (type == AtomicBoolean.class) {
