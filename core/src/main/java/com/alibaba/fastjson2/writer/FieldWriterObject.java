@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.BeanUtils;
 
@@ -19,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
 public class FieldWriterObject<T>
@@ -268,8 +270,18 @@ public class FieldWriterObject<T>
         return result;
     }
 
+    @Override
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T object) {
+        JSONWriter.Context context = jsonWriter.context;
+        long oldFeatures = context.getFeatures();
+        context.setFeatures(this.features | oldFeatures);
+        boolean result = writeInternalUTF8(jsonWriter, object);
+        context.setFeatures(oldFeatures);
+        return result;
+    }
+
     private boolean writeInternal(JSONWriter jsonWriter, T object) {
-        long features = jsonWriter.getFeatures();
+        long features = jsonWriter.getFeatures(this.features);
 
         if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
             return false;
@@ -283,7 +295,7 @@ public class FieldWriterObject<T>
         try {
             value = propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & IgnoreErrorGetter.mask) != 0) {
                 return false;
             }
             throw error;
@@ -405,6 +417,142 @@ public class FieldWriterObject<T>
             } else {
                 valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
             }
+        }
+
+        if (refDetect) {
+            jsonWriter.popPath(value);
+        }
+        return true;
+    }
+
+    private boolean writeInternalUTF8(JSONWriterUTF8 jsonWriter, T object) {
+        long features = jsonWriter.getFeatures(this.features);
+
+        if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+            return false;
+        }
+
+        if (backReference && jsonWriter.containsReference(object)) {
+            return false;
+        }
+
+        Object value;
+        try {
+            value = propertyAccessor.getObject(object);
+        } catch (RuntimeException error) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
+                return false;
+            }
+            throw error;
+        }
+
+        // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
+        if (value == null) {
+            long nullFeatures = JSONWriter.Feature.WriteNulls.mask;
+            if (array) {
+                nullFeatures |= WriteNullListAsEmpty.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
+            } else if (number) {
+                nullFeatures |= WriteNullNumberAsZero.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
+            } else if (fieldClass == Boolean.class) {
+                nullFeatures |= WriteNullBooleanAsFalse.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
+            } else if (fieldClass == String.class) {
+                nullFeatures |= WriteNullStringAsEmpty.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
+            } else {
+                nullFeatures |= NullAsDefaultValue.mask;
+            }
+
+            if ((features & nullFeatures) == 0) {
+                return false;
+            }
+
+            writeFieldNameUTF8(jsonWriter);
+            if (array) {
+                jsonWriter.writeArrayNull();
+            } else if (number) {
+                if (fieldClass == Float.class
+                        || fieldClass == Double.class
+                        || fieldClass == BigDecimal.class) {
+                    jsonWriter.writeDecimalNull();
+                } else {
+                    jsonWriter.writeNumberNull();
+                }
+            } else if (fieldClass == Appendable.class
+                    || fieldClass == StringBuffer.class
+                    || fieldClass == StringBuilder.class) {
+                jsonWriter.writeStringNull();
+            } else if ((fieldClass == Boolean.class || fieldClass == AtomicBoolean.class)) {
+                jsonWriter.writeBooleanNull();
+            } else {
+                jsonWriter.writeObjectNull(fieldClass);
+            }
+            return true;
+        }
+
+        if (value == object) {
+            if (fieldClass == Throwable.class
+                    && field != null
+                    && field.getDeclaringClass() == Throwable.class
+            ) {
+                return false;
+            }
+        }
+
+        if ((features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0 && !(value instanceof Serializable)) {
+            return false;
+        }
+
+        if ((features & JSONWriter.Feature.IgnoreEmpty.mask) != 0) {
+            if ((value instanceof Collection) && ((Collection<?>) value).isEmpty()) {
+                return false;
+            }
+
+            if ((value instanceof Map) && ((Map<?, ?>) value).isEmpty()) {
+                return false;
+            }
+        }
+
+        boolean refDetect = jsonWriter.isRefDetect(value);
+        if (refDetect) {
+            if (value == object) {
+                writeFieldNameUTF8(jsonWriter);
+                jsonWriter.writeReference("..");
+                return true;
+            }
+
+            String refPath = jsonWriter.setPath(this, value);
+            if (refPath != null) {
+                writeFieldNameUTF8(jsonWriter);
+                jsonWriter.writeReference(refPath);
+                jsonWriter.popPath(value);
+                return true;
+            }
+        }
+
+        Class<?> valueClass = value.getClass();
+        if (valueClass == byte[].class) {
+            writeBinary(jsonWriter, (byte[]) value);
+            return true;
+        }
+
+        ObjectWriter valueWriter = getObjectWriter(jsonWriter, valueClass);
+        if (valueWriter == null) {
+            throw new JSONException("get objectWriter error : " + valueClass);
+        }
+
+        if (unwrapped
+                && writeWithUnwrapped(jsonWriter, value, features, refDetect, valueWriter)) {
+            return true;
+        }
+
+        jsonWriter.writeNameRaw(fieldNameUTF8(jsonWriter.getFeatures(features)));
+        if ((this.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
+            valueWriter.writeArrayMapping(jsonWriter, value, fieldName, fieldType, this.features);
+        } else {
+            valueWriter.writeUTF8(jsonWriter, value, fieldName, fieldType, this.features);
         }
 
         if (refDetect) {

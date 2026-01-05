@@ -1,13 +1,12 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
-import java.lang.reflect.Type;
 import java.util.List;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
-
+@SuppressWarnings("ALL")
 public class ObjectWriter11<T>
         extends ObjectWriterAdapter<T> {
     public final FieldWriter fieldWriter0;
@@ -44,61 +43,48 @@ public class ObjectWriter11<T>
     }
 
     @Override
-    public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        long featuresAll = features | this.features | jsonWriter.getFeatures();
-        boolean beanToArray = (featuresAll & BeanToArray.mask) != 0;
+    protected void writeFieldsJSONB(JSONWriterJSONB jsonWriter, Object object) {
+        fieldWriter0.writeJSONB(jsonWriter, object);
+        fieldWriter1.writeJSONB(jsonWriter, object);
+        fieldWriter2.writeJSONB(jsonWriter, object);
+        fieldWriter3.writeJSONB(jsonWriter, object);
+        fieldWriter4.writeJSONB(jsonWriter, object);
+        fieldWriter5.writeJSONB(jsonWriter, object);
+        fieldWriter6.writeJSONB(jsonWriter, object);
+        fieldWriter7.writeJSONB(jsonWriter, object);
+        fieldWriter8.writeJSONB(jsonWriter, object);
+        fieldWriter9.writeJSONB(jsonWriter, object);
+        fieldWriter10.writeJSONB(jsonWriter, object);
+    }
 
-        if (jsonWriter.jsonb) {
-            if (beanToArray) {
-                writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
-                return;
-            }
+    @Override
+    protected void writeFieldsUTF8(JSONWriterUTF8 jsonWriter, Object object) {
+        fieldWriter0.writeUTF8(jsonWriter, object);
+        fieldWriter1.writeUTF8(jsonWriter, object);
+        fieldWriter2.writeUTF8(jsonWriter, object);
+        fieldWriter3.writeUTF8(jsonWriter, object);
+        fieldWriter4.writeUTF8(jsonWriter, object);
+        fieldWriter5.writeUTF8(jsonWriter, object);
+        fieldWriter6.writeUTF8(jsonWriter, object);
+        fieldWriter7.writeUTF8(jsonWriter, object);
+        fieldWriter8.writeUTF8(jsonWriter, object);
+        fieldWriter9.writeUTF8(jsonWriter, object);
+        fieldWriter10.writeUTF8(jsonWriter, object);
+    }
 
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
-            return;
-        }
-
-        if (beanToArray) {
-            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features | this.features);
-            return;
-        }
-
-        if (!serializable) {
-            if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
-                errorOnNoneSerializable();
-                return;
-            }
-
-            if ((featuresAll & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
-                jsonWriter.writeNull();
-                return;
-            }
-        }
-
-        if (hasFilter(jsonWriter)) {
-            writeWithFilter(jsonWriter, object, fieldName, fieldType, 0);
-            return;
-        }
-
-        jsonWriter.startObject();
-
-        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
-            writeTypeInfo(jsonWriter);
-        }
-
-        fieldWriter0.write(jsonWriter, object);
-        fieldWriter1.write(jsonWriter, object);
-        fieldWriter2.write(jsonWriter, object);
-        fieldWriter3.write(jsonWriter, object);
-        fieldWriter4.write(jsonWriter, object);
-        fieldWriter5.write(jsonWriter, object);
-        fieldWriter6.write(jsonWriter, object);
-        fieldWriter7.write(jsonWriter, object);
-        fieldWriter8.write(jsonWriter, object);
-        fieldWriter9.write(jsonWriter, object);
-        fieldWriter10.write(jsonWriter, object);
-
-        jsonWriter.endObject();
+    @Override
+    protected void writeFieldsUTF16(JSONWriterUTF16 jsonWriter, Object object) {
+        fieldWriter0.writeUTF16(jsonWriter, object);
+        fieldWriter1.writeUTF16(jsonWriter, object);
+        fieldWriter2.writeUTF16(jsonWriter, object);
+        fieldWriter3.writeUTF16(jsonWriter, object);
+        fieldWriter4.writeUTF16(jsonWriter, object);
+        fieldWriter5.writeUTF16(jsonWriter, object);
+        fieldWriter6.writeUTF16(jsonWriter, object);
+        fieldWriter7.writeUTF16(jsonWriter, object);
+        fieldWriter8.writeUTF16(jsonWriter, object);
+        fieldWriter9.writeUTF16(jsonWriter, object);
+        fieldWriter10.writeUTF16(jsonWriter, object);
     }
 
     @Override

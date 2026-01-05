@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
@@ -87,6 +88,49 @@ final class ObjectWriterImplInt64ValueArray
                     jsonWriter.writeComma();
                 }
                 objectWriter.write(jsonWriter, array[i], i, long.class, features);
+            }
+            jsonWriter.endArray();
+        }
+    }
+
+    @Override
+    public void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (object == null) {
+            jsonWriter.writeNull();
+            return;
+        }
+
+        ObjectWriterProvider provider = jsonWriter.context.provider;
+        ObjectWriter objectWriter = null;
+        if ((provider.userDefineMask & TYPE_INT64_MASK) != 0) {
+            objectWriter = jsonWriter.context.getObjectWriter(Long.class);
+        }
+
+        long[] array;
+        if (function != null) {
+            array = function.apply(object);
+        } else {
+            array = (long[]) object;
+        }
+
+        if (objectWriter == null || objectWriter == ObjectWriterImplInt32.INSTANCE) {
+            if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(array);
+            } else {
+                jsonWriter.writeInt64(array);
+            }
+            return;
+        }
+
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.startArray();
+            for (int i = 0; i < array.length; i++) {
+                if (i != 0) {
+                    jsonWriter.writeComma();
+                }
+                objectWriter.writeUTF8(jsonWriter, array[i], i, long.class, features);
             }
             jsonWriter.endArray();
         }

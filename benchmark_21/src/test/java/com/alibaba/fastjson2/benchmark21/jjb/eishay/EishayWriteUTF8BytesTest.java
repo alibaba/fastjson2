@@ -1,5 +1,6 @@
-package com.alibaba.fastjson2.benchmark.eishay;
+package com.alibaba.fastjson2.benchmark21.jjb.eishay;
 
+import com.alibaba.fastjson2.benchmark.eishay.EishayWriteUTF8Bytes;
 import org.openjdk.jmh.infra.Blackhole;
 
 public class EishayWriteUTF8BytesTest {
@@ -7,7 +8,6 @@ public class EishayWriteUTF8BytesTest {
     static final EishayWriteUTF8Bytes benchmark = new EishayWriteUTF8Bytes();
 
     public static void fastjson2() {
-        System.out.println("fastjson2_size : " + benchmark.fastjson2_size());
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 10_000_000; ++i) {

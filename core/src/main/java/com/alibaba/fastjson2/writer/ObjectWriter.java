@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -273,6 +275,12 @@ public interface ObjectWriter<T> {
      * @param features the features to use for writing
      */
     void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features);
+    default void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        write(jsonWriter, object, fieldName, fieldType, features);
+    }
+    default void writeUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        write(jsonWriter, object, fieldName, fieldType, features);
+    }
 
     /**
      * Writes an object to the JSONWriter with filter support using default parameters.

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
+import static com.alibaba.fastjson2.JSONWriter.MASK_NOT_WRITE_DEFAULT_VALUE;
 import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
 public final class FieldWriterListStr<T>
@@ -37,17 +40,17 @@ public final class FieldWriterListStr<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         List<String> list;
         try {
             list = toList(propertyAccessor.getObject(object));
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
         }
 
-        long features = this.features | jsonWriter.getFeatures();
         if (list == null) {
             if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
@@ -78,6 +81,55 @@ public final class FieldWriterListStr<T>
             }
             return true;
         }
+
+        jsonWriter.startArray();
+        for (int i = 0; i < list.size(); i++) {
+            if (i != 0) {
+                jsonWriter.writeComma();
+            }
+
+            String item = list.get(i);
+            if (item == null) {
+                jsonWriter.writeNull();
+                continue;
+            }
+            jsonWriter.writeString(item);
+        }
+        jsonWriter.endArray();
+
+        return true;
+    }
+
+    private static final long MASK_WRITE_NULL = WriteNulls.mask | NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask;
+
+    @Override
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T object) {
+        long features = jsonWriter.getFeatures(this.features);
+        List<String> list;
+        try {
+            list = toList(propertyAccessor.getObject(object));
+        } catch (RuntimeException error) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
+                return false;
+            }
+            throw error;
+        }
+
+        if (list == null) {
+            if ((features & MASK_WRITE_NULL) != 0) {
+                writeFieldNameUTF8(jsonWriter);
+                jsonWriter.writeArrayNull(features);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        if ((features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && list.isEmpty()) {
+            return false;
+        }
+
+        jsonWriter.writeNameRaw(fieldNameUTF8(features));
 
         jsonWriter.startArray();
         for (int i = 0; i < list.size(); i++) {

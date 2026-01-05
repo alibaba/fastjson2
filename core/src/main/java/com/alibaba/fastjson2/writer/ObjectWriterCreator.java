@@ -1121,7 +1121,7 @@ public class ObjectWriterCreator {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
-        if (fieldClass == OffsetDateTime.class) {
+        if (fieldClass == OffsetDateTime.class && provider.getObjectWriter(OffsetDateTime.class) == ObjectWriterImplOffsetDateTime.INSTANCE) {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
@@ -1429,7 +1429,7 @@ public class ObjectWriterCreator {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
-        if (fieldClass == OffsetDateTime.class) {
+        if (fieldClass == OffsetDateTime.class && provider.getObjectWriter(OffsetDateTime.class) == ObjectWriterImplOffsetDateTime.INSTANCE) {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
@@ -1861,7 +1861,7 @@ public class ObjectWriterCreator {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
-        if (fieldClass == OffsetDateTime.class) {
+        if (fieldClass == OffsetDateTime.class && provider.getObjectWriter(OffsetDateTime.class) == ObjectWriterImplOffsetDateTime.INSTANCE) {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 

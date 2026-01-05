@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -47,6 +48,34 @@ final class FieldWriterLocalDate<T>
         }
 
         writeFieldName(jsonWriter);
+
+        if (objectWriter == null) {
+            objectWriter = getObjectWriter(jsonWriter, LocalDate.class);
+        }
+
+        if (objectWriter != ObjectWriterImplLocalDate.INSTANCE) {
+            objectWriter.write(jsonWriter, localDate, fieldName, fieldClass, features);
+        } else {
+            jsonWriter.writeLocalDate(localDate);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T object) {
+        LocalDate localDate = (LocalDate) propertyAccessor.getObject(object);
+        if (localDate == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+                writeFieldNameUTF8(jsonWriter);
+                jsonWriter.writeNull();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        writeFieldNameUTF8(jsonWriter);
 
         if (objectWriter == null) {
             objectWriter = getObjectWriter(jsonWriter, LocalDate.class);

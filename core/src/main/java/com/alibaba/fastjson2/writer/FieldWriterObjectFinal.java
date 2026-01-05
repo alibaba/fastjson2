@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 
 class FieldWriterObjectFinal<T>
@@ -90,6 +92,49 @@ class FieldWriterObjectFinal<T>
         } else {
             valueWriter.write(jsonWriter, value, fieldName, fieldType, features);
         }
+
+        return true;
+    }
+
+    private static final long MAKS_WRITE_NULLS = MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE;
+
+    @Override
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
+        Object value;
+        try {
+            value = getFieldValue(object);
+        } catch (RuntimeException error) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
+                return false;
+            }
+            throw error;
+        }
+
+        if (value == null) {
+            if ((features & MAKS_WRITE_NULLS) == 0) {
+                return false;
+            }
+            writeFieldNameUTF8(jsonWriter);
+            if (fieldClass.isArray()) {
+                jsonWriter.writeArrayNull();
+            } else if (fieldClass == StringBuffer.class || fieldClass == StringBuilder.class) {
+                jsonWriter.writeStringNull();
+            } else {
+                jsonWriter.writeObjectNull(fieldClass);
+            }
+            return true;
+        }
+
+        ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
+
+        if (unwrapped
+                && writeWithUnwrapped(jsonWriter, value, features, refDetect, valueWriter)) {
+            return true;
+        }
+
+        jsonWriter.writeNameRaw(fieldNameUTF8(features));
+        valueWriter.writeUTF8(jsonWriter, value, fieldName, fieldType, features);
 
         return true;
     }

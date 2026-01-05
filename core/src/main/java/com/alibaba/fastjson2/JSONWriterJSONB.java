@@ -27,7 +27,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
-final class JSONWriterJSONB
+public final class JSONWriterJSONB
         extends JSONWriter {
     // optimize for write ZonedDateTime
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);

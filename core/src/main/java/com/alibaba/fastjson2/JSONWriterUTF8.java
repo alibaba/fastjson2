@@ -26,7 +26,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 
-final class JSONWriterUTF8
+public final class JSONWriterUTF8
         extends JSONWriter {
     static final long REF;
     static final short QUOTE2_COLON, QUOTE_COLON;
@@ -449,8 +449,9 @@ final class JSONWriterUTF8
     private void writeStringJDK8(String str) {
         char[] chars = getCharArray(str);
 
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
-        boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
+        long features = context.features;
+        boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
+        boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
 
         int off = this.off;
         // ensureCapacity

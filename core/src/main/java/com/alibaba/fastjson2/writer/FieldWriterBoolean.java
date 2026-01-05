@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -99,41 +102,61 @@ class FieldWriterBoolean
     }
 
     @Override
-    public final void writeBool(JSONWriter jsonWriter, boolean value) {
+    public final void writeBoolUTF8(JSONWriterUTF8 jsonWriter, boolean value) {
         long features = jsonWriter.getFeatures(this.features);
         if (!value && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
             return;
         }
         if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
-            writeFieldName(jsonWriter);
+            writeFieldNameUTF8(jsonWriter);
             jsonWriter.writeString(value ? "true" : "false");
             return;
         }
 
-        if (jsonWriter.utf8) {
-            jsonWriter.writeNameRaw(
-                    (features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0
-                            ? (value ? utf8Value1 : utf8Value0)
-                            : (value ? utf8ValueTrue : utf8ValueFalse)
-            );
+        jsonWriter.writeNameRaw(
+                (features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0
+                        ? (value ? utf8Value1 : utf8Value0)
+                        : (value ? utf8ValueTrue : utf8ValueFalse)
+        );
+    }
+
+    @Override
+    public final void writeBoolUTF16(JSONWriterUTF16 jsonWriter, boolean value) {
+        long features = jsonWriter.getFeatures(this.features);
+        if (!value && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+            return;
+        }
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            writeFieldNameUTF16(jsonWriter);
+            jsonWriter.writeString(value ? "true" : "false");
             return;
         }
 
-        if (jsonWriter.utf16) {
-            jsonWriter.writeNameRaw(
-                    (features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0
-                            ? (value ? utf16Value1 : utf16Value0)
-                            : (value ? utf16ValueTrue : utf16ValueFalse)
-            );
+        jsonWriter.writeNameRaw(
+                (features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0
+                        ? (value ? utf16Value1 : utf16Value0)
+                        : (value ? utf16ValueTrue : utf16ValueFalse)
+        );
+    }
+
+    @Override
+    public final void writeBoolJSONB(JSONWriterJSONB jsonWriter, boolean value) {
+        long features = jsonWriter.getFeatures(this.features);
+        if (!value && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+            return;
+        }
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            writeFieldNameJSONB(jsonWriter);
+            jsonWriter.writeString(value ? "true" : "false");
             return;
         }
 
-        writeFieldName(jsonWriter);
+        writeFieldNameJSONB(jsonWriter);
         jsonWriter.writeBool(value);
     }
 
     @Override
-    public boolean write(JSONWriter jsonWriter, Object object) {
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, Object object) {
         Boolean value;
         try {
             value = (Boolean) getFieldValue(object);
@@ -149,7 +172,7 @@ class FieldWriterBoolean
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullBooleanAsFalse.mask)) == 0) {
                 return false;
             }
-            writeFieldName(jsonWriter);
+            writeFieldNameUTF8(jsonWriter);
             if ((features & JSONWriter.Feature.WriteNullBooleanAsFalse.mask) != 0) {
                 jsonWriter.writeBool(false);
             } else {
@@ -165,7 +188,81 @@ class FieldWriterBoolean
             return false;
         }
 
-        writeBool(jsonWriter, value);
+        writeBoolUTF8(jsonWriter, value);
+        return true;
+    }
+
+    @Override
+    public boolean writeUTF16(JSONWriterUTF16 jsonWriter, Object object) {
+        Boolean value;
+        try {
+            value = (Boolean) getFieldValue(object);
+        } catch (RuntimeException error) {
+            if (jsonWriter.isIgnoreErrorGetter()) {
+                return false;
+            }
+            throw error;
+        }
+
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullBooleanAsFalse.mask)) == 0) {
+                return false;
+            }
+            writeFieldNameUTF16(jsonWriter);
+            if ((features & JSONWriter.Feature.WriteNullBooleanAsFalse.mask) != 0) {
+                jsonWriter.writeBool(false);
+            } else {
+                jsonWriter.writeBooleanNull();
+            }
+            return true;
+        }
+
+        if (fieldClass == boolean.class
+                && !value
+                && (jsonWriter.getFeatures(features) & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0
+        ) {
+            return false;
+        }
+
+        writeBoolUTF16(jsonWriter, value);
+        return true;
+    }
+
+    @Override
+    public boolean writeJSONB(JSONWriterJSONB jsonWriter, Object object) {
+        Boolean value;
+        try {
+            value = (Boolean) getFieldValue(object);
+        } catch (RuntimeException error) {
+            if (jsonWriter.isIgnoreErrorGetter()) {
+                return false;
+            }
+            throw error;
+        }
+
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullBooleanAsFalse.mask)) == 0) {
+                return false;
+            }
+            writeFieldNameJSONB(jsonWriter);
+            if ((features & JSONWriter.Feature.WriteNullBooleanAsFalse.mask) != 0) {
+                jsonWriter.writeBool(false);
+            } else {
+                jsonWriter.writeBooleanNull();
+            }
+            return true;
+        }
+
+        if (fieldClass == boolean.class
+                && !value
+                && (jsonWriter.getFeatures(features) & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0
+        ) {
+            return false;
+        }
+
+        writeBoolJSONB(jsonWriter, value);
         return true;
     }
 

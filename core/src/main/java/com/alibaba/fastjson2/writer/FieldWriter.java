@@ -45,9 +45,15 @@ public abstract class FieldWriter<T>
 
     final long hashCode;
     final byte[] nameWithColonUTF8;
+    final byte[] nameWithColonUTF8SingleQuote;
+    final byte[] nameUnquoteWithColonUTF8;
     final char[] nameWithColonUTF16;
+    final char[] nameWithColonUTF16SingleQuote;
+    final char[] nameUnquoteWithColonUTF16;
     final byte[] nameJSONB;
     long nameSymbolCache;
+    final byte[] nameNullUTF8;
+    final char[] nameNullUTF16;
 
     final boolean fieldClassSerializable;
     final JSONWriter.Path rootParentPath;
@@ -176,12 +182,39 @@ public abstract class FieldWriter<T>
         bytes[off] = ':';
         nameWithColonUTF8 = bytes;
 
+        byte[] nameWithColonUTF8SingleQuote = nameWithColonUTF8.clone();
+        nameWithColonUTF8SingleQuote[0] = '\'';
+        nameWithColonUTF8SingleQuote[nameWithColonUTF8SingleQuote.length - 2] = '\'';
+        this.nameWithColonUTF8SingleQuote = nameWithColonUTF8SingleQuote;
+
+        byte[] nameUnquoteWithColonUTF8 = Arrays.copyOfRange(nameWithColonUTF8, 1, nameWithColonUTF8.length - 1);
+        nameUnquoteWithColonUTF8[nameUnquoteWithColonUTF8.length - 1] = ':';
+        this.nameUnquoteWithColonUTF8 = nameUnquoteWithColonUTF8;
+
         char[] chars = new char[nameLength + 3];
         chars[0] = '"';
         name.getChars(0, name.length(), chars, 1);
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
         nameWithColonUTF16 = chars;
+
+        char[] nameUnquoteWithColonUTF16 = Arrays.copyOfRange(nameWithColonUTF16, 1, nameWithColonUTF16.length - 1);
+        nameUnquoteWithColonUTF16[nameUnquoteWithColonUTF16.length - 1] = ':';
+        this.nameUnquoteWithColonUTF16 = nameUnquoteWithColonUTF16;
+
+        char[] nameWithColonUTF16SingleQuote = nameWithColonUTF16.clone();
+        nameWithColonUTF16SingleQuote[0] = '\'';
+        nameWithColonUTF16SingleQuote[nameWithColonUTF16SingleQuote.length - 2] = '\'';
+        this.nameWithColonUTF16SingleQuote = nameWithColonUTF16SingleQuote;
+
+        byte[] nameNullUTF8 = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + 4);
+        "null".getBytes(0, 4, nameNullUTF8, nameWithColonUTF8.length - 4);
+        this.nameNullUTF8 = nameNullUTF8;
+
+        char[] nameNullUTF16 = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + 4);
+        "null".getChars(0, 4, nameNullUTF16, nameWithColonUTF16.length - 4);
+        this.nameNullUTF16 = nameNullUTF16;
+
         propertyAccessor = createPropertyAccessor(name, fieldType, fieldClass, field, method, function);
         if (function instanceof Function) {
             this.function = (Function) function;
@@ -244,7 +277,7 @@ public abstract class FieldWriter<T>
         return false;
     }
 
-    public final void writeFieldNameJSONB(JSONWriter jsonWriter) {
+    public final void writeFieldNameJSONB(JSONWriterJSONB jsonWriter) {
         SymbolTable symbolTable = jsonWriter.symbolTable;
         if (symbolTable != null && writeFieldNameSymbol(jsonWriter, symbolTable)) {
             return;
@@ -262,29 +295,37 @@ public abstract class FieldWriter<T>
     }
 
     public final void writeFieldName(JSONWriter jsonWriter) {
-        if (jsonWriter.jsonb) {
-            SymbolTable symbolTable = jsonWriter.symbolTable;
-            if (symbolTable != null && writeFieldNameSymbol(jsonWriter, symbolTable)) {
-                return;
-            }
-            jsonWriter.writeNameRaw(nameJSONB, hashCode);
-            return;
+        if (jsonWriter instanceof JSONWriterUTF8) {
+            writeFieldNameUTF8((JSONWriterUTF8) jsonWriter);
+        } else if (jsonWriter instanceof JSONWriterUTF16) {
+            writeFieldNameUTF16((JSONWriterUTF16) jsonWriter);
+        } else {
+            writeFieldNameJSONB((JSONWriterJSONB) jsonWriter);
         }
+    }
 
-        if (!jsonWriter.useSingleQuote && (jsonWriter.context.getFeatures() & UnquoteFieldName.mask) == 0) {
-            if (jsonWriter.utf8) {
-                jsonWriter.writeNameRaw(nameWithColonUTF8);
-                return;
-            }
+    public final void writeFieldNameUTF8(JSONWriterUTF8 jsonWriter) {
+        jsonWriter.writeNameRaw(fieldNameUTF8(jsonWriter.getFeatures(this.features)));
+    }
 
-            if (jsonWriter.utf16) {
-                jsonWriter.writeNameRaw(nameWithColonUTF16);
-                return;
-            }
-        }
+    protected final byte[] fieldNameUTF8(long features) {
+        return (features & UnquoteFieldName.mask) != 0
+                ? nameUnquoteWithColonUTF8
+                : (features & UseSingleQuotes.mask) != 0
+                ? nameWithColonUTF8SingleQuote
+                : nameWithColonUTF8;
+    }
 
-        jsonWriter.writeName(fieldName);
-        jsonWriter.writeColon();
+    public final void writeFieldNameUTF16(JSONWriterUTF16 jsonWriter) {
+        jsonWriter.writeNameRaw(fieldNameUTF16(jsonWriter.getFeatures(this.features)));
+    }
+
+    protected final char[] fieldNameUTF16(long features) {
+        return (features & UnquoteFieldName.mask) != 0
+                ? nameUnquoteWithColonUTF16
+                : (features & UseSingleQuotes.mask) != 0
+                ? nameWithColonUTF16SingleQuote
+                : nameWithColonUTF16;
     }
 
     private boolean writeFieldNameSymbol(JSONWriter jsonWriter, SymbolTable symbolTable) {
@@ -568,6 +609,11 @@ public abstract class FieldWriter<T>
         jsonWriter.writeEnum(e);
     }
 
+    public void writeEnumUTF8(JSONWriterUTF8 jsonWriter, Enum e) {
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeEnum(e);
+    }
+
     public void writeBinary(JSONWriter jsonWriter, byte[] value) {
         if (value == null) {
             if (!jsonWriter.isWriteNulls()) {
@@ -624,13 +670,61 @@ public abstract class FieldWriter<T>
         }
     }
 
-    public void writeInt32(JSONWriter jsonWriter, int value) {
-        writeFieldName(jsonWriter);
+    public final void writeInt32(JSONWriter jsonWriter, int value) {
+        if (jsonWriter instanceof JSONWriterUTF8) {
+            writeInt32UTF8((JSONWriterUTF8) jsonWriter, value);
+        } else if (jsonWriter instanceof JSONWriterUTF16) {
+            writeInt32UTF16((JSONWriterUTF16) jsonWriter, value);
+        } else {
+            writeInt32JSONB((JSONWriterJSONB) jsonWriter, value);
+        }
+    }
+
+    public void writeInt32UTF8(JSONWriterUTF8 jsonWriter, int value) {
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeInt32(value);
+    }
+
+    public void writeInt32UTF16(JSONWriterUTF16 jsonWriter, int value) {
+        writeFieldNameUTF16(jsonWriter);
+        jsonWriter.writeInt32(value);
+    }
+
+    public void writeInt32JSONB(JSONWriterJSONB jsonWriter, int value) {
+        writeFieldNameJSONB(jsonWriter);
         jsonWriter.writeInt32(value);
     }
 
     public void writeInt64(JSONWriter jsonWriter, long value) {
-        writeFieldName(jsonWriter);
+        if (jsonWriter instanceof JSONWriterUTF8) {
+            writeInt64UTF8((JSONWriterUTF8) jsonWriter, value);
+        } else if (jsonWriter instanceof JSONWriterUTF16) {
+            writeInt64UTF16((JSONWriterUTF16) jsonWriter, value);
+        } else {
+            writeInt64JSONB((JSONWriterJSONB) jsonWriter, value);
+        }
+    }
+
+    public void writeInt64UTF8(JSONWriterUTF8 jsonWriter, long value) {
+        writeFieldNameUTF8(jsonWriter);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(Long.toString(value));
+        } else {
+            jsonWriter.writeInt64(value);
+        }
+    }
+
+    public void writeInt64UTF16(JSONWriterUTF16 jsonWriter, long value) {
+        writeFieldNameUTF16(jsonWriter);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(Long.toString(value));
+        } else {
+            jsonWriter.writeInt64(value);
+        }
+    }
+
+    public void writeInt64JSONB(JSONWriterJSONB jsonWriter, long value) {
+        writeFieldNameJSONB(jsonWriter);
         if ((features & WriteNonStringValueAsString.mask) != 0) {
             jsonWriter.writeString(Long.toString(value));
         } else {
@@ -702,7 +796,25 @@ public abstract class FieldWriter<T>
         }
     }
 
-    public void writeBool(JSONWriter jsonWriter, boolean value) {
+    public final void writeBool(JSONWriter jsonWriter, boolean value) {
+        if (jsonWriter instanceof JSONWriterUTF8) {
+            writeBoolUTF8((JSONWriterUTF8) jsonWriter, value);
+        } else if (jsonWriter instanceof JSONWriterUTF16) {
+            writeBoolUTF16((JSONWriterUTF16) jsonWriter, value);
+        } else {
+            writeBoolJSONB((JSONWriterJSONB) jsonWriter, value);
+        }
+    }
+
+    public void writeBoolUTF8(JSONWriterUTF8 jsonWriter, boolean value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeBoolUTF16(JSONWriterUTF16 jsonWriter, boolean value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeBoolJSONB(JSONWriterJSONB jsonWriter, boolean value) {
         throw new UnsupportedOperationException();
     }
 
@@ -899,7 +1011,27 @@ public abstract class FieldWriter<T>
 
     public abstract void writeValue(JSONWriter jsonWriter, T object);
 
-    public abstract boolean write(JSONWriter jsonWriter, T o);
+    public boolean write(JSONWriter jsonWriter, T o) {
+        if (jsonWriter instanceof JSONWriterUTF16) {
+            return writeUTF16((JSONWriterUTF16) jsonWriter, o);
+        } else if (jsonWriter instanceof JSONWriterUTF8) {
+            return writeUTF8((JSONWriterUTF8) jsonWriter, o);
+        } else {
+            return writeJSONB((JSONWriterJSONB) jsonWriter, o);
+        }
+    }
+
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T o) {
+        return write(jsonWriter, o);
+    }
+
+    public boolean writeUTF16(JSONWriterUTF16 jsonWriter, T o) {
+        return write(jsonWriter, o);
+    }
+
+    public boolean writeJSONB(JSONWriterJSONB jsonWriter, T o) {
+        return write(jsonWriter, o);
+    }
 
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == Float[].class) {
@@ -943,6 +1075,10 @@ public abstract class FieldWriter<T>
 
     public void writeList(JSONWriter jsonWriter, List list) {
         throw new UnsupportedOperationException();
+    }
+
+    public void writeListUTF8(JSONWriterUTF8 jsonWriter, List list) {
+        writeList(jsonWriter, list);
     }
 
     public void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {

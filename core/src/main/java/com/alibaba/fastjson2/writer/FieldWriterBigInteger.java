@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -39,7 +42,7 @@ final class FieldWriterBigInteger<T>
     }
 
     @Override
-    public boolean write(JSONWriter jsonWriter, T o) {
+    public boolean writeJSONB(JSONWriterJSONB jsonWriter, T o) {
         BigInteger value = (BigInteger) propertyAccessor.getObject(o);
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
@@ -47,7 +50,35 @@ final class FieldWriterBigInteger<T>
                 return false;
             }
         }
-        writeFieldName(jsonWriter);
+        writeFieldNameJSONB(jsonWriter);
+        jsonWriter.writeBigInt(value, features);
+        return true;
+    }
+
+    @Override
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T o) {
+        BigInteger value = (BigInteger) propertyAccessor.getObject(o);
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
+                return false;
+            }
+        }
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeBigInt(value, features);
+        return true;
+    }
+
+    @Override
+    public boolean writeUTF16(JSONWriterUTF16 jsonWriter, T o) {
+        BigInteger value = (BigInteger) propertyAccessor.getObject(o);
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
+                return false;
+            }
+        }
+        writeFieldNameUTF16(jsonWriter);
         jsonWriter.writeBigInt(value, features);
         return true;
     }

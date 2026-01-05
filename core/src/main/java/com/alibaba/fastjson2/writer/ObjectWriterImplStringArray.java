@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
@@ -15,6 +16,17 @@ final class ObjectWriterImplStringArray
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (object == null) {
+            jsonWriter.writeArrayNull();
+            return;
+        }
+
+        String[] strings = (String[]) object;
+        jsonWriter.writeString(strings);
+    }
+
+    @Override
+    public void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();
             return;

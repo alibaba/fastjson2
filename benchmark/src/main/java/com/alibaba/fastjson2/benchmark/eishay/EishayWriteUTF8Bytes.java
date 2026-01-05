@@ -49,6 +49,10 @@ public class EishayWriteUTF8Bytes {
         bh.consume(com.alibaba.fastjson.JSON.toJSONBytes(mc));
     }
 
+    public int fastjson2_size() {
+        return JSON.toJSONBytes(mc).length;
+    }
+
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(mc));

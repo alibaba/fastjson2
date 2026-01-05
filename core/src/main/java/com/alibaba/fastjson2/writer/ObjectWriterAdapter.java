@@ -15,8 +15,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
+import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
+@SuppressWarnings("ALL")
 public class ObjectWriterAdapter<T>
         implements ObjectWriter<T> {
     boolean hasFilter;
@@ -32,14 +34,14 @@ public class ObjectWriterAdapter<T>
     protected final FieldWriter[] fieldWriterArray;
 
     final String typeKey;
-    byte[] typeKeyJSONB;
+    final byte[] typeKeyJSONB;
     protected final String typeName;
     protected final long typeNameHash;
     protected long typeNameSymbolCache;
     protected final byte[] typeNameJSONB;
 
-    byte[] nameWithColonUTF8;
-    char[] nameWithColonUTF16;
+    final byte[] nameWithColonUTF8;
+    final char[] nameWithColonUTF16;
 
     final long features;
 
@@ -71,7 +73,10 @@ public class ObjectWriterAdapter<T>
         }
 
         this.objectClass = objectClass;
-        this.typeKey = typeKey == null || typeKey.isEmpty() ? TYPE : typeKey;
+        if (typeKey == null || typeKey.isEmpty()) {
+            typeKey = TYPE;
+        }
+        this.typeKey = typeKey;
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
         this.typeNameJSONB = JSONB.toBytes(typeName);
@@ -109,6 +114,38 @@ public class ObjectWriterAdapter<T>
             int index = Arrays.binarySearch(this.hashCodes, hashCode);
             mapping[index] = (short) i;
         }
+
+        int typeKeyLength = typeKey.length();
+        if (typeName == null) {
+            nameWithColonUTF8 = null;
+            nameWithColonUTF16 = null;
+        } else {
+            int typeNameLength = typeName.length();
+            {
+                byte[] bytes = new byte[typeKeyLength + typeNameLength + 5];
+                bytes[0] = '"';
+                typeKey.getBytes(0, typeKeyLength, bytes, 1);
+                bytes[typeKeyLength + 1] = '"';
+                bytes[typeKeyLength + 2] = ':';
+                bytes[typeKeyLength + 3] = '"';
+                typeName.getBytes(0, typeNameLength, bytes, typeKeyLength + 4);
+                bytes[typeKeyLength + typeNameLength + 4] = '"';
+                nameWithColonUTF8 = bytes;
+            }
+            {
+                char[] chars = new char[typeKeyLength + typeNameLength + 5];
+                chars[0] = '"';
+                typeKey.getChars(0, typeKeyLength, chars, 1);
+                chars[typeKeyLength + 1] = '"';
+                chars[typeKeyLength + 2] = ':';
+                chars[typeKeyLength + 3] = '"';
+                typeName.getChars(0, typeNameLength, chars, typeKeyLength + 4);
+                chars[typeKeyLength + typeNameLength + 4] = '"';
+
+                nameWithColonUTF16 = chars;
+            }
+        }
+        typeKeyJSONB = JSONB.toBytes(typeKey);
     }
 
     @Override
@@ -181,6 +218,10 @@ public class ObjectWriterAdapter<T>
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
+        if ((featuresAll & BeanToArray.mask) != 0) {
+            writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
 
         if (!serializable) {
             if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
@@ -204,11 +245,16 @@ public class ObjectWriterAdapter<T>
             writeClassInfo(jsonWriter);
         }
         jsonWriter.startObject();
+        writeFieldsJSONB((JSONWriterJSONB) jsonWriter, object);
+        jsonWriter.endObject();
+    }
+
+    protected void writeFieldsJSONB(JSONWriterJSONB jsonWriter, Object object) {
+        int size = fieldWriterArray.length;
         for (int i = 0; i < size; ++i) {
             fieldWriters.get(i)
-                    .write(jsonWriter, object);
+                    .writeJSONB(jsonWriter, object);
         }
-        jsonWriter.endObject();
     }
 
     protected final void writeClassInfo(JSONWriter jsonWriter) {
@@ -253,6 +299,17 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (jsonWriter instanceof JSONWriterUTF16) {
+            writeUTF16((JSONWriterUTF16) jsonWriter, object, fieldName, fieldType, features);
+        } else if (jsonWriter instanceof JSONWriterUTF8) {
+            writeUTF8((JSONWriterUTF8) jsonWriter, object, fieldName, fieldType, features);
+        } else {
+            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
+        }
+    }
+
+    @Override
+    public void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (hasValueField) {
             FieldWriter fieldWriter = fieldWriterArray[0];
             fieldWriter.writeValue(jsonWriter, object);
@@ -260,25 +317,71 @@ public class ObjectWriterAdapter<T>
         }
 
         long featuresAll = features | this.features | jsonWriter.getFeatures();
-        boolean beanToArray = (featuresAll & BeanToArray.mask) != 0;
-
-        if (jsonWriter.jsonb) {
-            if (beanToArray) {
-                writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
-                return;
-            }
-
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
-            return;
-        }
 
         if (googleCollection) {
             Collection collection = (Collection) object;
-            ObjectWriterImplCollection.INSTANCE.write(jsonWriter, collection, fieldName, fieldType, features);
+            ObjectWriterImplCollection.INSTANCE.writeUTF8(jsonWriter, collection, fieldName, fieldType, features);
             return;
         }
 
-        if (beanToArray) {
+        if ((featuresAll & MAKS_BEAN_TO_ARRAY) != 0) {
+            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
+
+        if (!serializable) {
+            if ((featuresAll & MAKS_ERROR_ON_NONE_SERIALIZABLE) != 0) {
+                errorOnNoneSerializable();
+                return;
+            }
+
+            if ((featuresAll & MASK_IGNORE_NONE_SERIALIZABLE) != 0) {
+                jsonWriter.writeNull();
+                return;
+            }
+        }
+
+        if (hasFilter(jsonWriter)) {
+            writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
+
+        jsonWriter.startObject();
+
+        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+            jsonWriter.writeNameRaw(nameWithColonUTF8);
+        }
+
+        writeFieldsUTF8(jsonWriter, object);
+
+        jsonWriter.endObject();
+    }
+
+    protected void writeFieldsUTF8(JSONWriterUTF8 jsonWriter, Object object) {
+        final int size = fieldWriters.size();
+        for (int i = 0; i < size; i++) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
+            fieldWriter.writeUTF8(jsonWriter, object);
+        }
+    }
+
+    @Override
+    public void writeUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (hasValueField) {
+            FieldWriter fieldWriter = fieldWriterArray[0];
+            fieldWriter.writeValue(jsonWriter, object);
+            return;
+        }
+
+        long featuresAll = features | this.features | jsonWriter.getFeatures();
+
+        if (googleCollection) {
+            Collection collection = (Collection) object;
+            ObjectWriterImplCollection.INSTANCE.writeUTF16(jsonWriter, collection, fieldName, fieldType, features);
+            return;
+        }
+
+        if ((featuresAll & MAKS_BEAN_TO_ARRAY) != 0) {
             writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
@@ -303,16 +406,20 @@ public class ObjectWriterAdapter<T>
         jsonWriter.startObject();
 
         if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
-            writeTypeInfo(jsonWriter);
+            jsonWriter.writeNameRaw(nameWithColonUTF16);
         }
 
+        writeFieldsUTF16(jsonWriter, object);
+
+        jsonWriter.endObject();
+    }
+
+    protected void writeFieldsUTF16(JSONWriterUTF16 jsonWriter, Object object) {
         final int size = fieldWriters.size();
         for (int i = 0; i < size; i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
-            fieldWriter.write(jsonWriter, object);
+            fieldWriter.writeUTF16(jsonWriter, object);
         }
-
-        jsonWriter.endObject();
     }
 
     public Map<String, Object> toMap(Object object) {
@@ -333,48 +440,15 @@ public class ObjectWriterAdapter<T>
         return fieldWriters;
     }
 
-    byte[] jsonbClassInfo;
-
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
         if (jsonWriter.utf8) {
-            if (nameWithColonUTF8 == null) {
-                int typeKeyLength = typeKey.length();
-                int typeNameLength = typeName.length();
-                byte[] chars = new byte[typeKeyLength + typeNameLength + 5];
-                chars[0] = '"';
-                typeKey.getBytes(0, typeKeyLength, chars, 1);
-                chars[typeKeyLength + 1] = '"';
-                chars[typeKeyLength + 2] = ':';
-                chars[typeKeyLength + 3] = '"';
-                typeName.getBytes(0, typeNameLength, chars, typeKeyLength + 4);
-                chars[typeKeyLength + typeNameLength + 4] = '"';
-
-                nameWithColonUTF8 = chars;
-            }
             jsonWriter.writeNameRaw(nameWithColonUTF8);
             return true;
         } else if (jsonWriter.utf16) {
-            if (nameWithColonUTF16 == null) {
-                int typeKeyLength = typeKey.length();
-                int typeNameLength = typeName.length();
-                char[] chars = new char[typeKeyLength + typeNameLength + 5];
-                chars[0] = '"';
-                typeKey.getChars(0, typeKeyLength, chars, 1);
-                chars[typeKeyLength + 1] = '"';
-                chars[typeKeyLength + 2] = ':';
-                chars[typeKeyLength + 3] = '"';
-                typeName.getChars(0, typeNameLength, chars, typeKeyLength + 4);
-                chars[typeKeyLength + typeNameLength + 4] = '"';
-
-                nameWithColonUTF16 = chars;
-            }
             jsonWriter.writeNameRaw(nameWithColonUTF16);
             return true;
         } else if (jsonWriter.jsonb) {
-            if (typeKeyJSONB == null) {
-                typeKeyJSONB = JSONB.toBytes(typeKey);
-            }
             jsonWriter.writeRaw(typeKeyJSONB);
             jsonWriter.writeRaw(typeNameJSONB);
             return true;

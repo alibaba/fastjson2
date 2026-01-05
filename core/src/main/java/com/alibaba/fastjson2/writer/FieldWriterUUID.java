@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -31,7 +34,25 @@ final class FieldWriterUUID<T>
     }
 
     @Override
-    public boolean write(JSONWriter jsonWriter, T object) {
+    public boolean writeJSONB(JSONWriterJSONB jsonWriter, T object) {
+        UUID uuid = (UUID) propertyAccessor.getObject(object);
+        if (uuid == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+                writeFieldNameJSONB(jsonWriter);
+                jsonWriter.writeNull();
+                return true;
+            } else {
+                return false;
+            }
+        }
+        writeFieldNameJSONB(jsonWriter);
+        jsonWriter.writeUUID(uuid);
+        return true;
+    }
+
+    @Override
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T object) {
         UUID uuid = (UUID) propertyAccessor.getObject(object);
         if (uuid == null) {
             long features = this.features | jsonWriter.getFeatures();
@@ -43,7 +64,25 @@ final class FieldWriterUUID<T>
                 return false;
             }
         }
-        writeFieldName(jsonWriter);
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeUUID(uuid);
+        return true;
+    }
+
+    @Override
+    public boolean writeUTF16(JSONWriterUTF16 jsonWriter, T object) {
+        UUID uuid = (UUID) propertyAccessor.getObject(object);
+        if (uuid == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+                writeFieldNameUTF16(jsonWriter);
+                jsonWriter.writeNull();
+                return true;
+            } else {
+                return false;
+            }
+        }
+        writeFieldNameUTF16(jsonWriter);
         jsonWriter.writeUUID(uuid);
         return true;
     }

@@ -1,13 +1,12 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
-import java.lang.reflect.Type;
 import java.util.List;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
-
+@SuppressWarnings("ALL")
 public class ObjectWriter1<T>
         extends ObjectWriterAdapter<T> {
     public final FieldWriter fieldWriter0;
@@ -24,50 +23,18 @@ public class ObjectWriter1<T>
     }
 
     @Override
-    public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        long featuresAll = features | this.features | jsonWriter.getFeatures();
+    protected void writeFieldsJSONB(JSONWriterJSONB jsonWriter, Object object) {
+        fieldWriter0.writeJSONB(jsonWriter, object);
+    }
 
-        if (jsonWriter.jsonb) {
-            if ((featuresAll & BeanToArray.mask) != 0) {
-                writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
-                return;
-            }
+    @Override
+    protected void writeFieldsUTF8(JSONWriterUTF8 jsonWriter, Object object) {
+        fieldWriter0.writeUTF8(jsonWriter, object);
+    }
 
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
-            return;
-        }
-
-        if ((featuresAll & BeanToArray.mask) != 0) {
-            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
-            return;
-        }
-
-        if (!serializable) {
-            if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
-                errorOnNoneSerializable();
-                return;
-            }
-
-            if ((featuresAll & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
-                jsonWriter.writeNull();
-                return;
-            }
-        }
-
-        if (hasFilter(jsonWriter)) {
-            writeWithFilter(jsonWriter, object, fieldName, fieldType, 0);
-            return;
-        }
-
-        jsonWriter.startObject();
-
-        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
-            writeTypeInfo(jsonWriter);
-        }
-
-        fieldWriter0.write(jsonWriter, object);
-
-        jsonWriter.endObject();
+    @Override
+    protected void writeFieldsUTF16(JSONWriterUTF16 jsonWriter, Object object) {
+        fieldWriter0.writeUTF16(jsonWriter, object);
     }
 
     @Override

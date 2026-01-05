@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
@@ -12,6 +13,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.function.Function;
+
+import static com.alibaba.fastjson2.JSONWriter.*;
 
 class FieldWriterEnum
         extends FieldWriter {
@@ -253,6 +256,36 @@ class FieldWriterEnum
         jsonWriter.writeString(e.toString());
     }
 
+    @Override
+    public final void writeEnumUTF8(JSONWriterUTF8 jsonWriter, Enum e) {
+        long features = jsonWriter.getFeatures(this.features);
+
+        if ((features & MASK_WRITE_ENUM_USING_TO_STRING) == 0) {
+            final int ordinal = e.ordinal();
+            if ((features & MASK_WRITE_ENUM_USING_ORDINAL) != 0) {
+                writeEnumUsingOrdinal(jsonWriter, ordinal);
+                return;
+            }
+
+            if ((features & MASK_UNQUOTE_FIELD_NAME) == 0) {
+                byte[] bytes = valueNameCacheUTF8[ordinal];
+
+                if (bytes == null) {
+                    valueNameCacheUTF8[ordinal] = bytes = getNameBytes(ordinal);
+                }
+                jsonWriter.writeNameRaw(bytes);
+                return;
+            }
+        }
+
+        writeEnumToStringUTF8(jsonWriter, e);
+    }
+
+    private void writeEnumToStringUTF8(JSONWriterUTF8 jsonWriter, Enum e) {
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeString(e.toString());
+    }
+
     private void writeEnumUsingOrdinal(JSONWriter jsonWriter, int ordinal) {
         if ((features & JSONWriter.Feature.UnquoteFieldName.mask) == 0) {
             if (jsonWriter.utf8) {
@@ -346,6 +379,24 @@ class FieldWriterEnum
         } else {
             writeEnum(jsonWriter, value);
         }
+        return true;
+    }
+
+    @Override
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, Object object) {
+        Enum value = (Enum) propertyAccessor.getObject(object);
+
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
+                jsonWriter.writeNameRaw(nameNullUTF8);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        writeEnumUTF8(jsonWriter, value);
         return true;
     }
 }
