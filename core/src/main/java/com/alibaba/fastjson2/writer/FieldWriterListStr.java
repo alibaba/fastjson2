@@ -11,10 +11,9 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
-public final class FieldWriterListStrFunc<T>
+public final class FieldWriterListStr<T>
         extends FieldWriter<T> {
-
-    public FieldWriterListStrFunc(
+    public FieldWriterListStr(
             String fieldName,
             Type itemType,
             int ordinal,

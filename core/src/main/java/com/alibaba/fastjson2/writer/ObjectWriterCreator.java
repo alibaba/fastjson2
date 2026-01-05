@@ -1897,8 +1897,8 @@ public class ObjectWriterCreator {
                 if (actualTypeArguments.length == 1) {
                     Type itemType = actualTypeArguments[0];
                     if (itemType == String.class) {
-                        // For string lists with function, create FieldWriterListStrFunc with function
-                        return new FieldWriterListStrFunc(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, function, contentAs);
+                        // For string lists with function, create FieldWriterListStr with function
+                        return new FieldWriterListStr(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, function, contentAs);
                     }
                     return new FieldWriterList(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, method, function, contentAs);
                 }
