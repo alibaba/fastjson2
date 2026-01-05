@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.internal;
+package com.alibaba.fastjson2.internal.memory;
 
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;

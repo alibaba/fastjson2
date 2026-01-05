@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.internal;
+package com.alibaba.fastjson2.internal.memory;
 
 import java.nio.ByteOrder;
 

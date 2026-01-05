@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.internal;
 
+import com.alibaba.fastjson2.internal.memory.ByteArray;
+import com.alibaba.fastjson2.internal.memory.ByteArrayUnsafe;
 import com.alibaba.fastjson2.introspect.PropertyAccessor;
 import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
 import com.alibaba.fastjson2.introspect.PropertyAccessorFactoryUnsafe;
