@@ -1501,7 +1501,8 @@ public class ObjectWriterBaseModule
                 return ObjectWriterImplInstant.INSTANCE;
             }
 
-            if (Duration.class == clazz || Period.class == clazz) {
+            if (Duration.class == clazz || Period.class == clazz
+                    || Year.class == clazz || YearMonth.class == clazz || MonthDay.class == clazz) {
                 return ObjectWriterImplToString.INSTANCE;
             }
 

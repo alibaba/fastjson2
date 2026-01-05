@@ -1629,6 +1629,18 @@ public class ObjectReaderBaseModule
             return new ObjectReaderImplFromString(Period.class, (Function<String, Period>) Period::parse);
         }
 
+        if (type == Year.class) {
+            return new ObjectReaderImplFromString(Year.class, (Function<String, Year>) Year::parse);
+        }
+
+        if (type == YearMonth.class) {
+            return new ObjectReaderImplFromString(YearMonth.class, (Function<String, YearMonth>) YearMonth::parse);
+        }
+
+        if (type == MonthDay.class) {
+            return new ObjectReaderImplFromString(MonthDay.class, (Function<String, MonthDay>) MonthDay::parse);
+        }
+
         if (type == AtomicBoolean.class) {
             return new ObjectReaderImplFromBoolean(
                     AtomicBoolean.class,
