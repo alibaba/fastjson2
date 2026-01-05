@@ -1125,7 +1125,7 @@ public class ObjectWriterCreator {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
-        if (fieldClass == UUID.class) {
+        if (fieldClass == UUID.class && isDefaultUUIDObjectWriter(provider)) {
             return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
@@ -1433,7 +1433,7 @@ public class ObjectWriterCreator {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
-        if (fieldClass == UUID.class) {
+        if (fieldClass == UUID.class && isDefaultUUIDObjectWriter(provider)) {
             return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
@@ -1583,7 +1583,7 @@ public class ObjectWriterCreator {
             Class fieldClass,
             Function<T, V> function
     ) {
-        return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
+        return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
     }
 
     /**
@@ -1865,7 +1865,7 @@ public class ObjectWriterCreator {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
-        if (fieldClass == UUID.class) {
+        if (fieldClass == UUID.class && isDefaultUUIDObjectWriter(provider)) {
             return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
@@ -1922,6 +1922,10 @@ public class ObjectWriterCreator {
         }
 
         return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+    }
+
+    private static boolean isDefaultUUIDObjectWriter(ObjectWriterProvider provider) {
+        return provider.getObjectWriter(UUID.class) == ObjectWriterImplUUID.INSTANCE;
     }
 
     static class LambdaInfo {

@@ -43,18 +43,8 @@ final class FieldWriterUUID<T>
                 return false;
             }
         }
-
         writeFieldName(jsonWriter);
-
-        if (objectWriter == null) {
-            objectWriter = getObjectWriter(jsonWriter, UUID.class);
-        }
-
-        if (objectWriter != ObjectWriterImplUUID.INSTANCE) {
-            objectWriter.write(jsonWriter, uuid, fieldName, fieldClass, features);
-        } else {
-            jsonWriter.writeUUID(uuid);
-        }
+        jsonWriter.writeUUID(uuid);
         return true;
     }
 
