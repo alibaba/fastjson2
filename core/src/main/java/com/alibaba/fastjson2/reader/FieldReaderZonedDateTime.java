@@ -17,8 +17,6 @@ import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 public class FieldReaderZonedDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
-    final BiConsumer<T, ZonedDateTime> function;
-
     FieldReaderZonedDateTime(
             String fieldName,
             Type fieldType,
@@ -45,9 +43,9 @@ public class FieldReaderZonedDateTime<T>
                 schema,
                 method,
                 field,
+                function,
                 ObjectReaderImplZonedDateTime.of(format, locale)
         );
-        this.function = function;
     }
 
     @Override

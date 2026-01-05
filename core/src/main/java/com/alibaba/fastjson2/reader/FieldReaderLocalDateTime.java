@@ -17,8 +17,6 @@ import java.util.function.BiConsumer;
 
 public final class FieldReaderLocalDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
-    final BiConsumer<T, ZonedDateTime> function;
-
     FieldReaderLocalDateTime(
             String fieldName,
             Type fieldType,
@@ -45,9 +43,9 @@ public final class FieldReaderLocalDateTime<T>
                 schema,
                 method,
                 field,
+                function,
                 format != null ? new ObjectReaderImplLocalDateTime(format, locale) : ObjectReaderImplLocalDateTime.INSTANCE
         );
-        this.function = function;
     }
 
     public boolean supportAcceptType(Class valueClass) {

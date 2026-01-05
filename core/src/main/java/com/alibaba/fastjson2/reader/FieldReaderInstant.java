@@ -45,6 +45,7 @@ public final class FieldReaderInstant<T>
                 schema,
                 method,
                 field,
+                function,
                 ObjectReaderImplInstant.of(format, locale)
         );
         this.function = function;
