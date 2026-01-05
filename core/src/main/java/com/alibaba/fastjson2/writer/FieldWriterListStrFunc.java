@@ -13,7 +13,6 @@ import static com.alibaba.fastjson2.util.TypeUtils.toList;
 
 public final class FieldWriterListStrFunc<T>
         extends FieldWriter<T> {
-    final Function<T, List<String>> function;
 
     public FieldWriterListStrFunc(
             String fieldName,
@@ -26,23 +25,22 @@ public final class FieldWriterListStrFunc<T>
             Class fieldClass,
             Field field,
             Method method,
-            Class<?> contentAs,
-            Function<T, List<String>> function
+            Function<T, List<String>> function,
+            Class<?> contentAs
     ) {
         super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
-        this.function = function;
     }
 
     @Override
     public Object getFieldValue(T object) {
-        return function.apply(object);
+        return propertyAccessor.getObject(object);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         List<String> list;
         try {
-            list = toList(function.apply(object));
+            list = toList(propertyAccessor.getObject(object));
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -102,7 +100,7 @@ public final class FieldWriterListStrFunc<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        List<String> list = toList(function.apply(object));
+        List<String> list = toList(propertyAccessor.getObject(object));
         if (list == null) {
             jsonWriter.writeNull();
             return;
