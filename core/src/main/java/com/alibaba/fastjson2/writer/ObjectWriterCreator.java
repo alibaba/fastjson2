@@ -1125,6 +1125,10 @@ public class ObjectWriterCreator {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
+        if (fieldClass == UUID.class) {
+            return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
+        }
+
         if (fieldClass.isEnum()) {
             BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
@@ -1427,6 +1431,10 @@ public class ObjectWriterCreator {
 
         if (fieldClass == OffsetDateTime.class) {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == UUID.class) {
+            return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
@@ -1858,7 +1866,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == UUID.class) {
-            return new FieldWriterUUIDFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
         if (Calendar.class.isAssignableFrom(fieldClass)) {

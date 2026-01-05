@@ -8,9 +8,9 @@ import java.lang.reflect.Type;
 import java.util.UUID;
 import java.util.function.Function;
 
-final class FieldWriterUUIDFunc<T>
+final class FieldWriterUUID<T>
         extends FieldWriterObjectFinal<T> {
-    FieldWriterUUIDFunc(
+    FieldWriterUUID(
             String name,
             int ordinal,
             long features,
@@ -27,12 +27,12 @@ final class FieldWriterUUIDFunc<T>
 
     @Override
     public Object getFieldValue(Object object) {
-        return function.apply(object);
+        return propertyAccessor.getObject(object);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        UUID uuid = (UUID) function.apply(object);
+        UUID uuid = (UUID) propertyAccessor.getObject(object);
         if (uuid == null) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
