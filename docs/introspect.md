@@ -99,55 +99,53 @@ The factory also provides methods to create constructor-based functions:
 ### Class Hierarchy Diagram
 
 ```
-                                    PropertyAccessor (Interface)
-                                           |
-                                    PropertyAccessorObject
-                                           |
-                   +------------------------+------------------------+
-                   |                        |                        |
-            FieldAccessor              MethodAccessor        FunctionAccessor
-                   |                        |                        |
-         +---------+---------+              |                        |
-         |         |         |              |                        |
-   FieldAccessor   |         |              |                        |
-  Reflect/Unsafe/  |         |              |                        |
-  MethodHandle/    |         |              |                        |
-  VarHandle        |         |              |                        |
-         |         |         |              |                        |
-         +---------+---------+              |                        |
-                   |                        |                        |
-                   +------------------------+------------------------+
-                                            |
-                                    PropertyAccessorFactory
-                                            |
-                   +------------------------+------------------------+
-                   |                        |                        |
-      PropertyAccessorFactoryLambda  PropertyAccessorFactoryUnsafe  |
-                   |                        |                        |
-                   |            +-----------+-----------+            |
-                   |            |           |           |            |
-                   |    PropertyAccessorFactoryVarHandle |            |
-                   |            |           |           |            |
-                   |            |    PropertyAccessorFactoryMethodHandle
-                   |            |           |           |
-                   |            |           |           |
-         (Lambda-based)    (VarHandle-based)    (MethodHandle-based)
+                             PropertyAccessor (Interface)
+                                    │
+                             PropertyAccessorObject
+                                    │
+                   ┌───────────────────────────────────────────────┐
+                   │                                               │
+            FieldAccessor        MethodAccessor        FunctionAccessor
+                   │                    │                          │
+         ┌─────────┼─────────┐          │                          │
+         │         │         │          │                          │
+FieldAccessor   FieldAccessor  FieldAccessor                       │
+Reflect-based    Unsafe-based  MethodHandle-based                  │
+         │         │         │          │                          │
+         └─────────┼─────────┘          │                          │
+                   │                    │                          │
+                   └────────────────────┼──────────────────────────┘
+                                        │
+                            PropertyAccessorFactory
+                                        │
+                   ┌────────────────────┼────────────────────┐
+                   │                    │                    │
+PropertyAccessorFactoryLambda  PropertyAccessorFactoryUnsafe │
+                   │                    │                    │
+                   │        ┌───────────┼───────────┐        │
+                   │        │           │           │        │
+                   │  PropertyAccessorFactoryVarHandle       │
+                   │        │           │           │        │
+                   │        │PropertyAccessorFactoryMethodHandle
+                   │        │           │           │        │
+                   │        │           │           │        │
+         Lambda-based    VarHandle-based    MethodHandle-based
 ```
 
 ### Component Interaction Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Fastjson2 Introspect Package                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────────┐    ┌─────────────────────┐    ┌─────────────┐ │
-│  │   User Code     │    │  Property Accessor  │    │   Object    │ │
-│  │ (JSON Ser/Des)  │◄──►│  (PropertyAccessor) │◄──►│   Fields/   │ │
-│  └─────────────────┘    └─────────────────────┘    │ Methods/    │ │
-│         │                        │                  │ Functions   │ │
-│         │                        │                  └─────────────┘ │
-│         │                        │                                    │
+┌──────────────────────────────────────────────────────────────────────┐
+│                    Fastjson2 Introspect Package                      │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌─────────────────┐    ┌─────────────────────┐    ┌─────────────┐   │
+│  │   User Code     │    │  Property Accessor  │    │   Object    │   │
+│  │ (JSON Ser/Des)  │◄──►│  (PropertyAccessor) │◄──►│   Fields/   │   │
+│  └─────────────────┘    └─────────────────────┘    │ Methods/    │   │
+│         │                        │                 │ Functions   │   │
+│         │                        │                 └─────────────┘   │
+│         │                        │                                   │
 │         │    ┌─────────────────────────────────────────────────────┐ │
 │         └───►│ Factory Hierarchy                                   │ │
 │              │                                                     │ │
@@ -168,7 +166,7 @@ The factory also provides methods to create constructor-based functions:
 │              │ │ FactoryUnsafe       │ │ FactoryMethodHandle     │ │ │
 │              │ └─────────────────────┘ └─────────────────────────┘ │ │
 │              └─────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Performance Considerations

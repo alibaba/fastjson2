@@ -99,57 +99,55 @@
 ### 类继承层次图
 
 ```
-                                    PropertyAccessor (接口)
-                                           |
-                                    PropertyAccessorObject
-                                           |
-                   +------------------------+------------------------+
-                   |                        |                        |
-            FieldAccessor              MethodAccessor        FunctionAccessor
-                   |                        |                        |
-         +---------+---------+              |                        |
-         |         |         |              |                        |
-   FieldAccessor   |         |              |                        |
-  Reflect/Unsafe/  |         |              |                        |
-  MethodHandle/    |         |              |                        |
-  VarHandle        |         |              |                        |
-         |         |         |              |                        |
-         +---------+---------+              |                        |
-                   |                        |                        |
-                   +------------------------+------------------------+
-                                            |
-                                    PropertyAccessorFactory
-                                            |
-                   +------------------------+------------------------+
-                   |                        |                        |
-      PropertyAccessorFactoryLambda  PropertyAccessorFactoryUnsafe  |
-                   |                        |                        |
-                   |            +-----------+-----------+            |
-                   |            |           |           |            |
-                   |    PropertyAccessorFactoryVarHandle |            |
-                   |            |           |           |            |
-                   |            |    PropertyAccessorFactoryMethodHandle
-                   |            |           |           |
-                   |            |           |           |
-         (基于Lambda)       (基于VarHandle)       (基于MethodHandle)
+                             PropertyAccessor (Interface)
+                                    │
+                             PropertyAccessorObject
+                                    │
+                   ┌───────────────────────────────────────────────┐
+                   │                                               │
+            FieldAccessor        MethodAccessor        FunctionAccessor
+                   │                    │                          │
+         ┌─────────┼─────────┐          │                          │
+         │         │         │          │                          │
+FieldAccessor   FieldAccessor  FieldAccessor                       │
+Reflect-based    Unsafe-based  MethodHandle-based                  │
+         │         │         │          │                          │
+         └─────────┼─────────┘          │                          │
+                   │                    │                          │
+                   └────────────────────┼──────────────────────────┘
+                                        │
+                            PropertyAccessorFactory
+                                        │
+                   ┌────────────────────┼────────────────────┐
+                   │                    │                    │
+PropertyAccessorFactoryLambda  PropertyAccessorFactoryUnsafe │
+                   │                    │                    │
+                   │        ┌───────────┼───────────┐        │
+                   │        │           │           │        │
+                   │  PropertyAccessorFactoryVarHandle       │
+                   │        │           │           │        │
+                   │        │PropertyAccessorFactoryMethodHandle
+                   │        │           │           │        │
+                   │        │           │           │        │
+         Lambda-based    VarHandle-based    MethodHandle-based
 ```
 
 ### 组件交互图
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Fastjson2 内省包                             │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────────┐    ┌─────────────────────┐    ┌─────────────┐ │
-│  │    用户代码     │    │    属性访问器       │    │    对象     │ │
-│  │  (JSON序列化/    │◄──►│  (PropertyAccessor) │◄──►│   字段/     │ │
-│  │   反序列化)     │    │                     │    │  方法/函数  │ │
-│  └─────────────────┘    └─────────────────────┘    └─────────────┘ │
-│         │                        │                                    │
-│         │                        │                                    │
+┌──────────────────────────────────────────────────────────────────────┐
+│                    Fastjson2 Introspect Package                      │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌─────────────────┐    ┌─────────────────────┐    ┌─────────────┐   │
+│  │   User Code     │    │  Property Accessor  │    │   Object    │   │
+│  │ (JSON Ser/Des)  │◄──►│  (PropertyAccessor) │◄──►│   Fields/   │   │
+│  └─────────────────┘    └─────────────────────┘    │ Methods/    │   │
+│         │                        │                 │ Functions   │   │
+│         │                        │                 └─────────────┘   │
+│         │                        │                                   │
 │         │    ┌─────────────────────────────────────────────────────┐ │
-│         └───►│ 工厂层次结构                                        │ │
+│         └───►│ Factory Hierarchy                                   │ │
 │              │                                                     │ │
 │              │ ┌─────────────────────┐ ┌─────────────────────────┐ │ │
 │              │ │ PropertyAccessor    │ │ PropertyAccessor        │ │ │
@@ -168,7 +166,7 @@
 │              │ │ FactoryUnsafe       │ │ FactoryMethodHandle     │ │ │
 │              │ └─────────────────────┘ └─────────────────────────┘ │ │
 │              └─────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 性能考虑
