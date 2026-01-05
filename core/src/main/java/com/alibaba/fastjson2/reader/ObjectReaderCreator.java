@@ -2961,7 +2961,7 @@ public class ObjectReaderCreator {
                     return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
                 }
             } else {
-                Type itemType = BeanUtils.resolveCollectionItemType(fieldType);
+                Type itemType = BeanUtils.resolveCollectionItemType(fieldTypeResolved, fieldClass);
                 Class itemClass = TypeUtils.getMapping(itemType);
                 return new FieldReaderList(fieldName, fieldTypeResolved != null ? fieldTypeResolved : fieldType, fieldClassResolved != null ? fieldClassResolved : fieldClass, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
             }
@@ -3365,7 +3365,10 @@ public class ObjectReaderCreator {
                 }
             }
 
-            Type itemType = BeanUtils.resolveCollectionItemType(fieldType);
+            Type itemType = BeanUtils.resolveCollectionItemType(fieldTypeResolved, fieldClass);
+            if (itemType == null) {
+                itemType = Object.class;
+            }
             Class itemClass = TypeUtils.getClass(itemType);
 
             return new FieldReaderListField(
