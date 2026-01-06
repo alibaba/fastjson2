@@ -76,45 +76,4 @@ public class ObjectWriter9<T>
         fieldWriter7.writeUTF16(jsonWriter, object);
         fieldWriter8.writeUTF16(jsonWriter, object);
     }
-
-    @Override
-    public final FieldWriter getFieldWriter(long hashCode) {
-        if (hashCode == fieldWriter0.hashCode) {
-            return fieldWriter0;
-        }
-
-        if (hashCode == fieldWriter1.hashCode) {
-            return fieldWriter1;
-        }
-
-        if (hashCode == fieldWriter2.hashCode) {
-            return fieldWriter2;
-        }
-
-        if (hashCode == fieldWriter3.hashCode) {
-            return fieldWriter3;
-        }
-
-        if (hashCode == fieldWriter4.hashCode) {
-            return fieldWriter4;
-        }
-
-        if (hashCode == fieldWriter5.hashCode) {
-            return fieldWriter5;
-        }
-
-        if (hashCode == fieldWriter6.hashCode) {
-            return fieldWriter6;
-        }
-
-        if (hashCode == fieldWriter7.hashCode) {
-            return fieldWriter7;
-        }
-
-        if (hashCode == fieldWriter8.hashCode) {
-            return fieldWriter8;
-        }
-
-        return null;
-    }
 }
