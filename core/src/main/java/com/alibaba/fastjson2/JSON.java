@@ -3650,7 +3650,7 @@ public interface JSON {
      * @since 2.0.51
      */
     static int writeTo(OutputStream out, Object object, JSONWriter.Context context) {
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3659,7 +3659,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF8(writer, object, null, null, 0);
             }
 
             return writer.flushTo(out);
