@@ -520,13 +520,13 @@ public final class JSONWriterUTF8
 
     public final void writeStringLatin1(byte[] name, byte[] value, long features) {
         if ((features & MASK_BROWSER_SECURE) != 0) {
-            writeStringLatin1BrowserSecure(name, value, features);
+            writeStringLatin1BrowserSecure(name, value);
             return;
         }
 
         byte quote = (byte) this.quote;
         if (StringUtils.escaped(value, quote, byteVectorQuote)) {
-            writeStringEscaped(name, value, features);
+            writeStringEscaped(name, value);
             return;
         }
 
@@ -563,7 +563,7 @@ public final class JSONWriterUTF8
         this.off = StringUtils.writeLatin1(bytes, off, value, quote);
     }
 
-    protected final void writeStringLatin1BrowserSecure(byte[] name, byte[] value, long features) {
+    protected final void writeStringLatin1BrowserSecure(byte[] name, byte[] value) {
         writeNameRaw(name);
         writeStringLatin1BrowserSecure(value);
     }
@@ -716,7 +716,7 @@ public final class JSONWriterUTF8
         this.bytes[this.off++] = (byte) quote;
     }
 
-    protected final void writeStringEscaped(byte[] name, byte[] values, long features) {
+    protected final void writeStringEscaped(byte[] name, byte[] values) {
         writeNameRaw(name);
         writeStringEscaped(values);
     }
@@ -1992,8 +1992,7 @@ public final class JSONWriterUTF8
     }
 
     @Override
-    public final void writeInt64(long i) {
-        final long features = context.features;
+    public final void writeInt64(long i, long features) {
         int off = this.off;
         int minCapacity = off + 23;
         byte[] bytes = this.bytes;

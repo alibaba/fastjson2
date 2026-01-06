@@ -1879,7 +1879,15 @@ public abstract class JSONWriter
      * Writes a long value.
      * @param i the long value to write
      */
-    public abstract void writeInt64(long i);
+    public final void writeInt64(long i) {
+        writeInt64(i, context.features);
+    }
+
+    /**
+     * Writes a long value.
+     * @param i the long value to write
+     */
+    public abstract void writeInt64(long i, long features);
 
     /**
      * Writes a Long object.
@@ -3876,7 +3884,7 @@ public abstract class JSONWriter
 
     public static final long MASK_IGNORE_NONE_SERIALIZABLE = 1 << 1;
     public static final long MAKS_ERROR_ON_NONE_SERIALIZABLE = 1 << 2;
-    public static final long MAKS_BEAN_TO_ARRAY = 1 << 3;
+    public static final long MASK_BEAN_TO_ARRAY = 1 << 3;
     public static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
     public static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
     public static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
@@ -3995,7 +4003,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        BeanToArray(MAKS_BEAN_TO_ARRAY),
+        BeanToArray(MASK_BEAN_TO_ARRAY),
 
         /**
          * Feature that determines whether to write null values during serialization.

@@ -886,7 +886,7 @@ public final class JSONWriterJSONB
     }
 
     @Override
-    public void writeInt64(long val) {
+    public void writeInt64(long val, long features) {
         int minCapacity = off + 9;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {

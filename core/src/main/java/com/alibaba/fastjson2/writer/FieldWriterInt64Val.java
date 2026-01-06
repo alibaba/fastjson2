@@ -65,7 +65,7 @@ final class FieldWriterInt64Val
         if (value == 0 && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
             return false;
         }
-        utf8NameValue.accept(jsonWriter, value);
+        utf8NameValue.write(jsonWriter, value, features);
         return true;
     }
 
@@ -86,7 +86,7 @@ final class FieldWriterInt64Val
             return false;
         }
         jsonWriter.writeNameRaw(fieldNameUTF16(features));
-        utf16Value.accept(jsonWriter, value);
+        utf16Value.write(jsonWriter, value, features);
         return true;
     }
 

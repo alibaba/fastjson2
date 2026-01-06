@@ -15,6 +15,10 @@ import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
 
 final class FieldWriterOffsetDateTime<T>
         extends FieldWriterObjectFinal<T> {
+    final NameValueWriter<JSONWriterUTF8, OffsetDateTime> nameValueUTF8;
+    final NameValueWriter<JSONWriterUTF16, OffsetDateTime> nameValueUTF16;
+    final NameValueWriter<JSONWriterJSONB, OffsetDateTime> nameValueJSONB;
+
     FieldWriterOffsetDateTime(
             String name,
             int ordinal,
@@ -30,6 +34,33 @@ final class FieldWriterOffsetDateTime<T>
     ) {
         super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         this.initObjectWriter = objectWriter = ObjectWriterImplOffsetDateTime.of(format, locale);
+
+        if (objectWriter != ObjectWriterImplOffsetDateTime.INSTANCE) {
+            nameValueUTF8 = (jsonWriter, value, features2) -> {
+                jsonWriter.writeNameRaw(fieldNameUTF8(features));
+                objectWriter.write(jsonWriter, value, name, fieldType, features2);
+            };
+            nameValueUTF16 = (jsonWriter, value, features2) -> {
+                jsonWriter.writeNameRaw(fieldNameUTF16(features));
+                objectWriter.write(jsonWriter, value, name, fieldType, features2);
+            };
+            nameValueJSONB = (jsonWriter, value, features2) -> {
+                writeFieldNameJSONB(jsonWriter);
+                objectWriter.write(jsonWriter, value, name, fieldType, features2);
+            };
+        } else {
+            nameValueUTF8 = (jsonWriter, value, features2) -> {
+                jsonWriter.writeOffsetDateTime(fieldNameUTF8(features), value);
+            };
+            nameValueUTF16 = (jsonWriter, value, features2) -> {
+                jsonWriter.writeNameRaw(fieldNameUTF16(features));
+                jsonWriter.writeOffsetDateTime(value);
+            };
+            nameValueJSONB = (jsonWriter, value, features2) -> {
+                writeFieldNameJSONB(jsonWriter);
+                jsonWriter.writeOffsetDateTime(value);
+            };
+        }
     }
 
     @Override
@@ -51,8 +82,7 @@ final class FieldWriterOffsetDateTime<T>
             }
         }
 
-        writeFieldNameJSONB(jsonWriter);
-        jsonWriter.writeOffsetDateTime(dateTime);
+        nameValueJSONB.write(jsonWriter, dateTime, features);
         return true;
     }
 
@@ -70,8 +100,7 @@ final class FieldWriterOffsetDateTime<T>
             }
         }
 
-        jsonWriter.writeNameRaw(fieldNameUTF16(features));
-        jsonWriter.writeOffsetDateTime(dateTime);
+        nameValueUTF16.write(jsonWriter, dateTime, features);
         return true;
     }
 
@@ -88,7 +117,7 @@ final class FieldWriterOffsetDateTime<T>
             }
         }
 
-        jsonWriter.writeOffsetDateTime(fieldNameUTF8(jsonWriter.getFeatures(features)), dateTime);
+        nameValueUTF8.write(jsonWriter, dateTime, features);
         return true;
     }
 

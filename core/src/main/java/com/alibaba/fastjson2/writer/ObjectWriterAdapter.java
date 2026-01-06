@@ -160,7 +160,7 @@ public class ObjectWriterAdapter<T>
                 Collection collection = (Collection) object;
                 ObjectWriterImplCollection.INSTANCE.writeUTF8(jsonWriter, collection, fieldName, fieldType, features2);
             };
-        } else if ((features & MAKS_BEAN_TO_ARRAY) != 0) {
+        } else if ((features & MASK_BEAN_TO_ARRAY) != 0) {
             writerUTF8 = (jsonWriter, object, fieldName, fieldType, features2) -> {
                 writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features2);
             };
@@ -182,7 +182,7 @@ public class ObjectWriterAdapter<T>
                         return;
                     }
 
-                    if ((featuresAll & MAKS_BEAN_TO_ARRAY) != 0) {
+                    if ((featuresAll & MASK_BEAN_TO_ARRAY) != 0) {
                         writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
                         return;
                     }
@@ -376,6 +376,10 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (((features | this.features | jsonWriter.getFeatures()) & MASK_BEAN_TO_ARRAY) != 0) {
+            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
         if (jsonWriter instanceof JSONWriterUTF16) {
             writeUTF16((JSONWriterUTF16) jsonWriter, object, fieldName, fieldType, features);
         } else if (jsonWriter instanceof JSONWriterUTF8) {
@@ -414,7 +418,7 @@ public class ObjectWriterAdapter<T>
             return;
         }
 
-        if ((featuresAll & MAKS_BEAN_TO_ARRAY) != 0) {
+        if ((featuresAll & MASK_BEAN_TO_ARRAY) != 0) {
             writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
             return;
         }

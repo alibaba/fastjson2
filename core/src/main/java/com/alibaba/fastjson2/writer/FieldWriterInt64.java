@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.function.ObjLongConsumer;
 
 import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -16,10 +15,10 @@ class FieldWriterInt64<T>
         extends FieldWriter<T> {
     final boolean browserCompatible;
     final boolean toString;
-    final ObjLongConsumer<JSONWriterUTF8> utf8Value;
-    final ObjLongConsumer<JSONWriterUTF8> utf8NameValue;
-    final ObjLongConsumer<JSONWriterUTF16> utf16Value;
-    final ObjLongConsumer<JSONWriterJSONB> jsonbValue;
+    final NameValueLongWriter<JSONWriterUTF8> utf8Value;
+    final NameValueLongWriter<JSONWriterUTF8> utf8NameValue;
+    final NameValueLongWriter<JSONWriterUTF16> utf16Value;
+    final NameValueLongWriter<JSONWriterJSONB> jsonbValue;
 
     FieldWriterInt64(
             String name,
@@ -37,22 +36,22 @@ class FieldWriterInt64<T>
         toString = (features & WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
 
-        ObjLongConsumer<JSONWriterUTF8> utf8NameValue = null;
+        NameValueLongWriter<JSONWriterUTF8> utf8NameValue = null;
         if (toString) {
-            utf8Value = JSONWriterUTF8::writeString;
-            utf16Value = JSONWriterUTF16::writeString;
-            jsonbValue = JSONWriterJSONB::writeString;
+            utf8Value = (w, v, f) -> w.writeString(v);
+            utf16Value = (w, v, f) -> w.writeString(v);
+            jsonbValue = (w, v, f) -> w.writeString(v);
         } else if (format != null) {
-            utf8Value = (w, v) -> w.writeString(String.format(format, v));
-            utf16Value = (w, v) -> w.writeString(String.format(format, v));
-            jsonbValue = (w, v) -> w.writeString(String.format(format, v));
+            utf8Value = (w, v, f) -> w.writeString(String.format(format, v));
+            utf16Value = (w, v, f) -> w.writeString(String.format(format, v));
+            jsonbValue = (w, v, f) -> w.writeString(String.format(format, v));
         } else {
             utf8Value = JSONWriterUTF8::writeInt64;
             utf16Value = JSONWriterUTF16::writeInt64;
             jsonbValue = JSONWriterJSONB::writeInt64;
 
             if (defaultValue == null) {
-                utf8NameValue = (w, v) -> {
+                utf8NameValue = (w, v, f) -> {
                     long features2 = w.getFeatures() | this.features;
                     if (v == 0 && (features2 & MASK_NOT_WRITE_DEFAULT_VALUE) != 0) {
                         return;
@@ -62,13 +61,13 @@ class FieldWriterInt64<T>
             }
         }
         if (utf8NameValue == null) {
-            utf8NameValue = (w, v) -> {
+            utf8NameValue = (w, v, f) -> {
                 long features2 = w.getFeatures() | this.features;
                 if (v == 0 && (features2 & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
                     return;
                 }
                 w.writeNameRaw(fieldNameUTF8(features2));
-                utf8Value.accept(w, v);
+                utf8Value.write(w, v, features2);
             };
         }
         this.utf8NameValue = utf8NameValue;
@@ -81,12 +80,12 @@ class FieldWriterInt64<T>
             return;
         }
         writeFieldName(jsonWriter);
-        jsonbValue.accept(jsonWriter, value);
+        jsonbValue.write(jsonWriter, value, features);
     }
 
     @Override
     public final void writeInt64UTF8(JSONWriterUTF8 jsonWriter, long value) {
-        utf8NameValue.accept(jsonWriter, value);
+        utf8NameValue.write(jsonWriter, value, jsonWriter.getFeatures() | this.features);
     }
 
     @Override
@@ -96,7 +95,7 @@ class FieldWriterInt64<T>
             return;
         }
         jsonWriter.writeNameRaw(fieldNameUTF16(features));
-        utf16Value.accept(jsonWriter, value);
+        utf16Value.write(jsonWriter, value, features);
     }
 
     private static final long MASK_WRITE_NULLS = MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO;

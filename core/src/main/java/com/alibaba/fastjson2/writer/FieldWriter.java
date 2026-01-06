@@ -53,7 +53,11 @@ public abstract class FieldWriter<T>
     final byte[] nameJSONB;
     long nameSymbolCache;
     final byte[] nameNullUTF8;
+    final byte[] nameNullUTF8SingleQuote;
+    final byte[] nameNullUTF8Unquote;
     final char[] nameNullUTF16;
+    final char[] nameNullUTF16SingleQuote;
+    final char[] nameNullUTF16Unquote;
 
     final boolean fieldClassSerializable;
     final JSONWriter.Path rootParentPath;
@@ -208,12 +212,30 @@ public abstract class FieldWriter<T>
         this.nameWithColonUTF16SingleQuote = nameWithColonUTF16SingleQuote;
 
         byte[] nameNullUTF8 = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + 4);
-        "null".getBytes(0, 4, nameNullUTF8, nameWithColonUTF8.length - 4);
+        "null".getBytes(0, 4, nameNullUTF8, nameWithColonUTF8.length);
         this.nameNullUTF8 = nameNullUTF8;
 
+        byte[] nameNullUTF8Unquote = Arrays.copyOf(nameUnquoteWithColonUTF8, nameUnquoteWithColonUTF8.length + 4);
+        "null".getBytes(0, 4, nameNullUTF8Unquote, nameNullUTF8Unquote.length - 4);
+        this.nameNullUTF8Unquote = nameNullUTF8Unquote;
+
+        byte[] nameNullUTF8SingleQuote = nameNullUTF8.clone();
+        nameNullUTF8SingleQuote[0] = '\'';
+        nameNullUTF8SingleQuote[nameNullUTF8SingleQuote.length - 4] = '\'';
+        this.nameNullUTF8SingleQuote = nameNullUTF8SingleQuote;
+
         char[] nameNullUTF16 = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + 4);
-        "null".getChars(0, 4, nameNullUTF16, nameWithColonUTF16.length - 4);
+        "null".getChars(0, 4, nameNullUTF16, nameWithColonUTF16.length);
         this.nameNullUTF16 = nameNullUTF16;
+
+        char[] nameNullUTF16Unquote = Arrays.copyOf(nameUnquoteWithColonUTF16, nameUnquoteWithColonUTF16.length + 4);
+        "null".getChars(0, 4, nameNullUTF16Unquote, nameNullUTF16Unquote.length - 4);
+        this.nameNullUTF16Unquote = nameNullUTF16Unquote;
+
+        char[] nameNullUTF16SingleQuote = nameNullUTF16.clone();
+        nameNullUTF16SingleQuote[0] = '\'';
+        nameNullUTF16SingleQuote[nameNullUTF16SingleQuote.length - 4] = '\'';
+        this.nameNullUTF16SingleQuote = nameNullUTF16SingleQuote;
 
         propertyAccessor = createPropertyAccessor(name, fieldType, fieldClass, field, method, function);
         if (function instanceof Function) {
@@ -316,6 +338,14 @@ public abstract class FieldWriter<T>
                 : nameWithColonUTF8;
     }
 
+    protected final byte[] fieldNameNullUTF8(long features) {
+        return (features & UnquoteFieldName.mask) != 0
+                ? nameNullUTF8Unquote
+                : (features & UseSingleQuotes.mask) != 0
+                ? nameNullUTF8SingleQuote
+                : nameNullUTF8;
+    }
+
     public final void writeFieldNameUTF16(JSONWriterUTF16 jsonWriter) {
         jsonWriter.writeNameRaw(fieldNameUTF16(jsonWriter.getFeatures(this.features)));
     }
@@ -326,6 +356,14 @@ public abstract class FieldWriter<T>
                 : (features & UseSingleQuotes.mask) != 0
                 ? nameWithColonUTF16SingleQuote
                 : nameWithColonUTF16;
+    }
+
+    protected final char[] fieldNameNullUTF16(long features) {
+        return (features & UnquoteFieldName.mask) != 0
+                ? nameNullUTF16Unquote
+                : (features & UseSingleQuotes.mask) != 0
+                ? nameNullUTF16SingleQuote
+                : nameNullUTF16;
     }
 
     private boolean writeFieldNameSymbol(JSONWriter jsonWriter, SymbolTable symbolTable) {
@@ -1246,5 +1284,20 @@ public abstract class FieldWriter<T>
             jsonWriter.writeNull();
         }
         return true;
+    }
+
+    @FunctionalInterface
+    interface NameValueWriter<T extends JSONWriter, V> {
+        void write(T jsonWriter, V value, long features);
+    }
+
+    @FunctionalInterface
+    interface NameValueLongWriter<T extends JSONWriter> {
+        void write(T jsonWriter, long value, long features);
+    }
+
+    @FunctionalInterface
+    interface NameValueIntWriter<T extends JSONWriter> {
+        void write(T jsonWriter, int value, long features);
     }
 }

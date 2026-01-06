@@ -15,8 +15,8 @@ import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
 
 final class FieldWriterLocalDate<T>
         extends FieldWriterObjectFinal<T> {
-    final NameValueWriter<JSONWriterUTF8> nameValueUTF8;
-    final NameValueWriter<JSONWriterUTF16> nameValueUTF16;
+    final NameValueWriter<JSONWriterUTF8, LocalDate> nameValueUTF8;
+    final NameValueWriter<JSONWriterUTF16, LocalDate> nameValueUTF16;
 
     FieldWriterLocalDate(
             String name,
@@ -98,7 +98,7 @@ final class FieldWriterLocalDate<T>
         LocalDate localDate = (LocalDate) propertyAccessor.getObject(object);
         if (localDate == null) {
             if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
-                jsonWriter.writeNameRaw(nameNullUTF8);
+                jsonWriter.writeNameRaw(nameNullUTF16);
                 return true;
             } else {
                 return false;
@@ -112,9 +112,5 @@ final class FieldWriterLocalDate<T>
     @Override
     public Function getFunction() {
         return function;
-    }
-
-    interface NameValueWriter<T extends JSONWriter> {
-        void write(T jsonWriter, LocalDate value, long features);
     }
 }

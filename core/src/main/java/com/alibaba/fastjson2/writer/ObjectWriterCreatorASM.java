@@ -54,6 +54,9 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_WRITE_UTF16_FIELD_NAME = "(" + DESC_JSON_WRITER_UTF16 + ")V";
     static final String METHOD_DESC_WRITE_OBJECT = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
     static final String METHOD_DESC_WRITE_JSONB_OBJECT = "(" + DESC_JSONB_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
+    static final String METHOD_DESC_WRITE_JSONB_J = "(" + DESC_JSONB_WRITER + "J)V";
+    static final String METHOD_DESC_WRITE_UTF8_J = "(" + DESC_JSON_WRITER_UTF8 + "J)V";
+    static final String METHOD_DESC_WRITE_UTF16_J = "(" + DESC_JSON_WRITER_UTF16 + "J)V";
     static final String METHOD_DESC_WRITE_J = "(" + DESC_JSON_WRITER + "J)V";
     static final String METHOD_DESC_WRITE_D = "(" + DESC_JSON_WRITER + "D)V";
     static final String METHOD_DESC_WRITE_F = "(" + DESC_JSON_WRITER + "F)V";
@@ -187,6 +190,27 @@ public class ObjectWriterCreatorASM
             }
         }
 
+        public String writeInt64MethodName() {
+            switch (this) {
+                case JSONB:
+                    return "writeInt64JSONB";
+                case JSON_UTF8:
+                    return "writeInt64UTF8";
+                default:
+                    return "writeInt64UTF16";
+            }
+        }
+
+        public String writeInt64MethodDesc() {
+            switch (this) {
+                case JSONB:
+                    return METHOD_DESC_WRITE_JSONB_J;
+                case JSON_UTF8:
+                    return METHOD_DESC_WRITE_UTF8_J;
+                default:
+                    return METHOD_DESC_WRITE_UTF16_J;
+            }
+        }
     }
 
     static String fieldWriter(int i) {
@@ -748,7 +772,7 @@ public class ObjectWriterCreatorASM
         mw.aload(FIELD_NAME);
         mw.aload(FIELD_TYPE);
         mw.lload(FIELD_FEATURES);
-        mw.invokespecial(TYPE_OBJECT_WRITER_ADAPTER, type.writeMethodName(), METHOD_DESC_WRITE_OBJECT);
+        mw.invokespecial(TYPE_OBJECT_WRITER_ADAPTER, type.writeMethodName(), type.writeMethodDesc());
         mw.return_();
 
         mw.visitLabel(notSuper_);
@@ -827,7 +851,7 @@ public class ObjectWriterCreatorASM
 
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
-            gwFieldValue(mwc, fieldWriter, OBJECT, i);
+            gwFieldValue(mwc, fieldWriter, OBJECT, i, type);
         }
 
         mw.aload(1);
@@ -2538,7 +2562,8 @@ public class ObjectWriterCreatorASM
             MethodWriterContext mwc,
             FieldWriter fieldWriter,
             int OBJECT,
-            int i
+            int i,
+            JSONWriterType type
     ) {
         Class<?> fieldClass = fieldWriter.fieldClass;
 
@@ -2563,7 +2588,7 @@ public class ObjectWriterCreatorASM
             gwFieldValueIntVA(mwc, fieldWriter, OBJECT, i, false);
         } else if (fieldClass == long.class
                 || fieldClass == double.class) {
-            gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, true);
+            gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, type);
         } else if (fieldClass == long[].class
                 && mwc.provider.getObjectWriter(Long.class) == ObjectWriterImplInt64.INSTANCE
         ) {
@@ -2571,7 +2596,7 @@ public class ObjectWriterCreatorASM
         } else if (fieldClass == Integer.class) {
             gwInt32(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass == Long.class) {
-            gwInt64(mwc, fieldWriter, OBJECT, i);
+            gwInt64(mwc, fieldWriter, OBJECT, i, type);
         } else if (fieldClass == Float.class) {
             gwFloat(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass == Double.class) {
@@ -3172,7 +3197,7 @@ public class ObjectWriterCreatorASM
             gwFieldValueIntVA(mwc, fieldWriter, OBJECT, i, true);
         } else if (fieldClass == long.class
                 || fieldClass == double.class) {
-            gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, true);
+            gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, JSONWriterType.JSONB);
         } else if (fieldClass == long[].class
                 && mwc.provider.getObjectWriter(Long.class) == ObjectWriterImplInt64.INSTANCE
         ) {
@@ -3180,7 +3205,7 @@ public class ObjectWriterCreatorASM
         } else if (fieldClass == Integer.class) {
             gwInt32(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass == Long.class) {
-            gwInt64(mwc, fieldWriter, OBJECT, i);
+            gwInt64(mwc, fieldWriter, OBJECT, i, JSONWriterType.JSONB);
         } else if (fieldClass == String.class) {
             gwFieldValueString(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass.isEnum()) {
@@ -3271,7 +3296,8 @@ public class ObjectWriterCreatorASM
             MethodWriterContext mwc,
             FieldWriter fieldWriter,
             int OBJECT,
-            int i
+            int i,
+            JSONWriterType type
     ) {
 //        boolean jsonb = mwc.jsonb;
         MethodWriter mw = mwc.mw;
@@ -4078,7 +4104,7 @@ public class ObjectWriterCreatorASM
             FieldWriter fieldWriter,
             int OBJECT,
             int i,
-            boolean jsonb
+            JSONWriterType type
     ) {
         MethodWriter mw = mwc.mw;
         String format = fieldWriter.format;
@@ -4110,8 +4136,17 @@ public class ObjectWriterCreatorASM
 
                 mw.aload(JSON_WRITER);
                 mw.lload(FIELD_VALUE);
+                String methodName;
+                String methodDesc;
+                if (writeDate) {
+                    methodName = "writeDate";
+                    methodDesc = METHOD_DESC_WRITE_J;
+                } else {
+                    methodName = type.writeInt64MethodName();
+                    methodDesc = type.writeInt64MethodDesc();
+                }
 
-                mw.invokevirtual(TYPE_FIELD_WRITER, writeDate ? "writeDate" : "writeInt64", METHOD_DESC_WRITE_J);
+                mw.invokevirtual(TYPE_FIELD_WRITER, methodName, methodDesc);
             } else {
                 gwFieldName(mwc, fieldWriter, i);
                 mw.aload(JSON_WRITER);

@@ -2002,8 +2002,7 @@ public class JSONWriterUTF16
     }
 
     @Override
-    public final void writeInt64(long i) {
-        long features = context.features;
+    public final void writeInt64(long i, long features) {
         int off = this.off;
         int minCapacity = off + 23;
         char[] chars = this.chars;
