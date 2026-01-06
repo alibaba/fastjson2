@@ -150,30 +150,6 @@ public class CodeGenUtils {
             case 12:
                 objectReaderSuper = ObjectReader12.class;
                 break;
-            case 13:
-                objectReaderSuper = ObjectReader13.class;
-                break;
-            case 14:
-                objectReaderSuper = ObjectReader14.class;
-                break;
-            case 15:
-                objectReaderSuper = ObjectReader15.class;
-                break;
-            case 16:
-                objectReaderSuper = ObjectReader16.class;
-                break;
-            case 17:
-                objectReaderSuper = ObjectReader17.class;
-                break;
-            case 18:
-                objectReaderSuper = ObjectReader18.class;
-                break;
-            case 19:
-                objectReaderSuper = ObjectReader19.class;
-                break;
-            case 20:
-                objectReaderSuper = ObjectReader20.class;
-                break;
             default:
                 objectReaderSuper = ObjectReaderAdapter.class;
                 break;
@@ -231,18 +207,6 @@ public class CodeGenUtils {
                 break;
             case 16:
                 objectWriterSuper = ObjectWriter16.class;
-                break;
-            case 17:
-                objectWriterSuper = ObjectWriter17.class;
-                break;
-            case 18:
-                objectWriterSuper = ObjectWriter18.class;
-                break;
-            case 19:
-                objectWriterSuper = ObjectWriter19.class;
-                break;
-            case 20:
-                objectWriterSuper = ObjectWriter20.class;
                 break;
             default:
                 objectWriterSuper = ObjectWriterAdapter.class;
