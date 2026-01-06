@@ -1069,6 +1069,14 @@ public abstract class FieldWriter<T>
         throw new UnsupportedOperationException();
     }
 
+    public void writeListValueUTF8(JSONWriterUTF8 jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeListValueUTF16(JSONWriterUTF16 jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
     public void writeListJSONB(JSONWriter jsonWriter, List list) {
         throw new UnsupportedOperationException();
     }

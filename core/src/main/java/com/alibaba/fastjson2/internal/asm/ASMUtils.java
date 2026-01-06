@@ -72,8 +72,8 @@ public final class ASMUtils {
 
     public static final String TYPE_OBJECT_WRITER = ObjectWriter.class.getName().replace('.', '/');
     public static final String TYPE_JSON_WRITER = JSONWriter.class.getName().replace('.', '/');
-    public static final String TYPE_JSON_UTF8_WRITER = JSONWriterUTF8.class.getName().replace('.', '/');
-    public static final String TYPE_JSON_UTF16_WRITER = JSONWriterUTF16.class.getName().replace('.', '/');
+    public static final String TYPE_JSON_WRITER_UTF8 = JSONWriterUTF8.class.getName().replace('.', '/');
+    public static final String TYPE_JSON_WRITER_UTF16 = JSONWriterUTF16.class.getName().replace('.', '/');
     public static final String TYPE_JSONB_WRITER = JSONWriterJSONB.class.getName().replace('.', '/');
     public static final String TYPE_JSONB_IO = JSONB.IO.class.getName().replace('.', '/');
     public static final String TYPE_FIELD_WRITER = FieldWriter.class.getName().replace('.', '/');
@@ -89,8 +89,8 @@ public final class ASMUtils {
     public static final String DESC_JSON_READER = 'L' + TYPE_JSON_READER + ';';
     public static final String DESC_JSON_WRITER = 'L' + TYPE_JSON_WRITER + ';';
     public static final String DESC_JSONB_WRITER = 'L' + TYPE_JSONB_WRITER + ';';
-    public static final String DESC_JSON_UTF8_WRITER = 'L' + TYPE_JSON_UTF8_WRITER + ';';
-    public static final String DESC_JSON_UTF16_WRITER = 'L' + TYPE_JSON_UTF16_WRITER + ';';
+    public static final String DESC_JSON_WRITER_UTF8 = 'L' + TYPE_JSON_WRITER_UTF8 + ';';
+    public static final String DESC_JSON_WRITER_UTF16 = 'L' + TYPE_JSON_WRITER_UTF16 + ';';
     public static final String DESC_OBJECT_READER = 'L' + TYPE_OBJECT_READER + ';';
     public static final String DESC_OBJECT_WRITER = 'L' + TYPE_OBJECT_WRITER + ';';
     public static final String DESC_BYTE_ARRAY = 'L' + TYPE_BYTE_ARRAY + ';';
