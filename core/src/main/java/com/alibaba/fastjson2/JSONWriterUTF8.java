@@ -1831,19 +1831,8 @@ public final class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        off = writeNameBefore(bytes, off);
-        System.arraycopy(name, 0, bytes, off, name.length);
-        off += name.length;
-
-        boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
-        if (writeAsString) {
-            bytes[off++] = (byte) quote;
-        }
-        off = IOUtils.writeInt32(bytes, off, i);
-        if (writeAsString) {
-            bytes[off++] = (byte) quote;
-        }
-        this.off = off;
+        off = IO.writeName(this, bytes, off, name);
+        this.off = IO.writeValue(this, bytes, off, i, features);
     }
 
     @Override
@@ -1971,24 +1960,8 @@ public final class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        off = writeNameBefore(bytes, off);
-        System.arraycopy(name, 0, bytes, off, name.length);
-        off += name.length;
-
-        boolean writeAsString = isWriteAsString(i, features);
-        if (writeAsString) {
-            bytes[off++] = (byte) quote;
-        }
-        off = IOUtils.writeInt64(bytes, off, i);
-        if (writeAsString) {
-            bytes[off++] = (byte) quote;
-        } else if ((features & MASK_WRITE_CLASS_NAME) != 0
-                && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
-                && i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE
-        ) {
-            bytes[off++] = 'L';
-        }
-        this.off = off;
+        off = IO.writeName(this, bytes, off, name);
+        this.off = IO.writeValue(this, bytes, off, i, features);
     }
 
     @Override
@@ -1999,20 +1972,7 @@ public final class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        boolean writeAsString = isWriteAsString(i, features);
-        if (writeAsString) {
-            bytes[off++] = (byte) quote;
-        }
-        off = IOUtils.writeInt64(bytes, off, i);
-        if (writeAsString) {
-            bytes[off++] = (byte) quote;
-        } else if ((features & MASK_WRITE_CLASS_NAME) != 0
-                && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
-                && i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE
-        ) {
-            bytes[off++] = 'L';
-        }
-        this.off = off;
+        this.off = IO.writeValue(this, bytes, off, i, features);
     }
 
     @Override
@@ -2613,46 +2573,19 @@ public final class JSONWriterUTF8
         }
 
         if (format != null) {
-            String str = format.format(value);
+            String str = value == null ? "null" : format.format(value);
             writeRaw(str);
             return;
         }
 
-        features |= context.features;
-
-        int precision = value.precision();
-        boolean writeAsString = isWriteAsString(value, features);
-
         int off = this.off;
-        int minCapacity = off + precision + Math.abs(value.scale()) + 7;
+        int minCapacity = off + value.precision() + Math.abs(value.scale()) + 7;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        if (writeAsString) {
-            bytes[off++] = '"';
-        }
 
-        boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
-        long unscaleValue;
-        int scale;
-        if (precision < 19
-                && (scale = value.scale()) >= 0
-                && DECIMAL_INT_COMPACT != null
-                && (unscaleValue = DECIMAL_INT_COMPACT.applyAsLong(value)) != Long.MIN_VALUE
-                && !asPlain
-        ) {
-            off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);
-        } else {
-            String str = asPlain ? value.toPlainString() : value.toString();
-            str.getBytes(0, str.length(), bytes, off);
-            off += str.length();
-        }
-
-        if (writeAsString) {
-            bytes[off++] = '"';
-        }
-        this.off = off;
+        this.off = IO.writeValue(this, bytes, off, value, features | context.features);
     }
 
     public final void writeDecimal(byte[] name, BigDecimal value, long features) {
@@ -2664,35 +2597,8 @@ public final class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        off = writeNameBefore(bytes, off);
-        System.arraycopy(name, 0, bytes, off, name.length);
-        off += name.length;
-
-        boolean writeAsString = isWriteAsString(value, features);
-        if (writeAsString) {
-            bytes[off++] = '"';
-        }
-
-        boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
-        long unscaleValue;
-        int scale;
-        if (precision < 19
-                && (scale = value.scale()) >= 0
-                && DECIMAL_INT_COMPACT != null
-                && (unscaleValue = DECIMAL_INT_COMPACT.applyAsLong(value)) != Long.MIN_VALUE
-                && !asPlain
-        ) {
-            off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);
-        } else {
-            String str = asPlain ? value.toPlainString() : value.toString();
-            str.getBytes(0, str.length(), bytes, off);
-            off += str.length();
-        }
-
-        if (writeAsString) {
-            bytes[off++] = '"';
-        }
-        this.off = off;
+        off = IO.writeName(this, bytes, off, name);
+        this.off = IO.writeValue(this, bytes, off, value, features);
     }
 
     @Override
@@ -2940,5 +2846,96 @@ public final class JSONWriterUTF8
         byte[] encodedBytes = str.getBytes(charset);
         out.write(encodedBytes);
         return encodedBytes.length;
+    }
+
+    interface IO {
+        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, long value, long features) {
+            byte quote = (byte) writer.quote;
+
+            boolean writeAsString = isWriteAsString(value, features);
+            if (writeAsString) {
+                bytes[off++] = quote;
+            }
+            off = IOUtils.writeInt64(bytes, off, value);
+            if (writeAsString) {
+                bytes[off++] = quote;
+            } else if ((features & MASK_WRITE_CLASS_NAME) != 0
+                    && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
+                    && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE
+            ) {
+                bytes[off++] = 'L';
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, int value, long features) {
+            byte quote = (byte) writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+
+            if (writeAsString) {
+                bytes[off++] = quote;
+            }
+            off = IOUtils.writeInt32(bytes, off, value);
+            if (writeAsString) {
+                bytes[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, BigDecimal value, long features) {
+            if (value == null) {
+                return writeNull(bytes, off);
+            }
+
+            byte quote = (byte) writer.quote;
+            boolean writeAsString = isWriteAsString(value, features);
+            if (writeAsString) {
+                bytes[off++] = quote;
+            }
+
+            boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
+            long unscaleValue;
+            int scale;
+            int precision = value.precision();
+            if (precision < 19
+                    && (scale = value.scale()) >= 0
+                    && DECIMAL_INT_COMPACT != null
+                    && (unscaleValue = DECIMAL_INT_COMPACT.applyAsLong(value)) != Long.MIN_VALUE
+                    && !asPlain
+            ) {
+                off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);
+            } else {
+                String str = asPlain ? value.toPlainString() : value.toString();
+                str.getBytes(0, str.length(), bytes, off);
+                off += str.length();
+            }
+
+            if (writeAsString) {
+                bytes[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeName(JSONWriterUTF8 writer, byte[] bytes, int off, byte[] name) {
+            if (writer.startObject) {
+                writer.startObject = false;
+            } else {
+                bytes[off++] = ',';
+                if (writer.pretty != PRETTY_NON) {
+                    off = writer.indent(bytes, off);
+                }
+            }
+            System.arraycopy(name, 0, bytes, off, name.length);
+            return off + name.length;
+        }
+
+        static int writeNull(byte[] bytes, int off) {
+            IOUtils.putNULL(bytes, off);
+            return off + 4;
+        }
     }
 }
