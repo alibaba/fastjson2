@@ -149,6 +149,10 @@ public interface ObjectWriter<T> {
         writeArrayMappingJSONB(jsonWriter, object, null, null, 0);
     }
 
+    default void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
+    }
+
     /**
      * Writes an object to the JSONWriter in array mapping JSONB format with additional parameters.
      *
@@ -158,7 +162,7 @@ public interface ObjectWriter<T> {
      * @param fieldType the type of the field being written
      * @param features the features to use for writing
      */
-    default void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    default void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         List<FieldWriter> fieldWriters = getFieldWriters();
         int size = fieldWriters.size();
         jsonWriter.startArray(size);
@@ -238,6 +242,14 @@ public interface ObjectWriter<T> {
         }
 
         jsonWriter.endArray();
+    }
+
+    default void writeArrayMappingUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+    }
+
+    default void writeArrayMappingUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
     }
 
     /**

@@ -38,6 +38,32 @@ public class EishayWriteBinaryArrayMappingTest {
         }
     }
 
+    public static void json_str() throws Exception {
+        System.out.println("protobuf size " + benchmark.jsonbSize()); // 235
+
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < LOOP; ++i) {
+                benchmark.json_str(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayWriteBinaryArrayMapping-json_str millis : " + millis);
+        }
+    }
+
+    public static void json_bytes() throws Exception {
+        System.out.println("protobuf size " + benchmark.jsonbSize()); // 235
+
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < LOOP; ++i) {
+                benchmark.json_bytes(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayWriteBinaryArrayMapping-json_bytes millis : " + millis);
+        }
+    }
+
     public static void fory() throws Exception {
         System.out.println("fory size " + benchmark.forySize()); // 388
 
@@ -72,6 +98,8 @@ public class EishayWriteBinaryArrayMappingTest {
 
     public static void main(String[] args) throws Exception {
         jsonb();
+//        json_str();
+//        json_bytes();
 //        fory();
 //        kryo();
 //        protobuf();

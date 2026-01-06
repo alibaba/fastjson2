@@ -279,7 +279,7 @@ public class ObjectWriterAdapter<T>
     }
 
     @Override
-    public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
             writeClassInfo(jsonWriter);
         }

@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -83,6 +84,20 @@ public class EishayWriteBinaryArrayMapping {
     public void jsonb(Blackhole bh) {
         bh.consume(
                 JSONB.toBytes(mediaContent, JSONWriter.Feature.BeanToArray)
+        );
+    }
+
+    @Benchmark
+    public void json_str(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONString(mediaContent, JSONWriter.Feature.BeanToArray)
+        );
+    }
+
+    @Benchmark
+    public void json_bytes(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONBytes(mediaContent, JSONWriter.Feature.BeanToArray)
         );
     }
 

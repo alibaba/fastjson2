@@ -1099,12 +1099,18 @@ public abstract class FieldWriter<T>
         return jsonWriter.getObjectWriter(valueClass);
     }
 
-    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListValueJSONB(JSONWriterJSONB jsonWriter, List list) {
         throw new UnsupportedOperationException();
     }
 
-    public void writeListValue(JSONWriter jsonWriter, List list) {
-        throw new UnsupportedOperationException();
+    public final void writeListValue(JSONWriter jsonWriter, List list) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            writeListValueJSONB((JSONWriterJSONB) jsonWriter, list);
+        } else if (jsonWriter instanceof JSONWriterUTF8) {
+            writeListValueUTF8((JSONWriterUTF8) jsonWriter, list);
+        } else {
+            writeListValueUTF16((JSONWriterUTF16) jsonWriter, list);
+        }
     }
 
     public void writeListValueUTF8(JSONWriterUTF8 jsonWriter, List list) {

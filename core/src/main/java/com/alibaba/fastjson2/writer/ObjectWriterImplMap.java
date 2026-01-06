@@ -139,7 +139,7 @@ public final class ObjectWriterImplMap
     }
 
     @Override
-    public void writeArrayMappingJSONB(JSONWriter jsonWriter,
+    public void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter,
                                        Object object,
                                        Object fieldName,
                                        Type fieldType,

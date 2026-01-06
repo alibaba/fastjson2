@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.JSONWriterUTF16;
 import com.alibaba.fastjson2.JSONWriterUTF8;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -146,7 +147,7 @@ public class FieldWriterList<T>
     }
 
     @Override
-    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListValueJSONB(JSONWriterJSONB jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -203,76 +204,6 @@ public class FieldWriterList<T>
                 jsonWriter.popPath(item);
             }
         }
-    }
-
-    @Override
-    public final void writeListValue(JSONWriter jsonWriter, List list) {
-        if (jsonWriter.jsonb) {
-            writeListValueJSONB(jsonWriter, list);
-            return;
-        }
-
-        Class previousClass = null;
-        ObjectWriter previousObjectWriter = null;
-
-        long features = jsonWriter.getFeatures(this.features);
-
-        boolean previousItemRefDetect = (features & ReferenceDetection.mask) != 0;
-
-        jsonWriter.startArray();
-        for (int i = 0; i < list.size(); i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-
-            Object item = list.get(i);
-            if (item == null) {
-                jsonWriter.writeNull();
-                continue;
-            }
-
-            Class<?> itemClass = item.getClass();
-            if (itemClass == String.class) {
-                jsonWriter.writeString((String) item);
-                continue;
-            } else if (writeAsString) {
-                jsonWriter.writeString(item.toString());
-                continue;
-            }
-
-            boolean itemRefDetect;
-            ObjectWriter itemObjectWriter;
-            if (itemClass == previousClass) {
-                itemObjectWriter = previousObjectWriter;
-                itemRefDetect = previousItemRefDetect;
-            } else {
-                itemRefDetect = (features & ReferenceDetection.mask) != 0;
-                itemObjectWriter = getItemWriter(jsonWriter, itemClass);
-                previousClass = itemClass;
-                previousObjectWriter = itemObjectWriter;
-                if (itemRefDetect) {
-                    itemRefDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
-                }
-                previousItemRefDetect = itemRefDetect;
-            }
-
-            if (itemRefDetect) {
-                if (jsonWriter.writeReference(i, item)) {
-                    continue;
-                }
-            }
-
-            if (managedReference) {
-                jsonWriter.addManagerReference(item);
-            }
-
-            itemObjectWriter.write(jsonWriter, item, null, itemType, features);
-
-            if (itemRefDetect) {
-                jsonWriter.popPath(item);
-            }
-        }
-        jsonWriter.endArray();
     }
 
     @Override
