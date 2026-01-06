@@ -90,7 +90,7 @@ final class ObjectWriterImplList
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();
             return;

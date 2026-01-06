@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.JSONWriterUTF16;
-import com.alibaba.fastjson2.JSONWriterUTF8;
+import com.alibaba.fastjson2.*;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -24,7 +21,7 @@ public final class ObjectWriterRootName<T>
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         jsonWriter.startObject();
         jsonWriter.writeName(rootName);
         super.writeJSONB(jsonWriter, object, fieldName, fieldType, features);

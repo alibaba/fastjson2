@@ -11,6 +11,8 @@ import java.lang.reflect.Type;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
+
 final class FieldWriterUUID<T>
         extends FieldWriterObjectFinal<T> {
     FieldWriterUUID(
@@ -54,9 +56,9 @@ final class FieldWriterUUID<T>
     @Override
     public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T object) {
         UUID uuid = (UUID) propertyAccessor.getObject(object);
+        long features = this.features | jsonWriter.getFeatures();
         if (uuid == null) {
-            long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+            if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeNull();
                 return true;
@@ -64,8 +66,7 @@ final class FieldWriterUUID<T>
                 return false;
             }
         }
-        writeFieldNameUTF8(jsonWriter);
-        jsonWriter.writeUUID(uuid);
+        jsonWriter.writeUUID(fieldNameUTF8(jsonWriter.getFeatures(features)), uuid);
         return true;
     }
 

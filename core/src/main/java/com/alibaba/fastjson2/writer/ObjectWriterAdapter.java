@@ -53,6 +53,8 @@ public class ObjectWriterAdapter<T>
     final boolean containsNoneFieldGetter;
     final boolean googleCollection;
 
+    final ObjectConsumer<JSONWriterUTF8> writerUTF8;
+
     public ObjectWriterAdapter(Class<T> objectClass, List<FieldWriter> fieldWriters) {
         this(objectClass, null, null, 0, fieldWriters);
     }
@@ -146,6 +148,81 @@ public class ObjectWriterAdapter<T>
             }
         }
         typeKeyJSONB = JSONB.toBytes(typeKey);
+
+        ObjectConsumer<JSONWriterUTF8> writerUTF8 = null;
+        if (hasValueField) {
+            writerUTF8 = (jsonWriter, object, fieldName, fieldType, features2) -> {
+                FieldWriter fieldWriter = fieldWriterArray[0];
+                fieldWriter.writeValue(jsonWriter, object);
+            };
+        } else if (googleCollection) {
+            writerUTF8 = (jsonWriter, object, fieldName, fieldType, features2) -> {
+                Collection collection = (Collection) object;
+                ObjectWriterImplCollection.INSTANCE.writeUTF8(jsonWriter, collection, fieldName, fieldType, features2);
+            };
+        } else if ((features & MAKS_BEAN_TO_ARRAY) != 0) {
+            writerUTF8 = (jsonWriter, object, fieldName, fieldType, features2) -> {
+                writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features2);
+            };
+        } else if (hasFilter) {
+            writerUTF8 = (jsonWriter, object, fieldName, fieldType, features2) -> {
+                writeWithFilter(jsonWriter, object, fieldName, fieldType, features2);
+            };
+        } else {
+            if (!serializable) {
+                writerUTF8 = (jsonWriter, object, fieldName, fieldType, features2) -> {
+                    long featuresAll = features2 | this.features | jsonWriter.getFeatures();
+                    if ((featuresAll & MAKS_ERROR_ON_NONE_SERIALIZABLE) != 0) {
+                        errorOnNoneSerializable();
+                        return;
+                    }
+
+                    if ((featuresAll & MASK_IGNORE_NONE_SERIALIZABLE) != 0) {
+                        jsonWriter.writeNull();
+                        return;
+                    }
+
+                    if ((featuresAll & MAKS_BEAN_TO_ARRAY) != 0) {
+                        writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+                        return;
+                    }
+
+                    if (jsonWriter.hasFilter(this.containsNoneFieldGetter)) {
+                        writeWithFilter(jsonWriter, object, fieldName, fieldType, features2);
+                        return;
+                    }
+
+                    jsonWriter.startObject();
+
+                    if ((featuresAll & MASK_WRITE_CLASS_NAME) != 0 || jsonWriter.isWriteTypeInfo(object, featuresAll)) {
+                        jsonWriter.writeNameRaw(nameWithColonUTF8);
+                    }
+
+                    writeFieldsUTF8(jsonWriter, object);
+
+                    jsonWriter.endObject();
+                };
+            } else {
+                writerUTF8 = (jsonWriter, object, fieldName, fieldType, features2) -> {
+                    long featuresAll = features2 | this.features | jsonWriter.getFeatures();
+                    if (jsonWriter.hasFilter(this.containsNoneFieldGetter)) {
+                        writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
+                        return;
+                    }
+
+                    jsonWriter.startObject();
+
+                    if ((featuresAll & MASK_WRITE_CLASS_NAME) != 0 || jsonWriter.isWriteTypeInfo(object, featuresAll)) {
+                        jsonWriter.writeNameRaw(nameWithColonUTF8);
+                    }
+
+                    writeFieldsUTF8(jsonWriter, object);
+
+                    jsonWriter.endObject();
+                };
+            }
+        }
+        this.writerUTF8 = writerUTF8;
     }
 
     @Override
@@ -216,7 +293,7 @@ public class ObjectWriterAdapter<T>
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
         if ((featuresAll & BeanToArray.mask) != 0) {
             writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
@@ -310,51 +387,7 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (hasValueField) {
-            FieldWriter fieldWriter = fieldWriterArray[0];
-            fieldWriter.writeValue(jsonWriter, object);
-            return;
-        }
-
-        long featuresAll = features | this.features | jsonWriter.getFeatures();
-
-        if (googleCollection) {
-            Collection collection = (Collection) object;
-            ObjectWriterImplCollection.INSTANCE.writeUTF8(jsonWriter, collection, fieldName, fieldType, features);
-            return;
-        }
-
-        if ((featuresAll & MAKS_BEAN_TO_ARRAY) != 0) {
-            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
-            return;
-        }
-
-        if (!serializable) {
-            if ((featuresAll & MAKS_ERROR_ON_NONE_SERIALIZABLE) != 0) {
-                errorOnNoneSerializable();
-                return;
-            }
-
-            if ((featuresAll & MASK_IGNORE_NONE_SERIALIZABLE) != 0) {
-                jsonWriter.writeNull();
-                return;
-            }
-        }
-
-        if (hasFilter(jsonWriter)) {
-            writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
-            return;
-        }
-
-        jsonWriter.startObject();
-
-        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
-            jsonWriter.writeNameRaw(nameWithColonUTF8);
-        }
-
-        writeFieldsUTF8(jsonWriter, object);
-
-        jsonWriter.endObject();
+        writerUTF8.accept(jsonWriter, object, fieldName, fieldType, features);
     }
 
     protected void writeFieldsUTF8(JSONWriterUTF8 jsonWriter, Object object) {
@@ -781,5 +814,9 @@ public class ObjectWriterAdapter<T>
 
     protected void errorOnNoneSerializable() {
         throw new JSONException("not support none serializable class " + objectClass.getName());
+    }
+
+    interface ObjectConsumer<T extends JSONWriter> {
+        void accept(T jsonWriter, Object object, Object fieldName, Type fieldType, long features);
     }
 }

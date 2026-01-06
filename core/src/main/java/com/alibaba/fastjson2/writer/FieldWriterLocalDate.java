@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterUTF16;
 import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Field;
@@ -10,8 +11,13 @@ import java.time.LocalDate;
 import java.util.Locale;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
+
 final class FieldWriterLocalDate<T>
         extends FieldWriterObjectFinal<T> {
+    final NameValueWriter<JSONWriterUTF8> nameValueUTF8;
+    final NameValueWriter<JSONWriterUTF16> nameValueUTF16;
+
     FieldWriterLocalDate(
             String name,
             int ordinal,
@@ -26,6 +32,23 @@ final class FieldWriterLocalDate<T>
             Function function
     ) {
         super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+
+        if (format == null) {
+            objectWriter = ObjectWriterImplLocalDate.INSTANCE;
+            nameValueUTF8 = (jsonWriter, value, features2) -> {
+                jsonWriter.writeLocalDate(fieldNameUTF8(features), value);
+            };
+        } else {
+            objectWriter = ObjectWriterImplLocalDate.of(format, locale);
+            nameValueUTF8 = (jsonWriter, value, features2) -> {
+                jsonWriter.writeNameRaw(fieldNameUTF8(features));
+                objectWriter.write(jsonWriter, value, name, fieldType, features2);
+            };
+        }
+        nameValueUTF16 = (jsonWriter, value, features2) -> {
+            jsonWriter.writeNameRaw(fieldNameUTF16(features));
+            objectWriter.write(jsonWriter, value, name, fieldType, features2);
+        };
     }
 
     @Override
@@ -48,49 +71,50 @@ final class FieldWriterLocalDate<T>
         }
 
         writeFieldName(jsonWriter);
-
-        if (objectWriter == null) {
-            objectWriter = getObjectWriter(jsonWriter, LocalDate.class);
-        }
-
-        if (objectWriter != ObjectWriterImplLocalDate.INSTANCE) {
-            objectWriter.write(jsonWriter, localDate, fieldName, fieldClass, features);
-        } else {
-            jsonWriter.writeLocalDate(localDate);
-        }
+        jsonWriter.writeLocalDate(localDate);
         return true;
     }
 
     @Override
     public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         LocalDate localDate = (LocalDate) propertyAccessor.getObject(object);
         if (localDate == null) {
-            long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
-                writeFieldNameUTF8(jsonWriter);
-                jsonWriter.writeNull();
+            if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
+                jsonWriter.writeNameRaw(nameNullUTF8);
                 return true;
             } else {
                 return false;
             }
         }
 
-        writeFieldNameUTF8(jsonWriter);
+        nameValueUTF8.write(jsonWriter, localDate, features);
+        return true;
+    }
 
-        if (objectWriter == null) {
-            objectWriter = getObjectWriter(jsonWriter, LocalDate.class);
+    @Override
+    public boolean writeUTF16(JSONWriterUTF16 jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
+        LocalDate localDate = (LocalDate) propertyAccessor.getObject(object);
+        if (localDate == null) {
+            if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
+                jsonWriter.writeNameRaw(nameNullUTF8);
+                return true;
+            } else {
+                return false;
+            }
         }
 
-        if (objectWriter != ObjectWriterImplLocalDate.INSTANCE) {
-            objectWriter.write(jsonWriter, localDate, fieldName, fieldClass, features);
-        } else {
-            jsonWriter.writeLocalDate(localDate);
-        }
+        nameValueUTF16.write(jsonWriter, localDate, features);
         return true;
     }
 
     @Override
     public Function getFunction() {
         return function;
+    }
+
+    interface NameValueWriter<T extends JSONWriter> {
+        void write(T jsonWriter, LocalDate value, long features);
     }
 }

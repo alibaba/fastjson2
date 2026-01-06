@@ -42,6 +42,10 @@ public final class ASMUtils {
     public static final String TYPE_OBJECT_WRITER_10 = ObjectWriter10.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_WRITER_11 = ObjectWriter11.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_WRITER_12 = ObjectWriter12.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_13 = ObjectWriter13.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_14 = ObjectWriter14.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_15 = ObjectWriter15.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_16 = ObjectWriter16.class.getName().replace('.', '/');
     public static final String TYPE_FIELD_READE = FieldReader.class.getName().replace('.', '/');
     public static final String TYPE_JSON_READER = JSONReader.class.getName().replace('.', '/');
 
@@ -70,6 +74,7 @@ public final class ASMUtils {
     public static final String TYPE_JSON_WRITER = JSONWriter.class.getName().replace('.', '/');
     public static final String TYPE_JSON_UTF8_WRITER = JSONWriterUTF8.class.getName().replace('.', '/');
     public static final String TYPE_JSON_UTF16_WRITER = JSONWriterUTF16.class.getName().replace('.', '/');
+    public static final String TYPE_JSONB_WRITER = JSONWriterJSONB.class.getName().replace('.', '/');
     public static final String TYPE_JSONB_IO = JSONB.IO.class.getName().replace('.', '/');
     public static final String TYPE_FIELD_WRITER = FieldWriter.class.getName().replace('.', '/');
     public static final String TYPE_IO_UTILS = IOUtils.class.getName().replace('.', '/');
@@ -83,6 +88,7 @@ public final class ASMUtils {
     public static final String DESC_FIELD_READER_ARRAY = "[" + DESC_FIELD_READER;
     public static final String DESC_JSON_READER = 'L' + TYPE_JSON_READER + ';';
     public static final String DESC_JSON_WRITER = 'L' + TYPE_JSON_WRITER + ';';
+    public static final String DESC_JSONB_WRITER = 'L' + TYPE_JSONB_WRITER + ';';
     public static final String DESC_JSON_UTF8_WRITER = 'L' + TYPE_JSON_UTF8_WRITER + ';';
     public static final String DESC_JSON_UTF16_WRITER = 'L' + TYPE_JSON_UTF16_WRITER + ';';
     public static final String DESC_OBJECT_READER = 'L' + TYPE_OBJECT_READER + ';';
@@ -203,6 +209,10 @@ public final class ASMUtils {
                 ObjectWriter10.class,
                 ObjectWriter11.class,
                 ObjectWriter12.class,
+                ObjectWriter13.class,
+                ObjectWriter14.class,
+                ObjectWriter15.class,
+                ObjectWriter16.class,
                 com.alibaba.fastjson2.writer.FieldWriter.class,
                 JSONPathCompilerReflect.SingleNamePathTyped.class,
                 JSONWriter.Context.class,

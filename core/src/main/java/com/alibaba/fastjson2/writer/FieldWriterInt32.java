@@ -18,6 +18,7 @@ class FieldWriterInt32<T>
     final boolean toString;
     final ObjIntConsumer<JSONWriterUTF8> utf8Value;
     final ObjIntConsumer<JSONWriterUTF16> utf16Value;
+    final NameValueConsumer<JSONWriterUTF8> utf8NameValue;
 
     public FieldWriterInt32(
             String name,
@@ -35,6 +36,7 @@ class FieldWriterInt32<T>
         toString = (features & WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
 
+        NameValueConsumer<JSONWriterUTF8> utf8NameValue = null;
         if (toString) {
             utf8Value = JSONWriterUTF8::writeString;
             utf16Value = JSONWriterUTF16::writeString;
@@ -44,7 +46,25 @@ class FieldWriterInt32<T>
         } else {
             utf8Value = JSONWriterUTF8::writeInt32;
             utf16Value = JSONWriterUTF16::writeInt32;
+            utf8NameValue = (w, v) -> {
+                long features2 = w.getFeatures() | this.features;
+                if (v == 0 && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
+                    return;
+                }
+                w.writeInt32(fieldNameUTF8(features2), v, features2);
+            };
         }
+        if (utf8NameValue == null) {
+            utf8NameValue = (w, v) -> {
+                long features2 = w.getFeatures() | this.features;
+                if (v == 0 && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
+                    return;
+                }
+                w.writeNameRaw(fieldNameUTF8(features2));
+                utf8Value.accept(w, v);
+            };
+        }
+        this.utf8NameValue = utf8NameValue;
     }
 
     @Override
@@ -68,12 +88,7 @@ class FieldWriterInt32<T>
 
     @Override
     public final void writeInt32UTF8(JSONWriterUTF8 jsonWriter, int value) {
-        long features = jsonWriter.getFeatures() | this.features;
-        if (value == 0 && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
-            return;
-        }
-        jsonWriter.writeNameRaw(fieldNameUTF8(features));
-        utf8Value.accept(jsonWriter, value);
+        utf8NameValue.accept(jsonWriter, value);
     }
 
     @Override
@@ -125,5 +140,9 @@ class FieldWriterInt32<T>
         }
 
         return jsonWriter.getObjectWriter(valueClass);
+    }
+
+    interface NameValueConsumer<T extends JSONWriter> {
+        void accept(T writer, int value);
     }
 }

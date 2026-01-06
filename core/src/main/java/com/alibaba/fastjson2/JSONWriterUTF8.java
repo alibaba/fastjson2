@@ -427,6 +427,19 @@ public final class JSONWriterUTF8
         writeRaw((byte) quote);
     }
 
+    public void writeString(byte[] name, String str, long features) {
+        if (STRING_VALUE != null) {
+            byte[] value = STRING_VALUE.apply(str);
+            if (STRING_CODER.applyAsInt(str) == 0) {
+                writeStringLatin1(name, value, features);
+            } else {
+                writeStringUTF16(name, value, features);
+            }
+        } else {
+            writeStringJDK8(name, str, features);
+        }
+    }
+
     @Override
     public void writeString(String str) {
         if (str == null) {
@@ -444,6 +457,11 @@ public final class JSONWriterUTF8
         } else {
             writeStringJDK8(str);
         }
+    }
+
+    public void writeStringJDK8(byte[] name, String str, long features) {
+        writeNameRaw(name);
+        writeStringJDK8(str);
     }
 
     private void writeStringJDK8(String str) {
@@ -500,6 +518,30 @@ public final class JSONWriterUTF8
         this.bytes[this.off++] = (byte) quote;
     }
 
+    public final void writeStringLatin1(byte[] name, byte[] value, long features) {
+        if ((features & MASK_BROWSER_SECURE) != 0) {
+            writeStringLatin1BrowserSecure(name, value, features);
+            return;
+        }
+
+        byte quote = (byte) this.quote;
+        if (StringUtils.escaped(value, quote, byteVectorQuote)) {
+            writeStringEscaped(name, value, features);
+            return;
+        }
+
+        int off = this.off;
+        int minCapacity = off + name.length + 2 + pretty * level + 23;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+        this.off = StringUtils.writeLatin1(bytes, off, value, quote);
+    }
+
     public final void writeStringLatin1(byte[] value) {
         if ((context.features & MASK_BROWSER_SECURE) != 0) {
             writeStringLatin1BrowserSecure(value);
@@ -519,6 +561,11 @@ public final class JSONWriterUTF8
             bytes = grow(minCapacity);
         }
         this.off = StringUtils.writeLatin1(bytes, off, value, quote);
+    }
+
+    protected final void writeStringLatin1BrowserSecure(byte[] name, byte[] value, long features) {
+        writeNameRaw(name);
+        writeStringLatin1BrowserSecure(value);
     }
 
     protected final void writeStringLatin1BrowserSecure(byte[] value) {
@@ -546,6 +593,11 @@ public final class JSONWriterUTF8
             return;
         }
         writeStringEscaped(value);
+    }
+
+    public final void writeStringUTF16(byte[] name, byte[] value, long features) {
+        writeNameRaw(name);
+        writeStringUTF16(value);
     }
 
     public final void writeStringUTF16(byte[] value) {
@@ -662,6 +714,11 @@ public final class JSONWriterUTF8
         }
 
         this.bytes[this.off++] = (byte) quote;
+    }
+
+    protected final void writeStringEscaped(byte[] name, byte[] values, long features) {
+        writeNameRaw(name);
+        writeStringEscaped(values);
     }
 
     protected final void writeStringEscaped(byte[] values) {
@@ -1031,6 +1088,22 @@ public final class JSONWriterUTF8
         this.off = off + 1;
     }
 
+    public final void writeUUID(byte[] name, UUID value) {
+        int off = this.off;
+        int minCapacity = off + name.length + 2 + pretty * level + 38;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+
+        byte quote = (byte) this.quote;
+        writeUUID(value, bytes, off, quote);
+        this.off = off + 38;
+    }
+
     @Override
     public final void writeUUID(UUID value) {
         if (value == null) {
@@ -1045,26 +1118,29 @@ public final class JSONWriterUTF8
             bytes = grow(minCapacity);
         }
         byte quote = (byte) this.quote;
+        writeUUID(value, bytes, off, quote);
+        this.off += 38;
+    }
 
+    private static void writeUUID(UUID value, byte[] bytes, int off, byte quote) {
         BYTES.putByte(bytes, off, quote);
-        BYTES.putByte(bytes, off + 9, (byte) '-');
-        BYTES.putByte(bytes, off + 14, (byte) '-');
-        BYTES.putByte(bytes, off + 19, (byte) '-');
-        BYTES.putByte(bytes, off + 24, (byte) '-');
-        BYTES.putByte(bytes, off + 37, quote);
         long msb = value.getMostSignificantBits();
         long lsb = value.getLeastSignificantBits();
         long x = msb, x0 = hex8(x >>> 32), x1 = hex8(x);
         BYTES.putLongUnaligned(bytes, off + 1, x0);
+        BYTES.putByte(bytes, off + 9, (byte) '-');
         BYTES.putIntUnaligned(bytes, off + 10, (int) x1);
+        BYTES.putByte(bytes, off + 14, (byte) '-');
         BYTES.putIntUnaligned(bytes, off + 15, (int) (x1 >>> 32));
+        BYTES.putByte(bytes, off + 19, (byte) '-');
         x = lsb;
         x0 = hex8(x >>> 32);
         x1 = hex8(x);
         BYTES.putIntUnaligned(bytes, off + 20, (int) (x0));
+        BYTES.putByte(bytes, off + 24, (byte) '-');
         BYTES.putIntUnaligned(bytes, off + 25, (int) (x0 >>> 32));
         BYTES.putLongUnaligned(bytes, off + 29, x1);
-        this.off += 38;
+        BYTES.putByte(bytes, off + 37, quote);
     }
 
     /**
@@ -1153,6 +1229,22 @@ public final class JSONWriterUTF8
         }
         System.arraycopy(raw, 0, bytes, off, raw.length);
         this.off = off + raw.length;
+    }
+
+    public int writeNameBefore(byte[] bytes, int off) {
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty != PRETTY_NON) {
+                off = indent(bytes, off);
+            }
+        }
+        return off;
+    }
+
+    public final byte[] ensureCapacityForNameName(int nameLength) {
+        return ensureCapacity(off + nameLength + 2 + pretty * level);
     }
 
     @Override
@@ -1570,7 +1662,7 @@ public final class JSONWriterUTF8
         this.off = off + len;
     }
 
-    public final Object ensureCapacity(int minCapacity) {
+    public final byte[] ensureCapacity(int minCapacity) {
         byte[] bytes = this.bytes;
         if (minCapacity >= bytes.length) {
             this.bytes = bytes = Arrays.copyOf(bytes, newCapacity(minCapacity, bytes.length));
@@ -1732,6 +1824,28 @@ public final class JSONWriterUTF8
         this.off = off;
     }
 
+    public final void writeInt32(byte[] name, int i, long features) {
+        int off = this.off;
+        int minCapacity = off + name.length + pretty * level + 15;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+
+        boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+        if (writeAsString) {
+            bytes[off++] = (byte) quote;
+        }
+        off = IOUtils.writeInt32(bytes, off, i);
+        if (writeAsString) {
+            bytes[off++] = (byte) quote;
+        }
+        this.off = off;
+    }
+
     @Override
     public final void writeListInt32(List<Integer> values) {
         if (values == null) {
@@ -1850,6 +1964,33 @@ public final class JSONWriterUTF8
         this.off = off + 1;
     }
 
+    public final void writeInt64(byte[] name, long i, long features) {
+        int off = this.off;
+        int minCapacity = off + name.length + 2 + pretty * level + 23;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+
+        boolean writeAsString = isWriteAsString(i, features);
+        if (writeAsString) {
+            bytes[off++] = (byte) quote;
+        }
+        off = IOUtils.writeInt64(bytes, off, i);
+        if (writeAsString) {
+            bytes[off++] = (byte) quote;
+        } else if ((features & MASK_WRITE_CLASS_NAME) != 0
+                && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
+                && i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE
+        ) {
+            bytes[off++] = 'L';
+        }
+        this.off = off;
+    }
+
     @Override
     public final void writeInt64(long i) {
         final long features = context.features;
@@ -1905,6 +2046,35 @@ public final class JSONWriterUTF8
         }
 
         off = NumberUtils.writeFloat(bytes, off, value, true, writeSpecialAsString);
+
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+        this.off = off;
+    }
+
+    public final void writeDouble(byte[] name, double value, long features) {
+        int off = this.off;
+        int minCapacity = off + name.length + 2 + pretty * level + 26;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+
+        boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+        boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+
+        if (writeSpecialAsString && !Double.isFinite(value)) {
+            writeAsString = false;
+        }
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+
+        off = NumberUtils.writeDouble(bytes, off, value, true, writeSpecialAsString);
 
         if (writeAsString) {
             bytes[off++] = '"';
@@ -2094,6 +2264,23 @@ public final class JSONWriterUTF8
         this.off = off + 1;
     }
 
+    public final void writeLocalDate(byte[] name, LocalDate date) {
+        int off = this.off;
+        int minCapacity = off + name.length + pretty * level + 20;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+
+        bytes[off++] = (byte) quote;
+        off = IOUtils.writeLocalDate(bytes, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        bytes[off] = (byte) quote;
+        this.off = off + 1;
+    }
+
     @Override
     public final void writeLocalDateTime(LocalDateTime dateTime) {
         int off = this.off;
@@ -2217,6 +2404,37 @@ public final class JSONWriterUTF8
             zoneId.getBytes(0, zoneIdLength, bytes, off);
             off += zoneIdLength;
             bytes[off++] = ']';
+        }
+        bytes[off] = (byte) quote;
+        this.off = off + 1;
+    }
+
+    public final void writeOffsetDateTime(byte[] name, OffsetDateTime dateTime) {
+        int off = this.off;
+        int minCapacity = off + name.length + 2 + pretty * level + 23;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+
+        bytes[off] = (byte) quote;
+        LocalDateTime ldt = dateTime.toLocalDateTime();
+        LocalDate date = ldt.toLocalDate();
+        off = IOUtils.writeLocalDate(bytes, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        bytes[off] = 'T';
+        off = IOUtils.writeLocalTime(bytes, off + 1, ldt.toLocalTime());
+
+        ZoneOffset offset = dateTime.getOffset();
+        if (offset.getTotalSeconds() == 0) {
+            bytes[off++] = 'Z';
+        } else {
+            String zoneId = offset.getId();
+            zoneId.getBytes(0, zoneId.length(), bytes, off);
+            off += zoneId.length();
         }
         bytes[off] = (byte) quote;
         this.off = off + 1;
@@ -2412,6 +2630,46 @@ public final class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+
+        boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
+        long unscaleValue;
+        int scale;
+        if (precision < 19
+                && (scale = value.scale()) >= 0
+                && DECIMAL_INT_COMPACT != null
+                && (unscaleValue = DECIMAL_INT_COMPACT.applyAsLong(value)) != Long.MIN_VALUE
+                && !asPlain
+        ) {
+            off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);
+        } else {
+            String str = asPlain ? value.toPlainString() : value.toString();
+            str.getBytes(0, str.length(), bytes, off);
+            off += str.length();
+        }
+
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+        this.off = off;
+    }
+
+    public final void writeDecimal(byte[] name, BigDecimal value, long features) {
+        int precision = value.precision();
+
+        int off = this.off;
+        int minCapacity = off + name.length + 2 + pretty * level + precision + Math.abs(value.scale()) + 30;
+        byte[] bytes = this.bytes;
+        if (minCapacity > bytes.length) {
+            bytes = grow(minCapacity);
+        }
+        off = writeNameBefore(bytes, off);
+        System.arraycopy(name, 0, bytes, off, name.length);
+        off += name.length;
+
+        boolean writeAsString = isWriteAsString(value, features);
         if (writeAsString) {
             bytes[off++] = '"';
         }

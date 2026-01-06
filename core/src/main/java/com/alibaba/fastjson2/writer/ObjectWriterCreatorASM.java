@@ -45,8 +45,11 @@ public class ObjectWriterCreatorASM
 
     static final String METHOD_DESC_WRITE_VALUE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;)V";
     static final String METHOD_DESC_WRITE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
+    static final String METHOD_DESC_WRITE_JSONB = "(" + DESC_JSONB_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
     static final String METHOD_DESC_WRITE_FIELD_NAME = "(" + DESC_JSON_WRITER + ")V";
+    static final String METHOD_DESC_WRITE_JSONB_FIELD_NAME = "(" + DESC_JSONB_WRITER + ")V";
     static final String METHOD_DESC_WRITE_OBJECT = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
+    static final String METHOD_DESC_WRITE_JSONB_OBJECT = "(" + DESC_JSONB_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
     static final String METHOD_DESC_WRITE_J = "(" + DESC_JSON_WRITER + "J)V";
     static final String METHOD_DESC_WRITE_D = "(" + DESC_JSON_WRITER + "D)V";
     static final String METHOD_DESC_WRITE_F = "(" + DESC_JSON_WRITER + "F)V";
@@ -70,7 +73,7 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_WRITE_REFERENCE = "(Ljava/lang/String;)V";
     static final String METHOD_DESC_IO_WRITE_REFERENCE = "([BILjava/lang/String;" + DESC_JSON_WRITER + ")I";
     static final String METHOD_DESC_WRITE_CLASS_INFO = "(" + DESC_JSON_WRITER + ")V";
-    static final String METHOD_DESC_WRITE_FIELD_NAME_JSONB = "([BI" + DESC_JSON_WRITER + ")I";
+    static final String METHOD_DESC_WRITE_FIELD_NAME_JSONB = "([BI" + DESC_JSONB_WRITER + ")I";
     static final String METHOD_DESC_WRITE_NAME_SYMBOL = "(" + DESC_SYMBOL + ")I";
     static final String METHOD_DESC_WRITE_LIST_VALUE_JSONB = "(" + DESC_JSON_WRITER + "Ljava/util/List;)V";
 
@@ -80,6 +83,12 @@ public class ObjectWriterCreatorASM
     static final String WRITE_NULLS = "WRITE_NULLS";
     static final String CONTEXT_FEATURES = "CONTEXT_FEATURES";
     static final String NAME_DIRECT = "NAME_DIRECT";
+
+    enum JSONWriterType {
+        JSONB,
+        JSON_UTF8,
+        JSON_UTF16
+    }
 
     static String fieldWriter(int i) {
         switch (i) {
@@ -807,7 +816,7 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "writeJSONB",
-                METHOD_DESC_WRITE,
+                METHOD_DESC_WRITE_JSONB,
                 fieldWriters.size() < 6 ? 512 : 1024
         );
 
@@ -2806,7 +2815,7 @@ public class ObjectWriterCreatorASM
             mw.invokeinterface(
                     TYPE_OBJECT_WRITER,
                     writeMethod,
-                    METHOD_DESC_WRITE_OBJECT);
+                    jsonb ? METHOD_DESC_WRITE_JSONB_OBJECT : METHOD_DESC_WRITE_OBJECT);
         }
 
         if (refDetection) {
@@ -3950,7 +3959,7 @@ public class ObjectWriterCreatorASM
         mw.invokevirtual(
                 TYPE_FIELD_WRITER,
                 mwc.jsonb ? "writeFieldNameJSONB" : "writeFieldName",
-                METHOD_DESC_WRITE_FIELD_NAME);
+                mwc.jsonb ? METHOD_DESC_WRITE_JSONB_FIELD_NAME : METHOD_DESC_WRITE_FIELD_NAME);
 
         if (writeDirect) {
             mw.visitLabel(labelEnd);

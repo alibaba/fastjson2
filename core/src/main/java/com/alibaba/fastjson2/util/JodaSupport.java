@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.support.LambdaMiscCodec;
@@ -233,7 +230,7 @@ public class JodaSupport {
         }
 
         @Override
-        public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             Object zone = getZone.apply(object);
             String zoneId = (String) getID.apply(zone);
 
@@ -284,7 +281,7 @@ public class JodaSupport {
         }
 
         @Override
-        public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             Object zone = getZone.apply(object);
             String zoneId = (String) getID.apply(zone);
 
@@ -446,7 +443,7 @@ public class JodaSupport {
         }
 
         @Override
-        public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             int year = getYear.applyAsInt(object);
             int monthOfYear = getMonthOfYear.applyAsInt(object);
             int dayOfMonth = getDayOfMonth.applyAsInt(object);
@@ -693,7 +690,7 @@ public class JodaSupport {
         }
 
         @Override
-        public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 int year = (Integer) getYear.invoke(object);
                 int monthOfYear = (Integer) getMonthOfYear.invoke(object);

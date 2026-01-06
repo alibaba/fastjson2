@@ -12,11 +12,13 @@ import java.util.function.ObjDoubleConsumer;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
 import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
-import static com.alibaba.fastjson2.JSONWriter.MASK_NOT_WRITE_DEFAULT_VALUE;
 
 final class FieldWriterDoubleVal<T>
         extends FieldWriter<T> {
-    private final ObjDoubleConsumer<JSONWriter> writerImpl;
+    private final ObjDoubleConsumer<JSONWriterUTF8> valueUTF8;
+    private final ObjDoubleConsumer<JSONWriterUTF16> valueUTF16;
+    private final ObjDoubleConsumer<JSONWriterJSONB> valueJSONB;
+    private final ObjDoubleConsumer<JSONWriterUTF8> nameValueUTF8;
 
     FieldWriterDoubleVal(
             String name,
@@ -33,12 +35,30 @@ final class FieldWriterDoubleVal<T>
         super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
 
         if (decimalFormat != null) {
-            writerImpl = (w, v) -> w.writeDouble(v, decimalFormat);
+            valueUTF8 = (w, v) -> w.writeDouble(v, decimalFormat);
+            valueUTF16 = (w, v) -> w.writeDouble(v, decimalFormat);
+            valueJSONB = (w, v) -> w.writeDouble(v, decimalFormat);
+            nameValueUTF8 = (w, v) -> {
+                writeFieldNameUTF8(w);
+                w.writeDouble(v, decimalFormat);
+            };
         } else {
             if ((features & WriteNonStringValueAsString.mask) != 0) {
-                writerImpl = JSONWriter::writeString;
+                valueUTF8 = JSONWriterUTF8::writeString;
+                valueUTF16 = JSONWriterUTF16::writeString;
+                valueJSONB = JSONWriterJSONB::writeString;
+                nameValueUTF8 = (w, v) -> {
+                    writeFieldNameUTF8(w);
+                    w.writeString(v);
+                };
             } else {
-                writerImpl = JSONWriter::writeDouble;
+                valueUTF8 = JSONWriterUTF8::writeDouble;
+                valueUTF16 = JSONWriterUTF16::writeDouble;
+                valueJSONB = JSONWriterJSONB::writeDouble;
+                nameValueUTF8 = (w, v) -> {
+                    long features2 = w.getFeatures(this.features);
+                    w.writeDouble(fieldNameUTF8(w.getFeatures(features2)), v, features2);
+                };
             }
         }
     }
@@ -60,7 +80,7 @@ final class FieldWriterDoubleVal<T>
         }
 
         writeFieldNameJSONB(jsonWriter);
-        writerImpl.accept(jsonWriter, value);
+        valueJSONB.accept(jsonWriter, value);
         return true;
     }
 
@@ -77,12 +97,7 @@ final class FieldWriterDoubleVal<T>
             throw error;
         }
 
-        if (value == 0 && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
-            return false;
-        }
-
-        jsonWriter.writeNameRaw(fieldNameUTF8(features));
-        writerImpl.accept(jsonWriter, value);
+        nameValueUTF8.accept(jsonWriter, value);
         return true;
     }
 
@@ -103,12 +118,17 @@ final class FieldWriterDoubleVal<T>
         }
 
         writeFieldNameUTF16(jsonWriter);
-        writerImpl.accept(jsonWriter, value);
+        valueUTF16.accept(jsonWriter, value);
         return true;
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        writerImpl.accept(jsonWriter, propertyAccessor.getDoubleValue(object));
+        double value = propertyAccessor.getDoubleValue(object);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 }

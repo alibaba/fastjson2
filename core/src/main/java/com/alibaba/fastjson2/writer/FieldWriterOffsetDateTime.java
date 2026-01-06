@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.JSONWriterUTF16;
 import com.alibaba.fastjson2.JSONWriterUTF8;
@@ -30,7 +29,7 @@ final class FieldWriterOffsetDateTime<T>
             Function function
     ) {
         super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
-        this.initObjectWriter = ObjectWriterImplOffsetDateTime.INSTANCE;
+        this.initObjectWriter = objectWriter = ObjectWriterImplOffsetDateTime.of(format, locale);
     }
 
     @Override
@@ -82,16 +81,14 @@ final class FieldWriterOffsetDateTime<T>
         OffsetDateTime dateTime = (OffsetDateTime) propertyAccessor.getObject(object);
         if (dateTime == null) {
             if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
-                writeFieldName(jsonWriter);
-                jsonWriter.writeNull();
+                jsonWriter.writeNameRaw(nameNullUTF8);
                 return true;
             } else {
                 return false;
             }
         }
 
-        jsonWriter.writeNameRaw(fieldNameUTF8(jsonWriter.getFeatures(features)));
-        jsonWriter.writeOffsetDateTime(dateTime);
+        jsonWriter.writeOffsetDateTime(fieldNameUTF8(jsonWriter.getFeatures(features)), dateTime);
         return true;
     }
 

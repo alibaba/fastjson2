@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.JSONWriterUTF16;
 import com.alibaba.fastjson2.JSONWriterUTF8;
 
@@ -14,7 +15,7 @@ public class ObjectWriterException
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         writeClassInfo(jsonWriter);
 
         int size = fieldWriters.size();

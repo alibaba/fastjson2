@@ -79,7 +79,7 @@ public abstract class JSONWriter
     public final SymbolTable symbolTable;
 
     protected final Charset charset;
-    protected final char quote;
+    public final char quote;
     protected final int maxArraySize;
 
     protected boolean startObject;
@@ -851,11 +851,11 @@ public abstract class JSONWriter
     public final boolean isWriteTypeInfo(Object object, long features) {
         features |= context.features;
 
-        if ((features & WriteClassName.mask) == 0) {
+        if ((features & MASK_WRITE_CLASS_NAME) == 0) {
             return false;
         }
 
-        if ((features & NotWriteHashMapArrayListClassName.mask) != 0) {
+        if ((features & MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME) != 0) {
             if (object != null) {
                 Class objectClass = object.getClass();
                 if (objectClass == HashMap.class || objectClass == ArrayList.class) {
@@ -864,7 +864,7 @@ public abstract class JSONWriter
             }
         }
 
-        return (features & NotWriteRootClassName.mask) == 0
+        return (features & MASK_NOT_WRITE_ROOT_CLASSNAME) == 0
                 || object != this.rootObject;
     }
 
@@ -1476,7 +1476,7 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    protected static boolean isWriteAsString(long value, long features) {
+    public static boolean isWriteAsString(long value, long features) {
         return (features & (MASK_WRITE_NON_STRING_VALUE_AS_STRING | MASK_WRITE_LONG_AS_STRING)) != 0
                 || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
@@ -3883,6 +3883,8 @@ public abstract class JSONWriter
     public static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
     public static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
     public static final long MASK_WRITE_CLASS_NAME = 1 << 9;
+    public static final long MASK_NOT_WRITE_ROOT_CLASSNAME = 1 << 10;
+    public static final long MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME = 1 << 11;
     public static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
     public static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
     public static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
@@ -4075,7 +4077,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        NotWriteRootClassName(1 << 10),
+        NotWriteRootClassName(MASK_NOT_WRITE_ROOT_CLASSNAME),
 
         /**
          * Feature that determines whether to write class names for HashMap and ArrayList during serialization.
@@ -4085,7 +4087,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        NotWriteHashMapArrayListClassName(1 << 11),
+        NotWriteHashMapArrayListClassName(MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME),
 
         /**
          * Feature that determines whether to write default values during serialization.

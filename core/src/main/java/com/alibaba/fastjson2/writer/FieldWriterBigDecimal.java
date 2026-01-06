@@ -9,12 +9,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Locale;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
 
 final class FieldWriterBigDecimal<T>
         extends FieldWriter<T> {
+    private final BiConsumer<JSONWriterUTF8, BigDecimal> nameValueUTF8;
+
     FieldWriterBigDecimal(
             String fieldName,
             int ordinal,
@@ -27,6 +30,19 @@ final class FieldWriterBigDecimal<T>
             Function function
     ) {
         super(fieldName, ordinal, features, format, locale, label, BigDecimal.class, BigDecimal.class, field, method, function);
+
+        if (decimalFormat != null) {
+            nameValueUTF8 = (w, v) -> {
+                long features2 = w.getFeatures() | this.features;
+                w.writeNameRaw(fieldNameUTF8(features));
+                w.writeDecimal(v, features2, decimalFormat);
+            };
+        } else {
+            nameValueUTF8 = (w, v) -> {
+                long features2 = w.getFeatures() | this.features;
+                w.writeDecimal(fieldNameUTF8(features2), v, features2);
+            };
+        }
     }
 
     @Override
@@ -73,8 +89,7 @@ final class FieldWriterBigDecimal<T>
             return writeFloatNull(jsonWriter);
         }
 
-        jsonWriter.writeNameRaw(fieldNameUTF8(features));
-        jsonWriter.writeDecimal(value, features, decimalFormat);
+        nameValueUTF8.accept(jsonWriter, value);
         return true;
     }
 

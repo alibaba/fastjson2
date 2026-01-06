@@ -41,6 +41,10 @@ public class ClientsWriteUTF8Bytes {
         }
     }
 
+    public int fastjson2_size() {
+        return JSON.toJSONBytes(clients).length;
+    }
+
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(clients));

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
@@ -27,7 +28,7 @@ final class ObjectWriterImplZonedDateTime
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         ZonedDateTime zdt;
         if (function != null) {
             zdt = (ZonedDateTime) function.apply(object);

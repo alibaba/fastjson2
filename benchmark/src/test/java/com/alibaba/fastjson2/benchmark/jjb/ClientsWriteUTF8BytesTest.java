@@ -32,6 +32,7 @@ public class ClientsWriteUTF8BytesTest {
     }
 
     public static void fastjson2() {
+        System.out.println("fastjson2_size : " + benchmark.fastjson2_size());
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.JSONWriterUTF16;
 import com.alibaba.fastjson2.JSONWriterUTF8;
 import com.alibaba.fastjson2.filter.*;
@@ -127,6 +128,10 @@ public interface ObjectWriter<T> {
      * @param features the features to use for writing
      */
     default void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        writeJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
+    }
+
+    default void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         write(jsonWriter, object, fieldName, fieldType, features);
     }
 
@@ -137,6 +142,10 @@ public interface ObjectWriter<T> {
      * @param object the object to write
      */
     default void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object) {
+        writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, object, null, null, 0);
+    }
+
+    default void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter, Object object) {
         writeArrayMappingJSONB(jsonWriter, object, null, null, 0);
     }
 

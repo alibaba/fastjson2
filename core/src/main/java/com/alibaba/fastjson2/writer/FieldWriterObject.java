@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
 public class FieldWriterObject<T>
@@ -448,22 +448,13 @@ public class FieldWriterObject<T>
 
         // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
         if (value == null) {
-            long nullFeatures = JSONWriter.Feature.WriteNulls.mask;
+            long nullFeatures = MASK_WRITE_MAP_NULL_VALUE;
             if (array) {
-                nullFeatures |= WriteNullListAsEmpty.mask;
-                nullFeatures |= NullAsDefaultValue.mask;
+                nullFeatures |= MASK_WRITE_NULL_LIST_AS_EMPTY;
             } else if (number) {
-                nullFeatures |= WriteNullNumberAsZero.mask;
-                nullFeatures |= NullAsDefaultValue.mask;
-            } else if (fieldClass == Boolean.class) {
-                nullFeatures |= WriteNullBooleanAsFalse.mask;
-                nullFeatures |= NullAsDefaultValue.mask;
-            } else if (fieldClass == String.class) {
-                nullFeatures |= WriteNullStringAsEmpty.mask;
-                nullFeatures |= NullAsDefaultValue.mask;
-            } else {
-                nullFeatures |= NullAsDefaultValue.mask;
+                nullFeatures |= MASK_WRITE_NULL_NUMBER_AS_ZERO;
             }
+            nullFeatures |= MASK_NULL_AS_DEFAULT_VALUE;
 
             if ((features & nullFeatures) == 0) {
                 return false;

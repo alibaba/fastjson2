@@ -174,7 +174,7 @@ public final class ObjectWriterImplMap
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if ((fieldType == this.objectType && jsonWriter.isWriteMapTypeInfo(object, objectClass, features))
                 || jsonWriter.isWriteTypeInfo(object, fieldType, features)
         ) {

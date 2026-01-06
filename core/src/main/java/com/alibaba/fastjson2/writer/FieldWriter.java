@@ -290,7 +290,7 @@ public abstract class FieldWriter<T>
         return off + nameJSONB.length;
     }
 
-    public final int writeFieldNameJSONB(byte[] bytes, int off, JSONWriter jsonWriter) {
+    public final int writeFieldNameJSONB(byte[] bytes, int off, JSONWriterJSONB jsonWriter) {
         return JSONB.IO.writeNameRaw(bytes, off, nameJSONB, hashCode, jsonWriter);
     }
 

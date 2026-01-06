@@ -202,6 +202,14 @@ public class ObjectWriterCreator {
                     return new ObjectWriter11(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 12:
                     return new ObjectWriter12(objectClass, null, null, features, Arrays.asList(fieldWriters));
+                case 13:
+                    return new ObjectWriter13(objectClass, null, null, features, Arrays.asList(fieldWriters));
+                case 14:
+                    return new ObjectWriter14(objectClass, null, null, features, Arrays.asList(fieldWriters));
+                case 15:
+                    return new ObjectWriter15(objectClass, null, null, features, Arrays.asList(fieldWriters));
+                case 16:
+                    return new ObjectWriter16(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 default:
                     return new ObjectWriterAdapter(objectClass, null, null, features, Arrays.asList(fieldWriters));
             }
@@ -712,6 +720,30 @@ public class ObjectWriterCreator {
                 case 12:
                     writerAdapter = new ObjectWriter12(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
+                case 13:
+                    writerAdapter = new ObjectWriter13(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 14:
+                    writerAdapter = new ObjectWriter14(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 15:
+                    writerAdapter = new ObjectWriter15(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 16:
+                    writerAdapter = new ObjectWriter16(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+//                case 17:
+//                    writerAdapter = new ObjectWriter17(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+//                    break;
+//                case 18:
+//                    writerAdapter = new ObjectWriter18(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+//                    break;
+//                case 19:
+//                    writerAdapter = new ObjectWriter19(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+//                    break;
+//                case 20:
+//                    writerAdapter = new ObjectWriter20(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+//                    break;
                 default:
                     break;
             }
@@ -1117,7 +1149,7 @@ public class ObjectWriterCreator {
             return new FieldWriterString(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null, null);
         }
 
-        if (fieldClass == LocalDate.class) {
+        if (fieldClass == LocalDate.class && provider.getObjectWriter(LocalDate.class) == ObjectWriterImplLocalDate.INSTANCE) {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
@@ -1425,7 +1457,7 @@ public class ObjectWriterCreator {
             return new FieldWriterString(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
-        if (fieldClass == LocalDate.class) {
+        if (fieldClass == LocalDate.class && provider.getObjectWriter(LocalDate.class) == ObjectWriterImplLocalDate.INSTANCE) {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
@@ -1857,7 +1889,7 @@ public class ObjectWriterCreator {
             return new FieldWriterDate(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
-        if (fieldClass == LocalDate.class) {
+        if (fieldClass == LocalDate.class && provider.getObjectWriter(LocalDate.class) == ObjectWriterImplLocalDate.INSTANCE) {
             return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
