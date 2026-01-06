@@ -1021,9 +1021,9 @@ public abstract class JSONWriter
      * @param features the features to enable for the new JSONWriter
      * @return a new JSONWriter instance using UTF-16 encoding
      */
-    public static JSONWriter ofUTF16(Feature... features) {
+    public static JSONWriterUTF16 ofUTF16(Feature... features) {
         Context writeContext = createWriteContext(features);
-        JSONWriter jsonWriter;
+        JSONWriterUTF16 jsonWriter;
         if (JVM_VERSION == 8) {
             if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
                 jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
@@ -1046,7 +1046,7 @@ public abstract class JSONWriter
      *
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB() {
+    public static JSONWriterJSONB ofJSONB() {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(defaultObjectWriterProvider),
                 null
@@ -1059,7 +1059,7 @@ public abstract class JSONWriter
      * @param context the context to use for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(JSONWriter.Context context) {
+    public static JSONWriterJSONB ofJSONB(JSONWriter.Context context) {
         return new JSONWriterJSONB(context, null);
     }
 
@@ -1070,7 +1070,7 @@ public abstract class JSONWriter
      * @param symbolTable the symbol table to use for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(JSONWriter.Context context, SymbolTable symbolTable) {
+    public static JSONWriterJSONB ofJSONB(JSONWriter.Context context, SymbolTable symbolTable) {
         return new JSONWriterJSONB(context, symbolTable);
     }
 
@@ -1080,7 +1080,7 @@ public abstract class JSONWriter
      * @param features the features to enable for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(Feature... features) {
+    public static JSONWriterJSONB ofJSONB(Feature... features) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(defaultObjectWriterProvider, features),
                 null
@@ -1093,7 +1093,7 @@ public abstract class JSONWriter
      * @param symbolTable the symbol table to use for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(SymbolTable symbolTable) {
+    public static JSONWriterJSONB ofJSONB(SymbolTable symbolTable) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(defaultObjectWriterProvider),
                 symbolTable
@@ -1128,7 +1128,7 @@ public abstract class JSONWriter
      *
      * @return a new JSONWriter instance using UTF-8 encoding
      */
-    public static JSONWriter ofUTF8() {
+    public static JSONWriterUTF8 ofUTF8() {
         return ofUTF8(
                 createWriteContext()
         );
@@ -1150,7 +1150,7 @@ public abstract class JSONWriter
      * @param features the features to enable for the new JSONWriter
      * @return a new JSONWriter instance using UTF-8 encoding
      */
-    public static JSONWriter ofUTF8(Feature... features) {
+    public static JSONWriterUTF8 ofUTF8(Feature... features) {
         return ofUTF8(
                 createWriteContext(features)
         );
