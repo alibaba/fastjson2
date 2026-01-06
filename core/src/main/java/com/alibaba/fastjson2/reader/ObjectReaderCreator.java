@@ -2974,7 +2974,6 @@ public class ObjectReaderCreator {
                 }
                 return new FieldReaderList(fieldName, fieldTypeResolved != null ? fieldTypeResolved : fieldType, fieldClassResolved != null ? fieldClassResolved : fieldClass, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
             }
-            return new FieldReaderList(fieldName, fieldType, fieldClass, Object.class, Object.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
         }
 
         if (fieldClass == Date.class) {
