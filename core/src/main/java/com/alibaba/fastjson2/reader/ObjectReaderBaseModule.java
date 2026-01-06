@@ -23,6 +23,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.chrono.HijrahDate;
+import java.time.chrono.JapaneseDate;
+import java.time.chrono.MinguoDate;
+import java.time.chrono.ThaiBuddhistDate;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -1639,6 +1643,22 @@ public class ObjectReaderBaseModule
 
         if (type == MonthDay.class) {
             return ObjectReaderImplMonthDay.INSTANCE;
+        }
+
+        if (type == HijrahDate.class) {
+            return ObjectReaderImplHijrahDate.INSTANCE;
+        }
+
+        if (type == JapaneseDate.class) {
+            return ObjectReaderImplJapaneseDate.INSTANCE;
+        }
+
+        if (type == MinguoDate.class) {
+            return ObjectReaderImplMinguoDate.INSTANCE;
+        }
+
+        if (type == ThaiBuddhistDate.class) {
+            return ObjectReaderImplThaiBuddhistDate.INSTANCE;
         }
 
         if (type == AtomicBoolean.class) {

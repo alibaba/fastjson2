@@ -22,6 +22,10 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.*;
+import java.time.chrono.HijrahDate;
+import java.time.chrono.JapaneseDate;
+import java.time.chrono.MinguoDate;
+import java.time.chrono.ThaiBuddhistDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
@@ -1502,7 +1506,9 @@ public class ObjectWriterBaseModule
             }
 
             if (Duration.class == clazz || Period.class == clazz
-                    || Year.class == clazz || YearMonth.class == clazz || MonthDay.class == clazz) {
+                    || Year.class == clazz || YearMonth.class == clazz || MonthDay.class == clazz
+                    || HijrahDate.class == clazz || JapaneseDate.class == clazz
+                    || MinguoDate.class == clazz || ThaiBuddhistDate.class == clazz) {
                 return ObjectWriterImplToString.INSTANCE;
             }
 
