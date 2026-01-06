@@ -537,6 +537,7 @@ class JSONReaderUTF8
         this.nameBegin = offset - 1;
         int first = ch;
         long nameValue = 0;
+        boolean isNumeric = first >= '0' && first <= '9';
         _for:
         for (int i = 0; offset <= end; ++i) {
             switch (ch) {
@@ -649,6 +650,11 @@ class JSONReaderUTF8
             }
 
             byte c = (byte) ch;
+
+            if (isNumeric && (c < '0' || c > '9')) {
+                isNumeric = false;
+            }
+
             switch (i) {
                 case 0:
                     nameValue = c;
@@ -683,7 +689,7 @@ class JSONReaderUTF8
 
         long hashCode;
 
-        if (nameValue != 0) {
+        if (nameValue != 0 && !isNumeric) {
             hashCode = nameValue;
         } else {
             hashCode = Fnv.MAGIC_HASH_CODE;
