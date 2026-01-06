@@ -32,19 +32,11 @@ final class FieldWriterLocalDate<T>
             Function function
     ) {
         super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
-
-        if (format == null) {
-            objectWriter = ObjectWriterImplLocalDate.INSTANCE;
-            nameValueUTF8 = (jsonWriter, value, features2) -> {
-                jsonWriter.writeLocalDate(fieldNameUTF8(features), value);
-            };
-        } else {
-            objectWriter = ObjectWriterImplLocalDate.of(format, locale);
-            nameValueUTF8 = (jsonWriter, value, features2) -> {
-                jsonWriter.writeNameRaw(fieldNameUTF8(features));
-                objectWriter.write(jsonWriter, value, name, fieldType, features2);
-            };
-        }
+        objectWriter = ObjectWriterImplLocalDate.of(format, locale);
+        nameValueUTF8 = (jsonWriter, value, features2) -> {
+            jsonWriter.writeNameRaw(fieldNameUTF8(features));
+            objectWriter.write(jsonWriter, value, name, fieldType, features2);
+        };
         nameValueUTF16 = (jsonWriter, value, features2) -> {
             jsonWriter.writeNameRaw(fieldNameUTF16(features));
             objectWriter.write(jsonWriter, value, name, fieldType, features2);

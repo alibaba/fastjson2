@@ -1306,4 +1306,9 @@ public abstract class FieldWriter<T>
     interface NameValueIntWriter<T extends JSONWriter> {
         void write(T jsonWriter, int value, long features);
     }
+
+    @FunctionalInterface
+    interface NameValueDoubleWriter<T extends JSONWriter> {
+        void write(T jsonWriter, double value, long features);
+    }
 }

@@ -65,7 +65,7 @@ final class FieldWriterInt32Val
             return false;
         }
         jsonWriter.writeNameRaw(fieldNameUTF8(features));
-        utf8Value.accept(jsonWriter, value);
+        utf8Value.write(jsonWriter, value, features);
         return true;
     }
 
@@ -81,8 +81,11 @@ final class FieldWriterInt32Val
             }
             throw error;
         }
-
-        writeInt32UTF16(jsonWriter, value);
+        if (value == 0 && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
+            return false;
+        }
+        jsonWriter.writeNameRaw(fieldNameUTF16(features));
+        utf16Value.write(jsonWriter, value, features);
         return true;
     }
 
