@@ -32,6 +32,17 @@ public class Issue3939 {
         assertEquals(obj.get("a"), a.a);
     }
 
+    @Test
+    public void test_3() {
+        String json = "{\"a\":9223372036854776000e-10}";
+        A a = JSON.parseObject(json, A.class);
+        JSONObject obj = JSON.parseObject(json, JSONReader.Feature.UseBigDecimalForDoubles);
+
+        BigDecimal expected = new BigDecimal("9223372036854776000e-10");
+        assertEquals(expected, a.a);
+        assertEquals(obj.get("a"), a.a);
+    }
+
     public static class A {
         public BigDecimal a;
     }

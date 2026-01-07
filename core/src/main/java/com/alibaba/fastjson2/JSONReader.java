@@ -4395,11 +4395,13 @@ public abstract class JSONReader
             }
             case JSON_TYPE_DEC: {
                 BigDecimal decimal = null;
+                boolean needsExponent = false;
 
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
                         decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        needsExponent = true;
                     } else {
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
@@ -4408,6 +4410,7 @@ public abstract class JSONReader
                             long v23 = (v2 << 32) + v3;
                             long unscaledVal = negative ? -v23 : v23;
                             decimal = BigDecimal.valueOf(unscaledVal, scale);
+                            needsExponent = true;
                         }
                     }
                 }
@@ -4434,7 +4437,7 @@ public abstract class JSONReader
                         return Double.parseDouble(
                                 decimalStr + "E" + exponent);
                     }
-                    if (mag0 == 0 && mag1 == 0) {
+                    if (needsExponent) {
                         return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
                     }
                     return decimal.signum() == 0 ? BigDecimal.ZERO : decimal;
