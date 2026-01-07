@@ -1,11 +1,14 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.internal.Conf;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalTime;
 
 import static com.alibaba.fastjson2.internal.Conf.BYTES;
@@ -2519,5 +2522,33 @@ public class IOUtils {
             return fc == '-' ? result : -result;
         }
         throw new NumberFormatException(new String(buf, off, len));
+    }
+
+    public static int stringSize(BigInteger value) {
+        if (value == null) {
+            return 4;
+        }
+        int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
+        return mag.length * 13;
+    }
+
+    public static int stringSize(BigDecimal value) {
+        if (value == null) {
+            return 4;
+        }
+        long intCompact = Conf.DECIMAL_INT_COMPACT.applyAsLong(value);
+        if (intCompact == Long.MIN_VALUE) {
+            return 13;
+        }
+
+        int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
+        int size = mag.length * 13;
+        int scale = value.scale();
+        if (scale < 0) {
+            size -= scale;
+        } else {
+            size = Math.max(size, scale) + 2 /* 0. */;
+        }
+        return size;
     }
 }
