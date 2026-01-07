@@ -3,16 +3,18 @@ package com.alibaba.fastjson2.issues_3900;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue3936 {
+    public static class JsonTest {
+    }
+
     @Test
     public void testBaseCase() {
         String jsonStr = "{\"list\":[{\"name1\":\"ccc\"},{\"name2\":{3:[{\"id\":123}]}}]}";
-        JSON.parseObject(jsonStr, JSONTest.class, JSONReader.Feature.AllowUnQuotedFieldNames);
+        JSON.parseObject(jsonStr, JsonTest.class, JSONReader.Feature.AllowUnQuotedFieldNames);
     }
 
     @Test
