@@ -24,6 +24,8 @@ import java.util.function.ToDoubleFunction;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.MASK_UNQUOTE_FIELD_NAME;
+import static com.alibaba.fastjson2.JSONWriter.MASK_USE_SINGLE_QUOTES;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
@@ -330,10 +332,10 @@ public abstract class FieldWriter<T>
         jsonWriter.writeNameRaw(fieldNameUTF8(jsonWriter.getFeatures(this.features)));
     }
 
-    protected final byte[] fieldNameUTF8(long features) {
-        return (features & UnquoteFieldName.mask) != 0
+    public final byte[] fieldNameUTF8(long features) {
+        return (features & MASK_UNQUOTE_FIELD_NAME) != 0
                 ? nameUnquoteWithColonUTF8
-                : (features & UseSingleQuotes.mask) != 0
+                : (features & MASK_USE_SINGLE_QUOTES) != 0
                 ? nameWithColonUTF8SingleQuote
                 : nameWithColonUTF8;
     }
@@ -350,10 +352,10 @@ public abstract class FieldWriter<T>
         jsonWriter.writeNameRaw(fieldNameUTF16(jsonWriter.getFeatures(this.features)));
     }
 
-    protected final char[] fieldNameUTF16(long features) {
-        return (features & UnquoteFieldName.mask) != 0
+    public final char[] fieldNameUTF16(long features) {
+        return (features & MASK_UNQUOTE_FIELD_NAME) != 0
                 ? nameUnquoteWithColonUTF16
-                : (features & UseSingleQuotes.mask) != 0
+                : (features & MASK_USE_SINGLE_QUOTES) != 0
                 ? nameWithColonUTF16SingleQuote
                 : nameWithColonUTF16;
     }
@@ -1310,5 +1312,13 @@ public abstract class FieldWriter<T>
     @FunctionalInterface
     interface NameValueDoubleWriter<T extends JSONWriter> {
         void write(T jsonWriter, double value, long features);
+    }
+
+    public final int writeFieldName(JSONWriterUTF8 jsonWriter, byte[] buf, int off, long features) {
+        return JSONWriterUTF8.IO.writeName(jsonWriter, buf, off, fieldNameUTF8(features));
+    }
+
+    public final int writeFieldName(JSONWriterUTF16 jsonWriter, char[] buf, int off, long features) {
+        return JSONWriterUTF16.IO.writeName(jsonWriter, buf, off, fieldNameUTF16(features));
     }
 }

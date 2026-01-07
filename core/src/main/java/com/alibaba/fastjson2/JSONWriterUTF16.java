@@ -13,10 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -3713,6 +3710,31 @@ public class JSONWriterUTF16
             return name.length + 2 + writer.pretty * writer.level;
         }
 
+        public static int stringCapacity(String value) {
+            if (value == null) {
+                return 4;
+            }
+            return value.length() * 6 + 2;
+        }
+
+        public static int stringCapacity(Collection<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = strings.size();
+            for (String string : strings) {
+                size += stringCapacity(string);
+            }
+            return size;
+        }
+
+        public static int enumCapacity(Enum value, long features) {
+            if (value == null) {
+                return 4;
+            }
+            return value.name().length() * 6 + 2;
+        }
+
         public static int valueSizeString(byte[] value, byte coder, boolean escaped) {
             if (value == null) {
                 return 4;
@@ -3724,6 +3746,10 @@ public class JSONWriterUTF16
                 multi = escaped ? 3 : 6;
             }
             return value.length * multi + 2;
+        }
+
+        public static char[] buffer(JSONWriterUTF16 writer) {
+            return writer.chars;
         }
 
         public static char[] ensureCapacity(JSONWriterUTF16 writer, char[] buf, int minCapacity) {
@@ -3740,7 +3766,7 @@ public class JSONWriterUTF16
             return buf;
         }
 
-        public static int writeName(JSONWriterUTF16 writer, char[] buf, int off, byte[] name) {
+        public static int writeName(JSONWriterUTF16 writer, char[] buf, int off, char[] name) {
             if (writer.startObject) {
                 writer.startObject = false;
             } else {
