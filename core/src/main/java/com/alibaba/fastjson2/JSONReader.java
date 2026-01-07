@@ -4429,12 +4429,15 @@ public abstract class JSONReader
                 }
 
                 if (exponent != 0) {
-                    String decimalStr = decimal.toPlainString();
                     if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                        String decimalStr = decimal.toPlainString();
                         return Double.parseDouble(
                                 decimalStr + "E" + exponent);
                     }
-                    return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
+                    if (mag0 == 0 && mag1 == 0) {
+                        return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimal.toPlainString() + "E" + exponent);
+                    }
+                    return decimal.signum() == 0 ? BigDecimal.ZERO : decimal;
                 }
 
                 if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
@@ -4444,7 +4447,10 @@ public abstract class JSONReader
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
-                if (scale > 0) {
+                boolean hasExponent = stringValue.indexOf('e') != -1 || stringValue.indexOf('E') != -1;
+                if (hasExponent) {
+                    return toBigDecimal(stringValue);
+                } else if (scale > 0) {
                     if (scale > defaultDecimalMaxScale) {
                         throw new JSONException("scale overflow : " + scale);
                     }
