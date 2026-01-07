@@ -731,8 +731,8 @@ public class ObjectWriterCreatorASM
 
         genMethodWriteJSONB(provider, objectClass, fieldWriterGroups, fieldWriters, cw, classNameType, writerFeatures);
 
-        genMethodWrite(provider, objectClass, fieldWriters, cw, classNameType, writerFeatures, JSONWriterType.JSON_UTF8);
-        genMethodWrite(provider, objectClass, fieldWriters, cw, classNameType, writerFeatures, JSONWriterType.JSON_UTF16);
+        genMethodWrite(provider, objectClass, fieldWriterGroups, fieldWriters, cw, classNameType, writerFeatures, JSONWriterType.JSON_UTF8);
+        genMethodWrite(provider, objectClass, fieldWriterGroups, fieldWriters, cw, classNameType, writerFeatures, JSONWriterType.JSON_UTF16);
 
         genMethodWriteArrayMappingJSONB(provider, objectClass, writerFeatures, fieldWriterGroups, fieldWriters, cw, classNameType, writerFeatures);
         genMethodWriteArrayMapping(provider, objectClass, writerFeatures, fieldWriters, cw, classNameType, JSONWriterType.JSON_UTF8);
@@ -763,6 +763,7 @@ public class ObjectWriterCreatorASM
     private void genMethodWrite(
             ObjectWriterProvider provider,
             Class objectType,
+            List<FieldWriterGroup> fieldWriterGroups,
             List<FieldWriter> fieldWriters,
             ClassWriter cw,
             String classNameType,
@@ -875,9 +876,12 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(writeFields_);
         }
 
-        for (int i = 0; i < fieldWriters.size(); i++) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
-            gwFieldValue(mwc, fieldWriter, OBJECT, i, type);
+        for (FieldWriterGroup group : fieldWriterGroups) {
+            for (int i = 0; i < group.fieldWriters.size(); i++) {
+                FieldWriterRecord fwr = group.fieldWriters.get(i);
+                FieldWriter fieldWriter = fwr.fieldWriter;
+                gwFieldValue(mwc, fieldWriter, OBJECT, i, type);
+            }
         }
 
         mw.aload(1);
