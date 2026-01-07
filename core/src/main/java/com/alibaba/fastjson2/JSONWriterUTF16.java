@@ -3035,4 +3035,706 @@ public class JSONWriterUTF16
         }
         this.off = off;
     }
+
+    interface IO {
+        static int writeValue(JSONWriterUTF8 writer, char[] buf, int off, byte value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt8(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Byte value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.byteValue(), features);
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, byte[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = IOUtils.writeInt8(buf, off, value[i]);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, short value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt16(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Short value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.shortValue(), features);
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt32(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Integer value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.intValue(), features);
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = IOUtils.writeInt32(buf, off, value[i]);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = isWriteAsString(value, features);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt64(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            } else if ((features & MASK_WRITE_CLASS_NAME) != 0
+                    && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
+                    && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE
+            ) {
+                buf[off++] = 'L';
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Long value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.longValue(), features);
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            buf[off++] = '[';
+
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                long v = value[i];
+                boolean writeAsString = isWriteAsString(v, features);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = IOUtils.writeInt64(buf, off, v);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigInteger value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            if (isInt64(value) && features == 0) {
+                return writeValue(writer, buf, off, value.longValue(), features);
+            }
+
+            String str = value.toString(10);
+
+            boolean writeAsString = isWriteAsString(value, features);
+
+            int strlen = str.length();
+            if (writeAsString) {
+                buf[off++] = '"';
+            }
+            str.getChars(0, strlen, buf, off);
+            off += strlen;
+            if (writeAsString) {
+                buf[off++] = '"';
+            }
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigDecimal value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            char quote = writer.quote;
+            boolean writeAsString = isWriteAsString(value, features);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
+            long unscaleValue;
+            int scale;
+            int precision = value.precision();
+            if (precision < 19
+                    && (scale = value.scale()) >= 0
+                    && DECIMAL_INT_COMPACT != null
+                    && (unscaleValue = DECIMAL_INT_COMPACT.applyAsLong(value)) != Long.MIN_VALUE
+                    && !asPlain
+            ) {
+                off = IOUtils.writeDecimal(buf, off, unscaleValue, scale);
+            } else {
+                String str = asPlain ? value.toPlainString() : value.toString();
+                str.getChars(0, str.length(), buf, off);
+                off += str.length();
+            }
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            off = NumberUtils.writeFloat(buf, off, value, true, writeSpecialAsString);
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Float value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.floatValue(), features);
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+
+                if (!Float.isFinite(value[i])) {
+                    off = NumberUtils.writeFloat(buf, off, value[i], true, writeSpecialAsString);
+                    continue;
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = NumberUtils.writeFloat(buf, off, value[i], true, false);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            off = NumberUtils.writeDouble(buf, off, value, true, writeSpecialAsString);
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Double value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.doubleValue(), features);
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+
+                if (!Double.isFinite(value[i])) {
+                    off = NumberUtils.writeDouble(buf, off, value[i], true, writeSpecialAsString);
+                    continue;
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = NumberUtils.writeDouble(buf, off, value[i], true, false);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDate value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalDate(buf, off + 1, value.getYear(), value.getMonthValue(), value.getDayOfMonth());
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalTime(buf, off + 1, value);
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDateTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            LocalDate localDate = value.toLocalDate();
+            off = IOUtils.writeLocalDate(buf, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+            buf[off] = ' ';
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetDateTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            char quote = writer.quote;
+            LocalDateTime ldt = value.toLocalDateTime();
+            LocalDate date = ldt.toLocalDate();
+            buf[off] = quote;
+            off = IOUtils.writeLocalDate(buf, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+            buf[off] = 'T';
+            off = IOUtils.writeLocalTime(buf, off + 1, ldt.toLocalTime());
+
+            ZoneOffset offset = value.getOffset();
+            if (offset.getTotalSeconds() == 0) {
+                buf[off++] = 'Z';
+            } else {
+                String zoneId = offset.getId();
+                zoneId.getChars(0, zoneId.length(), buf, off);
+                off += zoneId.length();
+            }
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
+
+            ZoneOffset offset = value.getOffset();
+            if (offset.getTotalSeconds() == 0) {
+                buf[off++] = 'Z';
+            } else {
+                String zoneId = offset.getId();
+                zoneId.getChars(0, zoneId.length(), buf, off);
+                off += zoneId.length();
+            }
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, ZonedDateTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            ZoneId zone = value.getZone();
+            String zoneId = zone.getId();
+            int zoneIdLength = zoneId.length();
+            char firstZoneChar = '\0';
+            int zoneSize;
+            if (ZoneOffset.UTC == zone || (zoneIdLength <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
+                zoneId = "Z";
+                zoneSize = 1;
+            } else if (zoneIdLength != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
+                zoneSize = zoneIdLength;
+            } else {
+                zoneSize = 2 + zoneIdLength;
+            }
+
+            char quote = writer.quote;
+            buf[off] = quote;
+            LocalDate localDate = value.toLocalDate();
+            off = IOUtils.writeLocalDate(buf, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+            buf[off] = 'T';
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
+            if (zoneSize == 1) {
+                buf[off++] = 'Z';
+            } else if (firstZoneChar == '+' || firstZoneChar == '-') {
+                zoneId.getChars(0, zoneIdLength, buf, off);
+                off += zoneIdLength;
+            } else {
+                buf[off++] = '[';
+                zoneId.getChars(0, zoneIdLength, buf, off);
+                off += zoneIdLength;
+                buf[off++] = ']';
+            }
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        static int writeNumberNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+                if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
+                    char quote = writer.quote;
+                    buf[off++] = quote;
+                    buf[off++] = '0';
+                    buf[off] = quote;
+                } else {
+                    buf[off] = '0';
+                }
+                return off + 1;
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
+        static int writeArrayNull(char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
+                return writeEmptyArray(buf, off);
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
+        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, boolean value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            if ((features & MASK_WRITE_BOOLEAN_AS_NUMBER) != 0) {
+                buf[off++] = value ? '1' : '0';
+            } else {
+                off = IOUtils.putBoolean(buf, off, value);
+            }
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        static int writeValue(JSONWriterUTF8 writer, char[] buf, int off, UUID value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            long msb = value.getMostSignificantBits();
+            long lsb = value.getLeastSignificantBits();
+
+            char quote = writer.quote;
+
+            buf[off] = quote;
+            putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
+            putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
+            buf[off + 9] = '-';
+            putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
+            buf[off + 14] = '-';
+            putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
+            buf[off + 19] = '-';
+            putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
+            buf[off + 24] = '-';
+            putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
+            putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
+            putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
+            buf[off + 37] = quote;
+
+            return off + 38;
+        }
+
+        static int valueSize(boolean value) {
+            return 5;
+        }
+
+        static int valueSize(byte value) {
+            return 5;
+        }
+
+        static int valueSize(Byte value) {
+            return 5;
+        }
+
+        static int valueSize(short value) {
+            return 7;
+        }
+
+        static int valueSize(Short value) {
+            return 7;
+        }
+
+        static int valueSize(int value) {
+            return 13;
+        }
+
+        static int valueSize(Integer value) {
+            return 13;
+        }
+
+        static int valueSize(long value) {
+            return 23;
+        }
+
+        static int valueSize(Long value) {
+            return 23;
+        }
+
+        static int valueSize(float value) {
+            return 17;
+        }
+
+        static int valueSize(double value) {
+            return 26;
+        }
+
+        static int valueSize(UUID value) {
+            return 38;
+        }
+
+        static int valueSize(float[] value) {
+            return value == null ? 4 : value.length * (17 /* float value size */ + 1);
+        }
+
+        static int valueSize(double[] value) {
+            return value == null ? 4 : value.length * (26 /* double value size */ + 1);
+        }
+
+        static int valueSize(int[] value) {
+            return value == null ? 4 : value.length * (13 /* int value size */ + 1);
+        }
+
+        static int valueSize(byte[] value) {
+            return value == null ? 4 : value.length * (23 /* long value size */ + 1);
+        }
+
+        static int valueSize(long[] value) {
+            return value == null ? 4 : value.length * (23 /* long value size */ + 1);
+        }
+
+        static int valueSize(LocalDate value) {
+            return 18;
+        }
+
+        static int valueSize(LocalDateTime value) {
+            return 38;
+        }
+
+        static int valueSize(LocalTime value) {
+            return 20;
+        }
+
+        static int valueSize(OffsetDateTime value) {
+            return 45;
+        }
+
+        static int valueSize(OffsetTime value) {
+            return 28;
+        }
+
+        static int valueSize(ZonedDateTime value) {
+            if (value == null) {
+                return 4;
+            }
+            return value.getZone().getId().length() + 38;
+        }
+
+        static int valueSize(BigInteger value) {
+            return IOUtils.stringSize(value);
+        }
+
+        static int valueSize(BigDecimal value) {
+            return IOUtils.stringSize(value);
+        }
+
+        static int nameSize(JSONWriterUTF8 writer, byte[] name) {
+            return name.length + 2 + writer.pretty * writer.level;
+        }
+
+        static int valueSizeString(byte[] value, byte coder, boolean escaped) {
+            if (value == null) {
+                return 4;
+            }
+            int multi;
+            if (coder == 0) {
+                multi = escaped ? 1 : 6;
+            } else {
+                multi = escaped ? 3 : 6;
+            }
+            return value.length * multi + 2;
+        }
+
+        static char[] ensureCapacity(JSONWriterUTF16 writer, char[] buf, int minCapacity) {
+            buf = Arrays.copyOf(buf, writer.newCapacity(minCapacity, buf.length));
+            writer.chars = buf;
+            return buf;
+        }
+
+        static char[] ensureCapacity(JSONWriterUTF16 writer, int minCapacity) {
+            char[] buf = writer.chars;
+            if (minCapacity > buf.length) {
+                buf = ensureCapacity(writer, buf, minCapacity);
+            }
+            return buf;
+        }
+
+        static int writeName(JSONWriterUTF16 writer, char[] buf, int off, byte[] name) {
+            if (writer.startObject) {
+                writer.startObject = false;
+            } else {
+                buf[off++] = ',';
+                if (writer.pretty != PRETTY_NON) {
+                    off = writer.indent(buf, off);
+                }
+            }
+            System.arraycopy(name, 0, buf, off, name.length);
+            return off + name.length;
+        }
+
+        static int writeNull(char[] buf, int off) {
+            IOUtils.putNULL(buf, off);
+            return off + 4;
+        }
+
+        static int writeEmptyArray(char[] buf, int off) {
+            buf[off] = '[';
+            buf[off + 1] = ']';
+            return off + 2;
+        }
+    }
 }
