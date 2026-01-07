@@ -2336,190 +2336,190 @@ public final class JSONWriterUTF8
     }
 
     interface IO {
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, byte value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, byte value, long features) {
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
-            off = IOUtils.writeInt8(bytes, off, value);
+            off = IOUtils.writeInt8(buf, off, value);
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, Byte value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, Byte value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, bytes, off, features);
+                return writeNumberNull(writer, buf, off, features);
             }
-            return writeValue(writer, bytes, off, value.byteValue(), features);
+            return writeValue(writer, buf, off, value.byteValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, byte[] value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, byte[] value, long features) {
             if (value == null) {
-                return writeArrayNull(bytes, off, features);
+                return writeArrayNull(buf, off, features);
             }
 
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
 
-            bytes[off++] = '[';
+            buf[off++] = '[';
             for (int i = 0; i < value.length; i++) {
                 if (i != 0) {
-                    bytes[off++] = ',';
+                    buf[off++] = ',';
                 }
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
-                off = IOUtils.writeInt8(bytes, off, value[i]);
+                off = IOUtils.writeInt8(buf, off, value[i]);
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
             }
-            bytes[off] = ']';
+            buf[off] = ']';
 
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, short value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, short value, long features) {
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
-            off = IOUtils.writeInt16(bytes, off, value);
+            off = IOUtils.writeInt16(buf, off, value);
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, Short value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, Short value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, bytes, off, features);
+                return writeNumberNull(writer, buf, off, features);
             }
-            return writeValue(writer, bytes, off, value.shortValue(), features);
+            return writeValue(writer, buf, off, value.shortValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, int value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, int value, long features) {
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
 
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
-            off = IOUtils.writeInt32(bytes, off, value);
+            off = IOUtils.writeInt32(buf, off, value);
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, Integer value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, Integer value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, bytes, off, features);
+                return writeNumberNull(writer, buf, off, features);
             }
-            return writeValue(writer, bytes, off, value.intValue(), features);
+            return writeValue(writer, buf, off, value.intValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, int[] value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, int[] value, long features) {
             if (value == null) {
-                return writeArrayNull(bytes, off, features);
+                return writeArrayNull(buf, off, features);
             }
 
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
 
-            bytes[off++] = '[';
+            buf[off++] = '[';
             for (int i = 0; i < value.length; i++) {
                 if (i != 0) {
-                    bytes[off++] = ',';
+                    buf[off++] = ',';
                 }
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
-                off = IOUtils.writeInt32(bytes, off, value[i]);
+                off = IOUtils.writeInt32(buf, off, value[i]);
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
             }
-            bytes[off] = ']';
+            buf[off] = ']';
 
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, long value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, long value, long features) {
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = isWriteAsString(value, features);
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
-            off = IOUtils.writeInt64(bytes, off, value);
+            off = IOUtils.writeInt64(buf, off, value);
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             } else if ((features & MASK_WRITE_CLASS_NAME) != 0
                     && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
                     && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE
             ) {
-                bytes[off++] = 'L';
+                buf[off++] = 'L';
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, Long value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, Long value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, bytes, off, features);
+                return writeNumberNull(writer, buf, off, features);
             }
-            return writeValue(writer, bytes, off, value.longValue(), features);
+            return writeValue(writer, buf, off, value.longValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, long[] value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, long[] value, long features) {
             if (value == null) {
-                return writeArrayNull(bytes, off, features);
+                return writeArrayNull(buf, off, features);
             }
 
             byte quote = (byte) writer.quote;
 
-            bytes[off++] = '[';
+            buf[off++] = '[';
 
             for (int i = 0; i < value.length; i++) {
                 if (i != 0) {
-                    bytes[off++] = ',';
+                    buf[off++] = ',';
                 }
                 long v = value[i];
                 boolean writeAsString = isWriteAsString(v, features);
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
-                off = IOUtils.writeInt64(bytes, off, v);
+                off = IOUtils.writeInt64(buf, off, v);
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
             }
 
-            bytes[off] = ']';
+            buf[off] = ']';
 
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, BigInteger value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, BigInteger value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
 
             if (isInt64(value) && features == 0) {
-                return writeValue(writer, bytes, off, value.longValue(), features);
+                return writeValue(writer, buf, off, value.longValue(), features);
             }
 
             String str = value.toString(10);
@@ -2528,25 +2528,25 @@ public final class JSONWriterUTF8
 
             int strlen = str.length();
             if (writeAsString) {
-                bytes[off++] = '"';
+                buf[off++] = '"';
             }
-            str.getBytes(0, strlen, bytes, off);
+            str.getBytes(0, strlen, buf, off);
             off += strlen;
             if (writeAsString) {
-                bytes[off++] = '"';
+                buf[off++] = '"';
             }
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, BigDecimal value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, BigDecimal value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
 
             byte quote = (byte) writer.quote;
             boolean writeAsString = isWriteAsString(value, features);
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
@@ -2559,217 +2559,217 @@ public final class JSONWriterUTF8
                     && (unscaleValue = DECIMAL_INT_COMPACT.applyAsLong(value)) != Long.MIN_VALUE
                     && !asPlain
             ) {
-                off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);
+                off = IOUtils.writeDecimal(buf, off, unscaleValue, scale);
             } else {
                 String str = asPlain ? value.toPlainString() : value.toString();
-                str.getBytes(0, str.length(), bytes, off);
+                str.getBytes(0, str.length(), buf, off);
                 off += str.length();
             }
 
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, float value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, float value, long features) {
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
             boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
-            off = NumberUtils.writeFloat(bytes, off, value, true, writeSpecialAsString);
+            off = NumberUtils.writeFloat(buf, off, value, true, writeSpecialAsString);
 
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, Float value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, Float value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, bytes, off, features);
+                return writeNumberNull(writer, buf, off, features);
             }
-            return writeValue(writer, bytes, off, value.floatValue(), features);
+            return writeValue(writer, buf, off, value.floatValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, float[] value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, float[] value, long features) {
             if (value == null) {
-                return writeArrayNull(bytes, off, features);
+                return writeArrayNull(buf, off, features);
             }
 
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
             boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
-            bytes[off++] = '[';
+            buf[off++] = '[';
             for (int i = 0; i < value.length; i++) {
                 if (i != 0) {
-                    bytes[off++] = ',';
+                    buf[off++] = ',';
                 }
 
                 if (!Float.isFinite(value[i])) {
-                    off = NumberUtils.writeFloat(bytes, off, value[i], true, writeSpecialAsString);
+                    off = NumberUtils.writeFloat(buf, off, value[i], true, writeSpecialAsString);
                     continue;
                 }
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
-                off = NumberUtils.writeFloat(bytes, off, value[i], true, false);
+                off = NumberUtils.writeFloat(buf, off, value[i], true, false);
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
             }
-            bytes[off] = ']';
+            buf[off] = ']';
 
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, double value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, double value, long features) {
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
             boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
-            off = NumberUtils.writeDouble(bytes, off, value, true, writeSpecialAsString);
+            off = NumberUtils.writeDouble(buf, off, value, true, writeSpecialAsString);
 
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, Double value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, Double value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, bytes, off, features);
+                return writeNumberNull(writer, buf, off, features);
             }
-            return writeValue(writer, bytes, off, value.doubleValue(), features);
+            return writeValue(writer, buf, off, value.doubleValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, double[] value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, double[] value, long features) {
             if (value == null) {
-                return writeArrayNull(bytes, off, features);
+                return writeArrayNull(buf, off, features);
             }
 
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
             boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
-            bytes[off++] = '[';
+            buf[off++] = '[';
             for (int i = 0; i < value.length; i++) {
                 if (i != 0) {
-                    bytes[off++] = ',';
+                    buf[off++] = ',';
                 }
 
                 if (!Double.isFinite(value[i])) {
-                    off = NumberUtils.writeDouble(bytes, off, value[i], true, writeSpecialAsString);
+                    off = NumberUtils.writeDouble(buf, off, value[i], true, writeSpecialAsString);
                     continue;
                 }
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
-                off = NumberUtils.writeDouble(bytes, off, value[i], true, false);
+                off = NumberUtils.writeDouble(buf, off, value[i], true, false);
                 if (writeAsString) {
-                    bytes[off++] = quote;
+                    buf[off++] = quote;
                 }
             }
-            bytes[off] = ']';
+            buf[off] = ']';
 
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, LocalDate value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, LocalDate value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
             byte quote = (byte) writer.quote;
-            bytes[off] = quote;
-            off = IOUtils.writeLocalDate(bytes, off + 1, value.getYear(), value.getMonthValue(), value.getDayOfMonth());
-            bytes[off] = quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalDate(buf, off + 1, value.getYear(), value.getMonthValue(), value.getDayOfMonth());
+            buf[off] = quote;
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, LocalTime value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, LocalTime value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
             byte quote = (byte) writer.quote;
-            bytes[off] = quote;
-            off = IOUtils.writeLocalTime(bytes, off + 1, value);
-            bytes[off] = quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalTime(buf, off + 1, value);
+            buf[off] = quote;
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, LocalDateTime value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, LocalDateTime value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
             byte quote = (byte) writer.quote;
-            bytes[off] = quote;
+            buf[off] = quote;
             LocalDate localDate = value.toLocalDate();
-            off = IOUtils.writeLocalDate(bytes, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-            bytes[off] = ' ';
-            off = IOUtils.writeLocalTime(bytes, off + 1, value.toLocalTime());
-            bytes[off] = quote;
+            off = IOUtils.writeLocalDate(buf, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+            buf[off] = ' ';
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
+            buf[off] = quote;
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, OffsetDateTime value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, OffsetDateTime value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
             byte quote = (byte) writer.quote;
             LocalDateTime ldt = value.toLocalDateTime();
             LocalDate date = ldt.toLocalDate();
-            bytes[off] = quote;
-            off = IOUtils.writeLocalDate(bytes, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-            bytes[off] = 'T';
-            off = IOUtils.writeLocalTime(bytes, off + 1, ldt.toLocalTime());
+            buf[off] = quote;
+            off = IOUtils.writeLocalDate(buf, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+            buf[off] = 'T';
+            off = IOUtils.writeLocalTime(buf, off + 1, ldt.toLocalTime());
 
             ZoneOffset offset = value.getOffset();
             if (offset.getTotalSeconds() == 0) {
-                bytes[off++] = 'Z';
+                buf[off++] = 'Z';
             } else {
                 String zoneId = offset.getId();
-                zoneId.getBytes(0, zoneId.length(), bytes, off);
+                zoneId.getBytes(0, zoneId.length(), buf, off);
                 off += zoneId.length();
             }
-            bytes[off] = quote;
+            buf[off] = quote;
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, OffsetTime value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, OffsetTime value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
             byte quote = (byte) writer.quote;
-            bytes[off] = quote;
-            off = IOUtils.writeLocalTime(bytes, off + 1, value.toLocalTime());
+            buf[off] = quote;
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
 
             ZoneOffset offset = value.getOffset();
             if (offset.getTotalSeconds() == 0) {
-                bytes[off++] = 'Z';
+                buf[off++] = 'Z';
             } else {
                 String zoneId = offset.getId();
-                zoneId.getBytes(0, zoneId.length(), bytes, off);
+                zoneId.getBytes(0, zoneId.length(), buf, off);
                 off += zoneId.length();
             }
-            bytes[off] = quote;
+            buf[off] = quote;
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, ZonedDateTime value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, ZonedDateTime value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
 
             ZoneId zone = value.getZone();
@@ -2787,95 +2787,95 @@ public final class JSONWriterUTF8
             }
 
             byte quote = (byte) writer.quote;
-            bytes[off] = quote;
+            buf[off] = quote;
             LocalDate localDate = value.toLocalDate();
-            off = IOUtils.writeLocalDate(bytes, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-            bytes[off] = 'T';
-            off = IOUtils.writeLocalTime(bytes, off + 1, value.toLocalTime());
+            off = IOUtils.writeLocalDate(buf, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+            buf[off] = 'T';
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
             if (zoneSize == 1) {
-                bytes[off++] = 'Z';
+                buf[off++] = 'Z';
             } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-                zoneId.getBytes(0, zoneIdLength, bytes, off);
+                zoneId.getBytes(0, zoneIdLength, buf, off);
                 off += zoneIdLength;
             } else {
-                bytes[off++] = '[';
-                zoneId.getBytes(0, zoneIdLength, bytes, off);
+                buf[off++] = '[';
+                zoneId.getBytes(0, zoneIdLength, buf, off);
                 off += zoneIdLength;
-                bytes[off++] = ']';
+                buf[off++] = ']';
             }
-            bytes[off] = quote;
+            buf[off] = quote;
             return off + 1;
         }
 
-        static int writeNumberNull(JSONWriterUTF8 writer, byte[] bytes, int off, long features) {
+        static int writeNumberNull(JSONWriterUTF8 writer, byte[] buf, int off, long features) {
             if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
                 if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
                     byte quote = (byte) writer.quote;
-                    bytes[off++] = quote;
-                    bytes[off++] = '0';
-                    bytes[off] = quote;
+                    buf[off++] = quote;
+                    buf[off++] = '0';
+                    buf[off] = quote;
                 } else {
-                    bytes[off] = '0';
+                    buf[off] = '0';
                 }
                 return off + 1;
             } else {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
         }
 
-        static int writeArrayNull(byte[] bytes, int off, long features) {
+        static int writeArrayNull(byte[] buf, int off, long features) {
             if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
-                return writeEmptyArray(bytes, off);
+                return writeEmptyArray(buf, off);
             } else {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, boolean value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, boolean value, long features) {
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
             if ((features & MASK_WRITE_BOOLEAN_AS_NUMBER) != 0) {
-                bytes[off++] = (byte) (value ? '1' : '0');
+                buf[off++] = (byte) (value ? '1' : '0');
             } else {
-                off = IOUtils.putBoolean(bytes, off, value);
+                off = IOUtils.putBoolean(buf, off, value);
             }
             if (writeAsString) {
-                bytes[off++] = quote;
+                buf[off++] = quote;
             }
 
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, byte[] bytes, int off, UUID value, long features) {
+        static int writeValue(JSONWriterUTF8 writer, byte[] buf, int off, UUID value, long features) {
             if (value == null) {
-                return writeNull(bytes, off);
+                return writeNull(buf, off);
             }
 
             byte quote = (byte) writer.quote;
 
             final long base = ARRAY_BYTE_BASE_OFFSET + off;
-            UNSAFE.putByte(bytes, base, quote);
-            UNSAFE.putByte(bytes, base + 9, (byte) '-');
-            UNSAFE.putByte(bytes, base + 14, (byte) '-');
-            UNSAFE.putByte(bytes, base + 19, (byte) '-');
-            UNSAFE.putByte(bytes, base + 24, (byte) '-');
-            UNSAFE.putByte(bytes, base + 37, quote);
+            UNSAFE.putByte(buf, base, quote);
+            UNSAFE.putByte(buf, base + 9, (byte) '-');
+            UNSAFE.putByte(buf, base + 14, (byte) '-');
+            UNSAFE.putByte(buf, base + 19, (byte) '-');
+            UNSAFE.putByte(buf, base + 24, (byte) '-');
+            UNSAFE.putByte(buf, base + 37, quote);
             long msb = value.getMostSignificantBits();
             long lsb = value.getLeastSignificantBits();
             long x = msb, x0 = hex8(x >>> 32), x1 = hex8(x);
-            UNSAFE.putLong(bytes, base + 1, x0);
-            UNSAFE.putInt(bytes, base + 10, (int) x1);
-            UNSAFE.putInt(bytes, base + 15, (int) (x1 >>> 32));
+            UNSAFE.putLong(buf, base + 1, x0);
+            UNSAFE.putInt(buf, base + 10, (int) x1);
+            UNSAFE.putInt(buf, base + 15, (int) (x1 >>> 32));
             x = lsb;
             x0 = hex8(x >>> 32);
             x1 = hex8(x);
-            UNSAFE.putInt(bytes, base + 20, (int) (x0));
-            UNSAFE.putInt(bytes, base + 25, (int) (x0 >>> 32));
-            UNSAFE.putLong(bytes, base + 29, x1);
+            UNSAFE.putInt(buf, base + 20, (int) (x0));
+            UNSAFE.putInt(buf, base + 25, (int) (x0 >>> 32));
+            UNSAFE.putLong(buf, base + 29, x1);
 
             return off + 38;
         }
@@ -3000,41 +3000,41 @@ public final class JSONWriterUTF8
             return value.length * multi + 2;
         }
 
-        static byte[] ensureCapacity(JSONWriterUTF8 writer, byte[] bytes, int minCapacity) {
-            bytes = Arrays.copyOf(bytes, writer.newCapacity(minCapacity, bytes.length));
-            writer.bytes = bytes;
-            return bytes;
+        static byte[] ensureCapacity(JSONWriterUTF8 writer, byte[] buf, int minCapacity) {
+            buf = Arrays.copyOf(buf, writer.newCapacity(minCapacity, buf.length));
+            writer.bytes = buf;
+            return buf;
         }
 
         static byte[] ensureCapacity(JSONWriterUTF8 writer, int minCapacity) {
-            byte[] bytes = writer.bytes;
-            if (minCapacity > bytes.length) {
-                bytes = ensureCapacity(writer, bytes, minCapacity);
+            byte[] buf = writer.bytes;
+            if (minCapacity > buf.length) {
+                buf = ensureCapacity(writer, buf, minCapacity);
             }
-            return bytes;
+            return buf;
         }
 
-        static int writeName(JSONWriterUTF8 writer, byte[] bytes, int off, byte[] name) {
+        static int writeName(JSONWriterUTF8 writer, byte[] buf, int off, byte[] name) {
             if (writer.startObject) {
                 writer.startObject = false;
             } else {
-                bytes[off++] = ',';
+                buf[off++] = ',';
                 if (writer.pretty != PRETTY_NON) {
-                    off = writer.indent(bytes, off);
+                    off = writer.indent(buf, off);
                 }
             }
-            System.arraycopy(name, 0, bytes, off, name.length);
+            System.arraycopy(name, 0, buf, off, name.length);
             return off + name.length;
         }
 
-        static int writeNull(byte[] bytes, int off) {
-            IOUtils.putNULL(bytes, off);
+        static int writeNull(byte[] buf, int off) {
+            IOUtils.putNULL(buf, off);
             return off + 4;
         }
 
-        static int writeEmptyArray(byte[] bytes, int off) {
-            bytes[off] = '[';
-            bytes[off + 1] = ']';
+        static int writeEmptyArray(byte[] buf, int off) {
+            buf[off] = '[';
+            buf[off + 1] = ']';
             return off + 2;
         }
 
