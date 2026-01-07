@@ -5049,4 +5049,8 @@ public abstract class JSONWriter
      * @since 2.0.51
      */
     public abstract Object ensureCapacity(int minCapacity);
+
+    protected static JSONException overflowLevel(int level) {
+        return new JSONException("level too large : " + level);
+    }
 }

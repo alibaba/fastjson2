@@ -3036,8 +3036,35 @@ public class JSONWriterUTF16
         this.off = off;
     }
 
-    interface IO {
-        static int writeValue(JSONWriterUTF8 writer, char[] buf, int off, byte value, long features) {
+    public static abstract class IO {
+        public static int startObject(JSONWriterUTF16 writer, char[] buf, int off) {
+            int level = writer.level++;
+            if (level> writer.context.maxLevel) {
+                throw overflowLevel(level);
+            }
+
+            writer.startObject = true;
+
+            buf[off++] = '{';
+
+            if (writer.pretty != PRETTY_NON) {
+                off = writer.indent(buf, off);
+            }
+            return off;
+        }
+
+        public static int endObject(JSONWriterUTF16 writer, char[] buf, int off) {
+            int level = writer.level--;
+            if (writer.pretty != PRETTY_NON) {
+                off = writer.indent(buf, off);
+            }
+
+            buf[off] = '}';
+            writer.startObject = false;
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, byte value, long features) {
             char quote = writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
@@ -3052,14 +3079,14 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Byte value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Byte value, long features) {
             if (value == null) {
                 return writeNumberNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.byteValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, byte[] value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, byte[] value, long features) {
             if (value == null) {
                 return writeArrayNull(buf, off, features);
             }
@@ -3086,7 +3113,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, short value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, short value, long features) {
             char quote = writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
@@ -3101,14 +3128,14 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Short value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Short value, long features) {
             if (value == null) {
                 return writeNumberNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.shortValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int value, long features) {
             char quote = writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
@@ -3124,14 +3151,14 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Integer value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Integer value, long features) {
             if (value == null) {
                 return writeNumberNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.intValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int[] value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int[] value, long features) {
             if (value == null) {
                 return writeArrayNull(buf, off, features);
             }
@@ -3158,7 +3185,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long value, long features) {
             char quote = writer.quote;
 
             boolean writeAsString = isWriteAsString(value, features);
@@ -3178,14 +3205,14 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Long value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Long value, long features) {
             if (value == null) {
                 return writeNumberNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.longValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long[] value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long[] value, long features) {
             if (value == null) {
                 return writeArrayNull(buf, off, features);
             }
@@ -3214,7 +3241,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigInteger value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigInteger value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3239,7 +3266,7 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigDecimal value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigDecimal value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3274,7 +3301,7 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float value, long features) {
             char quote = writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
@@ -3292,14 +3319,14 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Float value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Float value, long features) {
             if (value == null) {
                 return writeNumberNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.floatValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float[] value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float[] value, long features) {
             if (value == null) {
                 return writeArrayNull(buf, off, features);
             }
@@ -3331,7 +3358,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double value, long features) {
             char quote = writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
@@ -3349,14 +3376,14 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Double value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Double value, long features) {
             if (value == null) {
                 return writeNumberNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.doubleValue(), features);
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double[] value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double[] value, long features) {
             if (value == null) {
                 return writeArrayNull(buf, off, features);
             }
@@ -3388,7 +3415,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDate value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDate value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3399,7 +3426,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalTime value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalTime value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3410,7 +3437,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDateTime value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDateTime value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3424,7 +3451,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetDateTime value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetDateTime value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3448,7 +3475,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetTime value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetTime value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3468,7 +3495,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, ZonedDateTime value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, ZonedDateTime value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3508,7 +3535,7 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
-        static int writeNumberNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
+        public static int writeNumberNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
             if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
                 if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
                     char quote = writer.quote;
@@ -3524,7 +3551,7 @@ public class JSONWriterUTF16
             }
         }
 
-        static int writeArrayNull(char[] buf, int off, long features) {
+        public static int writeArrayNull(char[] buf, int off, long features) {
             if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
                 return writeEmptyArray(buf, off);
             } else {
@@ -3532,7 +3559,7 @@ public class JSONWriterUTF16
             }
         }
 
-        static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, boolean value, long features) {
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, boolean value, long features) {
             char quote = writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
@@ -3551,7 +3578,7 @@ public class JSONWriterUTF16
             return off;
         }
 
-        static int writeValue(JSONWriterUTF8 writer, char[] buf, int off, UUID value, long features) {
+        public static int writeValue(JSONWriterUTF8 writer, char[] buf, int off, UUID value, long features) {
             if (value == null) {
                 return writeNull(buf, off);
             }
@@ -3579,114 +3606,114 @@ public class JSONWriterUTF16
             return off + 38;
         }
 
-        static int valueSize(boolean value) {
+        public static int valueSize(boolean value) {
             return 5;
         }
 
-        static int valueSize(byte value) {
+        public static int valueSize(byte value) {
             return 5;
         }
 
-        static int valueSize(Byte value) {
+        public static int valueSize(Byte value) {
             return 5;
         }
 
-        static int valueSize(short value) {
+        public static int valueSize(short value) {
             return 7;
         }
 
-        static int valueSize(Short value) {
+        public static int valueSize(Short value) {
             return 7;
         }
 
-        static int valueSize(int value) {
+        public static int valueSize(int value) {
             return 13;
         }
 
-        static int valueSize(Integer value) {
+        public static int valueSize(Integer value) {
             return 13;
         }
 
-        static int valueSize(long value) {
+        public static int valueSize(long value) {
             return 23;
         }
 
-        static int valueSize(Long value) {
+        public static int valueSize(Long value) {
             return 23;
         }
 
-        static int valueSize(float value) {
+        public static int valueSize(float value) {
             return 17;
         }
 
-        static int valueSize(double value) {
+        public static int valueSize(double value) {
             return 26;
         }
 
-        static int valueSize(UUID value) {
+        public static int valueSize(UUID value) {
             return 38;
         }
 
-        static int valueSize(float[] value) {
+        public static int valueSize(float[] value) {
             return value == null ? 4 : value.length * (17 /* float value size */ + 1);
         }
 
-        static int valueSize(double[] value) {
+        public static int valueSize(double[] value) {
             return value == null ? 4 : value.length * (26 /* double value size */ + 1);
         }
 
-        static int valueSize(int[] value) {
+        public static int valueSize(int[] value) {
             return value == null ? 4 : value.length * (13 /* int value size */ + 1);
         }
 
-        static int valueSize(byte[] value) {
+        public static int valueSize(byte[] value) {
             return value == null ? 4 : value.length * (23 /* long value size */ + 1);
         }
 
-        static int valueSize(long[] value) {
+        public static int valueSize(long[] value) {
             return value == null ? 4 : value.length * (23 /* long value size */ + 1);
         }
 
-        static int valueSize(LocalDate value) {
+        public static int valueSize(LocalDate value) {
             return 18;
         }
 
-        static int valueSize(LocalDateTime value) {
+        public static int valueSize(LocalDateTime value) {
             return 38;
         }
 
-        static int valueSize(LocalTime value) {
+        public static int valueSize(LocalTime value) {
             return 20;
         }
 
-        static int valueSize(OffsetDateTime value) {
+        public static int valueSize(OffsetDateTime value) {
             return 45;
         }
 
-        static int valueSize(OffsetTime value) {
+        public static int valueSize(OffsetTime value) {
             return 28;
         }
 
-        static int valueSize(ZonedDateTime value) {
+        public static int valueSize(ZonedDateTime value) {
             if (value == null) {
                 return 4;
             }
             return value.getZone().getId().length() + 38;
         }
 
-        static int valueSize(BigInteger value) {
+        public static int valueSize(BigInteger value) {
             return IOUtils.stringSize(value);
         }
 
-        static int valueSize(BigDecimal value) {
+        public static int valueSize(BigDecimal value) {
             return IOUtils.stringSize(value);
         }
 
-        static int nameSize(JSONWriterUTF8 writer, byte[] name) {
+        public static int nameSize(JSONWriterUTF8 writer, byte[] name) {
             return name.length + 2 + writer.pretty * writer.level;
         }
 
-        static int valueSizeString(byte[] value, byte coder, boolean escaped) {
+        public static int valueSizeString(byte[] value, byte coder, boolean escaped) {
             if (value == null) {
                 return 4;
             }
@@ -3699,13 +3726,13 @@ public class JSONWriterUTF16
             return value.length * multi + 2;
         }
 
-        static char[] ensureCapacity(JSONWriterUTF16 writer, char[] buf, int minCapacity) {
+        public static char[] ensureCapacity(JSONWriterUTF16 writer, char[] buf, int minCapacity) {
             buf = Arrays.copyOf(buf, writer.newCapacity(minCapacity, buf.length));
             writer.chars = buf;
             return buf;
         }
 
-        static char[] ensureCapacity(JSONWriterUTF16 writer, int minCapacity) {
+        public static char[] ensureCapacity(JSONWriterUTF16 writer, int minCapacity) {
             char[] buf = writer.chars;
             if (minCapacity > buf.length) {
                 buf = ensureCapacity(writer, buf, minCapacity);
@@ -3713,7 +3740,7 @@ public class JSONWriterUTF16
             return buf;
         }
 
-        static int writeName(JSONWriterUTF16 writer, char[] buf, int off, byte[] name) {
+        public static int writeName(JSONWriterUTF16 writer, char[] buf, int off, byte[] name) {
             if (writer.startObject) {
                 writer.startObject = false;
             } else {
@@ -3726,12 +3753,12 @@ public class JSONWriterUTF16
             return off + name.length;
         }
 
-        static int writeNull(char[] buf, int off) {
+        public static int writeNull(char[] buf, int off) {
             IOUtils.putNULL(buf, off);
             return off + 4;
         }
 
-        static int writeEmptyArray(char[] buf, int off) {
+        public static int writeEmptyArray(char[] buf, int off) {
             buf[off] = '[';
             buf[off + 1] = ']';
             return off + 2;
