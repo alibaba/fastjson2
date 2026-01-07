@@ -2987,6 +2987,19 @@ public final class JSONWriterUTF8
             return name.length + 2 + writer.pretty * writer.level;
         }
 
+        static int valueSizeString(byte[] value, byte coder, boolean escaped) {
+            if (value == null) {
+                return 4;
+            }
+            int multi;
+            if (coder == 0) {
+                multi = escaped ? 1 : 6;
+            } else {
+                multi = escaped ? 3 : 6;
+            }
+            return value.length * multi + 2;
+        }
+
         static byte[] ensureCapacity(JSONWriterUTF8 writer, byte[] bytes, int minCapacity) {
             bytes = Arrays.copyOf(bytes, writer.newCapacity(minCapacity, bytes.length));
             writer.bytes = bytes;
