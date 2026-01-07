@@ -4429,13 +4429,13 @@ public abstract class JSONReader
                 }
 
                 if (exponent != 0) {
+                    String decimalStr = decimal.toPlainString();
                     if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
-                        String decimalStr = decimal.toPlainString();
                         return Double.parseDouble(
                                 decimalStr + "E" + exponent);
                     }
                     if (mag0 == 0 && mag1 == 0) {
-                        return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimal.toPlainString() + "E" + exponent);
+                        return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
                     }
                     return decimal.signum() == 0 ? BigDecimal.ZERO : decimal;
                 }
