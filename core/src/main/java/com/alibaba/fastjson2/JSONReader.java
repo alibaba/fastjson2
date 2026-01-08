@@ -2075,19 +2075,7 @@ public abstract class JSONReader
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
                 }
-                Number number = getNumber();
-                if (number instanceof BigInteger) {
-                    BigInteger bigInt = (BigInteger) number;
-                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
-                        return bigInt.longValue();
-                    }
-                    try {
-                        return bigInt.longValueExact();
-                    } catch (ArithmeticException e) {
-                        throw numberError();
-                    }
-                }
-                return number.doubleValue();
+                return getNumber().doubleValue();
             case JSON_TYPE_DEC:
             case JSON_TYPE_INT64:
             case JSON_TYPE_FLOAT:
