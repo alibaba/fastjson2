@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.time.LocalTime;
 
 import static com.alibaba.fastjson2.internal.Conf.BYTES;
@@ -2550,5 +2551,13 @@ public class IOUtils {
             size = Math.max(size, scale) + 2 /* 0. */;
         }
         return size;
+    }
+
+    public static void writeFile(String fileName, byte[] data) {
+        try {
+            java.nio.file.Files.write(java.nio.file.Paths.get(fileName), data);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 }

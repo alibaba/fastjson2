@@ -118,6 +118,14 @@ public interface ObjectWriter<T> {
         return false;
     }
 
+    default boolean writeTypeInfo(JSONWriterUTF8 jsonWriter, Object object, long features) {
+        return false;
+    }
+
+    default boolean writeTypeInfo(JSONWriterUTF16 jsonWriter, Object object, long features) {
+        return false;
+    }
+
     /**
      * Writes an object to the JSONWriter in JSONB format.
      *

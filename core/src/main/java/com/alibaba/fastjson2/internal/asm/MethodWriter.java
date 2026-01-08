@@ -249,6 +249,14 @@ public final class MethodWriter {
         visitInsn(Opcodes.IADD);
     }
 
+    public void ladd() {
+        visitInsn(Opcodes.LADD);
+    }
+
+    public void ior() {
+        visitInsn(Opcodes.IOR);
+    }
+
     public void imul() {
         visitInsn(Opcodes.IMUL);
     }
@@ -844,6 +852,14 @@ public final class MethodWriter {
         }
     }
 
+    public void ldc(final int value) {
+        visitLdcInsn(value);
+    }
+
+    public void ldc(final long value) {
+        visitLdcInsn(value);
+    }
+
     public void visitLdcInsn(final long value) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
@@ -854,6 +870,10 @@ public final class MethodWriter {
         if (currentBasicBlock != null) {
             currentBasicBlock.frame.execute(Opcodes.LDC, 0, constantSymbol, symbolTable);
         }
+    }
+
+    public void iinc(final int var, final int increment) {
+        visitIincInsn(var, increment);
     }
 
     public void visitIincInsn(final int var, final int increment) {

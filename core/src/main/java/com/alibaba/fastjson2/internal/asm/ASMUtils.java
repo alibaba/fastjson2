@@ -83,6 +83,7 @@ public final class ASMUtils {
     public static final String TYPE_CONF = Conf.class.getName().replace('.', '/');
     public static final String TYPE_BYTE_ARRAY = ByteArray.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT = "java/lang/Object";
+    public static final String TYPE_SYSTEM = "java/lang/System";
 
     public static final String DESC_FIELD_WRITER = 'L' + FieldWriter.class.getName().replace('.', '/') + ';';
     public static final String DESC_FIELD_WRITER_ARRAY = "[" + DESC_FIELD_WRITER;

@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.introspect.PropertyAccessor;
 import com.alibaba.fastjson2.util.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,9 +24,8 @@ import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.zip.GZIPOutputStream;
 
+import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriter.MASK_UNQUOTE_FIELD_NAME;
-import static com.alibaba.fastjson2.JSONWriter.MASK_USE_SINGLE_QUOTES;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
@@ -340,6 +340,12 @@ public abstract class FieldWriter<T>
                 : nameWithColonUTF8;
     }
 
+    public final byte[] fieldNameUTF8Quote(long features) {
+        return (features & MASK_USE_SINGLE_QUOTES) != 0
+                ? nameWithColonUTF8SingleQuote
+                : nameWithColonUTF8;
+    }
+
     protected final byte[] fieldNameNullUTF8(long features) {
         return (features & UnquoteFieldName.mask) != 0
                 ? nameNullUTF8Unquote
@@ -356,6 +362,12 @@ public abstract class FieldWriter<T>
         return (features & MASK_UNQUOTE_FIELD_NAME) != 0
                 ? nameUnquoteWithColonUTF16
                 : (features & MASK_USE_SINGLE_QUOTES) != 0
+                ? nameWithColonUTF16SingleQuote
+                : nameWithColonUTF16;
+    }
+
+    public final char[] fieldNameUTF16Quote(long features) {
+        return (features & MASK_USE_SINGLE_QUOTES) != 0
                 ? nameWithColonUTF16SingleQuote
                 : nameWithColonUTF16;
     }
@@ -1320,5 +1332,27 @@ public abstract class FieldWriter<T>
 
     public final int writeFieldName(JSONWriterUTF16 jsonWriter, char[] buf, int off, long features) {
         return JSONWriterUTF16.IO.writeName(jsonWriter, buf, off, fieldNameUTF16(features));
+    }
+
+    public boolean writeReference(JSONWriter writer, Object object, Object value, long features) {
+        if ((features & ReferenceDetection.mask) != 0
+                && (features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
+                && object != null
+                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+            return false;
+        }
+
+        return writeReference0(writer, object, value, features);
+    }
+
+    private boolean writeReference0(JSONWriter writer, Object object, Object value, long features) {
+        String refPath = writer.setPath(this, value);
+        if (refPath != null) {
+            writeFieldName(writer);
+            writer.writeReference(refPath);
+            writer.popPath(value);
+            return true;
+        }
+        return false;
     }
 }

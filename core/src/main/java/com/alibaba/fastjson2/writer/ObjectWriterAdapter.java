@@ -497,6 +497,40 @@ public class ObjectWriterAdapter<T>
         return true;
     }
 
+    public boolean writeTypeInfo(JSONWriterUTF8 jsonWriter, Object object, long features) {
+        if (!jsonWriter.isWriteTypeInfo(object, features)) {
+            return false;
+        }
+
+        writeTypeInfo(jsonWriter);
+        return true;
+    }
+
+    private void writeTypeInfo(JSONWriterUTF8 jsonWriter) {
+        jsonWriter.writeNameRaw(nameWithColonUTF8);
+
+        jsonWriter.writeString(typeKey);
+        jsonWriter.writeColon();
+        jsonWriter.writeString(typeName);
+    }
+
+    public boolean writeTypeInfo(JSONWriterUTF16 jsonWriter, Object object, long features) {
+        if (!jsonWriter.isWriteTypeInfo(object, features)) {
+            return false;
+        }
+
+        writeTypeInfo(jsonWriter);
+        return true;
+    }
+
+    private void writeTypeInfo(JSONWriterUTF16 jsonWriter) {
+        jsonWriter.writeNameRaw(nameWithColonUTF16);
+
+        jsonWriter.writeString(typeKey);
+        jsonWriter.writeColon();
+        jsonWriter.writeString(typeName);
+    }
+
     @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {

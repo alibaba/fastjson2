@@ -2601,7 +2601,7 @@ public final class JSONWriterUTF8
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
-            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
             if (writeAsString) {
                 buf[off++] = quote;
             }
@@ -2630,7 +2630,7 @@ public final class JSONWriterUTF8
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
-            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
             buf[off++] = '[';
             for (int i = 0; i < value.length; i++) {
                 if (i != 0) {
@@ -2658,7 +2658,7 @@ public final class JSONWriterUTF8
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
-            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
             if (writeAsString) {
                 buf[off++] = quote;
             }
@@ -2687,7 +2687,7 @@ public final class JSONWriterUTF8
             byte quote = (byte) writer.quote;
 
             boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
-            boolean writeSpecialAsString = (features & WriteFloatSpecialAsString.mask) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
             buf[off++] = '[';
             for (int i = 0; i < value.length; i++) {
                 if (i != 0) {
@@ -2861,18 +2861,28 @@ public final class JSONWriterUTF8
             return off + 1;
         }
 
-        public static int writeValueJDK11(JSONWriterUTF8 writer, byte[] buf, int off, String[] value, long features) {
-            if (value == null) {
+        public static int writeValueJDK11(JSONWriterUTF8 writer, byte[] buf, int off, String[] values, long features) {
+            if (values == null) {
                 return writeArrayNull(buf, off, features);
             }
 
             byte quote = (byte) writer.quote;
             buf[off++] = '[';
-            for (int i = 0; i < value.length; i++) {
+            for (int i = 0; i < values.length; i++) {
                 if (i != 0) {
                     buf[off++] = ',';
                 }
-                writeValueJDK11(writer, buf, off, value[i], features);
+                String value = values[i];
+                if (values == null) {
+                    off = writeStringNull(writer, buf, off, features);
+                } else {
+                    byte[] valueBytes = STRING_VALUE.apply(value);
+                    if (STRING_CODER.applyAsInt(value) == 0) {
+                        off = writeStringLatin1(writer, buf, off, valueBytes, features);
+                    } else {
+                        off = writeStringUTF16(writer, buf, off, valueBytes, features);
+                    }
+                }
             }
             buf[off] = ']';
             return off + 1;
@@ -2889,7 +2899,7 @@ public final class JSONWriterUTF8
                 if (i != 0) {
                     buf[off++] = ',';
                 }
-                writeValueJDK8(writer, buf, off, value[i], features);
+                off = writeValueJDK8(writer, buf, off, value[i], features);
             }
             buf[off] = ']';
             return off + 1;
@@ -3425,10 +3435,35 @@ public final class JSONWriterUTF8
                 return 1;
             }
             int size = strings.size();
-            for (String string : strings) {
-                size += stringCapacity(string);
+            for (String value : strings) {
+                size += value == null ? 4 : value.length() * 6 + 2;
             }
             return size;
+        }
+
+        public static int stringCapacity(List<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int stringsSize = strings.size();
+            int size = stringsSize;
+            for (int i = 0; i < stringsSize; i++) {
+                String value = strings.get(i);
+                size += value == null ? 4 : value.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int writeNameBefore(JSONWriterUTF8 writer, byte[] buf, int off) {
+            if (writer.startObject) {
+                writer.startObject = false;
+            } else {
+                buf[off++] = ',';
+                if (writer.pretty != PRETTY_NON) {
+                    off = writer.indent(buf, off);
+                }
+            }
+            return off;
         }
 
         public static int writeName(JSONWriterUTF8 writer, byte[] buf, int off, byte[] name) {

@@ -3912,6 +3912,7 @@ public abstract class JSONWriter
     public static final long MASK_WRITE_ENUM_USING_ORDINAL = 1L << 36;
     public static final long MASK_UNQUOTE_FIELD_NAME = 1L << 38;
     public static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+    public static final long MASK_WRITE_FLOAT_SPECIAL_AS_STRING = 1L << 45;
 
     /**
      * Feature is used to control the behavior of JSON writing and serialization in FASTJSON2.
@@ -4446,7 +4447,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.61
          */
-        WriteFloatSpecialAsString(1L << 45);
+        WriteFloatSpecialAsString(MASK_WRITE_FLOAT_SPECIAL_AS_STRING);
 
         public final long mask;
 
