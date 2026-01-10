@@ -33,7 +33,7 @@ final class FieldWriterOffsetDateTime<T>
             Function function
     ) {
         super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
-        this.initObjectWriter = objectWriter = ObjectWriterImplOffsetDateTime.of(format, locale);
+        this.objectWriter = ObjectWriterImplOffsetDateTime.of(format, locale);
 
         if (objectWriter != ObjectWriterImplOffsetDateTime.INSTANCE) {
             nameValueUTF8 = (jsonWriter, value, features2) -> {
