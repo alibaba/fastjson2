@@ -215,6 +215,28 @@ public abstract class BeanUtils {
         return fieldMap.get(fieldName);
     }
 
+    public static Type resolveCollectionItemType(Type fieldTypeResolved, Class<?> fieldClass) {
+        Type contextType = fieldTypeResolved != null ? fieldTypeResolved : fieldClass;
+
+        Type listType = getGenericSupertype(contextType, fieldClass, List.class);
+
+        if (listType == null || listType == List.class) {
+            listType = getGenericSupertype(contextType, fieldClass, Collection.class);
+        }
+
+        listType = BeanUtils.resolve(contextType, fieldClass, listType);
+
+        if (listType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) listType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+            if (actualTypeArguments.length == 1) {
+                return actualTypeArguments[0];
+            }
+        }
+        return null;
+    }
+
     public static Method getSetter(Class objectClass, String methodName) {
         Method[] methods = new Method[1];
         setters(objectClass, e -> {
