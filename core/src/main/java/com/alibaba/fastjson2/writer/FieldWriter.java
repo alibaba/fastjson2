@@ -8,7 +8,6 @@ import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.introspect.PropertyAccessor;
 import com.alibaba.fastjson2.util.*;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -346,6 +345,12 @@ public abstract class FieldWriter<T>
                 : nameWithColonUTF8;
     }
 
+    public final char[] fieldNameUTF16Quote(long features) {
+        return (features & MASK_USE_SINGLE_QUOTES) != 0
+                ? nameWithColonUTF16SingleQuote
+                : nameWithColonUTF16;
+    }
+
     protected final byte[] fieldNameNullUTF8(long features) {
         return (features & UnquoteFieldName.mask) != 0
                 ? nameNullUTF8Unquote
@@ -362,12 +367,6 @@ public abstract class FieldWriter<T>
         return (features & MASK_UNQUOTE_FIELD_NAME) != 0
                 ? nameUnquoteWithColonUTF16
                 : (features & MASK_USE_SINGLE_QUOTES) != 0
-                ? nameWithColonUTF16SingleQuote
-                : nameWithColonUTF16;
-    }
-
-    public final char[] fieldNameUTF16Quote(long features) {
-        return (features & MASK_USE_SINGLE_QUOTES) != 0
                 ? nameWithColonUTF16SingleQuote
                 : nameWithColonUTF16;
     }

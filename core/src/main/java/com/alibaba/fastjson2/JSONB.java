@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.internal.Conf;
 import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
@@ -12,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
@@ -24,6 +27,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.Conf.BYTES;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 
 /**
  * This is the main entry point for using fastjson2 binary format (JSONB) API.
@@ -2211,6 +2215,19 @@ public interface JSONB {
             return off + 1;
         }
 
+        static int writeChar(byte[] bytes, int off, char value) {
+            bytes[off] = BC_CHAR;
+            return writeInt32(bytes, off + 1, value);
+        }
+
+        static int writeChar(byte[] bytes, int off, Character value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            return writeChar(bytes, off, value.charValue());
+        }
+
         /**
          * Writes a boolean value to a byte array
          *
@@ -2455,6 +2472,19 @@ public interface JSONB {
             return IO.writeInt32(bytes, off, value);
         }
 
+        static int writeInt32(byte[] bytes, int off, int[] values, long features) {
+            if (values == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = values.length;
+            off = startArray(bytes, off, size);
+            for (int value : values) {
+                off = writeInt32(bytes, off, value);
+            }
+            return off;
+        }
+
         /**
          * Writes a string with a symbol table to a byte array
          *
@@ -2607,6 +2637,19 @@ public interface JSONB {
             off = startArray(bytes, off, size);
             for (Long value : values) {
                 off = writeInt64(bytes, off, value, features);
+            }
+            return off;
+        }
+
+        static int writeInt64(byte[] bytes, int off, long[] values, long features) {
+            if (values == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = values.length;
+            off = startArray(bytes, off, size);
+            for (long value : values) {
+                off = IO.writeInt64(bytes, off, value);
             }
             return off;
         }
@@ -2799,6 +2842,24 @@ public interface JSONB {
                 size += stringCapacity(string);
             }
             return size;
+        }
+
+        static int stringCapacity(List<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = stringCapacity(strings.getClass().getName()) + 7;
+            for (int i = 0; i < strings.size(); i++) {
+                size += stringCapacity(strings.get(i));
+            }
+            return size;
+        }
+
+        static int int64Capacity(List<Long> values) {
+            if (values == null) {
+                return 1;
+            }
+            return values.size() * 23;
         }
 
         /**
@@ -3029,6 +3090,70 @@ public interface JSONB {
             BYTES.putLongBE(bytes, off + 2, value.getMostSignificantBits());
             BYTES.putLongBE(bytes, off + 10, value.getLeastSignificantBits());
             return off + 18;
+        }
+
+        static int writeBigDecimal(byte[] bytes, int off, BigDecimal value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+
+            int precision = value.precision();
+            int scale = value.scale();
+
+            if (precision < 19 && Conf.DECIMAL_INT_COMPACT != null) {
+                long intCompact = Conf.DECIMAL_INT_COMPACT.applyAsLong(value);
+                if (scale == 0) {
+                    bytes[off] = BC_DECIMAL_LONG;
+                    return JSONB.IO.writeInt64(bytes, off + 1, intCompact);
+                }
+
+                bytes[off] = BC_DECIMAL;
+                off = JSONB.IO.writeInt32(bytes, off + 1, scale);
+                if (intCompact >= Integer.MIN_VALUE && intCompact <= Integer.MAX_VALUE) {
+                    off = JSONB.IO.writeInt32(bytes, off, (int) intCompact);
+                } else {
+                    off = JSONB.IO.writeInt64(bytes, off, intCompact);
+                }
+                return off;
+            }
+
+            BigInteger unscaledValue = value.unscaledValue();
+            if (scale == 0
+                    && isInt64(unscaledValue)) {
+                bytes[off] = BC_DECIMAL_LONG;
+                return IO.writeInt64(bytes, off + 1, unscaledValue.longValue());
+            }
+
+            bytes[off] = BC_DECIMAL;
+            off = JSONB.IO.writeInt32(bytes, off + 1, scale);
+
+            if (TypeUtils.isInt32(unscaledValue)) {
+                off = writeInt32(bytes, off, unscaledValue.intValue());
+            } else if (isInt64(unscaledValue)) {
+                off = JSONB.IO.writeInt64(bytes, off, unscaledValue.longValue());
+            } else {
+                off = writeBigInteger(bytes, off, unscaledValue);
+            }
+            return off;
+        }
+
+        static int writeBigInteger(byte[] bytes, int off, BigInteger value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+
+            if (TypeUtils.isInt64(value)) {
+                bytes[off] = BC_BIGINT_LONG;
+                return JSONB.IO.writeInt64(bytes, off + 1, value.longValue());
+            }
+
+            byte[] valueBytes = value.toByteArray();
+            bytes[off] = BC_BIGINT;
+            off = JSONB.IO.writeInt32(bytes, off + 1, valueBytes.length);
+            System.arraycopy(valueBytes, 0, bytes, off, valueBytes.length);
+            return off + valueBytes.length;
         }
 
         /**

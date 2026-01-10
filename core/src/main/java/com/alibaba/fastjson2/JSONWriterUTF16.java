@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -1098,36 +1099,9 @@ public class JSONWriterUTF16
 
     @Override
     public final void writeUUID(UUID value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-
-        long msb = value.getMostSignificantBits();
-        long lsb = value.getLeastSignificantBits();
-
-        int minCapacity = off + 38;
-        char[] buf = this.chars;
-        if (minCapacity > chars.length) {
-            buf = grow(minCapacity);
-        }
-
-        final int off = this.off;
-        buf[off] = '"';
-        putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
-        putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
-        buf[off + 9] = '-';
-        putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
-        buf[off + 14] = '-';
-        putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
-        buf[off + 19] = '-';
-        putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
-        buf[off + 24] = '-';
-        putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
-        putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
-        putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
-        buf[off + 37] = '"';
-        this.off += 38;
+        int off = this.off;
+        char[] buf = IO.ensureCapacity(this, off + JSONWriterUTF8.IO.valueSize(value));
+        this.off = IO.writeValue(this, buf, off, value, context.features);
     }
 
     @Override
@@ -1161,89 +1135,7 @@ public class JSONWriterUTF16
             chars = grow(off + 8);
         }
 
-        chars[off++] = quote;
-        switch (ch) {
-            case '"':
-            case '\'':
-                if (ch == quote) {
-                    chars[off++] = '\\';
-                }
-                chars[off++] = ch;
-                break;
-            case '\\':
-            case '\r':
-            case '\n':
-            case '\b':
-            case '\f':
-            case '\t':
-                StringUtils.writeEscapedChar(chars, off, ch);
-                off += 2;
-                break;
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-                chars[off] = '\\';
-                chars[off + 1] = 'u';
-                chars[off + 2] = '0';
-                chars[off + 3] = '0';
-                chars[off + 4] = '0';
-                chars[off + 5] = (char) ('0' + (int) ch);
-                off += 6;
-                break;
-            case 11:
-            case 14:
-            case 15:
-                chars[off] = '\\';
-                chars[off + 1] = 'u';
-                chars[off + 2] = '0';
-                chars[off + 3] = '0';
-                chars[off + 4] = '0';
-                chars[off + 5] = (char) ('a' + (ch - 10));
-                off += 6;
-                break;
-            case 16:
-            case 17:
-            case 18:
-            case 19:
-            case 20:
-            case 21:
-            case 22:
-            case 23:
-            case 24:
-            case 25:
-                chars[off] = '\\';
-                chars[off + 1] = 'u';
-                chars[off + 2] = '0';
-                chars[off + 3] = '0';
-                chars[off + 4] = '1';
-                chars[off + 5] = (char) ('0' + (ch - 16));
-                off += 6;
-                break;
-            case 26:
-            case 27:
-            case 28:
-            case 29:
-            case 30:
-            case 31:
-                chars[off] = '\\';
-                chars[off + 1] = 'u';
-                chars[off + 2] = '0';
-                chars[off + 3] = '0';
-                chars[off + 4] = '1';
-                chars[off + 5] = (char) ('a' + (ch - 26));
-                off += 6;
-                break;
-            default:
-                chars[off++] = ch;
-                break;
-        }
-        chars[off] = quote;
-        this.off = off + 1;
+        this.off = IO.writeValue(this, chars, off, ch, context.features);
     }
 
     @Override
@@ -3034,10 +2926,10 @@ public class JSONWriterUTF16
         this.off = off;
     }
 
-    public static abstract class IO {
+    public abstract static class IO {
         public static int startObject(JSONWriterUTF16 writer, char[] buf, int off) {
             int level = writer.level++;
-            if (level> writer.context.maxLevel) {
+            if (level > writer.context.maxLevel) {
                 throw overflowLevel(level);
             }
 
@@ -3205,7 +3097,7 @@ public class JSONWriterUTF16
 
         public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Long value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, buf, off, features);
+                return writeLongNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.longValue(), features);
         }
@@ -3266,7 +3158,7 @@ public class JSONWriterUTF16
 
         public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigDecimal value, long features) {
             if (value == null) {
-                return writeNull(buf, off);
+                return writeDoubleNull(writer, buf, off, features);
             }
 
             char quote = writer.quote;
@@ -3319,7 +3211,7 @@ public class JSONWriterUTF16
 
         public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Float value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, buf, off, features);
+                return writeDoubleNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.floatValue(), features);
         }
@@ -3376,7 +3268,7 @@ public class JSONWriterUTF16
 
         public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Double value, long features) {
             if (value == null) {
-                return writeNumberNull(writer, buf, off, features);
+                return writeDoubleNull(writer, buf, off, features);
             }
             return writeValue(writer, buf, off, value.doubleValue(), features);
         }
@@ -3533,17 +3425,69 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Instant value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            String str = DateTimeFormatter.ISO_INSTANT.format(value);
+            str.getChars(0, str.length(), buf, off + 1);
+            off += str.length() + 1;
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeLongNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+                if ((features & (MASK_WRITE_NON_STRING_VALUE_AS_STRING | MASK_WRITE_LONG_AS_STRING)) != 0) {
+                    char quote = writer.quote;
+                    buf[off] = quote;
+                    buf[off + 1] = '0';
+                    buf[off + 2] = quote;
+                    return off + 3;
+                } else {
+                    buf[off] = '0';
+                    return off + 1;
+                }
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
+        public static int writeDoubleNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+                if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
+                    char quote = writer.quote;
+                    buf[off] = quote;
+                    buf[off + 1] = '0';
+                    buf[off + 2] = '.';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = quote;
+                    return off + 5;
+                } else {
+                    buf[off] = '0';
+                    buf[off + 1] = '.';
+                    buf[off + 2] = '0';
+                    return off + 3;
+                }
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
         public static int writeNumberNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
             if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
                 if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
                     char quote = writer.quote;
-                    buf[off++] = quote;
-                    buf[off++] = '0';
                     buf[off] = quote;
+                    buf[off + 1] = '0';
+                    buf[off + 2] = quote;
+                    return off + 3;
                 } else {
                     buf[off] = '0';
+                    return off + 1;
                 }
-                return off + 1;
             } else {
                 return writeNull(buf, off);
             }
@@ -3555,6 +3499,13 @@ public class JSONWriterUTF16
             } else {
                 return writeNull(buf, off);
             }
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Boolean value, long features) {
+            if (value == null) {
+                return writeBooleanNull(buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.booleanValue(), features);
         }
 
         public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, boolean value, long features) {
@@ -3574,6 +3525,100 @@ public class JSONWriterUTF16
             }
 
             return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Character value, long features) {
+            if (value == null) {
+                return writeStringNull(buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.charValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, char value, long features) {
+            char quote = writer.quote;
+            buf[off++] = quote;
+            switch (value) {
+                case '"':
+                case '\'':
+                    if (value == quote) {
+                        buf[off++] = '\\';
+                    }
+                    buf[off++] = value;
+                    break;
+                case '\\':
+                case '\r':
+                case '\n':
+                case '\b':
+                case '\f':
+                case '\t':
+                    StringUtils.writeEscapedChar(buf, off, value);
+                    off += 2;
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '0';
+                    buf[off + 5] = (char) ('0' + (int) value);
+                    off += 6;
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '0';
+                    buf[off + 5] = (char) ('a' + (value - 10));
+                    off += 6;
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '1';
+                    buf[off + 5] = (char) ('0' + (value - 16));
+                    off += 6;
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '1';
+                    buf[off + 5] = (char) ('a' + (value - 26));
+                    off += 6;
+                    break;
+                default:
+                    buf[off++] = value;
+                    break;
+            }
+            buf[off] = quote;
+            return off + 1;
         }
 
         public static int writeValue(JSONWriterUTF8 writer, char[] buf, int off, UUID value, long features) {
@@ -3718,6 +3763,17 @@ public class JSONWriterUTF16
             return value.length() * 6 + 2;
         }
 
+        public static int stringCapacity(String[] value) {
+            if (value == null) {
+                return 4;
+            }
+            int size = value.length + 2;
+            for (String str : value) {
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
         public static int stringCapacity(Collection<String> strings) {
             if (strings == null) {
                 return 1;
@@ -3740,6 +3796,10 @@ public class JSONWriterUTF16
                 size += value == null ? 4 : value.length() * 6 + 2;
             }
             return size;
+        }
+
+        public static int int64Capacity(Collection<Long> values) {
+            return values == null ? 4 : values.size() * (23 /* long value size */ + 1);
         }
 
         public static int enumCapacity(Enum value, long features) {
@@ -3831,6 +3891,83 @@ public class JSONWriterUTF16
             return off + 1;
         }
 
+        public static int writeValueJDK8(JSONWriterUTF16 writer, char[] buf, int off, List<String> values, long features) {
+            if (values == null) {
+                return writeArrayNull(buf, off, features);
+            }
+            buf[off++] = '[';
+            for (int i = 0; i < values.size(); i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                off = writeValueJDK8(writer, buf, off, values.get(i), features);
+            }
+            buf[off] = ']';
+            return off + 1;
+        }
+
+        public static int writeValueJDK8(JSONWriterUTF16 writer, char[] buf, int off, String str, long features) {
+            if (str == null) {
+                return writeStringNull(buf, off, features);
+            }
+
+            boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
+            boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
+            boolean escape = false;
+            final char quote = writer.quote;
+
+            final int strlen = str.length();
+            for (int i = 0; i < strlen; i++) {
+                char c = str.charAt(i);
+                if (c == '\\'
+                        || c == quote
+                        || c < ' '
+                        || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
+                        || (escapeNoneAscii && c > 0x007F)
+                ) {
+                    escape = true;
+                    break;
+                }
+            }
+
+            if (!escape) {
+                buf[off++] = quote;
+                str.getChars(0, strlen, buf, off);
+                off += strlen;
+                buf[off] = quote;
+                return off + 1;
+            }
+
+            return writeStringEscape(writer, buf, off, str, features);
+        }
+
+        public static int writeValueJDK11(JSONWriterUTF16 writer, char[] buf, int off, String[] values, long features) {
+            if (values == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            byte quote = (byte) writer.quote;
+            buf[off++] = '[';
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                String value = values[i];
+                if (value == null) {
+                    off = writeStringNull(buf, off, features);
+                } else {
+                    byte[] valueBytes = STRING_VALUE.apply(value);
+                    if (STRING_CODER.applyAsInt(value) == 0) {
+                        off = writeStringLatin1(writer, buf, off, valueBytes, features);
+                    } else {
+                        off = writeStringUTF16(writer, buf, off, valueBytes, features);
+                    }
+                }
+            }
+            buf[off] = ']';
+            return off + 1;
+        }
+
         public static int writeValueJDK11(JSONWriterUTF16 writer, char[] buf, int off, String value, long features) {
             if (value == null) {
                 return writeStringNull(buf, off, features);
@@ -3850,7 +3987,7 @@ public class JSONWriterUTF16
             }
 
             boolean escape = false;
-           char quote = writer.quote;
+            char quote = writer.quote;
             chars[off++] = quote;
 
             int coff = 0;
@@ -3910,6 +4047,87 @@ public class JSONWriterUTF16
             return StringUtils.writeLatin1EscapedRest(chars, off, value, 0, quote, features);
         }
 
+        protected static int writeStringEscape(JSONWriterUTF16 writer, char[] chars, int off, String str, long features) {
+            final int strlen = str.length();
+            final char quote = writer.quote;
+            boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
+            boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
+
+            chars[off++] = quote;
+            for (int i = 0; i < strlen; ++i) {
+                char ch = str.charAt(i);
+                switch (ch) {
+                    case '"':
+                    case '\'':
+                        if (ch == quote) {
+                            chars[off++] = '\\';
+                        }
+                        chars[off++] = ch;
+                        break;
+                    case '\\':
+                    case '\r':
+                    case '\n':
+                    case '\b':
+                    case '\f':
+                    case '\t':
+                        StringUtils.writeEscapedChar(chars, off, ch);
+                        off += 2;
+                        break;
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 11:
+                    case 14:
+                    case 15:
+                    case 16:
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 24:
+                    case 25:
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                    case 30:
+                    case 31:
+                        StringUtils.writeU4Hex2(chars, off, ch);
+                        off += 6;
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                    default:
+                        if (escapeNoneAscii && ch > 0x007F) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                }
+            }
+            chars[off] = quote;
+            return off + 1;
+        }
+
         public static int writeStringUTF16(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
             if (value == null) {
                 return writeStringNull(chars, off, features);
@@ -3919,6 +4137,7 @@ public class JSONWriterUTF16
                 return writeStringUTF16BrowserSecure(writer, chars, off, value, features);
             }
 
+            int start = off;
             final long vecQuote = writer.byteVectorQuote;
             char quote = writer.quote;
             boolean escape = false;
@@ -3949,7 +4168,7 @@ public class JSONWriterUTF16
                 return off + 1;
             }
 
-            return writeStringEscapeUTF16(writer, chars, off, value, features);
+            return writeStringEscapeUTF16(writer, chars, start, value, features);
         }
 
         static int writeStringUTF16BrowserSecure(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
@@ -3985,14 +4204,14 @@ public class JSONWriterUTF16
         }
 
         protected static int writeStringEscapeUTF16(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
-            final int strlen = chars.length;
+            final int strlen = value.length >> 1;
             final char quote = writer.quote;
             boolean escapeNoneAscii = (features & EscapeNoneAscii.mask) != 0;
             boolean browserSecure = (features & BrowserSecure.mask) != 0;
 
             chars[off++] = quote;
-            for (int i = 0; i < strlen; i += 2) {
-                char ch = UNSAFE.getChar(value, (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i);
+            for (int charIndex = 0; charIndex < strlen; charIndex++) {
+                char ch = UNSAFE.getChar(value, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + ((long) charIndex << 1));
                 switch (ch) {
                     case '"':
                     case '\'':
@@ -4077,6 +4296,33 @@ public class JSONWriterUTF16
             return off;
         }
 
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, UUID value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            long msb = value.getMostSignificantBits();
+            long lsb = value.getLeastSignificantBits();
+
+            char quote = writer.quote;
+
+            buf[off] = quote;
+            putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
+            putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
+            buf[off + 9] = '-';
+            putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
+            buf[off + 14] = '-';
+            putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
+            buf[off + 19] = '-';
+            putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
+            buf[off + 24] = '-';
+            putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
+            putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
+            putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
+            buf[off + 37] = quote;
+            return off + 38;
+        }
+
         public static int writeName(JSONWriterUTF16 writer, char[] buf, int off, char[] name) {
             if (writer.startObject) {
                 writer.startObject = false;
@@ -4088,6 +4334,12 @@ public class JSONWriterUTF16
             }
             System.arraycopy(name, 0, buf, off, name.length);
             return off + name.length;
+        }
+
+        public static int writeBooleanNull(char[] buf, int off, long features) {
+            String raw = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_BOOLEAN_AS_FALSE)) != 0 ? "false" : "null";
+            raw.getChars(0, raw.length(), buf, off);
+            return off + raw.length();
         }
 
         public static int writeStringNull(char[] buf, int off, long features) {

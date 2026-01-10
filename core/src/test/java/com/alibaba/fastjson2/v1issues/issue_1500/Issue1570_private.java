@@ -35,6 +35,7 @@ public class Issue1570_private {
         ModelBool model = new ModelBool();
         assertEquals("{}", JSON.toJSONString(model));
         assertEquals("{\"value\":false}", JSON.toJSONString(model, JSONWriter.Feature.NullAsDefaultValue));
+        assertEquals("{\"value\":false}", new String(JSON.toJSONBytes(model, JSONWriter.Feature.NullAsDefaultValue)));
     }
 
     @Test

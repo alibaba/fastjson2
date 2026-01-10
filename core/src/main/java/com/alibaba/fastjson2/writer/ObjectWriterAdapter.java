@@ -40,8 +40,8 @@ public class ObjectWriterAdapter<T>
     protected long typeNameSymbolCache;
     protected final byte[] typeNameJSONB;
 
-    final byte[] nameWithColonUTF8;
-    final char[] nameWithColonUTF16;
+    public final byte[] nameWithColonUTF8;
+    public final char[] nameWithColonUTF16;
 
     final long features;
 
@@ -502,16 +502,8 @@ public class ObjectWriterAdapter<T>
             return false;
         }
 
-        writeTypeInfo(jsonWriter);
-        return true;
-    }
-
-    private void writeTypeInfo(JSONWriterUTF8 jsonWriter) {
         jsonWriter.writeNameRaw(nameWithColonUTF8);
-
-        jsonWriter.writeString(typeKey);
-        jsonWriter.writeColon();
-        jsonWriter.writeString(typeName);
+        return true;
     }
 
     public boolean writeTypeInfo(JSONWriterUTF16 jsonWriter, Object object, long features) {
@@ -519,16 +511,8 @@ public class ObjectWriterAdapter<T>
             return false;
         }
 
-        writeTypeInfo(jsonWriter);
-        return true;
-    }
-
-    private void writeTypeInfo(JSONWriterUTF16 jsonWriter) {
         jsonWriter.writeNameRaw(nameWithColonUTF16);
-
-        jsonWriter.writeString(typeKey);
-        jsonWriter.writeColon();
-        jsonWriter.writeString(typeName);
+        return true;
     }
 
     @Override

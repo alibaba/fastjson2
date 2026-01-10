@@ -241,6 +241,14 @@ public final class MethodWriter {
         visitInsn(Opcodes.LCMP);
     }
 
+    public void fcmpg() {
+        visitInsn(Opcodes.FCMPG);
+    }
+
+    public void dcmpg() {
+        visitInsn(Opcodes.DCMPG);
+    }
+
     public void land() {
         visitInsn(Opcodes.LAND);
     }

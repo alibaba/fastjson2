@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.internal.emit;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.internal.asm.MethodWriter;
 import com.alibaba.fastjson2.util.JDKUtils;
 
@@ -14,15 +15,22 @@ public class ByteArrayEmitter {
     private final MethodWriter mw;
     private final int slotBufer;
     private final int slotOffset;
+    private final int slotQuote;
 
-    public ByteArrayEmitter(MethodWriter mw, int slotBuffer, int slotOffset) {
+    public ByteArrayEmitter(MethodWriter mw, int slotBuffer, int slotOffset, int slotQuote) {
         this.mw = mw;
         this.slotBufer = slotBuffer;
         this.slotOffset = slotOffset;
+        this.slotQuote = slotQuote;
     }
 
     public boolean tryPutArray(int off, byte[] value) {
+        if (value.length > 14) {
+            return false;
+        }
+
         long base = ARRAY_BYTE_BASE_OFFSET;
+        putByteSlot(base, off++, slotQuote);
         switch (value.length) {
             case 0:
                 break;
@@ -87,7 +95,7 @@ public class ByteArrayEmitter {
             case 7: {
                 int name0 = UNSAFE.getInt(value, ARRAY_BYTE_BASE_OFFSET);
                 short name1 = UNSAFE.getShort(value, ARRAY_BYTE_BASE_OFFSET + 4);
-                byte name2 = UNSAFE.getByte(value, ARRAY_BYTE_BASE_OFFSET + 4);
+                byte name2 = UNSAFE.getByte(value, ARRAY_BYTE_BASE_OFFSET + 6);
                  /*
                     UNSAFE.putInt(BUF, ARRAY_BYTE_BASE_OFFSET + OFFSET, name0);
                     UNSAFE.putShort(BUF, ARRAY_BYTE_BASE_OFFSET + OFFSET + 8, name1);
@@ -162,7 +170,7 @@ public class ByteArrayEmitter {
                  */
                 putLong(base, off, name0);
                 putInt(base, off + 8, name1);
-                putByte(base, off + 10, name2);
+                putByte(base, off + 12, name2);
                 break;
             }
             case 14: {
@@ -175,12 +183,15 @@ public class ByteArrayEmitter {
                  */
                 putLong(base, off, name0);
                 putInt(base, off + 8, name1);
-                putShort(base, off + 10, name2);
+                putShort(base, off + 12, name2);
                 break;
             }
             default:
-                return false;
+                throw new JSONException("TODO");
         }
+        off += value.length;
+        putByteSlot(base, off, slotQuote);
+        putByte(base, off + 1, (byte) ':');
         return true;
     }
 
@@ -372,5 +383,43 @@ public class ByteArrayEmitter {
         mw.ladd();
         mw.iconst_n(value);
         mw.invokevirtual("sun/misc/Unsafe", "putByte", "(Ljava/lang/Object;JB)V");
+    }
+
+    public void putByteSlot(long base, int off, int slotValue) {
+//        mw.aload(slotBufer);
+//        mw.iload(slotOffset);
+//        mw.iconst_n(off);
+//        mw.iadd();
+//        mw.iload(slotValue);
+//        mw.bastore();
+        mw.getstatic(TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
+        mw.aload(slotBufer);
+        mw.ldc(base + off);
+        mw.iload(slotOffset);
+        mw.i2l();
+        mw.ladd();
+        mw.iload(slotValue);
+        mw.invokevirtual("sun/misc/Unsafe", "putByte", "(Ljava/lang/Object;JB)V");
+    }
+
+    public void arrayCopy(int slotSrc) {
+        /*
+         * System.arraycopy(src, srcPos, dest, destPos, length);
+         */
+        mw.aload(slotSrc);
+        mw.iconst_0();
+        mw.aload(slotBufer);
+        mw.iload(slotOffset);
+        mw.aload(slotSrc);
+        mw.arraylength();
+        mw.invokestatic("java/lang/System", "arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V");
+    }
+
+    public void incArrayLength(int slotSrc) {
+        mw.iload(slotOffset);
+        mw.aload(slotSrc);
+        mw.arraylength();
+        mw.iadd();
+        mw.istore(slotOffset);
     }
 }

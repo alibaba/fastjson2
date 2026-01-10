@@ -18,8 +18,9 @@ public class Issue2211 {
     @Test
     public void test() {
         UserDo userDo = new UserDo();
-        String json = JSON.toJSONString(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString);
-        assertEquals("{\"b1\":true,\"d0\":0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
+        String expected = "{\"b1\":true,\"d0\":0.0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}";
+        assertEquals(expected, JSON.toJSONString(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString));
+        assertEquals(expected, new String(JSON.toJSONBytes(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString)));
     }
 
     @Test
@@ -27,7 +28,7 @@ public class Issue2211 {
         UserDo userDo = new UserDo();
         ObjectWriter objectWriter = new ObjectWriterProvider().getObjectWriter(UserDo.class);
         String json = objectWriter.toJSONString(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString);
-        assertEquals("{\"b1\":true,\"d0\":0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
+        assertEquals("{\"b1\":true,\"d0\":0.0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
     }
 
     @Getter

@@ -15,17 +15,41 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue3702 {
     @Test
     public void test() {
-        assertEquals(JSON.toJSONString(new NumberDTO()), "{\"d\":0,\"f\":0,\"i\":0,\"l\":0}");
-        assertEquals(JSON.toJSONString(new NumberDTO2()), "{\"d\":0.0,\"f\":0.0,\"i\":0,\"l\":0}");
-        assertEquals(JSON.toJSONString(new NumberDTO3()), "{}");
-        assertEquals(JSON.toJSONString(new NumberDTO4()),
-                "{\"bigDecimal\":0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0,\"floatValue\":0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
-        assertEquals(JSON.toJSONString(new NumberDTO5()),
-                "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
-        assertEquals(JSON.toJSONString(new NumberDTO3(), JSONWriter.Feature.WriteNullNumberAsZero),
-                "{\"bigDecimal\":0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0,\"floatValue\":0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
-        assertEquals(JSON.toJSONString(new NumberDTO3(), JSONWriter.Feature.NullAsDefaultValue),
-                "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}");
+        String expected = "{\"d\":0.0,\"f\":0.0,\"i\":0,\"l\":0}";
+        assertEquals(expected, JSON.toJSONString(new NumberDTO()));
+        assertEquals(expected, new String(JSON.toJSONBytes(new NumberDTO())));
+        assertEquals(expected, JSON.toJSONString(new NumberDTO2()));
+        assertEquals(expected, new String(JSON.toJSONBytes(new NumberDTO2())));
+    }
+
+    @Test
+    public void test4() {
+        String expected = "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}";
+        assertEquals(expected, JSON.toJSONString(new NumberDTO4()));
+        assertEquals(expected, new String(JSON.toJSONBytes(new NumberDTO4())));
+    }
+
+    @Test
+    public void test5() {
+        String expected = "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}";
+        assertEquals(expected, JSON.toJSONString(new NumberDTO5()));
+        assertEquals(expected, new String(JSON.toJSONBytes(new NumberDTO5())));
+    }
+
+    @Test
+    public void test6() {
+        String expected = "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}";
+        assertEquals(expected, JSON.toJSONString(new NumberDTO3(), JSONWriter.Feature.WriteNullNumberAsZero));
+    }
+
+    @Test
+    public void test3() {
+        assertEquals("{}", JSON.toJSONString(new NumberDTO3()));
+        assertEquals("{}", new String(JSON.toJSONBytes(new NumberDTO3())));
+
+        String expected = "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}";
+        assertEquals(expected, JSON.toJSONString(new NumberDTO3(), JSONWriter.Feature.WriteNullNumberAsZero));
+        assertEquals(expected, new String(JSON.toJSONBytes(new NumberDTO3(), JSONWriter.Feature.WriteNullNumberAsZero)));
     }
 
     @Data

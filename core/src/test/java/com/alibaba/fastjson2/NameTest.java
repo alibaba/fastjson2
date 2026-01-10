@@ -86,7 +86,7 @@ public class NameTest {
             assertEquals(value, field.getInt(bean2));
 
             byte[] jsonBytes = JSON.toJSONBytes(bean);
-            assertEquals(json, new String(jsonBytes));
+            assertEquals(json, new String(jsonBytes), "nameLength " + fieldName.length());
 
             Object bean3 = JSON.parseObject(jsonBytes, beanClass);
             assertEquals(beanClass, bean3.getClass());
