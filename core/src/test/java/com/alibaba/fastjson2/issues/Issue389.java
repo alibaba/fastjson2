@@ -30,7 +30,7 @@ public class Issue389 {
         assertNull(JSON.parse((String) null, JSONReader.Feature.SupportSmartMatch));
         assertNull(JSON.parse("", JSONReader.Feature.SupportSmartMatch));
         assertNull(JSON.parse((String) null, (JSONReader.Context) null));
-        assertNull(JSON.parse((InputStream) null, null));
+        assertNull(JSON.parse((InputStream) null, (JSONReader.Context) null));
         assertNull(JSON.parseObject(null, StandardCharsets.ISO_8859_1, null));
         assertNull(JSON.parse("", (JSONReader.Context) null));
 
