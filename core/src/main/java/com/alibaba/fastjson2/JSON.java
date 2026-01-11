@@ -376,6 +376,20 @@ public interface JSON {
      * Returns {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param in the specified stream to be parsed
+     * @param features the specified features is applied to parsing
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @since 2.0.61
+     */
+    static Object parse(InputStream in, JSONReader.Feature... features) {
+        return parse(in, JSONFactory.createReadContext(features));
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param in the specified stream to be parsed
      * @param context the specified custom context
      * @return either {@link JSONArray} or {@link JSONObject} or null
      * @throws JSONException If a parsing error occurs
