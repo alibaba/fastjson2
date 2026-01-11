@@ -111,9 +111,13 @@ public class FieldReaderList<T, V>
                     continue;
                 }
 
-                list.add(
-                        itemObjectReader.readObject(jsonReader, null, null, 0)
-                );
+                Object value;
+                if (jsonReader.isString() && itemObjectReader instanceof ObjectReaderInterface) {
+                    value = jsonReader.readString();
+                } else {
+                    value = itemObjectReader.readObject(jsonReader, null, null, 0);
+                }
+                list.add(value);
 
                 jsonReader.nextIfComma();
             }
