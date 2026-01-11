@@ -1141,7 +1141,7 @@ public class ObjectWriterCreator {
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
             Class<?> itemClass = fieldClass.getComponentType();
-            return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
+            return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, field);
         }
 
         return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null);

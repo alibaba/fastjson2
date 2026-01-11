@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
+import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectWriterBaseModule
@@ -396,7 +397,7 @@ public class ObjectWriterBaseModule
                         break;
                     case "com.fasterxml.jackson.annotation.JsonManagedReference":
                         if (useJacksonAnnotation) {
-                            fieldInfo.features |= JSONWriter.Feature.ReferenceDetection.mask;
+                            fieldInfo.features |= MASK_REFERENCE_DETECTION;
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonBackReference":
@@ -429,7 +430,7 @@ public class ObjectWriterBaseModule
                 fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
             }
 
-            if ((fieldInfo.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0
+            if ((fieldInfo.features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0
                     && !String.class.equals(field.getType())
                     && fieldInfo.writeUsing == null
             ) {
@@ -514,7 +515,7 @@ public class ObjectWriterBaseModule
                         String value = (String) result;
                         if (!value.isEmpty()) {
                             beanInfo.typeKey = value;
-                            beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
+                            beanInfo.writerFeatures |= MASK_WRITE_CLASS_NAME;
                         }
                     }
                 } catch (Throwable ignored) {
@@ -728,40 +729,40 @@ public class ObjectWriterBaseModule
                         fieldInfo.format = "iso8601";
                         break;
                     case "WriteMapNullValue":
-                        fieldInfo.features |= JSONWriter.Feature.WriteNulls.mask;
+                        fieldInfo.features |= MASK_WRITE_MAP_NULL_VALUE;
                         break;
                     case "WriteNullListAsEmpty":
-                        fieldInfo.features |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+                        fieldInfo.features |= MASK_WRITE_NULL_LIST_AS_EMPTY;
                         break;
                     case "WriteNullStringAsEmpty":
-                        fieldInfo.features |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+                        fieldInfo.features |= MASK_WRITE_NULL_STRING_AS_EMPTY;
                         break;
                     case "WriteNullNumberAsZero":
-                        fieldInfo.features |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+                        fieldInfo.features |= MASK_WRITE_NULL_NUMBER_AS_ZERO;
                         break;
                     case "WriteNullBooleanAsFalse":
-                        fieldInfo.features |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
+                        fieldInfo.features |= MASK_WRITE_NULL_BOOLEAN_AS_FALSE;
                         break;
                     case "BrowserCompatible":
-                        fieldInfo.features |= JSONWriter.Feature.BrowserCompatible.mask;
+                        fieldInfo.features |= MASK_BROWSER_COMPATIBLE;
                         break;
                     case "WriteClassName":
-                        fieldInfo.features |= JSONWriter.Feature.WriteClassName.mask;
+                        fieldInfo.features |= MASK_WRITE_CLASS_NAME;
                         break;
                     case "WriteNonStringValueAsString":
-                        fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                        fieldInfo.features |= MASK_WRITE_NON_STRING_VALUE_AS_STRING;
                         break;
                     case "WriteEnumUsingToString":
-                        fieldInfo.features |= JSONWriter.Feature.WriteEnumUsingToString.mask;
+                        fieldInfo.features |= MASK_WRITE_ENUM_USING_TO_STRING;
                         break;
                     case "NotWriteRootClassName":
-                        fieldInfo.features |= JSONWriter.Feature.NotWriteRootClassName.mask;
+                        fieldInfo.features |= MASK_NOT_WRITE_ROOT_CLASSNAME;
                         break;
                     case "IgnoreErrorGetter":
-                        fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                        fieldInfo.features |= MASK_IGNORE_ERROR_GETTER;
                         break;
                     case "WriteBigDecimalAsPlain":
-                        fieldInfo.features |= JSONWriter.Feature.WriteBigDecimalAsPlain.mask;
+                        fieldInfo.features |= MASK_WRITE_BIG_DECIMAL_AS_PLAIN;
                         break;
                     case "DisableCircularReferenceDetect":
                         fieldInfo.features |= FieldInfo.DISABLE_REFERENCE_DETECT;
@@ -781,7 +782,7 @@ public class ObjectWriterBaseModule
                 if (objectClass != null
                         && objectClass.getName().startsWith("com.baomidou.mybatisplus.")
                 ) {
-                    fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                    fieldInfo.features |= MASK_IGNORE_ERROR_GETTER;
                 }
             }
 

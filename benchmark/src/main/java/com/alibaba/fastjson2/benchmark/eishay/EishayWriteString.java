@@ -50,6 +50,10 @@ public class EishayWriteString {
         bh.consume(com.alibaba.fastjson.JSON.toJSONString(mc));
     }
 
+    public int fastjson2_size() {
+        return JSON.toJSONString(mc).length();
+    }
+
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.toJSONString(mc));

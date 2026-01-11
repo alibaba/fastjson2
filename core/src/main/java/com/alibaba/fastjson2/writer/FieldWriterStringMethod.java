@@ -8,6 +8,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_NON_FIELD_GETTER;
+import static com.alibaba.fastjson2.JSONWriter.MASK_NOT_WRITE_EMPTY_ARRAY;
+import static com.alibaba.fastjson2.JSONWriter.MASK_NULL_AS_DEFAULT_VALUE;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_NULL_STRING_AS_EMPTY;
+
 final class FieldWriterStringMethod<T>
         extends FieldWriter<T> {
     FieldWriterStringMethod(
@@ -56,7 +62,7 @@ final class FieldWriterStringMethod<T>
         try {
             value = (String) getFieldValue(object);
         } catch (JSONException error) {
-            if ((jsonWriter.getFeatures(features) | JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0) {
+            if ((jsonWriter.getFeatures(features) | MASK_IGNORE_NON_FIELD_GETTER) != 0) {
                 return false;
             }
             throw error;
@@ -64,7 +70,7 @@ final class FieldWriterStringMethod<T>
 
         long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) == 0) {
+            if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_STRING_AS_EMPTY)) == 0) {
                 return false;
             }
         } else if (trim) {
@@ -73,7 +79,7 @@ final class FieldWriterStringMethod<T>
 
         if (value != null
                 && value.isEmpty()
-                && (features & JSONWriter.Feature.IgnoreEmpty.mask) != 0
+                && (features & MASK_NOT_WRITE_EMPTY_ARRAY) != 0
         ) {
             return false;
         }

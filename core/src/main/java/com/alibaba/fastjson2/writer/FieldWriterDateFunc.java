@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
+
 final class FieldWriterDateFunc<T>
         extends FieldWriterDate<T> {
     final Function<T, Date> function;
@@ -47,7 +49,7 @@ final class FieldWriterDateFunc<T>
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+            if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeNull();
                 return true;

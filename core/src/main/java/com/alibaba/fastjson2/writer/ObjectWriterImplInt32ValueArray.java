@@ -8,6 +8,8 @@ import com.alibaba.fastjson2.util.Fnv;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_NON_STRING_VALUE_AS_STRING;
+
 final class ObjectWriterImplInt32ValueArray
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt32ValueArray INSTANCE = new ObjectWriterImplInt32ValueArray(null);
@@ -38,7 +40,7 @@ final class ObjectWriterImplInt32ValueArray
             array = (int[]) object;
         }
 
-        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+        if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
             jsonWriter.writeString(array);
         } else {
             jsonWriter.writeInt32(array);
@@ -59,7 +61,7 @@ final class ObjectWriterImplInt32ValueArray
             array = (int[]) object;
         }
 
-        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+        if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
             jsonWriter.writeString(array);
         } else {
             jsonWriter.writeInt32(array);

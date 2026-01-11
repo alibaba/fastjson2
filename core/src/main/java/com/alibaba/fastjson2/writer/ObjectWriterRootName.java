@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.*;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -22,6 +20,7 @@ public final class ObjectWriterRootName<T>
         this.rootName = rootName;
     }
 
+    @Override
     public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         jsonWriter.startObject();
         jsonWriter.writeName(rootName);
@@ -29,11 +28,21 @@ public final class ObjectWriterRootName<T>
         jsonWriter.endObject();
     }
 
-    public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    @Override
+    public void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         jsonWriter.startObject();
         jsonWriter.writeName(rootName);
         jsonWriter.writeColon();
-        super.write(jsonWriter, object, fieldName, fieldType, features);
+        super.writeUTF8(jsonWriter, object, fieldName, fieldType, features);
+        jsonWriter.endObject();
+    }
+
+    @Override
+    public void writeUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        jsonWriter.startObject();
+        jsonWriter.writeName(rootName);
+        jsonWriter.writeColon();
+        super.writeUTF16(jsonWriter, object, fieldName, fieldType, features);
         jsonWriter.endObject();
     }
 

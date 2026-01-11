@@ -215,7 +215,7 @@ public class FieldWriterObject<T>
     }
 
     @Override
-    public void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e) {
+    public void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e, long features) {
         if (e == null) {
             return;
         }

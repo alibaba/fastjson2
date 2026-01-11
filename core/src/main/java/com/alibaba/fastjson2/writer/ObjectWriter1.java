@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -25,21 +27,23 @@ public class ObjectWriter1<T>
     }
 
     @Override
-    public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
 
-        if (jsonWriter instanceof JSONWriterJSONB) {
-            if ((featuresAll & BeanToArray.mask) != 0) {
-                writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
-                return;
-            }
-
-            writeJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
+        if ((featuresAll & BeanToArray.mask) != 0) {
+            writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
+        super.writeJSONB(jsonWriter, object, fieldName, fieldType, features);
+    }
+
+    @Override
+    public void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        long featuresAll = features | this.features | jsonWriter.getFeatures();
+
         if ((featuresAll & BeanToArray.mask) != 0) {
-            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+            writeArrayMappingUTF8(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -66,7 +70,44 @@ public class ObjectWriter1<T>
             writeTypeInfo(jsonWriter);
         }
 
-        fieldWriter0.write(jsonWriter, object);
+        fieldWriter0.writeUTF8(jsonWriter, object);
+
+        jsonWriter.endObject();
+    }
+
+    @Override
+    public void writeUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        long featuresAll = features | this.features | jsonWriter.getFeatures();
+
+        if ((featuresAll & BeanToArray.mask) != 0) {
+            writeArrayMappingUTF16(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
+
+        if (!serializable) {
+            if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
+                errorOnNoneSerializable();
+                return;
+            }
+
+            if ((featuresAll & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+                jsonWriter.writeNull();
+                return;
+            }
+        }
+
+        if (hasFilter(jsonWriter)) {
+            writeWithFilter(jsonWriter, object, fieldName, fieldType, 0);
+            return;
+        }
+
+        jsonWriter.startObject();
+
+        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+            writeTypeInfo(jsonWriter);
+        }
+
+        fieldWriter0.writeUTF16(jsonWriter, object);
 
         jsonWriter.endObject();
     }

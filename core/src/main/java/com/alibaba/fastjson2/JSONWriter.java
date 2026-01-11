@@ -154,7 +154,7 @@ public abstract class JSONWriter
      * @return true if the feature is enabled, false otherwise
      */
     public final boolean isIgnoreNoneSerializable() {
-        return (context.features & IgnoreNoneSerializable.mask) != 0;
+        return (context.features & MASK_IGNORE_NONE_SERIALIZABLE) != 0;
     }
 
     /**
@@ -164,7 +164,7 @@ public abstract class JSONWriter
      * @return true if the feature is enabled and the object is not serializable, false otherwise
      */
     public final boolean isIgnoreNoneSerializable(Object object) {
-        return (context.features & IgnoreNoneSerializable.mask) != 0
+        return (context.features & MASK_IGNORE_NONE_SERIALIZABLE) != 0
                 && object != null
                 && !Serializable.class.isAssignableFrom(object.getClass());
     }
@@ -460,7 +460,7 @@ public abstract class JSONWriter
      * @return true if any filter is configured or the IgnoreNonFieldGetter feature should be applied, false otherwise
      */
     public final boolean hasFilter(boolean containsNoneFieldGetter) {
-        return context.hasFilter || containsNoneFieldGetter && (context.features & IgnoreNonFieldGetter.mask) != 0;
+        return context.hasFilter || containsNoneFieldGetter && (context.features & MASK_IGNORE_NON_FIELD_GETTER) != 0;
     }
 
     /**
@@ -498,7 +498,7 @@ public abstract class JSONWriter
      * @return true if the ReferenceDetection feature is enabled and the object is not null and not a non-reference detect type, false otherwise
      */
     public final boolean isRefDetect(Object object) {
-        return (context.features & ReferenceDetection.mask) != 0
+        return (context.features & MASK_REFERENCE_DETECTION) != 0
                 && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
@@ -554,7 +554,7 @@ public abstract class JSONWriter
      * @return true if the BeanToArray feature is enabled, false otherwise
      */
     public final boolean isBeanToArray() {
-        return (context.features & BeanToArray.mask) != 0;
+        return (context.features & MASK_BEAN_TO_ARRAY) != 0;
     }
 
     /**
@@ -734,7 +734,7 @@ public abstract class JSONWriter
     public final boolean isWriteTypeInfo(Object object, Type fieldType, long features) {
         features |= context.features;
 
-        if ((features & WriteClassName.mask) == 0) {
+        if ((features & MASK_WRITE_CLASS_NAME) == 0) {
             return false;
         }
 
@@ -756,7 +756,7 @@ public abstract class JSONWriter
             return false;
         }
 
-        if ((features & NotWriteHashMapArrayListClassName.mask) != 0) {
+        if ((features & MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME) != 0) {
             if (objectClass == HashMap.class) {
                 if (fieldClass == null || fieldClass == Object.class || fieldClass == Map.class || fieldClass == AbstractMap.class) {
                     return false;
@@ -876,7 +876,7 @@ public abstract class JSONWriter
      * @return the ObjectWriter for the specified class
      */
     public final ObjectWriter getObjectWriter(Class objectClass) {
-        boolean fieldBased = (context.features & FieldBased.mask) != 0;
+        boolean fieldBased = (context.features & MASK_FIELD_BASED) != 0;
         return context.provider.getObjectWriter(objectClass, objectClass, fieldBased);
     }
 
@@ -1021,9 +1021,9 @@ public abstract class JSONWriter
      * @param features the features to enable for the new JSONWriter
      * @return a new JSONWriter instance using UTF-16 encoding
      */
-    public static JSONWriter ofUTF16(Feature... features) {
+    public static JSONWriterUTF16 ofUTF16(Feature... features) {
         Context writeContext = createWriteContext(features);
-        JSONWriter jsonWriter;
+        JSONWriterUTF16 jsonWriter;
         if (JVM_VERSION == 8) {
             if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
                 jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
@@ -1035,6 +1035,29 @@ public abstract class JSONWriter
                 jsonWriter = new JSONWriterUTF16JDK9UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16(writeContext);
+            }
+        }
+
+        return jsonWriter;
+    }
+
+    public static JSONWriterUTF16 ofUTF16(Context context) {
+        if (context == null) {
+            context = createWriteContext();
+        }
+
+        JSONWriterUTF16 jsonWriter;
+        if (JVM_VERSION == 8) {
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+                jsonWriter = new JSONWriterUTF16JDK8UF(context);
+            } else {
+                jsonWriter = new JSONWriterUTF16JDK8(context);
+            }
+        } else {
+            if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
+                jsonWriter = new JSONWriterUTF16JDK9UF(context);
+            } else {
+                jsonWriter = new JSONWriterUTF16(context);
             }
         }
 
@@ -1128,7 +1151,7 @@ public abstract class JSONWriter
      *
      * @return a new JSONWriter instance using UTF-8 encoding
      */
-    public static JSONWriter ofUTF8() {
+    public static JSONWriterUTF8 ofUTF8() {
         return ofUTF8(
                 createWriteContext()
         );
@@ -1140,7 +1163,7 @@ public abstract class JSONWriter
      * @param context the context to use for the new JSONWriter
      * @return a new JSONWriter instance using UTF-8 encoding
      */
-    public static JSONWriter ofUTF8(JSONWriter.Context context) {
+    public static JSONWriterUTF8 ofUTF8(JSONWriter.Context context) {
         return new JSONWriterUTF8(context);
     }
 
@@ -1150,7 +1173,7 @@ public abstract class JSONWriter
      * @param features the features to enable for the new JSONWriter
      * @return a new JSONWriter instance using UTF-8 encoding
      */
-    public static JSONWriter ofUTF8(Feature... features) {
+    public static JSONWriterUTF8 ofUTF8(Feature... features) {
         return ofUTF8(
                 createWriteContext(features)
         );
@@ -3874,6 +3897,7 @@ public abstract class JSONWriter
         }
     }
 
+    public static final long MASK_FIELD_BASED = 1;
     public static final long MASK_IGNORE_NONE_SERIALIZABLE = 1 << 1;
     public static final long MAKS_ERROR_ON_NONE_SERIALIZABLE = 1 << 2;
     public static final long MASK_BEAN_TO_ARRAY = 1 << 3;
@@ -3891,12 +3915,15 @@ public abstract class JSONWriter
     public static final long MASK_IGNORE_ERROR_GETTER = 1L << 15;
     public static final long MASK_PRETTY_FORMAT = 1 << 16;
     public static final long MASK_REFERENCE_DETECTION = 1 << 17;
+    public static final long MASK_WRITE_BIG_DECIMAL_AS_PLAIN = 1 << 19;
     public static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
     public static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
     public static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
     public static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
     public static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
     public static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
+    public static final long MASK_WRITE_NON_STRING_KEY_AS_STRING = 1 << 27;
+    public static final long MASK_WRITE_PAIR_AS_JAVA_BEAN = 1 << 28;
     public static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
     public static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
     public static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
@@ -3963,7 +3990,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        FieldBased(1),
+        FieldBased(MASK_FIELD_BASED),
 
         /**
          * Feature that determines whether to ignore non-serializable classes during serialization.
@@ -4170,7 +4197,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        WriteBigDecimalAsPlain(1 << 19),
+        WriteBigDecimalAsPlain(MASK_WRITE_BIG_DECIMAL_AS_PLAIN),
 
         /**
          * Feature that determines whether to use single quotes instead of double quotes for strings.
@@ -4261,7 +4288,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        WriteNonStringKeyAsString(1 << 27),
+        WriteNonStringKeyAsString(MASK_WRITE_NON_STRING_KEY_AS_STRING),
 
         /**
          * Feature that determines whether to write key-value pairs as Java beans during serialization.
@@ -4271,7 +4298,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.11
          */
-        WritePairAsJavaBean(1L << 28),
+        WritePairAsJavaBean(MASK_WRITE_PAIR_AS_JAVA_BEAN),
 
         /**
          * Feature that enables optimization for ASCII characters during serialization.

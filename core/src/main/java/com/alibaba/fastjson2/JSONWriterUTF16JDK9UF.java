@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.IOUtils;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteBooleanAsNumber;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF16JDK9UF
@@ -34,7 +33,7 @@ final class JSONWriterUTF16JDK9UF
 
         char[] chars = this.chars;
         int off = this.off;
-        if ((context.features & WriteBooleanAsNumber.mask) != 0) {
+        if ((context.features & MASK_WRITE_BOOLEAN_AS_NUMBER) != 0) {
             chars[off++] = value ? '1' : '0';
         } else {
             off = IOUtils.putBoolean(chars, off, value);

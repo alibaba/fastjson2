@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.JSONWriterJSONB;
-import com.alibaba.fastjson2.SymbolTable;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 
@@ -12,6 +9,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
+import static com.alibaba.fastjson2.JSONWriter.*;
 
 class FieldWriterEnum
         extends FieldWriter {
@@ -76,12 +75,11 @@ class FieldWriterEnum
     }
 
     @Override
-    public final void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e) {
+    public final void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e, long features) {
         if (e == null) {
             return;
         }
 
-        long features = jsonWriter.getFeatures(this.features);
         boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
         boolean usingToString = (features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0;
 
@@ -211,69 +209,77 @@ class FieldWriterEnum
     }
 
     @Override
-    public final void writeEnum(JSONWriter jsonWriter, Enum e) {
-        long features = jsonWriter.getFeatures(this.features);
-
-        if ((features & JSONWriter.Feature.WriteEnumUsingToString.mask) == 0) {
-            if (jsonWriter instanceof JSONWriterJSONB) {
-                writeEnumJSONB((JSONWriterJSONB) jsonWriter, e);
-                return;
-            }
-
+    public final void writeEnumUTF8(JSONWriterUTF8 jsonWriter, Enum e, long features) {
+        if ((features & MASK_WRITE_ENUM_USING_TO_STRING) == 0) {
             final int ordinal = e.ordinal();
-            if ((features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0) {
+            if ((features & MASK_WRITE_ENUM_USING_ORDINAL) != 0) {
                 writeEnumUsingOrdinal(jsonWriter, ordinal);
                 return;
             }
 
-            if ((features & JSONWriter.Feature.UnquoteFieldName.mask) == 0) {
-                if (jsonWriter.utf8) {
-                    byte[] bytes = valueNameCacheUTF8[ordinal];
+            if ((features & MASK_UNQUOTE_FIELD_NAME) == 0) {
+                byte[] bytes = valueNameCacheUTF8[ordinal];
 
-                    if (bytes == null) {
-                        valueNameCacheUTF8[ordinal] = bytes = getNameBytes(ordinal);
-                    }
-                    jsonWriter.writeNameRaw(bytes);
-                    return;
-                }
-
-                if (jsonWriter.utf16) {
-                    char[] chars = valueNameCacheUTF16[ordinal];
-                    if (chars == null) {
-                        valueNameCacheUTF16[ordinal] = chars = getNameChars(ordinal);
-                    }
-                    jsonWriter.writeNameRaw(chars);
-                    return;
-                }
-            }
-        }
-
-        writeFieldName(jsonWriter);
-        jsonWriter.writeString(e.toString());
-    }
-
-    private void writeEnumUsingOrdinal(JSONWriter jsonWriter, int ordinal) {
-        if ((features & JSONWriter.Feature.UnquoteFieldName.mask) == 0) {
-            if (jsonWriter.utf8) {
-                byte[] bytes = utf8ValueCache[ordinal];
                 if (bytes == null) {
-                    utf8ValueCache[ordinal] = bytes = getBytes(ordinal);
+                    valueNameCacheUTF8[ordinal] = bytes = getNameBytes(ordinal);
                 }
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
+        }
 
-            if (jsonWriter.utf16) {
-                char[] chars = utf16ValueCache[ordinal];
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeString(e.toString());
+    }
+
+    @Override
+    public final void writeEnumUTF16(JSONWriterUTF16 jsonWriter, Enum e, long features) {
+        if ((features & MASK_WRITE_ENUM_USING_TO_STRING) == 0) {
+            final int ordinal = e.ordinal();
+            if ((features & MASK_WRITE_ENUM_USING_ORDINAL) != 0) {
+                writeEnumUsingOrdinal(jsonWriter, ordinal);
+                return;
+            }
+
+            if ((features & MASK_UNQUOTE_FIELD_NAME) == 0) {
+                char[] chars = valueNameCacheUTF16[ordinal];
                 if (chars == null) {
-                    utf16ValueCache[ordinal] = chars = getChars(ordinal);
+                    valueNameCacheUTF16[ordinal] = chars = getNameChars(ordinal);
                 }
                 jsonWriter.writeNameRaw(chars);
                 return;
             }
         }
 
-        writeFieldName(jsonWriter);
+        writeFieldNameUTF16(jsonWriter);
+        jsonWriter.writeString(e.toString());
+    }
+
+    private void writeEnumUsingOrdinal(JSONWriterUTF8 jsonWriter, int ordinal) {
+        if ((features & MASK_UNQUOTE_FIELD_NAME) == 0) {
+            byte[] bytes = utf8ValueCache[ordinal];
+            if (bytes == null) {
+                utf8ValueCache[ordinal] = bytes = getBytes(ordinal);
+            }
+            jsonWriter.writeNameRaw(bytes);
+            return;
+        }
+
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeInt32(ordinal);
+    }
+
+    private void writeEnumUsingOrdinal(JSONWriterUTF16 jsonWriter, int ordinal) {
+        if ((features & MASK_UNQUOTE_FIELD_NAME) == 0) {
+            char[] chars = utf16ValueCache[ordinal];
+            if (chars == null) {
+                utf16ValueCache[ordinal] = chars = getChars(ordinal);
+            }
+            jsonWriter.writeNameRaw(chars);
+            return;
+        }
+
+        writeFieldNameUTF16(jsonWriter);
         jsonWriter.writeInt32(ordinal);
     }
 
@@ -327,9 +333,8 @@ class FieldWriterEnum
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
         Enum value = (Enum) getFieldValue(object);
-
+        long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeNull();
@@ -340,7 +345,7 @@ class FieldWriterEnum
         }
 
         if (jsonWriter instanceof JSONWriterJSONB) {
-            writeEnumJSONB((JSONWriterJSONB) jsonWriter, value);
+            writeEnumJSONB((JSONWriterJSONB) jsonWriter, value, features);
         } else {
             writeEnum(jsonWriter, value);
         }

@@ -184,7 +184,7 @@ public abstract class FieldWriter<T>
         throw new UnsupportedOperationException();
     }
 
-    public void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e) {
+    public void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e, long features) {
         throw new UnsupportedOperationException();
     }
 
@@ -233,6 +233,26 @@ public abstract class FieldWriter<T>
                 jsonWriter.writeNameRaw(nameWithColonUTF16);
                 return;
             }
+        }
+
+        jsonWriter.writeName(fieldName);
+        jsonWriter.writeColon();
+    }
+
+    public final void writeFieldNameUTF8(JSONWriterUTF8 jsonWriter) {
+        if (!jsonWriter.useSingleQuote && (jsonWriter.context.getFeatures() & UnquoteFieldName.mask) == 0) {
+            jsonWriter.writeNameRaw(nameWithColonUTF8);
+            return;
+        }
+
+        jsonWriter.writeName(fieldName);
+        jsonWriter.writeColon();
+    }
+
+    public final void writeFieldNameUTF16(JSONWriterUTF16 jsonWriter) {
+        if (!jsonWriter.useSingleQuote && (jsonWriter.context.getFeatures() & UnquoteFieldName.mask) == 0) {
+            jsonWriter.writeNameRaw(nameWithColonUTF16);
+            return;
         }
 
         jsonWriter.writeName(fieldName);
@@ -533,8 +553,24 @@ public abstract class FieldWriter<T>
         return nameCompare;
     }
 
-    public void writeEnum(JSONWriter jsonWriter, Enum e) {
-        writeFieldName(jsonWriter);
+    public final void writeEnum(JSONWriter jsonWriter, Enum e) {
+        long features = jsonWriter.getFeatures(this.features);
+        if (jsonWriter instanceof JSONWriterUTF16) {
+            writeEnumUTF16((JSONWriterUTF16) jsonWriter, e, features);
+        } else if (jsonWriter instanceof JSONWriterUTF8) {
+            writeEnumUTF8((JSONWriterUTF8) jsonWriter, e, features);
+        } else {
+            writeEnumJSONB((JSONWriterJSONB) jsonWriter, e, features);
+        }
+    }
+
+    public void writeEnumUTF8(JSONWriterUTF8 jsonWriter, Enum e, long features) {
+        writeFieldNameUTF8(jsonWriter);
+        jsonWriter.writeEnum(e);
+    }
+
+    public void writeEnumUTF16(JSONWriterUTF16 jsonWriter, Enum e, long features) {
+        writeFieldNameUTF16(jsonWriter);
         jsonWriter.writeEnum(e);
     }
 
@@ -871,6 +907,14 @@ public abstract class FieldWriter<T>
 
     public abstract boolean write(JSONWriter jsonWriter, T o);
 
+    public boolean writeUTF8(JSONWriterUTF8 jsonWriter, T o) {
+        return write(jsonWriter, o);
+    }
+
+    public boolean writeUTF16(JSONWriterUTF16 jsonWriter, T o) {
+        return write(jsonWriter, o);
+    }
+
     public boolean writeJSONB(JSONWriterJSONB jsonWriter, T o) {
         return write(jsonWriter, o);
     }
@@ -908,6 +952,14 @@ public abstract class FieldWriter<T>
     }
 
     public void writeListValue(JSONWriter jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeListValueUTF8(JSONWriterUTF8 jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeListValueUTF16(JSONWriterUTF16 jsonWriter, List list) {
         throw new UnsupportedOperationException();
     }
 

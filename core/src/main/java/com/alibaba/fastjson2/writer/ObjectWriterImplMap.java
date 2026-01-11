@@ -447,12 +447,14 @@ public final class ObjectWriterImplMap
     }
 
     @Override
-    public boolean writeTypeInfo(JSONWriter jsonWriter) {
-        if (jsonWriter.utf8) {
-            jsonWriter.writeNameRaw(typeInfoUTF8);
-        } else {
-            jsonWriter.writeNameRaw(typeInfoUTF16);
-        }
+    public boolean writeTypeInfo(JSONWriterUTF8 jsonWriter) {
+        jsonWriter.writeNameRaw(typeInfoUTF8);
+        return true;
+    }
+
+    @Override
+    public boolean writeTypeInfo(JSONWriterUTF16 jsonWriter) {
+        jsonWriter.writeNameRaw(typeInfoUTF16);
         return true;
     }
 

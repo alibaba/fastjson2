@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
 
+import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.util.JDKUtils.ANDROID_SDK_INT;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
@@ -2805,37 +2806,37 @@ public abstract class BeanUtils {
                     for (Enum feature : serializeFeatures) {
                         switch (feature.name()) {
                             case "WriteMapNullValue":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_MAP_NULL_VALUE;
                                 break;
                             case "WriteNullListAsEmpty":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_NULL_LIST_AS_EMPTY;
                                 break;
                             case "WriteNullStringAsEmpty":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_NULL_STRING_AS_EMPTY;
                                 break;
                             case "WriteNullNumberAsZero":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_NULL_NUMBER_AS_ZERO;
                                 break;
                             case "WriteNullBooleanAsFalse":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_NULL_BOOLEAN_AS_FALSE;
                                 break;
                             case "BrowserCompatible":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.BrowserCompatible.mask;
+                                beanInfo.writerFeatures |= MASK_BROWSER_COMPATIBLE;
                                 break;
                             case "WriteClassName":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_CLASS_NAME;
                                 break;
                             case "WriteNonStringValueAsString":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_NON_STRING_VALUE_AS_STRING;
                                 break;
                             case "WriteEnumUsingToString":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteEnumUsingToString.mask;
+                                beanInfo.writerFeatures |= MASK_WRITE_ENUM_USING_TO_STRING;
                                 break;
                             case "NotWriteRootClassName":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteRootClassName.mask;
+                                beanInfo.writerFeatures |= MASK_NOT_WRITE_ROOT_CLASSNAME;
                                 break;
                             case "IgnoreErrorGetter":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                                beanInfo.writerFeatures |= MASK_IGNORE_ERROR_GETTER;
                                 break;
                             default:
                                 break;
@@ -2993,13 +2994,13 @@ public abstract class BeanUtils {
                     String include = ((Enum) result).name();
                     switch (include) {
                         case "ALWAYS":
-                            beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                            beanInfo.writerFeatures |= MASK_WRITE_MAP_NULL_VALUE;
                             break;
                         case "NON_DEFAULT":
-                            beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
+                            beanInfo.writerFeatures |= MASK_NOT_WRITE_DEFAULT_VALUE;
                             break;
                         case "NON_EMPTY":
-                            beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteEmptyArray.mask;
+                            beanInfo.writerFeatures |= MASK_NOT_WRITE_EMPTY_ARRAY;
                             break;
                         default:
                             break;
@@ -3021,14 +3022,14 @@ public abstract class BeanUtils {
                     String include = ((Enum) result).name();
                     switch (include) {
                         case "ALWAYS":
-                            fieldInfo.features |= JSONWriter.Feature.WriteNulls.mask;
+                            fieldInfo.features |= MASK_WRITE_MAP_NULL_VALUE;
                             break;
                         case "NON_DEFAULT":
-                            fieldInfo.features |= JSONWriter.Feature.NotWriteDefaultValue.mask;
+                            fieldInfo.features |= MASK_NOT_WRITE_DEFAULT_VALUE;
                             break;
                         case "NON_EMPTY":
-                            fieldInfo.features |= JSONWriter.Feature.NotWriteEmptyArray.mask;
-                            fieldInfo.features |= JSONWriter.Feature.IgnoreEmpty.mask;
+                            fieldInfo.features |= MASK_NOT_WRITE_EMPTY_ARRAY;
+                            fieldInfo.features |= MASK_NOT_WRITE_EMPTY_ARRAY;
                             break;
                         default:
                             break;

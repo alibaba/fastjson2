@@ -481,8 +481,8 @@ public class JSONWriterUTF16
             return;
         }
 
-        boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
-        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escapeNoneAscii = (context.features & MASK_ESCAPE_NONE_ASCII) != 0;
+        boolean browserSecure = (context.features & MASK_BROWSER_SECURE) != 0;
         boolean escape = false;
         final char quote = this.quote;
 

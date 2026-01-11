@@ -32,6 +32,8 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
 import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
+import static com.alibaba.fastjson2.JSONWriter.MASK_FIELD_BASED;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_CLASS_NAME;
 
 /**
  * This is the main entry point for using fastjson2 API.
@@ -3214,7 +3216,7 @@ public interface JSON {
     static String toJSONString(Object object) {
         final ObjectWriterProvider provider = defaultObjectWriterProvider;
         final JSONWriter.Context context = new JSONWriter.Context(provider);
-        try (JSONWriter writer = JSONWriter.of(context)) {
+        try (JSONWriterUTF16 writer = JSONWriter.ofUTF16(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3228,9 +3230,9 @@ public interface JSON {
                     ObjectWriter<?> objectWriter = provider.getObjectWriter(
                             valueClass,
                             valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                            (defaultWriterFeatures & MASK_FIELD_BASED) != 0
                     );
-                    objectWriter.write(writer, object, null, null, 0);
+                    objectWriter.writeUTF16(writer, object, null, null, 0);
                 }
             }
             return writer.toString();
@@ -3252,7 +3254,7 @@ public interface JSON {
             context = JSONFactory.createWriteContext();
         }
 
-        try (JSONWriter writer = JSONWriter.of(context)) {
+        try (JSONWriterUTF16 writer = JSONWriter.ofUTF16(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3261,7 +3263,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF16(writer, object, null, null, 0);
             }
             return writer.toString();
         } catch (NullPointerException | NumberFormatException e) {
@@ -3279,7 +3281,7 @@ public interface JSON {
      */
     static String toJSONString(Object object, JSONWriter.Feature... features) {
         JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
-        try (JSONWriter writer = JSONWriter.of(context)) {
+        try (JSONWriterUTF16 writer = JSONWriter.ofUTF16(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3287,9 +3289,9 @@ public interface JSON {
                 writer.path = JSONWriter.Path.ROOT;
                 Class<?> valueClass = object.getClass();
 
-                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                boolean fieldBased = (context.features & MASK_FIELD_BASED) != 0;
                 ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF16(writer, object, null, null, 0);
             }
             return writer.toString();
         }
@@ -3306,7 +3308,7 @@ public interface JSON {
      */
     static String toJSONString(Object object, Filter filter, JSONWriter.Feature... features) {
         JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
-        try (JSONWriter writer = JSONWriter.of(context)) {
+        try (JSONWriterUTF16 writer = JSONWriter.ofUTF16(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3317,8 +3319,8 @@ public interface JSON {
                 }
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, (defaultWriterFeatures & MASK_FIELD_BASED) != 0);
+                objectWriter.writeUTF16(writer, object, null, null, 0);
             }
             return writer.toString();
         }
@@ -3339,7 +3341,7 @@ public interface JSON {
             context.configFilter(filters);
         }
 
-        try (JSONWriter writer = JSONWriter.of(context)) {
+        try (JSONWriterUTF16 writer = JSONWriter.ofUTF16(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3348,7 +3350,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF16(writer, object, null, null, 0);
             }
             return writer.toString();
         }
@@ -3369,7 +3371,7 @@ public interface JSON {
             context.setDateFormat(format);
         }
 
-        try (JSONWriter writer = JSONWriter.of(context)) {
+        try (JSONWriterUTF16 writer = JSONWriter.ofUTF16(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3377,7 +3379,7 @@ public interface JSON {
                 writer.path = JSONWriter.Path.ROOT;
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF16(writer, object, null, null, 0);
             }
             return writer.toString();
         }
@@ -3402,7 +3404,7 @@ public interface JSON {
             context.configFilter(filters);
         }
 
-        try (JSONWriter writer = JSONWriter.of(context)) {
+        try (JSONWriterUTF16 writer = JSONWriter.ofUTF16(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3410,7 +3412,7 @@ public interface JSON {
                 writer.path = JSONWriter.Path.ROOT;
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF16(writer, object, null, null, 0);
             }
             return writer.toString();
         }
@@ -3426,7 +3428,7 @@ public interface JSON {
     static byte[] toJSONBytes(Object object) {
         final ObjectWriterProvider provider = defaultObjectWriterProvider;
         final JSONWriter.Context context = new JSONWriter.Context(provider);
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3440,9 +3442,9 @@ public interface JSON {
                     ObjectWriter<?> objectWriter = provider.getObjectWriter(
                             valueClass,
                             valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                            (defaultWriterFeatures & MASK_FIELD_BASED) != 0
                     );
-                    objectWriter.write(writer, object, null, null, 0);
+                    objectWriter.writeUTF8(writer, object, null, null, 0);
                 }
             }
             return writer.getBytes();
@@ -3461,7 +3463,7 @@ public interface JSON {
     static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Feature... features) {
         final ObjectWriterProvider provider = defaultObjectWriterProvider;
         final JSONWriter.Context context = new JSONWriter.Context(provider, features);
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3475,9 +3477,9 @@ public interface JSON {
                     ObjectWriter<?> objectWriter = provider.getObjectWriter(
                             valueClass,
                             valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                            (defaultWriterFeatures & MASK_FIELD_BASED) != 0
                     );
-                    objectWriter.write(writer, object, null, null, 0);
+                    objectWriter.writeUTF8(writer, object, null, null, 0);
                 }
             }
             return writer.getBytes(charset);
@@ -3496,7 +3498,7 @@ public interface JSON {
      */
     static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Context context) {
         final ObjectWriterProvider provider = context.provider;
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3510,9 +3512,9 @@ public interface JSON {
                     ObjectWriter<?> objectWriter = provider.getObjectWriter(
                             valueClass,
                             valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                            (defaultWriterFeatures & MASK_FIELD_BASED) != 0
                     );
-                    objectWriter.write(writer, object, null, null, 0);
+                    objectWriter.writeUTF8(writer, object, null, null, 0);
                 }
             }
             return writer.getBytes(charset);
@@ -3534,7 +3536,7 @@ public interface JSON {
             context.setDateFormat(format);
         }
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3543,7 +3545,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF8(writer, object, null, null, 0);
             }
             return writer.getBytes();
         }
@@ -3563,7 +3565,7 @@ public interface JSON {
             context.configFilter(filters);
         }
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3572,7 +3574,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF8(writer, object, null, null, 0);
             }
             return writer.getBytes();
         }
@@ -3588,7 +3590,7 @@ public interface JSON {
      */
     static byte[] toJSONBytes(Object object, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3597,7 +3599,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF8(writer, object, null, null, 0);
             }
             return writer.getBytes();
         }
@@ -3618,7 +3620,7 @@ public interface JSON {
             context.configFilter(filters);
         }
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3627,7 +3629,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF8(writer, object, null, null, 0);
             }
             return writer.getBytes();
         }
@@ -3652,7 +3654,7 @@ public interface JSON {
             context.configFilter(filters);
         }
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = JSONWriter.ofUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3661,7 +3663,7 @@ public interface JSON {
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                objectWriter.writeUTF8(writer, object, null, null, 0);
             }
             return writer.getBytes();
         }
@@ -4079,7 +4081,7 @@ public interface JSON {
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
         if (objectWriter instanceof ObjectWriterAdapter
                 && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)
-                && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
+                && (objectWriter.getFeatures() & MASK_WRITE_CLASS_NAME) == 0) {
             ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
             return objectWriterAdapter.toJSONObject(object, writeContext.features);
         }

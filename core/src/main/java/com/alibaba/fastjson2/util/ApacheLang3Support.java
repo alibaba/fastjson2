@@ -15,6 +15,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_CLASS_NAME;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_PAIR_AS_JAVA_BEAN;
 
 public interface ApacheLang3Support {
     interface TripleMixIn<L, M, R> {
@@ -179,7 +181,7 @@ public interface ApacheLang3Support {
                 return;
             }
 
-            if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteClassName.mask) != 0) {
+            if ((jsonWriter.getFeatures(features) & MASK_WRITE_CLASS_NAME) != 0) {
                 if (typeNameJSONB == null) {
                     typeNameJSONB = JSONB.toBytes(typeName);
                 }
@@ -210,7 +212,7 @@ public interface ApacheLang3Support {
             Object right = getRight(object);
 
             jsonWriter.startObject();
-            if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WritePairAsJavaBean.mask) != 0) {
+            if ((jsonWriter.getFeatures(features) & MASK_WRITE_PAIR_AS_JAVA_BEAN) != 0) {
                 jsonWriter.writeName("left");
                 jsonWriter.writeColon();
                 jsonWriter.writeAny(left);

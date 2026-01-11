@@ -6,6 +6,11 @@ import com.alibaba.fastjson2.JSONWriterJSONB;
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_NOT_WRITE_NUMBER_CLASS_NAME;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_CLASS_NAME;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_NON_STRING_KEY_AS_STRING;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_NON_STRING_VALUE_AS_STRING;
+
 final class ObjectWriterImplDouble
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplDouble INSTANCE = new ObjectWriterImplDouble(null);
@@ -24,7 +29,7 @@ final class ObjectWriterImplDouble
         }
 
         double value = (Double) object;
-        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+        if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
             jsonWriter.writeString(value);
         } else {
             jsonWriter.writeDouble(value);
@@ -53,16 +58,16 @@ final class ObjectWriterImplDouble
         }
 
         double value = (Double) object;
-        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+        if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
             jsonWriter.writeString(value);
             return;
         }
 
         jsonWriter.writeDouble(value);
         long features2 = jsonWriter.getFeatures(features);
-        if ((features2 & JSONWriter.Feature.WriteClassName.mask) != 0
-                && (features2 & JSONWriter.Feature.WriteNonStringKeyAsString.mask) == 0
-                && (features2 & JSONWriter.Feature.NotWriteNumberClassName.mask) == 0
+        if ((features2 & MASK_WRITE_CLASS_NAME) != 0
+                && (features2 & MASK_WRITE_NON_STRING_KEY_AS_STRING) == 0
+                && (features2 & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
                 && fieldType != Double.class && fieldType != double.class) {
             jsonWriter.writeRaw('D');
         }

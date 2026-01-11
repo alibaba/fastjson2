@@ -6,6 +6,9 @@ import com.alibaba.fastjson2.JSONWriterJSONB;
 import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+import static com.alibaba.fastjson2.JSONWriter.MASK_NOT_WRITE_NUMBER_CLASS_NAME;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_CLASS_NAME;
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_NON_STRING_KEY_AS_STRING;
 
 final class ObjectWriterImplInt8
         extends ObjectWriterPrimitiveImpl {
@@ -44,9 +47,9 @@ final class ObjectWriterImplInt8
 
         jsonWriter.writeInt8(byteValue);
         long features2 = jsonWriter.getFeatures(features);
-        if ((features2 & JSONWriter.Feature.WriteClassName.mask) != 0
-                && (features2 & JSONWriter.Feature.WriteNonStringKeyAsString.mask) == 0
-                && (features2 & JSONWriter.Feature.NotWriteNumberClassName.mask) == 0
+        if ((features2 & MASK_WRITE_CLASS_NAME) != 0
+                && (features2 & MASK_WRITE_NON_STRING_KEY_AS_STRING) == 0
+                && (features2 & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
                 && fieldType != Byte.class && fieldType != byte.class) {
             jsonWriter.writeRaw('B');
         }

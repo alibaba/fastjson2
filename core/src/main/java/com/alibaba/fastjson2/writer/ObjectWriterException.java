@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.JSONWriterUTF16;
+import com.alibaba.fastjson2.JSONWriterUTF8;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -26,12 +28,29 @@ public class ObjectWriterException
     }
 
     @Override
-    public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter instanceof JSONWriterJSONB) {
-            writeJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
+    public void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (hasFilter(jsonWriter)) {
+            writeWithFilter(jsonWriter, object);
             return;
         }
 
+        jsonWriter.startObject();
+
+        if ((jsonWriter.getFeatures(features)
+                & (JSONWriter.Feature.WriteClassName.mask | JSONWriter.Feature.WriteThrowableClassName.mask)) != 0
+        ) {
+            writeTypeInfo(jsonWriter);
+        }
+
+        for (FieldWriter fieldWriter : fieldWriters) {
+            fieldWriter.write(jsonWriter, object);
+        }
+
+        jsonWriter.endObject();
+    }
+
+    @Override
+    public void writeUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (hasFilter(jsonWriter)) {
             writeWithFilter(jsonWriter, object);
             return;

@@ -1045,16 +1045,6 @@
             </modules>
         </profile>
         <profile>
-            <id>enable-codegen</id>
-            <activation>
-                <jdk>(,22]</jdk>
-            </activation>
-            <modules>
-                <module>codegen</module>
-                <module>codegen-test</module>
-            </modules>
-        </profile>
-        <profile>
             <id>deploy-settings</id>
             <activation>
                 <property>

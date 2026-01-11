@@ -249,6 +249,10 @@ public final class MethodWriter {
         visitInsn(Opcodes.IADD);
     }
 
+    public void ladd() {
+        visitInsn(Opcodes.LADD);
+    }
+
     public void imul() {
         visitInsn(Opcodes.IMUL);
     }
@@ -816,6 +820,14 @@ public final class MethodWriter {
         if (currentBasicBlock != null) {
             currentBasicBlock.frame.execute(Opcodes.LDC, 0, constantSymbol, symbolTable);
         }
+    }
+
+    public void ldc(final int value) {
+        visitLdcInsn(value);
+    }
+
+    public void ldc(final long value) {
+        visitLdcInsn(value);
     }
 
     public void visitLdcInsn(final Number value) {

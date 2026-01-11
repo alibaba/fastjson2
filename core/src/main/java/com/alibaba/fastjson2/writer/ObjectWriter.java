@@ -1,13 +1,14 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.JSONWriterJSONB;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_NON_FIELD_GETTER;
 
 /**
  * ObjectWriter is responsible for serializing Java objects into JSON format.
@@ -113,6 +114,24 @@ public interface ObjectWriter<T> {
      * @return true if type information was written, false otherwise
      */
     default boolean writeTypeInfo(JSONWriter jsonWriter) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            return writeTypeInfo((JSONWriterJSONB) jsonWriter);
+        } else if (jsonWriter instanceof JSONWriterUTF16) {
+            return writeTypeInfo((JSONWriterUTF16) jsonWriter);
+        } else {
+            return writeTypeInfo((JSONWriterUTF8) jsonWriter);
+        }
+    }
+
+    default boolean writeTypeInfo(JSONWriterJSONB jsonWriter) {
+        return false;
+    }
+
+    default boolean writeTypeInfo(JSONWriterUTF8 jsonWriter) {
+        return false;
+    }
+
+    default boolean writeTypeInfo(JSONWriterUTF16 jsonWriter) {
         return false;
     }
 
@@ -230,6 +249,14 @@ public interface ObjectWriter<T> {
         jsonWriter.endArray();
     }
 
+    default void writeArrayMappingUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+    }
+
+    default void writeArrayMappingUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+    }
+
     /**
      * Checks if the JSONWriter has any filters enabled that would affect serialization.
      *
@@ -237,7 +264,7 @@ public interface ObjectWriter<T> {
      * @return true if filters are enabled, false otherwise
      */
     default boolean hasFilter(JSONWriter jsonWriter) {
-        return jsonWriter.hasFilter(JSONWriter.Feature.IgnoreNonFieldGetter.mask);
+        return jsonWriter.hasFilter(MASK_IGNORE_NON_FIELD_GETTER);
     }
 
     /**
@@ -278,6 +305,14 @@ public interface ObjectWriter<T> {
      * @param features the features to use for writing
      */
     void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features);
+
+    default void writeUTF8(JSONWriterUTF8 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        write(jsonWriter, object, fieldName, fieldType, features);
+    }
+
+    default void writeUTF16(JSONWriterUTF16 jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        write(jsonWriter, object, fieldName, fieldType, features);
+    }
 
     /**
      * Writes an object to the JSONWriter with filter support using default parameters.
